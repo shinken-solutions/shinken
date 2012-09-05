@@ -103,7 +103,7 @@ def rpn_calculator(rpn_list):
 def parse_args(cmd_args):
     #Default params
     host = None
-    community = 'public'
+    community = 'public3'
     version = '2c'
     dstemplate = None
     triggergroup = None
@@ -241,14 +241,18 @@ class SNMPHost(object):
 
         return base_oids
 
-    def get_oids_for_limits(self, interval, datasource):
+    def get_oids_for_limits(self, interval):
         """ Return all oids from an frequence in order to get data max values
         """
+        return dict([(snmpoid.max_, snmpoid)
+                    for s in self.frequences[interval].services.values()
+                    for snmpoid in s.oids.values()
+                    if s.instance != "NOTFOUND" and isinstance(snmpoid.max_, str) and snmpoid.max_])
         max_oids = []
         for s in self.frequences[interval].services.values():
             for snmpoid in s.oids.values():
                 if snmpoid.max_ and not isinstance(snmpoid.max_, float):
-                    oid_max, _ = snmpoid.max_.rsplit(".", 1)
+                    oid_max, _ = snmpoid.max_.rsplit(".", 1) # DELETE ME PLEASE! :)
                     max_oids.append(oid_max)
 
         return max_oids
@@ -414,7 +418,6 @@ class SNMPService(object):
                                 value = el
                             rpn_list.append(value)
 
-                        print 'TRIGGER', rpn_list
                         error = rpn_calculator(rpn_list)
                         if error:
                             return error_code
@@ -559,7 +562,6 @@ class SNMPOid(object):
         return self.raw_value == self.raw_old_value
 
     def prct(self):
-        print float(self.value) * 100 / float(self.max_)
         return float(self.value) * 100 / float(self.max_)
 
     def last(self):
@@ -585,7 +587,7 @@ class SNMPOid(object):
     def format_derive64_output(self, check_time, old_check_time):
         """ Format output for derive64 type
         """
-        self.format_derive_output(self, check_time, old_check_time, limit=18446744073709551615)
+        self.format_derive_output(check_time, old_check_time, limit=18446744073709551615)
 
     def format_derive_output(self, check_time, old_check_time, limit=4294967295):
         """ Format output for derive type
@@ -625,7 +627,7 @@ class SNMPOid(object):
     def format_counter64_output(self, check_time, old_check_time):
         """ Format output for counter64 type
         """
-        self.format_counter_output(self, check_time, old_check_time, limit=18446744073709551615)
+        self.format_counter_output(check_time, old_check_time, limit=18446744073709551615)
 
     def format_counter_output(self, check_time, old_check_timei, limit=4294967295):
         """ Format output for counter type
@@ -637,9 +639,10 @@ class SNMPOid(object):
         else:
             raw_value = self.raw_value
             # detect counter reset
-            if self.raw_value < self.raw_old_value:
+            # USELESS FOR SIMPLE COUNTER
+            #if self.raw_value < self.raw_old_value:
                 # Counter reseted
-                raw_value = (limit - self.old_value) + raw_value
+            #    raw_value = (limit - self.old_value) + raw_value
             # Make calculation
             if self.calc:
                 self.value = self.calculation(raw_value)
@@ -702,6 +705,8 @@ class SNMPAsyncClient(object):
         self.serv_key = (dstemplate, instance, instance_name)
 
         self.interval_length = 60
+        self.remaining_oids = None
+        self.nb_next_requests = 0
 
         self.memcached = memcache.Client([memcached_address], debug=0)
         self.datasource = datasource
@@ -802,11 +807,11 @@ class SNMPAsyncClient(object):
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
 
-        self.limit_oids = []
+        self.limit_oids = {}
         if not self.mapping_oids:
             # Prepare SNMP oid for limits
-            self.limit_oids = list(set(self.obj.get_oids_for_limits(self.check_interval, self.datasource)))
-            tmp_oids = list(set([oid[1:] for oid in self.limit_oids]))
+            self.limit_oids = self.obj.get_oids_for_limits(self.check_interval)
+            tmp_oids = list(set([oid[1:].rsplit(".", 1)[0] for oid in self.limit_oids]))
             for oid in tmp_oids:
                 try:
                     oid = tuple(int(i) for i in oid.split("."))
@@ -872,11 +877,13 @@ class SNMPAsyncClient(object):
                                         udp.domainName,
                                         (self.hostname, 161))
         transportDispatcher.jobStarted(1)
-        #try:
-        transportDispatcher.runDispatcher()
-        #except Exception, e:
-#        logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
-#        self.set_exit("SNMP Request error: " + str(e), rc=3)
+
+#        transportDispatcher.runDispatcher()
+        try:
+            transportDispatcher.runDispatcher()
+        except Exception, e:
+            logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
+            self.set_exit("SNMP Request error: " + str(e), rc=3)
         transportDispatcher.closeDispatcher()
 
     def callback(self, transportDispatcher, transportDomain, transportAddress,
@@ -919,22 +926,23 @@ class SNMPAsyncClient(object):
                                     instance = oid.replace(m_oid + ".", "")
                                     val = re.sub("[,:/ ]", "_", str(val))
                                     mapping_instance[val] = instance
-                        elif any([oid.startswith(l_oid + ".") for l_oid in self.limit_oids]):
+                        elif oid in self.limit_oids:
                             # get limits
-                            for l_oid in self.limit_oids:
-                                if oid.startswith(l_oid + "."):
-                                    self.results_limits_dict[oid] = str(val)
+                            try:
+                                self.results_limits_dict[oid] = float(val)
+                            except ValueError:
+                                logger.error('[SnmpBooster] Bad limit for oid: %s - Skipping' % str(oid))
                 # SNPNEXT NEEDED ????
                 if self.mapping_done:
                     # trier `oids' par table, puis par oid => A faire avant le dispatcher
                     # oids = {'.1.3.6.1.2.1.2.2.1.11' : { '.1.3.6.1.2.1.2.2.1.11.10016': VALUE }, ... }
-                    oids = set(self.oids_to_check.keys() + self.limit_oids)
+                    oids = set(self.oids_to_check.keys() + self.limit_oids.keys())
                     results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
-                    # PAS DE FRANCAIS !!!
-                    restant = oids - results_oids
+
+                    self.remaining_oids = oids - results_oids
                     #COMMENTTTTTTTTTTT
-                    tableRow = [oid.rsplit(".", 1)[0] + "." + str(int(oid.rsplit(".", 1)[1]) - 1)  for oid in restant]
-                    if oids != results_oids:
+                    tableRow = [oid.rsplit(".", 1)[0] + "." + str(int(oid.rsplit(".", 1)[1]) - 1)  for oid in self.remaining_oids]
+                    if oids != results_oids and self.nb_next_requests < 5:
                         # SNMP next needed
                         aBP.setVarBinds(self.reqPDU,
                                 [(x, v2c.null) for x in tableRow])
@@ -942,6 +950,7 @@ class SNMPAsyncClient(object):
                         transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
                                                 transportDomain,
                                                 transportAddress)
+                        self.nb_next_requests = self.nb_next_requests + 1
                         return wholeMsg
 
 
@@ -1014,8 +1023,7 @@ class SNMPAsyncClient(object):
 
     def callback_timer(self, timeNow):
         if timeNow - self.startedAt > self.timeout:
-            self.set_exit("SNMP Request timed out", rc=3)
-            return
+            raise Exception("Request timed out or bad community")
 
     def is_done(self):
         return self.state == 'received'
@@ -1026,13 +1034,13 @@ class SNMPAsyncClient(object):
     def look_for_timeout(self):
         now = datetime.now()
         t_delta = now - self.start_time
-        if t_delta.seconds > self.timeout:
+        if t_delta.seconds > self.timeout + 1:
         # TODO add `unknown_on_timeout` option
 #            if self.unknown_on_timeout:
 #                rc = 3
 #            else:
             rc = 3
-            message = 'Error : connection timeout after %d seconds' % self.timeout
+            message = 'Error : SnmpBooster request timeout after %d seconds' % self.timeout
             self.set_exit(message, rc)
 
     def set_exit(self, message, rc=3, transportDispatcher=None):
