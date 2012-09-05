@@ -420,7 +420,12 @@ if not hasattr(ShinkenTest, 'assertIn'):
     def assertIn(self, member, container, msg=None):
         self.assertTrue(member in container)
     ShinkenTest.assertIn = assertIn
-                   
+
+if not hasattr(ShinkenTest, 'assertIsInstance'):
+    def assertIsInstance(self, obj, cls, msg=None):
+        self.assertTrue(isinstance(obj, cls)
+    ShinkenTest.assertIn = assertIn
+                    
 
 
 if __name__ == '__main__':
