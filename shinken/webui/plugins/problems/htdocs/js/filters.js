@@ -66,6 +66,14 @@ function save_state_downtime_filter(){
     }
 }
 
+function save_state_criticity_filter(){
+    var r = document.forms.criticity_filter.show_critical.checked;
+    if(r){
+        add_state_criticity_filter('critical');
+    }
+}
+
+
 
 function clean_new_search(){
     console.log('Cleaning new search');
@@ -250,6 +258,26 @@ function add_state_downtime_filter(name){
     f = {};
     f.type = 'downtime';
     f.long_type = 'Downtime';
+    f.search = name;
+    new_filters.push(f);
+    refresh_new_search_div();
+}
+
+function add_active_state_criticity_filter(name){
+    if(already_got_filter('criticity', name)){return;}
+    f = {};
+    f.type = 'crit';
+    f.long_type = 'Criticity';
+    f.search = name;
+    current_filters.push(f);
+    add_state_criticity_filter(name);
+}
+
+function add_state_criticity_filter(name){
+    if(already_got_filter('criticity', name)){return;}
+    f = {};
+    f.type = 'crit';
+    f.long_type = 'Criticity';
     f.search = name;
     new_filters.push(f);
     refresh_new_search_div();
