@@ -315,6 +315,7 @@ class ShinkenTest(unittest.TestCase):
         res = []
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
+                brok.prepare()
                 if re.search(regex, brok.data['log']):
                     res.append(brok.data['log'])
         return res

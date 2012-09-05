@@ -3,6 +3,7 @@
 # which take more than 5 minutes to complete.
 ###############################################
 test_logging.py
+test_results.py
 test_properties_defaults.py
 test_services.py
 test_hosts.py

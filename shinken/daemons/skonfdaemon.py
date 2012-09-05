@@ -42,6 +42,7 @@ import tempfile
 import zipfile
 import shutil
 
+import shinken
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
@@ -331,7 +332,7 @@ class Skonf(Daemon):
         self.community_uri = str(self.conf.community_uri)
         self.http_proxy = str(self.conf.http_proxy)
         self.use_local_log = self.conf.use_local_log
-        self.log_level = logger.get_level_id(self.conf.log_level)
+        self.log_level = shinken.log.getLevelName(self.conf.log_level)
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
@@ -535,10 +536,6 @@ class Skonf(Daemon):
 
     # Main function
     def run(self):
-        if self.conf.human_timestamp_log:
-            logger.set_human_format()
-
-        # Ok start to work :)
         self.check_photo_dir()
 
         self.request = request

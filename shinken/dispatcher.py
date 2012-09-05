@@ -396,7 +396,9 @@ class Dispatcher:
                             logger.warning('[%s] configuration dispatching error for scheduler %s' % (r.get_name(), sched.get_name()))
                             continue
 
-                        logger.info('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
+                        # Log as `warning` since this is also used
+                        # when a spare gets the config.
+                        logger.warning('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
 
                         sched.conf = conf
                         sched.push_flavor = conf.push_flavor
@@ -512,7 +514,9 @@ class Dispatcher:
 
                                     if is_sent:
                                         satellite.active = True
-                                        logger.info('[%s] Dispatch OK of configuration %s to %s %s' % (r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        # Log as `warning` since this is also used
+                                        # when a spare gets the config.
+                                        logger.warning('[%s] Dispatch OK of configuration %s to %s %s' % (r.get_name(), cfg_id, kind, satellite.get_name()))
                                         # We change the satellite configuration, update our data
                                         satellite.known_conf_managed_push(cfg_id, flavor)
 
@@ -546,6 +550,8 @@ class Dispatcher:
                         if is_sent:
                             rec.active = True
                             rec.need_conf = False
-                            logger.info('[%s] Dispatch OK of configuration to receiver %s' % (r.get_name(), rec.get_name()))
+                            # Log as `warning` since this is also used
+                            # when a spare gets the config.
+                            logger.warning('[%s] Dispatch OK of configuration to receiver %s' % (r.get_name(), rec.get_name()))
                         else:
                             logger.error('[%s] Dispatching failed for receiver %s' % (r.get_name(), rec.get_name()))

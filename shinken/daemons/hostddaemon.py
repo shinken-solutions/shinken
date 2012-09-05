@@ -47,6 +47,7 @@ import zipfile
 import tempfile
 import shutil
 
+import shinken
 from shinken.objects.config import Config
 from shinken.objects.pack import Pack, Packs
 from shinken.external_command import ExternalCommandManager
@@ -366,7 +367,7 @@ class Hostd(Daemon):
         # Ok, here we must check if we go on or not.
         # TODO: check OK or not
         self.use_local_log = self.conf.use_local_log
-        self.log_level = logger.get_level_id(self.conf.log_level)
+        self.log_level = shinken.log.getLevelName(self.conf.log_level)
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
@@ -573,10 +574,6 @@ class Hostd(Daemon):
 
     # Main function
     def run(self):
-        if self.conf.human_timestamp_log:
-            logger.set_human_format()
-
-        # Ok start to work :)
         self.check_photo_dir()
 
         self.request = request

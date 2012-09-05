@@ -261,7 +261,7 @@ class Config(Item):
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format
-        'human_timestamp_log':   BoolProp(default='0'),
+        'human_timestamp_log':   UnusedProp(text='This parameter is no longer used.'),
 
         ## Discovery part
         'strip_idname_fqdn':    BoolProp(default='1'),

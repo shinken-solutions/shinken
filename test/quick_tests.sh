@@ -40,6 +40,7 @@ function launch_and_assert {
 
 # Launching only quick tests for quick regression check
 launch_and_assert test_logging.py
+launch_and_assert test_results.py
 launch_and_assert test_properties_defaults.py
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py

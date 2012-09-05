@@ -278,9 +278,6 @@ class Shinken(BaseSatellite):
         self.satellites = satellites
         #self.pollers = self.app.pollers
 
-        if self.conf.human_timestamp_log:
-            logger.set_human_format()
-
         # Now We create our pollers
         for pol_id in satellites['pollers']:
             # Must look if we already have it

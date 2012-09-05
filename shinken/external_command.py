@@ -31,7 +31,7 @@ from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.commandcall import CommandCall
-from shinken.log import logger, console_logger
+from shinken.log import logger, send_result
 from shinken.pollerlink import PollerLink
 
 MODATTR_NONE = 0
@@ -1286,8 +1286,9 @@ class ExternalCommandManager:
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            console_logger.info('PASSIVE HOST CHECK: %s;%d;%s'
-                                % (host.get_name().decode('utf8', 'ignore'), status_code, plugin_output.decode('utf8', 'ignore')))
+            send_result('PASSIVE HOST CHECK: %s;%d;%s'
+                        % (host.get_name().decode('utf8', 'ignore'),
+                           status_code, plugin_output.decode('utf8', 'ignore')))
         now = time.time()
         cls = host.__class__
         # If globally disable OR locally, do not launch
@@ -1319,9 +1320,10 @@ class ExternalCommandManager:
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            console_logger.info('PASSIVE SERVICE CHECK: %s;%s;%d;%s'
-                                % (service.host.get_name().decode('utf8', 'ignore'), service.get_name().decode('utf8', 'ignore'),
-                                   return_code, plugin_output.decode('utf8', 'ignore')))
+            send_result('PASSIVE SERVICE CHECK: %s;%s;%d;%s'
+                        % (service.host.get_name().decode('utf8', 'ignore'),
+                           service.get_name().decode('utf8', 'ignore'),
+                           return_code, plugin_output.decode('utf8', 'ignore')))
         now = time.time()
         cls = service.__class__
         # If globally disable OR locally, do not launch
