@@ -4,6 +4,11 @@
 .element   { margin-left: 30px;}
 
 
+/* Move the tool bar from the show/hide button */
+#toolbar{
+    padding-top: 30px;
+}
+
 .shortdesc { cursor:pointer; /*width: 70%;*/}
 .tabledesc:hover   {background:#ddd; }
 .detail {margin-left: 30px;}

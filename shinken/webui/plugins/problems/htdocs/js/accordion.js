@@ -57,6 +57,31 @@ function hovering_selection(name){
 }
 
 
+/*
+  Tool bar related code
+*/
+
+function hide_toolbar(){
+    $('#toolbar').hide();
+    $('#hide_toolbar_btn').hide();
+    $('#show_toolbar_btn').show();
+    save_toolbar('hide');
+}
+
+function show_toolbar(){
+    $('#toolbar').show();
+    $('#hide_toolbar_btn').show();
+    $('#show_toolbar_btn').hide();
+    save_toolbar('show');
+}
+
+function save_toolbar(toolbar){
+    console.log('Need to save toolbar pref '+toolbar);
+    $.post("/user/save_pref", { 'key' : 'toolbar', 'value' : toolbar});
+}
+
+
+
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
     var myFx = $('#'+name).slideToggle();
@@ -233,21 +258,3 @@ function acknowledge_all(user){
     flush_selected_elements();
 }
 
-function hide_toolbar(){
-    $('#toolbar').hide();
-    $('#hide_toolbar_btn').hide();
-    $('#show_toolbar_btn').show();
-    save_toolbar('hide');
-}
-
-function show_toolbar(){
-    $('#toolbar').show();
-    $('#hide_toolbar_btn').show();
-    $('#show_toolbar_btn').hide();
-    save_toolbar('show');
-}
-
-function save_toolbar(toolbar){
-    console.log('Need to save toolbar pref '+toolbar);
-    $.post("/user/save_pref", { 'key' : 'toolbar', 'value' : toolbar});
-}

@@ -235,11 +235,13 @@ $(function(){
 <div class="span12">
 
   <div class='row'>
-    <div class='span2 offset2'>
-      <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
-      <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
-      <a id='hide_toolbar_btn' href="javascript:hide_toolbar()" class="btn pull-left"><i class="icon-minus"></i> Hide toolbar</a>
-      <a id='show_toolbar_btn' href="javascript:show_toolbar()" class="btn pull-left"><i class="icon-plus"></i> Show toolbar</a>
+    <div class='span2'>
+      <a id='hide_toolbar_btn' style="display:inline;" href="javascript:hide_toolbar()" class="btn pull-left"><i class="icon-minus"></i> Hide toolbar</a>
+      <a id='show_toolbar_btn' style="display:inline;" href="javascript:show_toolbar()" class="btn pull-left"><i class="icon-plus"></i> Show toolbar</a>      
+    </div>
+    <div class='span2'>
+      <a id='select_all_btn' style="display:inline;" href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
+      <a id='unselect_all_btn' style="display:inline;" href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
     </div>
     <div class='span7'>
       &nbsp;
