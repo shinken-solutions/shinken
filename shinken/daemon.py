@@ -114,7 +114,7 @@ class Interface(Pyro.core.ObjBase, object):
         return self.app.cur_conf is not None
 
     def set_log_level(self, loglevel):
-        return logger.set_level(loglevel)
+        return logger.setLevel(loglevel)
 
 # If we are under android, we can't give parameters
 if is_android:
@@ -215,7 +215,6 @@ class Daemon(object):
             print('Stopping inter-process message (PYRO)')
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
-        logger.quit()
 
 
     def request_stop(self):
@@ -479,10 +478,10 @@ class Daemon(object):
             self.setup_pyro_daemon()
 
         # Setting log level
-        logger.set_level(self.log_level)
+        logger.setLevel(self.log_level)
         # Force the debug level if the daemon is said to start with such level
         if self.debug:
-            logger.set_level('DEBUG')
+            logger.setLevel('DEBUG')
         
         # Then start to log all in the local file if asked so
         self.register_local_log()

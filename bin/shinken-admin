@@ -310,9 +310,9 @@ class ShinkenAdmin(cmd.Cmd):
             return
 
         daemon = '*' if len(args) < 2 else args[0]
-        try:
-            loglevel = logger.get_level_id(args[-1])
-        except KeyError:
+        loglevel = shinken.log.getLevelName(args[-1])
+        if ' ' in loglevel:
+            # "Level xxx" returned, so this is none of the predefined levels
             print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]
             return
 

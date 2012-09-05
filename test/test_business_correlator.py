@@ -24,7 +24,7 @@
 
 import re
 from shinken_test import *
-
+import shinken.log
 
 class TestBusinesscorrel(ShinkenTest):
 
@@ -1165,6 +1165,9 @@ class TestConfigBroken(ShinkenTest):
         #
         print "conf_is_correct", self.conf.conf_is_correct
         self.assert_(not self.conf.conf_is_correct)
+
+        self.assertEqual(shinken.log.logger.getEffectiveLevel(),
+                         shinken.log.WARNING)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]

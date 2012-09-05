@@ -20,10 +20,10 @@ except ImportError:
 
 from shinken.objects.pack import Pack, Packs
 
-from shinken.log import logger
+from shinken.log import logger, DEBUG
 from shinken.objects.config import Config
 
-logger.set_level(10)
+logger.setLevel(DEBUG)
 
 
 class Dummy():
