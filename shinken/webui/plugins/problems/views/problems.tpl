@@ -23,6 +23,16 @@
 </script>
 %end
 
+%if toolbar=='hide':
+<script type="text/javascript">
+  var toolbar_hide = true;
+</script>
+%else:
+<script type="text/javascript">
+  var toolbar_hide = false;
+</script>
+%end
+
 
 
 <script type="text/javascript">
@@ -175,6 +185,16 @@
       <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
 
+    <form name='criticity_filter' class='form-horizontal'>
+      <span class="help-inline">Critical Only</span>
+      %if page=='problems':
+      <input type='checkbox' name='show_critical'></input>
+      %else:
+      <input type='checkbox' name='show_critical' checked></input>
+      %end
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_criticity_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
     <span><p>&nbsp;</p></span>
 
 
@@ -218,23 +238,27 @@ $(function(){
     <div class='span2 offset2'>
       <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
       <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
+      <a id='hide_toolbar_btn' href="javascript:hide_toolbar()" class="btn pull-left"><i class="icon-minus"></i> Hide toolbar</a>
+      <a id='show_toolbar_btn' href="javascript:show_toolbar()" class="btn pull-left"><i class="icon-plus"></i> Show toolbar</a>
     </div>
     <div class='span7'>
       &nbsp;
       %if navi is not None:
-      <div class="pagination center no-margin">
-	<ul class="pull-right">
-	  %for name, start, end, is_current in navi:
-	    %if is_current:
-	    <li class="active"><a href="#">{{name}}</a></li>
-	    %elif start == None or end == None:
-	    <li class="disabled"> <a href="#">...</a> </li>
-	    %else:
-	    <li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-	    %end
-	  %end
-	</ul>
-    </div>
+	<div class="pagination center">
+		<ul class="pull-right">
+		%for name, start, end, is_current in navi:
+		   	%if is_current:
+		   	<li class="active"><a href="#">{{name}}</a></li>
+		   	%elif start == None or end == None:
+		   	<li class="disabled"> <a href="#">...</a> </li>
+			%elif search:
+			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
+		   	%else:
+			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+		   	%end
+		    %end
+		</ul>
+	</div>
       %# end of the navi part
       %end
     </div>
@@ -243,7 +267,7 @@ $(function(){
 
 
 <div class='row-fluid'>
-  <div class='span2'>
+  <div id='toolbar' class='span2'>
     <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add filters</a>
     <p></p>
     %got_filters = sum([len(v) for (k,v) in filters.iteritems()]) > 0
@@ -308,6 +332,15 @@ $(function(){
       <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_state_downtime_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['crit']:
+    <li>
+      <span class="filter_color criticity_filter_color">&nbsp;</span>
+      <span class="criticity_filter_name">Criticity: {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("crit", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_criticity_filter('{{r}}');</script>
     %end
 
     </ul>
