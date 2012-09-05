@@ -50,7 +50,7 @@ do_with_root ./install -i
 do_with_root ./install -p nagios-plugins
 do_with_root ./install -p check_mem
 do_with_root ./install -p manubulon
-do_with_root ./install -p pnp4nagios
+do_with_root ./install -a pnp4nagios
 
 
 # Bail out

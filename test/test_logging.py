@@ -238,7 +238,9 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def _get_logging_output(self):
         msgs, lines = super(TestWithLocalLogging, self)._get_logging_output()
-        local_lines = list(open(self.logfile_name).readlines())
+        f = open(self.logfile_name)
+        local_lines = list(f.readlines())
+        f.close()
         os.remove(self.logfile_name)
         return msgs, lines, local_lines
 
