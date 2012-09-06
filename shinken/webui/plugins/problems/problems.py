@@ -55,13 +55,28 @@ def get_view(page):
 
     print 'DUMP COMMON GET', app.request.GET.__dict__
 
+
+   # Look for the toolbar pref
+    tool_pref = app.get_user_preference(user, 'toolbar')
+    # If void, create an empty one
+    if not tool_pref:
+        app.set_user_preference(user, 'toolbar', 'show')
+        tool_pref = 'show'
+    toolbar = app.request.GET.get('toolbar', '')
+    print "Toolbar", tool_pref, toolbar
+    if toolbar != tool_pref and len(toolbar) > 0:
+        print "Need to change user prefs for Toolbar", 
+        app.set_user_preference(user, 'toolbar', toolbar)
+    tool_pref = app.get_user_preference(user, 'toolbar')
+
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg', 'realm', 'htag', 'ack', 'downtime']
+    ts = ['hst_srv', 'hg', 'realm', 'htag', 'ack', 'downtime', 'crit']
     for t in ts:
         filters[t] = []
 
@@ -182,6 +197,12 @@ def get_view(page):
                 # Now ok for hosts, but look for services, and service hosts
                 items = [i for i in items if i.__class__.my_type == 'host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
 
+        if t == 'crit':
+            print "Add a criticity filter", s
+            items = [i for i in items if (i.__class__.my_type == 'service' and i.state_id == 2) or (i.__class__.my_type == 'host' and i.state_id == 1)]
+
+
+
         print "After filtering for", t, s, 'we got', len(items)
 
     # If we are in the /problems and we do not have an ack filter
@@ -218,7 +239,7 @@ def get_view(page):
     ## for pb in pbs:
     ##     print pb.get_name()
     print 'Give filters', filters
-    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro }
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro, 'toolbar': tool_pref }
 
 
 # Our page

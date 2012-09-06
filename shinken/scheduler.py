@@ -25,7 +25,6 @@
 
 import time
 import os
-import traceback
 import cStringIO
 import sys
 import socket
@@ -709,7 +708,6 @@ class Scheduler:
         except KeyError, exp:
             logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
-            traceback.print_stack()
             return
         except Pyro.errors.CommunicationError, exp:
             logger.warning("The %s '%s' got CommunicationError: %s" % (type, links[id]['name'], str(exp)))
@@ -745,7 +743,6 @@ class Scheduler:
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
-                    traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
                     logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
@@ -782,7 +779,6 @@ class Scheduler:
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
-                    traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
                     logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
@@ -822,7 +818,6 @@ class Scheduler:
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
-                    traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
                     logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
@@ -860,7 +855,6 @@ class Scheduler:
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
-                    traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
                     logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
