@@ -197,30 +197,26 @@ $(document).ready(function(){
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-not').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-evt').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-flp').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
 
-		}
-		);
+		});
 	}); 
 	</script>
 
@@ -469,7 +465,6 @@ $(document).ready(function(){
 		      			</div>
 		      			%end #of the only host part
 
-
 		      			<!-- If we are a root problem and got real impacts, show them! -->
 		      			%if elt.is_problem and len(elt.impacts) != 0:
 		      			<h3 class="span10">My impacts:</h3>
@@ -500,9 +495,6 @@ $(document).ready(function(){
 		      				</div>
 		      				%# end of the 'is problem' if
 		      				%end
-
-
-
 		      			</div><!-- End of the right part -->
 
 		      		</div>
@@ -541,8 +533,7 @@ $(document).ready(function(){
 		      		</div>
 		      	</div>
 		      	<!-- Tab Comments End -->
-
-
+		      	
 		      	<!-- Tab Downtimes Start -->
 		      	<div class="tab-pane" id="downtimes">
 		      		<div>
