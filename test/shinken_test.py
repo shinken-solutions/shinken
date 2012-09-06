@@ -424,7 +424,7 @@ if not hasattr(ShinkenTest, 'assertIn'):
 if not hasattr(ShinkenTest, 'assertIsInstance'):
     def assertIsInstance(self, obj, cls, msg=None):
         self.assertTrue(isinstance(obj, cls))
-    ShinkenTest.assertIn = assertIn
+    ShinkenTest.assertIsInstance = assertIsInstance
                     
 
 
