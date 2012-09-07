@@ -776,6 +776,7 @@ class SNMPAsyncClient(object):
 #                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
                 message = "FROM CACHE: " + message
                 self.set_exit(message, rc=rc)
+                self.memcached.set(self.obj_key, self.obj, time=604800)
                 return
             else:
                 # Datas not valide: datas too old
