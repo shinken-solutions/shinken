@@ -1,10 +1,3 @@
-.icon-logout { 
-  background-image: url("/static/img/icons/icon-logout.png"); 
-  background-position: center; 
-  height: 25px; 
-  width: 30px; 
-} 
-
 .icon-setting { 
   background-image: url("/static/img/icons/icon-settings.png"); 
   background-position: center; 
@@ -15,6 +8,8 @@
 .icon-impact { 
   background-image: url("/static/img/icons/icon-impact.png"); 
   background-position: center; 
+  background-repeat: no-repeat;
+  background-size: 20px auto;
   height: 25px; 
   width: 30px; 
 }
@@ -22,29 +17,26 @@
 .icon-itproblem { 
   background-image: url("/static/img/icons/icon-it.png"); 
   background-position: center; 
+  background-repeat: no-repeat;
+    background-size: 20px auto;
   height: 25px; 
-  width: 30px; 
+  width: 30px;
+
 }
-
-
-/*.navbar .nav > li > a {
-    color: #FFFFFF;
-}
-
-.navbar .navbar-text {
-    color: #FFFFFF;
-}*/
 
 .navbar .nav .active > a, .navbar .nav .active > a:hover {
   background: transparent url(/static/img/icons/pointer.gif) bottom center no-repeat !important;
-/*  color: #FFFFFF;
-  font-weight: bold;
-  text-decoration: none;*/
+  padding: 11px 15px;
 }
 
+.nav-icon {
+  padding-top: 4px;
+  color: #FFFFFF !important; 
+  font-size: 18px;
+}
 
 .brand {
-     text-shadow: 1px 1px 3px #E3E3E5; /* FF3.5+, Opera 9+, Saf1+, Chrome */
+  text-shadow: 1px 1px 3px #E3E3E5; /* FF3.5+, Opera 9+, Saf1+, Chrome */
 }
 
 .nav-controll .navbar-text > span > a {
@@ -63,23 +55,7 @@
   width: 1px;
   margin: 0 9px;
   overflow: hidden;
-  /*background-color: #FFFFFF;*/
 }
-
-
-/*
-.navbar-inner {
-  background-color: #2F5F8F;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#2F5F8F), to(#005086));
-  background-image: -webkit-linear-gradient(top, #2F5F8F, #005086);
-  background-image:    -moz-linear-gradient(top, #2F5F8F, #005086);
-  background-image:     -ms-linear-gradient(top, #2F5F8F, #005086);
-  background-image:      -o-linear-gradient(top, #2F5F8F, #005086);
-  background-image:         linear-gradient(top, #2F5F8F, #005086);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086');
-}
-*/
-
 
 .pagination.center, .pagination.center ul {
     float: left;
@@ -87,12 +63,3 @@
 }
 .pagination.center { left: 50%; }
 .pagination.center ul { left: -50%; }
-
-
-/* Typeachead is by default at 4px radius. 14 looks better.*/
-/*.typeahead {
-  margin-top: 2px;
-  -webkit-border-radius: 14px;
-  -moz-border-radius: 14px;
-  border-radius: 14px;
-}*/

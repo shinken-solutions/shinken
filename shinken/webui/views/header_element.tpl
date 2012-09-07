@@ -60,7 +60,7 @@
         <li class="divider-vertical"></li>
         %# Check for the selected element, if there is one
         %if menu_part == '/dashboard':
-        <li><a href="/dashboard/currently"><i class="icon-itproblem"></i></a></li>
+        <li><a href="/dashboard/currently"><i class="nav-icon icon-fullscreen"></i></a></li>
         %else:
         <li></li>
         %end
@@ -85,7 +85,7 @@
         %end
         %end
         <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
-        <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
+        <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="nav-icon icon-off"></i></a></li>
       </ul>
     </div>
     <ul class="nav pull-right">

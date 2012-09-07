@@ -249,8 +249,8 @@
   padding: 1px 3px 2px;
   text-transform: uppercase;
   position: relative;
-  top: -5px;
-  right: 15px;
+  top: -15px;
+  right: 8px;
   z-index: 666;
 }
 
