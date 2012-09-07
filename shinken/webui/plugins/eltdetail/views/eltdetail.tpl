@@ -264,7 +264,9 @@ $(document).ready(function(){
 						</tr>
 						<tr>
 							<td class="column1"><b>In Scheduled Downtime?</b></td>
-							<td><span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span></td>
+							<td><!-- <span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span> -->
+							<button class="span12 btn btn-mini trim-{{helper.yes_no(elt.in_scheduled_downtime)}}" type="button">{{helper.yes_no(elt.in_scheduled_downtime)}}</button>
+							</td>
 						</tr>
 					</table>
 					<hr>
