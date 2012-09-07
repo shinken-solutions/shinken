@@ -4,7 +4,7 @@
 %helper = app.helper
 
 <div class="span12 leftmargin">
-	<h2>General Informations</h2>
+	<h2><i class="icon-cogs"> General Informations </i></h2>
 	<div class="shell span12">
 		<div class="span4 well general-box">
 			<h4><i class="icon-cog"></i> Start Time</h4>
@@ -15,7 +15,7 @@
 			<span class="general">Shinken {{VERSION}}</span>
 		</div>
 	</div>
-	<h2>Shinken Daemons</h2>
+	<h2><i class="icon-cogs"> Shinken Daemons </i></h2>
 	<div class="shell span12">
 		    %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 	    	%for (sat_type, sats) in types:
