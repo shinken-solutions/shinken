@@ -32,6 +32,7 @@
 
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/font-awesome.css" rel="stylesheet">
     <link href="/static/css/custom/layout.css" rel="stylesheet">
     <link href="/static/css/custom/badger.css" rel="stylesheet">
     <link href="/static/css/elements/jquery.meow.css" rel="stylesheet">
