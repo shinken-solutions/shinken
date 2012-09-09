@@ -234,9 +234,9 @@ $(document).ready(function(){
 			<div class="tab-content">
 				<div class="tab-pane fade in active" id="basic">
 					%if elt_type=='host':
-					<h3>Host Information:</h3>
+					<h4>Host Information:</h4>
 					%else:
-					<h3>Service Information:</h3>
+					<h4>Service Information:</h4>
 					%end:
 
 					<script type="text/javascript">
@@ -307,7 +307,7 @@ $(document).ready(function(){
 					});
 					</script>
 
-					<h3>Additonal Informations</h3>
+					<h4>Additonal Informations</h4>
 					<table class="table tabletop">
 						<tbody class="tabletop">
 						<tr class="tabletop">
@@ -355,7 +355,7 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="commands">
-					<h3>Commands</h3>
+					<h4>Commands</h4>
 					<div>
 						<ul style="padding-top:5px" class="nav nav-list">
 							%disabled_s = ''
@@ -379,7 +379,7 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="gesture">
-					<h3>Gesture</h3>
+					<h4>Gesture</h4>
 					<canvas id="canvas" width="100" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
 					<div class="gesture_button">
 						<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
