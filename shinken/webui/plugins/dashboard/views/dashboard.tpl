@@ -13,10 +13,9 @@
 <!-- Maybe the admin didn't add a user preference module, or the module is dead, if so, warn about it -->
 %if not has_user_pref_mod:
    <div class="span11 alert alert-critical offset1">
-     Error : you didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
+     Error : You didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
    </div>
 %end
-
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
@@ -56,17 +55,12 @@
     </div>
     %end
     </div>
-
-
-
 </div>
 
 <script >$(function(){
   $(".slidelink").pageslide({ direction: "left", modal: true});
   });
 </script>
-
-
 
 <script>
   // Now load all widgets
