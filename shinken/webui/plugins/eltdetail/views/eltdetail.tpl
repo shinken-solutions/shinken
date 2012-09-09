@@ -256,16 +256,16 @@ $(document).ready(function(){
 					<table class="table">
 						<tr>
 							<td class="column1"><b>Status:</b></td>
-							<td><span class="btn span11 alert-small alert-{{elt.state.lower()}} quickinforight" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</span> </td>
+							<td><button class="btn span11 alert-small alert-{{elt.state.lower()}} quickinforight" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</button> </td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Flapping:</b></td>
-							<td><span class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</span></td>
+							<td><button class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</button></td>
 						</tr>
 						<tr>
 							<td class="column1"><b>In Scheduled Downtime?</b></td>
 							<td><!-- <span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span> -->
-							<button class="span12 btn btn-mini trim-{{helper.yes_no(elt.in_scheduled_downtime)}}" type="button">{{helper.yes_no(elt.in_scheduled_downtime)}}</button>
+							<button class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" type="button">{{helper.yes_no(elt.in_scheduled_downtime)}}</button>
 							</td>
 						</tr>
 					</table>
