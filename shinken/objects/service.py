@@ -1246,9 +1246,9 @@ class Services(Items):
                         hname = ''
                         for elt in sdeps:
                             if i % 2 == 0:  # host
-                                hname = elt
+                                hname = elt.strip()
                             else:  # description
-                                desc = elt
+                                desc = elt.strip()
                                 # we can register it (s) (depend on) -> (hname, desc)
                                 # If we do not have enouth data for s, it's no use
                                 if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
