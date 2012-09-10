@@ -62,6 +62,7 @@ class NoSetup:
 logger.load_obj(Dummy())
 
 
+
 class TestLevels(unittest.TestCase):
 
     def test_get_level_id(self):

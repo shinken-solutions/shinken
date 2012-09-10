@@ -424,9 +424,21 @@ if not hasattr(ShinkenTest, 'assertIn'):
 if not hasattr(ShinkenTest, 'assertIsInstance'):
     def assertIsInstance(self, obj, cls, msg=None):
         self.assertTrue(isinstance(obj, cls))
-    ShinkenTest.assertIn = assertIn
+    ShinkenTest.assertIsInstance = assertIsInstance
                     
 
+if not hasattr(ShinkenTest, 'assertRegexpMatches'):
+    def assertRegexpMatches(self, line, patern):
+        r = re.search(patern, line)
+        self.assertTrue(r is not None)
+    ShinkenTest.assertRegexpMatches = assertRegexpMatches
+                    
+
+if not hasattr(ShinkenTest, 'assertIs2'):
+    def assertIs(self, obj, cmp, msg=None):
+        self.assertTrue(obj is cmp)
+    ShinkenTest.assertIs = assertIs
+                            
 
 if __name__ == '__main__':
     unittest.main()

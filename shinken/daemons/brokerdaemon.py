@@ -487,6 +487,14 @@ class Broker(BaseSatellite):
             self.have_modules = True
             logger.info("We received modules %s " % mods)
 
+            # Ok now start, or restart them!
+            # Set modules, init them and start external ones
+            self.modules_manager.set_modules(self.modules)
+            self.do_load_modules()
+            self.modules_manager.start_external_instances()
+
+
+
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
@@ -655,10 +663,13 @@ class Broker(BaseSatellite):
 
             self.setup_new_conf()
 
+            # We already init modules durint the new conf thing
             # Set modules, init them and start external ones
-            self.modules_manager.set_modules(self.modules)
-            self.do_load_modules()
-            self.modules_manager.start_external_instances()
+            #self.modules_manager.set_modules(self.modules)
+            #self.do_load_modules()
+            #self.modules_manager.start_external_instances()
+
+
 
             # Do the modules part, we have our modules in self.modules
             # REF: doc/broker-modules.png (1)

@@ -1246,20 +1246,24 @@ class Services(Items):
                         hname = ''
                         for elt in sdeps:
                             if i % 2 == 0:  # host
-                                hname = elt
+                                hname = elt.strip()
                             else:  # description
-                                desc = elt
+                                desc = elt.strip()
                                 # we can register it (s) (depend on) -> (hname, desc)
                                 # If we do not have enouth data for s, it's no use
                                 if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
+                                    if hname == '':
+                                        hname = s.host_name
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
+
 
     # Will create all business tree for the
     # services
     def create_business_rules(self, hosts, services):
         for s in self:
             s.create_business_rules(hosts, services)
+
 
     # Will link all business service/host with theirs
     # dep for problem/impact link
