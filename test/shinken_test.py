@@ -434,7 +434,7 @@ if not hasattr(ShinkenTest, 'assertRegexpMatches'):
     ShinkenTest.assertRegexpMatches = assertRegexpMatches
                     
 
-if not hasattr(ShinkenTest, 'assertIs2'):
+if not hasattr(ShinkenTest, 'assertIs'):
     def assertIs(self, obj, cmp, msg=None):
         self.assertTrue(obj is cmp)
     ShinkenTest.assertIs = assertIs
