@@ -220,7 +220,7 @@ class LiveStatusRegenerator(Regenerator):
                     servicegroup_service_ids = set([h.id for h in v.members])
                     # if all of the servicegroup_service_ids are in contact_service_ids
                     # then the servicegroup belongs to the contact
-                     print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
+                    # print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
                     if servicegroup_service_ids <= contact_service_ids:
                         self.servicegroups._id_contact_heap.setdefault(c, []).append(v.id)
         else:

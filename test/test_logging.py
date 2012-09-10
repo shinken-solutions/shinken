@@ -36,6 +36,7 @@ import __import_shinken
 from shinken.log import logger, Log
 import shinken.log as logging
 from shinken.brok import Brok
+from shinken_test import *
 
 # The logging module requires some object for collecting broks
 class Dummy:
@@ -52,7 +53,14 @@ class Collector:
         self.list.append(o)
 
 
+class NoSetup:
+    def setUp(self):
+        pass
+
+
+
 logger.load_obj(Dummy())
+
 
 
 class TestLevels(unittest.TestCase):
@@ -82,7 +90,8 @@ class TestLevels(unittest.TestCase):
 
     def test_set_level_non_integer_raises(self):
         self.assertRaises(TypeError, logger.set_level, 1.0)
-        self.assertRaises(TypeError, logger.set_level, 'INFO')
+        # Why raise if there is an easy way to give the value like this string?
+        #self.assertRaises(TypeError, logger.set_level, 'INFO')
 
     def test_load_obj_must_not_change_level(self):
         # argl, load_obj() unsets the level! save and restore it
@@ -106,7 +115,6 @@ class TestBasics(unittest.TestCase):
 
 
 class LogCollectMixin:
-
     def _get_brok_log_messages(self, collector):
         """
         Return the log messages stored as Broks into the collector.
@@ -142,7 +150,7 @@ class LogCollectMixin:
             return self._get_logging_output()
     
 
-class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
+class TestDefaultLoggingMethods(NoSetup, ShinkenTest, LogCollectMixin):
 
     def test_basic_logging_log(self):
         msgs, lines = self._put_log(logger.log, 'Some log-message')
@@ -156,38 +164,39 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         msgs, lines = self._put_log(logger.debug, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Debug: Some log-message$')
+        self.assertRegexpMatches(lines[0], r'^\[\d+\] Debug :\s+Some log-message$')
 
     def test_basic_logging_info(self):
         logger.set_level(logger.INFO)
         msgs, lines = self._put_log(logger.info, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Info: Some log-message\n$')
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Info: Some log-message$')
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Info :\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[\d+\] Info :\s+Some log-message$')
 
     def test_basic_logging_warning(self):
         logger.set_level(logger.WARNING)
         msgs, lines = self._put_log(logger.warning, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Warning: Some log-message\n$')
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Warning: Some log-message$')
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Warning :\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[\d+\] Warning :\s+Some log-message$')
+
 
     def test_basic_logging_error(self):
         logger.set_level(logger.ERROR)
         msgs, lines = self._put_log(logger.error, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Error: Some log-message\n$')
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Error: Some log-message$')
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Error :\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[\d+\] Error :\s+Some log-message$')
 
     def test_basic_logging_critical(self):
         msgs, lines = self._put_log(logger.critical, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Critical: Some log-message\n$')
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Critical: Some log-message$')
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Critical :\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[\d+\] Critical :\s+Some log-message$')
 
     def test_level_is_higher_then_the_one_set(self):
         # just test two samples
@@ -207,11 +216,11 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         logger.set_human_format(True)
         msgs, lines = self._put_log(logger.info, 'Some ] log-message')
         self.assertRegexpMatches(msgs[0],
-            r'^\[[^\]]+] Info: Some \] log-message\n$')
-        time.strptime(msgs[0].split(' Info: ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
+            r'^\[[^\]]+] Info :\s+Some \] log-message\n$')
+        time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         self.assertRegexpMatches(lines[0],
-            r'^\[[^\]]+] Info: Some \] log-message$')
-        time.strptime(msgs[0].split(' Info: ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
+            r'^\[[^\]]+] Info :\s+Some \] log-message$')
+        time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         logger.set_human_format(False)
 
     def test_reset_human_timestamp_format(self):
@@ -224,26 +233,28 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         self.test_basic_logging_info()
 
 
-class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
+class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
 
     def _prepare_logging(self):
         super(TestWithLocalLogging, self)._prepare_logging()
         # set up a temporary file for logging
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         self.logfile_name = logfile.name
         logger.register_local_log(logfile.name)
 
     def _get_logging_output(self):
         msgs, lines = super(TestWithLocalLogging, self)._get_logging_output()
-        local_lines = list(open(self.logfile_name).readlines())
+        f = open(self.logfile_name)
+        local_lines = list(f.readlines())
+        f.close()
         os.remove(self.logfile_name)
         return msgs, lines, local_lines
 
     def test_register_local_log_keeps_level(self):
         logger.set_level(logger.ERROR)
         self.assertEqual(logger._level, logger.ERROR)
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         logfile_name = logfile.name
         logger.register_local_log(logfile_name)
@@ -263,7 +274,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(lines), 1)
         self.assertEqual(len(local_log), 1)
         self.assertRegexpMatches(local_log[0],
-            r' \[\d+\] Debug: Some log-message$')
+            r' \[\d+\] Debug :\s+Some log-message$')
 
     def test_basic_logging_info(self):
         logger.set_level(logger.INFO)
@@ -272,7 +283,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(lines), 1)
         self.assertEqual(len(local_log), 1)
         self.assertRegexpMatches(local_log[0],
-            r' \[\d+\] Info: Some log-message\n$')
+            r' \[\d+\] Info :\s+Some log-message\n$')
 
     def test_basic_logging_error(self):
         logger.set_level(logger.ERROR)
@@ -282,7 +293,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(local_log), 1)
         print >> sys.stderr, local_log[0]
         self.assertRegexpMatches(local_log[0],
-            r' \[\d+\] Error: Some log-message\n$')
+            r' \[\d+\] Error :\s+Some log-message\n$')
 
     def test_basic_logging_critical(self):
         logger.set_level(logger.CRITICAL)
@@ -291,7 +302,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(lines), 1)
         self.assertEqual(len(local_log), 1)
         self.assertRegexpMatches(local_log[0],
-            r' \[\d+\] Critical: Some log-message\n$')
+            r' \[\d+\] Critical :\s+Some log-message\n$')
 
     def test_level_is_higher_then_the_one_set(self):
         # just test two samples
@@ -314,11 +325,11 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         msgs, lines, local_log = self._put_log(logger.info, 'Some ] log-message')
         self.assertEqual(len(local_log), 1)
         self.assertRegexpMatches(local_log[0],
-            r' \[[^\]]+] Info: Some \] log-message\n$')
+            r' \[[^\]]+] Info :\s+Some \] log-message\n$')
         # :fixme: Currently, the local log gets prefixed another
         # timestamp. As it is yet unclear, whether this intended or
         # not, we test it, too.
-        times = local_log[0].split(' Info: ', 1)[0]
+        times = local_log[0].split(' Info :    ', 1)[0]
         time1, time2 = times.rsplit('[', 1)
         time.strptime(time1.rsplit(',')[0], '%Y-%m-%d %H:%M:%S')
         time.strptime(time2, '%a %b %d %H:%M:%S %Y]')
@@ -334,7 +345,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.test_basic_logging_info()
 
 
-class TestNamedCollector(unittest.TestCase, LogCollectMixin):
+class TestNamedCollector(NoSetup, ShinkenTest, LogCollectMixin):
 
     # :todo: add a test for the local log file, too
 
@@ -351,20 +362,20 @@ class TestNamedCollector(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 1)
         self.assertRegexpMatches(msgs[0],
-             r'^\[\d+\] Info: \[Tiroler Schinken\] Some log-message\n$')
+             r'^\[\d+\] Info :\s+\[Tiroler Schinken\] Some log-message\n$')
         self.assertRegexpMatches(lines[0],
-             r'^\[\d+\] Info: \[Tiroler Schinken\] Some log-message$')
+             r'^\[\d+\] Info :\s+\[Tiroler Schinken\] Some log-message$')
 
     def test_human_timestamp_format(self):
         logger.set_level(logger.INFO)
         logger.set_human_format(True)
         msgs, lines = self._put_log(logger.info, 'Some ] log-message')
         self.assertRegexpMatches(msgs[0],
-            r'^\[[^\]]+] Info: \[Tiroler Schinken\] Some \] log-message\n$')
-        time.strptime(msgs[0].split(' Info: ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
+            r'^\[[^\]]+] Info :\s+\[Tiroler Schinken\] Some \] log-message\n$')
+        time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         self.assertRegexpMatches(lines[0],
-            r'^\[[^\]]+] Info: \[Tiroler Schinken\] Some \] log-message$')
-        time.strptime(msgs[0].split(' Info: ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
+            r'^\[[^\]]+] Info :\s+\[Tiroler Schinken\] Some \] log-message$')
+        time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         logger.set_human_format(False)
 
     def test_reset_human_timestamp_format(self):

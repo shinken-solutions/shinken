@@ -27,7 +27,7 @@ import re
 import time
 from heapq import nsmallest
 from operator import itemgetter
-from livestatus_query_metainfo import LiveStatusQueryMetainfo, cache_IMPOSSIBLE, CACHE_PROGRAM_STATIC, CACHE_GLOBAL_STATS, CACHE_GLOBAL_STATS_WITH_STATEtype, CACHE_HOST_STATS, CACHE_SERVICE_STATS, CACHE_IRREVERSIBLE_HISTORY
+from livestatus_query_metainfo import LiveStatusQueryMetainfo, CACHE_IMPOSSIBLE, CACHE_PROGRAM_STATIC, CACHE_GLOBAL_STATS, CACHE_GLOBAL_STATS_WITH_STATETYPE, CACHE_HOST_STATS, CACHE_SERVICE_STATS, CACHE_IRREVERSIBLE_HISTORY
 from counter import Counter
 from shinken.log import logger
 
@@ -165,6 +165,6 @@ class LiveStatusQueryCache(object):
                 logger.info("[Livestatus Broker Query Cache] Detected statetypechange: %s" % str(obj))
                 self.invalidate_category(cache_GLOBAL_STATS_WITH_STATEtype)
                 self.invalidate_category(cache_SERVICE_STATS)
-            logger.debug("[Livestatus Broker Query Cache] Obj State id: %d and State type id: %d, Data state id: %d abd state type id: %d" % (obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id'])
+            logger.debug("[Livestatus Broker Query Cache] Obj State id: %d and State type id: %d, Data state id: %d abd state type id: %d" % (obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']))
         except Exception:
             pass

@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import Queue
-import shinken.log import logger
+from shinken.log import logger
 
 
 class MyLifoQueue(Queue.Queue):

@@ -28,21 +28,18 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_servicedependency_complexes.cfg')
+        self.setup_with_file('etc/nagios_python_crash_with_recursive_bp_rules.cfg')
 
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        for s in self.sched.services:
-            print s.get_full_name()
-        NRPE = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "NRPE")
-        self.assert_(NRPE is not None)
-        Load = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "Load")
-        self.assert_(Load is not None)
-        print Load.act_depend_of
-        self.assert_(NRPE in [e[0] for e in Load.act_depend_of])
+        print "Get the hosts and services"
+        now = time.time()
+        host1 = self.sched.hosts.find_by_name("ht34-peret-2-dif0")
+        host2 = self.sched.hosts.find_by_name("ht34-peret-2-dif1")
+        self.scheduler_loop(5, [[host1, 2, 'DOWN | value1=1 value2=2'], [host2, 2, 'DOWN | rtt=10']])
 
 
 if __name__ == '__main__':
