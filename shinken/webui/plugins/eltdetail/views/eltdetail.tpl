@@ -71,36 +71,38 @@ $(document).ready(function(){
 
   %#  "Content Container Start"
   <!--<div class="">-->
-  <div id="content_container" class="span12">
-  	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+  <div id="content_container" class="row-fluid">
+  	<div class="row-fluid">
+  		<h1 class="span6 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
 
-	<div class="span6 no-leftmargin">
-		<span class="pull-right leftmargin" id="host_tags">
-			%tags = elt.get_host_tags()
-			%for t in tags:
-			<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
-			%end
-		</span>
+		<div class="span6">
+			<span class="pull-right leftmargin" id="host_tags">
+				%tags = elt.get_host_tags()
+				%for t in tags:
+				<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+				%end
+			</span>
 
-	  	%if elt.action_url != '':
-	    	%action_urls = elt.action_url.split('|')
-			%if len(action_urls) > 0:
-				%for triplet in action_urls:
-					%if len(triplet.split(',')) == 3:
-						%( action_url, icon, alt) = triplet.split(',')
-						<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
-					%else:
-						%if len(triplet.split(',')) == 1:
-							<a href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
+		  	%if elt.action_url != '':
+		    	%action_urls = elt.action_url.split('|')
+				%if len(action_urls) > 0:
+					%for triplet in action_urls:
+						%if len(triplet.split(',')) == 3:
+							%( action_url, icon, alt) = triplet.split(',')
+							<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
+						%else:
+							%if len(triplet.split(',')) == 1:
+								<a href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
+							%end
 						%end
 					%end
 				%end
-			%end
-	  	%end
-	</div>
+		  	%end
+		</div>
+  	</div>
 
-	<div class="span12 no-leftmargin box">	   
-		<table class="span4 no-leftmargin">
+	<div class="row-fluid box">	   
+		<table class="span4">
 			%#Alias, apretns and hostgroups arefor host only
 			%if elt_type=='host':
 			<tr>
@@ -221,9 +223,9 @@ $(document).ready(function(){
 	</script>
 
 	<!-- Le Anfang -->
-	<div class="span12">
+	<div class="row-fluid">
 		<!-- Start Host/Services-->
-		<div class="tabbable verticaltabs-container span3 no-leftmargin"> <!-- Wrap the Bootstrap Tabs/Pills in this container to position them vertically -->
+		<div class="tabbable verticaltabs-container span3"> <!-- Wrap the Bootstrap Tabs/Pills in this container to position them vertically -->
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#basic" data-toggle="tab">{{elt_type.capitalize()}} Information:</a></li>
 				<li><a href="#additonal" data-toggle="tab">Additonal Informations:</a></li>
@@ -395,7 +397,7 @@ $(document).ready(function(){
 		</div>
 
 		<!-- Detail info box start -->
-		<div class="span9 tabbable no-leftmargin">
+		<div class="span9 tabbable">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
 				<li><a href="#comments" data-toggle="tab">Comments</a></li>

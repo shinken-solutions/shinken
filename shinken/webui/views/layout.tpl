@@ -104,7 +104,7 @@
 		%include header_element globals()
 	%end
 
-    <div class="container-fluid no-leftpadding">
+    <div class="container-fluid">
       <div class="row-fluid">
 %#        <div class="span2 min-height">
 %#			%if print_menu:
