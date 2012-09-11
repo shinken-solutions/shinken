@@ -164,15 +164,6 @@ function remove(){
     return 0
 }
 
-function enable_rhel_service(){
-    service=$1
-    if [ $CODE == "REDHAT" ]
-    then
-        chkconfig --add $service >> ${LOGFILE} 2>&1
-        chkconfig $service on >> ${LOGFILE} 2>&1
-    fi
-}
-
 function purgeSQLITE(){
     cadre "Purge livestatus db logs" green
     if [ ! -f $TARGET/var/livestatus.db ]
@@ -257,11 +248,11 @@ function setdirectives(){
 
 function create_user(){
     cadre "Creating user" green
-    if [ ! -z "$(cat /etc/passwd | grep $SKUSER)" ]
+    if grep -q "^${SKUSER}:" /etc/passwd;
     then
         cecho " > User $SKUSER already exists" yellow
     else
-            useradd -r -s /bin/bash $SKUSER -m
+            useradd -r -s /bin/bash $SKUSER -m -d /home/$SKUSER
     fi
         usermod -G $SKGROUP $SKUSER
 }
@@ -385,6 +376,11 @@ function prerequisites(){
 #                    PACKAGES=$YUMPKGS
 #                    QUERY="rpm -q "
 #                    ;;
+        Fedora)
+                16|17)
+                    PACKAGES=$YUMPKGS
+                    QUERY="rpm -q "
+                    ;;
                 *)
                     cecho " > Unsupported RedHat/CentOs version" red
                     exit 2
@@ -473,7 +469,37 @@ function prerequisites(){
 
 
         done
-    elif [ "$CODE" == "DEBIAN" ]
+    elif [ "$CODE" = "Fedora" ]
+    then
+        case $VERS in
+            16|17)
+                export PY="python"
+                export PYEI="easy_install"
+                PYLIBS=$PYLIBS
+                ;;
+        esac
+        for p in $PYLIBS
+        do
+            module=$(echo $p | awk -F: '{print $1'})
+            import=$(echo $p | awk -F: '{print $2'})
+
+            $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
+            if [ $? -eq 2 ]
+            then
+                if [ $SKIPPREREQUISITES -eq 1 ]
+                then
+                    cecho " > SKIPPREQUISITES enabled: won't install $p " red
+                else
+                    cecho " > Module $module ($import) not found. Installing..." yellow
+                    $PYEI $module >> ${LOGFILE} 2>&1
+                fi
+            else
+                cecho " > Module $module found." green
+            fi
+
+
+        done
+    elif [ "$CODE" = "DEBIAN" ]
     then
         export PY="python"
         export PYEI="easy_install"
@@ -684,7 +710,6 @@ function relocate(){
     done
 
     # relocate nagios plugin path
-    cecho " > relocate nagios plugin path" green
     sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
     sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
     # relocate default /usr/local/shinken path
@@ -785,7 +810,8 @@ function enable_initd(){
     cecho " > Enabling $DIST startup script" green
     case $CODE in
         REDHAT)
-            enable_rhel_service shinken
+            chkconfig --add shinken
+            chkconfig shinken on
             ;;
         Fedora)
             systemctl --system daemon-reload
@@ -928,12 +954,7 @@ function sinstall(){
     enableretention
     enable_initd
 
-    if [[ $NOMONGO -eq 1 ]]
-    then
-        cecho " > Skip mongo installation" green
-    else
-        install_mongodb
-    fi
+    install_mongodb
 
     if [ "$LOGSTORE" == "mongo" ]
     then
@@ -1066,8 +1087,8 @@ function restore(){
 
     # Keep Shinken original files as samples conf files and restore.
     cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/etc/* $ETC/
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/var/* $VAR/
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
+    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/var/* $VAR/
+    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
 
     cecho " > Restoration done. Original files was kept with '.example' suffix, use 'diff' to check differences between your files and original." green
 }
@@ -1328,22 +1349,12 @@ function install_mongodb(){
                 cecho " > Installing mongodb server" green
                 yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
                 cecho " > Enable mongodb startup scripts" green
-                enable_rhel_service mongod
+                chkconfig --add mongod >> ${LOGFILE} 2>&1
+                chkconfig mongod on >> ${LOGFILE} 2>&1
                 cecho " > Start mongodb server" green
                 /etc/init.d/mongod start >> ${LOGFILE} 2>&1
             else
-                # check if mongo is installed
-                exist=$(rpm -qa | grep mongo-10gen)
-                if [[ -z "$exist" ]]
-                then
-                    cecho " > Installing mongodb server" green
-                    yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
-                    enable_rhel_service mongod
-                    cecho " > Start mongodb server" green
-                    /etc/init.d/mongod start >> ${LOGFILE} 2>&1
-                else
-                    cecho "Already installed" yellow
-                fi
+                cecho "Already installed" yellow
             fi
             ;;
         Fedora)
@@ -1600,10 +1611,10 @@ function install_multisite(){
         echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers
         echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
     fi
-#    if [ $movepnp -eq 1 ]
-#    then
-#        mv $PNPPREFIX $PNPPREFIX.MK
-#    fi
+    if [ $movepnp -eq 1 ]
+    then
+        mv $PNPPREFIX $PNPPREFIX.MK
+    fi
 }
 
 # pnp4nagios
@@ -1674,8 +1685,6 @@ function install_pnp4nagios(){
             cecho " > Fix htpasswd.users path" green
             sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf
             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
-            cecho " > Enable npcd startup" green
-            enable_rhel_service npcd
             ;;
         DEBIAN)
             cecho " > Fix htpasswd.users path" green
@@ -1778,12 +1787,13 @@ function install_mysql(){
     cecho " > Checking for mysql server" green
     case $CODE in
         REDHAT)
-            if [[ -z "$(rpm -qa | grep mysql-server)" ]]
+            if [ -z "$(rpm -qa | grep mysql-server)"
+                ]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
                 yum install -y mysql-server >> ${LOGFILE} 2>&1
-                enable_rhel_service mysqld
-                /etc/init.d/mysqld start
+                chkconfig mysqld on >> ${LOGFILE} 2>&1
+                /etc/init.d/mysqld start >> ${LOGFILE} 2>&1
                 while true
                 do
                     creads " --> Please provide a password for root user: " yellow
@@ -1902,7 +1912,7 @@ function install_nconf(){
             REDHAT|Fedora)
                 cecho " > Installing prerequisites" green
                 yum -y install $NCONFYUMPKG >> ${LOGFILE} 2>&1
-                enable_rhel_service httpd
+                chkconfig httpd on >> ${LOGFILE} 2>&1
                 /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
                 ;;
             DEBIAN)
@@ -2021,7 +2031,8 @@ function install_nconf(){
     # restart apache for dependencies
     case $CODE in
         REDHAT|Fedora)
-            enable_rhel_service httpd
+            chkconfig httpd on >> ${LOGFILE} 2>&1
+            chkconfig --add httpd  >> ${LOGFILE} 2>&1
             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
             ;;
         DEBIAN)
@@ -2055,9 +2066,7 @@ function do_skmacro(){
     export PYTHONPATH="$TARGET"
     export SHINKEN="$PYTHONPATH"
     export SKTOOLS="$PYTHONPATH/install.d/tools"
-
     $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args  >> ${LOGFILE} 2>&1
-
 
 }
 
@@ -2131,64 +2140,6 @@ function install_notify_by_xmpp(){
 #################################
 ### PLUGINS INSTALLATION PART ###
 #################################
-
-# CUCUMBER
-function install_cucumber(){
-    if [[ "$CODE" == "REDHAT" ]]
-    then
-        if [[ ! -f /etc/yum.repos.d/dag.repo ]]
-        then
-            cecho " > Enable dag repository for ffmpeg" green
-            cp $myscripts/install.d/dag.repo /etc/yum.repos.d
-            yum clean all >> ${LOGFILE} 2>&1
-        fi
-        cecho " > Installing eue dependencies" green
-        for p in $EUEYUMPKG
-        do 
-            cecho " --> Installing $p" green
-            yum install -y $p >> ${LOGFILE} 2>&1
-            if [[ $? -ne 0 ]]
-            then
-                cecho " ----> There was a problem installing $p" red
-            fi
-        done
-    elif [[ "$CODE" == "DEBIAN" ]]
-    then
-        cecho " > Unsuported at the moment ...." red
-        exit 2
-    else
-        cecho " > Unsupported distribution" red
-        exit 2
-    fi
-
-    cecho " --> Installing ruby gems" green
-    for g in $EUEGEMS
-    do
-        gem=$(echo $g | awk -F: '{print $1}')
-        gemver=$(echo $g | awk -F: '{print $2}')
-        cecho " ----> Installing gem ${gem} version ${gemver}" green
-        gem install --no-ri --no-rdoc $gem --version $gemver >> ${LOGFILE} 2>&1
-        if [[ $? -ne 0 ]]
-        then
-            cecho " ------> There was a problem installing gem ${gem} version ${gemver}" red
-        fi
-    done
-
-    cecho " --> Alter max_ouput_length for webui" green
-    do_skmacro set_webui_ouptput_length.macro 200 
-  
-    cecho " --> Deploy example eue service" green
-    IP=$(ifconfig  | grep adr | awk -F: '{print $2}' | awk '{print $1}' | head -n 1)
-    cp $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services/
-    cp $TARGET/libexec/eue/glpi.ini.in $TARGET/libexec/eue/glpi.ini
-    sed -i "s/@@IPWEBUI@@/"$IP"/g" $TARGET/libexec/eue/glpi.ini
-
-    cecho " --> restart shinken" green
-    /etc/init.d/shinken restart
-}
-
-
-
 
 # CAPTURE_PLUGIN
 function install_capture_plugin(){
@@ -2322,8 +2273,8 @@ function install_check_mongodb(){
 function install_IBM_DS() {
     cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
 
-    SMcli_bin=$(which SMcli)
-    if [ $? -ne 0 ]
+    SMcli_bin="/opt/IBM_DS/client/SMcli"
+    if [ -x $SMcli_bin ]
     then
         cecho "You do not have Storage Manager installed. Go on:" red
         cecho "http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=Entry-level+disk+systems&product=ibm/Storage_Disk/DS3500&release=All&platform=All&function=all#Storage%20Manager" red
@@ -2349,16 +2300,6 @@ function install_IBM_plugins() {
 
     cecho "Installing plugins..." green
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_systemHealth.pl check_snmp_aixVGstate.pl check_snmp_HACMP.pl check_snmp_Safekit.pl >> $TMP/shinken.install.log 2>&1
-}
-
-function install_HPUX_plugins() {
-    cadre "Install HPUX plugins" green
-
-    cecho "Downloading plugins..." green
-    wget $WGETPROXY $CHECKHPUX >> ${LOGFILE} 2>&1
-
-    cecho "Installing plugins..." green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_hpux_storage.pl check_snmp_mem >> $TMP/shinken.install.log 2>&1
 }
 
 # CHECK_NWC_HEALTH
@@ -2938,24 +2879,6 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
-function install_check_snmp_netint(){
-    cadre "Install install_check_snmp_netint" green
-
-    cd $TMP
-
-    filename="check_snmp_netint.pl"
-    cecho " > Downloading check_snmp_netint" green
-    wget $WGETPROXY $CHECKSNMPNETINT -O ${filename} >> ${LOGFILE} 2>&1
-    if [ $? -ne 0 ]
-    then
-        cecho " > Error while downloading $script" red
-        exit 2
-    fi
-
-    cecho " > install check_snmp_netint" green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
-}
-
 function install_check_rsync(){
     cadre "Install the rsync check plugin" green
 
@@ -3095,7 +3018,6 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                 broker
                                 reactionner
                                 receiver
-                                skonf
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins
@@ -3111,10 +3033,8 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
                                check_snmp_bandwidth (check bandwidth usage with snmp)
-                               check_snmp_netint (enhanced version of check_snmp_int plugins)
                                check_IBM
                                check_IBM_DS
-                               check_HPUX
                                check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
@@ -3125,7 +3045,6 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                notify_by_xmpp
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
-    --enableeue             Enable application performance monitoring stack (experimental)
     -h | --help             Show help"
 }
 
@@ -3151,7 +3070,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,enableeue,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -3233,10 +3152,6 @@ do
             then
                 install_check_snmp_bandwidth
                 exit 0
-            elif [ "$OPTARG" == "check_snmp_netint" ]
-            then
-                install_check_snmp_netint
-                exit 0
             elif [ "$OPTARG" == "check_IBM" ]
             then
                 install_IBM_plugins
@@ -3244,10 +3159,6 @@ do
             elif [ "$OPTARG" == "check_IBM_DS" ]
             then
                 install_IBM_DS
-                exit 0
-            elif [ "$OPTARG" == "check_HPUX" ]
-            then
-                install_HPUX_plugins
                 exit 0
             elif [ "$OPTARG" == "check_rsync" ]
             then
@@ -3312,7 +3223,7 @@ do
             ;;
         -i|--install)
             FROMSRC=1
-            sinstall 
+            sinstall
             fixHtpasswdPath
             exit 0
             ;;
@@ -3394,10 +3305,6 @@ do
             ;;
         --register)
             register
-            exit 0
-            ;;
-        --enableeue)
-            install_cucumber
             exit 0
             ;;
         (--)
