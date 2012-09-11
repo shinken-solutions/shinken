@@ -37,6 +37,7 @@ elif python_version >= (3,):
 from setuptools import setup, find_packages
 from glob import glob
 import os
+import os.path
 import itertools
 import ConfigParser
 try:
@@ -116,6 +117,10 @@ class install(_install):
         ),
     ]
 
+    boolean_options = _install.boolean_options + [
+        'relocatable'
+    ]
+    
     def initialize_options(self):
         _install.initialize_options(self)
         self.etc_path = None
@@ -125,6 +130,7 @@ class install(_install):
         self.plugins_path = None
         self.owner = None
         self.group = None
+        self.relocatable = None
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -142,6 +148,8 @@ class install(_install):
             self.owner = DEFAULT_OWNER
         if self.group is None:
             self.group = DEFAULT_GROUP
+        if self.relocatable is None:
+            self.relocatable = False
 
         if self.root:
             for attr in ('etc_path', 'var_path', 'plugins_path', 'run_path', 'log_path'):
@@ -163,8 +171,9 @@ class build_config(Command):
         self.run_path = None
         self.log_path = None
         self.plugins_path = None
-
+        self.root = None
         self._install_scripts = None
+        self.relocatable = None
 
         self.owner = None
         self.group = None
@@ -176,6 +185,8 @@ class build_config(Command):
         )
         self.set_undefined_options('install',
                                    ('install_scripts', '_install_scripts'),
+                                   ('relocatable', 'relocatable'),
+                                   ('root', 'root'),
         )
         self.set_undefined_options('install_config',
                                    ('etc_path', 'etc_path'),
@@ -212,11 +223,11 @@ class build_config(Command):
             buf = f.read()
             f.close
             # substitute
-            buf = buf.replace("$ETC$", self.etc_path)
-            buf = buf.replace("$VAR$", self.var_path)
-            buf = buf.replace("$RUN$", self.run_path)
-            buf = buf.replace("$LOG$", self.log_path)
-            buf = buf.replace("$SCRIPTS_BIN$", self._install_scripts)
+            buf = buf.replace("$ETC$", relative_path_if_relocatable(self.relocatable, self.root, self.etc_path))
+            buf = buf.replace("$VAR$", relative_path_if_relocatable(self.relocatable, self.root, self.var_path))
+            buf = buf.replace("$RUN$", relative_path_if_relocatable(self.relocatable, self.root, self.run_path))
+            buf = buf.replace("$LOG$", relative_path_if_relocatable(self.relocatable, self.root, self.log_path))
+            buf = buf.replace("$SCRIPTS_BIN$", relative_path_if_relocatable(self.relocatable, self.root, self._install_scripts))
             # write out the new file
             f = open(outfile, "w")
             f.write(buf)
@@ -259,7 +270,11 @@ user=%s
 group=%s
 workdir=%s
 pidfile=%s/%sd.pid
-""" % (self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner,
+       self.group,
+       relative_path_if_relocatable(self.relocatable, self.root, self.var_path),
+       relative_path_if_relocatable(self.relocatable, self.root, self.run_path),
+       dname))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -269,7 +284,7 @@ pidfile=%s/%sd.pid
             log.info('updating path in %s', outname)
             update_file_with_string(inname, outname,
                                     "/usr/local/shinken/libexec",
-                                    self.plugins_path)
+                                    relative_path_if_relocatable(self.relocatable, self.root, self.plugins_path))
 
         # And update the nagios.cfg file for all /usr/local/shinken/var
         # value with good one
@@ -284,7 +299,10 @@ shinken_user=%s
 shinken_group=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % (self.owner, self.group, self.run_path, self.log_path)
+""" % (self.owner,
+       self.group,
+       relative_path_if_relocatable(self.relocatable, self.root,self.run_path),
+       relative_path_if_relocatable(self.relocatable, self.root,self.log_path))
             )
 
         # UPDATE Shinken-specific.cfg files too
@@ -293,12 +311,13 @@ local_log=%s/arbiterd.log
             outname = os.path.join(self.build_dir, name)
 
             update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/var", self.var_path)
+                                    "/usr/local/shinken/var",
+                                    relative_path_if_relocatable(self.relocatable, self.root, self.var_path))
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
                                     "nagios.log",
-                                    "%s/nagios.log" % self.log_path)
+                                    "%s/nagios.log" % relative_path_if_relocatable(self.relocatable, self.root, self.log_path))
 
 
 class install_config(Command):
@@ -402,6 +421,10 @@ class install_config(Command):
                                        "Maybe you should create this group"
                                        % group_name)
 
+def relative_path_if_relocatable(relocatable, root, path):
+    if relocatable:
+        return os.path.join('/', os.path.relpath(path, root))
+    return path
 
 def ensure_dir_exist(f):
     dirname = os.path.dirname(f)
