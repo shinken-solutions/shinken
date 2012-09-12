@@ -169,7 +169,7 @@ function enable_rhel_service(){
     if [ $CODE == "REDHAT" ]
     then
         chkconfig --add $service >> ${LOGFILE} 2>&1
-        chkconfig $ervice on >> ${LOGFILE} 2>&1
+        chkconfig $service on >> ${LOGFILE} 2>&1
     fi
 }
 
