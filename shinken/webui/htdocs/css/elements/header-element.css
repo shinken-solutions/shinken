@@ -1,9 +1,30 @@
-.icon-setting { 
-  background-image: url("/static/img/icons/icon-settings.png"); 
-  background-position: center; 
-  height: 25px; 
-  width: 30px; 
-} 
+/**
+* Copyright (C) 2009-2012:
+*    Gabes Jean, naparuba@gmail.com
+*    Gerhard Lausser, Gerhard.Lausser@consol.de
+*    Gregory Starck, g.starck@gmail.com
+*    Hartmut Goebel, h.goebel@goebel-consult.de
+*    Andreas Karfusehr, andreas@karfusehr.de
+*
+* This file is part of Shinken.
+*
+* Shinken is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Shinken is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*
+**/
+
+/*  Header element styles
+    ------------------------------------------------------- */
 
 .icon-impact { 
   background-image: url("/static/img/icons/icon-impact.png"); 
@@ -18,7 +39,7 @@
   background-image: url("/static/img/icons/icon-it.png"); 
   background-position: center; 
   background-repeat: no-repeat;
-    background-size: 20px auto;
+  background-size: 20px auto;
   height: 25px; 
   width: 30px;
 
