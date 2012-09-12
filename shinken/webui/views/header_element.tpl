@@ -107,7 +107,7 @@
     </script>  
     <form name="global_search" class="navbar-search pull-right topmmargin1" action='#'>
       <input type="text" class="search-query typeahead no-bottommargin" autocomplete="off" placeholder="Search" name="global_search">
-      <a id="searchhelp" data-content="<a href='http://www.shinken-monitoring.org/wiki/'>Search documentation</a>" rel="popover" href="#" data-original-title="Help"><i class="icon-question-sign icon-white topmmargin2"></i></a>  
+      <a id="searchhelp" data-content="<a href='http://www.shinken-monitoring.org/wiki/'>Search documentation</a>" rel="popover" href="#" data-original-title="Help"><i class="icon-question-sign font-white topmmargin2"></i></a>  
     </form>
     %end
   </div><!--/.nav-collapse -->

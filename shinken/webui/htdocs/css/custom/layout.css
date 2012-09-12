@@ -23,6 +23,20 @@
 *
 **/
 
+/*  Special Font Awesome styles (Font Color)
+    ------------------------------------------------------- */
+.font-white {
+  color: #FFFFFF;
+}
+
+.font-black {
+  color: #000000;
+}
+
+.font-red {
+  color: #DA4F49;
+}
+
 /*  Special Shinken styles
     ------------------------------------------------------- */
 
