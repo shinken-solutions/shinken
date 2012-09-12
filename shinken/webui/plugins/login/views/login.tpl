@@ -34,7 +34,7 @@
         <label>Password</label>
         <input class="span6" id="password" name="password" type="password">
         <br>
-        <button class="btn" type="submit" href="javascript: submitform()">Login</button>
+        <button class="btn" type="submit" href="javascript: submitform()"><i class="icon-signin"></i> Login</button>
       </form>
     </div>
   </div>
