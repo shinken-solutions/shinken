@@ -75,15 +75,16 @@ $(document).ready(function(){
   	<div class="row-fluid">
   		<h1 class="span6 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
 
-		<div class="span6">
-			<span class="pull-right leftmargin" id="host_tags">
-				%tags = elt.get_host_tags()
-				%for t in tags:
-				<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
-				%end
-			</span>
-
-		  	%if elt.action_url != '':
+		%if elt.action_url != '':
+			<div class="span5">
+				<span class="pull-right leftmargin" id="host_tags">
+					%tags = elt.get_host_tags()
+					%for t in tags:
+					<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+					%end
+				</span>
+			</div>
+			<div class="span1">
 		    	%action_urls = elt.action_url.split('|')
 				%if len(action_urls) > 0:
 					%for triplet in action_urls:
@@ -92,13 +93,20 @@ $(document).ready(function(){
 							<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
 						%else:
 							%if len(triplet.split(',')) == 1:
-								<a href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
+								<a id="action-link" href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
 							%end
 						%end
 					%end
 				%end
-		  	%end
-		</div>
+			</div>	
+		%else:
+		  	<span class="pull-right leftmargin" id="host_tags">
+				%tags = elt.get_host_tags()
+				%for t in tags:
+				<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+				%end
+			</span>
+		%end	
   	</div>
 
 	<div class="row-fluid box">	   
