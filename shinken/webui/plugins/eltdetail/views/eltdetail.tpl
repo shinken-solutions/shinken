@@ -85,19 +85,27 @@ $(document).ready(function(){
 				</span>
 			</div>
 			<div class="span1">
-		    	%action_urls = elt.action_url.split('|')
-				%if len(action_urls) > 0:
-					%for triplet in action_urls:
-						%if len(triplet.split(',')) == 3:
-							%( action_url, icon, alt) = triplet.split(',')
-							<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
-						%else:
-							%if len(triplet.split(',')) == 1:
-								<a id="action-link" href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
+				<div class="btn-group">
+				<button class="btn btn-mini"><i class="icon-cog"></i> Action</button>
+				<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+			 		<span class="caret"></span>
+			 	</button>
+					<ul class="dropdown-menu pull-right">
+						%action_urls = elt.action_url.split('|')
+						%if len(action_urls) > 0:
+							%for triplet in action_urls:
+								%if len(triplet.split(',')) == 3:
+									%( action_url, icon, alt) = triplet.split(',')
+									<li><a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a></li>
+								%else:
+									%if len(triplet.split(',')) == 1:
+										<li><a id="action-link" href="{{triplet}}" target=_blank>{{triplet}}</a></li>
+									%end
+								%end
 							%end
 						%end
-					%end
-				%end
+				    </ul>
+			    </div>
 			</div>	
 		%else:
 		  	<span class="pull-right leftmargin" id="host_tags">
