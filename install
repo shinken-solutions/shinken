@@ -164,6 +164,15 @@ function remove(){
     return 0
 }
 
+function enable_rhel_service(){
+    service=$1
+    if [ $CODE == "REDHAT" ]
+    then
+        chkconfig --add $service >> ${LOGFILE} 2>&1
+        chkconfig $service on >> ${LOGFILE} 2>&1
+    fi
+}
+
 function purgeSQLITE(){
     cadre "Purge livestatus db logs" green
     if [ ! -f $TARGET/var/livestatus.db ]
