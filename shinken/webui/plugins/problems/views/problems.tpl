@@ -83,7 +83,7 @@
         %if user.is_admin:
         var advfct=1;
         %else:
-        var advcft=0;
+        var advfct=0;
         %end
 
 	%for b in bookmarks:
