@@ -64,8 +64,9 @@
 
       <div class='span10'>
       %for _t in lst:
-         %(tpl, services) = _t
-	 <div id="services-{{tpl.get('name', '')}}" class='services_list'>
+         %if len(services) != 0:
+            %(tpl, services) = _t
+	    <div id="services-{{tpl.get('name', '')}}" class='services_list'>
          %if len(services) == 0:
 	   <div class="alert">No services enabled for this pack</div>
 	 %else:
