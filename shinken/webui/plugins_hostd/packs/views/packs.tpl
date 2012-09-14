@@ -48,7 +48,7 @@
         %(tpl, services) = _t
         %if tpl:
            %tname = tpl.get('name', '')
-           <div> Host tag: <a href='/elemments/hosts/{{tname}}'> {{tname}}</a>
+           <div> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
 	     <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>
 	   </div>
         %else:
@@ -83,7 +83,7 @@
 	 %for s in services:
 	   %sid = s.get('_id', '')
 	   %sname = s.get('service_description', 'unknown')
-           <div class=''><a href='/elemments/services/{{sid}}'> {{sname}}</a></div>
+           <div class=''><a href='/elements/services/{{sid}}'> {{sname}}</a></div>
 	 %end
 	</div>
       %end
