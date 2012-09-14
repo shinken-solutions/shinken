@@ -86,10 +86,15 @@ $(document).ready(function(){
 			</div>
 			<div class="span1">
 				<div class="btn-group">
-				<button class="btn btn-mini"><i class="icon-cog"></i> Action</button>
-				<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-			 		<span class="caret"></span>
-			 	</button>
+					%action_urls = elt.action_url.split('|')
+					%if len(action_urls) == 1:
+					<button class="btn btn-mini"><i class="icon-cog"></i> Action</button>
+					%else:
+					<button class="btn btn-mini"><i class="icon-cog"></i> Actions</button>
+					%end
+					<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+				 		<span class="caret"></span>
+				 	</button>
 					<ul class="dropdown-menu pull-right">
 						%action_urls = elt.action_url.split('|')
 						%if len(action_urls) > 0:
@@ -745,3 +750,4 @@ $(document).ready(function(){
     $('#inner_depgraph').load('/inner/depgraph/{{elt.get_full_name()}}');
 });*/
 </script>
+
