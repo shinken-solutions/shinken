@@ -119,8 +119,8 @@ class _Unittest2CompatMixIn:
     def assertIsInstance(self, obj, cls, msg=None):
         self.assertTrue(isinstance(obj, cls), msg)
 
-    def assertRegexpMatches(self, line, patern, msg):
-        r = re.search(patern, line)
+    def assertRegexpMatches(self, line, pattern, msg):
+        r = re.search(pattern, line)
         self.assertTrue(r is not None, msg)
 
     def assertIs(self, obj, cmp, msg=None):
