@@ -20,9 +20,8 @@
     width:600px;
 }
 
-.page-center{
+.page-center {
     position: absolute;
-    left: 45%;
     top : 50%;
     z-index:10;
 }

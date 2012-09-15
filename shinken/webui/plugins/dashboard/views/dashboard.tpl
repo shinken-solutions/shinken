@@ -3,8 +3,6 @@
 %from shinken.bin import VERSION
 %helper = app.helper
 
-
-
 <script>
   /* We are saving the global context for theses widgets */
   widget_context = 'dashboard';
@@ -17,8 +15,8 @@
    </div>
 %end
 
-<div class='span12'>
-  <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
+<div class="row-fluid">
+  <div id="loading" class="pull-left"> <img src='/static/images/spinner.gif'> Loading widgets</div>
   %# If we got no widget, we should put the button at the center fo the screen
   %small_show_panel_s = ''
   %if len(widgets) == 0:
@@ -26,7 +24,7 @@
   %end
   <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
   %# Go in the center of the page!
-  <span class="page-center center" id='center-button'>
+  <span id="center-button" class="span4 offset4 page-center" >
     <h3>You don't have any widget yet?</h3>
   <a href="#pageslide" class="slidelink btn btn-large btn-success at-center"><i class="icon-plus"></i> Add a new widget</a>
   </span>
