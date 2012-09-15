@@ -114,7 +114,15 @@ class Pluginconf(object):
 
 class Unittest2CompatMixIn:
     """
-    Mixin for simulating methods new in unittest2 resp. Python 2.7
+    Mixin for simulating methods new in unittest2 resp. Python 2.7.
+
+    Every test-case should inherit this *after* unittest.TestCase to
+    make the compatiblity-methods available if they are not defined in
+    unittest.TestCase already. Example::
+
+       class MyTestCase(unittest.TestCase, Unittest2CompatMixIn):
+           ...
+
     """
     def assertNotIn(self, member, container, msg=None):
        self.assertTrue(member not in container)
