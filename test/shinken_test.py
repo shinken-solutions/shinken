@@ -98,7 +98,7 @@ class Pluginconf(object):
     pass
 
 
-class Unittest2CompatMixIn:
+class _Unittest2CompatMixIn:
     """
     Mixin for simulating methods new in unittest2 resp. Python 2.7.
 
@@ -126,8 +126,14 @@ class Unittest2CompatMixIn:
     def assertIs(self, obj, cmp, msg=None):
         self.assertTrue(obj is cmp)
 
+class TestCase(unittest.TestCase, _Unittest2CompatMixIn):
+    """
+    `unittest.TestCase` with mix-in for simulating methods new in
+    unittest2 resp. Python 2.7 already mixed-in.
+    """
 
-class ShinkenTest(unittest.TestCase, Unittest2CompatMixIn):
+
+class ShinkenTest(TestCase):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
