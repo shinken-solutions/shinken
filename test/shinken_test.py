@@ -111,20 +111,21 @@ class _Unittest2CompatMixIn:
 
     """
     def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
+       self.assertTrue(member not in container, msg)
 
     def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
+        self.assertTrue(member in container, msg)
 
     def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
+        self.assertTrue(isinstance(obj, cls), msg)
 
-    def assertRegexpMatches(self, line, patern):
+    def assertRegexpMatches(self, line, patern, msg):
         r = re.search(patern, line)
-        self.assertTrue(r is not None)
+        self.assertTrue(r is not None, msg)
 
     def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
+        self.assertTrue(obj is cmp, msg)
+
 
 class TestCase(unittest.TestCase, _Unittest2CompatMixIn):
     """
