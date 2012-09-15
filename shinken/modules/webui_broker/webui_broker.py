@@ -46,6 +46,7 @@ from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
+from socket import gethostname
 
 # Local import
 from shinken.misc.datamanager import datamgr
@@ -641,3 +642,7 @@ class Webui_broker(BaseModule, Daemon):
 
         safe_print("Will return external_ui_link::", lst)
         return lst
+
+    # Will get all label/uri for external UI like PNP or NagVis
+    def get_hostname_uri(self):
+        return gethostname()
