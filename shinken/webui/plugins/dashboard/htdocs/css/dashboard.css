@@ -1,4 +1,12 @@
-.widget_desc{
+#warn-pref {
+    padding: 30px;
+}
+
+#warn-pref h2, #warn-pref p {
+    color: #FFFFFF;
+}
+
+.widget_desc {
     background-color : white;
     margin : 5px;
     padding : 10px;

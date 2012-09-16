@@ -10,12 +10,14 @@
 
 <!-- Maybe the admin didn't add a user preference module, or the module is dead, if so, warn about it -->
 %if not has_user_pref_mod:
-   <div class="span11 alert alert-critical offset1">
-     Error : You didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
-   </div>
+<div id="warn-pref" class="hero-unit alert-critical">
+  <h2>Warning</h2>
+  <p>You didn't define a WebUI module for saving user preferences like the Mongodb one. You won't be able to use this page!</p>
+  <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success btn-large">Learn more »</a></p>
+</div>
 %end
 
-<div class="row-fluid">
+<div class="">
   <div id="loading" class="pull-left"> <img src='/static/images/spinner.gif'> Loading widgets</div>
   %# If we got no widget, we should put the button at the center fo the screen
   %small_show_panel_s = ''
