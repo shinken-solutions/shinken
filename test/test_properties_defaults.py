@@ -449,6 +449,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('notes', ''),
         ('notes_url', ''),
         ('action_url', ''),
+        ('realm', ''),
         ])
 
     def setUp(self):

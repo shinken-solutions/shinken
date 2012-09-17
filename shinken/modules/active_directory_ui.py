@@ -225,7 +225,9 @@ class AD_Webui(BaseModule):
         try:
             # On AD take the uid / principalename
             if self.mode == 'ad':
-                account_name = elts[self.auth_key][0]
+                # Maybe the entry is void....
+                if self.auth_key in elts:
+                    account_name = elts[self.auth_key][0]
             else: # For openldap, use the full DN
                 account_name = elts[self.auth_key]
         except KeyError:

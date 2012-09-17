@@ -29,7 +29,9 @@ import time
 import traceback
 from Queue import Empty
 import socket
-import cPickle
+import traceback
+import cStringIO
+
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -279,6 +281,10 @@ class Arbiter(Daemon):
                     r = inst.get_objects()
                 except Exception, exp:
                     logger.error("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
+                    output = cStringIO.StringIO()
+                    traceback.print_exc(file=output)
+                    logger.error("Back trace of this remove: %s" % (output.getvalue()))
+                    output.close()
                     continue
 
                 types_creations = self.conf.types_creations
