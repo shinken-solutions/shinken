@@ -27,7 +27,14 @@
  elements like service, hosts or contacts.
 """
 import time
-import hashlib, cPickle  # for hashing compute
+import cPickle  # for hashing compute
+
+# Try to import md5 function
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+    
 from copy import copy
 
 from shinken.graph import Graph
@@ -195,7 +202,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # for hash compute
         i = self.id
         del self.id
-        m = hashlib.md5()
+        m = md5()
         tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
         m.update(tmp)
         self.hash = m.digest()
