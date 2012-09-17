@@ -243,6 +243,10 @@ def expand_with_macros(ref, value):
 # Just get the string name of the object
 # (like for realm)
 def get_obj_name(obj):
+    # Maybe we do not have a real object but already a stirng. If so
+    # return the string
+    if isinstance(obj, basestring):
+        return obj
     return obj.get_name()
 
 

@@ -25,6 +25,7 @@
 
 from itemgroup import Itemgroup, Itemgroups
 
+from shinken.util import get_obj_name
 from shinken.property import StringProp
 from shinken.log import logger
 
@@ -41,6 +42,7 @@ class Hostgroup(Itemgroup):
         'notes':          StringProp(default='', fill_brok=['full_status']),
         'notes_url':      StringProp(default='', fill_brok=['full_status']),
         'action_url':     StringProp(default='', fill_brok=['full_status']),
+        'realm':          StringProp(default='', fill_brok=['full_status'], conf_send_preparation=get_obj_name),
     })
 
     macros = {
@@ -103,9 +105,11 @@ class Hostgroups(Itemgroups):
             return []
         return hg.get_hosts()
 
+
     def linkify(self, hosts=None, realms=None):
         self.linkify_hg_by_hst(hosts)
         self.linkify_hg_by_realms(realms)
+
 
     # We just search for each hostgroup the id of the hosts
     # and replace the name by the id
@@ -146,6 +150,10 @@ class Hostgroups(Itemgroups):
         # The group realm must not overide a host one (warning?)
         for hg in self:
             if not hasattr(hg, 'realm'):
+                continue
+
+            # Maybe the value is void?
+            if not hg.realm.strip():
                 continue
 
             r = realms.find_by_name(hg.realm.strip())

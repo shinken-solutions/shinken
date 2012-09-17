@@ -62,6 +62,7 @@ class NoSetup:
 logger.load_obj(Dummy())
 
 
+
 class TestLevels(unittest.TestCase):
 
     def test_get_level_id(self):
@@ -247,8 +248,12 @@ class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
         f = open(self.logfile_name)
         local_lines = list(f.readlines())
         f.close()
-        os.remove(self.logfile_name)
+        try:
+            os.remove(self.logfile_name)
+        except : # On windows, the file is still lock. But should be close!?!
+            pass
         return msgs, lines, local_lines
+    
 
     def test_register_local_log_keeps_level(self):
         logger.set_level(logger.ERROR)

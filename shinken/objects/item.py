@@ -646,6 +646,11 @@ class Items(object):
         else:
             return None
 
+    # prepare_for_conf_sending to flatten some properties
+    def prepare_for_sending(self):
+        for i in self:
+            i.prepare_for_conf_sending()
+
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):

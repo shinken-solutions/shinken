@@ -95,7 +95,7 @@ class ModulesManager(object):
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception, exp:
-                logger.warning("Importing module: %s" % exp)
+                logger.warning("Importing module %s: %s" % (fname, exp))
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:

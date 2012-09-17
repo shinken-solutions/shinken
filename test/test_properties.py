@@ -29,9 +29,14 @@ import __import_shinken
 import shinken.property
 from shinken.property import none_object
 
+from shinken_test import *
+
 
 class PropertyTests:
     """Common tests for all property classes"""
+
+    def setUp(self):
+        pass
 
     def test_no_default_value(self):
         p = self.prop_class()
@@ -57,7 +62,9 @@ class PropertyTests:
         self.assertFalse(p.unused)
 
 
-class TestBoolProp(unittest.TestCase, PropertyTests):
+#ShinkenTest, unittest.TestCase
+
+class TestBoolProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the BoolProp class"""
 
     prop_class = shinken.property.BoolProp
@@ -76,7 +83,7 @@ class TestBoolProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("off"), False)
 
 
-class TestIntegerProp(unittest.TestCase, PropertyTests):
+class TestIntegerProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the IntegerProp class"""
 
     prop_class = shinken.property.IntegerProp
@@ -88,7 +95,7 @@ class TestIntegerProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("1000.33"), 1000)
 
 
-class TestFloatProp(unittest.TestCase, PropertyTests):
+class TestFloatProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the FloatProp class"""
 
     prop_class = shinken.property.FloatProp
@@ -100,7 +107,7 @@ class TestFloatProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("1000.33"), 1000.33)
 
 
-class TestStringProp(unittest.TestCase, PropertyTests):
+class TestStringProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the StringProp class"""
 
     prop_class = shinken.property.StringProp
@@ -113,7 +120,7 @@ class TestStringProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("no"), "no")
 
 
-class TestCharProp(unittest.TestCase, PropertyTests):
+class TestCharProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the CharProp class"""
 
     prop_class = shinken.property.CharProp
@@ -144,7 +151,7 @@ class TestConfigPathProp(TestStringProp):
     # any relevant change. So no further tests are implemented here.
 
 
-class TestListProp(unittest.TestCase, PropertyTests):
+class TestListProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the ListProp class"""
 
     prop_class = shinken.property.ListProp
@@ -155,7 +162,7 @@ class TestListProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
 
 
-class TestLogLevelProp(unittest.TestCase, PropertyTests):
+class TestLogLevelProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the LogLevelProp class"""
 
     prop_class = shinken.property.LogLevelProp
@@ -174,7 +181,7 @@ class TestLogLevelProp(unittest.TestCase, PropertyTests):
 
 
 ## :todo: fix DictProp error if no `elts_prop` are passed
-## class TestDictProp(unittest.TestCase, PropertyTests):
+## class TestDictProp(PropertyTests, ShinkenTest, unittest.TestCase):
 ##     """Test the DictProp class"""
 ##
 ##     prop_class = shinken.property.DictProp
@@ -184,7 +191,7 @@ class TestLogLevelProp(unittest.TestCase, PropertyTests):
 ##         self.assertEqual(p.pythonize(""), "")
 
 
-class TestAddrProp(unittest.TestCase, PropertyTests):
+class TestAddrProp(PropertyTests, ShinkenTest, unittest.TestCase):
     """Test the AddrProp class"""
 
     prop_class = shinken.property.AddrProp
