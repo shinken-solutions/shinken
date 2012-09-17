@@ -948,10 +948,6 @@ class Hosts(Items):
     name_property = "host_name"  # use for the search by name
     inner_class = Host  # use for know what is in items
 
-    # prepare_for_conf_sending to flatten some properties
-    def prepare_for_sending(self):
-        for h in self:
-            h.prepare_for_conf_sending()
 
     # Create link between elements:
     # hosts -> timeperiods

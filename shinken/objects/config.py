@@ -792,7 +792,12 @@ class Config(Item):
     # We are also pre-serializing the confs so the sending pahse will
     # be quicker.
     def prepare_for_sending(self):
+        # Preparing hosts and hostgroups for sending. Some properties
+        # should be "flatten" before sent, like .realm object that should
+        # be changed into names
         self.hosts.prepare_for_sending()
+        self.hostgroups.prepare_for_sending()
+        
         logger.info('[Arbiter] Serializing the configurations...')
         for r in self.realms:
             for (i, conf) in r.confs.iteritems():
