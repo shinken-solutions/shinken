@@ -207,3 +207,31 @@ function loadjscssfile(filename, filetype){
         });
     };
 })(jQuery);
+
+
+/**
+ * Description: Url changer
+ * Example: header_element.tpl
+ */
+
+function skonf() {
+    var Port = 7766;
+    var Host = document.domain;
+    //var Host = www.spiegel.de
+    var Url = 'http://' + Host + ':' + Port;
+    //alert (Url)
+    return Url;
+}
+
+function webui() {
+    var Port = 7767;
+    var Host = document.domain;
+    //var Host = www.spiegel.de
+    var Url = 'http://' + Host + ':' + Port;
+    //alert (Url)
+    return Url;
+}
+$(function(){
+    $("a[href=':7766']").attr('href', skonf());
+    $("a[href=':7767']").attr('href', webui());
+});
