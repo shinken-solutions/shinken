@@ -29,6 +29,10 @@ This module job is to get configuration data (mostly hosts) from a mongodb datab
 
 # This module imports hosts and services configuration from a MySQL Database
 # Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
+try:
+    import uuid
+except ImportError:
+    uuid = None
 
 try:
     from pymongo.connection import Connection
@@ -70,21 +74,21 @@ class Mongodb_generic(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[Mongodb Module]: Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
+        logger.info("[Mongodb Module]: Try to open a Mongodb connection to %s:%s" % (self.uri, self.database))
         try:
             self.con = Connection(self.uri)
             self.db = getattr(self.con, self.database)
         except Exception, e:
-            print "Mongodb Module: Error %s:" % e
+            logger.error("Mongodb Module: Error %s:" % e)
             raise
-        print "[Mongodb Module]: Connection OK"
+        logger.info("[Mongodb Module]: Connection OK")
 
 ################################ Arbiter part #################################
 
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not self.db:
-            print "[Mongodb Module]: Problem during init phase"
+            logger.error("[Mongodb Module]: Problem during init phase")
             return {}
 
         r = {}
@@ -95,7 +99,7 @@ class Mongodb_generic(BaseModule):
 
             cur = getattr(self.db, t).find({'_state': {'$ne': 'disabled'}})
             for h in cur:
-                print "DBG: mongodb: get an ", t, h
+                #print "DBG: mongodb: get an ", t, h
                 # We remove a mongodb specific property, the _id
                 del h['_id']
                 # And we add an imported_from property to say it came from
@@ -104,6 +108,59 @@ class Mongodb_generic(BaseModule):
                 r[t].append(h)
 
         return r
+
+
+    def get_uniq_id(self, t, i):
+        #by default we will return a very uniq id
+        u = str(int(uuid.uuid4().int))
+        
+        is_tpl = (getattr(i, 'register', '1')  == '0')
+        if is_tpl:
+            return 'tpl-%s' % getattr(i, 'name', u)
+
+        lst = {'hosts' : 'host_name', 'commands' : 'command_name',
+               'timeperiods' : 'timeperiod_name',
+               'contacts' : 'contact_name',
+               }
+        if t in lst:
+            prop = lst[t]
+            n = getattr(i, prop, None)
+            if n:
+                return n
+            return u
+        if t == 'services':
+            return u
+
+        print "Unknown TYPE in migration!"
+        return u
+            
+
+
+    # Function called by the arbiter so we import the objects in our databases
+    def import_objects(self, data):
+        if not self.db:
+            logger.error("[Mongodb]: error Problem during init phase")
+            return False
+
+        # Maybe we can't have a good way to have uniq id, if so, bail out
+        if not uuid:
+            logger.error("Your python version is too old. Please update to a 2.6 version to use this feature")
+            return False
+
+        
+        for t in data:
+            col = getattr(self.db, t)
+            print "Saving objects %s" % t
+            elts = data[t]
+            for e in elts:
+                print "Element", e
+                e['_id'] = self.get_uniq_id(t, e)
+                col.save(e)
+            
+
+        return True
+        
+
 
 #################################### WebUI parts ############################
 

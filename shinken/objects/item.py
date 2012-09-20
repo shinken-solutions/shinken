@@ -369,6 +369,22 @@ Like temporary attributes such as "imported_from", etc.. """
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
 
+    # The arbiter is asking us our raw value before all explode or linking
+    def get_raw_import_values(self):
+        r = {}
+        properties = self.__class__.properties.keys()
+        # Register is not by default in the properties
+        if not 'register' in properties:
+            properties.append('register')
+            
+        for prop in properties:
+            if hasattr(self, prop):
+                v = getattr(self, prop)
+                print prop, ":", v
+                r[prop] = v
+        return r
+
+
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
 
