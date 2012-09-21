@@ -29,7 +29,9 @@ import time
 import traceback
 from Queue import Empty
 import socket
-import cPickle
+import traceback
+import cStringIO
+
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -131,15 +133,14 @@ class IForArbiter(Interface):
 # Main Arbiter Class
 class Arbiter(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None, analyse=None):
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None, analyse=None, migrate=None):
 
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
 
         self.config_files = config_files
-
         self.verify_only = verify_only
-
         self.analyse = analyse
+        self.migrate = migrate
 
         self.broks = {}
         self.is_master = False
@@ -157,6 +158,7 @@ class Arbiter(Daemon):
 
         self.interface = IForArbiter(self)
         self.conf = Config()
+
 
     # Use for adding things like broks
     def add(self, b):
@@ -279,6 +281,10 @@ class Arbiter(Daemon):
                     r = inst.get_objects()
                 except Exception, exp:
                     logger.error("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
+                    output = cStringIO.StringIO()
+                    traceback.print_exc(file=output)
+                    logger.error("Back trace of this remove: %s" % (output.getvalue()))
+                    output.close()
                     continue
 
                 types_creations = self.conf.types_creations
@@ -305,6 +311,11 @@ class Arbiter(Daemon):
 
         # Manage all post-conf modules
         self.hook_point('early_configuration')
+
+        # Ok here maybe we should stop because we are in a pure migration run
+        if self.migrate:
+            print "Migration MODE. Early exiting from configuration relinking phase"
+            return
 
         # Load all file triggers
         self.conf.load_triggers()
@@ -471,6 +482,47 @@ class Arbiter(Daemon):
         f.close()
 
 
+    def go_migrate(self):
+        print "***********"*5
+        print "WARNING : this feature is NOT supported in this version!"
+        print "***********"*5
+        
+        migration_module_name = self.migrate.strip()
+        mig_mod = self.conf.modules.find_by_name(migration_module_name)
+        if not mig_mod:
+            print "Cannot find the migration module %s. Please configure it" % migration_module_name
+            sys.exit(2)
+
+        print self.modules_manager.instances
+        # Ok now all we need is the import module
+        self.modules_manager.set_modules([mig_mod])
+        self.do_load_modules()
+        print self.modules_manager.instances
+        if len(self.modules_manager.instances) == 0:
+            print "Error duringthe initialization of the import module. Bailing out"
+            sys.exit(2)
+        print "Configuration migrating in progress..."
+        mod  = self.modules_manager.instances[0]
+        f = getattr(mod, 'import_objects', None)
+        if not f or not callable(f):
+            print "Import module is missing the import_objects function. Bailing out"
+            sys.exit(2)
+
+        objs = {}
+        types = ['hosts', 'services', 'commands', 'timeperiods', 'contacts']
+        for t in types:
+            print "New type", t
+            objs[t] = []
+            for i in getattr(self.conf, t):
+                d = i.get_raw_import_values()
+                if d:
+                    objs[t].append(d)
+            f(objs)
+        # Ok we can exit now
+        sys.exit(0)
+        
+
+
     # Main loop function
     def main(self):
         try:
@@ -480,6 +532,10 @@ class Arbiter(Daemon):
 
             self.load_config_file()
 
+            # Maybe we are in a migration phase. If so, we will bailout here
+            if self.migrate:
+                self.go_migrate()
+                
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()

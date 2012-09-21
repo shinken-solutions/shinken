@@ -35,7 +35,10 @@ def find(value, lst, key):
 
     for i in lst:
         v = i.get(key, None)
-        print 'MAtch with', v, value
+        try:
+            print 'MAtch with', v, value
+        except:
+            pass
         if v == value:
             return i
     return None
@@ -61,7 +64,10 @@ def find_several(lst, elt, prop, key):
         if v is None:
             continue
         v = v.strip()
-        print 'MAtch with db', v
+        try:
+            print 'MAtch with db', v
+        except:
+            pass
         if v  in values:
             res.append(dbi)
     print "Return find_several::", res

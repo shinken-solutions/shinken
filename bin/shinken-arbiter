@@ -91,6 +91,10 @@ parser.add_option("-p", "--profile",
 parser.add_option("-a", "--analyse",
                   dest="analyse",
                   help="Dump an analyse statistics file, for support")
+parser.add_option("-m", "--migrate",
+                  dest="migrate",
+                  help="Migrate the raw configuration read from the arbier to another module. --> VERY EXPERIMENTAL!")
+
 
 opts, args = parser.parse_args()
 

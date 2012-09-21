@@ -673,7 +673,7 @@ printf "[111] PROCESS_SERVICE_CHECK_RESULT;localhost;LocalDisks;2;Oh yes\n" > $C
 printf "[111] PROCESS_HOST_CHECK_RESULT;localhost;2;Oh yes\n" > $CMD_FILE
 
 
-sleep 3
+sleep 30
 
 string_in_file "Dispatch OK of configuration 0 to poller newpoller"   $VAR/nagios.log
 string_in_file "PASSIVE HOST CHECK: localhost;2;Oh yes"   $VAR/nagios.log

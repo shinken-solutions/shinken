@@ -255,7 +255,7 @@ if not simulate:
 
     print "propose a tmppath", tmppath
 
-    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O --traceroute -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
+    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
     print "Launching command,", cmd
     try:
         nmap_process = subprocess.Popen(

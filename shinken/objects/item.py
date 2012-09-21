@@ -27,7 +27,14 @@
  elements like service, hosts or contacts.
 """
 import time
-import hashlib, cPickle  # for hashing compute
+import cPickle  # for hashing compute
+
+# Try to import md5 function
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+    
 from copy import copy
 
 from shinken.graph import Graph
@@ -195,7 +202,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # for hash compute
         i = self.id
         del self.id
-        m = hashlib.md5()
+        m = md5()
         tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
         m.update(tmp)
         self.hash = m.digest()
@@ -361,6 +368,22 @@ Like temporary attributes such as "imported_from", etc.. """
             if hasattr(self, old_name) and not hasattr(self, new_name):
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
+
+    # The arbiter is asking us our raw value before all explode or linking
+    def get_raw_import_values(self):
+        r = {}
+        properties = self.__class__.properties.keys()
+        # Register is not by default in the properties
+        if not 'register' in properties:
+            properties.append('register')
+            
+        for prop in properties:
+            if hasattr(self, prop):
+                v = getattr(self, prop)
+                print prop, ":", v
+                r[prop] = v
+        return r
+
 
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
@@ -645,6 +668,11 @@ class Items(object):
             return self.items[id]
         else:
             return None
+
+    # prepare_for_conf_sending to flatten some properties
+    def prepare_for_sending(self):
+        for i in self:
+            i.prepare_for_conf_sending()
 
     # It's used to change old Nagios2 names to
     # Nagios3 ones

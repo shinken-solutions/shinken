@@ -36,6 +36,7 @@ import __import_shinken
 from shinken.log import logger, Log
 import shinken.log as logging
 from shinken.brok import Brok
+from shinken_test import *
 
 # The logging module requires some object for collecting broks
 class Dummy:
@@ -52,7 +53,14 @@ class Collector:
         self.list.append(o)
 
 
+class NoSetup:
+    def setUp(self):
+        pass
+
+
+
 logger.load_obj(Dummy())
+
 
 
 class TestLevels(unittest.TestCase):
@@ -107,7 +115,6 @@ class TestBasics(unittest.TestCase):
 
 
 class LogCollectMixin:
-
     def _get_brok_log_messages(self, collector):
         """
         Return the log messages stored as Broks into the collector.
@@ -143,7 +150,7 @@ class LogCollectMixin:
             return self._get_logging_output()
     
 
-class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
+class TestDefaultLoggingMethods(NoSetup, ShinkenTest, LogCollectMixin):
 
     def test_basic_logging_log(self):
         msgs, lines = self._put_log(logger.log, 'Some log-message')
@@ -226,26 +233,32 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         self.test_basic_logging_info()
 
 
-class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
+class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
 
     def _prepare_logging(self):
         super(TestWithLocalLogging, self)._prepare_logging()
         # set up a temporary file for logging
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         self.logfile_name = logfile.name
         logger.register_local_log(logfile.name)
 
     def _get_logging_output(self):
         msgs, lines = super(TestWithLocalLogging, self)._get_logging_output()
-        local_lines = list(open(self.logfile_name).readlines())
-        os.remove(self.logfile_name)
+        f = open(self.logfile_name)
+        local_lines = list(f.readlines())
+        f.close()
+        try:
+            os.remove(self.logfile_name)
+        except : # On windows, the file is still lock. But should be close!?!
+            pass
         return msgs, lines, local_lines
+    
 
     def test_register_local_log_keeps_level(self):
         logger.set_level(logger.ERROR)
         self.assertEqual(logger._level, logger.ERROR)
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         logfile_name = logfile.name
         logger.register_local_log(logfile_name)
@@ -336,7 +349,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.test_basic_logging_info()
 
 
-class TestNamedCollector(unittest.TestCase, LogCollectMixin):
+class TestNamedCollector(NoSetup, ShinkenTest, LogCollectMixin):
 
     # :todo: add a test for the local log file, too
 

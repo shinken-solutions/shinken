@@ -63,6 +63,7 @@ def elements_generic(cls, show_tpls=False):
     key = keys[t]
     #if cls.my_type == 'host':
     #    print "HOOK HOSTS"
+
     elts = [cls(i) for i in app.datamgr.get_generics(t, key)]
     print "GOT elements", elts
 
