@@ -150,6 +150,13 @@ class NotificationWay(Item):
         state = True
         cls = self.__class__
 
+        # Raised all previously saw errors like unknown commands or timeperiods
+        if self.configuration_errors != []:
+            state = False
+            for err in self.configuration_errors:
+                logger.error("[item::%s] %s" % (self.get_name(), err))
+
+
         # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
         if hasattr(self, 'service_notification_options') and self.service_notification_options == ['n']:
