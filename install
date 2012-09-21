@@ -385,6 +385,7 @@ function prerequisites(){
 #                    PACKAGES=$YUMPKGS
 #                    QUERY="rpm -q "
 #                    ;;
+        ;;
         Fedora)
                 16|17)
                     PACKAGES=$YUMPKGS
