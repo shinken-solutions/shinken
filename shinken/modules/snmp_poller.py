@@ -312,7 +312,7 @@ class SNMPService(object):
                'SysName' : <SNMPOid>
                }
     """
-    def __init__(self, service, host, triggergroup, dstemplate, instance, instance_name):
+    def __init__(self, service, host, triggergroup, dstemplate, instance, instance_name, name=None):
         self.host = host
         self.check_interval = service.check_interval
         self.triggergroup = triggergroup
@@ -321,6 +321,7 @@ class SNMPService(object):
         self.instance = instance # If = 'NOTFOUND' means mapping failed
         self.raw_instance = instance
         self.instance_name = instance_name
+        self.name = name
         self.oids = {}
         self.key = (dstemplate, instance, instance_name)
 
@@ -397,6 +398,7 @@ class SNMPService(object):
                             if len(tmp) > 1:
                                 # detect oid with function
                                 ds, fct = tmp
+                                #print "self.oids", self.oids
                                 if self.oids[ds].value is None:
                                     return int(trigger['default_status'])
                                 fct, args = fct.split("(")
@@ -423,7 +425,8 @@ class SNMPService(object):
                             return error_code
             return errors['ok']
         except Exception, e:
-            logger.error("[SnmpBooster] Get Trigger  error: %s" % str(e))
+            
+            logger.error("[SnmpBooster] Get Trigger error: %s" % str(e))
             return int(trigger['default_status'])
 
     def set_triggers(self, datasource):
@@ -706,6 +709,7 @@ class SNMPAsyncClient(object):
 
         self.interval_length = 60
         self.remaining_oids = None
+        self.remaining_tablerow = []
         self.nb_next_requests = 0
 
         self.memcached = memcache.Client([memcached_address], debug=0)
@@ -768,12 +772,18 @@ class SNMPAsyncClient(object):
             # Just to be sure to invalidate datas ...
             mini_td = timedelta(seconds=(5))
             data_valid = self.obj.frequences[self.check_interval].check_time + td \
-                                                        > self.start_time - mini_td
+                                                        > self.start_time + mini_td
+            #print "==========================="
+            #print self.obj.frequences[self.check_interval].check_time
+            #print td
+            #print self.start_time
+            #print mini_td
+            #print data_valid
             if data_valid:
                 # Datas valid
                 data_validity = True
                 message, rc = self.obj.format_output(self.check_interval, self.serv_key)
-#                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
+                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
                 message = "FROM CACHE: " + message
                 self.set_exit(message, rc=rc)
                 self.memcached.set(self.obj_key, self.obj, time=604800)
@@ -783,9 +793,6 @@ class SNMPAsyncClient(object):
                 data_validity = False
 
         # Save old datas
-        self.obj.frequences[self.check_interval].old_check_time = \
-                                copy.copy(self.obj.frequences[self.check_interval].check_time)
-        self.obj.frequences[self.check_interval].check_time = self.start_time
         #for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
         for service in self.obj.frequences[self.check_interval].services.values():
             for snmpoid in service.oids.values():
@@ -943,8 +950,26 @@ class SNMPAsyncClient(object):
                     self.remaining_oids = oids - results_oids
                     #COMMENTTTTTTTTTTT
                     tableRow = [oid.rsplit(".", 1)[0] + "." + str(int(oid.rsplit(".", 1)[1]) - 1)  for oid in self.remaining_oids]
+
+                    # LIMIT SNMP BULK to 120 OIDs in same request
+                    if self.remaining_tablerow:
+                        aBP.setVarBinds(self.reqPDU,
+                                [(x, v2c.null) for x in self.remaining_tablerow])
+                        self.remaining_tablerow = []
+                        aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
+                        transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
+                                                transportDomain,
+                                                transportAddress)
+                        self.nb_next_requests = self.nb_next_requests + 1
+                        return wholeMsg
+
                     if oids != results_oids and self.nb_next_requests < 5:
                         # SNMP next needed
+                        # LIMIT SNMP BULK to 120 OIDs in same request
+                        if len(tableRow) > 100:
+                            self.remaining_tablerow.extend(tableRow[100:])
+                            self.remaining_tablerow = list(set(self.remaining_tablerow))
+                            tableRow = tableRow[:100]
                         aBP.setVarBinds(self.reqPDU,
                                 [(x, v2c.null) for x in tableRow])
                         aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
@@ -964,6 +989,10 @@ class SNMPAsyncClient(object):
                                   % self.memcached.get(self.obj_key),
                                   3, transportDispatcher)
                     return wholeMsg
+
+                self.obj.frequences[self.check_interval].old_check_time = \
+                                copy.copy(self.obj.frequences[self.check_interval].check_time)
+                self.obj.frequences[self.check_interval].check_time = self.start_time
 
                 # MAPPING
                 if not self.mapping_done:
@@ -1004,6 +1033,7 @@ class SNMPAsyncClient(object):
                     self.oids_to_check[oid].raw_value = str(value)
 
                 # save data
+
                 self.memcached.set(self.obj_key, self.obj, time=604800)
 
                 # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
@@ -1349,7 +1379,7 @@ class Snmp_poller(BaseModule):
                             # Update host
                             obj.community = new_obj.community
                             obj.version = new_obj.version
-                        new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance, instance_name)
+                        new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance, instance_name, s.service_description)
                         new_serv.set_oids(self.datasource)
                         new_serv.set_triggers(self.datasource)
                         obj.update_service(new_serv)
@@ -1358,7 +1388,7 @@ class Snmp_poller(BaseModule):
                     else:
                         # No old datas for this host
                         new_obj = SNMPHost(host, community, version)
-                        new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance, instance_name)
+                        new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance, instance_name, s.service_description)
                         new_serv.set_oids(self.datasource)
                         new_serv.set_triggers(self.datasource)
                         new_obj.update_service(new_serv)
