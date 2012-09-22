@@ -403,7 +403,7 @@ $(document).ready(function(){
 
 				<div class="tab-pane fade" id="gesture">
 					<h4>Gesture</h4>
-					<canvas id="canvas" width="100" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+					<canvas id="canvas" height="200" class="" style="border: 1px solid black;"></canvas>
 					<div class="gesture_button">
 						<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 					</div>
