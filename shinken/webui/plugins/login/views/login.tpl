@@ -15,12 +15,12 @@ $(document).ready(function(){
   %if login_text:
   <p><span id="login-text"> {{login_text}}</span></p>
   %end
-      <noscript>
-        <div class="alert">
-  <button type="button" class="close" data-dismiss="alert">×</button>
-  <strong>Warning!</strong> Please enable Java Script in your browser and retry.
-</div>
-      </noscript>
+  <noscript>
+    <div class="row alert">
+      <button type="button" class="close" data-dismiss="alert">×</button>
+      <div class="font-red"><strong>Warning!</strong> Please enable Java Script in your browser and retry.</div>
+    </div>
+  </noscript>
   <div class="row well">
     <div class="span5">
     	<img src="/static/img/logo.png" alt="Shinken is awesome!">
