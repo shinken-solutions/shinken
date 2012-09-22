@@ -2,12 +2,12 @@
 
 <script type="text/javascript">
 // If we are a mobile device, go in the /mobile part :)
-  $(document).ready(function(){
-  //jQuery.browser.mobile is filled by login/js/detectmobilebrowser.js
+$(document).ready(function(){
+  // jQuery.browser.mobile is filled by login/js/detectmobilebrowser.js
   if($.browser.mobile){
     window.location = '/mobile/';
   }
-  });
+});
 </script>
 
 <div id="login_container" class="span9">
@@ -15,8 +15,13 @@
   %if login_text:
   <p><span id="login-text"> {{login_text}}</span></p>
   %end
-
-	<div class="row well">
+      <noscript>
+        <div class="alert">
+  <button type="button" class="close" data-dismiss="alert">×</button>
+  <strong>Warning!</strong> Please enable Java Script in your browser and retry.
+</div>
+      </noscript>
+  <div class="row well">
     <div class="span5">
     	<img src="/static/img/logo.png" alt="Shinken is awesome!">
     </div>
