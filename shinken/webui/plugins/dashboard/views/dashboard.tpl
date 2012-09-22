@@ -17,7 +17,7 @@
 </div>
 %end
 
-<div class="">
+<div class="row">
   <div id="loading" class="pull-left"> <img src='/static/images/spinner.gif'> Loading widgets</div>
   %# If we got no widget, we should put the button at the center fo the screen
   %small_show_panel_s = ''
@@ -30,8 +30,8 @@
     <h3>You don't have any widget yet?</h3>
   <a href="#pageslide" class="slidelink btn btn-large btn-success at-center"><i class="icon-plus"></i> Add a new widget</a>
   </span>
-
 </div>
+
 <div id="pageslide" style="display:none">
     <div class='row'>
       <h2 class='pull-left'>Widgets available</h2>
