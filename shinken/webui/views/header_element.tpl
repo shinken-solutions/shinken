@@ -8,7 +8,7 @@
         <span class="i-bar"></span>
         <span class="i-bar"></span>
       </a>
-      <!--<a class="brand" href="#">Shinken</a>-->
+
       <div class="nav-collapse">
        <ul class="nav">
          <li class="dropdown">
@@ -53,7 +53,6 @@
       </li>
     </ul>
 
-
     %if user is not None:
     <div class="nav-controll">
       <ul class="nav pull-right">
@@ -88,6 +87,7 @@
         <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="nav-icon icon-off"></i></a></li>
       </ul>
     </div>
+
     <ul class="nav pull-right">
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
@@ -100,14 +100,16 @@
     <ul class="nav pull-right">
       <li class="divider-vertical"></li>
     </ul>
+
     <script>  
       $(function ()  
       { $("#searchhelp").popover({trigger: 'click', placement:'bottom', html: 'true', animation: 'true'});  
       });  
-    </script>  
+    </script> 
+
     <form name="global_search" class="navbar-search pull-right topmmargin1" action='#'>
       <input type="text" class="search-query typeahead no-bottommargin" autocomplete="off" placeholder="Search" name="global_search">
-      <a id="searchhelp" data-content="<a href='http://www.shinken-monitoring.org/wiki/'>Search documentation</a>" rel="popover" href="#" data-original-title="Help"><i class="icon-question-sign font-white topmmargin2"></i></a>  
+      <a id="searchhelp" href="http://www.shinken-monitoring.org/wiki/webui_search" target="_blank"><i class="icon-question-sign font-white topmmargin2"></i></a>  
     </form>
     %end
   </div><!--/.nav-collapse -->
