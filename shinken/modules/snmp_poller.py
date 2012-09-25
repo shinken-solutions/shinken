@@ -1202,7 +1202,7 @@ class Snmp_poller(BaseModule):
 
         # First look for checks in timeout
         for c in self.checks:
-            if c.status == 'launched':
+            if c.status == 'launched' and c.con.state != 'received':
                 c.con.look_for_timeout()
 
         # Now we look for finished checks
