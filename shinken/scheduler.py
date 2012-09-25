@@ -29,6 +29,7 @@ import cStringIO
 import sys
 import socket
 import tempfile
+import traceback
 from Queue import Empty
 
 try:
