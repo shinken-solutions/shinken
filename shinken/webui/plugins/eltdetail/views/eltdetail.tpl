@@ -505,14 +505,12 @@ $(document).ready(function(){
 		      					%else:
 		      					<div class="service hidden_impacts_services">
 		      						%end
-
 		      						<div>
 		      							<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 		      							<span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 		      							%for i in range(0, i.business_impact-2):
 		      							<img alt="icon state" src="/static/images/star.png">
 		      							%end
-
 		      						</div>
 		      					</div>
 		      					%# End of this impact
@@ -521,7 +519,6 @@ $(document).ready(function(){
 		      				%# end of the 'is problem' if
 		      				%end
 		      			</div><!-- End of the right part -->
-
 		      		</div>
 		      		<!-- End of the row with the 2 blocks-->
 		      	</div>
@@ -591,16 +588,16 @@ $(document).ready(function(){
 		      	</div>
 		      	<!-- Tab Comments and Downtimes End -->
 
-
 		      	<!-- Tab Graph Start -->
 		      	<div class="tab-pane" id="graphs">
 		      		%uris = app.get_graph_uris(elt, graphstart, graphend)
 		      		%if len(uris) == 0:
-		      		<h3>No graphs, sorry</h3>
+					<div class="row alert">
+					    <div class="font-red"><strong>Oh snap!</strong> No graphs available!</div>
+					</div>
 		      		%else:
-		      		<h3>Graphs</h3>
+		      		<h4>Graphs</h4>
 		      		<div class='row-fluid well span6'>
-
 		      			<!-- Get the uris for the 4 standard time ranges in advance	 -->
 		      			%now = int(time.time())
 		      			%fourhours = now - 3600*4
@@ -622,8 +619,6 @@ $(document).ready(function(){
 		      			<div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1y,{{lastyear}});" class=""> 1 year</a></div>
-
-
 		      		</div>
 
 		      		<script langage="javascript">
@@ -729,8 +724,8 @@ $(document).ready(function(){
 
 			<!-- Tab Dep graph Start -->
 			<div class="tab-pane" id="depgraph">
-				<div id='inner_depgraph' data-elt-name='{{elt.get_full_name()}}'>
-					<span class='alert alert-error'> Cannot load dependency graph.</span>
+				<div id="inner_depgraph" data-elt-name='{{elt.get_full_name()}}'>
+					<span class="alert alert-error"> Cannot load dependency graph.</span>
 				</div>
 			</div>
 			<!-- Tab Dep graph End -->
