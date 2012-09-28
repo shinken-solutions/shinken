@@ -3,11 +3,48 @@ Shinken ChangeLog
 #######################
 1.2.1 - 0x/09/2012
 ------------------
-	DEFAULT PACKS
-	* Fix : check_mongodb invalid option -C Thanks jhurliman
+        CORE ENHANCEMENTS
+        * Add : Landscape (ubuntu SaaS) arbiter importer module
+
+	CORE FIXES
+        * Fix : (reported by: Yannig Perre) bad contacts/notifways notif periods were not caught
+        * Fix : Realm objects were not being stripped when hostgroups were used
+        * Fix : (reported by : Rémi BUISSON) there was still realm objects on sub-conf hostgroups objects
+        * Fix : Issue #588 Graphite Templates formatting
+        * Fix : (from Nicolas Boos) output an error at setup if the lsb_release
+        * Fix : make service property service_dependencies take a void hostname
+        * Fix : broker failed to initialize new modules when it get a new configuration
+        * Fix : Restore Python 2.4 compatibility for test suite
+        * Fix : (reported by: Dravail) bad install for PNP in install script
+        * Fix : Cleanup shinken-specific-* files
 
 	MODULE FIXES
 	* Fix : graphite_broker typo in logger call (Reported by pushou)
+        * Fix : a bug in livestatus "GET log" for python 2.4 (no partition method)
+        * Fix : No override mongo replication state levels
+        * Fix : Correct livestatus commands table. Fix #520
+
+        UI ENHANCEMENTS
+        * Add : Business impact Filter
+        * Add : Multiple action URLS (Thanks to h4wkmoon)
+        * Add : Webui, move the show/hide tool bar button (Thanks GAULUPEAU Jonathan)
+
+        UI FIXES
+        * Fix : Dynamic reload of widget after save
+        * Fix : bug in active_directory_ui for unknown users
+        * Fix : typo in javascript for bookmarks
+        * Fix : Bookmark Business impact Filter
+        * Fix : Issue #570 gear.png
+        
+
+        DEFAULT PACKS
+	* Fix : check_mongodb invalid option -C Thanks jhurliman
+        * Fix : Missing IMAPS/POPS ports
+        * Fix : update check_nwc_health install to the 1.3 version.
+        * Fix : Typo in Packs.tpl and accept packs with no services
+        * Fix : invalid nmap parameter
+
+
 
 1.2 - 31/08/2012
 ------------------
