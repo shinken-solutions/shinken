@@ -492,7 +492,7 @@ $(document).ready(function(){
 
 		      			<!-- If we are a root problem and got real impacts, show them! -->
 		      			%if elt.is_problem and len(elt.impacts) != 0:
-		      			<h3 class="span10">My impacts:</h3>
+		      			<h4 class="span10">My impacts:</h4>
 		      			<div class='host-services'>
 		      				%nb = 0
 		      				%for i in helper.get_impacts_sorted(elt):
