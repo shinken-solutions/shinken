@@ -53,7 +53,7 @@ parser.add_option('-c', '--cfg-input',
 parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
 parser.add_option('-w', '--overwrite', dest="overwrite", action='store_true',
-                  help="Allow overwithing xisting file (disabled by default)")
+                  help="Allow overwithing existing file (disabled by default)")
 parser.add_option('-r', '--runners', dest="runners",
                   help="List of runners you allow to run, (like nmap,vsphere)")
 parser.add_option('-m', '--macros', dest="macros",
