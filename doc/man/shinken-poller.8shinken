@@ -44,3 +44,5 @@ Enable debug logging to \f[I]DEBUGFILE\f[]
 .RE
 .SH AUTHORS
 Arthur Gautier.
+David Hannequin
+Michael Leinartas.
