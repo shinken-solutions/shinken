@@ -208,7 +208,8 @@ class MacroResolver(Borg):
                                 macros[macro]['val'] = self._delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
-                    macro_name = re.split('_' + cls_type, macro)[1].upper()
+                    # Beware : only cut the frst _HOST value, so the macro name can have it on it...
+                    macro_name = re.split('_' + cls_type, macro, 1)[1].upper()
                     # Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
                     # Now we get the element in data that have the type HOST
                     # and we check if it gots the custom value
