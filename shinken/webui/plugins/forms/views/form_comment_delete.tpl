@@ -1,11 +1,5 @@
 <script type="text/javascript">
-	function submit_local_form() {
-		var form = document.forms['modal_form'];
-		var comment = form.comment.value;
 
-		add_comment("{{name}}", '{{user.get_name()}}', comment);
-		$('#modal').modal('hide')
-	}
 </script>
 
 <div class="modal-header">
@@ -14,10 +8,7 @@
 </div>
 
 <div class="modal-body">
-<!-- 	<form class="well" name='modal_form'>
-		<textarea type="textarea" name='comment' class="span4" rows=5 placeholder="Comment…"/>
-		<span class="help-inline">Comment</span>
-	</form> -->
+	<p>Are you sure you want to delete all comments?</p>
 </div>
 
 <div class="modal-footer">
