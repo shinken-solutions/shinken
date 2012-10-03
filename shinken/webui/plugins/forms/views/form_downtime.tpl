@@ -73,7 +73,7 @@
 <div class="modal-body">
 	<form class="well" name='modal_form'>
 		<label>Downtime date range</label>
-		<div class='input'>
+		<div class="row-fluid input">
 			<div class="inline-inputs">
 				From
 				<input name='from_day' data-datepicker="datepicker" class="input input-small" type="text" value="{{s_now_day}}" />
@@ -83,12 +83,12 @@
 				<input name='to_hour' class="intput input-mini" type="text" value="{{s_nxt_hour}}" />
 			</div>
 		</div>
-		<textarea type="textarea" name='reason' class="span6" placeholder="Reason…" rows=5></textarea>
+		<textarea type="textarea" name='reason' class="span5" placeholder="Reason…" rows=5></textarea>
 	</form>
 </div>
 
 <div class="modal-footer">
-	<div class="error" id='dateinversion'>
+	<div class="error" id="dateinversion">
 		<p><strong>Error:</strong> Your ending date is before the starting one!</p>
 	</div>
 	<a href="javascript:submit_local_form();" class="btn btn-primary">Submit</button>
