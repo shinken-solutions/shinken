@@ -561,7 +561,7 @@ $(document).ready(function(){
 		      		<div>
 		      			<ul class="nav nav-pills">
 		      				<li class="active"><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
-		      				<li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class="{{global_disabled}}"><i class="icon-minus"></i> Delete all downtimes</a> </li>
+		      				<li><a class='{{global_disabled}}' href="/forms/downtime_delete/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-minus"></i> Delete all comments</a></li>
 		      			</ul>
 		      		</div>
 		      		<div class="clear"></div>

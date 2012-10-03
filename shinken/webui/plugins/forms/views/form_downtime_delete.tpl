@@ -2,9 +2,9 @@
 function submit_local_form() {
 	var form = document.forms['modal_form'];
 
-	var comment = form.comment.value;
+	var comment = form.downtime.value;
 
-	delete_all_comments('{{name}}');
+	delete_all_downtimes('{{name}}');
 	$('#modal').modal('hide')
 }
 </script>
@@ -15,8 +15,8 @@ function submit_local_form() {
 </div>
 <div class="modal-body">
 	<form class="well" name='modal_form'>
-		<textarea type="textarea" name='comment' class="span4 hide" rows=5 placeholder="Comment…"/>
-		<span class="help-inline">Are you sure you want to delete all comments</span>
+		<textarea type="textarea" name='downtime' class="span4 hide" rows=5 placeholder="Comment…"/>
+		<span class="help-inline">Are you sure you want to delete all downtimes?</span>
 	</form>
 </div>
 <div class="modal-footer">
