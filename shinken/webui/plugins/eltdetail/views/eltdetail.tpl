@@ -550,7 +550,9 @@ $(document).ready(function(){
 		      				%end
 		      			</ol>
 		      			%else:
-		      			<p>No comments available</p>
+						<div class="alert alert-info">
+							<p class="font-blue">No comments available</p>
+						</div>
 		      			%end
 		      		</div>
 		      	</div>
@@ -582,7 +584,9 @@ $(document).ready(function(){
 		      				%end
 		      			</ol>
 		      			%else:
-		      			<p>No downtime planned.</p>
+		      			<div class="alert alert-info">
+							<p class="font-blue">No downtime planned</p>
+						</div>
 		      			%end
 		      		</div>
 		      	</div>
