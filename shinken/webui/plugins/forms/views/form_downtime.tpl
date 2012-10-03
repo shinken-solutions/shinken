@@ -63,42 +63,37 @@
 	$(function() {
 	$('[data-datepicker]').datepicker();
 	});
-
 </script>
 
-
 <div class="modal-header">
-  <a class="close" data-dismiss="modal">×</a>
-  <h3>Schedule downtime for {{name}}</h3>
+	<a class="close" data-dismiss="modal">×</a>
+	<h3>Schedule downtime for {{name}}</h3>
 </div>
+
 <div class="modal-body">
-  <form class="well" name='modal_form'>
-
-
-    <label>Downtime date range</label>
-    <div class='input'>
-      <div class="inline-inputs">
-	From
-	<input name='from_day' data-datepicker="datepicker" class="input input-small" type="text" value="{{s_now_day}}" />
-	<input name='from_hour' class="input input-mini" type="text" value="{{s_now_hour}}" />
-	to
-	<input name='to_day' data-datepicker="datepicker" class="input input-small" type="text" value="{{s_nxt_day}}" />
-	<input name='to_hour' class="intput input-mini" type="text" value="{{s_nxt_hour}}" />
-      </div>
-    </div>
-    <textarea type="textarea" name='reason' class="span6" placeholder="Reason…" rows=5></textarea>
-
-  </form>
-
+	<form class="well" name='modal_form'>
+		<label>Downtime date range</label>
+		<div class='input'>
+			<div class="inline-inputs">
+				From
+				<input name='from_day' data-datepicker="datepicker" class="input input-small" type="text" value="{{s_now_day}}" />
+				<input name='from_hour' class="input input-mini" type="text" value="{{s_now_hour}}" />
+				to
+				<input name='to_day' data-datepicker="datepicker" class="input input-small" type="text" value="{{s_nxt_day}}" />
+				<input name='to_hour' class="intput input-mini" type="text" value="{{s_nxt_hour}}" />
+			</div>
+		</div>
+		<textarea type="textarea" name='reason' class="span6" placeholder="Reason…" rows=5></textarea>
+	</form>
 </div>
+
 <div class="modal-footer">
-  <div class="error" id='dateinversion'>
-    <p><strong>Error:</strong> Your ending date is before the starting one!</p>
+	<div class="error" id='dateinversion'>
+		<p><strong>Error:</strong> Your ending date is before the starting one!</p>
+	</div>
+	<a href="javascript:submit_local_form();" class="btn btn-primary">Submit</button>
+	<a href="#" class="btn" data-dismiss="modal">Close</a>
 </div>
-  <a href="javascript:submit_local_form();" class="btn btn-primary">Submit</button>
-  <a href="#" class="btn" data-dismiss="modal">Close</a>
-</div>
-
 
 <script type="text/javascript">
   $('#dateinversion').hide();
