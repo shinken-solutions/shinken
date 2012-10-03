@@ -3277,7 +3277,7 @@ do
             ;;
         -e|--enabledaemons)
             shift
-            OPTARG=$1
+            OPTARG=$(echo "$*" |sed 's/--//g')
             shift
             setdaemons "$OPTARG"
             exit 0
