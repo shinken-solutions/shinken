@@ -20,6 +20,6 @@ function submit_local_form() {
 	</form>
 </div>
 <div class="modal-footer">
-	<a href="javascript:submit_local_form();" class="btn btn-danger"> <i class="icon-save"></i> Submit</button>
+	<button><a href="javascript:submit_local_form();" class="btn btn-danger"> <i class="icon-save"></i> Delete</button>
 	<a href="#" class="btn" data-dismiss="modal">Close</a>
 </div>
