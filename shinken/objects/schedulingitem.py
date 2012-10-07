@@ -25,12 +25,13 @@
 
 """ This class is a common one for service/host. Here you
 will find all scheduling related functions, like the schedule
-or the consume_check ones. It's a quite important class!
+or the consume_check. It's a very important class!
 """
 
 import random
 import time
 import traceback
+from datetime import datetime
 
 from item import Item
 
@@ -461,8 +462,8 @@ class SchedulingItem(Item):
     # The check interval change with HARD state or not:
     # SOFT: retry_interval
     # HARD: check_interval
-    # The first scheduling is a little random, so all checks
-    # are not launch in the same time...
+    # The first scheduling is evenly distributed, so all checks
+    # are not launched at the same time.
     def schedule(self, force=False, force_time=None):
         # if last_chk == 0 put in a random way so all checks
         # are not in the same time
@@ -492,16 +493,17 @@ class SchedulingItem(Item):
         else:  # TODO: if no retry_interval?
             interval = self.retry_interval * cls.interval_length
 
-        # The next_chk is pass so we need a new one
-        # so we got a check_interval
+        # Determine when a new check (randomize and distribute next check time)
+        # or recurring check should happen.
         if self.next_chk == 0:
-            # At the start, we cannot have a interval more than cls.max_check_spread
+            # At the start, we cannot have an interval more than cls.max_check_spread
             # is service_max_check_spread or host_max_check_spread in config
             interval = min(interval, cls.max_check_spread * cls.interval_length)
-            r = interval * (random.random() - 0.5)
-            time_add = interval / 2 + r
+            time_add = interval * random.uniform(0.2,0.85)
         else:
             time_add = interval
+
+        # Do the actual Scheduling
 
         # If not force_time, try to schedule
         if force_time is None:
@@ -510,11 +512,25 @@ class SchedulingItem(Item):
             # like from a previous run (load from retention). If so, use it
             # by default it's 0, so there is no problem
             if self.next_chk < now:
+                # Do not calculate next_chk based on current time, but based on the last check execution time.
+                # Important for consistency of data for trending.
+                if self.next_chk == 0:
+                    self.next_chk = now
                 # maybe we do not have a check_period, if so, take always good (24x7)
                 if self.check_period:
-                    self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
+                    self.next_chk = self.check_period.get_next_valid_time_from_t(self.next_chk + time_add)
                 else:
-                    self.next_chk = int(now + time_add)
+                    self.next_chk = int(self.next_chk + time_add)
+                # If check interval is a multiple of 60 (seconds), the check must be scheduler 
+                # between 0 et 49 absolute seconds.
+                # Else re-schedule if the check is scheduled between 50 et 60 inclusively in absolute seconds.
+                # We assume here that checks do not take more than 10 seconds to execute.
+                # We also do not make a distinction between the last absolute 10 seconds of a minute
+                # in the middle of a 5 minute interval versus the last 10 seconds of the check_interval.
+                if ((self.check_interval * cls.interval_length) % 60) == 0:
+                    second = datetime.fromtimestamp(self.next_chk).second
+                    if second > 49:
+                        self.next_chk = self.next_chk - (((second % 4) + 1) * 10)
             # else: keep the self.next_chk value in the future
         else:
             self.next_chk = int(force_time)
