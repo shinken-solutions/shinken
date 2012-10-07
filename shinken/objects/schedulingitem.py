@@ -496,12 +496,14 @@ class SchedulingItem(Item):
             interval = self.retry_interval * cls.interval_length
 
         # Determine when a new check (randomize and distribute next check time)
-        # or recurring check should happen.
+        # or recurring check should happen. Always start at hour.minute.0 to schedule.
         if self.next_chk == 0:
             # At the start, we cannot have an interval more than cls.max_check_spread
             # is service_max_check_spread or host_max_check_spread in config
             interval = min(interval, cls.max_check_spread * cls.interval_length)
-            time_add = interval * random.uniform(0.2,0.85)
+            time_add_rnd = interval * random.uniform(0.0,0.80)
+            time_add_offset = abs(datetime.now().second - 60)
+            time_add = time_add_offset + time_add_rnd
         else:
             time_add = interval
 
@@ -524,14 +526,15 @@ class SchedulingItem(Item):
                 else:
                     self.next_chk = int(self.next_chk + time_add)
                 # If check interval is a multiple of 60 (seconds), the check must be scheduler 
-                # between 0 et 49 absolute seconds.
-                # Else re-schedule if the check is scheduled between 50 et 60 inclusively in absolute seconds.
-                # We assume here that checks do not take more than 10 seconds to execute.
-                # We also do not make a distinction between the last absolute 10 seconds of a minute
+                # between 0 et 48 absolute seconds.
+                # Else re-schedule if the check is scheduled between 49 et 59 inclusively in absolute seconds.
+                # We assume here that checks do not take more than 11 seconds to execute.
+                # We also do not make a distinction between the last absolute 11 seconds of a minute
                 # in the middle of a 5 minute interval versus the last 10 seconds of the check_interval.
+                # The algorithm is imperfect.
                 if ((self.check_interval * cls.interval_length) % 60) == 0:
                     second = datetime.fromtimestamp(self.next_chk).second
-                    if second > 49:
+                    if second > 48:
                         self.next_chk = self.next_chk - (((second % 4) + 1) * 10)
             # else: keep the self.next_chk value in the future
         else:
