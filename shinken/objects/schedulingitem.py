@@ -7,6 +7,8 @@
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
+#    Thibault Cohen, thibault.cohen@savoirfairelinux.com
+#    Francois Mikus, fmikus@acktomic.com
 #
 # This file is part of Shinken.
 #
