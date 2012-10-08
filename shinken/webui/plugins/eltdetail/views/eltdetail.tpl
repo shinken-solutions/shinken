@@ -716,7 +716,7 @@ $(document).ready(function(){
 
 		      		<div class='row-fluid well span8 jcrop'>
 		      			<div id='real_graphs'>
-    			  <!-- Let's keep this part visible. This is the custom and default range --!>
+    			  <!-- Let's keep this part visible. This is the custom and default range -->
 				    %for g in uris:
 				      %img_src = g['img_src']
 				      %link = g['link']
@@ -750,13 +750,7 @@ $(document).ready(function(){
 	<!--</div>-->
 </div>
 
-</div>
 %#End of the Host Exist or not case
 %end
 
-<script>
-/*$(document).ready(function(){
-    $('#inner_depgraph').load('/inner/depgraph/{{elt.get_full_name()}}');
-});*/
-</script>
 
