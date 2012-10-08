@@ -104,26 +104,17 @@
 		%include header_element globals()
 	%end
 
-    <div class="container-fluid">
-      <div class="row-fluid">
-%#        <div class="span2 min-height">
-%#			%if print_menu:
-%#				%include navigation_element globals()
-%#			%end
-%#        </div><!--/span-->
-        <div class="span12 min-height">
-			%include
+    <div id="wrap">
+      <div class="row-fluid container">
+        <div id="content" class="span12">
+		      %include
         </div><!--/span-->
       </div><!--/row-->
-
-      <hr>
-    %if print_footer:
-		  %include footer_element
-    %end
-
     </div><!--/.fluid-container-->
+  %if print_footer:
+    %include footer_element
+  %end
   <!-- The modal div that will be shown when we want, and after put in it the data we want -->
   <div class="modal fade" id="modal"></div>
-
   </body>
 </html>
