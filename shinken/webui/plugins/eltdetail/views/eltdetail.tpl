@@ -543,6 +543,7 @@ $(document).ready(function(){
 						      <th class="span1"></th>
 						      <th class="span6"></th>
 						      <th class="span4"></th>
+						      <th class="span1"></th>
 						    </tr>
 						  </thead>
 						  <tbody>
@@ -552,6 +553,7 @@ $(document).ready(function(){
 						      <td><span class="label pull-right">Comments</span></td>
 						      <td><strong>{{c.comment}}</strong></td>
 						      <td><strong>{{helper.print_date(c.entry_time)}} - {{helper.print_date(c.expire_time)}}</strong></td>
+						      <td><a class="icon-trash {{global_disabled}} font-red" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})"></a></td>
 						    </tr>
 						    %end
 						  </tbody>
