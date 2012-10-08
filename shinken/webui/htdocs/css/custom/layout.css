@@ -26,7 +26,7 @@
 
 /*  Shinken basics
     ------------------------------------------------------- */
-html, body { height: 100%;}
+html, body {height: 100%;}
 
 #wrap {
   min-height: 100%;
@@ -34,7 +34,7 @@ html, body { height: 100%;}
   height: 100%;
   margin: 0 auto -30px;
 }
-#push, #footer {height: 30px; }
+#push, #footer {height: 30px;}
 
 /*  Special Font Awesome styles (Font Color)
     ------------------------------------------------------- */

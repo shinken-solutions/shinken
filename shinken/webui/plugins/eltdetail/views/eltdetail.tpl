@@ -534,21 +534,29 @@ $(document).ready(function(){
 		      		</div>
 		      		<div class="clear"></div>
 
-		      		<div id="log_container">
+		      		<div id="log_container" class="row-fluid">
 		      			%if len(elt.comments) > 0:
-		      			<h2></h2>
-		      			<ol>
-		      				%for c in elt.comments:
-		      				<li>
-		      					<div class="left">
-		      						<p class="log-text">{{c.comment}}</p>
-		      						<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
-		      						</div>
-		      					</div>
-		      					<div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
-		      				</li>
-		      				%end
-		      			</ol>
+		      			<table class="table table-condensed table-hover">
+						  <thead>
+						    <tr>
+						      <th class="span2"></th>
+						      <th class="span1"></th>
+						      <th class="span6"></th>
+						      <th class="span4"></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	%for c in elt.comments:
+						    <tr>
+						      <td><strong>{{c.author}}</strong></td>
+						      <td><span class="label pull-right">Comments</span></td>
+						      <td><strong>{{c.comment}}</strong></td>
+						      <td><strong>{{helper.print_date(c.entry_time)}} - {{helper.print_date(c.expire_time)}}</strong></td>
+						    </tr>
+						    %end
+						  </tbody>
+						</table>
+
 		      			%else:
 						<div class="alert alert-info">
 							<p class="font-blue">No comments available</p>
