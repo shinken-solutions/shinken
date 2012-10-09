@@ -43,7 +43,7 @@
     %for w in app.get_widgets_for('dashboard'):
     <div class='widget_desc span5' style='position: relative;'>
       <div class='row-fluid'>
-	<span class='span4'>
+	<span class="span4" style="margin-top:10px;">
 	  <img class="img-rounded" style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
 	</span>
 	<span class='span6'>
