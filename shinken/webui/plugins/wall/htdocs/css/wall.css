@@ -83,7 +83,7 @@
     border : 1px;
     top : 55%;
     position: absolute;
-    min-height : 500px;
+    /*min-height : 500px;*/
     width: 100%;
 }
 
