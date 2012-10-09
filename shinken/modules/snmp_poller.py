@@ -299,6 +299,7 @@ class SNMPFrequence(object):
         # List services
         self.services = {}
         self.forced = None
+        self.checking = False
 
     def format_output(self, key):
         """ Prepare service output 
@@ -398,7 +399,6 @@ class SNMPService(object):
                             if len(tmp) > 1:
                                 # detect oid with function
                                 ds, fct = tmp
-                                #print "self.oids", self.oids
                                 if self.oids[ds].value is None:
                                     return int(trigger['default_status'])
                                 fct, args = fct.split("(")
@@ -746,6 +746,13 @@ class SNMPAsyncClient(object):
             self.set_exit("Interval not found in memcache", rc=3)
             return
 
+        # Check if a SNMP request is on the way for the frequence ....
+        if self.obj.frequences[self.check_interval].checking:
+            # Yes ? then waiting the answer to get it from cache !
+            while self.obj.frequences[self.check_interval].checking:
+                time.sleep(0.5)
+                self.obj = self.memcached.get(self.obj_key)
+
         # Check if map is done
         s = self.obj.frequences[self.check_interval].services[self.serv_key]
         if isinstance(s.instance, str):
@@ -773,12 +780,7 @@ class SNMPAsyncClient(object):
             mini_td = timedelta(seconds=(5))
             data_valid = self.obj.frequences[self.check_interval].check_time + td \
                                                         > self.start_time + mini_td
-            #print "==========================="
-            #print self.obj.frequences[self.check_interval].check_time
-            #print td
-            #print self.start_time
-            #print mini_td
-            #print data_valid
+
             if data_valid:
                 # Datas valid
                 data_validity = True
@@ -798,6 +800,9 @@ class SNMPAsyncClient(object):
             for snmpoid in service.oids.values():
                 snmpoid.old_value = snmpoid.value
                 snmpoid.raw_old_value = snmpoid.raw_value
+
+        # One SNMP request is now running
+        self.obj.frequences[self.check_interval].checking = True
 
         self.memcached.set(self.obj_key, self.obj, time=604800)
         # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
@@ -999,11 +1004,13 @@ class SNMPAsyncClient(object):
                     self.obj.instances = mapping_instance
                     mapping = self.obj.map_instances(self.check_interval) # mapping = useless
                     s = self.obj.frequences[self.check_interval].services[self.serv_key] # useless
+                    self.obj.frequences[self.check_interval].checking = False
                     self.memcached.set(self.obj_key, self.obj, time=604800)
                     if s.instance.startswith("map("):
                         result_oids_mapping = set([".%s" % str(o).rsplit(".",1)[0] for t in varBindTable for o, _ in t])
                         if not result_oids_mapping.intersection(set(self.mapping_oids.keys())):
                             s.instance = "NOTFOUND"
+                            self.obj.frequences[self.check_interval].checking = False
                             self.memcached.set(self.obj_key, self.obj, time=604800)
                             logger.info("[SnmpBooster] - Instance mapping not found. Please check your config")
                             self.set_exit("%s: Instance mapping not found. Please check your config" % s.instance_name, 3, transportDispatcher)
@@ -1034,6 +1041,7 @@ class SNMPAsyncClient(object):
 
                 # save data
 
+                self.obj.frequences[self.check_interval].checking = False
                 self.memcached.set(self.obj_key, self.obj, time=604800)
 
                 # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
@@ -1324,13 +1332,13 @@ class Snmp_poller(BaseModule):
                                 continue
                             if not obj.frequences[s.check_interval].check_time is None:
                                 # Forced or not forced check ??
-                                if True:
-                                    if s.state_type == 'SOFT':
-                                        forced = True
-                                    else:
-                                        # Detect if the checked is forced by an UI/Com
-                                        forced = (s.next_chk - s.last_chk) < \
-                                                 s.check_interval * s.interval_length
+                                if s.state_type == 'SOFT':
+                                    forced = True
+                                else:
+                                    # Detect if the checked is forced by an UI/Com
+                                    forced = (s.next_chk - s.last_chk) < \
+                                             s.check_interval * s.interval_length - 10
+                                        
                                 if forced:
                                     # Set forced
                                     logger.info("[SnmpBooster] Forced check for this host/service: %s/%s" % (obj_key, s.service_description))
