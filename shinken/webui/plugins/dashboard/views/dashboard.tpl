@@ -42,16 +42,15 @@
     <div class='row span12'>
     %for w in app.get_widgets_for('dashboard'):
     <div class='widget_desc span5' style='position: relative;'>
-      <div class='row'>
+      <div class='row-fluid'>
 	<span class='span4'>
-	  <img style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
+	  <img class="img-rounded" style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
 	</span>
 	<span class='span6'>
 	  {{!w['widget_desc']}}
 	</span>
-	<p>&nbsp;</p>
       </div>
-      <p class="add_button"><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
+      <p class="add_button"><a class='btn btn-mini btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
     </div>
     %end
     </div>
