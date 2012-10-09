@@ -12,7 +12,7 @@
     padding : 10px;
     border-radius: 4px;
     color : black;
-    min-height : 155px !important;
+    min-height : 160px !important;
     position: relative; /* To be sure absolute item will b where they should be*/
 }
 

@@ -33,9 +33,9 @@
 </div>
 
 <div id="pageslide" style="display:none">
-    <div class='row'>
-      <h2 class='pull-left'>Widgets available</h2>
-      <p class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+    <div class='span12 row'>
+      <h3 class='span10 pull-left font-white'>Widgets available</h3>
+      <p class='span2 pull-right'><a class='btn btn-small btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
     </div>
       <p>&nbsp;</p>
       <p>&nbsp;</p>
