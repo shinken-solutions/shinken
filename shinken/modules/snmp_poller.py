@@ -746,13 +746,6 @@ class SNMPAsyncClient(object):
             self.set_exit("Interval not found in memcache", rc=3)
             return
 
-        # Check if a SNMP request is on the way for the frequence ....
-        if self.obj.frequences[self.check_interval].checking:
-            # Yes ? then waiting the answer to get it from cache !
-            while self.obj.frequences[self.check_interval].checking:
-                time.sleep(0.5)
-                self.obj = self.memcached.get(self.obj_key)
-
         # Check if map is done
         s = self.obj.frequences[self.check_interval].services[self.serv_key]
         if isinstance(s.instance, str):
@@ -760,6 +753,7 @@ class SNMPAsyncClient(object):
         else:
             self.mapping_done = True
 
+        data_validity = False
         # Check if the check is forced
         if self.obj.frequences[self.check_interval].forced:
             # Check forced !!
@@ -778,21 +772,24 @@ class SNMPAsyncClient(object):
                                     self.interval_length))
             # Just to be sure to invalidate datas ...
             mini_td = timedelta(seconds=(5))
-            data_valid = self.obj.frequences[self.check_interval].check_time + td \
+            data_validity = self.obj.frequences[self.check_interval].check_time + td \
                                                         > self.start_time + mini_td
 
-            if data_valid:
-                # Datas valid
+        if self.obj.frequences[self.check_interval].check_time:
+            if self.start_time - self.obj.frequences[self.check_interval].check_time < timedelta(seconds=5):
                 data_validity = True
-                message, rc = self.obj.format_output(self.check_interval, self.serv_key)
-                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
-                message = "FROM CACHE: " + message
-                self.set_exit(message, rc=rc)
-                self.memcached.set(self.obj_key, self.obj, time=604800)
-                return
-            else:
-                # Datas not valide: datas too old
-                data_validity = False
+        if self.obj.frequences[self.check_interval].checking:
+            data_validity = True
+
+        if data_validity:
+            # Datas valid
+            data_validity = True
+            message, rc = self.obj.format_output(self.check_interval, self.serv_key)
+            logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
+            message = "FROM CACHE: " + message
+            self.set_exit(message, rc=rc)
+            self.memcached.set(self.obj_key, self.obj, time=604800)
+            return
 
         # Save old datas
         #for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
@@ -800,6 +797,7 @@ class SNMPAsyncClient(object):
             for snmpoid in service.oids.values():
                 snmpoid.old_value = snmpoid.value
                 snmpoid.raw_old_value = snmpoid.raw_value
+
 
         # One SNMP request is now running
         self.obj.frequences[self.check_interval].checking = True
@@ -897,6 +895,26 @@ class SNMPAsyncClient(object):
         except Exception, e:
             logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
             self.set_exit("SNMP Request error: " + str(e), rc=3)
+
+        # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+            try:
+                self.obj = self.memcached.get(self.obj_key)
+            except ValueError, e:
+                self.set_exit("Memcached error: `%s'"
+                              % self.memcached.get(self.obj_key),
+                              rc=3)
+                return
+            if not isinstance(self.obj, SNMPHost):
+                logger.error('[SnmpBooster] Host not found in memcache: %s' % self.hostname)
+                self.set_exit("Host not found in memcache: `%s'" % self.hostname,
+                              rc=3)
+                return
+
+            self.obj.frequences[self.check_interval].checking = False
+            self.memcached.set(self.obj_key, self.obj, time=604800)
+        # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+
+
         transportDispatcher.closeDispatcher()
 
     def callback(self, transportDispatcher, transportDomain, transportAddress,
@@ -1338,6 +1356,7 @@ class Snmp_poller(BaseModule):
                                     # Detect if the checked is forced by an UI/Com
                                     forced = (s.next_chk - s.last_chk) < \
                                              s.check_interval * s.interval_length - 10
+                                print s.service_description, s.next_chk, s.last_chk, forced
                                         
                                 if forced:
                                     # Set forced
