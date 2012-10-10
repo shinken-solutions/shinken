@@ -718,7 +718,7 @@ class LiveStatusQuery(object):
             if converter:
                 reference = converter(reference)
             if isinstance(reference, str):
-                reference = reference.decode("utf8")
+                reference = reference.decode('utf8','ignore')
         attribute = 'lsm_' + attribute
 
         # The filters are closures.
