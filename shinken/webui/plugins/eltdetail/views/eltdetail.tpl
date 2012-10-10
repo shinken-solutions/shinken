@@ -578,24 +578,34 @@ $(document).ready(function(){
 		      		</div>
 		      		<div class="clear"></div>
 
-		      		<div id="log_container">
+		      		<div id="log_container" class="row-fluid">
 		      			%if len(elt.downtimes) > 0:
-		      			<h2></h2>
-		      			<ol>
-		      				%for dt in elt.downtimes:
-		      				<li>
-		      					<div class="left">
-		      						<p class="log-text">{{dt.comment}}</p>
-		      						<div class="log-meta"> <span><b>Author:</b> {{dt.author}}</span> <span><b>Start:</b> {{helper.print_date(dt.start_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(dt.end_time)}}</span>
-		      						</div>
-		      					</div>
-		      					<div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
-		      				</li>
-		      				%end
-		      			</ol>
+		      			<table class="table table-condensed table-hover">
+						  <thead>
+						    <tr>
+						      <th class="span2"></th>
+						      <th class="span1"></th>
+						      <th class="span5"></th>
+						      <th class="span5"></th>
+						      <th class="span1"></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	%for dt in elt.downtimes:
+						    <tr>
+						      <td><strong>{{dt.author}}</strong></td>
+						      <td><span class="label pull-right">Downtime</span></td>
+						      <td><strong>{{dt.comment}}</strong></td>
+						      <td><strong>{{helper.print_date(dt.start_time)}} - {{helper.print_date(dt.end_time)}}</strong></td>
+						      <td><a class="icon-trash {{global_disabled}} font-red" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})"></a></td>
+						    </tr>
+						    %end
+						  </tbody>
+						</table>
+
 		      			%else:
-		      			<div class="alert alert-info">
-							<p class="font-blue">No downtime planned</p>
+						<div class="alert alert-info">
+							<p class="font-blue">No comments available</p>
 						</div>
 		      			%end
 		      		</div>
