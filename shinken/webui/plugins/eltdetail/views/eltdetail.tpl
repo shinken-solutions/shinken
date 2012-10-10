@@ -189,8 +189,9 @@ $(document).ready(function(){
 		<div class="span4">
 			%#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 			%if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="alert alert-critical no-bottommargin pulsate">
-				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+			<div class="alert alert-critical no-bottommargin pulsate row-fluid">
+				<div class="span2" style="font-size: 50px; padding-top: 10px;"> <i class="icon-bolt"></i> </div>
+				<p class="span10">This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 				%# "end of the 'SOLVE THIS' highlight box"
 				%end
 			</div>
