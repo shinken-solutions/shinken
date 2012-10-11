@@ -765,6 +765,12 @@ class SNMPAsyncClient(object):
         elif self.obj.frequences[self.check_interval].check_time is None:
             # Datas not valid : no data
             data_validity = False
+        # Don't send SNMP request if old check is younger than 30 sec
+        elif self.obj.frequences[self.check_interval].check_time and self.start_time - self.obj.frequences[self.check_interval].check_time < timedelta(seconds=20):
+            data_validity = True
+        # Don't send SNMP request if an other SNMP is on the way
+        elif self.obj.frequences[self.check_interval].checking:
+            data_validity = True
         else:
             # Compare last check time and check_interval and now
             td = timedelta(seconds=(self.check_interval
@@ -774,12 +780,6 @@ class SNMPAsyncClient(object):
             mini_td = timedelta(seconds=(5))
             data_validity = self.obj.frequences[self.check_interval].check_time + td \
                                                         > self.start_time + mini_td
-
-        if self.obj.frequences[self.check_interval].check_time:
-            if self.start_time - self.obj.frequences[self.check_interval].check_time < timedelta(seconds=5):
-                data_validity = True
-        if self.obj.frequences[self.check_interval].checking:
-            data_validity = True
 
         if data_validity:
             # Datas valid
@@ -1107,7 +1107,10 @@ class SNMPAsyncClient(object):
         self.message = message
         self.state = 'received'
         if transportDispatcher:
-            transportDispatcher.jobFinished(1)
+            try:
+                transportDispatcher.jobFinished(1)
+            except:
+               pass
 
 
 class Snmp_poller(BaseModule):
@@ -1355,9 +1358,8 @@ class Snmp_poller(BaseModule):
                                 else:
                                     # Detect if the checked is forced by an UI/Com
                                     forced = (s.next_chk - s.last_chk) < \
-                                             s.check_interval * s.interval_length - 10
-                                print s.service_description, s.next_chk, s.last_chk, forced
-                                        
+                                             s.check_interval * s.interval_length - 15
+
                                 if forced:
                                     # Set forced
                                     logger.info("[SnmpBooster] Forced check for this host/service: %s/%s" % (obj_key, s.service_description))
