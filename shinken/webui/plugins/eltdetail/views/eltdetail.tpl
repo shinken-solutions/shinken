@@ -67,16 +67,16 @@ $(document).ready(function(){
     	$("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
 	});
-  </script>
+</script>
 
   %#  "Content Container Start"
-  <!--<div class="">-->
+  
   <div id="content_container" class="row-fluid">
   	<div class="row-fluid">
-  		<h1 class="span6 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+  		<h1 class="span7 state_{{elt.state.lower()}} icon_down no-margin"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
 
 		%if elt.action_url != '':
-			<div class="span5">
+			<div class="span4">
 				<span class="pull-right leftmargin" id="host_tags">
 					%tags = elt.get_host_tags()
 					%for t in tags:
@@ -113,12 +113,14 @@ $(document).ready(function(){
 			    </div>
 			</div>	
 		%else:
-		  	<span class="pull-right leftmargin" id="host_tags">
-				%tags = elt.get_host_tags()
-				%for t in tags:
-				<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
-				%end
-			</span>
+			<div class="span5">
+			  	<span class="pull-right leftmargin" id="host_tags">
+					%tags = elt.get_host_tags()
+					%for t in tags:
+					<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+					%end
+				</span>
+			</div>
 		%end	
   	</div>
 
