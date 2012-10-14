@@ -455,10 +455,12 @@ $(document).ready(function(){
 		      		%if len(elt.services) > 0:
 		      		<h3 class="span10">My services:</h3>
 		      		%elif len(elt.parent_dependencies) == 0:
-		      		<h3 class="span10">No services</h3>
+					<div class="alert alert-info">
+						<p class="font-blue">No services available</p>
+					</div>
 		      		%end
 		      		<hr>
-		      		<div class='host-services'>
+		      		<div class="host-services">
 		      			%nb = 0
 		      			%for s in helper.get_host_services_sorted(elt):
 		      			%nb += 1
