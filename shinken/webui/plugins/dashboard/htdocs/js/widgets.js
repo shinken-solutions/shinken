@@ -180,11 +180,11 @@ $(function(){
     // Very basic usage
     var easy_widget_mgr = $.fn.EasyWidgets({
         i18n : {
-            editText : '<i class="icon-edit"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
-            closeText : '<i class="icon-remove"></i>',
-            collapseText : '<i class="icon-chevron-up"></i>',
-            cancelEditText : '<i class="icon-edit"></i>',
-            extendText : '<i class="icon-chevron-down"></i>',
+            editText : '<i class="icon-edit font-grey"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
+            closeText : '<i class="icon-remove font-grey"></i>',
+            collapseText : '<i class="icon-chevron-up font-grey"></i>',
+            cancelEditText : '<i class="icon-edit font-grey"></i>',
+            extendText : '<i class="icon-chevron-down font-grey"></i>',
         },
         effects : {
             effectDuration : 100,
