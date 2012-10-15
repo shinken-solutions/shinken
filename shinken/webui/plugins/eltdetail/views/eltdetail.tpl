@@ -455,7 +455,7 @@ $(document).ready(function(){
 		      		%# " print twice "
 		      		%if elt_type=='host' and not elt.is_problem:
 		      		%if len(elt.services) > 0:
-		      		<h3 class="span10">My services:</h3>
+		      		<h4 class="span10 no-topmargin">My services:</h4>
 		      		%elif len(elt.parent_dependencies) == 0:
 					<div class="alert alert-info">
 						<p class="font-blue">No services available</p>
