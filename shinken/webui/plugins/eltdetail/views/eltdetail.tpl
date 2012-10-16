@@ -461,7 +461,6 @@ $(document).ready(function(){
 						<p class="font-blue">No services available</p>
 					</div>
 		      		%end
-		      		<hr>
 		      		<div class="host-services">
 		      			%nb = 0
 		      			%for s in helper.get_host_services_sorted(elt):
