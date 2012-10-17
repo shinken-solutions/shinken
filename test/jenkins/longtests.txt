@@ -110,7 +110,9 @@ test_hostgroup_with_space.py
 test_conf_in_symlinks.py
 test_uknown_event_handler.py
 test_python_crash_with_recursive_bp_rules.py
+test_missing_timeperiod.py
 test_livestatus_allowedhosts.py
+
 
 # takes long
 test_livestatus.py

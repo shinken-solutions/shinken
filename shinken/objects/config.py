@@ -801,6 +801,8 @@ class Config(Item):
         logger.info('[Arbiter] Serializing the configurations...')
         for r in self.realms:
             for (i, conf) in r.confs.iteritems():
+                # Remember to protect the local conf hostgroups too!
+                conf.hostgroups.prepare_for_sending()
                 logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)

@@ -381,12 +381,20 @@ function prerequisites(){
                         cecho " > $EPELPKG already installed" green
                     fi
                     ;;
-#                6)
-#                    PACKAGES=$YUMPKGS
-#                    QUERY="rpm -q "
-#                    ;;
-                *)
+                *)                    
                     cecho " > Unsupported RedHat/CentOs version" red
+                    exit 2
+                    ;;
+            esac
+            ;;
+        Fedora)
+            case $VERS in
+                16|17)
+                    PACKAGES=$YUMPKGS
+                    QUERY="rpm -q "
+                    ;;
+                *)
+                    cecho " > Unsupported Fedora version" red
                     exit 2
                     ;;
             esac
@@ -452,52 +460,41 @@ function prerequisites(){
                 PYLIBS=$PYLIBSRHEL6
                 ;;
         esac
-        for p in $PYLIBS
-        do
-            module=$(echo $p | awk -F: '{print $1'})
-            import=$(echo $p | awk -F: '{print $2'})
-
-            $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
-            if [ $? -eq 2 ]
-            then
-                if [ $SKIPPREREQUISITES -eq 1 ]
-                then
-                    cecho " > SKIPPREQUISITES enabled: won't install $p " red
-                else
-                    cecho " > Module $module ($import) not found. Installing..." yellow
-                    $PYEI $module >> ${LOGFILE} 2>&1
-                fi
-            else
-                cecho " > Module $module found." green
-            fi
-
-
-        done
+    elif [ "$CODE" = "Fedora" ]
+    then
+        case $VERS in
+            16|17)
+                export PY="python"
+                export PYEI="easy_install"
+                PYLIBS=$PYLIBS
+                ;;
+        esac
     elif [ "$CODE" == "DEBIAN" ]
     then
         export PY="python"
         export PYEI="easy_install"
         PYLIBS=$PYLIBSDEB
-        for p in $PYLIBS
-        do
-            module=$(echo $p | awk -F: '{print $1'})
-            import=$(echo $p | awk -F: '{print $2'})
-
-            $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
-            if [ $? -eq 2 ]
-            then
-                if [ $SKIPPREREQUISITES -eq 1 ]
-                then
-                    cecho " > SKIPPREQUISITES enabled: won't install $p " red
-                else
-                    cecho " > Module $module ($import) not found. Installing..." yellow
-                    $PYEI $module >> ${LOGFILE} 2>&1
-                fi
-            else
-                cecho " > Module $module found." green
-            fi
-        done
     fi
+
+    for p in $PYLIBS
+    do
+        module=$(echo $p | awk -F: '{print $1'})
+        import=$(echo $p | awk -F: '{print $2'})
+
+        $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
+        if [ $? -eq 2 ]
+        then
+            if [ $SKIPPREREQUISITES -eq 1 ]
+            then
+                cecho " > SKIPPREQUISITES enabled: won't install $p " red
+            else
+                cecho " > Module $module ($import) not found. Installing..." yellow
+                $PYEI $module >> ${LOGFILE} 2>&1
+            fi
+        else
+            cecho " > Module $module found." green
+        fi
+    done
 
     if [ $MANAGEPYRO == 1 ]
     then
@@ -2936,22 +2933,22 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
-function install_check_snmp_netint(){
-    cadre "Install install_check_snmp_netint" green
+function install_check_netint(){
+    cadre "Install install_check_netint" green
 
     cd $TMP
 
-    filename="check_snmp_netint.pl"
-    cecho " > Downloading check_snmp_netint" green
-    wget $WGETPROXY $CHECKSNMPNETINT -O ${filename} >> ${LOGFILE} 2>&1
+    filename="check_netint.pl"
+    cecho " > Downloading check_netint" green
+    wget $WGETPROXY $CHECKNETINT -O ${filename} >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
     then
         cecho " > Error while downloading $script" red
         exit 2
     fi
 
-    cecho " > install check_snmp_netint" green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
+    cecho " > install check_netint" green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_netint.pl >> $TMP/shinken.install.log 2>&1
 }
 
 function install_check_rsync(){
@@ -3109,7 +3106,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
                                check_snmp_bandwidth (check bandwidth usage with snmp)
-                               check_snmp_netint (enhanced version of check_snmp_int plugins)
+                               check_netint (enhanced version of check_snmp_int plugins)
                                check_IBM
                                check_IBM_DS
                                check_HPUX
@@ -3231,9 +3228,9 @@ do
             then
                 install_check_snmp_bandwidth
                 exit 0
-            elif [ "$OPTARG" == "check_snmp_netint" ]
+            elif [ "$OPTARG" == "check_netint" ]
             then
-                install_check_snmp_netint
+                install_check_netint
                 exit 0
             elif [ "$OPTARG" == "check_IBM" ]
             then
@@ -3295,7 +3292,7 @@ do
             ;;
         -e|--enabledaemons)
             shift
-            OPTARG=$1
+            OPTARG=$(echo "$*" |sed 's/--//g')
             shift
             setdaemons "$OPTARG"
             exit 0
