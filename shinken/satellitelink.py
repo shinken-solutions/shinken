@@ -135,7 +135,8 @@ class SatelliteLink(Item):
             return True
         except Pyro_exp_pack, exp:
             self.con = None
-            logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+            logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
+            logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
 
     # Get and clean all of our broks

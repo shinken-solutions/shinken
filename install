@@ -381,18 +381,20 @@ function prerequisites(){
                         cecho " > $EPELPKG already installed" green
                     fi
                     ;;
-#                6)
-#                    PACKAGES=$YUMPKGS
-#                    QUERY="rpm -q "
-#                    ;;
-        ;;
+                *)                    
+                    cecho " > Unsupported RedHat/CentOs version" red
+                    exit 2
+                    ;;
+            esac
+            ;;
         Fedora)
+            case $VERS in
                 16|17)
                     PACKAGES=$YUMPKGS
                     QUERY="rpm -q "
                     ;;
                 *)
-                    cecho " > Unsupported RedHat/CentOs version" red
+                    cecho " > Unsupported Fedora version" red
                     exit 2
                     ;;
             esac
@@ -3275,7 +3277,7 @@ do
             ;;
         -e|--enabledaemons)
             shift
-            OPTARG=$1
+            OPTARG=$(echo "$*" |sed 's/--//g')
             shift
             setdaemons "$OPTARG"
             exit 0
