@@ -758,24 +758,24 @@ class SNMPAsyncClient(object):
         # Check if the check is forced
         if self.obj.frequences[self.check_interval].forced:
             # Check forced !!
-            logger.debug("Check forced : %s,%s" % self.hostname, self.instance_name)
+            logger.debug("[SnmpBooster] Check forced : %s,%s" % (self.hostname, self.instance_name))
             self.obj.frequences[self.check_interval].forced = False
             data_validity = False
         elif not self.mapping_done:
-            logger.debug("Mapping not done : %s,%s" % self.hostname, self.instance_name)
+            logger.debug("[SnmpBooster] Mapping not done : %s,%s" % (self.hostname, self.instance_name))
             data_validity = False
         # Check datas validity
         elif self.obj.frequences[self.check_interval].check_time is None:
             # Datas not valid : no data
-            logger.debug("No old data : %s,%s" % self.hostname, self.instance_name)
+            logger.debug("[SnmpBooster] No old data : %s,%s" % (self.hostname, self.instance_name))
             data_validity = False
         # Don't send SNMP request if old check is younger than 20 sec
         elif self.obj.frequences[self.check_interval].check_time and self.start_time - self.obj.frequences[self.check_interval].check_time < timedelta(seconds=20):
-            logger.debug("Derive 0s protection : %s,%s" % self.hostname, self.instance_name)
+            logger.debug("[SnmpBooster] Derive 0s protection : %s,%s" % (self.hostname, self.instance_name))
             data_validity = True
         # Don't send SNMP request if an other SNMP is on the way
         elif self.obj.frequences[self.check_interval].checking:
-            logger.debug("SNMP request already launched : %s,%s" % self.hostname, self.instance_name)
+            logger.debug("[SnmpBooster] SNMP request already launched : %s,%s" % (self.hostname, self.instance_name))
             data_validity = True
         else:
             # Compare last check time and check_interval and now
@@ -786,7 +786,7 @@ class SNMPAsyncClient(object):
             mini_td = timedelta(seconds=(5))
             data_validity = self.obj.frequences[self.check_interval].check_time + td \
                                                         > self.start_time + mini_td
-            logger.debug("Data validity : %s,%s => %s" % self.hostname, self.instance_name, data_validity)
+            logger.debug("[SnmpBooster] Data validity : %s,%s => %s" % (self.hostname, self.instance_name, data_validity))
 
         if data_validity:
             # Datas valid
