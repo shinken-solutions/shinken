@@ -1126,7 +1126,7 @@ class Snmp_poller(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.version = "1.0"
-        self.datasource_file = getattr(mod_conf, 'datasource_file', None)
+        self.datasource_file = getattr(mod_conf, 'datasource', None)
         self.memcached_host = getattr(mod_conf, 'memcached_host', "127.0.0.1")
         self.memcached_port = int(getattr(mod_conf, 'memcached_port', 11211))
         self.memcached_address = "%s:%s" % (self.memcached_host,
