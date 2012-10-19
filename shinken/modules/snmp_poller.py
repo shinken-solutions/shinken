@@ -28,6 +28,7 @@
 import os
 import re
 import sys
+import glob
 import signal
 import time
 import socket
@@ -1126,6 +1127,7 @@ class Snmp_poller(BaseModule):
         self.memcached_address = "%s:%s" % (self.memcached_host,
                                        self.memcached_port)
         self.max_repetitions = int(getattr(mod_conf, 'max_repetitions', 64))
+        self.datasource = None
 
         # Called by poller to say 'let's prepare yourself guy'
     def init(self):
@@ -1151,13 +1153,30 @@ class Snmp_poller(BaseModule):
         # Read datasource file
         # Config validation
         try:
-            self.datasource = ConfigObj(self.datasource_file,
+            # Test if self.datasource_file, is file or directory
+            #if file
+            if os.path.isfile(self.datasource_file):
+                self.datasource = ConfigObj(self.datasource_file,
                                         interpolation='template')
+
+            # if directory
+            elif os.path.isdir(self.datasource_file):
+                files = glob.glob(os.path.join(self.datasource_file,
+                                               '/Default*.ini')
+                                 )
+                for f in files:
+                    if self.datasource is None:
+                        self.datasource = ConfigObj(f,
+                                                    interpolation='template')
+                    else:
+                        ctemp = ConfigObj(f, interpolation='template')
+                        self.datasource.merge(ctemp)
+            else:
+                raise IOError, "File or folder not found"
             # Store config in memcache
             self.memcached.set('datasource', self.datasource, time=604800)
         # TODO
         # raise if reading error
-
         except Exception, e:
             logger.error("[SnmpBooster] Reading datasource file error: `%s'" % str(e))
             # Try to get it from memcache
