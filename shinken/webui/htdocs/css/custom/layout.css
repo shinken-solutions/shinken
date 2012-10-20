@@ -47,6 +47,14 @@ html, body {height: 95.5%;}
   color: #000000;
 }
 
+.font-green {
+  color: #468847;
+}
+
+.font-yellow {
+  color: #F89406;
+}
+
 .font-red {
   color: #DA4F49;
 }
