@@ -95,6 +95,9 @@ html, body {height: 95.5%;}
     margin : 0 !important;
 }
 
+.no-border {
+  border: none !important;
+}
 .topmmargin {
   margin-top: 10px;
 }

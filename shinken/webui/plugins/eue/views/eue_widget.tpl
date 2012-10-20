@@ -6,11 +6,11 @@
 %rebase widget globals(), css=['graphs/css/widget_graphs.css']
 
 <div>
-    <table class="table">
+    <table class="table no-bottommargin topmmargin">
         <tbody>
             <tr>
-                <td class="span7">Date</td>
-                <td><span>2012-05-23 23:15:00</span></td>
+                <td class="span7 no-border">Date</td>
+                <td class="no-border"><span>2012-05-23 23:15:00</span></td>
             </tr>
             <tr>
                 <td class="span7">Succeed</td>
