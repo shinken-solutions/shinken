@@ -6,7 +6,7 @@
 %rebase widget globals(), css=['graphs/css/widget_graphs.css']
 
 <div>
-    <table class="table table-striped table-bordered">
+    <table class="table">
         <tbody>
             <tr>
                 <td class="span7">Date</td>
@@ -18,7 +18,7 @@
             </tr>
             <tr>
                 <td class="span7">Pending</td>
-                <td><span class="badge badge-info">23</span></td>
+                <td><span class="badge badge-warning">23</span></td>
             </tr>
             <tr>
                 <td class="span7">Failed</td>
@@ -26,7 +26,7 @@
             </tr>
             <tr>
                 <td class="span7"><b>Totale</b></td>
-                <td><span class="badge">108</span></td>
+                <td><span class="badge badge-info">108</span></td>
             </tr>
         </tbody>
     </table>
