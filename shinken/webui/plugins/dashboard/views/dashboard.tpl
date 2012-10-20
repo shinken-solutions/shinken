@@ -24,7 +24,7 @@
   %if len(widgets) == 0:
      %small_show_panel_s = 'hide'
   %end
-  <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
+  <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-small btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
   %# Go in the center of the page!
   <span id="center-button" class="span4 offset4 page-center" >
     <h3>You don't have any widget yet?</h3>
@@ -33,9 +33,9 @@
 </div>
 
 <div id="pageslide" style="display:none">
-    <div class='span12 row'>
-      <h3 class='span10 pull-left font-white'>Widgets available</h3>
-      <p class='span2 pull-right'><a class='btn btn-small btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+    <div class="span12 row">
+      <h3 class="span10 pull-left font-white">Widgets available</h3>
+      <p class="span2 pull-right"><a class="btn btn-small btn-danger" href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
     </div>
       <p>&nbsp;</p>
       <p>&nbsp;</p>
