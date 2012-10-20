@@ -124,7 +124,7 @@ $(document).ready(function(){
 		%end	
   	</div>
 
-	<div class="row-fluid box no-margin">	   
+	<div class="row-fluid box">	   
 		<table class="span4">
 			%#Alias, apretns and hostgroups arefor host only
 			%if elt_type=='host':
