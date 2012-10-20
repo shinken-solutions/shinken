@@ -13,9 +13,6 @@
 
 </script>
 
-
-
-
 %helper = app.helper
 
 %collapsed_s = ''
@@ -24,7 +21,6 @@
    %collapsed_s = 'collapsed'
    %collapsed_j = 'true'
 %end
-
 
 <script type="text/javascript">
     $(document).ready(function(){
