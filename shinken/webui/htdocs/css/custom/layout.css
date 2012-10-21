@@ -47,10 +47,21 @@ html, body {height: 95.5%;}
   color: #000000;
 }
 
+.font-green {
+  color: #468847;
+}
+
+.font-yellow {
+  color: #F89406;
+}
+
 .font-red {
   color: #DA4F49;
 }
 
+.font-grey {
+  color: #505050;
+}
 .font-blue {
   color: #3A87AD;
 }
@@ -92,6 +103,9 @@ html, body {height: 95.5%;}
     margin : 0 !important;
 }
 
+.no-border {
+  border: none !important;
+}
 .topmmargin {
   margin-top: 10px;
 }
