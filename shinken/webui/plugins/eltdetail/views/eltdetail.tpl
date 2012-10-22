@@ -422,7 +422,7 @@ $(document).ready(function(){
 
 		<!-- Detail info box start -->
 		<div class="span9 tabbable">
-			<ul class="nav nav-tabs">
+			<ul class="nav nav-tabs"  style="margin-bottom: 12px;">
 				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
 				<li><a href="#comments" data-toggle="tab">Comments</a></li>
 				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
@@ -461,7 +461,6 @@ $(document).ready(function(){
 						<p class="font-blue">No services available</p>
 					</div>
 		      		%end
-		      		<hr>
 		      		<div class="host-services">
 		      			%nb = 0
 		      			%for s in helper.get_host_services_sorted(elt):
