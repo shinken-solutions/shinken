@@ -45,7 +45,6 @@ $(document).ready(function(){
     }
 });
 
-
 /* Look at the # part of the URI. If it match a nav name, go for it*/
 $(document).ready(function(){
 	if (window.location.hash.length > 0) {
@@ -68,41 +67,65 @@ $(document).ready(function(){
     	$("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
 	});
-  </script>
+</script>
 
   %#  "Content Container Start"
-  <!--<div class="">-->
-  <div id="content_container" class="span12">
-  	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+  
+  <div id="content_container" class="row-fluid">
+  	<div class="row-fluid">
+  		<h1 class="span7 state_{{elt.state.lower()}} icon_down no-margin"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
 
-	<div class="span6">
-		<span class="pull-right leftmargin" id="host_tags">
-			%tags = elt.get_host_tags()
-			%for t in tags:
-			<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
-			%end
-		</span>
-
-	  	%if elt.action_url != '':
-	    	%action_urls = elt.action_url.split('|')
-			%if len(action_urls) > 0:
-				%for triplet in action_urls:
-					%if len(triplet.split(',')) == 3:
-						%( action_url, icon, alt) = triplet.split(',')
-						<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
-					%else:
-						%if len(triplet.split(',')) == 1:
-							<a href="{{triplet}}" target=_blank><button class="btn btn-small pull-right" type="button"><i class="icon-cog"></i></button></a>
-						%end
+		%if elt.action_url != '':
+			<div class="span4">
+				<span class="pull-right leftmargin" id="host_tags">
+					%tags = elt.get_host_tags()
+					%for t in tags:
+					<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
 					%end
-				%end
-			%end
-	  	%end
-	</div>
+				</span>
+			</div>
+			<div class="span1">
+				<div class="btn-group">
+					%action_urls = elt.action_url.split('|')
+					%if len(action_urls) == 1:
+					<button class="btn btn-mini"><i class="icon-cog"></i> Action</button>
+					%else:
+					<button class="btn btn-mini"><i class="icon-cog"></i> Actions</button>
+					%end
+					<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+				 		<span class="caret"></span>
+				 	</button>
+					<ul class="dropdown-menu pull-right">
+						%action_urls = elt.action_url.split('|')
+						%if len(action_urls) > 0:
+							%for triplet in action_urls:
+								%if len(triplet.split(',')) == 3:
+									%( action_url, icon, alt) = triplet.split(',')
+									<li><a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a></li>
+								%else:
+									%if len(triplet.split(',')) == 1:
+										<li><a id="action-link" href="{{triplet}}" target=_blank>{{triplet}}</a></li>
+									%end
+								%end
+							%end
+						%end
+				    </ul>
+			    </div>
+			</div>	
+		%else:
+			<div class="span5">
+			  	<span class="pull-right leftmargin" id="host_tags">
+					%tags = elt.get_host_tags()
+					%for t in tags:
+					<script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+					%end
+				</span>
+			</div>
+		%end	
+  	</div>
 
-
-	<div class="span12 no-leftmargin box">	   
-		<table class="span4 no-leftmargin">
+	<div class="row-fluid box">	   
+		<table class="span4">
 			%#Alias, apretns and hostgroups arefor host only
 			%if elt_type=='host':
 			<tr>
@@ -168,8 +191,9 @@ $(document).ready(function(){
 		<div class="span4">
 			%#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 			%if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="alert alert-critical no-bottommargin pulsate">
-				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+			<div class="alert alert-critical no-bottommargin pulsate row-fluid">
+				<div class="span2" style="font-size: 50px; padding-top: 10px;"> <i class="icon-bolt"></i> </div>
+				<p class="span10">This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 				%# "end of the 'SOLVE THIS' highlight box"
 				%end
 			</div>
@@ -193,77 +217,39 @@ $(document).ready(function(){
 	%flp_state = 'unchecked=""'
 	%end
 
-
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$('#btn-checks').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-not').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-evt').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
-		}
-		);
+		});
 
 		$('#btn-flp').iphoneStyle({
 			resizeContainer: false,
 			resizeHandle: false,
 			onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
 
-		}
-		);
+		});
 	}); 
 	</script>
 
-	<div class="span12 row-fluid hide">
-		<div class="span5 well">
-			<div class="btn-toolbar">
-				<div class="btn-group ">
-					<a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
-					
-				</div>
-
-				<div class="btn-group">
-					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> {{elt_type.capitalize()}} commands</span> <span class="caret pull-right"></span></a>
-					<ul class="dropdown-menu no-maxwidth">
-						%disabled_s = ''
-						%if not elt.event_handler:
-						%disabled_s = 'disabled-link'
-						%end
-						<li><a class='{{disabled_s}} {{global_disabled}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
-						%disabled_s = ''
-						%if elt.problem_has_been_acknowledged:
-						%disabled_s = 'disabled-link'
-						%end
-						<li><a class='{{disabled_s}} {{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
-						<li><a class='{{global_disabled}}' href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
-						<li><a class='{{global_disabled}}' href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
-						<li><a class='disabled-link {{global_disabled}}' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-						<li><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
-						<li class="divider"></li>
-						<li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit {{elt_type.capitalize()}}</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<!-- Le Anfang -->
-	<div class="span12">
+	<div class="row-fluid">
 		<!-- Start Host/Services-->
-		<div class="tabbable verticaltabs-container span3 no-leftmargin"> <!-- Wrap the Bootstrap Tabs/Pills in this container to position them vertically -->
+		<div class="tabbable verticaltabs-container span3"> <!-- Wrap the Bootstrap Tabs/Pills in this container to position them vertically -->
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#basic" data-toggle="tab">{{elt_type.capitalize()}} Information:</a></li>
 				<li><a href="#additonal" data-toggle="tab">Additonal Informations:</a></li>
@@ -274,27 +260,43 @@ $(document).ready(function(){
 			<div class="tab-content">
 				<div class="tab-pane fade in active" id="basic">
 					%if elt_type=='host':
-					<h3>Host Information:</h3>
+					<h4>Host Information:</h4>
 					%else:
-					<h3>Service Information:</h3>
+					<h4>Service Information:</h4>
 					%end:
+
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate').jTruncate({
+							length: 85,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " (truncated)",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
 
 					<table class="table">
 						<tr>
 							<td class="column1"><b>Status:</b></td>
-							<td><span class="btn span11 alert-small alert-{{elt.state.lower()}} quickinforight" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</span> </td>
+							<td><button class="btn span11 alert-small alert-{{elt.state.lower()}} quickinforight" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</button> </td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Flapping:</b></td>
-							<td><span class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</span></td>
+							<td><button class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</button></td>
 						</tr>
 						<tr>
 							<td class="column1"><b>In Scheduled Downtime?</b></td>
-							<td><span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span></td>
+							<td><!-- <span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span> -->
+							<button class="btn alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}} span11" type="button">{{helper.yes_no(elt.in_scheduled_downtime)}}</button>
+							</td>
 						</tr>
 					</table>
 					<hr>
-					<div> <b><i>{{elt.output}}</i></b> </div>
+					<div class="truncate"> <b><i>{{elt.output}}</i></b> </div>
 					<hr>
 					<table class="table">
 						<tr>
@@ -313,35 +315,49 @@ $(document).ready(function(){
 							<td class="column1"><b>Next Active Check:</b></td>
 							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 						</tr>
-
 					</table>
 				</div>
 
 				<div class="tab-pane fade" id="additonal">
-					<h3>Additonal Informations</h3>
-					<table class="table">
-						<tr>
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate_perf').jTruncate({
+							length: 50,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " <b>(truncated)</b>",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
+
+					<h4>Additonal Informations</h4>
+					<table class="table tabletop">
+						<tbody class="tabletop">
+						<tr class="tabletop">
 							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
-							<td>{{elt.perf_data}}</td>
+							<td class="column2 truncate_perf">{{elt.perf_data}}</td>
 							%else:
-							<td>&nbsp;</td>
+							<td class="column2 truncate_perf">&nbsp;</td>
 							%end
 						</tr>
 						<tr>			
 							<td class="column1"><b>Check Latency / Duration</b></td>
 							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 						</tr>
-
 						<tr>			
 							<td class="column1"><b>Last Notification</b></td>
-							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+							<td class="column2">{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Current Attempt</b></td>
-							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+							<td class="column2">{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
+						</tbody>
 					</table>
 					<hr>
 					<table class="table">
@@ -365,7 +381,7 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="commands">
-					<h3>Commands</h3>
+					<h4>Commands</h4>
 					<div>
 						<ul style="padding-top:5px" class="nav nav-list">
 							%disabled_s = ''
@@ -389,8 +405,8 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="gesture">
-					<h3>Gesture</h3>
-					<canvas id="canvas" width="350%" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+					<h4>Gesture</h4>
+					<canvas id="canvas" height="200" class="" style="border: 1px solid black;"></canvas>
 					<div class="gesture_button">
 						<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 					</div>
@@ -426,7 +442,7 @@ $(document).ready(function(){
 		      		<!-- Show our father dependencies if we got some -->
 		      		%#    Now print the dependencies if we got somes
 		      		%if len(elt.parent_dependencies) > 0:
-		      		<h3 class="span10">Root cause:</h3>
+		      		<h4 class="span10">Root cause:</h4>
 		      		<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 		      		<div class="clear"></div>
 		      		{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems)}}
@@ -439,12 +455,14 @@ $(document).ready(function(){
 		      		%# " print twice "
 		      		%if elt_type=='host' and not elt.is_problem:
 		      		%if len(elt.services) > 0:
-		      		<h3 class="span10">My services:</h3>
+		      		<h4 class="span10 no-topmargin">My services:</h4>
 		      		%elif len(elt.parent_dependencies) == 0:
-		      		<h3 class="span10">No services</h3>
+					<div class="alert alert-info">
+						<p class="font-blue">No services available</p>
+					</div>
 		      		%end
 		      		<hr>
-		      		<div class='host-services'>
+		      		<div class="host-services">
 		      			%nb = 0
 		      			%for s in helper.get_host_services_sorted(elt):
 		      			%nb += 1
@@ -477,10 +495,9 @@ $(document).ready(function(){
 		      			</div>
 		      			%end #of the only host part
 
-
 		      			<!-- If we are a root problem and got real impacts, show them! -->
 		      			%if elt.is_problem and len(elt.impacts) != 0:
-		      			<h3 class="span10">My impacts:</h3>
+		      			<h4 class="span10">My impacts:</h4>
 		      			<div class='host-services'>
 		      				%nb = 0
 		      				%for i in helper.get_impacts_sorted(elt):
@@ -493,14 +510,12 @@ $(document).ready(function(){
 		      					%else:
 		      					<div class="service hidden_impacts_services">
 		      						%end
-
 		      						<div>
 		      							<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 		      							<span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 		      							%for i in range(0, i.business_impact-2):
 		      							<img alt="icon state" src="/static/images/star.png">
 		      							%end
-
 		      						</div>
 		      					</div>
 		      					%# End of this impact
@@ -508,11 +523,7 @@ $(document).ready(function(){
 		      				</div>
 		      				%# end of the 'is problem' if
 		      				%end
-
-
-
 		      			</div><!-- End of the right part -->
-
 		      		</div>
 		      		<!-- End of the row with the 2 blocks-->
 		      	</div>
@@ -523,76 +534,99 @@ $(document).ready(function(){
 		      		<div>
 		      			<ul class="nav nav-pills">
 		      				<li class="active"><a class='{{global_disabled}}' href="/forms/comment/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
-		      				<li> <a class='{{global_disabled}}' onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all comments</a> </li>
+		      				<li><a class='{{global_disabled}}' href="/forms/comment_delete/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-minus"></i> Delete all comments</a></li>
 		      			</ul>
 		      		</div>
 		      		<div class="clear"></div>
 
-		      		<div id="log_container">
+		      		<div id="log_container" class="row-fluid">
 		      			%if len(elt.comments) > 0:
-		      			<h2></h2>
-		      			<ol>
-		      				%for c in elt.comments:
-		      				<li>
-		      					<div class="left">
-		      						<p class="log-text">{{c.comment}}</p>
-		      						<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
-		      						</div>
-		      					</div>
-		      					<div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
-		      				</li>
-		      				%end
-		      			</ol>
+		      			<table class="table table-condensed table-hover">
+						  <thead>
+						    <tr>
+						      <th class="span2"></th>
+						      <th class="span1"></th>
+						      <th class="span6"></th>
+						      <th class="span4"></th>
+						      <th class="span1"></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	%for c in elt.comments:
+						    <tr>
+						      <td><strong>{{c.author}}</strong></td>
+						      <td><span class="label pull-right">Comments</span></td>
+						      <td><strong>{{c.comment}}</strong></td>
+						      <td><strong>{{helper.print_date(c.entry_time)}} - {{helper.print_date(c.expire_time)}}</strong></td>
+						      <td><a class="icon-trash {{global_disabled}} font-red" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})"></a></td>
+						    </tr>
+						    %end
+						  </tbody>
+						</table>
+
 		      			%else:
-		      			<p>No comments available</p>
+						<div class="alert alert-info">
+							<p class="font-blue">No comments available</p>
+						</div>
 		      			%end
 		      		</div>
 		      	</div>
 		      	<!-- Tab Comments End -->
-
-
+		      	
 		      	<!-- Tab Downtimes Start -->
 		      	<div class="tab-pane" id="downtimes">
 		      		<div>
 		      			<ul class="nav nav-pills">
 		      				<li class="active"><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
-		      				<li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class="{{global_disabled}}"><i class="icon-minus"></i> Delete all downtimes</a> </li>
+		      				<li><a class='{{global_disabled}}' href="/forms/downtime_delete/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-minus"></i> Delete all comments</a></li>
 		      			</ul>
 		      		</div>
 		      		<div class="clear"></div>
 
-		      		<div id="log_container">
+		      		<div id="log_container" class="row-fluid">
 		      			%if len(elt.downtimes) > 0:
-		      			<h2></h2>
-		      			<ol>
-		      				%for dt in elt.downtimes:
-		      				<li>
-		      					<div class="left">
-		      						<p class="log-text">{{dt.comment}}</p>
-		      						<div class="log-meta"> <span><b>Author:</b> {{dt.author}}</span> <span><b>Start:</b> {{helper.print_date(dt.start_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(dt.end_time)}}</span>
-		      						</div>
-		      					</div>
-		      					<div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
-		      				</li>
-		      				%end
-		      			</ol>
+		      			<table class="table table-condensed table-hover">
+						  <thead>
+						    <tr>
+						      <th class="span2"></th>
+						      <th class="span1"></th>
+						      <th class="span5"></th>
+						      <th class="span5"></th>
+						      <th class="span1"></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	%for dt in elt.downtimes:
+						    <tr>
+						      <td><strong>{{dt.author}}</strong></td>
+						      <td><span class="label pull-right">Downtime</span></td>
+						      <td><strong>{{dt.comment}}</strong></td>
+						      <td><strong>{{helper.print_date(dt.start_time)}} - {{helper.print_date(dt.end_time)}}</strong></td>
+						      <td><a class="icon-trash {{global_disabled}} font-red" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})"></a></td>
+						    </tr>
+						    %end
+						  </tbody>
+						</table>
+
 		      			%else:
-		      			<p>No downtime planned.</p>
+						<div class="alert alert-info">
+							<p class="font-blue">No comments available</p>
+						</div>
 		      			%end
 		      		</div>
 		      	</div>
 		      	<!-- Tab Comments and Downtimes End -->
 
-
 		      	<!-- Tab Graph Start -->
 		      	<div class="tab-pane" id="graphs">
 		      		%uris = app.get_graph_uris(elt, graphstart, graphend)
 		      		%if len(uris) == 0:
-		      		<h3>No graphs, sorry</h3>
+					<div class="row alert">
+					    <div class="font-red"><strong>Oh snap!</strong> No graphs available!</div>
+					</div>
 		      		%else:
-		      		<h3>Graphs</h3>
+		      		<h4>Graphs</h4>
 		      		<div class='row-fluid well span6'>
-
 		      			<!-- Get the uris for the 4 standard time ranges in advance	 -->
 		      			%now = int(time.time())
 		      			%fourhours = now - 3600*4
@@ -614,8 +648,6 @@ $(document).ready(function(){
 		      			<div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1y,{{lastyear}});" class=""> 1 year</a></div>
-
-
 		      		</div>
 
 		      		<script langage="javascript">
@@ -699,7 +731,7 @@ $(document).ready(function(){
 
 		      		<div class='row-fluid well span8 jcrop'>
 		      			<div id='real_graphs'>
-    			  <!-- Let's keep this part visible. This is the custom and default range --!>
+    			  <!-- Let's keep this part visible. This is the custom and default range -->
 				    %for g in uris:
 				      %img_src = g['img_src']
 				      %link = g['link']
@@ -721,8 +753,8 @@ $(document).ready(function(){
 
 			<!-- Tab Dep graph Start -->
 			<div class="tab-pane" id="depgraph">
-				<div id='inner_depgraph' data-elt-name='{{elt.get_full_name()}}'>
-					<span class='alert alert-error'> Cannot load dependency graph.</span>
+				<div id="inner_depgraph" data-elt-name='{{elt.get_full_name()}}'>
+					<span class="alert alert-error"> Cannot load dependency graph.</span>
 				</div>
 			</div>
 			<!-- Tab Dep graph End -->
@@ -733,12 +765,7 @@ $(document).ready(function(){
 	<!--</div>-->
 </div>
 
-</div>
 %#End of the Host Exist or not case
 %end
 
-<script>
-/*$(document).ready(function(){
-    $('#inner_depgraph').load('/inner/depgraph/{{elt.get_full_name()}}');
-});*/
-</script>
+

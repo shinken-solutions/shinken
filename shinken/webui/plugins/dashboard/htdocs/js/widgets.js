@@ -230,7 +230,13 @@ $(function(){
             onChangePositions : function(positions){
                 console.log('We are changing position of '+positions);
                 saveWidgets();
-            }
+            },
+            onEditQuery : function(link, widget){
+                //Postpone reload of page.
+                reinit_refresh();
+                return true;
+            },
+
         }
     });
 });

@@ -333,11 +333,11 @@ def get_last_errors_widget():
             'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/last_problems', 'title': title,
             }
 
-widget_desc = '''<h3>IT problems</h3>
+widget_desc = '''<h4>IT problems</h4>
 Show the most impacting IT problems
 '''
 
-last_widget_desc = '''<h3>Last IT problems</h3>
+last_widget_desc = '''<h4>Last IT problems</h4>
 Show the IT problems sorted by time
 '''
 
