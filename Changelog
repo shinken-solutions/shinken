@@ -1,7 +1,7 @@
 ########################
 Shinken ChangeLog
 #######################
-1.2.1 - 0x/09/2012
+1.2.1 - 22/10/2012
 ------------------
         CORE ENHANCEMENTS
         * Add : Landscape (ubuntu SaaS) arbiter importer module
@@ -17,6 +17,7 @@ Shinken ChangeLog
         * Fix : Restore Python 2.4 compatibility for test suite
         * Fix : (reported by: Dravail) bad install for PNP in install script
         * Fix : Cleanup shinken-specific-* files
+	* Fix : (from : xkillian) less time latency between checks, so perfdata modules won't lost some checks anymore
 
 	MODULE FIXES
 	* Fix : (Reported by pushou) graphite_broker typo in logger call 
