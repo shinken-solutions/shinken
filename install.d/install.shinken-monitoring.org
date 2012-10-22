@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURDIR=`pwd`
-SHINKEN_PACKAGE=shinken-1.2.1.tar.gz
+SHINKEN_PACKAGE=shinken-1.2.2.tar.gz
 SHINKEN_URI=http://www.shinken-monitoring.org/pub/$SHINKEN_PACKAGE
 
 download_url() {

@@ -1,6 +1,14 @@
 ########################
 Shinken ChangeLog
 #######################
+
+1.2.2 - 22/10/2012
+------------------
+	CORE FIXES
+	* Fix : bug in scheduler hwne next check was impossible.
+	
+
+
 1.2.1 - 22/10/2012
 ------------------
         CORE ENHANCEMENTS
