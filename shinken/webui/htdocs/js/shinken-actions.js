@@ -128,9 +128,12 @@ function do_remove(name, text, user){
     disable_notifications(elts);
     disable_event_handlers(elts);
     submit_check(name, 0, text);
-    // WARNING : Disable checks AFTER send the OK check, but wait for
-    // the check to be consume, so wait 1s
-    setTimeout(function(){disable_checks(elts);}, 5000);
+    // WARNING : Disable passive checks make the set not push, 
+    // so we only disable active checks
+    disable_checks(elts, false);
+    
+    // And later after (10s), we push a full disable, so passive too
+    setTimeout(function(){disable_checks(elts, true);}, 10000);
 }
 
 
@@ -173,18 +176,20 @@ function toggle_checks(name, b){
     var elts = get_elements(name);
     // Inverse the active check or not for the element
     if(b){ // go disable
-	disable_checks(elts);
-    }else{ // Go enable
-	enable_checks(elts);
+	disable_checks(elts, true);
+    }else{ // Go enable, passive too
+	enable_checks(elts, true);
     }
 }
 
 
-function enable_checks(elts){
+function enable_checks(elts, passive_too){
     var url = '/action/ENABLE_'+elts.type+'_CHECK/'+elts.nameslash;
     launch(url);
-    var url = '/action/ENABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
-    launch(url);
+    if(passive_too){
+	var url = '/action/ENABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
     // Disable host services only if it's an host ;)
     if(elts.type == 'HOST'){
 	var url = '/action/ENABLE_HOST_SVC_CHECKS/'+elts.nameslash;
@@ -193,11 +198,13 @@ function enable_checks(elts){
 }
 
 
-function disable_checks(elts){
+function disable_checks(elts, passive_too){
     var url = '/action/DISABLE_'+elts.type+'_CHECK/'+elts.nameslash;
     launch(url);
-    var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
-    launch(url);
+    if(passive_too){
+	var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
     // Disable host services only if it's an host ;)
     if(elts.type == 'HOST'){
 	var url = '/action/DISABLE_HOST_SVC_CHECKS/'+elts.nameslash;
