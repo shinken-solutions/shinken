@@ -90,6 +90,11 @@ function get_elements(name){
 	elt.type_long = 'SERVICE';
 	elt.namevalue = elts[0]+';'+elts[1];
 	elt.nameslash = elts[0]+'/'+elts[1];
+	// And now for all elements, change the / into a $SLASH$ macro
+	for(var i=2; i<elts.length; i++){
+	    elt.namevalue = elt.namevalue+ '$SLASH$'+ elts[i];
+	    elt.nameslash = elt.nameslash+ '$SLASH$'+ elts[i];
+	}	
     }
     return elt
 
