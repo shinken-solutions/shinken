@@ -1,10 +1,18 @@
-.widget_desc{
+#warn-pref {
+    padding: 10px 20px;
+}
+
+#warn-pref h2, #warn-pref p {
+    color: #FFFFFF;
+}
+
+.widget_desc {
     background-color : white;
     margin : 5px;
     padding : 10px;
     border-radius: 4px;
     color : black;
-    min-height : 140px;
+    min-height : 160px !important;
     position: relative; /* To be sure absolute item will b where they should be*/
 }
 
@@ -20,9 +28,8 @@
     width:600px;
 }
 
-.page-center{
+.page-center {
     position: absolute;
-    left: 45%;
     top : 50%;
     z-index:10;
 }

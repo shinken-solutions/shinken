@@ -82,9 +82,28 @@ def form_comment(name):
 
     return {'app': app, 'user': user, 'name': name}
 
+def form_comment_delete(name):
+    print "Want comment for", name
+    user = app.get_user_auth()
 
+    if not user:
+        redirect("/user/login")
+        return
+
+    return {'app': app, 'user': user, 'name': name}
+    
 def form_downtime(name):
     print "Want downtime for", name
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+        return
+
+    return {'app': app, 'user': user, 'name': name}
+
+def form_downtime_delete(name):
+    print "Want comment for", name
     user = app.get_user_auth()
 
     if not user:
@@ -106,4 +125,6 @@ pages = {get_page: {'routes': ['/blabla'], 'view': 'blabla', 'static': True},
          form_ack: {'routes': ['/forms/acknowledge/:name#.+#'], 'view': 'form_ack'},
          form_comment: {'routes': ['/forms/comment/:name#.+#'], 'view': 'form_comment'},
          form_downtime: {'routes': ['/forms/downtime/:name#.+#'], 'view': 'form_downtime'},
+         form_comment_delete: {'routes': ['/forms/comment_delete/:name#.+#'], 'view': 'form_comment_delete'},
+         form_downtime_delete: {'routes': ['/forms/downtime_delete/:name#.+#'], 'view': 'form_downtime_delete'},
          }

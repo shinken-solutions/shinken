@@ -95,7 +95,7 @@ def show_log():
             'receivers': receivers, 'pollers': pollers,
             }
 
-widget_desc = '''<h3>System state</h3>
+widget_desc = '''<h4>System state</h4>
 Show an aggregated view of all Shinken daemons.
 '''
 

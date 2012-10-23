@@ -8,14 +8,14 @@
         <span class="i-bar"></span>
         <span class="i-bar"></span>
       </a>
-      <!--<a class="brand" href="#">Shinken</a>-->
+
       <div class="nav-collapse">
        <ul class="nav">
          <li class="dropdown">
            <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
            <ul class="dropdown-menu span4">
-            <li><a href="/">Shinken UI </a></li>
-            <li><a href="/">Skonf UI</a></li>
+            <li><a href=":7767">Shinken UI </a></li>
+            <li><a href=":7766">Skonf UI</a></li>
             <!-- We will add also others UIs on the global menu -->
             %if app:
             %other_uis = app.get_external_ui_link()
@@ -32,16 +32,16 @@
       </ul>
 
       <ul class="nav">
-       %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
-       %for (key, value) in menu:
-       %# Check for the selected element, if there is one
-       %if menu_part == key:
-       <li class="active"><a href="{{key}}">{{value}}</a></li>
-       %else:
-       <li><a href="{{key}}">{{value}}</a></li>
-       %end
-       %end
-     </ul>
+        %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
+        %for (key, value) in menu:
+        %# Check for the selected element, if there is one
+        %if menu_part == key:
+        <li class="active"><a href="{{key}}">{{value}}</a></li>
+        %else:
+        <li><a href="{{key}}">{{value}}</a></li>
+        %end
+        %end
+      </ul>
 
      <ul class="nav">
       <li class="dropdown">
@@ -53,15 +53,13 @@
       </li>
     </ul>
 
-
     %if user is not None:
     <div class="nav-controll">
       <ul class="nav pull-right">
         <li class="divider-vertical"></li>
-
         %# Check for the selected element, if there is one
         %if menu_part == '/dashboard':
-        <li><a href="/dashboard/currently"><i class="icon-itproblem"></i></a></li>
+        <li><a class="quickinfo" data-original-title='Currently' href="/dashboard/currently"><i class="nav-icon icon-fullscreen"></i></a></li>
         %else:
         <li></li>
         %end
@@ -86,14 +84,15 @@
         %end
         %end
         <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
-        <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
+        <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="nav-icon icon-off"></i></a></li>
       </ul>
     </div>
+
     <ul class="nav pull-right">
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
         <ul class="dropdown-menu">
-          <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+          <a class="disabled-link" href="#"><i class="icon-pencil"></i> Edit profile</a>
         </ul>
       </li>
     </ul>
@@ -101,12 +100,19 @@
     <ul class="nav pull-right">
       <li class="divider-vertical"></li>
     </ul>
-    <form name='global_search' class="navbar-search pull-right" action='#'>
-      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search">
+
+    <script>  
+      $(function ()  
+      { $("#searchhelp").popover({trigger: 'click', placement:'bottom', html: 'true', animation: 'true'});  
+      });  
+    </script> 
+
+    <form name="global_search" class="navbar-search pull-right topmmargin1" action='#'>
+      <input type="text" class="search-query typeahead no-bottommargin" autocomplete="off" placeholder="Search" name="global_search">
+      <a id="searchhelp" href="http://www.shinken-monitoring.org/wiki/webui_search" target="_blank"><i class="icon-question-sign font-white topmmargin2"></i></a>  
     </form>
     %end
   </div><!--/.nav-collapse -->
 </div>
 </div>
 </div>
-

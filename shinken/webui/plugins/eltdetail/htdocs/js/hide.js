@@ -37,7 +37,7 @@ $(document).ready(function(){
 
     // And on leaving, hide them with opacity -> 0
     switches.mouseleave(function(){
-	$(this).animate({'opacity' : 0.7});
+	$(this).animate({'opacity' : 1});
     });
 
     // Now All Services
@@ -49,7 +49,7 @@ $(document).ready(function(){
 
 	// And on leaving, hide them with opacity -> 0
 	host_services.mouseleave(function(){
-	    $(this).animate({'opacity' : 0.3});
+	    $(this).animate({'opacity' : 1});
 	});
     }
 

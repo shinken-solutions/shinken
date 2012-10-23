@@ -61,7 +61,7 @@ def get_graphs_widget():
             'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/graphs', 'title': title,
             }
 
-widget_desc = '''<h3>Graphs</h3>
+widget_desc = '''<h4>Graphs</h4>
 Show the perfdata graph
 '''
 

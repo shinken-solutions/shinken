@@ -408,7 +408,7 @@ def eue_widget():
     }
 
 
-widget_desc = '''<h3>Eue problems</h3>'''
+widget_desc = '''<h4>Eue problems</h4>'''
 
 pages = {
     reporting: {'routes': ['/eue_report/:eueid'], 'view': 'eue_report', 'static': True},
@@ -418,3 +418,7 @@ pages = {
     # eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
 }
 
+
+
+# TODO : I comment the EUE page before the 1.2.1 release
+pages = {}
