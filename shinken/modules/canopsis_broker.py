@@ -215,7 +215,6 @@ class Canopsis_broker(BaseModule):
                 'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
-            # WTF?!
             logger.warning("[Canopsis] Invalid source_type %s" % (source_type))
             return None
 
@@ -243,12 +242,10 @@ class Canopsis_broker(BaseModule):
     def push2canopsis(self, message):
         strmessage = str(message)
         self.canopsis.postmessage(message)
-        #logger.debug("[Canopsis] push2canopsis: %s" % (strmessage))
 
     def hook_tick(self, brok):
         if self.canopsis:
             self.canopsis.hook_tick(brok)
-
 
 class event2amqp():
 
@@ -274,7 +271,9 @@ class event2amqp():
 
         self.tickage = 0
 
+        self.retentionfile_path = os.path.join(os.getcwd(), 'canopsis.dat')
         self.load_queue()
+
 
     def create_connection(self):
         self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user, self.password, self.host, self.port, self.virtual_host)
@@ -403,7 +402,6 @@ class event2amqp():
         else:
             errmsg = "[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)), str(self.maxqueuelength))
             logger.error(errmsg)
-            #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
                 self.queue.append({"key": key, "message": message})
                 logger.debug("[Canopsis] Queue length: %d" % len(self.queue))
@@ -445,21 +443,26 @@ class event2amqp():
         return True
 
     def save_queue(self):
-        retentionfile = "%s/canopsis.dat" % os.getcwd() #:fixme: use path.join
-        logger.info("[Canopsis] saving to %s" % retentionfile)
-        filehandler = open(retentionfile, 'w')
+        if not os.path.exists(self.retentionfile_path):
+            open(self.retentionfile_path, 'w').close()
+
+        logger.info("[Canopsis] saving to %s" % self.retentionfile_path)
+        filehandler = open(self.retentionfile_path, 'w')
         pickle.dump(self.queue, filehandler)
         filehandler.close()
 
         return True
 
     def load_queue(self):
-        retentionfile = "%s/canopsis.dat" % os.getcwd()
-        logger.info("[Canopsis] loading from %s" % retentionfile)
-        filehandler = open(retentionfile, 'r')
+        if not os.path.exists(self.retentionfile_path):
+            open(self.retentionfile_path, 'w').close()
+
+        logger.info("[Canopsis] loading from %s" % self.retentionfile_path)
+        filehandler = open(self.retentionfile_path, 'r')
 
         try:
             self.queue = pickle.load(filehandler)
         except:
             pass
+
         return True
