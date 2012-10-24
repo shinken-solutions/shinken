@@ -36,7 +36,7 @@ except ImportError:
     import fcrypt as crypt
 
 from shinken.log import logger
-from shinken.misc.md5crypt import apache_md5_crypt
+from shinken.misc.md5crypt import apache_md5_crypt, unix_md5_crypt
 from shinken.basemodule import BaseModule
 
 properties = {
@@ -79,7 +79,7 @@ class Passwd_Webui(BaseModule):
                 elts = line.split(':')
                 name = elts[0]
                 hash = elts[1]
-                if hash[:5] == '$apr1':
+                if hash[:5] == '$apr1' or hash[:3] == '$1$':
                     h = hash.split('$')
                     magic = h[1]
                     salt = h[2]
@@ -91,6 +91,8 @@ class Passwd_Webui(BaseModule):
                 if name == user:
                     if magic == 'apr1':
                         compute_hash = apache_md5_crypt(password, salt)
+                    elif magic == '1':
+                        compute_hash = unix_md5_crypt(password, salt)
                     else:
                         compute_hash = crypt.crypt(password, salt)
                     # print "Computed hash", compute_hash
