@@ -53,16 +53,16 @@
         %end
       </div>
       <div class="span4">
-        <div class="thumbnail">
+        <div class="thumbnail" style="margin-top: 65px;">
           <!-- <img alt="" src="http://placehold.it/300x200"> -->
           <div class="caption">
             <h3>Information</h3>
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/arbiter" class="" type="button">Arbiter:</a> The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons.</p>
-            <p>Scheduler: The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively.</p>
-            <p>Poller: The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers.</p>
-            <p>Reactionner: The reactionner daemon issues notifications and launches event_handlers. </p>
-            <p>Broker: The broker daemon exports and manages data from schedulers. The broker uses modules exclusively to get the job done.</p>
-            <p>Receiver (optional): The receiver daemon receives passive check data and serves as a distributed command buffer.</p>
+            <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/scheduler">Scheduler:</a> The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively.</p>
+            <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/poller">Poller:</a> The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers.</p>
+            <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/reactionner">Reactionner:</a> The reactionner daemon issues notifications and launches event_handlers. </p>
+            <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/broker">Broker:</a> The broker daemon exports and manages data from schedulers. The broker uses modules exclusively to get the job done.</p>
+            <p>Receiver (<b>optional</b>): The receiver daemon receives passive check data and serves as a distributed command buffer.</p>
             <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success">Learn more »</a></p>
           </div>
         </div>
