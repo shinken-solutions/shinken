@@ -21,12 +21,12 @@
     </div> -->
 
     <div class="row-fluid">
-      <div class="span9">
+      <div class="span8">
         <h3><i class="icon-cogs"> Shinken Daemons</i></h3>
         %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
         %for (sat_type, sats) in types:
         <h4><i class="icon-bullhorn"></i> {{sat_type.capitalize()}}</h4>
-        <table class="table">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th>#</th>
@@ -52,47 +52,21 @@
         </table>
         %end
       </div>
-      <div class="span3">
-        <span></span>
+      <div class="span4">
+        <div class="thumbnail">
+          <!-- <img alt="" src="http://placehold.it/300x200"> -->
+          <div class="caption">
+            <h3>Information</h3>
+            <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/arbiter" class="" type="button">Arbiter:</a> The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons.</p>
+            <p>Scheduler: The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively.</p>
+            <p>Poller: The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers.</p>
+            <p>Reactionner: The reactionner daemon issues notifications and launches event_handlers. </p>
+            <p>Broker: The broker daemon exports and manages data from schedulers. The broker uses modules exclusively to get the job done.</p>
+            <p>Receiver (optional): The receiver daemon receives passive check data and serves as a distributed command buffer.</p>
+            <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success">Learn more »</a></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-
-<!-- 	<div class="row-fluid shell">
-		    %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
-	    	%for (sat_type, sats) in types:
-	        <div class="span4 well daemon-box box-cheat">
-            <h4><i class="icon-th"></i> {{sat_type.capitalize()}}:</h4>
-            %for s in sats:
-            <table class="table">
-              <tr>
-                <td class="column1"><b>State:</b></td>
-                <td><img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" /></td>
-              </tr>
-              <tr>
-                <td class="column1"><b>Name:</b></td>
-                <td> {{s.get_name()}}</td>
-              </tr>
-              <tr>
-                <td class="column1"><b>Alive:</b></td>
-                <td>{{s.alive}}</td>
-              </tr>
-              <tr>
-                <td class="column1"><b>Attemts:</b></td>
-                <td>{{s.attempt}}/{{s.max_check_attempts}}</td>
-                <tr>
-                  <td class="column1"><b>Last Check:</b></td>
-                  <td title='{{helper.print_date(s.last_check)}}'>{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</td>
-                </tr>
-                <tr>
-                  <td class="column1"><b>Realm:</b></td>
-                  <td>{{s.realm}}</td>
-                </tr>
-              </tr>
-            </table>
-            %end
-          </div>
-          %end
-	</div> -->
