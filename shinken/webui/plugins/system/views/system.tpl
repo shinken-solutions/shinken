@@ -63,7 +63,8 @@
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/reactionner">Reactionner:</a> The reactionner daemon issues notifications and launches event_handlers. </p>
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/broker">Broker:</a> The broker daemon exports and manages data from schedulers. The broker uses modules exclusively to get the job done.</p>
             <p>Receiver (<b>optional</b>): The receiver daemon receives passive check data and serves as a distributed command buffer.</p>
-            <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success">Learn more »</a></p>
+            <hr>
+            <p><a href="http://www.shinken-monitoring.org/wiki/the_shinken_architecture" class="btn btn-success">Learn more »</a></p>
           </div>
         </div>
       </div>
