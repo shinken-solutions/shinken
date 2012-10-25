@@ -1,0 +1,1062 @@
+check_wmi_plus v1.53
+For installation details and more downloads see http://www.edcint.co.nz/checkwmiplus
+The --help output follows - 
+
+NAME
+ check_wmi_plus.pl - Client-less checking of Windows machines
+BRIEF
+ Typical Usage:  
+ 
+ check_wmi_plus.pl -H HOSTNAME -u DOMAIN/USER -p PASSWORD [-A AUTHFILE] -m MODE [-s SUBMODE] [-a ARG1 ] [-w WARN] [-c CRIT]
+
+ Complete Usage:  
+ 
+ check_wmi_plus.pl -H HOSTNAME -u DOMAIN/USER -p PASSWORD [-A AUTHFILE] -m MODE [-s SUBMODE] [-a ARG1 ] [-o ARG2] [-3 ARG3] [-4 ARG4] [-w WARN] [-c CRIT] [-b BYTEFACTOR] [-t TIMEOUT] [--includedata DATASPEC] [--excludedata DATASPEC] [--nodatamode] [--nodataexit NODATAEXIT] [--nodatastring NODATASTRING] [-y DELAY] [--namespace WMINAMESPACE] [--extrawmicarg EXTRAWMICARG] [--inihelp] [--inifile=INIFILE] [--inidir=INIDIR] [--nokeepstate] [--keepexpiry KEXPIRY] [--keepid KID] [--joinexpiry JEXPIRY] [-z] [-v OSVERSION] [-d] [--help] [--itexthelp]
+ 
+ Help as a Manpage:  
+ 
+ check_wmi_plus.pl --help
+ 
+ Help as Text:  
+ 
+ check_wmi_plus.pl --itexthelp (its very long!)
+ 
+DESCRIPTION
+ check_wmi_plus.pl is a client-less Nagios plugin for checking Windows systems.
+ No more need to install any software on any of your Windows machines. Check directly from your Nagios server.
+ Check WMI Plus uses the Windows Management Interface (WMI) to check for common services (cpu, disk, sevices, eventlog...) on Windows machines. It requires the open source wmi client for Linux (wmic).
+
+ Besides the built in checks, Check WMI Plus functionality can be easily extended through the use of ini files. Check WMI Plus comes with several ini files, but you are free to add your own checks to your own ini file. 
+
+ For more information see the website www.edcint.co.nz/checkwmiplus
+
+REQUIRED OPTIONS
+ -H HOSTNAME  specify the name or IP Address of the host that you want to check
+ 
+You must specifiy a username/password/domain in one of two ways. The use of -u DOMAIN/USER -p PASSWORD always overrides the values contained in -A AUTHFILE
+ -u DOMAIN/USER  specify the DOMAIN (optional) and USER that has permission to execute WMI queries on HOSTNAME
+ 
+ -p PASSWORD  the PASSWORD for USER
+ 
+ -A AUTHFILE  the full path to an authentication file. The file is passed directly to /bin/wmic. Check WMI PLus does not read the file and hence you must get the file format as required by /bin/wmic. You can override the settings in this file by using -u DOMAIN/USER -p PASSWORD.
+
+       Authentication File format is
+         username=USERNAME  
+         password=PASSWORD  
+         domain=DOMAIN  
+
+       Set your own values for USERNAME, PASSWORD and DOMAIN. DOMAIN may be nothing.
+
+ -m MODE  the check mode. The list of valid MODEs and a description is shown below
+
+COMMONLY USED OPTIONS
+ -s SUBMODE  the submode. Some MODEs have one or more submodes. These are also described below.
+ 
+ -a ARG1  argument number 1. Its meaning depends on the MODE/SUBMODE combination.
+ 
+ -o ARG2  argument number 2. Its meaning depends on the MODE/SUBMODE combination.
+ 
+ -3 ARG3  argument number 3. Its meaning depends on the MODE/SUBMODE combination.
+ 
+ -4 ARG4  argument number 4. Its meaning depends on the MODE/SUBMODE combination.
+ 
+ -w WARN  specify warning criteria. You can specify none, one or more criteria. If any one of the criteria is triggered then the plugin will exit with a warning status (unless a critical status is also triggered). See below for how to specify warning criteria.
+
+ -c CRIT  specify critical criteria. You can specify none, one or more criteria. If any one of the criteria is triggered then the plugin will exit with a critical status. See below for how to specify warning criteria.
+
+LESS COMMONLY USED OPTIONS
+ -b BYTEFACTOR  BYTEFACTOR is either 1000 or 1024 and is used for conversion units eg bytes to GB. Default is 1024.
+
+ -t TIMEOUT  specify the number of seconds before the plugin will timeout. Some WMI queries take longer than others and network links with high latency may also require you to increase this from the default value of 15
+ 
+ --includedata DATASPEC  specify data values that are to be included. See the section below on INCLUDING AND EXCLUDING WMI DATA
+
+ --excludedata DATASPEC  specify data values that are to be excluded. See the section below on INCLUDING AND EXCLUDING WMI DATA
+
+ --nodatamode  Controls how the plugin responds when no data is returned by the WMI query. Normally, the plugin returns an Unknown error. If you specify this option then you can use WARN/CRIT checking on the _ItemCount field. This is only useful for some checks eg checkfilesize where you might get no data back from the WMI query when the file is not found.
+
+ --nodataexit NODATAEXIT  specify the plugin status result if the WMI Query returns no data. Ignored if --nodatamode is set. Valid values are 0 for OK, 1 for Warning, 2 for Critical (Default) or 3 for Unknown. Only used for some checks. All checks from the ini file can use this.
+ 
+ --nodatastring NODATASTRING  specify the string that tha plugin will display if the WMI Query returns no data. Ignored if --nodatamode is set. Only used for some checks where the use of NODATAEXIT is valid. All checks from the ini file can use this.
+ 
+ -y DELAY  Specify the delay between 2 consecutive WMI queries that are run in a single call to the plugin. Defaults are set for certain checks. Only valid if --nokeepstate used.
+
+ --namespace WMINAMESPACE  Specify the WMI Namespace. eg root/MicrosoftDfs. The default is root/cimv2. Use '/' (forward slash) instead of '\\' (backslash).
+
+ --extrawmicarg EXTRAWMICARG  Specify additional arguments to be passed to the wmic command. The arguments are passed directly and must be complete and understood by wmic. In order to assist with escaping of quotes, all # are translated to ". To pass --option="client ntlmv2 auth"=Yes to wmic specifiy --extrawmicarg "--option=#client ntlmv2 auth#=Yes". This option can be specified multiple times to pass multiple arguments to wmic.
+
+ --inihelp  Show the help from the INIFILE for the specified MODE/SUBMODE. If specified without MODE/SUBMODE, this shows a quick short summary of all valid MODE/SUBMODEs in the ini files.
+ 
+ --inifile=INIFILE  INIFILE is the full path of an ini file to use. The use of --inidir is preferred over this option.
+ 
+ --inidir=INIDIR  INIDIR is the full path of an ini directory to use. The plugin reads files ending in .ini in INIDIR in the default directory order. The INIFILE is read first, if defined, then each .ini file found in INIDIR. Ini files read later merge with earlier ini files. For any settings that exist in one or more files, the last one read is set.
+ 
+ --nokeepstate  disables the default mode of keeping state between plugin runs.
+ 
+ --keepexpiry KEXPIRY  KEXPIRY is the number of seconds after which the plugin assumes that the previously collected data has expired. The default is 3600 sec. You should run your plugin more frequently than this value or set KEXPIRY higher.
+ 
+ --keepid KID  KID is a unique identifier. This is normally not needed. In order to keep state between plugin runs, the data is written to a file. In order to stop collisions between different plugin runs, and hence incorrect calculations,  the filename is unique based on the checkmode, hostname, arguments passed etc. If for some reason these are not sufficient and you are experiencing collisions, you can add a unique KID to each plugin check to ensure uniqueness.
+ 
+ --joinexpiry JEXPIRY  JEXPIRY is the number of seconds after which the plugin assumes that the previously collected join data has expired. The default is 3600 sec. Join data that is defined as being reasonably static by whomever created the check will only get refreshed every JEXPIRY seconds.
+ 
+ -z  Provide full specification warning and critical values for performance data. Not all performance data processing software can handle this eg PNP4Nagios.
+ 
+ -d  Enable debug. Use this to see a lot more of what is going on including the exact WMI Query and results. User/passwords should be masked in the resulting output unless -z is specified.
+
+KEEPING STATE
+This only applies to checks that need to perform 2 WMI queries to get a complete result eg checkcpu, checkio, checknetwork etc.
+
+Checks like this take 2 samples of WMI values (with a DELAY in between) and then calculate a result by differencing the values. By default, the plugin will "keepstate", which means that 1 WMI sample will be collected each time the plugin runs and it will calculate the difference using the values from the previous plugin run. For something like checkcpu, this means that the plugin gives you an average CPU utilisation between runs of the plugin. Even if you are 0% utilisation each time the plugin runs but 100% in between, checkcpu will still report a very high utilisation percentage. This makes for a very accurate plugin result. Another benefit of keeping state is that it results in fewer WMI queries and the plugin runs faster. If you disable keeping state, then, for these types of checks, the plugin reverts to taking 2 WMI samples with a DELAY each time it runs and works out the result then and there. This means that, for example, any CPU activity that happens between plugin runs is never detected.
+
+There are some specific state keeping options: 
+--nokeepstate, 
+--keepexpiry KEXPIRY, 
+--keepid KID, 
+
+The files used to keep state are stored in /tmp. The DELAY setting is not applicable when keeping state is used. If you are "keeping state" then one of the first things shown in the plugin output is the sample period.
+
+
+INI FILE SPECIFIED
+ There is an ini file/dir configured. The ini files contain more checks. --inihelp on its own shows a one line summary of all MODES/SUBMODES contained within the ini files. --inihelp specified with a MODE/SUBMODE shows the help just for that mode. All of the inihelp is also shown at the end of this help text.
+
+
+
+INCLUDING AND EXCLUDING WMI DATA
+The --includedata and --excludedata options modify the data returned from the WMI query to include/exclude only data that matches DATASPEC. DATASPEC is in the same format as warning/critical specifications (See Section WARNING AND CRITICAL SPECIFICATION).
+
+At the moment this is only enabled for checks from ini files and it does not apply to the built-in modes. All includes/excludes defined on the command line and the ini file are combined and then processed.
+
+Any fields that are returned by the WMI query can be used, not just the ones that are displayed. You might need to use the debug mode (-d) to see all the valid fields available.
+
+The include/exclude arguments can be specified multiple times on the command line. 
+
+If --includedata is not used, all data is included.
+If any of the inclusions are met the data is included. If any of the exclusions are met then the data is excluded. Inclusions are processed before Exclusions. 
+
+This can be useful to reduce the length of the output for certain checks or to focus on more important data eg on processes using more than 5% of the CPU rather than the potentially hundreds that are using less than 5%.
+
+Examples using -m checkproc -s cpu:
+
+--inc IDProcess=@2000:3000 to include all process IDs that are inside the range of 2000 to 3000.
+
+--exc _AvgCPU=@0:5 to exclude all processes where the average CPU utilisation is inside the range of 0 to 5.
+
+WARNING AND CRITICAL SPECIFICATION
+
+If warning or critical specifications are not provided then no checking is done and the check simply returns the value and any related performance data. If they are specified then they should be formatted as shown below.
+
+A range is defined as a start and end point (inclusive) on a numeric scale (possibly negative or positive infinity). The theory is that the plugin will do some sort of check which returns back a numerical value, or metric, which is then compared to the warning and critical thresholds. 
+
+Multiple warning or critical specifications can be specified. This allows for quite complex range checking and/or checking against multiple FIELDS (see below) at one time. The warning/critical is triggered if ANY of the warning/critical specifications are triggered.
+
+If a ini file check returns multiple rows eg checkio logical, criteria are applied to ALL rows and any ONE row meeting the criteria will cause a trigger. If the check has been defined properly it will show which row/instance triggered the criteria as well as the overall result.
+
+This is the generalised format for ranges:
+FIELD=[@]start:end
+
+The convention used for field names in this plugin is as follows:
+   - FIELDs that start with _ eg _Used% are calculated or derived values
+   - FIELDs that are all lower case are command line arguments eg _arg1
+   - Other FIELDs eg PacketsSentPersec are what is returned from the WMI Query
+
+ NOTES
+   1. FIELD describes which value the specification is compared against. It is optional (the default is dependent on the MODE).
+   2. start <= end
+   3. start and ":" is not required if start=0
+   4. if range is of format "start:" and end is not specified, assume end is infinity
+   5. to specify negative infinity, use "~"
+   6. alert is raised if metric is outside start and end range (inclusive of endpoints)
+   7. if range starts with "@", then alert if inside this range (inclusive of endpoints)
+   8. The start and end values can use multipliers from the following list: 
+      e, p, k, g, m, t or the time-based multipliers wk, yr, hr, sec, mth, min, day.
+      The time-based multipliers are normally used where the data is in seconds.
+      eg 1G for 1 x 10^9 or 2.5k for 2500
+      eg 1wk for 1 week, 3.5day for 3.5 days etc
+
+ EXAMPLE RANGES
+ This table lists example WARN/CRIT criteria and when they will trigger an alert.
+ 10                      < 0 or > 10, (outside the range of {0 .. 10})
+ 10:                     < 10, (outside {10 .. infinity})
+ ~:10                    > 10, (outside the range of {-infinity .. 10})
+ 10:20                   < 10 or > 20, (outside the range of {10 .. 20})
+ @10:20                  = 10 and = 20, (inside the range of {10 .. 20})
+ 10                      < 0 or > 10, (outside the range of {0 .. 10})
+ 10G                     < 0 or > 10G, (outside the range of {0 .. 10G})
+
+ EXAMPLES WITH FIELDS
+ for MODE=checkdrivesize:
+ _UsedGB=10G             Check if the _UsedGB field is < 0 or > 10G, (outside the range of {0 .. 10G}) 
+ 10                      Check if the _Used% field is < 0 or > 10, (outside the range of {0 .. 10}), since _Used% is the default
+ _Used%=10               Check if the _Used% field is < 0 or > 10, (outside the range of {0 .. 10}) 
+
+ EXAMPLES WITH MULITPLE SPECIFICATIONS
+ for MODE=checkdrivesize:
+ -w _UsedGB=10G -w 15 -w _Free%=5: -c _UsedGB=20G -c _Used%=25  
+ This will generate a warning if 
+    - the Used GB on the drive is more than 10G or 
+    - the used % of the drive is more than 15% or
+    - the free % of the drive is less than 5%
+ 
+ This will generate a critical if 
+    - the Used GB on the drive is more than 20G or 
+    - the used % of the drive is more than 25%
+
+BUILTIN MODES
+ The following modes are coded directly into the plugin itself and do not require any ini files to function.
+ 
+ Each mode describes the optional arguments and parameters valid for use with that MODE.
+ 
+ checkcpu  
+   Some CPU checks just take whatever WMI or SNMP gives them from the precalculated values. We don't.
+   We use WMI Raw counters to calculate values over a given timeperiod. This is much more accurate than taking Formatted WMI values.
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate.
+   WARN/CRIT  can be used as described below.
+   The only valid Warning/Critical Field is _AvgCPU, so you don't even need to specify it!.
+
+checkcpuq  
+   The WMI implementation of CPU Queue length is a point value.
+   We try and improve this slightly by performing several checks and averaging the values.
+   ARG1  (optional) specifies how many point checks are performed. Default 3.
+   DELAY  (optional) specifies the number of seconds between point checks. Default 1. It can be 0 but in reality there will always be some delay between checks as it takes time to perform the actual WMI query 
+   WARN/CRIT  can be used as described below.
+      The only valid Warning/Critical Field is _AvgCPUQLen, so you don't even need to specify it!.
+   
+   Note: Microsoft says "A sustained processor queue of greater than two threads generally indicates
+   processor congestion.". However, we recommended testing your warning/critical levels to determine the
+   optimal value for you.
+   
+checkdrivesize  
+   Also see checkvolsize
+   ARG1  drive letter or volume name of the disk to check. If omitted a list of valid drives will be shown. If set to . all drives will be included.
+      To include multiple drives separate them with a |. This uses a regular expression so take care to
+      specify exactly what you want. eg "C" or "C:" or "C|E" or "." or "Data"
+   ARG2  Set this to 1 to use volumes names (if they are defined) in plugin output and performance data ie -o 1
+   ARG3  Set this to 1 to include information about the sum of all disk space on the entire system.
+      If you set this you can also check warn/crit against the overall disk space.
+      To show only the overall disk, set ARG3 to 1 and set ARG1 to 1 (actually to any non-existant disk)
+      Eg -o 1 -3 1
+
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _Used% (Default), _UsedGB, _Free%, _FreeGB.
+
+checkeventlog  
+   ARG1  Name of the log eg "System" or "Application" or any other Event log as shown in the Windows "Event Viewer". You may also use a comma delimited list to specify multiple event logs. You can also specify event log names using the wildcard character % eg system,app%,%shell%.
+      Default is system
+   ARG2  Severity Number, 2 = warning 1 = error. Other levels you may wish to use include 3 = Information, 4 = Security Audit Success and 5 = Security Audit Failure. The plugin shows all severity levels less than and equal to the one chosen.
+      Default is 1.
+   ARG3  Number of past hours to check for events. Default is 1
+   ARG4  Comma delimited list of ini file sections to get extra settings from. Default value is eventdefault.
+      ie use the eventdefault section settings from the ini file. The ini file contains regular expression based inclusion
+      and exclusion rules to accurately define the events you want to or don't want to see. See the events.ini file for details.
+   WARN/CRIT   can be used as described below.
+      The only valid Warning/Critical Field is _ItemCount, so you don't even need to specify it!.
+
+   Examples:  
+      to report all errors that got logged in the past 24 hours in the System event log use:
+      
+      -a System -3 24
+      
+      to report all errors that got logged in the past 24 hours in any event log use:
+      
+      -a % -3 24
+
+      to report all warnings and errors that got logged in the past 4 hours in the Application event log use:
+      
+      -a application -o 2 -3 4
+      
+      to report your custom mix of event log messages from the system event log use (the names passed to this argument are ini sections defined in an ini file eg event.ini):
+      
+      -4 eventinc_1,eventinc_2,eventinc_3,eventexclude_1
+
+checkfileage  
+   ARG1  full path to the file. Use '/' (forward slash) instead of '\\' (backslash).
+   ARG2  set this to one of the time multipliers (wk, yr, hr, sec, mth, min, day)
+      This becomes the display unit and the unit used in the performance data. Default is hr.
+      -z can not be used for this mode.
+   WARN/CRIT  can be used as described below.
+      The only valid Warning/Critical Field is _FileAge, so you don't even need to specify it!
+      
+      The warning/critical values should be specified in seconds. However you can use the time multipliers
+      (wk, yr, hr, sec, mth, min, day) to make it easier to use
+      
+      eg instead of putting -w 3600 you can use -w 1hr
+      
+      eg instead of putting -w 5400 you can use -w 1.5hr
+      
+      Typically you would specify something like -w 24: -c 48:
+
+checkfilesize  
+   ARG1  full path to the file. Use '/' (forward slash) instead of '\\' (backslash).
+      eg "C:/pagefile.sys" or "C:/windows/winhlp32.exe"
+   NODATAEXIT  can be set for this check.
+   WARN/CRIT  can be used as described below.
+   If you specify --nodatamode then you can use WARN/CRIT checking on the _ItemCount. _ItemCount should only ever be 0 or 1.
+      This allows you to control how the plugin responds to non-existant files.
+      Valid Warning/Critical Fields are: FileSize (Default), _ItemCount.
+
+checkfoldersize  
+   WARNING - This check can be slow and may timeout, especially if including subdirectories. 
+      It can overload the Windows machine you are checking. Use with caution.
+   ARG1  full path to the folder. Use '/' (forward slash) instead of '\\' (backslash). eg "C:/Windows"
+   ARG4  Set this to s to include files from subdirectories eg -4 s
+   NODATAEXIT  can be set for this check.
+   WARN/CRIT  can be used as described below.
+   If you specify --nodatamode then you can use WARN/CRIT checking on the _ItemCount. _ItemCount should only ever be 0 or 1.
+      This allows you to control how the plugin responds to non-existant files.
+      Valid Warning/Critical Fields are: _FolderSize (Default), _ItemCount.
+
+checkmem  
+   This mode checks the amount of physical RAM in the system.
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _MemUsed% (Default), _MemFree%, _MemUsed, _MemFree, _MemTotal.
+
+checknetwork  
+   These network checks use WMI Raw counters to calculate values over a given timeperiod. 
+   This is much more accurate than taking Formatted WMI values.
+   ARG1  Specify the network interface the stats are collected for.  If set to . all interfaces will be included.
+      To include multiple interfaces separate them with a | or specify a common identifier eg part of an IP Address or MAC Address. This uses a regular expression so take care to
+      specify exactly what you want. eg "LAN0" or "192.168.0.1" or "192.168.0" or "LAN0|LAN2" or "." or "08:00:27:85:CE:6D" or "08:00:27"
+      To specify a network interface you can use either the Connection Name (as seen in Control Panel), IP Address (IPv4 or IPV6) or MAC Address. You can also use the name of the network adaptors as seen from WMI which is similar to what is seen in the output of the ipconfig/all command on Windows. However, it is not exactly the same and can be tricky since this uses a regular expression. Run without -a to show the interface
+      names, IP Addresses, MAC Addresses. Typically you need to use '' around the adapter name when specifying.
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate.
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: CurrentBandwidth (Default), _PacketsSentPersec, _PacketsReceivedPersec, OutputQueueLength, PacketsReceivedErrors, _BytesSentPersec, _BytesReceivedPersec, _SendByteUtilisation, _ReceiveByteUtilisation
+   BYTEFACTOR  defaults to 1000 for this mode. You can override this if you wish.
+
+   Note:  
+      This check does up to 3 WMI queries so it may be slow. You might need to use the -t option. Since 2 of the WMI queries are relatively static, their results are cached and you can set the refresh period for this data using --joinexpiry.
+   
+checkpage  
+   This mode checks the amount of page file usage.
+   The total page file size varies between the Initial size and the Maximum Size you set in Windows.
+   ARG1  Set this to "auto" to automatically set warning/critical levels. The warning level is set to the same as the
+      inital size of the page file. The critical level is set to 80% of the maximum page file size.
+      If set, it is used instead of any command line specification of warning/critical settings.
+      Note: The separate WMI query to obtain the additional information required to use this setting only works if you have set a custom size for your page files. If they are set to "System Managed", this will not work. You can tell if an automatic warning/critical level has been set by examining the performance data for the "Used" value. In this example - "'E:/pagefile.sys Used'=41943040Bytes;104857600;167772160;" you can tell that the levels have been automatically set because there are 3 numeric values in the performance data - the last 2 are the warning and critical levels.
+   ARG2  drive letter page to check. If omitted all page files will be included.
+      To include multiple drives separate them with a |. This uses a regular expression so take care to
+      specify exactly what you want. eg "C:" or "C:|E:". Make sure you use a : after each drive letter to match properly.
+   ARG3  Set this to 1 to include information about the sum of all pages file on the entire system.
+      If you set this you can also check warn/crit against the overall disk space.
+      To show only the overall page file info, set ARG3 to 1 and set ARG2 to 1 (actually to any non-existant disk)
+      Eg -o 1 -3 1
+
+   WARN/CRIT  can be used as described below.
+   Valid Warning/Critical Fields are: _Used% (Default), _Used, _Free, _Free%, _PeakUsed%, _PeakUsed, _PeakFree, _PeakFree%, _Total.
+
+   Note:  
+      This check does up to 2 WMI queries (if -a auto is used) so it may be slow. You might need to use the -t option. Since 1 of the WMI queries is relatively static, its results are cached and you can set the refresh period for this data using --joinexpiry.
+
+checkprocess  
+   SUBMODE  Set this to Name, ExecutablePath, or Commandline to determine if ARG1 and ARG3 matches against just the
+      process name (Default), the full path of the executable file, or the complete command line used to run the process.
+   ARG1  A regular expression to match against the process name, executable path or complete command line.
+      The matching processes are included in the resulting list. Use . alone to include all processes. Typically the process
+           - Executable Path is like DRIVE:PATH/PROCESSNAME eg C:/WINDOWS/system32/svchost.exe,
+           - Command Line is like DRIVE:PATH/PROCESSNAME PARAMETERS eg C:/WINDOWS/system32/svchost.exe -k LocalService
+         Use '/' (forward slash) instead of '\\' (backslash). eg "C:/Windows" or "C:/windows/system32"
+         Note: Any '/' in your regular expression will get converted to '\\'.
+   ARG2  Set this to 'Name' (Default), Executablepath or 'Commandline' to display the process names, executablepath or the 
+      whole command line.
+   ARG3  A regular expression to match against the process name, executable path or complete command line.
+      The matching processes are excluded from the resulting list. This exclusion list is applied after the inclusion list.
+      
+   For SUBMODE and ARG2 you only need to specify the minimum required to make it unique. Any of the following will work
+   -s e, -s exe, -s c, -s com, -o e, -o exe, -o c, -o com
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _ItemCount (Default), _NumExcluded
+   
+checkservice  
+   ARG1  A regular expression that matches against the short or long service name that can be seen in the properties of the
+      service in Windows. The matching services are included in the resulting list. Use . alone to include all services.
+      Use Auto to check that all automatically started services are OK.
+   ARG2  A regular expression that matches against the short or long service name that can be seen in the properties of the
+      service in Windows. The matching services are excluded in the resulting list.
+      This exclusion list is applied after the inclusion list.
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _NumBad (Default), _NumGood, _NumExcluded, _Total
+
+   Note:  
+      A "Good" service is one that is Started, its State is Running and its Status is OK. Anything else is considered "Bad". If you don't want certain services include in this count then you will need to exclude them with -o ARG2
+
+checksmart  
+   Check the SMART status of all hard drives on the system. Will only work for physical drives (ie not on disks in a virtual machine!). Probably will not work for disk array drives as they are not normally presented to the system as disks. Reports if any drives are failing the SMART checks which signals
+      imminent hard drive failure. It also grab various SMART attributes such as temperature. It also grab the disk serial
+      number which may work on OS versions above Win XP and Win Server 2003.
+   ARG1  (optional) By default checksmart shows all of a small set of SMART attributes as peformance data. If you want to reduce this list you can by specifying a comma delimited list of attribute codes. Specify ARG1 as 'none' to obtain no SMART attributes. This will actually remove one of the WMI queries. Specify ARG1 as 'list' to list all the valid attribute codes. If you wish to warn/critical against the temperature value you must at least specify that code (194).
+
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _DiskFailing (Default), _ItemCount, Temperature
+
+   Note:  
+      This check does up to 4 WMI queries so it may be slow. You might need to use the -t option. Since 2 of the WMI queries are relatively static, their results are cached and you can set the refresh period for this data using --joinexpiry.
+
+   Examples:  
+      Warn if more than zero drives fail the SMART check or if any of the disk temperatures are above 40 degrees Celcius.
+      
+      -m checksmart -w 0 -w Temperature=40
+      
+      List only the SMART temperature
+      
+      -m checksmart -a 194
+      
+      List Temperature and Power on Hours
+      
+      -m checksmart -a 194,9
+
+checkuptime  
+   WARN/CRIT  can be used as described below.
+      The only valid Warning/Critical Field is _UptimeSec, so you don't even need to specify it!
+      
+      The warning/critical values should be specified in seconds. However you can use the time multipliers (wk, yr, hr, sec, mth, min, day) to make it easier to use.
+      
+      eg instead of putting -w 1800 you can use -w 30min
+      
+      eg instead of putting -w 5400 you can use -w 1.5hr
+      
+      Typically you would specify something like -w 20min: -c 10min: (to if less than 20 min and critical if less than 10 min)
+
+checkvolsize  
+   Also see checkdrivesize
+   ARG1  drive letter or volume name or volume label of the volume to check. If omitted a list of valid drives will be shown. If set to . all drives will be included.
+      To include multiple volumes separate them with a |. This uses a regular expression so take care to
+      specify exactly what you want. eg "C" or "C:" or "C|E" or "." or "Data"
+   ARG2  Set this to 1 to use labels (if they are defined) in plugin output and performance data ie -o 1
+   ARG3  Set this to 1 to include information about the sum of all volume space on the entire system.
+      If you set this you can also check warn/crit against the overall volume space.
+      To show only the overall volume, set ARG3 to 1 and set ARG1 to 1 (actually to any non-existant volume)
+   WARN/CRIT  can be used as described below.
+      Valid Warning/Critical Fields are: _Used% (Default), _UsedGB, _Free%, _FreeGB.
+
+checkwsusserver  
+   If there are any WSUS related errors in the event log in the last 24 hours a CRITICAL state is returned.
+   This mode has been removed. You can perform the same check that this used to perform by using MODE=checkeventlog 
+   using the wsusevents ini section. The command line parameters are:
+   -m checkeventlog -o 2 -3 24 -4 wsusevents -c 0
+
+INI FILE HELP SUMMARY
+ The ini file and/or dir provides the following Modes and/or Submodes 
+
+ checkad, replication (-m checkad -s replication)  
+   Check the full replication of an Active Directory. Tested with AD v2003. Shows the number of failed replicas.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no failed replicas are found. 
+   Developed and tested by Patrick Fratczak. Typically run with -c 0, to go critical when any failed replicas are found.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkdhcp, stats (-m checkdhcp -s stats)  
+   Checks various stats for Microsoft Windows Server running as an IPv4 DHCP Server
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+   Note:  You may want to use --nodatamode so that you can control how the plugin responds when no data is returned by the WMI query.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AcksPersec (Default), ActiveQueueLength, ConflictCheckQueueLength, Deniedduetomatch, Deniedduetononmatch, _DeclinesPersec, _DiscoversPersec, _OffersPersec, _PacketsReceivedPersec, _ReleasesPersec, _RequestsPersec
+
+ checkdhcpv6, stats (-m checkdhcpv6 -s stats)  
+   Checks various stats for Microsoft Windows Server running as an IPv6 DHCP Server
+   Tested for Windows Server 2008 R2. Only tested on a zero volume server!!
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AcksPersec (Default), ActiveQueueLength, _ConfirmsPersec, _DeclinesPersec, _PacketsReceivedPersec, _ReleasesPersec, _RequestsPersec
+
+ checkdns, arecords (-m checkdns -s arecords)  
+   Shows the number of DNS A records defined.
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+   ARG1  (optional) Specify a ContainerName (normally seen as a domain name) to restrict the search to
+   Note:  You may want to use --nodatamode so that you can control how the plugin responds when no data is returned by the WMI query.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkdns, cnamerecords (-m checkdns -s cnamerecords)  
+   Shows the number of DNS CNAME records defined.
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+   ARG1  (optional) Specify a ContainerName (normally seen as a domain name) to restrict the search to
+   Note:  You may want to use --nodatamode so that you can control how the plugin responds when no data is returned by the WMI query.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkdns, ptrrecords (-m checkdns -s ptrrecords)  
+   Shows the number of DNS PTR records defined.
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+   ARG1  (optional) Specify a ContainerName (normally seen as a domain name) to restrict the search to
+   Note:  You may want to use --nodatamode so that you can control how the plugin responds when no data is returned by the WMI query.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkdns, stats (-m checkdns -s stats)  
+   Checks various stats for Microsoft Windows Server running as a DNS Server.
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: CachingMemory (Default), DatabaseNodeMemory, DynamicUpdateReceived, _DynamicUpdateReceivedPersec, RecursiveQueries, _RecursiveQueriesPersec, RecursiveQueryFailure, _RecursiveTimeOutPersec, TotalQueryReceived, _TotalQueryReceivedPersec, TCPQueryReceived, _TCPQueryReceivedPersec, UDPQueryReceived, _UDPQueryReceivedPersec, WINSLookupReceived, _WINSLookupReceivedPersec
+
+ checkeachcpu (-m checkeachcpu)  
+   Get CPU performance (like checkcpu) but provide information for each CPU. Cores are seen as CPUs. 
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default)
+
+ checkexchange, DBInstances (-m checkexchange -s DBInstances)  
+   Check Microsoft Exchange DB Instances. Tested for Microsoft Exchange 2010. Might work on earlier versions.
+   Only works for instances currently mounted. Can be used to detect instances that become unmounted.
+   There is very limited documentation on this WMI Class. We have made our best guess at calculating the values correctly.
+   The latency calculations might still be wrong. See the ini file for comments.
+   ARG1  The Instance name to view stats for. Use % for wildcards. Use only a single % to include stats for all Instances.
+   Use the helper check checkexchange listDBInstance to list valid instances names.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default), _DatabaseCachePercentHit, DatabaseCacheSizeMB, _DatabaseCacheRequestsPersec, _DatabaseCacheMissesPersec, _IODatabaseReadsAverageLatency, _IODatabaseWritesAverageLatency, _IOLogReadsAverageLatency, _IOLogWritesAverageLatency, _IODatabaseReadsPersec, _IODatabaseWritesPersec, _IOLogReadsPersec, _IOLogWritesPersec, _LogBytesWritePersec, SessionsInUse, _TableOpenCachePercentHit, TablesOpen, _TableOpensPersec
+
+ checkexchange, HubTransportServer (-m checkexchange -s HubTransportServer)  
+   Check Exchange Monitoring Hub Transport Server.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemsCompletedDeliveryPerSecond (Default), _ItemsQueuedforDeliveryPerSecond, _MessagesCompletedDeliveryPerSecond, _MessagesQueuedforDeliveryPerSecond, _MessagesSubmittedPerSecond, ItemsCompletedDeliveryTotal, MessagesSubmittedTotal, ActiveMailboxDeliveryQueueLength, ActiveNonSmtpDeliveryQueueLength, ActiveRemoteDeliveryQueueLength, AggregateDeliveryQueueLengthAllQueues, SubmissionQueueLength, RetryMailboxDeliveryQueueLength, RetryNonSmtpDeliveryQueueLength, RetryRemoteDeliveryQueueLength, UnreachableQueueLength, LargestDeliveryQueueLength, PoisonQueueLength
+
+ checkexchange, SmtpReceive (-m checkexchange -s SmtpReceive)  
+   Check Microsoft Exchange Transport SMTP Receive. Tested for Microsoft Exchange 2007.
+   ARG1  The transport/queue name to view stats for. Use _Total for the total stats for all transports.
+   Use % for wildcards. Use only a single % to include stats for all transports.
+   Use the helper check checkexchange listSmtpReceiveTransports to list valid transport names.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesReceivedPersec (Default), _ConnectionsCreatedPersec, _DisconnectionsbyAgentsPersecond, _MessageBytesReceivedPersec, _MessagesReceivedPersec, AveragebytesPerconnection_Base, AveragebytesPermessage, AveragebytesPermessage_Base, AveragemessagesPerconnection, AveragemessagesPerconnection_Base, AveragerecipientsPermessage, AveragerecipientsPermessage_Base, BytesReceivedTotal, ConnectionsTotal, Frequency_PerfTime, MessageBytesReceivedTotal, MessagesReceivedTotal, RecipientsacceptedTotal, TarpittingDelaysAnonymous
+
+ checkexchange, SmtpSend (-m checkexchange -s SmtpSend)  
+   Check Microsoft Exchange Transport SMTP Send. Tested for Microsoft Exchange 2007.
+   ARG1  The transport/queue name to view stats for. Use _Total for the total stats for all transports.
+   Use % for wildcards. Use only a single "%" to include stats for all transports.
+   Use the helper check "checkexchange listSmtpSendTransports" to list valid transport names.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesSentPersec (Default), _ConnectionsCreatedPersec, _MessageBytesSentPersec, _MessagesSentPersec, AveragebytesPerconnection, AveragebytesPerconnection_Base, AveragemessagebytesPermessage, AveragemessagebytesPermessage_Base, AveragemessagesPerconnection, AveragemessagesPerconnection_Base, AveragerecipientsPermessage, AveragerecipientsPermessage_Base, BytesSentTotal, ConnectionsTotal, Frequency_PerfTime, MessageBytesSentTotal, MessagesSentTotal, Recipientssent
+
+ checkexchange, TransportQueues (-m checkexchange -s TransportQueues)  
+   Check Microsoft Exchange Transport Queues. Tested for Microsoft Exchange 2007.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemsCompletedDeliveryPerSecond (Default), _ItemsQueuedforDeliveryPerSecond, _MessagesCompletedDeliveryPerSecond, _MessagesQueuedforDeliveryPerSecond, _MessagesSubmittedPerSecond, ActiveMailboxDeliveryQueueLength, ActiveNonSmtpDeliveryQueueLength, ActiveRemoteDeliveryQueueLength, AggregateDeliveryQueueLengthAllQueues, ItemsCompletedDeliveryTotal, ItemsQueuedForDeliveryTotal, ItemsResubmittedTotal, LargestDeliveryQueueLength, MessagesCompletedDeliveryTotal, MessagesQueuedForDelivery, MessagesQueuedForDeliveryTotal, MessagesSubmittedTotal, PoisonQueueLength, RetryMailboxDeliveryQueueLength, RetryNonSmtpDeliveryQueueLength, RetryRemoteDeliveryQueueLength, SubmissionQueueItemsExpiredTotal
+
+ checkexchange, listDBInstances (-m checkexchange -s listDBInstances)  
+   List the currently mounted Exchange Database instances. This is a helper check for checkexchange DBInstances but does contain some performance data. Only shows instances currently mounted. Can be used to detect instances that become unmounted.
+   Tested for Microsoft Exchange 2010.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default), SessionsInUse
+
+ checkexchange, listSmtpReceiveTransports (-m checkexchange -s listSmtpReceiveTransports)  
+   List the transports available for SMPT Receive. This is a helper check for checkexchange SmtpReceive.
+
+   WARN/CRIT  Not used for this MODE.
+
+ checkexchange, listSmtpSendTransports (-m checkexchange -s listSmtpSendTransports)  
+   List the transports available for SMPT Send. This is a helper check for checkexchange SmtpSend.
+
+   WARN/CRIT  Not used for this MODE.
+
+ checkexchange2003, listDBInstances (-m checkexchange2003 -s listDBInstances)  
+   List the currently mounted Exchange Database instances. This is a helper check for checkexchange DBInstances but does contain some performance data. Only shows instances currently mounted. Can be used to detect instances that become unmounted.
+   Tested for Microsoft Exchange 2003.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default), SessionsInUse
+
+ checkfolderfileage (-m checkfolderfileage)  
+   Check a Folder for files of a certain age.
+   You most likely want to use --includedata and or --excludedata to list only the files that match the age you are interested in and then use -w and -c to warn against the number of files you end up finding.
+   For example, find files in c:/temp with an age of between 0 and 10000 seconds. 
+   Warn if you find more than 3 of these. 
+   Use the parameters -a c: -o /temp/ -inc _FileAge=@0:10000 -w 3. 
+   Alternatively, you could just warn against the _FileAge directly eg -a c: -o /temp/ -w _FileAge=1000
+   ARG1  The drive letter of the folder  eg C:
+   ARG2  The path of the folder on the specified drive eg /temp/. Folders must end in /
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default), _FileAge
+
+ checkiis, connections (-m checkiis -s connections)  
+   Check connection stats for a Microsoft IIS Web Server.
+   Tested for IIS version 6.0 and 7.5. Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: CurrentConnections (Default), _ConnectionAttemptsPersec
+
+ checkiis, errors (-m checkiis -s errors)  
+   Check error stats for a Microsoft IIS Web Server.
+   Tested for IIS version 6.0 and 7.5. Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _NotFoundErrorsPersec (Default), _LockedErrorsPersec, TotalNotFoundErrors, TotalLockedErrors
+
+ checkiis, requests (-m checkiis -s requests)  
+   Check request stats for a Microsoft IIS Web Server.
+   Tested for IIS version 6.0 and 7.5. Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _GetRequestsPersec (Default), _HeadRequestsPersec, _PostRequestsPersec, _PropfindRequestsPersec, _PutRequestsPersec, _ISAPIExtensionRequestsPersec, TotalGetRequests, TotalHeadRequests, TotalPostRequests, TotalPropfindRequests, TotalPutRequests, TotalISAPIExtensionRequests
+
+ checkiis, transfers (-m checkiis -s transfers)  
+   Check transfer stats (bytes and files) for a Microsoft IIS Web Server.
+   Tested for IIS version 6.0 and 7.5. Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesTotalPersec (Default), _BytesReceivedPersec, _BytesSentPersec, _FilesPersec, _FilesReceivedPersec, _FilesSentPersec, TotalBytesTransferred, TotalBytesReceived, TotalBytesSent, TotalFilesTransferred, TotalFilesReceived, TotalFilesSent
+
+ checkiis, transfersV5 (-m checkiis -s transfersV5)  
+   Check transfer stats (bytes and files) for a Microsoft IIS Web Server.
+   Tested for IIS version 5.1 (Windows XP). Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesTotalPersec (Default), _BytesReceivedPersec, _BytesSentPersec, _FilesPersec, _FilesReceivedPersec, _FilesSentPersec, TotalFilesTransferred, TotalFilesReceived, TotalFilesSent
+
+ checkiis, users (-m checkiis -s users)  
+   Check user stats for a Microsoft IIS Web Server.
+   Tested for IIS version 6.0 and 7.5. Only tested on a low volume server.
+   ARG1  The web server instance name to view stats for. Use _Total for the total stats for all web sites.
+   The web server instance name can be seen in the Microsoft IIS Manager.
+   eg "Default Web Site"
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _LogonAttemptsPersec (Default), CurrentAnonymousUsers, CurrentNonAnonymousUsers, _AnonymousUsersPersec, _NonAnonymousUsersPersec, TotalLogonAttempts, TotalAnonymousUsers, TotalNonAnonymousUsers
+
+ checkio, logical (-m checkio -s logical)  
+   Check logical disk IO. 
+   These disks checks use WMI Raw counters to calculate values over a given timeperiod. 
+   This is much more accurate than taking Formatted WMI values.
+   Note that some of the PercentDisk values seem to give incorrect values. Use with caution.
+   This check can return data for multiple drives in a single check.
+   ARG1  Name of the logical Windows drive to check eg C:. Use % for Wilcard.
+   Use _Total to check all drives combined.
+   
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _PercentIdleTime (Default), _PercentBusyTime, _PercentDiskTime, _PercentDiskReadTime, _PercentDiskWriteTime, _DiskReadBytesPersec, _DiskReadsPersec, _DiskWriteBytesPersec, _DiskWritesPersec, CurrentDiskQueueLength, _AvgDiskQueueLength, _AvgDiskReadQueueLength, _AvgDiskWriteQueueLength
+
+ checkio, old_logical (-m checkio -s old_logical)  
+   Check logical disk IO. Superseeded by checkio logical.
+   ARG1  Name of the logical Windows drive to check eg C:. Use _Total to check all drives combined.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: PercentDiskTime (Default), PercentIdleTime, PercentDiskReadTime, PercentDiskWriteTime, DiskReadBytesPersec, DiskReadsPersec, DiskWriteBytesPersec, DiskWritesPersec, CurrentDiskQueueLength, AvgDiskQueueLength, AvgDiskReadQueueLength, AvgDiskWriteQueueLength
+
+ checkio, old_physical (-m checkio -s old_physical)  
+   Check physical disk IO. Superseeded by checkio physical.
+   ARG1  Name of the physical Windows drive to check eg C:. Use _Total to check all drives combined.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: PercentDiskTime (Default), PercentIdleTime, PercentDiskReadTime, PercentDiskWriteTime, DiskReadBytesPersec, DiskReadsPersec, DiskWriteBytesPersec, DiskWritesPersec, CurrentDiskQueueLength, AvgDiskQueueLength, AvgDiskReadQueueLength, AvgDiskWriteQueueLength
+
+ checkio, physical (-m checkio -s physical)  
+   Check physical disk IO. 
+   These disks checks use WMI Raw counters to calculate values over a given timeperiod. 
+   This is much more accurate than taking Formatted WMI values.
+   Note that some of the PercentDisk values seem to give incorrect values. Use with caution.
+   This check can return data for multiple drives in a single check.
+   ARG1  Name of the logical Windows drive to check eg C: Use % for Wilcard.
+   Use _Total to check all drives combined.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _PercentIdleTime (Default), _PercentBusyTime, _PercentDiskTime, _PercentDiskReadTime, _PercentDiskWriteTime, _DiskReadBytesPersec, _DiskReadsPersec, _DiskWriteBytesPersec, _DiskWritesPersec, CurrentDiskQueueLength, _AvgDiskQueueLength, _AvgDiskReadQueueLength, _AvgDiskWriteQueueLength
+
+ checkpower, state (-m checkpower -s state)  
+   This check shows the state of one or more power supplies. Only appears to work on Server 2008. Not tested on physical hardware. It would be really helpful of someone using this on physical hardware can send me the output of this check adding the -d option to the command line.
+   ARG1  The power supply number to view stats for. Power supplies start at 0. 
+   Use % for wildcards. Use only a single % to include stats for all power supplies.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: ActiveInputVoltage (Default), TotalOutputPower, TotalPowerOnHours
+
+ checkprint, spooler (-m checkprint -s spooler)  
+   Checks various print spooler stats
+   Tested for Windows Server 2003/2008 R2. Only tested on a low volume server.
+   This check can return information about multiple printers in a single check.
+   ARG1  The printer queue name to view stats for. Use _Total for the total stats for all print queues.
+   Use % for wildcards. The printer queue name can be seen in the Device and Printer screen
+   eg "Microsoft XPS Document Writer", "%laser%".
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesPrintedPersec (Default), JobErrors, Jobs, JobsSpooling, NotReadyErrors, OutofPaperErrors, TotalJobsPrinted, TotalPagesPrinted
+
+ checkprint, test (-m checkprint -s test)  
+   Demo check for join= and joinquery= settings.
+   Grabs the same information as checkprinter spooler but adds a couple of extra fields from another WMI Class. 
+   ARG1  The printer queue name to view stats for. Use _Total for the total stats for all print queues.
+   Use % for wildcards. The printer queue name can be seen in the Device and Printer screen
+   eg "Microsoft XPS Document Writer", "%laser%".
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BytesPrintedPersec (Default), JobErrors, Jobs, JobsSpooling, NotReadyErrors, OutofPaperErrors, TotalJobsPrinted, TotalPagesPrinted
+
+ checkproc, cmdline (-m checkproc -s cmdline)  
+   An ini implementation similar to checkprocess. 
+   ARG1  The exact command line to search for. Use / instead of \\.
+   e.g. C:/WINDOWS/system32/services.exe.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkproc, count (-m checkproc -s count)  
+   Check number of processes.
+   ARG1  The processname to look for. Use % for wildcards.
+   The process name typically only includes the actual file name minus its suffix eg firefox, svchost
+   If there are multiple instances eg svchost, then some versions of Windows have them named all the same while others
+   such as Windows 2008 Server, have them numbered eg svchost#1, svchost#2, svchost#3. To get all svchost processes you
+   need to set ARG1 to svchost%
+   To view all processes set ARG1 to "%" and the full process list will be included in the plugin output.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checkproc, cpu (-m checkproc -s cpu)  
+   Check cpu details for individual processes
+   ARG1  The processname to look for. Use % for wildcards.
+   The process name typically only includes the actual file name minus its suffix eg firefox, svchost
+   If there are multiple instances eg svchost, then some versions of Windows have them named all the same while others
+   such as Windows 2008 Server, have them numbered eg svchost#1, svchost#2, svchost#3. To get all svchost processes you
+   need to set ARG1 to svchost%
+   To view all processes set ARG1 to "%" and the full process list will be included in the plugin output.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default), _ItemCount
+
+ checkproc, cpuabove (-m checkproc -s cpuabove)  
+   Check for processes using more than a specified CPU utilisation. To make this work as intended you need to specify some
+   warning/critical criteria eg -w 50 for warning when a process uses more than 50% CPU.
+   ARG1  The processname to look for. Use % for wildcards.
+   The process name typically only includes the actual file name minus its suffix eg firefox, svchost
+   If there are multiple instances eg svchost, then some versions of Windows have them named all the same while others
+   such as Windows 2008 Server, have them numbered eg svchost#1, svchost#2, svchost#3. To get all svchost processes you
+   need to set ARG1 to svchost%
+   To view all processes set ARG1 to "%" and the full process list will be included in the plugin output.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default), _ItemCount
+
+ checkproc, memory (-m checkproc -s memory)  
+   Check memory details for individual processes
+   ARG1  The processname to look for. Use % for wildcards.
+   The process name typically only includes the actual file name minus its suffix eg firefox, svchost
+   If there are multiple instances eg svchost, then some versions of Windows have them named all the same while others
+   such as Windows 2008 Server, have them numbered eg svchost#1, svchost#2, svchost#3. To get all svchost processes you
+   need to set ARG1 to svchost%
+   To view all processes set ARG1 to "%" and the full process list will be included in the plugin output.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default), _ColSum_PrivateBytes, _ColSum_WorkingSet, _ColSum_VirtualBytes
+
+ checkserv, byname (-m checkserv -s byname)  
+   An ini implementation similar to checkservice. This uses a WMI query that may perform faster on busy systems.
+   ARG1  The DisplayName or Name of the service to search for. Use % for wildcards.
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching process is found.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checksql, buffermanager (-m checksql -s buffermanager)  
+   Check SQL Server Buffer Manager. Tested for Microsoft SQL Server 2008.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: Buffercachehitratio (Default), _CheckpointpagesPersec, Databasepages, _FreeliststallsPersec, Freepages, _LazywritesPersec, Pagelifeexpectancy, _PagelookupsPersec, _PagereadsPersec, _PagewritesPersec, _ReadaheadpagesPersec, Reservedpages, Stolenpages, Targetpages, Totalpages
+
+ checksql, cache (-m checksql -s cache)  
+   SQL Server Cache Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   ARG2  The cache type to view stats for. Use _Total for the total stats for the total of all cache (this is the default).
+   Use % for wildcards. Use only a single % to include stats for all cache types.
+   Use the helper check checksqlex listcache to list valid cache names.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: CacheHitRatio (Default), CacheObjectCounts, CacheObjectsinuse, CachePages
+
+ checksql, general (-m checksql -s general)  
+   General SQL Server Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: ActiveTempTables (Default), _LoginsPersec, _LogoutsPersec, LogicalConnections, Processesblocked, _TempTablesCreationRate, UserConnections
+
+ checksql, latches (-m checksql -s latches)  
+   SQL Server Latch and SuperLatch Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: AverageLatchWaitTimems (Default), _LatchWaitsPersec, NumberofSuperLatches, _SuperLatchDemotionsPersec, _SuperLatchPromotionsPersec, TotalLatchWaitTimems
+
+ checksql, listcache (-m checksql -s listcache)  
+   List all cache types in a SQL Server instance. This is just a helper check.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  Not used for this MODE.
+
+ checksql, listdb (-m checksql -s listdb)  
+   List all DBs in a SQL Server database. This is just a helper check.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ checksql, listlocks (-m checksql -s listlocks)  
+   List all lock types in a SQL Server instance. This is just a helper check.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  Not used for this MODE.
+
+ checksql, locks (-m checksql -s locks)  
+   SQL Server Lock Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   ARG2  (optional) The lock type to view stats for. Use _Total for the total stats for the total of all locks.
+   Use % for wildcards. Use only a single % to include stats for all locks. The default value for this is _Total.
+   Use the helper check checksqlex listlocks to list valid lock names.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: AverageWaitTimems (Default), _LockRequestsPersec, _LockTimeoutstimeout0Persec, _LockWaitsPersec, LockWaitTimems, _NumberofDeadlocksPersec
+
+ checksql, memory (-m checksql -s memory)  
+   SQL Server Memory Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ConnectionMemory (Default), LockBlocks, LockBlocksAllocated, _LockMemory, LockOwnerBlocks, LockOwnerBlocksAllocated, _MaximumWorkspaceMemory, MemoryGrantsOutstanding, MemoryGrantsPending, _OptimizerMemory, _SQLCacheMemory, _TargetServerMemory, _TotalServerMemory
+
+ checksql, sqlstats (-m checksql -s sqlstats)  
+   SQL Server SQL Statistics. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _BatchRequestsPersec (Default), _FailedAutoParamsPersec, _ForcedParameterizationsPersec, _GuidedplanexecutionsPersec, _MisguidedplanexecutionsPersec, _SafeAutoParamsPersec, _SQLAttentionrate, _SQLCompilationsPersec, _SQLReCompilationsPersec, _UnsafeAutoParamsPersec
+
+ checksql, waits (-m checksql -s waits)  
+   SQL Server Wait Statistics. This only shows Average Wait time in milliseconds. You could modify this check to show other wait types eg Waits in Progress. Tested for Microsoft SQL Server 2008. Only tested on a low volume server.
+   ARG1  (optional) Specify an non-default SQL Instance Name. You actually specify part of the WMI Class name but see below for more info. The default setting for this is MSSQLSERVER_SQLSERVER. If you specify this as "default" then the default value will be used. This can simplify your Nagios configuration by allowing you to have a single commmand definition.
+   Selecting an Instance:  
+   The WMI Class name is built up from the SQL instance name. For the default SQL Instance name, part of the WMI Class is MSSQLSERVER_SQLSERVER. It's a guess at the moment but the SQL Instance name for that WMI Class is probably SQL_SERVER. For SQL Express the part of the WMI Class is MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   If you have an installation that uses a different SQL Instance name you'll have to work out the WMI Class Name and use that. I'm going to guess here and say that if the SQL Instance is XXX then the WMI Class will be MSXXX_XXX. If you know how this mapping really works please contact me.
+   Examples:  
+   To select the default SQL Express Instance use -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS.
+   To select a non-default SQL Instance called XXX use -a MSXXX_XXX.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: Lockwaits (Default), Logbufferwaits, Logwritewaits, Memorygrantqueuewaits, NetworkIOwaits, NonPagelatchwaits, PageIOlatchwaits, Pagelatchwaits, Threadsafememoryobjectswaits, Transactionownershipwaits, Waitfortheworker, Workspacesynchronizationwaits
+
+ checkts, sessioninfo (-m checkts -s sessioninfo)  
+   Check Terminal Services Session Info for specific sessions.
+   ARG1  Name of the TS Session eg console
+   Note: Not tested on a real terminal services server - you might need to play with this to get what you need.
+   You can find the session names using the check MODE=checkts SUBMODE=show
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _InputBytes (Default), _InputCompressedBytes, InputErrors, InputTimeouts, _OutputBytes, _OutputCompressedBytes, OutputErrors, OutputTimeouts, _PercentProcessorTime, PrivateBytes, ThreadCount, _TotalBytes, TotalErrors, TotalTimeouts
+
+ checkts, sessions (-m checkts -s sessions)  
+   Check Terminal Services Sessions.
+   Tested for Windows Server 2008.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: ActiveSessions (Default), InactiveSessions, TotalSessions
+
+ checkts, sessions2003 (-m checkts -s sessions2003)  
+   Check Terminal Services Sessions.
+   Tested for Windows 2003, Windows XP.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: ActiveSessions (Default), InactiveSessions, TotalSessions
+
+ checkts, show (-m checkts -s show)  
+   Show current Terminal Services Session names. Use this check, normally from the command line, to list the 
+   curent session names. Session names are then used in other checkts checks.
+
+   WARN/CRIT  Not used for this MODE.
+
+ checkusers, count (-m checkusers -s count)  
+   Check the count of users. You can specify the attributes of the users using ARG1.
+   ARG1  You must specify everything that follows the "where" clause in the WMI query. You can use any combination of valid WMI fields for the Win32_UserAccount class. Use ' ' to quote strings. 
+   Note:  Use --nodatamode and/or NODATAEXIT settings to control what happens if no matching users are found.
+   Valid WMI Fields for Server 2003 R2/2008 R2  AccountType, Caption, Description, Disabled, Domain, FullName, InstallDate, LocalAccount, Lockout, Name, PasswordChangeable, PasswordExpires, PasswordRequired, SID, SIDType, Status
+   ARG1 Example  List all users: -a "status like '%'"
+   ARG1 Example  Show users where the Status is OK: -a "status='OK'"
+   ARG1 Example  Show usernames that contains the string "EX": -a "name like '%EX%'"
+   ARG1 Example  Show usernames that start with the string "Admin": -a "name like 'Admin%'"
+   ARG1 Example  Show usernames that end with the string "test": -a "name like '%test'"
+   ARG1 Example  Show users whose full name contains the String "Exchange": -a "fullname like '%Exchange%'"
+   ARG1 Example  Show users that belong to the Domain called "TEST": -a "Domain='TEST'"
+   ARG1 Example  Show users where a password is not required: -a "PasswordRequired!='True'"
+   ARG1 Example  Show users that belong to the Domain called "TEST" and that where a password is not required: -a "PasswordRequired!='True' AND Domain='TEST'"
+   ARG1 Example  Show users that do not belong to the Domain called "TEST": -a "Domain!='TEST'"
+   ARG1 Example  Show users that have local accounts: -a "LocalAccount='True'"
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _ItemCount (Default)
+
+ info, listsoftware2003 (-m info -s listsoftware2003)  
+   Lists all the instances of software installed. Used during testing/debuging/helping others.
+   Gives a lot of output!
+   Works for XP, Server 2003 and Server 2008.
+   You are better off using listsoftware2008 if you can.
+
+   WARN/CRIT  Not used for this MODE.
+
+ info, listsoftware2008 (-m info -s listsoftware2008)  
+   Lists all the instances of software installed which used an Installer. Used during testing/debuging/helping others.
+   Gives a lot of output!
+   Works for XP, Server 2008.
+   This is probably the best software lister (as it list software at a Product level) if it works for your OS version.
+
+   WARN/CRIT  Not used for this MODE.
+
+ info, listsoftwarefeatures2008 (-m info -s listsoftwarefeatures2008)  
+   Lists all the instances of software installed. Used during testing/debuging/helping others.
+   Gives a lot of output!
+   Works for XP, Server 2008.
+   This will add a lot of bits that listsoftware2008 will miss.
+
+   WARN/CRIT  Not used for this MODE.
+
+ info, net (-m info -s net)  
+   This check shows basic networking information (sometimes includes duplicate information).
+   Looks OK in Nagios with multi-line plugin output and not so good on the command line!
+
+   WARN/CRIT  Not used for this MODE.
+
+ info, os (-m info -s os)  
+   This check shows the Operating System Name and Service Pack version.
+   It also shows the Installation Date timestamp and age in days.
+   You can check warn/critical against the age of the Installation Date. The warn/critical specification should be in seconds.
+   Use the time multipliers to make this simpler. See the section "WARNING and CRITICAL Specification".
+   eg -w 2yr to test if the installation is older than 2 years.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _InstallSec (Default)
+
+ sample, full (-m sample -s full)  
+   Help for a sample check that specifies all currently possible fields in the ini File.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: NumberOfProcesses (Default), NumberOfUsers, _FreeMemPercent
+
+ sample, minimal (-m sample -s minimal)  
+   Help for a sample check that specifies only a minimal amount of configuration in the ini File.
+   This sample simply displays the Name of the Operating System and Service Pack version.
+   It has no warning/critical specification and provides no performance data.
+
+   WARN/CRIT  Not used for this MODE.
+
+ sample, uptime (-m sample -s uptime)  
+   Help for a sample check that is similar to checkuptime. This one is somewhat simpler and uses seconds.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _UptimeSec (Default)
+
+ test, 1 (-m test -s 1)  
+   Just for testing
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default)
+
+ test, 2 (-m test -s 2)  
+   Just for testing
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default), _NoCPU, NoSuchField
+
+ test, 3 (-m test -s 3)  
+   Just for testing
+
+   DELAY  (optional) specifies the number of seconds over which the utilisation is calculated. The longer you can make this without timing out, the more accurate it will be. If specifying longer values. You may also need to use the -t parameter to set a longer script timeout. Only valid if also specifying --nokeepstate ie you are not using the state keeping feature. We recommend that you do keep state and hence do not use --nokeepstate. Default is 5.
+
+   WARN/CRIT  can be used for this MODE. You need to specify a field name if not using the Default field eg -w FIELD=VALUE or simply -w VALUE for the Default field. Valid Warning/Critical Fields are: _AvgCPU (Default), _ItemCount
+
+ test, 4 (-m test -s 4)  
+   Just for testing
+
+   WARN/CRIT  Not used for this MODE.
+

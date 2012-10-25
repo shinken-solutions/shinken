@@ -1,0 +1,58 @@
+# Check WMI Plus Config file
+# This is read in-line into the perl program, so the syntax has to be just right.
+
+# The settings in here override the default settings in the plugin code
+# This file is only required if you want to change the default settings in the plugin
+
+# It is provided in the release package as check_wmi_plus.conf.sample
+# Rename it to check_wmi_plus.conf and/or set its location right at the top of the check_wmi_plus.pl script
+
+# this file makes it easier to upgrade the plugin since you can keep your old settings in your own copy of this file
+
+# ---------------------- FILE LOCATIONS -------------------------
+
+# we are looking for the dir where utils.pm is located. This is normally installed as part of Nagios
+#use lib "/usr/lib/nagios/plugins"; # CHANGE THIS IF NEEDED
+use lib "@@INSTALLDIR@@/libexec";
+
+# Set the full path where the plugin is installed
+# You might not even use this variable if you have different locations for everything
+# as a first guess, grab the directory that this conf file lives in
+$base_dir="@@INSTALLDIR@@/libexec";  # CHANGE THIS IF NEEDED
+
+# This is the full path location of the wmic command
+# - standard value "$base_dir/wmic"
+$wmic_command="@@INSTALLDIR@@/libexec/wmic.exe"; # CHANGE THIS IF NEEDED
+
+# you do not need to use this if you are using $wmi_ini_dir
+# normally you would only use this if you had a single specific ini file you wanted to use
+# set the location of the ini file. Set to '' if not using it or specify using the --inifile parameter
+# set this to something else if you want
+# - standard value "$base_dir/check_wmi_plus.ini"
+$wmi_ini_file='@@INSTALLDIR@@/libexec/check_wmi_plus.d/check_wmi_plus.ini'; # CHANGE THIS IF NEEDED
+
+# set the location of the ini dir. Set to '' if not using it or specify using the --inidir parameter
+# set this to something else if you want
+# you might like to use "$base_dir/wmic"
+# - standard value "$base_dir/check_wmi_plus.d"
+$wmi_ini_dir="@@INSTALLDIR@@/libexec/check_wmi_plus.d"; # CHANGE THIS IF NEEDED,
+
+# set the location of temporary directory - used for keep state option
+#$tmp_dir='/tmp'; # CHANGE THIS IF NEEDED
+
+# this script helps with making the manpage help. By default it is in the same directory as the plugin itself
+$make_manpage_script="$base_dir/check_wmi_plus.makeman.sh"; # CHANGE THIS IF NEEDED
+
+# this is the directory where the manpage is stored when created, defaults to the same directory as the ini files
+$manpage_dir="$wmi_ini_dir"; # CHANGE THIS IF NEEDED
+
+# ---------------------- OTHER CONFIGURATION -------------------------
+
+# Disable the check of Perl Module versions
+# The module versions are checked because the are often the cause of the plugin not working correctly
+# If you want support you will need to reproduce the fault with the supported versions of the modules ie enable this check
+# Set to 1 to ignore the version check, Set to 0 to perform the check
+# Setting this to 1 has the same effect as the command line option  --IgnoreMyOutDatedPerlModuleVersions
+# Setting either this to 1 or the command line option will disable the check
+$ignore_my_outdated_perl_module_versions=0; # CHANGE THIS IF NEEDED
+
