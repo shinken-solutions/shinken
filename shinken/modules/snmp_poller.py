@@ -704,6 +704,7 @@ class SNMPAsyncClient(object):
         self.version = version
         self.dstemplate = dstemplate
         self.instance = instance
+        self.instance_name = instance_name
         self.triggergroup = triggergroup
         self.max_repetitions = max_repetitions
         self.serv_key = (dstemplate, instance, instance_name)
