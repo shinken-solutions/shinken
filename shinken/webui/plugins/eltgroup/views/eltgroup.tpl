@@ -49,10 +49,104 @@
 		</div> -->				
 	</div>
 	<div class="row-fluid">
-		Level 1 of column
-		<div class="row-fluid">
-			<div class="span6">Level 2</div>
-			<div class="span6">Level 2</div>
+		<div class="well">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Host</th>
+						<th>Status</th>
+						<th>Last Check</th>
+						<th>Duration</th>
+						<th>Attempt</th>
+						<th>Status Information</th>
+						<th style="width: 36px;"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td>localhost</td>
+						<td>Up</td>
+						<td>23 s</td>
+						<td>3d 22h 12m 1s</td>
+						<td>2/3</td>
+						<td>HTTP: OK</td>
+						<td>
+							<a href="user.html"><i class="icon-pencil"></i></a>
+							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="row-fluid pagination pull-right">
+			<ul>
+				<li><a href="#">Prev</a></li>
+				<li><a href="#">1</a></li>
+				<li><a href="#">2</a></li>
+				<li><a href="#">3</a></li>
+				<li><a href="#">4</a></li>
+				<li><a href="#">Next</a></li>
+			</ul>
 		</div>
 	</div>
 </div>
