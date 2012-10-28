@@ -49,91 +49,101 @@
 		</div> -->				
 	</div>
 	<div class="row-fluid">
-		<div class="well">
-			<table class="table">
-				<thead>
+		<div class="">
+			<table class="table table-hover">
+				<tbody>
 					<tr>
+						<th><em>Status</em></th>
 						<th>Host</th>
-						<th>Status</th>
+						<th><em>Status</em></th>
+						<th>Service</th>
 						<th>Last Check</th>
 						<th>Duration</th>
 						<th>Attempt</th>
 						<th>Status Information</th>
-						<th style="width: 36px;"></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
-						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
-						</td>
 					</tr>
 					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
+						<td ><em>UP</em></td>
 						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+							<span><a href="#">localost</a></span>
 						</td>
+						<td><em>OK</em></td>
+
+						<td style="white-space: normal">
+							<span>Ping</span>
+						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>352d 23h 56m 56s</td>
+						<td>1/3</td>
+						<td>OK - localhost</td>	
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>&nbsp;</td>
+						<td><em>OK</em></td>
+						<td>
+							<span> <a href="#">Test</a> </span>
+						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>89d 17h 15m 59s</td>
+						<td>1/1</td>
+						<td>Service not intended for active checks</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>&nbsp;</td>
+						<td><em>OK</em></td>
+						<td>
+							<span> <a href="#">Test</a> </span>
+						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>89d 17h 15m 59s</td>
+						<td>1/1</td>
+						<td>Service not intended for active checks</td>
+						<td></td>
 					</tr>
 					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
+						<td ><em>UP</em></td>
 						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+							<span><a href="#">orca</a></span>
 						</td>
+						<td><em>OK</em></td>
+
+						<td style="white-space: normal">
+							<span>Ping</span>
+						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>352d 23h 56m 56s</td>
+						<td>1/3</td>
+						<td>OK - localhost</td>
 					</tr>
+
 					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
+						<td></td>
+						<td>&nbsp;</td>
+						<td><em>OK</em></td>
 						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+							<span> <a href="#">Test</a> </span>
 						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>89d 17h 15m 59s</td>
+						<td>1/1</td>
+						<td>Service not intended for active checks</td>
 					</tr>
+
 					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
+						<td></td>
+						<td>&nbsp;</td>
+						<td><em>OK</em></td>
 						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
+							<span> <a href="#">Test</a> </span>
 						</td>
-					</tr>
-					<tr>
-						<td>localhost</td>
-						<td>Up</td>
-						<td>23 s</td>
-						<td>3d 22h 12m 1s</td>
-						<td>2/3</td>
-						<td>HTTP: OK</td>
-						<td>
-							<a href="user.html"><i class="icon-pencil"></i></a>
-							<a href="#myModal" role="button" data-toggle="modal"><i class="icon-remove"></i></a>
-						</td>
+						<td>2012-07-30 22:53:03</td>
+						<td>89d 17h 15m 59s</td>
+						<td>1/1</td>
+						<td>Service not intended for active checks</td>
 					</tr>
 				</tbody>
 			</table>
