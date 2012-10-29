@@ -148,8 +148,8 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="row-fluid pagination pull-right">
-			<ul>
+		<div class="row-fluid pagination">
+			<ul class="pull-right">
 				<li><a href="#">Prev</a></li>
 				<li><a href="#">1</a></li>
 				<li><a href="#">2</a></li>
