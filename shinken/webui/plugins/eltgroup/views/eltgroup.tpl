@@ -1,6 +1,6 @@
 %rebase layout globals()
 
-<div id="content_container" class="row-fluid">
+<div id="" class="row-fluid">
 	<div class="row-fluid box">	   
 		<table class="span3">
 			<tbody>
@@ -39,7 +39,14 @@
 					<td> <span class="label label-info">10</span> </td>
 				</tr>
 			</tbody>
-		</table>	    
+		</table>
+
+		<div class="progress span5">
+			<div class="bar bar-success" style="width: 35%;"></div>
+			<div class="bar bar-info" style="width: 20%;"></div>
+			<div class="bar bar-danger" style="width: 10%;"></div>
+			<div class="bar bar-warning" style="width: 35%;"></div>
+		</div>	    
 
 <!-- 		<div class="span4">
 			<div class="alert alert-critical no-bottommargin pulsate row-fluid" style="opacity: 1;">
@@ -48,8 +55,9 @@
 			</div>
 		</div> -->				
 	</div>
-	<div class="row-fluid">
-		<div class="">
+
+	<div class="span12">
+		<div class="row-fluid">
 			<table class="table table-hover">
 				<tbody>
 					<tr>
@@ -148,6 +156,7 @@
 				</tbody>
 			</table>
 		</div>
+
 		<div class="row-fluid pagination">
 			<ul class="pull-right">
 				<li><a href="#">Prev</a></li>
