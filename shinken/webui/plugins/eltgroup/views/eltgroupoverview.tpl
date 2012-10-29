@@ -18,9 +18,26 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td>...</td>
-						<td>...</td>
-						<td>...</td>
+						<td>AspenTech Group</td>
+						<td>8 Up</td>
+						<td> 
+							<ul class="unstyled">
+								<li>12 OK</li>
+								<li>34 Warning</li>
+								<li>9 Critical</li>
+							</ul>
+						</td>
+					</tr>
+					<tr>
+						<td>OsiSoft Pims Group</td>
+						<td>12 Up</td>
+						<td> 
+							<ul class="unstyled">
+								<li>112 OK</li>
+								<li>42 Warning</li>
+								<li>3 Critical</li>
+							</ul>
+						</td>
 					</tr>
 				</tbody>
 			</table>
