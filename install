@@ -999,6 +999,15 @@ function backup(){
         cecho " > Backup check_mk" green
         cecho " --> Backup check_mk/etc" green
         cp -Rfp $MKPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cecho " --> Backup check_mk/share" green
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/perfometers	$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/htdocs/images/icons	$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cecho " --> Backup check_mk/var" green
+        cp -Rfp $MKPREFIX/var/lib/web $BACKUPDIR/bck-shinken.$DATE/check_mk/
+
     fi
 
     if [ -d $PNPPREFIX ]

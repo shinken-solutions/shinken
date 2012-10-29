@@ -125,7 +125,8 @@ class TestConfig(ShinkenTest):
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
         self.assert_(host.perf_data == 'rtt=9999')
-        
+
+
 
 
 if __name__ == '__main__':

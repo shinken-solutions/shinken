@@ -107,6 +107,10 @@
   <li class="sliding-element">
     <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
   </li>
+  <li class="sliding-element">
+    <a href="javascript:remove_all('{{user.get_name()}}')"><i class="icon-remove icon-white"></i> Delete</a>
+  </li>
+
 </ul>
 
 
