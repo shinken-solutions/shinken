@@ -1,7 +1,7 @@
 %rebase layout globals()
 
-<div id="" class="row-fluid">
-	<div class="row-fluid box">	   
+<div class="row-fluid">
+	<div class="span12 well well-small">	   
 		<table class="span3">
 			<tbody>
 				<tr>
@@ -41,23 +41,16 @@
 			</tbody>
 		</table>
 
-		<div class="progress span5">
+		<div class="progress span5 no-bottommargin" style="height: 45px;">
 			<div class="bar bar-success" style="width: 35%;"></div>
 			<div class="bar bar-info" style="width: 20%;"></div>
 			<div class="bar bar-danger" style="width: 10%;"></div>
 			<div class="bar bar-warning" style="width: 35%;"></div>
-		</div>	    
-
-<!-- 		<div class="span4">
-			<div class="alert alert-critical no-bottommargin pulsate row-fluid" style="opacity: 1;">
-				<div style="font-size: 50px; padding-top: 10px;" class="span2"> <i class="icon-bolt"></i> </div>
-				<p class="span10">This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
-			</div>
-		</div> -->				
+		</div>
 	</div>
 
-	<div class="span12">
-		<div class="row-fluid">
+	<div>
+		<div class="clearfix">
 			<table class="table table-hover">
 				<tbody>
 					<tr>
@@ -156,9 +149,11 @@
 				</tbody>
 			</table>
 		</div>
+	</div>
 
-		<div class="row-fluid pagination">
-			<ul class="pull-right">
+	<div class="pull-right">
+		<div class="pagination">
+			<ul>
 				<li><a href="#">Prev</a></li>
 				<li><a href="#">1</a></li>
 				<li><a href="#">2</a></li>
