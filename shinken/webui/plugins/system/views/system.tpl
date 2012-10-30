@@ -5,7 +5,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <h3><i class="icon-cogs"> General Informations </i></h3>
+<!--     <h3><i class="icon-cogs"> General Informations </i></h3>
     <div class="span4 well general-box">
       <h4><i class="icon-cog"></i> Start Time</h4>
       <span class="general">{{helper.print_duration(app.datamgr.get_program_start())}}</span>
@@ -13,7 +13,7 @@
     <div class="span4 well general-box">
       <h4><i class="icon-cog"></i> Version</h4>
       <span class="general">Shinken {{VERSION}}</span>
-    </div>
+    </div> -->
     <!--
     <div class="row-fluid">
       <div class="span6">Level 2</div>
@@ -25,7 +25,7 @@
         <h3><i class="icon-cogs"> Shinken Daemons</i></h3>
         %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
         %for (sat_type, sats) in types:
-        <h4><i class="icon-bullhorn"></i> {{sat_type.capitalize()}}</h4>
+        <h4><i class="icon-bullhorn font-blue"></i> {{sat_type.capitalize()}}</h4>
         <table class="table table-hover">
           <thead>
             <tr>
@@ -53,10 +53,10 @@
         %end
       </div>
       <div class="span4">
-        <div class="thumbnail" style="margin-top: 65px;">
+        <div class="well" style="margin-top: 65px;">
           <!-- <img alt="" src="http://placehold.it/300x200"> -->
           <div class="caption">
-            <h3>Information</h3>
+            <h3 class="font-blue"><i class="icon-question-sign"></i> Information</h3>
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/arbiter" class="" type="button">Arbiter:</a> The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons.</p>
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/scheduler">Scheduler:</a> The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively.</p>
             <p><a href="http://www.shinken-monitoring.org/wiki/official/configuringshinken/configobjects/poller">Poller:</a> The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers.</p>
