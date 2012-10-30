@@ -684,24 +684,26 @@ function relocate(){
     cecho " > relocate nagios plugin path" green
     sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
     sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
-    # relocate default /usr/local/shinken path
-    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
-    do
-        cecho " > Processing $fic" green
-        cp "$fic" "$fic.orig"
-        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic
-        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
-    done
 
+    # relocate default /usr/local/shinken path
+    if [ "$TARGET" != "/usr/local/shinken" ]
+    then
+	    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+	    do
+	        cecho " > Processing $fic" green
+	        cp "$fic" "$fic.orig"
+	        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
+	    done
+    fi
+
+    # do the same for etc dir if etc dir does not reside beside target
     if [ "$TARGET/etc" != "$ETC" ]
     then
-        # do the same for etc dir if etc dir does not reside beside target
         cd $ETC
         for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
         do
             cecho " > Processing $fic" green
             cp "$fic" "$fic.orig"
-            #sed -i 's#/opt/shinken#'$TARGET'#g' $fic
             sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
         done
         cd $TARGET
@@ -732,6 +734,12 @@ function relocate(){
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
     for fic in $(ls -1 $ETC/*.ini)
+    do
+        cecho " > Processing $fic" green;
+        setdirectives "$directives" $fic $TARGET
+    done
+    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    for fic in $(ls -1 $ETC/nagios*cfg)
     do
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
