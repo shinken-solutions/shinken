@@ -1,12 +1,13 @@
-%rebase layout globals()
+%rebase layout globals(), css=['eltgroup/css/group-overview.css'], title='', menu_part=''
 
 <div class="row-fluid">
 	<div>
 		<div class="well well-small">
 			<div class="span6">
-				<p>m</p>
+				<p></p>
 			</div>
 		</div>
+
 		<div class="row-fluid">
 			<table class="table table-bordered">
 				<thead>
