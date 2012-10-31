@@ -1971,20 +1971,8 @@ function install_notify_by_xmpp(){
     XMPP_CONFIG_FILE="$LIBEXEC/notify_by_xmpp.ini"
     cadre "Install notifiy_by_xmpp addon" green
 
-    cecho " > Checking for python-xmpp" green
-    case $CODE in
-        DEBIAN)
-            if [ -z "$(dpkg -l | grep ^ii.*python-xmpp)" ]
-            then
-                cecho " -> python-xmpp not found. Going to install" yellow
-                installpkg pkg python-xmpp
-            fi
-            ;;
-        *)
-            cecho " > Unsupported distro" red
-            exit 2
-            ;;
-    esac
+    cecho " > Installing python-xmpp" green
+    installpkg pkg python-xmpp
 
     cecho " > Configuring the XMPP account that will be used to send the notifications" green
     cecho " -> The credentials will be written in plain text in $XMPP_CONFIG_FILE" yellow
