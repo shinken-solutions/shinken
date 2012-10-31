@@ -1726,7 +1726,7 @@ function install_mysql(){
             if [[ -z "$(rpm -qa | grep mysql-server)" ]]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
-                installpkg pkg mysql-server
+                installpkg pkg mysql-server mysql-client
                 enable_service mysqld
                 manage_service mysqld start
                 while true
@@ -1780,7 +1780,7 @@ function install_mysql(){
                 echo "mysql-server-$MYVERS mysql-server/root_password_again password $MYSQLP" | debconf-set-selections
                 echo "mysql-server-$MYVERS mysql-server/root_password seen true" | debconf-set-selections
                 echo "mysql-server-$MYVERS mysql-server/root_password_again seen true" | debconf-set-selections
-                installpkg pkg mysql-server
+                installpkg pkg mysql-server mysql-client
             fi
             ;;
     esac
