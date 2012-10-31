@@ -107,6 +107,10 @@
   <li class="sliding-element">
     <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
   </li>
+  <li class="sliding-element">
+    <a href="javascript:remove_all('{{user.get_name()}}')"><i class="icon-remove icon-white"></i> Delete</a>
+  </li>
+
 </ul>
 
 
@@ -244,25 +248,8 @@ $(function(){
       <a id='unselect_all_btn' style="display:inline;" href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
     </div>
     <div class='span7'>
-      &nbsp;
-      %if navi is not None:
-	<div class="pagination center">
-		<ul class="pull-right">
-		%for name, start, end, is_current in navi:
-		   	%if is_current:
-		   	<li class="active"><a href="#">{{name}}</a></li>
-		   	%elif start == None or end == None:
-		   	<li class="disabled"> <a href="#">...</a> </li>
-			%elif search:
-			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
-		   	%else:
-			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-		   	%end
-		    %end
-		</ul>
-	</div>
-      %# end of the navi part
-      %end
+        &nbsp;
+        %include pagination_element navi=navi, app=app, page=page, div_class="center no-margin"
     </div>
 
 </div>
@@ -540,25 +527,7 @@ $(function(){
     %end
   </div>
 
-	%if navi is not None:
-	<div class="pagination center">
-		<ul class="pull-right">
-		%for name, start, end, is_current in navi:
-		   	%if is_current:
-		   	<li class="active"><a href="#">{{name}}</a></li>
-		   	%elif start == None or end == None:
-		   	<li class="disabled"> <a href="#">...</a> </li>
-			%elif search:
-			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
-		   	%else:
-			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-		   	%end
-		    %end
-		</ul>
-	</div>
-	%# end of the navi part
-	%end
-
+       %include pagination_element navi=navi, app=app, page=page, div_class="center"
 
 </div>
 </div>

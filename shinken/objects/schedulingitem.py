@@ -518,7 +518,7 @@ class SchedulingItem(Item):
             if self.next_chk < now:
                 # Do not calculate next_chk based on current time, but based on the last check execution time.
                 # Important for consistency of data for trending.
-                if self.next_chk == 0:
+                if self.next_chk == 0 or self.next_chk is None:
                     self.next_chk = now
                 # maybe we do not have a check_period, if so, take always good (24x7)
                 if self.check_period:
@@ -532,7 +532,7 @@ class SchedulingItem(Item):
                 # We also do not make a distinction between the last absolute 11 seconds of a minute
                 # in the middle of a 5 minute interval versus the last 10 seconds of the check_interval.
                 # The algorithm is imperfect.
-                if ((self.check_interval * cls.interval_length) % 60) == 0:
+                if self.next_chk and ((self.check_interval * cls.interval_length) % 60) == 0:
                     second = datetime.fromtimestamp(self.next_chk).second
                     if second > 48:
                         self.next_chk = self.next_chk - ((second % 48) + 48 * random.uniform(0.1,1.0))

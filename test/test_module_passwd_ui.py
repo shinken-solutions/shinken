@@ -71,6 +71,11 @@ class TestPasswdUI(ShinkenTest):
         r = sl.check_auth('admin', 'foobar')
         self.assertTrue(r)
 
+        r = sl.check_auth('apache', 'toto')
+        self.assertTrue(r)
+
+        r = sl.check_auth('apachemd5', '0123456789ABCDE')
+        self.assertTrue(r)
 
 if __name__ == '__main__':
     if sys.version_info > (2, 5):

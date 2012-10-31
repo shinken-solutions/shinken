@@ -684,24 +684,26 @@ function relocate(){
     cecho " > relocate nagios plugin path" green
     sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
     sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
-    # relocate default /usr/local/shinken path
-    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
-    do
-        cecho " > Processing $fic" green
-        cp "$fic" "$fic.orig"
-        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic
-        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
-    done
 
+    # relocate default /usr/local/shinken path
+    if [ "$TARGET" != "/usr/local/shinken" ]
+    then
+	    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+	    do
+	        cecho " > Processing $fic" green
+	        cp "$fic" "$fic.orig"
+	        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
+	    done
+    fi
+
+    # do the same for etc dir if etc dir does not reside beside target
     if [ "$TARGET/etc" != "$ETC" ]
     then
-        # do the same for etc dir if etc dir does not reside beside target
         cd $ETC
         for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
         do
             cecho " > Processing $fic" green
             cp "$fic" "$fic.orig"
-            #sed -i 's#/opt/shinken#'$TARGET'#g' $fic
             sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
         done
         cd $TARGET
@@ -736,6 +738,12 @@ function relocate(){
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
     done
+    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    for fic in $(ls -1 $ETC/nagios*cfg)
+    do
+        cecho " > Processing $fic" green;
+        setdirectives "$directives" $fic $TARGET
+    done
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
@@ -754,6 +762,14 @@ function relocate(){
 
 function fix(){
     cadre "Applying various fixes" green
+
+    # fix the htpasswd.users file path for WEBUI authentication
+    export PYTHONPATH=$TARGET
+    export PY="$(pythonver)"
+    result=$($PY $TARGET/install.d/tools/skonf.py -f $ETC/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$ETC/htpasswd.users")
+    cecho " > $result" green
+
+    cecho " > Make files permissions and owners good" green
     [ -f /etc/init.d/shinken ] && chmod +x /etc/init.d/shinken
     chmod +x $TARGET/bin/init.d/shinken
     chown -R $SKUSER:$SKGROUP $TARGET
@@ -934,7 +950,9 @@ function sinstall(){
     then
         enablemongologs
     fi
+
     fix
+
     sstart
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
@@ -999,6 +1017,15 @@ function backup(){
         cecho " > Backup check_mk" green
         cecho " --> Backup check_mk/etc" green
         cp -Rfp $MKPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cecho " --> Backup check_mk/share" green
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/plugins/perfometers	$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cp -Rfp $MKPREFIX/share/web/htdocs/images/icons	$BACKUPDIR/bck-shinken.$DATE/check_mk/
+        cecho " --> Backup check_mk/var" green
+        cp -Rfp $MKPREFIX/var/lib/web $BACKUPDIR/bck-shinken.$DATE/check_mk/
+
     fi
 
     if [ -d $PNPPREFIX ]
@@ -1289,15 +1316,6 @@ function setdaemons(){
     cecho " > Enabling the followings daemons: $daemons" green
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
-
-function fixHtpasswdPath(){
-    export PYTHONPATH=$TARGET
-    export PY="$(pythonver)"
-    # fix the htpasswd.users file path for WEBUI authentication
-    result=$($PY $TARGET/install.d/tools/skonf.py -f $ETC/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$ETC/htpasswd.users")
-    cecho " > $result" green
-}
-
 
 # addons installation
 
@@ -3308,7 +3326,6 @@ do
         -i|--install)
             FROMSRC=1
             sinstall 
-            fixHtpasswdPath
             exit 0
             ;;
         -u|--uninstall)

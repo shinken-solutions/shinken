@@ -90,6 +90,11 @@ function get_elements(name){
 	elt.type_long = 'SERVICE';
 	elt.namevalue = elts[0]+';'+elts[1];
 	elt.nameslash = elts[0]+'/'+elts[1];
+	// And now for all elements, change the / into a $SLASH$ macro
+	for(var i=2; i<elts.length; i++){
+	    elt.namevalue = elt.namevalue+ '$SLASH$'+ elts[i];
+	    elt.nameslash = elt.nameslash+ '$SLASH$'+ elts[i];
+	}	
     }
     return elt
 
@@ -112,6 +117,30 @@ function do_acknowledge(name, text, user){
     var url = '/action/ACKNOWLEDGE_'+elts.type+'_PROBLEM/'+elts.nameslash+'/1/0/1/'+user+'/'+text;
     launch(url);
 }
+
+
+function do_remove(name, text, user){
+    var elts = get_elements(name);
+    
+    /* A Remove is in fact some several commands :
+       DISABLE_SVC_CHECK
+       DISABLE_PASSIVE_SVC_CHECKS
+       DISABLE_SVC_NOTIFICATIONS
+       DISABLE_SVC_EVENT_HANDLER
+       PROCESS_SERVICE_CHECK_RESULT
+     */
+
+    disable_notifications(elts);
+    disable_event_handlers(elts);
+    submit_check(name, 0, text);
+    // WARNING : Disable passive checks make the set not push, 
+    // so we only disable active checks
+    disable_checks(elts, false);
+    
+    // And later after (10s), we push a full disable, so passive too
+    setTimeout(function(){disable_checks(elts, true);}, 10000);
+}
+
 
 
 //# SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
@@ -152,27 +181,42 @@ function toggle_checks(name, b){
     var elts = get_elements(name);
     // Inverse the active check or not for the element
     if(b){ // go disable
-	var url = '/action/DISABLE_'+elts.type+'_CHECK/'+elts.nameslash;
-	launch(url);
-	var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
-	launch(url);
-	// Disable host services only if it's an host ;)
-	if(elts.type == 'HOST'){
-	    var url = '/action/DISABLE_HOST_SVC_CHECKS/'+elts.nameslash;
-	    launch(url);
-	}
-    }else{ // Go enable
-	var url = '/action/ENABLE_'+elts.type+'_CHECK/'+elts.nameslash;
-	launch(url);
-	var url = '/action/ENABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
-	launch(url);
-	// Disable host services only if it's an host ;)
-        if(elts.type == 'HOST'){
-	    var url = '/action/ENABLE_HOST_SVC_CHECKS/'+elts.nameslash;
-	    launch(url);
-	}
+	disable_checks(elts, true);
+    }else{ // Go enable, passive too
+	enable_checks(elts, true);
     }
 }
+
+
+function enable_checks(elts, passive_too){
+    var url = '/action/ENABLE_'+elts.type+'_CHECK/'+elts.nameslash;
+    launch(url);
+    if(passive_too){
+	var url = '/action/ENABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
+    // Disable host services only if it's an host ;)
+    if(elts.type == 'HOST'){
+	var url = '/action/ENABLE_HOST_SVC_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
+}
+
+
+function disable_checks(elts, passive_too){
+    var url = '/action/DISABLE_'+elts.type+'_CHECK/'+elts.nameslash;
+    launch(url);
+    if(passive_too){
+	var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
+    // Disable host services only if it's an host ;)
+    if(elts.type == 'HOST'){
+	var url = '/action/DISABLE_HOST_SVC_CHECKS/'+elts.nameslash;
+	launch(url);
+    }
+}
+
 
 
 function toggle_notifications(name, b){
@@ -180,13 +224,22 @@ function toggle_notifications(name, b){
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
     if(b){ // go disable
-        var url = '/action/DISABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
-        launch(url);
+	disable_notifications(elts);
     }else{ // Go enable
-        var url = '/action/ENABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
-        launch(url);
+	enable_notifications(elts);
     }
 }
+
+function disable_notifications(elts){
+    var url = '/action/DISABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
+    launch(url);
+}
+
+function enable_notifications(elts){
+    var url = '/action/ENABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
+    launch(url);
+}
+
 
 
 function toggle_event_handlers(name, b){
@@ -194,14 +247,21 @@ function toggle_event_handlers(name, b){
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
     if(b){ // go disable
-        var url = '/action/DISABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
-        launch(url);
+	disable_event_handlers(elts);
     }else{ // Go enable
-        var url = '/action/ENABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
-        launch(url);
+	enable_event_handlers(elts);
     }
 }
 
+function enable_event_handlers(elts){
+    var url = '/action/ENABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
+    launch(url);
+}
+
+function disable_event_handlers(elts){
+    var url = '/action/DISABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
+    launch(url);
+}
 
 function toggle_flap_detection(name, b){
     var elts = get_elements(name);

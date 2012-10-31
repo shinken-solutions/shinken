@@ -253,8 +253,15 @@ function try_to_fix_all(){
 
 function acknowledge_all(user){
     $.each(selected_elements, function(idx, name){
-	do_acknowledge(unid_name(name), 'Acknowledge from WebUI.', user);
+	do_acknowledge(unid_name(name), 'Acknowledged from WebUI by '+user, user);
     });
     flush_selected_elements();
 }
 
+
+function remove_all(user){
+    $.each(selected_elements, function(idx, name){
+        do_remove(unid_name(name), 'Removed from WebUI by '+user, user);
+    });
+    flush_selected_elements();
+}
