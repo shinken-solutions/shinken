@@ -58,7 +58,7 @@ function remove(){
         cecho " > Removing defaults" green
         rm -Rf /etc/default/shinken
     fi
-    if [ -f "/etc/init.d/shinken" ] || [ -f /lib/systemd/system/shinken-arbiter.service ] || [ -f /usr/lib/systemd/system/shinken-arbiter.service ]
+    if [ -f "/etc/init.d/shinken" ] || [ -f ${SYSTEMDPATH}lib/systemd/system/shinken-arbiter.service ]
     then
         cecho " > Removing startup scripts" green
         case $INIT in
@@ -68,8 +68,7 @@ function remove(){
                 ;;
             systemd)
                 systemctl disable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
-                rm -f /lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
-                rm -f /usr/lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
+                rm -f ${SYSTEMDPATH}lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
                 ;;
         esac
     fi
@@ -391,6 +390,7 @@ function prerequisites(){
                                 exit 2
                             fi
                             rpm -Uvh ./$EPELPKG >> ${LOGFILE} 2>&1
+                            find /etc/pki/rpm-gpg -name "RPM-GPG-KEY-EPEl*" -exec rpm --import {} \;
                         fi
                     else
                         cecho " > $EPELPKG already installed" green
@@ -424,28 +424,21 @@ function prerequisites(){
             QUERY="debinstalled "
             ;;
     esac
-    for p in $PACKAGES
-    do
-        $QUERY $p >> ${LOGFILE} 2>&1
+    if [ $SKIPPREREQUISITES -eq 1 ]
+    then
+        cecho " > SKIPPREQUISITES enabled: won't install $PACKAGES" red
+    else
+        cecho " > Installing $PACKAGES " yellow
+        installpkg pkg $PACKAGES
         if [ $? -ne 0 ]
         then
-            if [ $SKIPPREREQUISITES -eq 1 ]
-            then
-                cecho " > SKIPPREQUISITES enabled: won't install $p" red
-            else
-                cecho " > Installing $p " yellow
-                installpkg pkg $p
-                if [ $? -ne 0 ]
-                then
-                    cecho " > Error while trying to install $p" red
-                    exit 2
-                fi
-            fi
-        else
-            cecho " > Package $p already installed " green
+            cecho " > Error while trying to install $PACKAGES" red
+            exit 2
         fi
-    done
+    fi
     # python prereq
+    export PY="python"
+    export PYEI="easy_install"
     if [ "$CODE" = "REDHAT" ]
     then
         case $VERS in
@@ -470,8 +463,6 @@ function prerequisites(){
                 PYLIBS=$PYLIBSRHEL
                 ;;
             6)
-                export PY="python"
-                export PYEI="easy_install"
                 PYLIBS=$PYLIBSRHEL6
                 ;;
         esac
@@ -479,15 +470,11 @@ function prerequisites(){
     then
         case $VERS in
             16|17)
-                export PY="python"
-                export PYEI="easy_install"
                 PYLIBS=$PYLIBS
                 ;;
         esac
     elif [ "$CODE" == "DEBIAN" ]
     then
-        export PY="python"
-        export PYEI="easy_install"
         PYLIBS=$PYLIBSDEB
     fi
 
@@ -520,7 +507,6 @@ function prerequisites(){
         pyroset
         $PYEI "$PYRO"
     fi
-
 }
 
 function check_distro(){
@@ -802,9 +788,9 @@ function enable_initd(){
             enable_service shinken
             ;;
         systemd)
-            cp -f $src/for_fedora/systemd/* /lib/systemd/system
+            cp -f $src/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
             # Fix path to daemon in service file for systemd
-            sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' /lib/systemd/system/shinken*
+            sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' ${SYSTEMDPATH}lib/systemd/system/shinken*
             cecho " > Enabling $DIST startup script" green
             enable_service shinken-arbiter
             enable_service shinken-broker
@@ -1372,7 +1358,7 @@ function install_mongodb(){
             ;;
         Fedora)
             cecho " > Installing mongodb server" green
-            if [ ! -f /lib/systemd/system/mongod.service ] || [ ! -f /usr/lib/systemd/system/mongod.service ]
+            if [ ! -f ${SYSTEMDPATH}lib/systemd/system/mongod.service ]
             then
                     installpkg pkg $MONGOPKGS 
             else
