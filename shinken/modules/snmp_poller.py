@@ -249,6 +249,7 @@ class SNMPHost(object):
                     for s in self.frequences[interval].services.values()
                     for snmpoid in s.oids.values()
                     if s.instance != "NOTFOUND" and isinstance(snmpoid.max_, str) and snmpoid.max_])
+        # TODO : Unreachable code, FIXME!!!
         max_oids = []
         for s in self.frequences[interval].services.values():
             for snmpoid in s.oids.values():
@@ -1117,7 +1118,7 @@ class SNMPAsyncClient(object):
             try:
                 transportDispatcher.jobFinished(1)
             except:
-               pass
+                pass
 
 
 class Snmp_poller(BaseModule):
@@ -1329,7 +1330,9 @@ class Snmp_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    logger.info("[SnmpBooster] [%d]Dad say we are diing..." % self.id)
+                    #TODO : What is self.id undefined variable
+                    #logger.info("[SnmpBooster] [%d]Dad say we are dying..." % self.id)
+                    logger.info("[SnmpBooster] FIX-ME-ID Parent requests termination.")
                     break
             except:
                 pass
@@ -1353,7 +1356,7 @@ class Snmp_poller(BaseModule):
                                                                     'ignore'))
                         # If the command doesn't seem good
                         if len(clean_command) <= 1:
-                            logger.error("[SnmpBooster] Bad command detected: %s", a.command)
+                            logger.error("[SnmpBooster] Bad command detected: %s" % a.command)
                             continue
 
                         # we do not want the first member, check_snmp thing
@@ -1411,7 +1414,7 @@ class Snmp_poller(BaseModule):
                                                             'ignore'))
                 # If the command doesn't seem good
                 if len(clean_command) <= 1:
-                    logger.error("[SnmpBooster] Bad command detected: %s", a.command)
+                    logger.error("[SnmpBooster] Bad command detected: %s" % c.command)
                     continue
 
                 # we do not want the first member, check_snmp thing
