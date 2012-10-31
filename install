@@ -2511,7 +2511,7 @@ function install_nagios-plugins(){
     make install >> ${LOGFILE} >> $TMP/shinken.install.log  2>&1
     cp contrib/check_mem.pl $TARGET/libexec >> ${LOGFILE}  2>&1
     chmod +x $TARGET/libexec/check_mem.pl >> ${LOGFILE}  2>&1
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mem.pl >> ${LOGFILE} 2>&1
+    chown -R $SKUSER:$SKGROUP $TARGET/libexec/ >> ${LOGFILE} 2>&1
 }
 
 # MANUBULON SNMP PLUGINS
@@ -2558,6 +2558,7 @@ function install_manubulon(){
         cecho " => Installing $s" green
         cp $s $TARGET/libexec
     done
+    chown $SKUSER:$SKGROUP $TARGET/libexec/check_snmp*
 }
 
 # CHECK_WMI_PLUS
