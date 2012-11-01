@@ -35,7 +35,7 @@
     </ul>
     <p>Info text</p>
     <hr>
-    <p><a class="btn btn-success btn-large" href="#"><i class="icon-magic"></i> Manage System</a></p>
+    <p><a class="btn btn-success btn-large disabled" href="#"><i class="icon-magic"></i> Manage System</a></p>
   </div>
 </div>
 
@@ -48,6 +48,6 @@
     </ul>
     <p>Info text</p>
     <hr>
-    <p><a class="btn btn-success btn-large" href="#"><i class="icon-magic"></i> Link with other apps</a></p>
+    <p><a class="btn btn-success btn-large disabled" href="#"><i class="icon-magic"></i> Link with other apps</a></p>
   </div>
 </div>
