@@ -80,3 +80,4 @@ To Jan Ulferts for his patch about env macros fix on notifications
 To Rémi Sauvat for his patch about dashboard automatic widget refresh
 To chris81 for his patch for graphite API URLs
 To maethor and scaminad for reporting IMAP/POPS missing port
+To Florent Houbart for this bug fix on LiveStatus+NagVis

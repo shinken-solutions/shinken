@@ -472,7 +472,7 @@ class LiveStatusQueryMetainfo(object):
                         # hint : hosts_names
                         if len(hosts) == 1:
                             self.query_hints['target'] = HINT_SERVICES_BY_HOST
-                            self.query_hints['host_name'] = hosts[0]
+                            self.query_hints['host_name'] = hosts.pop()
                         else:
                             self.query_hints['target'] = HINT_SERVICES
                             self.query_hints['host_names_service_descriptions'] = services
