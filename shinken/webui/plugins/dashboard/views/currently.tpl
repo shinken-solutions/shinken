@@ -24,13 +24,13 @@ $(function($) {
 </script>
 
 <!-- Jet Pack Area START -->
-<div class="span12">
+<div>
   <p><span id="clock"></span></p>
   <p><span id="date"></span></p>
 </div>
 <!-- Jet Pack Area END -->
 
-<div class="span12"> 
+<div> 
   <ul id="Navigation" class="span8 wtf">
     <li class="span3">
       <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="85px" viewBox="0 0 100 83.419" enable-background="new 0 0 100 83.419" fill ="#FFFFFF" xml:space="preserve">
