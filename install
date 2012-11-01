@@ -683,8 +683,8 @@ function relocate(){
 
     # relocate nagios plugin path
     cecho " > relocate nagios plugin path" green
-    sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
-    sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
+    sed -i "s#/usr/lib/nagios/plugins#$LIBEXEC#g" $ETC/resource.cfg
+    sed -i "s#/usr/local/shinken/libexec#$LIBEXEC#g" $ETC/resource.cfg
 
     # relocate default /usr/local/shinken path
     if [ "$TARGET" != "/usr/local/shinken" ]
@@ -995,7 +995,7 @@ function backup(){
     cecho " --> Backup shinken/etc" green
     cp -Rfp $ETC/* $BACKUPDIR/bck-shinken.$DATE/etc
     cecho " --> Backup shinken/libexec" green
-    cp -Rfp $TARGET/libexec/* $BACKUPDIR/bck-shinken.$DATE/libexec
+    cp -Rfp $LIBEXEC/* $BACKUPDIR/bck-shinken.$DATE/libexec
     cecho " --> Backup shinken/var" green
     cp -Rfp $TARGET/var/* $BACKUPDIR/bck-shinken.$DATE/var
 
@@ -2035,15 +2035,11 @@ function install_cucumber(){
             yum clean all >> ${LOGFILE} 2>&1
         fi
         cecho " > Installing eue dependencies" green
-        for p in $EUEYUMPKG
-        do 
-            cecho " --> Installing $p" green
-            yum install -y $p >> ${LOGFILE} 2>&1
-            if [[ $? -ne 0 ]]
-            then
-                cecho " ----> There was a problem installing $p" red
-            fi
-        done
+        installpkg pkg $EUEYUMPKG
+    elif [[ "$CODE" == "Fedora" ]]
+    then
+        cecho " > Installing eue dependencies" green
+        installpkg pkg $EUEYUMPKG
     elif [[ "$CODE" == "DEBIAN" ]]
     then
         cecho " > Unsuported at the moment ...." red
@@ -2071,9 +2067,9 @@ function install_cucumber(){
   
     cecho " --> Deploy example eue service" green
     IP=$(ifconfig  | grep adr | awk -F: '{print $2}' | awk '{print $1}' | head -n 1)
-    cp $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services/
-    cp $TARGET/libexec/eue/glpi.ini.in $TARGET/libexec/eue/glpi.ini
-    sed -i "s/@@IPWEBUI@@/"$IP"/g" $TARGET/libexec/eue/glpi.ini
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services 
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $LIBEXEC/eue/glpi.ini.in $LIBEXEC/eue/glpi.ini
+    sed -i "s/@@IPWEBUI@@/"$IP"/g" $LIBEXEC/eue/glpi.ini
 
     cecho " --> restart shinken" green
     skill
@@ -2090,9 +2086,7 @@ function install_capture_plugin(){
     cecho " > Getting capture_plugin" green
     wget $WGETPROXY $CAPTURE_PLUGIN >> ${LOGFILE} 2>&1
     cecho " > Installing capture_plugin" green
-    mv capture_plugin.txt $TARGET/libexec/capture_plugin
-    chmod +x $TARGET/libexec/capture_plugin
-    chown $SKUSER:$SKGROUP $TARGET/libexec/capture_plugin
+    install -b -g $SKGROUP -o $SKUSER -m 0775 capture_plugin.txt $LIBEXEC/capture_plugin
 }
 
 # CHECK_HPASM
@@ -2156,9 +2150,7 @@ function install_check_hpasm(){
         exit 2
     fi
     cecho " > Installing check_hpasm" green
-    cp plugins-scripts/check_hpasm $TARGET/libexec/ >> ${LOGFILE} 2>&1
-    chmod +x $TARGET/libexec/check_hpasm  >> ${LOGFILE} 2>&1
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_hpasm >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 plugins-scripts/check_hpasm $LIBEXEC/ >> ${LOGFILE} 2>&1
 }
 
 # CHECK_MONGODB
@@ -2203,10 +2195,7 @@ function install_check_mongodb(){
     fi
 
     cecho " > Installing check_mongodb.py" green
-    mv check_mongodb.py $TARGET/libexec/check_mongodb.py
-    chmod +x $TARGET/libexec/check_mongodb.py
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mongodb.py
-
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_mongodb.py $LIBEXEC/check_mongodb.py
 }
 
 # Add two plugins to check IBM DS san devices.
@@ -2222,12 +2211,12 @@ function install_IBM_DS() {
         exit 2
     else
         cecho "Downloading plugins..." green
-        wget $WGETPROXY -O check_IBM_DS_health.sh $CHECKIBMDSHEALTH >> $TMP/shinken.install.log 2>&1
-        wget $WGETPROXY -O check_IBM_DS_performance.pl $CHECKIBMDSPERF >> $TMP/shinken.install.log 2>&1
+        wget $WGETPROXY -O check_IBM_DS_health.sh $CHECKIBMDSHEALTH >> ${LOGFILE} 2>&1
+        wget $WGETPROXY -O check_IBM_DS_performance.pl $CHECKIBMDSPERF >> ${LOGFILE} 2>&1
     fi
 
     cecho "Installing plugins..." green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_IBM_DS_health.sh check_IBM_DS_performance.pl >> $TMP/shinken.install.log 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_IBM_DS_health.sh check_IBM_DS_performance.pl >> ${LOGFILE} 2>&1
 
     cadre "Successfully installed IBM DS san monitoring plugins." green
 }
@@ -2236,10 +2225,10 @@ function install_IBM_plugins() {
     cadre "Install check_snmp_aixVGstate.pl, check_snmp_HACMP.pl, check_snmp_Safekit.pl and check_snmp_systemHealth.pl" green
 
     cecho "Downloading plugins..." green
-    wget $WGETPROXY $CHECKIBM >> $TMP/shinken.install.log 2>&1
+    wget $WGETPROXY $CHECKIBM >> ${LOGFILE} 2>&1
 
     cecho "Installing plugins..." green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_systemHealth.pl check_snmp_aixVGstate.pl check_snmp_HACMP.pl check_snmp_Safekit.pl >> $TMP/shinken.install.log 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_snmp_systemHealth.pl check_snmp_aixVGstate.pl check_snmp_HACMP.pl check_snmp_Safekit.pl >> ${LOGFILE} 2>&1
 }
 
 function install_HPUX_plugins() {
@@ -2249,7 +2238,7 @@ function install_HPUX_plugins() {
     wget $WGETPROXY $CHECKHPUX >> ${LOGFILE} 2>&1
 
     cecho "Installing plugins..." green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_hpux_storage.pl check_snmp_mem >> $TMP/shinken.install.log 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_snmp_hpux_storage.pl check_snmp_mem >> ${LOGFILE} 2>&1
 }
 
 # CHECK_NWC_HEALTH
@@ -2369,9 +2358,7 @@ plugin. Ask your vendor to know how to get it." yellow
 
     cecho " > Install check_emc_clariion.pl" green
     cd check_emc
-    mv check_emc_clariion.pl $TARGET/libexec/
-    chmod +x $TARGET/libexec/check_emc_clariion.pl
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_emc_clariion.pl
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_emc_clariion.pl $LIBEXEC/
 }
 
 # CHECK_ESX3
@@ -2447,10 +2434,7 @@ function install_check_esx3(){
     cd $TMP
     cecho " > Getting check_esx3 plugin from op5" green
     wget $WGETPROXY $CHECK_ESX3_SCRIPT -O check_esx3.pl >> ${LOGFILE} 2>&1
-    mv check_esx3.pl $TARGET/libexec/check_esx3.pl
-    chmod +x $TARGET/libexec/check_esx3.pl
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_esx3.pl
-
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_esx3.pl $LIBEXEC/check_esx3.pl
 }
 
 # NAGIOS-PLUGINS
@@ -2480,12 +2464,10 @@ function install_nagios-plugins(){
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green
-    make >> ${LOGFILE} >> $TMP/shinken.install.log  2>&1
+    make >> ${LOGFILE} >> ${LOGFILE}  2>&1
     cecho " > Installing" green
-    make install >> ${LOGFILE} >> $TMP/shinken.install.log  2>&1
-    cp contrib/check_mem.pl $TARGET/libexec >> ${LOGFILE}  2>&1
-    chmod +x $TARGET/libexec/check_mem.pl >> ${LOGFILE}  2>&1
-    chown -R $SKUSER:$SKGROUP $TARGET/libexec/ >> ${LOGFILE} 2>&1
+    make install >> ${LOGFILE} >> ${LOGFILE}  2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 contrib/check_mem.pl $LIBEXEC >> ${LOGFILE} 2>&1
 }
 
 # MANUBULON SNMP PLUGINS
@@ -2504,7 +2486,7 @@ function install_manubulon(){
     cd $TMP
 
     # check if utils.pm is there
-    if [ ! -f $TARGET/libexec/utils.pm ]
+    if [ ! -f $LIBEXEC/utils.pm ]
     then
         cecho " > Unable to find utils.pm. You should install nagios-plugins first (./shinken.sh -p nagios-plugins)" red
         exit 2
@@ -2528,11 +2510,10 @@ function install_manubulon(){
     for s in $(ls -1 $TMP/$folder/*.pl)
     do
         cecho " => Processing $s" green
-        sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $s
-        cecho " => Installing $s" green
-        cp $s $TARGET/libexec
+        sed -i "s#/usr/local/nagios/libexec#"$LIBEXEC"#g" $s
     done
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_snmp*
+    cecho " => Installing" green
+    install -b -g $SKGROUP -o $SKUSER -m 0775 $TMP/$folder/*pl $LIBEXEC
 }
 
 # CHECK_WMI_PLUS
@@ -2577,8 +2558,7 @@ function install_check_wmi_plus(){
         exit 2
     fi
     cecho " > Installing wmic" green
-    cp Samba/source/bin/wmic $TARGET/libexec/
-    chown $SKUSER:$SKGROUP Samba/source/bin/wmic
+    install -b -g $SKGROUP -o $SKUSER -m 0775 Samba/source/bin/wmic $LIBEXEC
     cd $TMP
     cecho " > Downloading check_wmi_plus" green
     filename=$(echo $CHECKWMIPLUS | awk -F"/" '{print $NF}')
@@ -2590,15 +2570,16 @@ function install_check_wmi_plus(){
     cecho " > Extracting archive" green
     tar zxvf $filename >> ${LOGFILE} 2>&1
     cecho " > Installing plugin" green
-    cp check_wmi_plus.conf.sample $TARGET/libexec/check_wmi_plus.conf
-    cp check_wmi_plus.pl $TARGET/libexec/check_wmi_plus.pl
-    cp -R $TMP/check_wmi_plus.d $TARGET/libexec/
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_wmi_plus*
+    install -b -g $SKGROUP -o $SKUSER -m 0664 check_wmi_plus.conf.sample $LIBEXEC/check_wmi_plus.conf
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_wmi_plus.pl $LIBEXEC/check_wmi_plus.pl
+    install -g $SKGROUP -o $SKUSER -m 0775 -d $LIBEXEC/check_wmi_plus.d
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TMP/check_wmi_plus.d/* $LIBEXEC
+
     cecho " > configuring plugin" green
-    sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.conf
-    sed -i "s#/bin/wmic#"$TARGET"/libexec/wmic#g" $TARGET/libexec/check_wmi_plus.conf
-    sed -i "s#/opt/nagios/bin/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
-    sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+    sed -i "s#/usr/lib/nagios/plugins#"$LIBEXEC"#g" $LIBEXEC/check_wmi_plus.conf
+    sed -i "s#/bin/wmic#"$LIBEXEC"/wmic#g" $LIBEXEC/check_wmi_plus.conf
+    sed -i "s#/opt/nagios/bin/plugins#"$LIBEXEC"#g" $LIBEXEC/check_wmi_plus.pl
+    sed -i "s#/usr/lib/nagios/plugins#"$LIBEXEC"#g" $LIBEXEC/check_wmi_plus.pl
 }
 
 # CHECK_ORACLE_HEALTH
@@ -2663,7 +2644,7 @@ function install_check_oracle_health(){
     filename=$(echo $CHECKORACLEHEALTH | awk -F"/" '{print $NF}')
     tar zxvf $filename >> ${LOGFILE} 2>&1
     cd $(echo $filename | sed -e "s/\.tar\.gz//g")
-    ./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var$TMP >> ${LOGFILE} 2>&1
+    ./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$LIBEXEC --with-mymodules-dyn-dir=$LIBEXEC --with-statefiles-dir=$TARGET/var$TMP >> ${LOGFILE} 2>&1
     cecho " > Building plugin" green
     make >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
@@ -2679,7 +2660,7 @@ function install_check_oracle_health(){
     fi
     cecho " > Installing plugin" green
     make install >> ${LOGFILE} 2>&1
-    mkdir -p $TARGET/var$TMP >> $TMP/shinke.install.log 2>&1
+    mkdir -p ${VAR}${TMP} >> ${LOGFILE} 2>&1
 }
 # CHECK_NETAPP2
 
@@ -2707,10 +2688,8 @@ function install_check_netapp2(){
     cecho " > Installing plugin" green
     # fuckin assholes that upload perl scripts edited with notepad or so
     perl -p -e 's/\r$//' < check_netapp2 > check_netapp2.pl
-    chmod +x check_netapp2.pl >> ${LOGFILE} 2>&1
-    chown $SKUSER:$SKGROUP check_netapp2.pl >> ${LOGFILE} 2>&1
-    cp -p check_netapp2.pl $TARGET/libexec/check_netapp2 >> ${LOGFILE} 2>&1
-    sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $TARGET/libexec/check_netapp2 >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_netapp2.pl $LIBEXEC
+    sed -i "s#/usr/local/nagios/libexec#"$LIBEXEC"#g" $LIBEXEC/check_netapp2.pl >> ${LOGFILE} 2>&1
 }
 
     # CHECK_MEM
@@ -2736,9 +2715,7 @@ function install_check_mem(){
     tar zxvf check_mem.tar.gz >> ${LOGFILE} 2>&1
     cecho " > Installing plugin" green
     folder=$(ls -1 | grep "^justintime")
-    cp -f $folder/check_mem/check_mem.pl $TARGET/libexec/ >> ${LOGFILE} 2>&1
-    chmod +x $TARGET/libexec/check_mem.pl >> ${LOGFILE} 2>&1
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mem.pl >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 $folder/check_mem/check_mem.pl $LIBEXEC
 }
 
 # CHECK_MYSQL_HEALTH
@@ -2767,7 +2744,7 @@ function install_check_mysql_health(){
     filename=$(echo $CHECKMYSQLHEALTH | awk -F"/" '{print $NF}')
     tar zxvf $filename >> ${LOGFILE} 2>&1
     cd $(echo $filename | sed -e "s/\.tar\.gz//g")
-    ./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var$TMP >> ${LOGFILE} 2>&1
+    ./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$LIBEXEC --with-mymodules-dyn-dir=$LIBEXEC --with-statefiles-dir=$TARGET/var$TMP >> ${LOGFILE} 2>&1
     cecho " > Building plugin" green
     make >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
@@ -2818,7 +2795,7 @@ function install_check_snmp_bandwidth(){
     fi
 
     cecho " > install check_snmp_bandwidth pnp template" green
-    cp $filename $LIBEXEC/$script
+    install -b -g $SKGROUP -o $SKUSER -m 0775 $filename $LIBEXEC/$script
 }
 
 function install_check_netint(){
@@ -2836,7 +2813,7 @@ function install_check_netint(){
     fi
 
     cecho " > install check_netint" green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_netint.pl >> $TMP/shinken.install.log 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_netint.pl
 }
 
 function install_check_rsync(){
@@ -2852,12 +2829,10 @@ function install_check_rsync(){
     fi
 
     cecho " > Installing check_rsync" green
-    mv check_rsync $LIBEXEC/check_rsync
-    chmod +x $LIBEXEC/check_rsync
-    chown $SKUSER:$SKGROUP $LIBEXEC/check_rsync
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_rsync $LIBEXEC/check_rsync
 
     cecho " > Configuring check_rsync" green
-    sed -i "s#/usr/local/nagios/libexec#$LIBEXEC#g" $LIBEXEC/check_rsync
+    sed -i "s#/usr/local/nagios/libexec#"$LIBEXEC"#g" $LIBEXEC/check_rsync
 }
 
 function nconf-import-packs(){
