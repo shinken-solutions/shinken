@@ -798,7 +798,6 @@ function enable_initd(){
             enable_service shinken-reactionner
             enable_service shinken-receiver
             enable_service shinken-scheduler
-            enable_service shinken-skonf
             ;;
         *)
             cecho " > Error! your init system isn't support by shinken for now." red
