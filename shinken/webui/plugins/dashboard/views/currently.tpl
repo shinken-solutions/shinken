@@ -11,7 +11,7 @@ widget_context = 'dashboard';
 <script type="text/javascript">
 $(function($) {
   var options1 = {
-        format: '%I %M %S %p' // 12-hour
+        format: '%H:%M:%S ' // 24-hour
       }
       $('#clock').jclock(options1);
 
