@@ -13,9 +13,9 @@
 	<ul class="nav">
 	  <li class="dropdown">
 	    <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
-	    <ul class="dropdown-menu span4">
+	    <ul class="dropdown-menu">
             <li><a href=":7767">Shinken UI </a></li>
-            <li><a href=":7766">Skonf UI</a></li>
+            <li><a href=":7766">Skonf UI</a><span class="badger-beta badger-critical">Beta</span></li>
 	      <!-- We will add also others UIs on the global menu -->
 	      %if app:
 	        %other_uis = app.get_external_ui_link()
