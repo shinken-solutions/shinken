@@ -25,7 +25,7 @@
         <h3><i class="icon-cogs"> Shinken Daemons</i></h3>
         %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
         %for (sat_type, sats) in types:
-        <h4><i class="icon-bullhorn font-blue"></i> {{sat_type.capitalize()}}</h4>
+        <h4><i class="icon-wrench"></i> {{sat_type.capitalize()}}</h4>
         <table class="table table-hover">
           <thead>
             <tr>
