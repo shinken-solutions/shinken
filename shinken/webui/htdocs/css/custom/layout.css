@@ -52,6 +52,10 @@ html, body {height: 95.5%;}
 }
 
 .font-yellow {
+  color: #FFEE00;
+}
+
+.font-orange {
   color: #F89406;
 }
 
@@ -68,7 +72,6 @@ html, body {height: 95.5%;}
 
 /*  Special Shinken styles
     ------------------------------------------------------- */
-
 .min-height {
   min-height: 600px;
 }
