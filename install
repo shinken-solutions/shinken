@@ -740,7 +740,7 @@ function relocate(){
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
     done
-    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiterd.log lock_file=$TARGET/var/arbiterd.pid"
     for fic in $(ls -1 $ETC/nagios*cfg)
     do
         cecho " > Processing $fic" green;
