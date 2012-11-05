@@ -43,7 +43,7 @@
 
 NAME="shinken"
 
-AVAIL_MODULES="skonf scheduler poller reactionner broker receiver arbiter"
+AVAIL_MODULES="arbiter scheduler poller reactionner broker receiver skonf"
 
 ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
 if [ -z "$SHINKEN_MODULE_FILE" ]; then
