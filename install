@@ -69,6 +69,7 @@ function remove(){
             systemd)
                 systemctl disable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
                 rm -f ${SYSTEMDPATH}lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
+                systemctl --system daemon-reload
                 ;;
         esac
     fi
