@@ -104,7 +104,7 @@
 		%include header_element_skonf globals()
 	%end
 
-    <div class="container-fluid no-leftpadding">
+    <div class="container-fluid">
       <div class="row-fluid">
         <div class="span12 min-height">
 			%include
