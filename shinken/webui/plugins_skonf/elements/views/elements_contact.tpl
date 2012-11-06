@@ -1,7 +1,4 @@
-
-
 %rebase layout_skonf globals(), css=['elements/css/token-input.css', 'elements/css/token-input-facebook.css', 'elements/css/jquery.bsmselect.css', 'elements/css/jquery-ui.css'], js=['elements/js/host.js', 'elements/js/jquery.tokeninput.js', 'elements/js/jquery.bsmselect.js', 'elements/js/jquery.bsmselect.sortable.js', 'elements/js/jquery.bsmselect.compatibility.js', 'elements/js/sliders.js', 'elements/js/selects.js', 'elements/js/forms.js', 'elements/js/macros.js'], title='Contact'
-
 
 %editable = ''
 %print "EDITABLE?", elt, elt.get('editable', '1')
@@ -9,14 +6,10 @@
 %editable = 'disabled'
 %end
 
-
 <script>
-
-// Keep a list of all properties, with their own properties :)
-var properties = [];
-var new_properties = [];
-    </script>
-
+  // Keep a list of all properties, with their own properties :)
+  var properties = [];
+  var new_properties = [];
 </script>
 
 <div class='offset1 span10'>
@@ -25,7 +18,7 @@ var new_properties = [];
 
 <a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 
-<div class='offset1 span10'>
+<div class="row-fluid">
   <form data-table='contacts' name='form-element'>
     <input name="_id" type="hidden" value="{{elt.get('_id', '')}}"/>
     <ul class="nav nav-tabs">
@@ -53,9 +46,8 @@ var new_properties = [];
       </div>
       <!-- Tab Generic stop-->
 
-
-      <!-- Tab Macros -->
-      <div class="tab-pane" id="direct">
+<!-- Tab Macros -->
+<div class="tab-pane" id="direct">
 	{{!helper.get_select_input(elt, 'host_notification_period', 'Host notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 	{{!helper.get_select_input(elt, 'service_notification_period', 'Service notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 
@@ -70,17 +62,15 @@ var new_properties = [];
 	{{!helper.get_string_input(elt, 'service_notification_options', 'Service notification options', editable=editable)}}
 
 	{{!helper.get_string_input(elt, 'min_business_impact', 'Minimum business impact (filter)', editable=editable)}}
-
-
-      </div>
+</div>
       <!-- Tab Macros stop -->
 
 
-      <!-- Tab Macros -->
-      <div class="tab-pane" id="macros">
+<!-- Tab Macros -->
+<div class="tab-pane" id="macros">
 	{{!helper.get_customs_inputs(app, elt, editable=editable)}}
-      </div>
-      <!-- Tab Macros stop -->
+</div>
+<!-- Tab Macros stop -->
 
 
 

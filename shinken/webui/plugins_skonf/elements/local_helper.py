@@ -342,8 +342,8 @@ class Helper(object):
         sorted_names.sort()
         print 'Sorted names', sorted_names
 
-        s += "<span class='span12'><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>" % editable
-        s += "<span id='new_macros' class='span12'></span>"
+        s += "<span><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus'></i> Add macro</a></span>" % editable
+        s += "<span id='new_macros'></span>"
         # We want to show the how element macros value first
         tnames.insert(0, '__ITEM__')
         for tname in tnames:
