@@ -28,23 +28,36 @@
     </ul>
 
     <div class="tab-content">
-      <!-- Tab Generic Stop-->
-      <div class="tab-pane active" id="generic">
 
-	{{!helper.get_string_input(elt, 'contact_name', 'Contact name', span='span5', popover='Name of the contact. Should be unique.', editable=editable)}}
-	{{!helper.get_string_input(elt, 'display_name', 'Display name', span='span6', innerspan='span3', placeholder=elt.get('contact_name', ''), editable=editable)}}
-	{{!helper.get_string_input(elt, 'email', 'Email', span='span5', editable=editable)}}
-	{{!helper.get_string_input(elt, 'pager', 'Phone', span='span5', editable=editable)}}
-	<span class="span10">
-	  <span class="help-inline span1">Tags </span>
-	  <input id='use' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' data-cls='contact' name="use" type="text" tabindex="2"/>
-	  <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
-	</span>
-	{{!helper.get_bool_input(elt, 'can_submit_commands', 'Can submit command', editable=editable)}}
-	{{!helper.get_bool_input(elt, 'is_admin', 'Is a monitoring administrator', editable=editable)}}
+<!-- Tab Generic Stop-->
+<div class="tab-pane active" id="generic">
+  <div class="span6">
+    {{!helper.get_string_input(elt, 'contact_name', 'Contact name', span='', popover='Name of the contact. Should be unique.', editable=editable)}}
 
-      </div>
-      <!-- Tab Generic stop-->
+    {{!helper.get_string_input(elt, 'display_name', 'Display name', span='', innerspan='span3', placeholder=elt.get('contact_name', ''), editable=editable)}}
+  </div>
+	
+  <div class="span6">
+    {{!helper.get_string_input(elt, 'email', 'Email', span='', editable=editable)}}
+  
+    {{!helper.get_string_input(elt, 'pager', 'Phone', span='', editable=editable)}}
+  </div>
+
+  <div class="span11">
+    <form class="form-horizontal">
+      <label class="">Tags: </label>
+      <input id='use' class="to_use_complete" data-use='{{elt.get('use', '')}}' data-cls='contact' name="use" type="text" tabindex="2"/>
+      <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
+    </form>
+  </div>
+
+  <div class="span6">
+    {{!helper.get_bool_input(elt, 'can_submit_commands', 'Can submit command', editable=editable)}}
+   {{!helper.get_bool_input(elt, 'is_admin', 'Is a monitoring administrator', editable=editable)}}
+  </div>
+	
+</div>
+<!-- Tab Generic stop-->
 
 <!-- Tab Macros -->
 <div class="tab-pane" id="direct">
