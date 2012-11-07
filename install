@@ -734,13 +734,13 @@ function relocate(){
 
     # set some directives
     cadre "Set some configuration directives" green
-    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
-    for fic in $(ls -1 $ETC/*.ini)
+    directives="workdir=$TARGET/var user=$SKUSER shinken_user=$SKUSER group=$SKGROUP shinken_group=$SKGROUP"
+    for fic in $(ls -1 $ETC/*.ini $ETC/skonf.cfg)
     do
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
     done
-    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiterd.log lock_file=$TARGET/var/arbiterd.pid"
+    directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
     for fic in $(ls -1 $ETC/nagios*cfg)
     do
         cecho " > Processing $fic" green;
