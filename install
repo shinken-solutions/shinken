@@ -979,7 +979,7 @@ function backup(){
     if [ -f /etc/init.d/npcd ]
     then
         cecho " > Stop npcd" green
-        manage_service npcd stop > /dev/null 2>&1
+        /etc/init.d/npcd stop > /dev/null 2>&1
     fi
 
     if [ ! -e $BACKUPDIR ]
@@ -995,7 +995,7 @@ function backup(){
     cecho " --> Backup shinken/etc" green
     cp -Rfp $ETC/* $BACKUPDIR/bck-shinken.$DATE/etc
     cecho " --> Backup shinken/libexec" green
-    cp -Rfp $LIBEXEC/* $BACKUPDIR/bck-shinken.$DATE/libexec
+    cp -Rfp $TARGET/libexec/* $BACKUPDIR/bck-shinken.$DATE/libexec
     cecho " --> Backup shinken/var" green
     cp -Rfp $TARGET/var/* $BACKUPDIR/bck-shinken.$DATE/var
 
@@ -1015,15 +1015,14 @@ function backup(){
         cecho " > Backup check_mk" green
         cecho " --> Backup check_mk/etc" green
         cp -Rfp $MKPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cecho " --> Backup check_mk/share" green
-        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cp -Rfp $MKPREFIX/share/web/plugins/dashboard		$BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cp -Rfp $MKPREFIX/share/web/plugins/perfometers	$BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cp -Rfp $MKPREFIX/share/web/htdocs/images/icons	$BACKUPDIR/bck-shinken.$DATE/check_mk/
-        cecho " --> Backup check_mk/var" green
-        cp -Rfp $MKPREFIX/var/lib/web $BACKUPDIR/bck-shinken.$DATE/check_mk/
-
+	 cecho " --> Backup check_mk/share" green
+ 	 cp -Rfp $MKPREFIX/share/web/plugins/dashboard    $BACKUPDIR/bck-shinken.$DATE/check_mk/
+ 	 cp -Rfp $MKPREFIX/share/web/plugins/dashboard    $BACKUPDIR/bck-shinken.$DATE/check_mk/
+ 	 cp -Rfp $MKPREFIX/share/web/plugins/dashboard    $BACKUPDIR/bck-shinken.$DATE/check_mk/
+ 	 cp -Rfp $MKPREFIX/share/web/plugins/perfometer  $BACKUPDIR/bck-shinken.$DATE/check_mk/
+ 	 cp -Rfp $MKPREFIX/share/web/htdocs/images/icons  $BACKUPDIR/bck-shinken.$DATE/check_mk/
+ 	 cecho " --> Backup check_mk/var" green
+ 	 cp -Rfp $MKPREFIX/var/lib/web $BACKUPDIR/bck-shinken.$DATE/check_mk/
     fi
 
     if [ -d $PNPPREFIX ]
@@ -1038,13 +1037,19 @@ function backup(){
         cp -Rfp $PNPPREFIX/share/templates $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
     fi
 
-
+    
+    cecho " > Compressing backup file" green    
+    tar czPf $BACKUPDIR/bck-shinken.$DATE.tar.gz   $BACKUPDIR/bck-shinken.$DATE
+    cecho " > Removing backup folder. Backup is now at " green
+    echo $BACKUPDIR/bck-shinken.$DATE.tar.gz
+    rm -rf $BACKUPDIR/bck-shinken.$DATE
+    
     cecho " > Start shinken" green
     sstart
     if [ -f /etc/init.d/npcd ]
     then
         cecho " > Start npcd" green
-        manage_service npcd start
+        /etc/init.d/npcd start > /dev/null 2>&1
     fi
 
     cadre " > Backup done. Id is $DATE" green
@@ -1077,19 +1082,60 @@ function restore(){
         backuplist
         exit 2
     fi
-    if [ ! -e $BACKUPDIR/bck-shinken.$1 ]
+    if [ ! -e $BACKUPDIR/bck-shinken.$1.tar.gz ]
     then
         cecho " > Backup not found: $BACKUPDIR/bck-shinken.$1 " red
         backuplist
         exit 2
     fi
 
+    cecho " > Unpacking backup files" green
+    mkdir $BACKUPDIR/bck-shinken.$1
+    tar xzPf $BACKUPDIR/bck-shinken.$1.tar.gz -C $BACKUPDIR/bck-shinken.$1
+  
+    cecho " > Restoring Shinken" green	
     # Keep Shinken original files as samples conf files and restore.
+    cecho " --> Restoring Shinken files" green	
     cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/etc/* $ETC/
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/var/* $VAR/
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
+    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/var/* $VAR/
+    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
+    # Nagvis
+    if [ -d $NAGVISPREFIX ]
+    then
+        cecho " --> Restoring Restore Nagvis" green
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/etc $NAGVISPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/userfiles $NAGVISPREFIX/share/userfiles
+    fi
+    # Check_MK Multisite
+    if [ -d $MKPREFIX ]
+    then
+        cecho " --> Restoring Restore Check_mk" green
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/etc $MKPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard $MKPREFIX/share/web/plugins/dashboard
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/perfometer $MKPREFIX/share/web/plugins/perfometer
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard $MKPREFIX/share/web/plugins/dashboard
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/icons $MKPREFIX/share/web/htdocs/images/icons
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/web $MKPREFIX/var/lib/web
+    fi
+    # PNP4Nagios
+    if [ -d $PNPPREFIX ]
+    then
+        cecho " --> Restoring Restore PNP4Nagios" green
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/etc $PNPPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/var $PNPPREFIX/var
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/templates $PNPPREFIX/share/templates
+    fi
 
+    rm -rf $BACKUPDIR/bck-shinken.$1
     cecho " > Restoration done. Original files was kept with '.example' suffix, use 'diff' to check differences between your files and original." green
+
+    # Start Shinken after restore	
+    sstart
+    if [ -f /etc/init.d/npcd ]
+    then
+        cecho " > Start npcd" green
+        /etc/init.d/npcd start > /dev/null 2>&1
+    fi
 }
 
 ########################
