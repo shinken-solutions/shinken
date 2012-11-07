@@ -43,17 +43,21 @@
     {{!helper.get_string_input(elt, 'pager', 'Phone', span='', editable=editable)}}
   </div>
 
-  <div class="span11">
+  <div class="span12 no-leftmargin">
     <form class="form-horizontal">
-      <label class="">Tags: </label>
-      <input id='use' class="to_use_complete" data-use='{{elt.get('use', '')}}' data-cls='contact' name="use" type="text" tabindex="2"/>
-      <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
+      <div class="control-group">
+        <label class="control-label">Tags: </label>
+          <div class="controls"> 
+            <input id='use' class="to_use_complete" data-use='{{elt.get('use', '')}}' data-cls='contact' name="use" type="text" tabindex="2"/>
+          </div>
+        <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
+      </div>
     </form>
   </div>
 
-  <div class="span6">
+  <div class="span6 no-leftmargin">
     {{!helper.get_bool_input(elt, 'can_submit_commands', 'Can submit command', editable=editable)}}
-   {{!helper.get_bool_input(elt, 'is_admin', 'Is a monitoring administrator', editable=editable)}}
+    {{!helper.get_bool_input(elt, 'is_admin', 'Is a monitoring administrator', editable=editable)}}
   </div>
 	
 </div>

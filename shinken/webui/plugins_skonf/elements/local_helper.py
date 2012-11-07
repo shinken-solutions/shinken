@@ -108,16 +108,18 @@ class Helper(object):
             unset = 'active'
 
         s = '''
-        <span class="span10">
-           <span class="help-inline span2"> %s </span>
+        <form class="form-horizontal">
+        <div class="control-group">
+           <label class="control-label"> %s </label>
 
         <script>properties.push({'name': '%s', 'type': 'bool'});</script>
-        <div class="btn-group span9 %s" data-toggle="buttons-radio">
+        <div class="btn-group controls %s" data-toggle="buttons-radio">
           <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
           <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
           <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
         </div>
-        </span>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
+        </div>
+        </form>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
         return s
 
     def get_percent_input(self, elt, prop, name, editable='', placeholder='', popover=None):
