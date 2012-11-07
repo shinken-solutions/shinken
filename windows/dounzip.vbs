@@ -17,12 +17,14 @@ wscript.echo "foldername = " & zipfolder
 dounzip zipfoldername, zipfolder
 
 Sub doUnzip(sZipFolder, sDest)
-   Dim oShell
+   Dim oShell, objSource, objTarget
    Dim oZF        ' this must be Variant
    Dim oD         ' this must be Variant
    oZF = sZipFolder
    oD = sDest
    Set oShell = CreateObject("Shell.Application")
    'Extract the files from the zip into the folder
-   oShell.NameSpace(oD).CopyHere oShell.NameSpace(oZF).Items
+   Set objTarget = oShell.NameSpace(oD)
+   Set objSource = oShell.NameSpace(oZF).Items()
+   objTarget.CopyHere objSource, 256
 End Sub

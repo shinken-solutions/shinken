@@ -11,7 +11,7 @@ rem
 
 echo Shinken Windows Installation
 echo Provided by VEOSOFT for Shinken Team
-echo V 1.2 - October 2012z
+echo V 1.2 - October 2012
 echo ====================================
 echo Checkin for InstallUtil tool ....
 
@@ -27,12 +27,6 @@ echo Copying the logconfig folder...
 if not exist ..\logconfig md ..\logconfig
 xcopy logconfig ..\logconfig /S /E /Y
 echo logconfig copied.
-
-rem copying the libexec folder....
-echo Copying the libexec for windows folder...
-if not exist ..\libexec md ..\libexec
-xcopy libexec-windows ..\libexec /S /E /Y
-echo libexec for windows copied.
 
 rem updating the etc folder....
 echo Updating the etc for windows folder...
@@ -54,14 +48,18 @@ xcopy bin ..\bin /S /E /Y
 echo bin for windows updated.
 
 
-rem Checking the third par....
+rem Checking the third part....
 ping www.veosoft.net -n 1
 if "%errorlevel%"=="0" goto thirdpart
+echo #################################################################################
+echo #################################################################################
 echo WARNING !
 echo Internet seems to be not connected....
 echo Please check your connection. You may also download the thirdpart by your own way.
 echo Ending the installation script with services installation.
 echo .
+echo #################################################################################
+echo #################################################################################
 goto installservices
 :thirdpart
 
@@ -79,9 +77,14 @@ xcopy check_wmi_plus\*.* libexec-windows /S /E /Y
 
 copy /Y .\libexec-windows\check_wmi_plus.pltpl .\libexec-windows\check_wmi_plus.pl
 copy /Y .\libexec-windows\check_wmi_plus.conftpl .\libexec-windows\check_wmi_plus.conf
-xcopy libexec-windows ..\libexec /S /E /Y
 
 :installservices
+rem copying the libexec folder....
+echo Copying the libexec for windows folder...
+if not exist ..\libexec md ..\libexec
+xcopy libexec-windows ..\libexec /S /E /Y
+echo libexec for windows copied.
+
 echo Updating the install root for windows folder...
 xcopy *.* ..\ /Y
 echo install root for windows updated.
@@ -90,6 +93,12 @@ cd ..
 if exist .\libexec\check_wmi_plus.pl cscript replace_perl_installdir.vbs .\libexec\check_wmi_plus.pl @@installdir@@ "%cd%"
 if exist .\libexec\check_wmi_plus.conf cscript replace_perl_installdir.vbs .\libexec\check_wmi_plus.conf @@installdir@@ "%cd%"
 cscript replace_installdir.vbs .\etc\resource.cfg @@installdir@@ "%cd%"
+REM Now, change the @@installdir@@ of the conf files (xxxx-windows.ini
+
+REM Using replace_installdir2 is to use \\ in order of \
+cscript replace_installdir2.vbs .\etc\nagios-windows.cfg @@installdir@@ "%cd%"
+cscript replace_installdir2.vbs .\etc\shinken-specific-windows.cfg @@installdir@@ "%cd%"
+
 start install-arbiter.cmd
 start install-broker.cmd
 start install-poller.cmd

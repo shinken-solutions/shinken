@@ -1,0 +1,118 @@
+==============================================
+Shinken installation script for shinken 1.2.1
+==============================================
+
+Contact
+~~~~~~~~
+
+You can contact me at dguenault at monitoring-fr dot org if you find a bug
+or you can write an issue in the github interface
+
+if you find and fix a bug just send me the patch and i will apply it (and add credit for the patch in the README file)
+
+Minimal requirements
+~~~~~~~~~~~~~~~~~~~~
+
+For RedHat/CentOs you will need redhat-lsb (and git for cloning this repository)
+For Debian based distro you will need lsb_release
+
+Usage
+~~~~~
+
+This is a really simple script allowing to install a fully fonctionnal shinken in seconds!
+Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros.
+
+Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname
+    -k | --kill             Kill shinken
+    -i | --install          Install shinken
+    -u | --uninstall        Remove shinken and all of the addons. if an argument is specified then just remove the specified argument
+    -b | --backup           Backup shinken configuration plugins and data
+    -r | --restore          Restore shinken configuration plugins and data
+    -l | --listbackups      List shinken backups
+    -c | --compresslogs     Compress rotated logs
+    -e | --enabledaemons    Which daemons to keep enabled at boot time. It's a quoted list of shinken daemons that should be enabled at startup.
+                            Daemons are:
+                                arbiter
+                                scheduler
+                                poller
+                                broker
+                                reactionner
+                                receiver
+				skonf
+    -p | --plugin           Install plugins. Argument should be one of the following:
+                               check_esx3
+                               nagios-plugins
+                               check_oracle_health
+                               check_mysql_health
+                               capture_plugin
+                               check_wmi_plus
+                               check_mongodb
+                               check_emc_clariion
+                               check_nwc_health
+                               manubulon (snmp plugins)
+                               check_hpasm
+                               check_netapp2
+                               check_mem (local enhanced memory check plugin)
+                               check_snmp_bandwidth (check bandwidth usage with snmp)
+    -a | --addon            Install addons. Argument should be one of the following:
+                               pnp4nagios
+                               multisite
+                               nagvis
+                               mongodb
+    -h | --help             Show help
+
+configuration file/parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can modify the target folder, backup folder or user/group the following way:
+
+  TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./install -i
+
+allowed values are:
+
+  TMP               temporary folder
+  TARGET            where to put shinken
+  ETC               where to put the etc folder
+  BACKUPDIR         where to put backups
+  SKUSER            shinken user
+  SKGROUP           shinken group
+  USEPROXY          use proxy environment variable for wget operations (also see below for proxy usage)
+  SKIPPREREQUISITES bypass prerequisites checks and installation (experimental). Set to 1 if you want to skip prerequisites
+
+Others configuration values are stored in install.d/shinken.conf. You can try to modify them, but never forget to test it before using them in production.
+
+Using proxy
+~~~~~~~~~~~
+
+You can enable support for proxy this way
+    ex: USEPROXY=1 ./install -i
+
+Do not forget to declare proxy environment variables
+
+    export http_proxy=http://login:password@proxy:port
+    export https_proxy=$http_proxy
+
+For debian package manager you also have to declare your proxy in /etc/apt/apt.conf
+
+    Acquire::http::Proxy "http://login:password@proxy:Port";
+
+For yum package manager you have to declare your proxy in /etc/yum.conf
+
+    proxy=http://proxy:port/
+    proxy_username=username
+    proxy_password=password
+
+Using proxy and sudo
+~~~~~~~~~~~~~~~~~~~~
+
+You should use -E option in order to preserve your environment variables
+
+    export http_proxy=http://login:password@proxy:port
+    export https_proxy=$http_proxy
+    sudo -E -- USEPROXY=1 ./shinken.sh -i
+
+
+Note about addon installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you plan to install multisite, pnp4angios and nagvis, you must install them in the following order: pnp4nagios, nagivs and multisite. Installing multisite at the end allow a better intergration of pnp4nagios and nagvis in multisite.

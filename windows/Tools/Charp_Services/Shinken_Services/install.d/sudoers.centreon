@@ -1,0 +1,6 @@
+CENTREON   ALL = NOPASSWD: /etc/init.d/shinken restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/shinken start
+CENTREON   ALL = NOPASSWD: /etc/init.d/shinken reload
+CENTREON   ALL = NOPASSWD: /etc/init.d/shinken stop
+CENTREON   ALL = NOPASSWD: TARGET/bin/nagios -v *
+
