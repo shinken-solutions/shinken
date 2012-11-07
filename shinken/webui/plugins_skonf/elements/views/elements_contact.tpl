@@ -19,7 +19,7 @@
 <a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 
 <div class="row-fluid">
-  <form data-table='contacts' name='form-element'>
+  <div data-table='contacts' name='form-element'>
     <input name="_id" type="hidden" value="{{elt.get('_id', '')}}"/>
     <ul class="nav nav-tabs">
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>
@@ -94,7 +94,7 @@
 
     <!--{{elt}} -->
 
-  </form>
+  </div>
 
 </div>
 
