@@ -69,6 +69,7 @@ function remove(){
             systemd)
                 systemctl disable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
                 rm -f ${SYSTEMDPATH}lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
+                systemctl --system daemon-reload
                 ;;
         esac
     fi
@@ -739,7 +740,7 @@ function relocate(){
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
     done
-    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP local_log=$TARGET/var/arbiterd.log lock_file=$TARGET/var/arbiterd.pid"
     for fic in $(ls -1 $ETC/nagios*cfg)
     do
         cecho " > Processing $fic" green;
@@ -1711,7 +1712,7 @@ function install_mysql(){
             if [[ -z "$(rpm -qa | grep mysql-server)" ]]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
-                installpkg pkg mysql-server mysql-client
+                installpkg pkg mysql-server
                 enable_service mysqld
                 manage_service mysqld start
                 while true
