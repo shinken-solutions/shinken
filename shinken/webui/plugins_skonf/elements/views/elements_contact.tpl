@@ -66,17 +66,21 @@
 <!-- Tab Macros -->
 <div class="tab-pane" id="direct">
 	{{!helper.get_select_input(elt, 'host_notification_period', 'Host notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
+
 	{{!helper.get_select_input(elt, 'service_notification_period', 'Service notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 
 
 	{{!helper.get_bool_input(elt, 'host_notifications_enabled', 'Enable host notifications', editable=editable)}}
+
 	{{!helper.get_bool_input(elt, 'service_notifications_enabled', 'Enable service notifications', editable=editable)}}
 
 	{{!helper.get_multiselect_input(elt, 'host_notification_commands', 'Host notification commands', 'commands', 'command_name', editable=editable)}}
+
 	{{!helper.get_multiselect_input(elt, 'service_notification_commands', 'Service notification commands', 'commands', 'command_name', editable=editable)}}
 
 	{{!helper.get_string_input(elt, 'host_notification_options', 'Host notification options', editable=editable)}}
-	{{!helper.get_string_input(elt, 'service_notification_options', 'Service notification options', editable=editable)}}
+	
+  {{!helper.get_string_input(elt, 'service_notification_options', 'Service notification options', editable=editable)}}
 
 	{{!helper.get_string_input(elt, 'min_business_impact', 'Minimum business impact (filter)', editable=editable)}}
 </div>

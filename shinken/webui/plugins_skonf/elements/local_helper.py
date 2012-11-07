@@ -175,10 +175,10 @@ class Helper(object):
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         select_part += '</SELECT>'
 
-        s = '''<span class="span10">
+        s = '''<form class="form-horizontal">
                   <span class="help-inline span2"> %s </span>
                   %s
-               </span>
+               </form>
                <script>properties.push({'name': '%s', 'type': 'select'});</script>
             ''' % (name, select_part, prop)
         return s
@@ -250,10 +250,10 @@ class Helper(object):
                 select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         select_part += '</SELECT>'
 
-        s = '''<span class="span10">
+        s = '''<form class="span10">
                   <span class="help-inline span2"> %s </span>
                   %s
-               </span>
+               </form>
                <script>properties.push({'name': '%s', 'type': 'multiselect'});</script>
             ''' % (name, select_part, prop)
         return s
