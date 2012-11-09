@@ -66,7 +66,17 @@
           <p>What up girl, this is Section C.</p>
       </div>
       <div id="lG" class="tab-pane">
-          <p>Custom</p>
+        <label>Custom log range</label>
+        <div class="row-fluid input">
+            <div class="inline-inputs">
+                From
+                <input name='from_day' data-datepicker="datepicker" class="input input-small" type="text" value="" />
+                <input name='from_hour' class="input input-mini" type="text" value="" />
+                to
+                <input name='to_day' data-datepicker="datepicker" class="input input-small" type="text" value="" />
+                <input name='to_hour' class="intput input-mini" type="text" value="" />
+            </div>
+        </div>
       </div>
   </div>
 </div> <!-- /tabbable -->
