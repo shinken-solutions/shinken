@@ -312,11 +312,15 @@ function installpkg(){
     shift
     package="$*"
 
-    echo $package >> /tmp/packages
-
     if [ "$type" == "python" ]
     then
-        easy_install $package >> ${LOGFILE} 2>&1
+        if [ "$CODE" = "REDHAT" -a $VERS -eq 5 ]
+        then
+            PYEI="easy_install-2.6"
+        else
+            PYEI="easy_install"
+        fi
+        $PYEI $package >> ${LOGFILE} 2>&1
         return $?
     elif [ "$type" = "pkg" ]
     then
@@ -492,7 +496,12 @@ function prerequisites(){
                 cecho " > SKIPPREQUISITES enabled: won't install $p " red
             else
                 cecho " > Module $module ($import) not found. Installing..." yellow
-                $PYEI $module >> ${LOGFILE} 2>&1
+                installpkg python $module >> ${LOGFILE} 2>&1
+                if [ $? -ne 0 ]
+                then
+                    cecho " > $type package $package doesn't installed properly. Run 'easy_install $package' manually" red
+                    cecho " > and try to figure out what's is going on."
+                fi
             fi
         else
             cecho " > Module $module found." green
