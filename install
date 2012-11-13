@@ -1122,7 +1122,6 @@ function restore(){
     fi
 
     rm -rf $BACKUPDIR/bck-shinken.$1
-    cecho " > Restoration done. Original files was kept with '.example' suffix, use 'diff' to check differences between your files and original." green
 
     # Start Shinken after restore	
     sstart
