@@ -81,3 +81,4 @@ To Rémi Sauvat for his patch about dashboard automatic widget refresh
 To chris81 for his patch for graphite API URLs
 To maethor and scaminad for reporting IMAP/POPS missing port
 To Florent Houbart for this bug fix on LiveStatus+NagVis
+To olc and ppj for the arbiter spare bug report
