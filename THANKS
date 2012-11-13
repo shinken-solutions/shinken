@@ -10,6 +10,7 @@ To Nicolas Dupeux for patches, bug fixes, bug reports and the NSCA daemon
 To Gregory Starck for his patch about worker typo, and pyro hooks
 To David Guénault for the installer, patches, bug fixes, WebUI and more
 To David Hannequin for his bug reports and his packages :)
+To Jfbutkiewicz for his full windows management (installation and services!!)
 To Danijel Tasov for his repositiry cosmetics patch
 To Zoran Zaric for his help on website corrections and for help file typos
 To Gilles Seban for is bug report about commands that look like shells
