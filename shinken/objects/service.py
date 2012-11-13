@@ -374,7 +374,7 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("The service %s on host '%s' do not have %s" % (desc, hname, prop))
+                    logger.error("The service %s on host '%s' does not have %s" % (desc, hname, prop))
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
@@ -394,7 +394,7 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+            logger.warning("The service '%s' in the host '%s' does not have contacts nor contact_groups in '%s'" % (desc, hname, source))
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
@@ -424,14 +424,14 @@ class Service(SchedulingItem):
             logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
-            logger.info("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
+            logger.info("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s: My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the character %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
 
@@ -548,7 +548,7 @@ class Service(SchedulingItem):
                     logger.warning(err)
                     host.configuration_errors.append(err)
                 elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
-                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry)
+                    err = "The custom property '%s' of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry)
                     logger.warning(err)
                     host.configuration_errors.append(err)
         return duplicates
