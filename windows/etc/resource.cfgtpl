@@ -1,0 +1,23 @@
+# Nagios legacy macros
+$USER1$="@@INSTALLDIR@@\libexec"
+$USER2$=public
+
+
+# Where your plugins are located
+$PLUGINSDIR$="@@INSTALLDIR@@\libexec"
+
+
+##Now Active directory and Ldap macros
+$DOMAINUSER$=shinken_user
+$DOMAINPASSWORD$=superpassword
+$LDAPBASE$=dc=eu,dc=society,dc=com
+
+
+
+#### Discovery Part
+# default snmp community
+$SNMPCOMMUNITYREAD$=public
+# what to discover by default
+$NMAPTARGETS$=www.google.fr www.bing.com
+
+
