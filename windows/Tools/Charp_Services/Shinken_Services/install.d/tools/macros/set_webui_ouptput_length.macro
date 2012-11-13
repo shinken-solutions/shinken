@@ -1,0 +1,5 @@
+# Enable retention for all daemons
+setconfigfile __ETC__/shinken-specific.cfg
+setparam max_output_length=ARG1 from module where module_name=WebUI
+setparam allow_html_output=1 from module where module_name=WebUI
+writeconfig

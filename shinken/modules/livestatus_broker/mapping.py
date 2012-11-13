@@ -642,10 +642,18 @@ livestatus_attribute_map = {
             'function': lambda item, req: find_pnp_perfdata_xml(item.get_name(), req),
             'datatype': int,
         },
+        'poller_tag': {
+            'description': 'Poller Tag',
+            'function': lambda item, req: item.poller_tag,
+        },  
         'process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
             'function': lambda item, req: item.process_perf_data,
             'datatype': bool,
+        },
+        'realm': {
+            'description': 'Realm',
+            'function': lambda item, req: item.realm,
         },
         'retry_interval': {
             'description': 'Number of basic interval lengths between checks when retrying after a soft error',
@@ -1424,6 +1432,10 @@ livestatus_attribute_map = {
             'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
             'function': lambda item, req: find_pnp_perfdata_xml(item.get_full_name(), req),
             'datatype': int,
+        },
+        'poller_tag': {
+            'description': 'Poller Tag',
+            'function': lambda item, req: item.poller_tag,
         },
         'process_performance_data': {
             'description': 'Whether processing of performance data is enabled for the service (0/1)',

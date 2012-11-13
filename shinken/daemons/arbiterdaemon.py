@@ -31,7 +31,7 @@ from Queue import Empty
 import socket
 import traceback
 import cStringIO
-
+import cPickle
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
