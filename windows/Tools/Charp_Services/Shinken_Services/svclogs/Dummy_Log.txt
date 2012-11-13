@@ -1,0 +1,1 @@
+﻿// File only exists for log folder output
