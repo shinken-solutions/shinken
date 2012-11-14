@@ -1,0 +1,2 @@
+﻿Modification dans les fichiers de config de c:\\shinken\\var en .\\var
+Modification du log arbiterd : local_log=.\\arbiterd.log sinon, il part dans ....\\var\\var\\arbiterd.log
