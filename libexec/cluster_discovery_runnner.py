@@ -118,7 +118,8 @@ def get_cluster_discovery_output(list):
     names = []
     for elt in list:
         names.append(elt)
-    print "%s::%s=%s"%(hostname, clSolution, ','.join(names))# display like in the nmap model
+    print "%s::%s=1"%(hostname, clSolution)# display like in the nmap model
+    print "%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# display like in the nmap model
 
 ###############
 #  execution  #
