@@ -651,10 +651,16 @@ class Daemon(object):
             if config._sections == {}:
                 logger.error("Bad or missing config file: %s " % self.config_file)
                 sys.exit(2)
-            for (key, value) in config.items('daemon'):
-                if key in properties:
-                    value = properties[key].pythonize(value)
-                setattr(self, key, value)
+            try:
+                for (key, value) in config.items('daemon'):
+                    if key in properties:
+                        value = properties[key].pythonize(value)
+                    setattr(self, key, value)
+            except ConfigParser.InterpolationMissingOptionError, e:
+                e = str(e)
+                wrong_variable = e.split('\n')[3].split(':')[1].strip()
+                logger.error("Incorrect or missing variable '%s' in config file : %s" % (wrong_variable, self.config_file))
+                sys.exit(2)
         else:
             logger.warning("No config file specified, use defaults parameters")
         # Now fill all defaults where missing parameters
