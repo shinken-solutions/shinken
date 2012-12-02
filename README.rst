@@ -18,7 +18,7 @@ Requirements
 ============
 
 There are mandatory and conditional requirements for the installation
-methods which are described below. Keep in mind that you use an alternate installation method 
+methods which are described below. Keep in mind that you if use an alternate installation method 
 (setup.py or simple extraction to a folder), you have to use
 that method as well when you update or remove your installation.
 
