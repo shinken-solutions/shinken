@@ -171,7 +171,7 @@ The install script also installs some `init.d` scripts, enables them at boot tim
 Where is the configuration?
 ===========================
 
-The configuration is where you put the etc directory, `/etc/shinken`. (in
+The configuration is where you put the etc directory, `/etc/shinken` (in
 `/usr/local/shinken/etc` for the quick and dirty method, `/etc/shinken`
 for the first two methods).
 
