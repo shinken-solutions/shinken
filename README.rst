@@ -114,8 +114,8 @@ How to install Shinken
 ======================
 
 You can use the install script utility located at the root of the shinken sources.
-The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
-The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
+The script creates the user and group, installs all dependencies, and installs shinken. It is compatible with Debian, Ubuntu, and Centos/Redhat 5.x and 6.x
+The only requirement is an internet connection for the server on which you want to install shinken. It also allows you to modify the installation folder in a configuration file.
 
 If you want shinken installed in seconds (default in /usr/local/shinken) ::
 
