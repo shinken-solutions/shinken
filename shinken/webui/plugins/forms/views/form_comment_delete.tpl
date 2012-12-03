@@ -11,7 +11,7 @@ function submit_local_form() {
 
 <div class="modal-header">
 	<a class="close" data-dismiss="modal">×</a>
-	<h3>Warning!</h3>
+	<h3>Delete Confirmation</h3>
 </div>
 <div class="modal-body">
 	<form class="well" name='modal_form'>

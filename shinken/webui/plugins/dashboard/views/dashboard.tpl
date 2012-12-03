@@ -13,7 +13,7 @@
 <div id="warn-pref" class="hero-unit alert-critical">
   <h2>Warning:</h2>
   <p>You didn't define a WebUI module for saving user preferences like the MongoDB one. You won't be able to use this page!</p>
-  <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success btn-large">Learn more »</a></p>
+  <p><a href="http://www.shinken-monitoring.org/wiki/shinken_10min_start" class="btn btn-success btn-large">Learn more <i class="icon-hand-right"></i></a></p>
 </div>
 %end
 
