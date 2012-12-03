@@ -18,7 +18,7 @@ Requirements
 ============
 
 There are mandatory and conditional requirements for the installation
-methods which are described below. Keep in mind that you use an alternate installation method 
+methods which are described below. Keep in mind that you if use an alternate installation method 
 (setup.py or simple extraction to a folder), you have to use
 that method as well when you update or remove your installation.
 
@@ -114,8 +114,8 @@ How to install Shinken
 ======================
 
 You can use the install script utility located at the root of the shinken sources.
-The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
-The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
+The script creates the user and group, installs all dependencies, and installs shinken. It is compatible with Debian, Ubuntu, and Centos/Redhat 5.x and 6.x
+The only requirement is an internet connection for the server on which you want to install shinken. It also allows you to modify the installation folder in a configuration file.
 
 If you want shinken installed in seconds (default in /usr/local/shinken) ::
 
@@ -171,7 +171,7 @@ The install script also installs some `init.d` scripts, enables them at boot tim
 Where is the configuration?
 ===========================
 
-The configuration is where you put the etc directory, `/etc/shinken`. (in
+The configuration is where you put the etc directory, `/etc/shinken` (in
 `/usr/local/shinken/etc` for the quick and dirty method, `/etc/shinken`
 for the first two methods).
 
