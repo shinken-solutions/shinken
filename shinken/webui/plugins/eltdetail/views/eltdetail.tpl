@@ -304,11 +304,11 @@ $(document).ready(function(){
 							<td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
 						</tr>
 						<tr>		
-							<td class="column1"><b>Last State Change</b></td>
+							<td class="column1"><b>Last State Change:</b></td>
 							<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 						</tr>
 						<tr>										
-							<td class="column1"><b>Current Attempt</b></td>
+							<td class="column1"><b>Current Attempt:</b></td>
 							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
 						<tr>		
