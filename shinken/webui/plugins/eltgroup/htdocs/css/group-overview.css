@@ -23,17 +23,9 @@
 *
 **/
 
-.front_panel {
-	width: 20% !important;
-}
 
-.teaser {
-	position: relative;
-	height: 260px;
-}
-
-.teaser-btn {
-	width: 85%;
-	position: absolute;
-	bottom: 0;
+/*  Reset some layout basics
+    ------------------------------------------------------- */
+td {
+	vertical-align:middle !important;
 }
