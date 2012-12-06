@@ -35,6 +35,13 @@ try:
 except ImportError:
     Connection = None
 
+try:
+    from pymongo import ReplicaSetConnection, ReadPreference
+except ImportError:
+    ReplicaSetConnection = None
+    ReadPreference = None
+
+
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
@@ -54,26 +61,47 @@ def get_instance(plugin):
         raise Exception('Cannot find the module python-pymongo or python-gridfs. Please install both.')
     uri = plugin.uri
     database = plugin.database
-    instance = Mongodb_retention_scheduler(plugin, uri, database)
+    replica_set = getattr(plugin, 'replica_set', '')
+    instance = Mongodb_retention_scheduler(plugin, uri, database, replica_set)
     return instance
 
 
 class Mongodb_retention_scheduler(BaseModule):
-    def __init__(self, modconf, uri, database):
+    def __init__(self, modconf, uri, database, replica_set):
         BaseModule.__init__(self, modconf)
         self.uri = uri
         self.database = database
+        self.replica_set = replica_set
+        if self.replica_set and not ReplicaSetConnection:
+            logger.error('[MongodbRetention] Can not initialize module with '
+                         'replica_set because your pymongo lib is too old. '
+                         'Please install it with a 2.x+ version from '
+                         'https://github.com/mongodb/mongo-python-driver/downloads')
+            return None
+
+
 
     def init(self):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
         logger.debug("Initilisation of the mongodb  module")
-        self.con = Connection(self.uri)
+
+        if self.replica_set:
+            self.con = ReplicaSetConnection(self.uri, replicaSet=self.replica_set, fsync=True)
+        else:
+            # Old versions of pymongo do not known about fsync
+            if ReplicaSetConnection:
+                self.con = Connection(self.uri, fsync=True)
+            else:
+                self.con = Connection(self.uri)
+
+        #self.con = Connection(self.uri)
         # Open a gridfs connection
         self.db = getattr(self.con, self.database)
         self.hosts_fs = GridFS(self.db, collection='retention_hosts')
         self.services_fs = GridFS(self.db, collection='retention_services')
+
 
     def hook_save_retention(self, daemon):
         """
