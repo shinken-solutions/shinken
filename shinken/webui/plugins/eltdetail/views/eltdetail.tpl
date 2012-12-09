@@ -620,8 +620,8 @@ $(document).ready(function(){
 		      	<div class="tab-pane" id="graphs">
 		      		%uris = app.get_graph_uris(elt, graphstart, graphend)
 		      		%if len(uris) == 0:
-					<div class="row alert">
-					    <div class="font-red"><strong>Oh snap!</strong> No graphs available!</div>
+					<div class="alert alert-info">
+					    <div class="font-blue"><strong>Oh snap!</strong> No graphs available!</div>
 					</div>
 		      		%else:
 		      		<h4>Graphs</h4>
