@@ -36,7 +36,6 @@ from shinken.log import logger
 from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
-from shinken.log import logger
 
 
 properties = {
@@ -53,12 +52,39 @@ def get_instance(plugin):
     return instance
 
 
+class GraphOpts(object):
+   
+    def __init__(self):
+        self._max = None
+    
+    def render(self, host_name, desc, metric, graphite_data_source):    
+        target = self.render_target(host_name, desc, metric, graphite_data_source)
+
+        if self._max is not None:
+            return '{0}&yMax={1}'.format(target, self._max)
+        else:
+            return target
+          
+    def set_max(self, max):
+        self._max = max
+    
+    def render_target(self, host_name, desc, metric, graphite_data_source):
+            
+        if graphite_data_source:
+            target = "&target=%s.%s.%s.%s" % (host_name,
+                                            graphite_data_source,
+                                            desc, metric)
+        else:
+            target = "&target=%s.%s.%s" % (host_name, desc, metric)
+        return target #+ target + '?????'
+    
+        
 class Graphite_Webui(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.uri = getattr(modconf, 'uri', None)
         self.templates_path = getattr(modconf, 'templates_path', '/tmp')
-
+               
         if not self.uri:
             raise Exception('The WebUI Graphite module is missing uri parameter.')
 
@@ -95,6 +121,7 @@ class Graphite_Webui(BaseModule):
         # Get all metrics non void
         elts = s.split(' ')
         metrics = [e for e in elts if e != '']
+        
 
         for e in metrics:
             logger.debug("[Graphite UI] groking: %s" % e)
@@ -122,13 +149,14 @@ class Graphite_Webui(BaseModule):
                 else:
                     continue
             logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, value))
+            
             for key, value in name_value.items():
                 res.append((key, value))
         return res
 
     # Private function to replace the fontsize uri parameter by the correct value
     # or add it if not present.
-    def _replaceFontSize ( self, url, newsize ):
+    def _replaceFontSize( self, url, newsize ):
 
     # Do we have fontSize in the url alreadu, or not ?
         if re.search('fontSize=',url) is None:
@@ -136,15 +164,69 @@ class Graphite_Webui(BaseModule):
         else:
             url = re.sub(r'(fontSize=)[^\&]+',r'\g<1>' + newsize , url);
         return url
+   
+    fontsize={ 'detail': '8', 'dashboard': '18'}
+    def mk_uris(self, elt, source, d, e):
+                  
+        if not elt:
+            return []
+            
+        t = elt.__class__.my_type
+        r = []
+        
+        couples = self.get_metric_and_value(elt.perf_data)
 
+        # If no values, we can exit now
+        if len(couples) == 0:
+            return []
 
+        # Remove all non alpha numeric character
+        if t == 'host':
+            desc = "__HOST__"
+        elif t == 'service':
+            desc = self.illegal_char.sub('_', elt.service_description)
+        else:
+            return []
+            
+        host_name = self.illegal_char.sub('_', elt.host_name)
 
+        # find all crit 
+        max_map = {}
+        for (metric, value) in couples:    
+            logger.info('')
+            if re.search(u'_crit', metric):
+                for val_fragment in value:
+                    if not val_fragment:
+                        continue
+                    max_map[metric[:-5]] = val_fragment
+                    break
+                
+        # Send a bulk of all metrics at once
+        for (metric, value) in couples:
+            if re.search('_crit|_warn', metric):
+                continue                
+            elif value[1] == '%':
+                self.graph_opts.set_max('100')
+            else:
+                self.graph_opts.set_max(max_map.get(metric))
+                    
+                    
+            target_time = 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e # + "&yMin=0"
+            uri = ''.join([self.uri, target_time, self.graph_opts.render(host_name, desc, metric, self.graphite_data_source)])
+            
+            v = {}
+            v['link'] = self.uri
+            v['img_src'] = uri
+            v['img_src'] = self._replaceFontSize(v['img_src'], self.fontsize[source])
+            r.append(v)
+
+        return r
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and Graphite page link too.
     def get_graph_uris(self, elt, graphstart, graphend, source = 'detail'):
+        
         # Ugly to hard-code such values. But where else should I put them ?
-        fontsize={ 'detail': '8', 'dashboard': '18'}
         if not elt:
             return []
 
@@ -185,74 +267,18 @@ class Graphite_Webui(BaseModule):
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
                 if not img == "":
+                    
                     v = {}
                     v['link'] = self.uri
                     v['img_src'] = img.replace('"', "'") + "&from=" + d + "&until=" + e
-                    v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
+                    v['img_src'] = self._replaceFontSize(v['img_src'], self.fontsize[source])
                     r.append(v)
             # No need to continue, we have the images already.
             return r
 
         # If no template is present, then the usual way
+        
+        self.graph_opts = GraphOpts()
 
-        if t == 'host':
-            couples = self.get_metric_and_value(elt.perf_data)
-
-            # If no values, we can exit now
-            if len(couples) == 0:
-                return []
-
-            # Remove all non alpha numeric character
-            host_name = self.illegal_char.sub('_', elt.host_name)
-
-            # Send a bulk of all metrics at once
-            for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
-                if re.search(r'_warn|_crit', metric):
-                    continue
-                if self.graphite_data_source:
-                    target = "&target=%s.%s.__HOST__.%s" % (host_name, self.graphite_data_source, metric)
-                else:
-                    target = "&target=%s.__HOST__.%s" % (host_name, metric)
-                uri += target + target + "?????"
-                v = {}
-                v['link'] = self.uri
-                v['img_src'] = uri
-                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
-                r.append(v)
-
-            return r
-        if t == 'service':
-            couples = self.get_metric_and_value(elt.perf_data)
-
-            # If no values, we can exit now
-            if len(couples) == 0:
-                return []
-
-            # Remove all non alpha numeric character
-            desc = self.illegal_char.sub('_', elt.service_description)
-            host_name = self.illegal_char.sub('_', elt.host.host_name)
-
-            # Send a bulk of all metrics at once
-            for (metric, value) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
-                if re.search(r'_warn|_crit', metric):
-                    continue
-                elif value[1] == '%':
-                    uri += "&yMin=0&yMax=100"
-                if self.graphite_data_source:
-                    target = "&target=%s.%s.%s.%s" % (host_name,
-                                                    self.graphite_data_source,
-                                                    desc, metric)
-                else:
-                    target = "&target=%s.%s.%s" % (host_name, desc, metric)
-                uri += target + target + "?????"
-                v = {}
-                v['link'] = self.uri
-                v['img_src'] = uri
-                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
-                r.append(v)
-            return r
-
-        # Oups, bad type?
-        return []
+        #make uri
+        return self.mk_uris(elt, source, d , e)
