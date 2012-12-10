@@ -21,20 +21,11 @@
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-new_macro_id = 0;
-
-function add_macro(){
-    var s = $('#new_macros');
-
-    var n = $('<form id="new_macro'+new_macro_id+'" class="form-inline"> <input id="new_macro_name_'+new_macro_id+'" class="new_macro_name" name="" type="text" placeholder="new macro"> <input class="new_macro_value offset1" id="new_macro_value_'+new_macro_id+'" name="" type="text" value="" placeholder="value"> <a class="btn btn-danger offset1" href="javascript:del_macro('+new_macro_id+');"><i class="icon-remove"></i> DEL</a> </form> </span>');
-    s.append(n);
-    new_properties.push(new_macro_id);
-    new_macro_id += 1;
-}
-
-
-function del_macro(id){
-    var s = $('#new_macro'+id);
-    s.hide("slide", { direction: "down" }, 500);
-    new_properties.remove(id);
-}
+function capsCheck(e,obj){ 
+    kc = e.keyCode?e.keyCode:e.which;  
+    sk = e.shiftKey?e.shiftKey:((kc == 16)?true:false);  
+    if(((kc >= 65 && kc <= 90) && !sk)||((kc >= 97 && kc <= 122) && sk)){
+        document.getElementById('#'+obj.id).style.visibility = 'visible';
+    } 
+    else document.getElementById('#'+obj.id).style.visibility = 'hidden';
+}​

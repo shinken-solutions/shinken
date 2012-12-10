@@ -81,6 +81,7 @@ class TestDiscoveryConf(ShinkenTest):
         value = '800'
         self.assert_(genhttpstrict.is_matching(key, value) == False)
 
+
     # Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
@@ -98,6 +99,7 @@ class TestDiscoveryConf(ShinkenTest):
         print "Exit status", nmap.current_launch.exit_status
         print "Output", nmap.current_launch.output
         print "LongOutput", nmap.current_launch.long_output
+
 
     def test_look_for_host_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
@@ -128,6 +130,43 @@ class TestDiscoveryConf(ShinkenTest):
         print "Writing properties"
         print genhttp.writing_properties
 
+
+
+
+    def test_look_for_host_discorule_and_delete(self):
+        genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHostRemoveLinux')
+        self.assert_(genhttp != None)
+        self.assert_(genhttp.creation_type == 'host')
+        self.assert_(genhttp.matches['openports'] == '^80$')
+
+        key = 'os'
+        value = 'linux'
+
+        # Should not match this
+        self.assert_(genhttp.is_matching(key, value) == False)
+        
+        # But should match this one
+        key = 'openports'
+        value = '80'
+        self.assert_(genhttp.is_matching(key, value) == True)
+
+        # Low look for a list of matchings
+        l = {'openports': '80', 'os': 'linux'}
+        # should match this
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        # Match this one too
+        l = {'openports': '80', 'os': 'linux', 'super': 'man'}
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        # And this last one
+        l = {'openports': '80'}
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+
+        print "Writing properties"
+        print genhttp.writing_properties
+        
+        
+
+
     def test_discorun_matches(self):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
         self.assert_(linux != None)
@@ -148,6 +187,9 @@ class TestDiscoveryConf(ShinkenTest):
         l = {'openports': '80', 'osvendor': 'linux'}
         # should match this
         self.assert_(linux.is_matching_disco_datas(l) == True)
+
+
+    
 
 
 if __name__ == '__main__':

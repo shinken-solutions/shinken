@@ -13,9 +13,9 @@
        <ul class="nav">
          <li class="dropdown">
            <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
-           <ul class="dropdown-menu span4">
+           <ul class="dropdown-menu">
             <li><a href=":7767">Shinken UI </a></li>
-            <li><a href=":7766">Skonf UI</a></li>
+            <li><a href=":7766">Skonf UI</a><span class="badger-beta badger-critical">Beta</span></li>
             <!-- We will add also others UIs on the global menu -->
             %if app:
             %other_uis = app.get_external_ui_link()
@@ -84,22 +84,20 @@
         %end
         %end
         <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
-        <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="nav-icon icon-off"></i></a></li>
+        <!-- <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="nav-icon icon-off"></i></a></li> -->
+        <ul class="nav pull-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li> <a class="disabled-link" href="#"><i class="icon-pencil"></i> Edit profile</a> </li>
+              <li> <a class="" href="http://http://www.shinken-monitoring.org/wiki/"><i class="icon-external-link"></i> Help</a></li>
+              <li class="divider"></li>
+              <li> <a href="/user/logout" data-original-title='Logout'><i class="icon-off"></i> Logout</a></li>
+            </ul>
+          </li>
+        </ul>
       </ul>
     </div>
-
-    <ul class="nav pull-right">
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          <a class="disabled-link" href="#"><i class="icon-pencil"></i> Edit profile</a>
-        </ul>
-      </li>
-    </ul>
-
-    <ul class="nav pull-right">
-      <li class="divider-vertical"></li>
-    </ul>
 
     <script>  
       $(function ()  

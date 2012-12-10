@@ -52,6 +52,10 @@ html, body {height: 95.5%;}
 }
 
 .font-yellow {
+  color: #FFEE00;
+}
+
+.font-orange {
   color: #F89406;
 }
 
@@ -65,9 +69,9 @@ html, body {height: 95.5%;}
 .font-blue {
   color: #3A87AD;
 }
+
 /*  Special Shinken styles
     ------------------------------------------------------- */
-
 .min-height {
   min-height: 600px;
 }
@@ -295,6 +299,21 @@ html, body {height: 95.5%;}
   position: relative;
   top: -15px;
   right: 8px;
+  z-index: 666;
+}
+
+
+.badger-beta {
+  background-color: #999999;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+  font-size: 9.75px;
+  font-weight: bold;
+  padding: 1px 3px 2px;
+  position: relative;
+  right: -75px;
+  text-transform: uppercase;
+  top: -31px;
   z-index: 666;
 }
 

@@ -1,4 +1,3 @@
-
 Here is a way to setup a shinken in "raw mode" without installing it really:
 
 Install
@@ -27,5 +26,5 @@ WebUI / Skonf
 -------------
 Branch: develop-webui*
 * If you find a bug or have feature requests for us, please go to GitHub an Open an issue. Don't forget to label it (WebUI/Skonf)!
-* If you have a pull request for us, plase choose the develop-webui branch as destination.
+* If you have a pull request for us, please choose the develop-webui branch as destination.
 	Maintained by Andreas Karfusehr, Jean Gabès
