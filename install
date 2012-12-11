@@ -2868,6 +2868,16 @@ function install_check_netint(){
     cd $TMP
 
     filename="check_netint.pl"
+    cecho " > Installing pre-requisites." green
+    case $CODE in
+        REDHAT|Fedora)
+            installpkg pkg perl-Net-SNMP
+            ;;
+        DEBIAN)
+            installpkg pkg libnet-snmp-perl
+            ;;
+    esac
+
     cecho " > Downloading check_netint" green
     wget $WGETPROXY $CHECKNETINT -O ${filename} >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
