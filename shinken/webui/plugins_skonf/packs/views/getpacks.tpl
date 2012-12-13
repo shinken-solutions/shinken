@@ -1,40 +1,35 @@
+%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js'], css=['packs/css/tags.css'], title='Get packs'
 
-%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js'], css=['packs/css/tags.css']
-
-<div> <h1> Get new packs </h1> </div>
-
-
+<h1> Get new packs </h1>
 
 <script TYPE="text/javascript">
-
-function submit(){
+function submit() {
    document.forms['getpacks'].submit();
 }
-
 </script>
 
 %if error:
     <div class='alert alert-error span5 offset2'> {{error}}</div>
 %end
 
-
 %if api_error:
     <div class='alert alert-error span5 offset2'>
-      Oups! There was a problem with the API server connexion
+      Oups! There was a problem with the API server connection
       <br/>
       <div id='api_error' class='hide'>{{api_error}}</div>
       <a href="javascript:$('#api_error').show()" class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
-      <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connexion</a>
+      <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connection</a>
     </div>
 %end
+
 <div id="message" class='alert span5 offset2 hide'> </div>
 
-<form class='well span5 offset2' name='getpacks' action='/getpacks' METHOD='POST'>
+<form class="form-search span5" name="getpacks" action="/getpacks" METHOD="POST">
   <div class="input-prepend">
-    <span class="add-on"><i class="icon-search"></i></span><input type="textarea" name='search' class="span4" placeholder="Search">
+    <span class="add-on"> <i class="icon-search"></i> </span>
+    <input type="text" name='search' class="" placeholder="Search">
   </div>
-  <a href='javascript:submit();' class='btn'> Search</a>
-
+  <button href='javascript:submit();' class='btn'> Search</button>
 </form>
 
 <span class='span12'>
