@@ -423,7 +423,7 @@ $(document).ready(function(){
 		<!-- Detail info box start -->
 		<div class="span9 tabbable">
 			<ul class="nav nav-tabs"  style="margin-bottom: 12px;">
-				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
+				<li class="active"><a href="#impacts" data-toggle="tab">Services</a></li>
 				<li><a href="#comments" data-toggle="tab">Comments</a></li>
 				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>

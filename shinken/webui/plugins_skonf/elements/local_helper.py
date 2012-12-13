@@ -86,7 +86,7 @@ class Helper(object):
             p += '<script>$("#popover-%s").popover({"title": "Help", "content": "%s"});</script>' % (prop, popover)
         s = '''<form class="form-horizontal"> <div class="control-group %s">
                   <label class="control-label %s"> %s </label>
-                  <div class="controls"> <input class="%s %s" name="%s" type="text" value="%s" placeholder='%s' %s/> </div>
+                  <div class="controls"> <input class="%s %s span12" name="%s" type="text" value="%s" placeholder='%s' %s/> </div>
                   %s
                </div> </form>
                <script>properties.push({'name': '%s', 'type': 'string'});</script>
