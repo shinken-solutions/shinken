@@ -193,6 +193,14 @@ html, body {height: 95.5%;}
   word-wrap: break-word;
 }
 
+.hero-unit p {
+  color: #FFF;
+}
+
+.hero-unit-small {
+  padding: 30px;
+}
+
 /*  Alert styles => BTN Color
     ------------------------------------------------------- */
 .alert {
