@@ -358,7 +358,7 @@ function debinstalled(){
 function prerequisites(){
     cadre "Checking prerequisites" green
     # common prereq
-    bins="wget sed gawk grep python bash"
+    bins="wget sed gawk grep python bash sudo"
 
     for b in $bins
     do
