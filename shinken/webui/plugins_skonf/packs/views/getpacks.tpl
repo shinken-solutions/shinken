@@ -26,8 +26,12 @@ function submit() {
           </p>
         </div>
         %end
-        <div id="message" class='alert span5 offset2 hide'> </div>
 
+        <div id="message" class='alert span5 offset2 hide'> </div>
+        <div class="alert alert-info">
+          <p class="font-blue">Please choose a category or use the search function to find your packs.</p>
+        </div>
+        
         %if search:
         <h3> Search for {{search}}</h3>
         <div class="span12">
