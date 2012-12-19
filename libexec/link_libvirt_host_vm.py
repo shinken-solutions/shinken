@@ -22,12 +22,16 @@ This program use libvirt to put host parent-child relations in a json one so it
 can be loaded in hot_dependencies_arbiter module
 """
 
-
+import timeit
 import os
 import sys
 import optparse
+import signal
 
 import libvirt
+
+class TimeoutException(Exception): 
+    pass 
 
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
@@ -40,10 +44,14 @@ except ImportError:
         raise SystemExit("Error: you need the json or simplejson module "
                          "for this script")
 
-VERSION = '0.!'
+VERSION = '0.1'
 
 
 def main(uris, output_file, ignore):
+
+    def timeout_handler(signum, frame):
+        raise TimeoutException()
+
     ignored_doms = []
     r = []
 
@@ -51,7 +59,23 @@ def main(uris, output_file, ignore):
         ignored_doms = ignore.split(",")
         
     for uri in uris.split(","):
-        conn = libvirt.openReadOnly(uri)
+        signal.signal(signal.SIGALRM, timeout_handler) 
+        signal.alarm(10) # triger alarm in 10 seconds
+        try:
+            conn = libvirt.openReadOnly(uri)
+        except libvirt.libvirtError, e:
+            print "Libvirt connection error: `%s'" % e.message.replace("\r", "")
+            print "Let's try next URI"
+            continue
+        except TimeoutException:
+            print "Libvirt Request timeout"
+            print "Let's try next URI"
+            continue
+        except Exception, e:
+            print "Unknown Error: %s" % str(e)
+            print "Let's try next URI..."
+            continue
+            
         hypervisor = conn.getHostname()
         # List all VM (stopped and started)
         for dom in [conn.lookupByName(name) for name in conn.listDefinedDomains()]\
@@ -76,15 +100,21 @@ if __name__ == "__main__":
         version="Shinken libvirt mapping to json mapping %s" % VERSION)
     parser.add_option("-o", "--output", dest='output_file',
                       default='/tmp/external_mapping_file.json',
-                      help="Path of the generated json mapping file.")
+                      help="Path of the generated json mapping file.\n"
+                           "Default: /tmp/external_mapping_file.json")
     parser.add_option("-u", "--uris", dest='uris',
                       help="Libvirt URIS separated by comma")
     parser.add_option("-i", "--ignore", dest='ignore',
                       default=None,
-                      help="Ignore hsots (separated by comma)")
+                      help="Ignore hosts (separated by comma)\n"
+                           "Default: None")
 
     opts, args = parser.parse_args()
     if args:
         parser.error("does not take any positional arguments")
+
+    if opts.uris is None:
+        print "At least one URI is mandatory"
+        sys.exit(2)
 
     main(**vars(opts))
