@@ -19,7 +19,8 @@
   %is_well = ''
   %end
 
-  <div class='{{is_well}}'> {{!' <i class="icon-chevron-right"></i> '.join(['<b>%s</b>' % p.capitalize() for p in tree_path])}}
+<!--   <div class='{{is_well}}'> {{!' <i class="icon-chevron-right"></i> '.join(['<b>%s</b>' % p.capitalize() for p in tree_path])}} -->
+  <div class=''> {{!' <i class="icon-chevron-right"></i> '.join(['<h4>%s</h4>' % p.capitalize() for p in tree_path])}}
     %elif e['type'] == 'end_tree':
     %# We remove the last element
     %tree_path.reverse()
@@ -34,17 +35,17 @@
     <tr>
     <!-- {{p}} -->
     %pname = p.get_name()
-    <td class="span2">
+    <td class="span2 no-border">
       <span class="label">
         <img class="imgsize3" onerror="$(this).hide()" src="/static/images/sets/{{pname}}/tag.png" /> {{pname}}
       </span>
     </td>
 
-    <td class="span6">
+    <td class="span5 no-border">
       {{p.description}}
     </td>
 
-    <td>
+    <td class="span2 no-border">
       %lst = app.datamgr.related_to_pack(p)
       %print "LST", lst
       %for _t in lst:
@@ -52,7 +53,7 @@
       %if tpl:
       %tname = tpl.get('name', '')
       <div> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
-        <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>
+        <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down pull-right"></i></a>
       </div>
       %else:
       <div class="alert">No host template for this pack!</div>
@@ -60,15 +61,15 @@
       %end
     </td>
 
-    <td>
+    <td class="span1 no-border">
       %lnk = p.doc_link
       %if not lnk:
-      %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
+        %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
       %end
       <a class='pull-right' href="{{lnk}}" target='_blank'> <i class="icon-question-sign"></i></a>
     </td>
 
-    <td>
+    <td class="span1 no-border">
       %for _t in lst:
       %if len(services) != 0:
       %(tpl, services) = _t
@@ -86,10 +87,13 @@
         %end
       </div>
       %end
+      %end
     </td>
     
     </tr>
+
   </table>
+
   %end
   %end
 </div>
