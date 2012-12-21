@@ -70,6 +70,14 @@ html, body {height: 95.5%;}
   color: #3A87AD;
 }
 
+/*  Special Shinken Buttons
+    ------------------------------------------------------- */
+
+.btn-spezial {
+  min-height: 15px !important;
+  line-height: 17px;
+}
+
 /*  Special Shinken styles
     ------------------------------------------------------- */
 .min-height {
@@ -204,7 +212,7 @@ html, body {height: 95.5%;}
 /*  Alert styles => BTN Color
     ------------------------------------------------------- */
 .alert {
-  color: #FFFFFF;
+  /*color: #FFFFFF;*/
   text-align: center;
 }
 

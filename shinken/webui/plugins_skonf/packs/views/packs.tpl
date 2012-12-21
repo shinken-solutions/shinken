@@ -1,8 +1,12 @@
-%rebase layout_skonf globals(), js=['packs/js/packs.js'], title='Packs'
+%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/viewswitcher.js'], css=['packs/css/packs.css'], title='Packs'
 
 <div class="row-fluid">
-  <h1 class="span10 no-topmargin">Packs</h1>
-  <a href='/getpacks' class="span2 btn btn-success pull-right topmmargin1"> <i class="icon-search"></i> Get new packs</a>
+  <h3 class="span9 no-topmargin">Packs</h3>
+  <a href="/getpacks" class="span2 btn btn-small btn-spezial btn-success"> <i class="icon-search"></i> Get new packs</a>
+  <span class="span1 btn-group">
+    <a href="#" id="gridview" class="btn btn-small switcher"><i class="icon-th"></i></a>
+    <a href="#" id="listview" class="btn btn-small switcher active"> <i class="icon-list"></i></a>
+  </span>
 </div>
 
 <div class="row-fluid">
@@ -30,69 +34,73 @@
   %else:
   
   %p = e['pack']
+  <ul id="products" class="{{treename}} list clearfix">
+    <li class="clearfix">
+      <!-- {{p}} -->
+      %pname = p.get_name()
+      <section class="left span10">
+        <h3><img class="imgsize3" onerror="$(this).hide()" src="/static/images/sets/{{pname}}/tag.png" /> {{pname}}</h3>
+        <p><b>Description:</b>
+        {{p.description}}
+        </p>
+        <span class="meta">
+          %lst = app.datamgr.related_to_pack(p)
+          %print "LST", lst
+          %for _t in lst:
+          %(tpl, services) = _t
+          %if tpl:
+          %tname = tpl.get('name', '')
+          <div style="position: relative;"> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
 
-  <table class="table {{treename}}">
-    <tr>
-    <!-- {{p}} -->
-    %pname = p.get_name()
-    <td class="span2 no-border">
-      <span class="label">
-        <img class="imgsize3" onerror="$(this).hide()" src="/static/images/sets/{{pname}}/tag.png" /> {{pname}}
-      </span>
-    </td>
+          </div>
+          %else:
+          <div class="alert alert-info">No host template for this pack!</div>
+          %end
+          %end
+        </span>
+        %for _t in lst:
+        %if len(services) != 0:
+        %(tpl, services) = _t
+        <div id="services-{{tpl.get('name', '')}}" class='services_list'>
+          %if len(services) == 0:
+          <p class="alert">No services enabled for this pack</p>
+          %else:
+          <b> {{tpl.get('name', '')}} services: </b>
+          %end
 
-    <td class="span5 no-border">
-      {{p.description}}
-    </td>
+          %for s in services:
+          %sid = s.get('_id', '')
+          %sname = s.get('service_description', 'unknown')
+          <div class=''><a href='/elements/services/{{sid}}'> {{sname}}</a></div>
+          %end
+        </div>
+        %end
+        %end
+      </section>
 
-    <td class="span2 no-border">
-      %lst = app.datamgr.related_to_pack(p)
-      %print "LST", lst
-      %for _t in lst:
-      %(tpl, services) = _t
-      %if tpl:
-      %tname = tpl.get('name', '')
-      <div> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
+<!--  <section class="right span2">
+        <span class="darkview">
+        <a href="javascript:void(0);" class="firstbtn"><i class="icon-plus"></i></a>
+        <a href="javascript:void(0);"><i class="icon-question-sign"></i></a>
+        </span>
+      </section> -->
+
+      <section class="right span2">
+        <span class="darkview">
+        %lnk = p.doc_link
+        %if not lnk:
+          %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
+        %end
+        <a class="firstbtn" href="{{lnk}}" target='_blank'> <i class="icon-question-sign"></i></a>
+
         <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down pull-right"></i></a>
-      </div>
-      %else:
-      <div class="alert">No host template for this pack!</div>
-      %end
-      %end
-    </td>
+        </span>
+      </section>
 
-    <td class="span1 no-border">
-      %lnk = p.doc_link
-      %if not lnk:
-        %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
-      %end
-      <a class='pull-right' href="{{lnk}}" target='_blank'> <i class="icon-question-sign"></i></a>
-    </td>
 
-    <td class="span1 no-border">
-      %for _t in lst:
-      %if len(services) != 0:
-      %(tpl, services) = _t
-      <div id="services-{{tpl.get('name', '')}}" class='services_list'>
-        %if len(services) == 0:
-        <p class="alert">No services enabled for this pack</p>
-        %else:
-        <b> {{tpl.get('name', '')}} services: </b>
-        %end
 
-        %for s in services:
-        %sid = s.get('_id', '')
-        %sname = s.get('service_description', 'unknown')
-        <div class=''><a href='/elements/services/{{sid}}'> {{sname}}</a></div>
-        %end
-      </div>
-      %end
-      %end
-    </td>
-    
-    </tr>
-
-  </table>
+    </li>
+  </ul>
 
   %end
   %end
