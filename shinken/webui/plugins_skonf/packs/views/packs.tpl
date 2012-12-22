@@ -47,7 +47,7 @@
         <span class="meta">
           %lst = app.datamgr.related_to_pack(p)
           %print "LST", lst
-          <span class="pull-left">Host tag:&#32;</span>
+          <span class="pull-left" style="padding-right: 5px">Host tag:</span>
           %for _t in lst:
           %(tpl, services) = _t
           %if tpl:
