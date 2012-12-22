@@ -201,6 +201,7 @@ class __Action(object):
             self.stdoutdata = self.stdoutdata + self.stderrdata
         elif ('sh: -c: line 0: unexpected EOF while looking for matching'
               in self.stderrdata
+              or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
               or 'sh: Syntax error: Unterminated quoted string'
               in self.stderrdata):
             # Very, very ugly. But subprocess._handle_exitstatus does
