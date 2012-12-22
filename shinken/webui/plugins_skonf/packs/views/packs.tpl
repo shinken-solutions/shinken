@@ -43,21 +43,23 @@
         <p><b>Description:</b>
         {{p.description}}
         </p>
+
         <span class="meta">
           %lst = app.datamgr.related_to_pack(p)
           %print "LST", lst
+          <span class="pull-left">Host tag:&#32;</span>
           %for _t in lst:
           %(tpl, services) = _t
           %if tpl:
           %tname = tpl.get('name', '')
-          <div style="position: relative;"> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
-
-          </div>
+           <a class="label label-info" href='/elements/hosts/{{tname}}'> {{tname}}</a>
           %else:
+          <br>
           <div class="alert alert-info">No host template for this pack!</div>
           %end
           %end
         </span>
+
         %for _t in lst:
         %if len(services) != 0:
         %(tpl, services) = _t
