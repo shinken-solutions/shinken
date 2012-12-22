@@ -78,13 +78,6 @@
         %end
       </section>
 
-<!--  <section class="right span2">
-        <span class="darkview">
-        <a href="javascript:void(0);" class="firstbtn"><i class="icon-plus"></i></a>
-        <a href="javascript:void(0);"><i class="icon-question-sign"></i></a>
-        </span>
-      </section> -->
-
       <section class="right span2">
         <span class="darkview">
         %lnk = p.doc_link
@@ -96,12 +89,8 @@
         <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down pull-right"></i></a>
         </span>
       </section>
-
-
-
     </li>
   </ul>
-
   %end
   %end
 </div>
