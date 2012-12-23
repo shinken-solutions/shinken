@@ -1266,6 +1266,19 @@ class SchedulingItem(Item):
         # None mean I already take it into account
         return None
 
+    # returns either 0 or a positive number
+    # 0 == don't check for orphans
+    # non-zero == number of secs that can pass before
+    #             marking the check an orphan.
+    def get_time_to_orphanage(self):
+        # if disabled program-wide, disable it
+        if not self.check_for_orphaned:
+            return 0
+        # otherwise, check what my local conf says
+        if self.time_to_orphanage <= 0:
+            return 0
+        return self.time_to_orphanage
+
     # Get the perfdata command with macro resolved for this
     def get_perfdata_command(self):
         cls = self.__class__
