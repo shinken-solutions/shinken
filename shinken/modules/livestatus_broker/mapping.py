@@ -322,7 +322,7 @@ livestatus_attribute_map = {
         },
         'display_name': {
             'description': 'Optional display name of the host - not used by Nagios\' web interface',
-            'function': lambda item, req: item.host_name,
+            'function': lambda item, req: item.display_name,
         },
         'downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
@@ -855,7 +855,7 @@ livestatus_attribute_map = {
         },
         'display_name': {
             'description': 'An optional display name (not used by Nagios standard web pages)',
-            'function': lambda item, req: item.service_description,
+            'function': lambda item, req: item.display_name,
         },
         'downtimes': {
             'description': 'A list of all downtime ids of the service',
