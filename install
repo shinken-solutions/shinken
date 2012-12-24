@@ -105,7 +105,7 @@ function remove(){
                 rm -Rf $PNPPREFIX.MK
             fi
             cecho " > Remove sudoers configuration" green
-            sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers
+            sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers.d/shinken
             cecho " > Remove webserver configuration" green
             rm -f /etc/${WEBSERVER}/conf.d/zzz_check_mk.conf >> ${LOGFILE} 2>&1
             manage_service ${WEBSERVER} restart
@@ -789,17 +789,7 @@ function fix(){
     chmod -R g+w $ETC
 
     cecho " > Add Shinken entry for skonf in sudoers" green
-    cp /etc/sudoers /tmp/sudoers.shinken
-    echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /tmp/sudoers.shinken
-    visudo -c -f /tmp/sudoers.shinken
-    if [ $? -eq 0 ]
-    then
-        mv /tmp/sudoers.shinken /etc/sudoers
-        chmod 0440 /etc/sudoers
-    else
-        cecho " -> Fix sudoers skonf integration failed!" red
-        cecho " -> Look at /tmp/sudoers.shinken file to see where is the issue" red
-    fi
+    echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
 }
 
 function enable_initd(){
@@ -1233,7 +1223,9 @@ function cleanconf(){
 function fixsudoers(){
     cecho " > Fix /etc/sudoers file for shinken integration" green
     cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
-    cat $myscripts/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
+    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
+    sed -i -r 's/^#(includedir \/etc\/sudoers\.d)/\1/' /etc/sudoers
+    [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
 }
 
 function fixcentreondb(){
@@ -1651,9 +1643,9 @@ function install_multisite(){
     if [ -z "$exist" ]
     then
         cecho " > Enable sudoers commands for check_mk" green
-        echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
-        echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers
-        echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
+        echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers.d/shinken
+        echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers.d/shinken
+        echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers.d/shinken
     fi
 #    if [ $movepnp -eq 1 ]
 #    then
@@ -1945,9 +1937,8 @@ function install_nconf(){
     cecho " > configure sudo for deployment (should not work with systemd)" green
     if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
     then
-        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
+        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers.d/shinken
     fi
-    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
 
     cecho " -> Create nconf user and database" green
     while true
