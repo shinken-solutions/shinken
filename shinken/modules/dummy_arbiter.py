@@ -30,6 +30,7 @@ import time
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter'],
@@ -40,7 +41,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Dummy arbiter module for plugin %s" % plugin.get_name()
+    logger.info("[Dummy Arbiter] Get a Dummy arbiter module for plugin %s" % plugin.get_name())
     instance = Dummy_arbiter(plugin)
     return instance
 
@@ -52,13 +53,13 @@ class Dummy_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the dummy arbiter module"
+        logger.info("[Dummy Arbiter] Initilisation of the dummy arbiter module")
         #self.return_queue = self.properties['from_queue']
 
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
-        print "[Dummy] ask me for objects to return"
+        logger.info("[Dummy Arbiter] Ask me for objects to return")
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
@@ -70,14 +71,15 @@ class Dummy_arbiter(BaseModule):
                             'use': 'linux-server',
                             'address': 'localhost'
                             })
-        print "[Dummy] Returning to Arbiter the hosts:", r
+        logger.info("[Dummy Arbiter] Returning to Arbiter the hosts: %s" % str(r))
+
         return r
 
     def hook_late_configuration(self, conf):
-        print("Dummy in hook late config")
+        logger.info("[Dummy Arbiter] Dummy in hook late config")
 
     def do_loop_turn(self):
-        print "Raise a external command as example"
+        logger.info("[Dummy Arbiter] Raise a external command as example")
         e = ExternalCommand('Viva la revolution')
         self.from_q.put(e)
         time.sleep(1)

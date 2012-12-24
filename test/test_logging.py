@@ -104,7 +104,7 @@ class TestBasics(unittest.TestCase):
     def test_setting_and_unsetting_human_timestamp_format(self):
         # :hack: logging.human_timestamp_log is a global variable
         self.assertEqual(logging.human_timestamp_log, False)
-        logger.set_human_format()
+        logger.set_human_format(True)
         self.assertEqual(logging.human_timestamp_log, True)
         logger.set_human_format(False)
         self.assertEqual(logging.human_timestamp_log, False)

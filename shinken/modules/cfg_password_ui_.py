@@ -30,8 +30,10 @@ This class is for looking in the configuration for auth
 import os
 #import crypt
 
-from shinken.log import logger
 from shinken.basemodule import BaseModule
+from shinken.log import logger
+
+logger.info("[CfgPasswordUI] Loaded Apache/Passwd module")
 
 properties = {
     'daemons': ['webui', 'skonf'],
@@ -41,7 +43,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an CFG/Password UI module for plugin %s" % plugin.get_name()
+    logger.info("[Cfg Password UI] Get an CFG/Password UI module for plugin %s" % plugin.get_name())
 
     instance = Cfg_Password_Webui(plugin)
     return instance
@@ -53,7 +55,7 @@ class Cfg_Password_Webui(BaseModule):
 
     # Try to connect if we got true parameter
     def init(self):
-        print "Trying to initalize the CFG/Password auth"
+        logger.info("[Cfg Password UI] Trying to initalize the CFG/Password auth")
 
     # To load the webui application
     def load(self, app):
@@ -66,7 +68,7 @@ class Cfg_Password_Webui(BaseModule):
         if not c:
             return False
 
-        print "User %s try to init" % user
+        logger.info("[Cfg Password UI] User %s try to init" % user)
         p = None
         # In skonf, it's dummy object
         if isinstance(c, dict):
