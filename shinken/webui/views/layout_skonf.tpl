@@ -31,6 +31,7 @@
 
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/font-awesome.css" rel="stylesheet">
     <link href="/static/css/custom/layout.css" rel="stylesheet">
     <link href="/static/css/custom/badger.css" rel="stylesheet">
     <link href="/static/css/elements/jquery.meow.css" rel="stylesheet">
@@ -38,12 +39,12 @@
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
     <link href="/static/css/custom/buttons.css" rel="stylesheet">
     <link href="/static/css/elements/jquery.pageslide.css" rel="stylesheet">
-    <!-- css3 effect for pulse is not available on IE
-	 It's not real comment, if so it will not work.
-      -->
-    <![if !IE]>
+    
+    <!-- css3 effect for pulse is not available on IE, It's not real comment, if so it will not work. -->
+    <!--[IF !IE]> -->
     <link href="/static/css/elements/pulse.css" rel="stylesheet">
-    <![endif]>
+    <!-- <![ENDIF]-->
+    
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <link href="/static/css/custom/datepicker.css" rel="stylesheet">
 
@@ -67,19 +68,11 @@
     ================================================== -->
     <!-- WAS Placed at the end of the document so the pages load faster -->
     <!-- but then we a't call $ in our html page. So we will loose a bit loading speed (just
-	 for the first launch, not a big deal) but then we can call jquery in our page -->
+   for the first launch, not a big deal) but then we can call jquery in our page -->
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
     <script src="/static/js/shinkenui.js"></script>
-    <script src="/static/js/bootstrap-collapse.js"></script>
-    <script src="/static/js/bootstrap-tab.js"></script>
-    <script src="/static/js/bootstrap-button.js"></script>
-    <script src="/static/js/bootstrap-dropdown.js"></script>
-    <script src="/static/js/bootstrap-tooltip.js"></script>
-    <script src="/static/js/bootstrap-modal.js"></script>
-    <script src="/static/js/bootstrap-popover.js"></script>
-    <script src="/static/js/bootstrap-transition.js"></script>
-
+    <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/jquery.pageslide.js"></script>
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <script src="/static/js/bootstrap-datepicker.js"></script>
@@ -87,11 +80,11 @@
     <script src="/static/js/bootstrap-typeahead.js"></script>
     <script src="/static/js/jquery.meow.js"></script>
     <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
+    <script src="/static/js/jquery.hotkeys.js"></script>
+    
 
     <!--Shinken ones-->
-    %if refresh:
     <script src="/static/js/shinken-refresh.js"></script>
-    %end
     <script src="/static/js/shinken-actions.js"></script>
     <script src="/static/js/shinken-deptree.js"></script>
     <script src="/static/js/shinken-greeting.js"></script>
@@ -111,7 +104,7 @@
 		%include header_element_skonf globals()
 	%end
 
-    <div class="container-fluid no-leftpadding">
+    <div class="container-fluid">
       <div class="row-fluid">
         <div class="span12 min-height">
 			%include

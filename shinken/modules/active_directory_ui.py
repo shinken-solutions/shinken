@@ -38,7 +38,6 @@ except ImportError:
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("[Active Directory UI] Loaded AD module")
 
 properties = {
     'daemons': ['webui', 'skonf'],
@@ -154,6 +153,8 @@ class AD_Webui(BaseModule):
 
                 if result_type == ldap.RES_SEARCH_ENTRY:
                     (_, elts) = result_data[0]
+                    if self.mode =='openldap':
+                        elts['dn'] = str(result_data[0][0])
                     try:
                         account_name = elts[self.name_id][0]
                     except Exception:
@@ -224,7 +225,9 @@ class AD_Webui(BaseModule):
         try:
             # On AD take the uid / principalename
             if self.mode == 'ad':
-                account_name = elts[self.auth_key][0]
+                # Maybe the entry is void....
+                if self.auth_key in elts:
+                    account_name = elts[self.auth_key][0]
             else: # For openldap, use the full DN
                 account_name = elts[self.auth_key]
         except KeyError:

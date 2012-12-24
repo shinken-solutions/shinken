@@ -28,6 +28,6 @@
 
 </div>
 <div class="modal-footer">
-  <a href="javascript:submit_local_form();" class="btn btn-primary">Submit</button>
+  <a href="javascript:submit_local_form();" class="btn btn-primary"> <i class="icon-save"></i> Submit</button>
   <a href="#" class="btn" data-dismiss="modal">Close</a>
 </div>

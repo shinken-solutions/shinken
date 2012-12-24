@@ -143,7 +143,7 @@ class Dispatcher:
             # If not me and I'm a master
             if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
                 if not arb.have_conf(self.conf.magic_hash):
-                    arb.put_conf(self.conf)
+                    arb.put_conf(self.conf.whole_conf_pack)
                 else:
                     # Ok, it already has the conf. I remember that
                     # it does not have to run, I'm still alive!
@@ -527,10 +527,10 @@ class Dispatcher:
                                         #If receiver, we must send the hostnames of this configuration
                                         if kind == 'receiver':
                                             hnames = [h.get_name() for h in cfg.hosts]
-                                            print "Will send", hnames, "to the receiver", satellite.get_name()
+                                            logger.debug("[%s] Sending %s hostnames to the receiver %s" % (r.get_name(), len(hnames), satellite.get_name()))
                                             satellite.push_host_names(cfg_id, hnames)
                             # else:
-                            #    #I've got enough satellite, the next one are spare for me
+                            #    #I've got enough satellite, the next ones are considered spares
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.info("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id] = False
@@ -548,4 +548,4 @@ class Dispatcher:
                             rec.need_conf = False
                             logger.info('[%s] Dispatch OK of configuration to receiver %s' % (r.get_name(), rec.get_name()))
                         else:
-                            logger.warning('[%s] dispatching failed for receiver %s' % (r.get_name(), rec.get_name()))
+                            logger.error('[%s] Dispatching failed for receiver %s' % (r.get_name(), rec.get_name()))

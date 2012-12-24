@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals()
+%rebase layout_skonf globals(), title='Discovery process launched'
 
 <div class="span4 offset1 alert alert-success">
   Discovery launched. Redirecting in progress.

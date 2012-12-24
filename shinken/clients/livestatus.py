@@ -431,4 +431,4 @@ if __name__ == "__main__":
     r = cp.launch_raw_query('GET hosts\nColumns name last_check\n')
     logger.debug("Result= %s" % str(r))
     import time
-    print int(time.time())
+    logger.debug(int(time.time()))

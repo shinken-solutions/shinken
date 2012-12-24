@@ -43,7 +43,7 @@
 
 NAME="shinken"
 
-AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
+AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter skonf"
 
 ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
 if [ -z "$SHINKEN_MODULE_FILE" ]; then
@@ -284,7 +284,11 @@ do_start() {
         return 5
     }
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
-    if [ "$mod" != "arbiter" ]; then
+    # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
+    if [ "$mod" = 'skonf' ]; then
+	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+        rc=$?
+    elif [ "$mod" != "arbiter" ]; then
         output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
         rc=$?
     else

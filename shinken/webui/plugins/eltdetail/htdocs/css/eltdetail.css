@@ -70,9 +70,9 @@
 */
 
 .verticaltabs-container td { border-top: none; }
-.column1 { width: 50%; }
-
-
+.column1 { width: 50%;}
+.column2 { width: auto; display: block; word-wrap: break-word;}
+.tabletop {width: 100% !important;display: block;}
 
 #elt_container h2 {
 	font-size: 15px;
@@ -342,10 +342,9 @@ div.marginbottom {
 
 .verticaltabs-container {
   position: relative;
-  /*min-width: 460px;*/
-  min-height: 460px;
   width: 100%;
-  height: 100%;
+  min-height:500px;
+  height:auto !important;
   overflow: hidden;
 }
 
@@ -367,16 +366,15 @@ div.marginbottom {
 }
 
 .verticaltabs-container > .tab-content {
-  position: absolute;
-  top: 0;
+  position: relative;
+  top: -55px;
   right: 58px;
   bottom: 0;
   left: 0;
-  width: auto;
+  width: 78%;
+  min-height: 500px;
   height: auto;
 }
-
-
 
 /*
   Button showdown

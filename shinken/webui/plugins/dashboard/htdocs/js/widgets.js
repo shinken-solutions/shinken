@@ -29,7 +29,7 @@ var nb_widgets_loading = 0;
 var new_widget = false;
 
 // Now try to load widgets in a dynamic way
-function AddWidget(url, placeId){
+function AddWidget(url, placeId, replace){
     // We are saying to the user that we are loading a widget with
     // a spinner
     nb_widgets_loading += 1;
@@ -40,9 +40,15 @@ function AddWidget(url, placeId){
     $('#center-button').hide();
     $('#small_show_panel').show();
 
-    // We create a container before the AJAX request to display the widgets in the right order.
-    id_widget += 1;
-    container_object = $('<div id="widget-cell-' + id_widget + '"></div>').appendTo('#' + placeId);
+    //If we replace the widget like in reload,
+    //the container already exists and is passed as a parameter.
+    if (replace == true) {
+        container_object = placeId;
+    } else {
+        // We create a container before the AJAX request to display the widgets in the right order.
+        id_widget += 1;
+        container_object = $('<div id="widget-cell-' + id_widget + '"></div>').appendTo('#' + placeId);
+    }
 
     $.ajax({
         url: url,
@@ -73,6 +79,25 @@ function AddNewWidget(url, placeId){
     new_widget = true;
 }
 
+//Reload only widget
+function reloadWidget(name){
+    var widget = find_widget(name);
+    //Recreate uri with widget info.
+    var wuri = widget.base_url + "?";
+    var args = [];
+    args.push("collapsed=" + (widget.collapsed ? "True": "False"));
+    args.push("wid=" + widget.id);
+    for (var option in widget.options) {
+        args.push( option + "=" + widget.options[option]);
+    }
+    wuri += args.join("&");
+    console.log("Reload widget: " + widget.id + ", " + wuri);
+    container = jQuery('#' + widget.id).parent();
+    //Do not delete the container to keep the correct widget order.
+    jQuery('#' + widget.id).remove();
+    AddWidget(wuri, container, true);
+}
+
 function find_widget(name){
     res = -1;
     w = $.each(widgets, function(idx, w){
@@ -85,7 +110,7 @@ function find_widget(name){
 }
 
 // We will look if we need to save the current state and options or not
-function saveWidgets(){
+function saveWidgets(callback){
     // First we reupdate the widget-position, to be sure the js objects got the good value
     var pos = $.fn.GetEasyWidgetPositions();
     update_widgets_positions(pos);
@@ -108,7 +133,7 @@ function saveWidgets(){
     });
 
     console.log('Need to save widgets list: '+JSON.stringify(widgets_ids));
-    $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
+    $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)}, callback);
 }
 
 // Function that will look at the current state of the positions,
@@ -155,11 +180,11 @@ $(function(){
     // Very basic usage
     var easy_widget_mgr = $.fn.EasyWidgets({
         i18n : {
-            editText : '<i class="icon-edit"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
-            closeText : '<i class="icon-remove"></i>',
-            collapseText : '<i class="icon-chevron-up"></i>',
-            cancelEditText : '<i class="icon-edit"></i>',
-            extendText : '<i class="icon-chevron-down"></i>',
+            editText : '<i class="icon-edit font-grey"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
+            closeText : '<i class="icon-remove font-grey"></i>',
+            collapseText : '<i class="icon-chevron-up font-grey"></i>',
+            cancelEditText : '<i class="icon-edit font-grey"></i>',
+            extendText : '<i class="icon-chevron-down font-grey"></i>',
         },
         effects : {
             effectDuration : 100,
@@ -205,7 +230,13 @@ $(function(){
             onChangePositions : function(positions){
                 console.log('We are changing position of '+positions);
                 saveWidgets();
-            }
+            },
+            onEditQuery : function(link, widget){
+                //Postpone reload of page.
+                reinit_refresh();
+                return true;
+            },
+
         }
     });
 });

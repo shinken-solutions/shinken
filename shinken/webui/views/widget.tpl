@@ -13,9 +13,6 @@
 
 </script>
 
-
-
-
 %helper = app.helper
 
 %collapsed_s = ''
@@ -24,7 +21,6 @@
    %collapsed_s = 'collapsed'
    %collapsed_j = 'true'
 %end
-
 
 <script type="text/javascript">
     $(document).ready(function(){
@@ -62,10 +58,10 @@
              widget.options['{{k}}'] = v;
         %end
         // so now we can ask for saving the state :)
-        saveWidgets();
-        // Reloading the dashboard to let users see the changes.
-        // Would be better to only reload the widget...
-        window.location=window.location;
+        saveWidgets(function() {
+	    // If save is successfull we reload the widget
+	    reloadWidget('{{wid}}');
+	});
         // Prevent the form to be actually sent.
         return false;
     }

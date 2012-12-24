@@ -51,7 +51,7 @@ class Logline(dict):
     """
 
     id = 0
-    columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+    columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
 
     def __init__(self, sqlite_cursor=None, sqlite_row=None, line=None, srcdict=None):
         if srcdict != None:
@@ -207,6 +207,7 @@ class Logline(dict):
                 setattr(self, 'contact_name', contact_name)
                 setattr(self, 'host_name', host_name)
                 setattr(self, 'message', message)
+                setattr(self, 'options', '') # Fix a mismatch of number of fields with old databases and new ones
                 setattr(self, 'plugin_output', plugin_output)
                 setattr(self, 'service_description', service_description)
                 setattr(self, 'state', state)

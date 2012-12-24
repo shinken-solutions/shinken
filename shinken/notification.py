@@ -226,7 +226,7 @@ class Notification(Action):
             self.worker = 'none'
         if not getattr(self, 'module_type', None):
             self.module_type = 'fork'
-        if not hasattr(self, 'active_escalations'):
+        if not hasattr(self, 'already_start_escalations'):
             self.already_start_escalations = set()
         if not hasattr(self, 'execution_time'):
             self.execution_time = 0

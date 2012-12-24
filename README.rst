@@ -18,7 +18,7 @@ Requirements
 ============
 
 There are mandatory and conditional requirements for the installation
-methods which are described below. Keep in mind that you use an alternate installation method 
+methods which are described below. Keep in mind that you if use an alternate installation method 
 (setup.py or simple extraction to a folder), you have to use
 that method as well when you update or remove your installation.
 
@@ -32,13 +32,16 @@ requirement manually to confirm they are installed correctly.
 
 
 Mandatory Requirements
--------------------
+----------------------
 
 `shinken` requires
 
-* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
+* `Python`__ 2.4 or higher (Python 2.6 or higher is required if you want to use the Web interface)
 * `setuptools`__ or `distribute` Python package for installation (see below)
-* `pyro`__ Python package version less then 4.14 for all and not 3.x for debian squeeze
+* `pyro`__ Python package 3.x or 4.x (caveat: not 3.x for debian squeeze)
+* `pymongo`__ Python Package >= 2.1 for the Shinken WebUI
+* `pycurl`__ Python package for Shinken Skonf configuration pack management
+
 * `multiprocessing`__ Python package when using Python 2.4 or 2.5
   (`multiprocessing` is already included in Python 2.6 and higher)
 
@@ -46,8 +49,8 @@ __ http://www.python.org/download/
 __ http://pypi.python.org/pypi/setuptools/
 __ http://pypi.python.org/pypi/Pyro4
 __ http://pypi.python.org/pypi/multiprocessing/
-
-* python-devel Package
+__ http://pypi.python.org/pypi/pymongo/
+__ http://pycurl.sourceforge.net/
 
 
 Conditional Requirements
@@ -56,13 +59,20 @@ Conditional Requirements
 If you plan to use the `livestatus` module or the web interface, you will also
 need the following Python packages.
 
-* `simplejson`__
-* `ujson`__  (ujson is used in Livestatus for its speed)
+* `simplejson`__ only if python 2.5 used
+* `ujson`__  (ujson is used in Livestatus for added speed)
 * `pysqlite`__
+* `kombu`__ required by the Canopsis hypervisor and reporting module
+* `python-ldap`__ for active directory authentication (needed by Shinken WebUI ActiveDir_UI module)
+
+* `Python`__ 2.7 is required for developers to run the test suite, shinken/test/
 
 __ http://pypi.python.org/pypi/simplejson/
 __ http://pypi.python.org/pypi/ujson/
 __ http://code.google.com/p/pysqlite/
+__ http://pypi.python.org/pypi/kombu/2.4.5
+__ http://pypi.python.org/pypi/python-ldap/
+__ http://www.python.org/download/
 
 Installing/Checking Common Requirements on Windows
 ==================================================
@@ -87,6 +97,10 @@ Under ubuntu, you can grab the Pyro module with::
 
   sudo apt-get install pyro
 
+Under fedora, you can grab the Pyro module with::
+
+  sudo yum install python-pyro
+
 Under other distributions, you can search for it::
 
   yum search pyro
@@ -100,8 +114,8 @@ How to install Shinken
 ======================
 
 You can use the install script utility located at the root of the shinken sources.
-The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
-The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
+The script creates the user and group, installs all dependencies, and installs shinken. It is compatible with Debian, Ubuntu, and Centos/Redhat 5.x and 6.x
+The only requirement is an internet connection for the server on which you want to install shinken. It also allows you to modify the installation folder in a configuration file.
 
 If you want shinken installed in seconds (default in /usr/local/shinken) ::
 
@@ -118,7 +132,7 @@ __ http://www.shinken-monitoring.org/download/
 See the install.d/README file for further information on installing plugins and web frontends.
 
 Typical minimum installation using check scripts defined in Shinken, Shinken WebUI and PNP4Nagios for metrics.
-ie. ./install -i && ./install -p nagios-plugins && ./install -p check_mem && ./install -p manubulon && ./install -p pnp4nagios
+ie. ./install -i && ./install -p nagios-plugins && ./install -p check_mem && ./install -p manubulon && ./install -a pnp4nagios
 
 Update
 ------
@@ -157,7 +171,7 @@ The install script also installs some `init.d` scripts, enables them at boot tim
 Where is the configuration?
 ===========================
 
-The configuration is where you put the etc directory, `/etc/shinken`. (in
+The configuration is where you put the etc directory, `/etc/shinken` (in
 `/usr/local/shinken/etc` for the quick and dirty method, `/etc/shinken`
 for the first two methods).
 

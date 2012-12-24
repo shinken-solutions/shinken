@@ -13,9 +13,9 @@
 	<ul class="nav">
 	  <li class="dropdown">
 	    <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
-	    <ul class="dropdown-menu span4">
-              <li><a href="/">Shinken UI </a></li>
-              <li><a href="#">Skonf UI</a></li>
+	    <ul class="dropdown-menu">
+            <li><a href=":7767">Shinken UI </a></li>
+            <li><a href=":7766">Skonf UI</a><span class="badger-beta badger-critical">Beta</span></li>
 	      <!-- We will add also others UIs on the global menu -->
 	      %if app:
 	        %other_uis = app.get_external_ui_link()
@@ -29,6 +29,9 @@
 	      %end
 	    </ul>
 	  </li>
+	</ul>
+	<ul class="nav">
+	<p style="color: red;">BETA</p>
 	</ul>
 	<ul class="nav">
 	  <li><a href="/main">Home</a></li>
@@ -82,7 +85,8 @@
 
 
 
-	<ul class="nav">
+	<!-- Not finished from now
+	     <ul class="nav">
 	  %menu = [ ('/system','System'), ('/otheruis', 'Link with other UIs')]
           %for (key, value) in menu:
             %# Check for the selected element, if there is one
@@ -93,6 +97,7 @@
             %end
          %end
 	</ul>
+	     -->
 
 
         %if user is not None:

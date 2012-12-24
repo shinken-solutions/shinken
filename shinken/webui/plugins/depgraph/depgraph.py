@@ -128,7 +128,7 @@ def get_depgraph_inner(name):
 
     return {'app': app, 'elt': elt, 'user': user}
 
-widget_desc = '''<h3>Relation graph</h3>
+widget_desc = '''<h4>Relation graph</h4>
 Show a graph of an object relations
 '''
 

@@ -35,12 +35,14 @@ except ImportError:
     NodeSet = None
 
 from shinken.macroresolver import MacroResolver
+from shinken.log import logger
+
 #from memoized import memoized
 try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
 except Exception, exp:
-    print "Error: Encoding detection error", exp
+    logger.error('Encoding detection error= %s' % (exp))
     safe_stdout = False
 
 
@@ -153,7 +155,7 @@ def to_best_int_float(val):
 
 # bool('0') = true, so...
 def to_bool(val):
-    if val == '1':
+    if val == '1' or val == 'on' or val == 'true' or val == 'True':
         return True
     else:
         return False
@@ -241,6 +243,10 @@ def expand_with_macros(ref, value):
 # Just get the string name of the object
 # (like for realm)
 def get_obj_name(obj):
+    # Maybe we do not have a real object but already a stirng. If so
+    # return the string
+    if isinstance(obj, basestring):
+        return obj
     return obj.get_name()
 
 
@@ -569,7 +575,7 @@ def expect_file_dirs(root, path):
     tmp_dir = root
     for d in dirs:
         _d = os.path.join(tmp_dir, d)
-        print "Look for the directory existence", _d
+        logger.info ('Verify the existence of file %s' % (_d))
         if not os.path.exists(_d):
             try:
                 os.mkdir(_d)

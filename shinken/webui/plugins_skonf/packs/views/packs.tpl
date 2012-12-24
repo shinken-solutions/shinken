@@ -1,4 +1,3 @@
-
 %rebase layout_skonf globals(), js=['packs/js/packs.js']
 
 <div class='span10'>
@@ -47,7 +46,7 @@
         %(tpl, services) = _t
         %if tpl:
            %tname = tpl.get('name', '')
-           <div> Host tag: <a href='/elemments/hosts/{{tname}}'> {{tname}}</a>
+           <div> Host tag: <a href='/elements/hosts/{{tname}}'> {{tname}}</a>
 	     <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>
 	   </div>
         %else:
@@ -65,8 +64,9 @@
 
       <div class='span10'>
       %for _t in lst:
-         %(tpl, services) = _t
-	 <div id="services-{{tpl.get('name', '')}}" class='services_list'>
+         %if len(services) != 0:
+            %(tpl, services) = _t
+	    <div id="services-{{tpl.get('name', '')}}" class='services_list'>
          %if len(services) == 0:
 	   <div class="alert">No services enabled for this pack</div>
 	 %else:
@@ -76,7 +76,7 @@
 	 %for s in services:
 	   %sid = s.get('_id', '')
 	   %sname = s.get('service_description', 'unknown')
-           <div class=''><a href='/elemments/services/{{sid}}'> {{sname}}</a></div>
+           <div class=''><a href='/elements/services/{{sid}}'> {{sname}}</a></div>
 	 %end
 	</div>
       %end

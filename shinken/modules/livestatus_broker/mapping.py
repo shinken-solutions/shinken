@@ -323,7 +323,7 @@ livestatus_attribute_map = {
         },
         'display_name': {
             'description': 'Optional display name of the host - not used by Nagios\' web interface',
-            'function': lambda item, req: item.host_name,
+            'function': lambda item, req: item.display_name,
         },
         'downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
@@ -643,10 +643,18 @@ livestatus_attribute_map = {
             'function': lambda item, req: find_pnp_perfdata_xml(item.get_name(), req),
             'datatype': int,
         },
+        'poller_tag': {
+            'description': 'Poller Tag',
+            'function': lambda item, req: item.poller_tag,
+        },  
         'process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
             'function': lambda item, req: item.process_perf_data,
             'datatype': bool,
+        },
+        'realm': {
+            'description': 'Realm',
+            'function': lambda item, req: item.realm,
         },
         'retry_interval': {
             'description': 'Number of basic interval lengths between checks when retrying after a soft error',
@@ -848,7 +856,7 @@ livestatus_attribute_map = {
         },
         'display_name': {
             'description': 'An optional display name (not used by Nagios standard web pages)',
-            'function': lambda item, req: item.service_description,
+            'function': lambda item, req: item.display_name,
         },
         'downtimes': {
             'description': 'A list of all downtime ids of the service',
@@ -1425,6 +1433,10 @@ livestatus_attribute_map = {
             'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
             'function': lambda item, req: find_pnp_perfdata_xml(item.get_full_name(), req),
             'datatype': int,
+        },
+        'poller_tag': {
+            'description': 'Poller Tag',
+            'function': lambda item, req: item.poller_tag,
         },
         'process_performance_data': {
             'description': 'Whether processing of performance data is enabled for the service (0/1)',
@@ -4289,7 +4301,8 @@ livestatus_attribute_map = {
         },
         'options': {
             'description': 'The part of the message after the \':\'',
-            'function': lambda item, req: item.message.partition(":")[2].lstrip(),
+            # >2.4 'function': lambda item, req: item.message.partition(":")[2].lstrip(),
+            'function': lambda item, req: item.message.split(":")[1].lstrip(),
         },
         'plugin_output': {
             'description': 'The output of the check, if any is associated with the message',

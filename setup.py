@@ -482,7 +482,8 @@ main_config_files = ('nagios.cfg',
 
 additionnal_config_files = ('shinken-specific.cfg',
                             'shinken-specific-high-availability.cfg',
-                            'shinken-specific-load-balanced-only.cfg'
+                            'shinken-specific-load-balanced-only.cfg',
+                            'skonf.cfg',
                             )
 
 config_objects_file = (
@@ -503,7 +504,7 @@ config_objects_file = (
                         'hostgroups.cfg',
                         'certs/server.pem',
                         'certs/client.pem',
-                        'certs/ca.pem'
+                        'certs/ca.pem',
 )
 
 # Now service packs files
@@ -551,7 +552,8 @@ data_files = [
          'bin/init.d/shinken-receiver',
          'bin/init.d/shinken-poller',
          'bin/init.d/shinken-reactionner',
-         'bin/init.d/shinken-scheduler'
+         'bin/init.d/shinken-scheduler',
+         'bin/init.d/shinken-skonf',
          ]
         ),
     (
@@ -581,7 +583,7 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="1.0.1",
+        version="1.2.2",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",

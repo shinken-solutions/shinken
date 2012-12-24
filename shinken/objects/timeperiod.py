@@ -87,6 +87,7 @@
 
 import time
 import re
+import string
 
 from item import Item, Items
 
@@ -125,7 +126,7 @@ class Timeperiod(Item):
         self.plus = {}
         self.invalid_entries = []
         for key in params:
-            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from']:
+            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
                 setattr(self, key, params[key])
             else:
                 self.unresolved.append(key + ' ' + params[key])
@@ -148,6 +149,23 @@ class Timeperiod(Item):
         # Same story for plus
         for i in self.templates:
             self.unresolved.extend(i.unresolved)
+
+    # Ok timeperiods are a bit different from classic items, because we do not have a real list
+    # of our raw rpoperties, like if we got february 1 - 15 / 3 for example
+    def get_raw_import_values(self):
+        properties = ['timeperiod_name', 'alias', 'use', 'register']
+        r = {}
+        for prop in properties:
+            if hasattr(self, prop):
+                v = getattr(self, prop)
+                print prop, ":", v
+                r[prop] = v
+        # Now the unresolved one. The only way to get ride of same key things is to put
+        # directly the full value as the key
+        for other in self.unresolved:
+            r[other] = ''
+        return r
+
 
     def is_time_valid(self, t):
         if self.has('exclude'):

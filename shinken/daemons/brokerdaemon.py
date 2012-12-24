@@ -350,7 +350,7 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
-        self.log.load_obj(self, name)
+        logger.load_obj(self, name)
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
@@ -486,6 +486,14 @@ class Broker(BaseSatellite):
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
             logger.info("We received modules %s " % mods)
+
+            # Ok now start, or restart them!
+            # Set modules, init them and start external ones
+            self.modules_manager.set_modules(self.modules)
+            self.do_load_modules()
+            self.modules_manager.start_external_instances()
+
+
 
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
@@ -637,10 +645,12 @@ class Broker(BaseSatellite):
             self.load_config_file()
 
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
 
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
             self.do_daemon_init_and_start()
 
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
@@ -653,10 +663,13 @@ class Broker(BaseSatellite):
 
             self.setup_new_conf()
 
+            # We already init modules durint the new conf thing
             # Set modules, init them and start external ones
-            self.modules_manager.set_modules(self.modules)
-            self.do_load_modules()
-            self.modules_manager.start_external_instances()
+            #self.modules_manager.set_modules(self.modules)
+            #self.do_load_modules()
+            #self.modules_manager.start_external_instances()
+
+
 
             # Do the modules part, we have our modules in self.modules
             # REF: doc/broker-modules.png (1)

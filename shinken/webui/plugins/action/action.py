@@ -35,8 +35,12 @@ import re
 def subsNOW():
     return str(int(time.time()))
 
+def subsSLASH():
+    return '/'
+
 # This dictionnary associate macros with expansion function
-subs = {'$NOW$': subsNOW
+subs = {'$NOW$': subsNOW,
+        '$SLASH$' : subsSLASH,
         # Add new macros here
        }
 

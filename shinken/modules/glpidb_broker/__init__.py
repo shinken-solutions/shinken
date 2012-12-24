@@ -24,10 +24,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# This text is print at the import
 from shinken.log import logger
 
-# This text is print at the import
-logger.info("[GLPIdb Broker] I am GlpiDB Broker")
+logger.info("[GLPIdbBroker] Loading the Glpi broker module")
 
 properties = {
     'daemons': ['broker'],

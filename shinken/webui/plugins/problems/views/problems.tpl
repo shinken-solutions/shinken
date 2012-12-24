@@ -23,6 +23,16 @@
 </script>
 %end
 
+%if toolbar=='hide':
+<script type="text/javascript">
+  var toolbar_hide = true;
+</script>
+%else:
+<script type="text/javascript">
+  var toolbar_hide = false;
+</script>
+%end
+
 
 
 <script type="text/javascript">
@@ -73,7 +83,7 @@
         %if user.is_admin:
         var advfct=1;
         %else:
-        var advcft=0;
+        var advfct=0;
         %end
 
 	%for b in bookmarks:
@@ -97,6 +107,10 @@
   <li class="sliding-element">
     <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
   </li>
+  <li class="sliding-element">
+    <a href="javascript:remove_all('{{user.get_name()}}')"><i class="icon-remove icon-white"></i> Delete</a>
+  </li>
+
 </ul>
 
 
@@ -106,7 +120,6 @@
     new_filters = [];
     current_filters = [];
 </script>
-
 <div id="pageslide" style="display:none">
   <div class='row'>
     <span class='span8'><h2>Filtering options</h2></span>
@@ -176,6 +189,16 @@
       <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
 
+    <form name='criticity_filter' class='form-horizontal'>
+      <span class="help-inline">Critical Only</span>
+      %if page=='problems':
+      <input type='checkbox' name='show_critical'></input>
+      %else:
+      <input type='checkbox' name='show_critical' checked></input>
+      %end
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_criticity_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
     <span><p>&nbsp;</p></span>
 
 
@@ -216,57 +239,24 @@ $(function(){
 <div class="span12">
 
   <div class='row'>
-    <div class='span2 offset2'>
-      <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
-      <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
+    <div class='span2'>
+      <a id='hide_toolbar_btn' style="display:inline;" href="javascript:hide_toolbar()" class="btn pull-left"><i class="icon-minus"></i> Hide toolbar</a>
+      <a id='show_toolbar_btn' style="display:inline;" href="javascript:show_toolbar()" class="btn pull-left"><i class="icon-plus"></i> Show toolbar</a>      
+    </div>
+    <div class='span2'>
+      <a id='select_all_btn' style="display:inline;" href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
+      <a id='unselect_all_btn' style="display:inline;" href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
     </div>
     <div class='span7'>
-      &nbsp;
-      %if navi is not None:
-      <div class="pagination center no-margin">
-	<ul class="pull-right">
-	  %for name, start, end, is_current in navi:
-	    %if is_current:
-	    <li class="active"><a href="#">{{name}}</a></li>
-	    %elif start == None or end == None:
-	    <li class="disabled"> <a href="#">...</a> </li>
-	    %else:
-	    <li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-	    %end
-	  %end
-	</ul>
-    </div>
-      %# end of the navi part
-      %end
+        &nbsp;
+        %include pagination_element navi=navi, app=app, page=page, div_class="center no-margin"
     </div>
 
-    <div class='span1'>
-      <div class="btn-group pull-right">
-	<button class="btn"> <i class="icon-cog"></i> </button>
-	<button class="btn dropdown-toggle" data-toggle="dropdown">
-	  <span class="caret"></span>
-	</button>
-	<ul class="dropdown-menu">
-	  <li>
-	    <form class='form_in_dropdown'>
-	      <label> Number of elements to show </label>
-	      <select name='nb_elements'>
-		%t = [30, 50, 100, 200, 500, 1000, '5000', '10000', 'All']
-		%for v in t:
-		  <option value={{v}}>{{v}}</option>
-		%end
-	      </select>
-	    </form>
-	  </li>
-	</ul>
-      </div>
-
-    </div>
 </div>
 
 
 <div class='row-fluid'>
-  <div class='span2'>
+  <div id='toolbar' class='span2'>
     <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add filters</a>
     <p></p>
     %got_filters = sum([len(v) for (k,v) in filters.iteritems()]) > 0
@@ -331,6 +321,15 @@ $(function(){
       <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_state_downtime_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['crit']:
+    <li>
+      <span class="filter_color criticity_filter_color">&nbsp;</span>
+      <span class="criticity_filter_name">Criticity: {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("crit", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_criticity_filter('{{r}}');</script>
     %end
 
     </ul>
@@ -406,7 +405,7 @@ $(function(){
       %end
 	  <div class="tableCriticity pull-left">
 
-	    <div class='tick pull-left' style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
+	    <div class='tick pull-left' style="cursor:pointer;" onmouseover="hovering_selection('{{helper.get_html_id(pb)}}')" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
 	      <div class='img_status pull-left'>
 		<div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "
@@ -432,9 +431,9 @@ $(function(){
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</div>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:app.max_output_length])}}</div>
 		   %else:
-		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}</div>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:app.max_output_length]}}</div>
 		   %end
 		%else:
 		   %if app.allow_html_output:
@@ -528,25 +527,7 @@ $(function(){
     %end
   </div>
 
-	%if navi is not None:
-	<div class="pagination center">
-		<ul class="pull-right">
-		%for name, start, end, is_current in navi:
-		   	%if is_current:
-		   	<li class="active"><a href="#">{{name}}</a></li>
-		   	%elif start == None or end == None:
-		   	<li class="disabled"> <a href="#">...</a> </li>
-			%elif search:
-			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
-		   	%else:
-			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-		   	%end
-		    %end
-		</ul>
-	</div>
-	%# end of the navi part
-	%end
-
+       %include pagination_element navi=navi, app=app, page=page, div_class="center"
 
 </div>
 </div>

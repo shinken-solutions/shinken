@@ -27,7 +27,14 @@
  elements like service, hosts or contacts.
 """
 import time
-import hashlib, cPickle  # for hashing compute
+import cPickle  # for hashing compute
+
+# Try to import md5 function
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+    
 from copy import copy
 
 from shinken.graph import Graph
@@ -195,7 +202,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # for hash compute
         i = self.id
         del self.id
-        m = hashlib.md5()
+        m = md5()
         tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
         m.update(tmp)
         self.hash = m.digest()
@@ -361,6 +368,22 @@ Like temporary attributes such as "imported_from", etc.. """
             if hasattr(self, old_name) and not hasattr(self, new_name):
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
+
+    # The arbiter is asking us our raw value before all explode or linking
+    def get_raw_import_values(self):
+        r = {}
+        properties = self.__class__.properties.keys()
+        # Register is not by default in the properties
+        if not 'register' in properties:
+            properties.append('register')
+            
+        for prop in properties:
+            if hasattr(self, prop):
+                v = getattr(self, prop)
+                print prop, ":", v
+                r[prop] = v
+        return r
+
 
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
@@ -554,7 +577,6 @@ Like temporary attributes such as "imported_from", etc.. """
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
             t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
             if t:
-                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
@@ -568,7 +590,6 @@ Like temporary attributes such as "imported_from", etc.. """
         for tname in self.triggers:
             t = triggers.find_by_name(tname)
             if t:
-                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 new_triggers.append(t)
             else:
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
@@ -647,6 +668,11 @@ class Items(object):
             return self.items[id]
         else:
             return None
+
+    # prepare_for_conf_sending to flatten some properties
+    def prepare_for_sending(self):
+        for i in self:
+            i.prepare_for_conf_sending()
 
     # It's used to change old Nagios2 names to
     # Nagios3 ones
@@ -991,6 +1017,7 @@ class Items(object):
         for gn, val in groupsname2hostsnames.items():
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
             gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+            gn = gn.replace('.', HostGroup_Name_Parse_Ctx.dot_in_name)
             gn = gn.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
             newgroupname2hostnames[gn] = val
 
@@ -1063,6 +1090,7 @@ class HostGroup_Name_Parse_Ctx(object):
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
+    dot_in_name = "__DOT_IN_NAME__"
     space_in_name = '__SPACE_IN_NAME__'
 
     # flags:
@@ -1393,6 +1421,8 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
             parse_res = HostGroup_Name_Parse_Ctx.catch_all_name
         if 'print' in parse_res:
             parse_res = parse_res.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+        if '.' in parse_res:
+            parse_res = parse_res.replace('.', HostGroup_Name_Parse_Ctx.dot_in_name)
         if ' ' in parse_res:
             parse_res = parse_res.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
         return parse_res

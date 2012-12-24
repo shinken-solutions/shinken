@@ -537,7 +537,7 @@ class LiveStatusQuery(object):
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
         'services':             get_services_livedata,
-        'commands':             get_simple_livedata,
+        'commands':             get_filtered_livedata,
         'schedulers':           get_simple_livedata,
         'brokers':              get_simple_livedata,
         'pollers':              get_simple_livedata,
@@ -716,6 +716,8 @@ class LiveStatusQuery(object):
             converter = find_filter_converter(self.table, 'lsm_'+attribute)
             if converter:
                 reference = converter(reference)
+            if isinstance(reference, str):
+                reference = reference.decode('utf8','ignore')
         attribute = 'lsm_' + attribute
 
         # The filters are closures.

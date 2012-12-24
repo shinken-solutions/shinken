@@ -30,6 +30,58 @@ $(document).ready(function(){
     $('.chevron-up').hide();
 });
 
+
+/*
+  Look for Shift key up and down
+*/
+is_shift_pressed = false;
+function shift_pressed(){
+    is_shift_pressed = true;
+}
+
+function shift_released(){
+    is_shift_pressed = false;
+}
+
+$(document).bind('keydown', 'shift', shift_pressed);
+$(document).bind('keyup', 'shift', shift_released);
+
+/*
+  If we keep the shift pushed and hovering over selections, it
+  select the elements. Easier for massive selection :)
+*/
+function hovering_selection(name){
+    if(is_shift_pressed){
+	add_element(name);
+    }
+}
+
+
+/*
+  Tool bar related code
+*/
+
+function hide_toolbar(){
+    $('#toolbar').hide();
+    $('#hide_toolbar_btn').hide();
+    $('#show_toolbar_btn').show();
+    save_toolbar('hide');
+}
+
+function show_toolbar(){
+    $('#toolbar').show();
+    $('#hide_toolbar_btn').show();
+    $('#show_toolbar_btn').hide();
+    save_toolbar('show');
+}
+
+function save_toolbar(toolbar){
+    console.log('Need to save toolbar pref '+toolbar);
+    $.post("/user/save_pref", { 'key' : 'toolbar', 'value' : toolbar});
+}
+
+
+
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
     var myFx = $('#'+name).slideToggle();
@@ -48,6 +100,11 @@ function show_hidden_problems(cls){
 // At start we hide the unselect all button
 $(document).ready(function(){
     $('#unselect_all_btn').hide();
+    if(toolbar_hide){
+        hide_toolbar();
+    }else{
+        $('#show_toolbar_btn').hide();
+    }
 
     // If actions are not allowed, disable the button 'select all'
     if(!actions_enabled){
@@ -111,10 +168,10 @@ function unselect_all_problems(){
 /* We keep an array of all selected elements */
 var selected_elements = [];
 
-
 function add_remove_elements(name){
     // Maybe the actions are not allwoed. If so, don't act
     if(!actions_enabled){return;}
+
 
     //alert(selected_elements.indexOf(name));
     if( selected_elements.indexOf(name) != -1 ){
@@ -196,7 +253,15 @@ function try_to_fix_all(){
 
 function acknowledge_all(user){
     $.each(selected_elements, function(idx, name){
-	do_acknowledge(unid_name(name), 'Acknowledge from WebUI.', user);
+	do_acknowledge(unid_name(name), 'Acknowledged from WebUI by '+user, user);
+    });
+    flush_selected_elements();
+}
+
+
+function remove_all(user){
+    $.each(selected_elements, function(idx, name){
+        do_remove(unid_name(name), 'Removed from WebUI by '+user, user);
     });
     flush_selected_elements();
 }

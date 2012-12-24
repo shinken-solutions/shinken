@@ -35,7 +35,10 @@ def find(value, lst, key):
 
     for i in lst:
         v = i.get(key, None)
-        print 'MAtch with', v, value
+        try:
+            print 'MAtch with', v, value
+        except:
+            pass
         if v == value:
             return i
     return None
@@ -61,7 +64,10 @@ def find_several(lst, elt, prop, key):
         if v is None:
             continue
         v = v.strip()
-        print 'MAtch with db', v
+        try:
+            print 'MAtch with db', v
+        except:
+            pass
         if v  in values:
             res.append(dbi)
     print "Return find_several::", res
@@ -73,16 +79,16 @@ class Helper(object):
         self.app = app
 
     # Return a simple string input
-    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2', inputsize='', placeholder='', popover=None, editable=''):
+    def get_string_input(self, elt, prop, name, span='span10', innerspan='', inputsize='', placeholder='', popover=None, editable=''):
         p = ''
         if popover is not None:
             p = '<i id="popover-%s" class="icon-question-sign"></i>' % prop
             p += '<script>$("#popover-%s").popover({"title": "Help", "content": "%s"});</script>' % (prop, popover)
-        s = '''<span class="%s">
-                  <span class="help-inline %s"> %s </span>
-                  <input class="%s %s" name="%s" type="text" value="%s" placeholder='%s' %s/>
+        s = '''<form class="form-horizontal"> <div class="control-group %s">
+                  <label class="control-label %s"> %s </label>
+                  <div class="controls"> <input class="%s %s" name="%s" type="text" value="%s" placeholder='%s' %s/> </div>
                   %s
-               </span>
+               </div> </form>
                <script>properties.push({'name': '%s', 'type': 'string'});</script>
             ''' % (span, innerspan, name, editable, inputsize, prop, elt.get(prop, ''), placeholder, editable, p, prop)
         return s
@@ -102,16 +108,18 @@ class Helper(object):
             unset = 'active'
 
         s = '''
-        <span class="span10">
-           <span class="help-inline span2"> %s </span>
+        <form class="form-horizontal">
+        <div class="control-group">
+           <label class="control-label"> %s </label>
 
         <script>properties.push({'name': '%s', 'type': 'bool'});</script>
-        <div class="btn-group span9 %s" data-toggle="buttons-radio">
+        <div class="btn-group controls %s" data-toggle="buttons-radio">
           <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
           <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
           <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
         </div>
-        </span>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
+        </div>
+        </form>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
         return s
 
     def get_percent_input(self, elt, prop, name, editable='', placeholder='', popover=None):
@@ -167,10 +175,10 @@ class Helper(object):
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         select_part += '</SELECT>'
 
-        s = '''<span class="span10">
+        s = '''<form class="form-horizontal">
                   <span class="help-inline span2"> %s </span>
                   %s
-               </span>
+               </form>
                <script>properties.push({'name': '%s', 'type': 'select'});</script>
             ''' % (name, select_part, prop)
         return s
@@ -242,10 +250,10 @@ class Helper(object):
                 select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         select_part += '</SELECT>'
 
-        s = '''<span class="span10">
+        s = '''<form class="span10">
                   <span class="help-inline span2"> %s </span>
                   %s
-               </span>
+               </form>
                <script>properties.push({'name': '%s', 'type': 'multiselect'});</script>
             ''' % (name, select_part, prop)
         return s
@@ -336,8 +344,8 @@ class Helper(object):
         sorted_names.sort()
         print 'Sorted names', sorted_names
 
-        s += "<span class='span12'><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>" % editable
-        s += "<span id='new_macros' class='span12'></span>"
+        s += "<span><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus'></i> Add macro</a></span>" % editable
+        s += "<span id='new_macros'></span>"
         # We want to show the how element macros value first
         tnames.insert(0, '__ITEM__')
         for tname in tnames:

@@ -27,6 +27,7 @@ import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.brok import Brok
+from shinken.log import logger
 
 """ Schedules downtime for a specified service. If the "fixed" argument is set
  to one (1), downtime will start and end at the times specified by the
@@ -254,7 +255,7 @@ class Downtime:
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):
-            print "Passing downtime"
+            logger.info("Passing downtime")
             return
 
         self.id = state.pop()

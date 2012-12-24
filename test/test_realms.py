@@ -79,5 +79,19 @@ class TestConfig(ShinkenTest):
         self.assert_(in_realm2 in test_host3_hg_realm2.hostgroups)
 
 
+    # Realms should be stripped when linking to hosts and hostgroups
+    # so we don't pickle the whole object, but just a name
+    def test_realm_stripping_before_sending(self):
+        test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
+        self.assert_(test_host_realm1 is not None)
+        print type(test_host_realm1.realm)
+        self.assert_(isinstance(test_host_realm1.realm, basestring))
+
+        in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
+        self.assert_(in_realm2 is not None)
+        print type(in_realm2.realm)
+        self.assert_(isinstance(in_realm2.realm, basestring))
+
+
 if __name__ == '__main__':
     unittest.main()

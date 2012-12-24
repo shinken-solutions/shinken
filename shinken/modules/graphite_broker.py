@@ -98,10 +98,11 @@ class Graphite_broker(BaseModule):
             name = self.illegal_char.sub('_', elts[0])
 
             raw = elts[1]
-            # get the first value of ;
-            if ';' in raw:
+            # get metric value and its thresholds values if they exist
+            if ';' in raw and len(filter(None, raw.split(';'))) >= 3:
                 elts = raw.split(';')
                 name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
+            # get the first value of ;
             else:
                 value = raw
                 name_value = {name: raw}
@@ -179,7 +180,7 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.%s %s %d" % (path, metric,
                                                   value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s", packet)
+            logger.debug("[Graphite broker] Launching: %s" % packet)
             self.con.sendall(packet)
 
     # A host check result brok has just arrived, we UPDATE data info with this

@@ -440,7 +440,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.info("%s: My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My host_name got the character %s that is not allowed." % (self.get_name(), c))
                     state = False
 
         return state
@@ -948,10 +948,6 @@ class Hosts(Items):
     name_property = "host_name"  # use for the search by name
     inner_class = Host  # use for know what is in items
 
-    # prepare_for_conf_sending to flatten some properties
-    def prepare_for_sending(self):
-        for h in self:
-            h.prepare_for_conf_sending()
 
     # Create link between elements:
     # hosts -> timeperiods
@@ -1012,7 +1008,7 @@ class Hosts(Items):
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
                 if p is None:
-                    err = "the host %s got a invalid realm (%s)!" % (h.get_name(), h.realm)
+                    err = "the host %s got an invalid realm (%s)!" % (h.get_name(), h.realm)
                     h.configuration_errors.append(err)
                 h.realm = p
             else:

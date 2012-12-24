@@ -302,12 +302,6 @@ class LiveStatusQueryMetainfo(object):
         else:
             return re.sub(re.sub('s$', '', self.table) + '_', '', column, 1)
 
-    def columns(self):
-        try:
-            return set([l for l in self.structured_data if l[0] == 'Columns'][1])
-        except Exception:
-            return set([])
-
     def is_a_closed_chapter(self):
         """
         When the query is asking for log events from a time interval in the
@@ -382,8 +376,8 @@ class LiveStatusQueryMetainfo(object):
                 try:
                     num_hosts = 0
                     for i, _ in enumerate(self.structured_data):
-                        if self.structured_data[i][0] == 'Filter' and self.structured_data[i][1] == 'host_name':
-                            if self.structured_data[i+1][0] == 'Filter' and self.structured_data[i+1][1] == 'host_name':
+                        if self.structured_data[i][0] == 'Filter' and self.structured_data[i][1] == 'name':
+                            if self.structured_data[i+1][0] == 'Filter' and self.structured_data[i+1][1] == 'name':
                                 num_hosts += 1
                                 hosts.append(self.structured_data[i][3])
                             elif self.structured_data[i+1][0] == 'Or' and self.structured_data[i+1][1] == num_hosts + 1:
@@ -395,7 +389,7 @@ class LiveStatusQueryMetainfo(object):
                 except Exception, exp:
                     only_hosts = False
                 if only_hosts:
-                    if len(hosts) == len(filter(lambda x: x[0] == 'Filter' and x[1] == 'host_name', self.structured_data)):
+                    if len(hosts) == len(filter(lambda x: x[0] == 'Filter' and x[1] == 'name', self.structured_data)):
                         hosts = list(set(hosts))
                         hosts.sort()
                         self.query_hints['target'] = HINT_HOSTS
@@ -479,7 +473,7 @@ class LiveStatusQueryMetainfo(object):
                         # hint : hosts_names
                         if len(hosts) == 1:
                             self.query_hints['target'] = HINT_SERVICES_BY_HOST
-                            self.query_hints['host_name'] = hosts[0]
+                            self.query_hints['host_name'] = hosts.pop()
                         else:
                             self.query_hints['target'] = HINT_SERVICES
                             self.query_hints['host_names_service_descriptions'] = services
