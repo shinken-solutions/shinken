@@ -263,12 +263,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             mongo_filter_func = self.mongo_time_filter_stack.get_stack()
         result = []
         mongo_filter = mongo_filter_func()
-        logger.debug("[LogStoreMongoDB] Mongo filter is" % mongo_filter)
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
         filter_element = eval('{ ' + mongo_filter + ' }')
-        logger.debug("[LogStoreMongoDB] Mongo filter is" % filter_element)
         dbresult = []
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected == CONNECTED:
@@ -413,9 +411,7 @@ class LiveStatusMongoStack(LiveStatusStack):
             # Take from the stack:
             # Make a combined anded function
             # Put it on the stack
-            logger.debug("[LogStoreMongoDB] Filter is" % filters)
             and_clause = lambda: '\'$and\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
-            logger.debug("[LogStoreMongoDB] and_elements" % and_clause)
             self.put_stack(and_clause)
 
     def or_elements(self, num):
@@ -425,7 +421,6 @@ class LiveStatusMongoStack(LiveStatusStack):
             for _ in range(num):
                 filters.append(self.get_stack())
             or_clause = lambda: '\'$or\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
-            logger.debug("[LogStoreMongoDB] or_elements"% or_clause)
             self.put_stack(or_clause)
 
     def get_stack(self):

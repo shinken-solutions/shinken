@@ -358,7 +358,7 @@ function debinstalled(){
 function prerequisites(){
     cadre "Checking prerequisites" green
     # common prereq
-    bins="wget sed gawk grep python bash"
+    bins="wget sed gawk grep python bash sudo"
 
     for b in $bins
     do
@@ -795,6 +795,7 @@ function fix(){
     if [ $? -eq 0 ]
     then
         mv /tmp/sudoers.shinken /etc/sudoers
+        chmod 0440 /etc/sudoers
     else
         cecho " -> Fix sudoers skonf integration failed!" red
         cecho " -> Look at /tmp/sudoers.shinken file to see where is the issue" red
@@ -2878,6 +2879,16 @@ function install_check_netint(){
     cd $TMP
 
     filename="check_netint.pl"
+    cecho " > Installing pre-requisites." green
+    case $CODE in
+        REDHAT|Fedora)
+            installpkg pkg perl-Net-SNMP
+            ;;
+        DEBIAN)
+            installpkg pkg libnet-snmp-perl
+            ;;
+    esac
+
     cecho " > Downloading check_netint" green
     wget $WGETPROXY $CHECKNETINT -O ${filename} >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]

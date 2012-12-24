@@ -1,0 +1,10 @@
+[Unit]
+Description=Shinken Skonf
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/shinken-skonf -d -c /etc/shinken/skonf.cfg
+
+[Install]
+WantedBy=multi-user.target
