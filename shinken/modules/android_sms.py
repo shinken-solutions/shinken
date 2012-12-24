@@ -69,7 +69,7 @@ class Android_reactionner(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the android module"
+        logger.debug("[Android SMS] Initilisation of the android module")
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -78,11 +78,11 @@ class Android_reactionner(BaseModule):
     def get_new_checks(self):
         try:
             while(True):
-                #print "I", self.id, "wait for a message"
+                logger.debug("[Adnroid SMS] I %d wait for a message" % self.id)
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                #print "I", self.id, "I've got a message!"
+                logger.debug("[Android SMS] I %d got a message!" % self.id)
         except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
@@ -92,7 +92,7 @@ class Android_reactionner(BaseModule):
     def launch_new_checks(self):
         for chk in self.checks:
             if chk.status == 'queue':
-                print "Launchng SMS for command %s" % chk.command
+                logger.info("[Android SMS] Launching SMS for command %s" % chk.command)
 
                 elts = chk.command.split(' ')
 
@@ -118,7 +118,7 @@ class Android_reactionner(BaseModule):
                     chk.execution_time = 0.1
                     continue
 
-                print "SEND SMS", phone, text
+                logger.info("[Android SMS] Send SMS %s to %s" % text, str(phone))
                 # And finish the notification
                 chk.exit_status = 1
                 chk.get_outputs('SMS sent to %s' % phone, 8012)
@@ -136,7 +136,7 @@ class Android_reactionner(BaseModule):
                 # Under android we got a queue here
                 self.returns_queue.put(action)
             except IOError, exp:
-                print "[%d]Exiting: %s" % (self.id, exp)
+                 logger.error("[Android SMS] %d exiting: %s" % (self.id, str(exp)))
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
@@ -152,14 +152,14 @@ class Android_reactionner(BaseModule):
             # Read the message
             body = message['body'].encode('utf8', 'ignore')
             to_mark.append(message['_id'])
-            print 'Addr', type(message['address'])
-            print 'Message', type(body)
-            print message
+            logger.info('[Android SMS] Addr type : %s' % str(type(message['address'])))
+            logger.info('[Android SMS] Message type: %s ' % str(type(body)))
+            logger.info('[Android SMS] Message content : %s' % str(message))
             if body.startswith(('ack', 'Ack', 'ACK')):
                 elts = body.split(' ')
 
                 if len(elts) <= 1:
-                    print "Bad message length"
+                    logger.warning("[Android SMS] Bad message length")
                     continue
 
                 # Ok, look for host or host/service
@@ -183,14 +183,13 @@ class Android_reactionner(BaseModule):
         # Mark all read messages as read
         r = self.android.smsMarkMessageRead(to_mark, True)
 
-        print "Raise messages: "
-        print cmds
+        logger.info("[Android SMS] Raise messages: %s" % str(cmds))
         for cmd in cmds:
             try:
                 # Under android we got a queue here
                 self.returns_queue.put(cmd)
             except IOError, exp:
-                print "[%d]Exiting: %s" % (self.id, exp)
+                logger.error("[Android SMS] %d eiting: %s" % (self.id, str(exp)))
                 sys.exit(2)
 
     # id = id of the worker
@@ -199,7 +198,7 @@ class Android_reactionner(BaseModule):
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
-        print "Module Android started!"
+        logger.info("[Android SMS] Module Android started!")
         self.set_proctitle(self.name)
 
         self.android = android.Android()
@@ -230,7 +229,7 @@ class Android_reactionner(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self.id
+                    logger.info("[Android SMS] %d: Dad say we are diing..." % self.id)
                     break
             except:
                 pass

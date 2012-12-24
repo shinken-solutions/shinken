@@ -35,6 +35,7 @@ import datetime
 import re
 from shinken.objects.service import Service
 
+from shinken.log import log
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 
@@ -48,7 +49,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an LogStore Null module for plugin %s" % plugin.get_name()
+    logger.info("[Logstore Null] Get an LogStore Null module for plugin %s" % plugin.get_name())
     instance = LiveStatusLogStoreNull(plugin)
     return instance
 
@@ -66,7 +67,7 @@ class LiveStatusLogStoreNull(BaseModule):
         pass
 
     def open(self):
-        print "open LiveStatusLogStoreNull ok"
+        logger.info("[Logstore Null] Open LiveStatusLogStoreNull ok")
 
     def close(self):
         pass

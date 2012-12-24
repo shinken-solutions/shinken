@@ -25,6 +25,7 @@
 
 from livestatus_query import LiveStatusQuery
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 
 class LiveStatusCommandQuery(LiveStatusQuery):
@@ -49,7 +50,7 @@ class LiveStatusCommandQuery(LiveStatusQuery):
                 _, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle: '%s'" % line
+                logger.warning("[Livestatus Broker Command Query] Received a line of input which i can't handle: '%s'" % line)
                 pass
 
     def launch_query(self):

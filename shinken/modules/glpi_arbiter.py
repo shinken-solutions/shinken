@@ -42,7 +42,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Simple GLPI arbiter for plugin %s" % plugin.get_name()
+    logger.info("[GLPI Arbiter] Get a Simple GLPI arbiter for plugin %s" % plugin.get_name())
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
@@ -62,14 +62,14 @@ class Glpi_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "I open the GLPI connection to %s" % self.uri
+        logger.info("[GLPI Arbiter] I open the GLPI connection to %s" % self.uri)
         self.con = xmlrpclib.ServerProxy(self.uri)
-        print "Connection opened"
-        print "Authentification in progress"
+        logger.info("[GLPI Arbiter] Connection opened")
+        logger.info("[GLPI Arbiter] Authentification in progress")
         arg = {'login_name': self.login_name, 'login_password': self.login_password}
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
-        print "My session number", self.session
+        logger.info("[GLPI Arbiter] My session number %s" % str(self.session))
 
     # Ok, main function that will load config from GLPI
     def get_objects(self):
@@ -83,10 +83,9 @@ class Glpi_arbiter(BaseModule):
 
         # Get commands
         all_commands = self.con.monitoring.shinkenCommands(arg)
-        print "Get all commands", all_commands
-        for command_info in all_commands:
-            print "\n\n"
-            print "Command info in GLPI", command_info
+         logger.info("[GLPI Arbiter] Get all commands: %s" % str(all_commands))
+         for command_info in all_commands:
+            logger.info("[GLPI Arbiter] Command info in GLPI: " % str(command_info))
             h = {'command_name': command_info['command_name'],
                  'command_line': command_info['command_line'],
                  }
@@ -94,24 +93,23 @@ class Glpi_arbiter(BaseModule):
 
         # Get timeperiods
         all_timeperiods = self.con.monitoring.shinkenTimeperiods(arg)
-        print "Get all timeperiods", all_timeperiods
+        logger.info("[GLPI Arbiter] Get all timeperiods: %s" % str(all_timeperiods))
         attributs = ['timeperiod_name', 'alias', 'sunday',
                      'monday', 'tuesday', 'wednesday',
                      'thursday', 'friday', 'saturday']
         for timeperiod_info in all_timeperiods:
-            print "\n\n"
-            print "Timeperiod info in GLPI", timeperiod_info
+            logger.info("[GLPI Arbiter] Timeperiod info in GLPI: %s" % str(timeperiod_info))
             h = {}
             for attribut in attributs:
                 if attribut in timeperiod_info:
                     h[attribut] = timeperiod_info[attribut]
 
-            #print "\nReturning to Arbiter the timeperiods:", h
+            logger.debug("[GLPI Arbiter] Returning to Arbiter the timeperiods: %s " % str(h))
             r['timeperiods'].append(h)
 
         # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
-        print "Get all hosts", all_hosts
+        logger.info("[GLPI Arbiter] Get all hosts" % str(all_hosts))
         attributs = ['display_name', 'hostgroups', 'initial_state',
                      'active_checks_enabled', 'passive_checks_enabled', 'obsess_over_host',
                      'check_freshness', 'freshness_threshold', 'event_handler',
@@ -124,8 +122,7 @@ class Glpi_arbiter(BaseModule):
                      '2d_coords', '3d_coords', 'realm',
                      'poller_tag', 'business_impact']
         for host_info in all_hosts:
-            print "\n\n"
-            print "Host info in GLPI", host_info
+            logger.info("[GLPI Arbiter] Host info in GLPI: %s " % str(host_info))
             h = {'host_name': host_info['host_name'],
                  'alias': host_info['alias'],
                  'address': host_info['address'],
@@ -147,7 +144,7 @@ class Glpi_arbiter(BaseModule):
 
         # Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
-        print "Get all templates", all_templates
+        logger.info("[GLPI Arbiter] Get all templates: %s" % str(all_templates))
         attributs = ['name', 'check_interval', 'retry_interval',
                      'max_check_attempts', 'check_period', 'notification_interval',
                      'notification_period', 'notification_options', 'active_checks_enabled',
@@ -158,8 +155,7 @@ class Glpi_arbiter(BaseModule):
                      'retain_status_information', 'retain_nonstatus_information', 'is_volatile',
                      '_httpstink']
         for template_info in all_templates:
-            print "\n\n"
-            print "Template info in GLPI", template_info
+            logger("[GLPI Arbiter] Template info in GLPI: %s" % template_info)
             h = {'register': '0'}
             for attribut in attributs:
                 if attribut in template_info:
@@ -169,7 +165,7 @@ class Glpi_arbiter(BaseModule):
 
         # Get services
         all_services = self.con.monitoring.shinkenServices(arg)
-        print "Get all services", all_services
+        logger.info("[GLPI Arbiter] Get all services: %s" % str(all_services))
         attributs = ['host_name', 'hostgroup_name', 'service_description',
                      'use', 'check_command', 'check_interval', 'retry_interval',
                      'max_check_attempts', 'check_period', 'contacts',
@@ -188,8 +184,7 @@ class Glpi_arbiter(BaseModule):
                      'poller_tag', 'service_dependencies', 'business_impact']
 
         for service_info in all_services:
-            print "\n\n"
-            print "Service info in GLPI", service_info
+            logger.info("[GLPI Arbiter] Service info in GLPI: %s" % service_info)
             h = {}
             for attribut in attributs:
                 if attribut in service_info:
@@ -199,10 +194,9 @@ class Glpi_arbiter(BaseModule):
 
         # Get contacts
         all_contacts = self.con.monitoring.shinkenContacts(arg)
-        print "Get all contacts", all_contacts
+         logger.info("[GLPI Arbiter] Get all contacts: %s" % str(all_contacts))
         for contact_info in all_contacts:
-            print "\n\n"
-            print "Contact info in GLPI", contact_info
+            logger.info("[GLPI Arbiter] Contact info in GLPI:" % contact_info)
             h = {'contact_name': contact_info['contact_name'],
                  'alias': contact_info['alias'],
                  'host_notifications_enabled': contact_info['host_notifications_enabled'],
@@ -218,5 +212,5 @@ class Glpi_arbiter(BaseModule):
                  }
             r['contacts'].append(h)
 
-        #print "Returning to Arbiter the data:", r
+        logger.debug("[GLPI Arbiter] Returning to Arbiter the data: %s" % str(r))
         return r

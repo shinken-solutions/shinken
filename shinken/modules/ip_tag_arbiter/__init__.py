@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from shinken.log import logger
+
 properties = {
     'daemons': ['arbiter'],
     'type': 'ip_tag',
@@ -31,13 +33,13 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    #print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
+    logger.info("[IP Tag] Get a Service Perfdata broker for plugin %s" % plugin.get_name())
 
     # First try to import
     try:
         from ip_tag_arbiter import Ip_Tag_Arbiter
     except ImportError, exp:
-        print "Warning: the plugin type %s is unavailable: %s" % ('ip_tag', exp)
+        logger.warning("[IP Tag] Warning: the plugin type %s is unavailable: %s" % ('ip_tag', exp))
         return None
 
     # Catch errors
