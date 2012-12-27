@@ -61,7 +61,7 @@ class Ip_Tag_Arbiter(BaseModule):
             else:
                 addr = h.address
 
-            logger.info("[IP Tag] Looking for h" % h.get_name())
+            logger.info("[IP Tag] Looking for %s" % h.get_name())
             logger.info("[IP Tag] Address is %s" % str(addr))
             h_ip = None
             try:
