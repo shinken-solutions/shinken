@@ -33,13 +33,13 @@ from shinken.log import logger
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    logger.info("[Host Perfdata Broker] Get a Host Perfdata broker for plugin %s" % plugin.get_name()
+    logger.info("[Host Perfdata Broker] Get a Host Perfdata broker for plugin %s" % plugin.get_name())
 
     # First try to import
     try:
         from host_perfdata_broker import Host_perfdata_broker
     except ImportError, exp:
-        logger.warning("[Host Perfdata Broker] Warning: the plugin type %s is unavailable: %s" % ('host_perfdata', exp)
+        logger.warning("[Host Perfdata Broker] Warning: the plugin type %s is unavailable: %s" % ('host_perfdata', exp))
         return None
 
     # Catch errors

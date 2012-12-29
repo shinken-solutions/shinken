@@ -101,7 +101,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 self.last_update = last_update
                 return True
         except OSError, exp:  # Maybe the file got problem, we bypaass here
-            logger.error("[Hot dependencies] Error: %s" str(exp))
+            logger.error("[Hot dependencies] Error: %s" % str(exp))
         return False
 
     # Read the mapping file and update our internal mappings
@@ -245,7 +245,6 @@ class Hot_dependencies_arbiter(BaseModule):
                     logger.debug("[Hot dependencies] not find dumbass!")
                     continue
                 logger.info("[Hot dependencies] Linked son : %s and its father: %s" % (son_name, father_name))
-                if son_type == 'host' and father_type == 'host':
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
