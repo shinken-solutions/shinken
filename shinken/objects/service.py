@@ -119,6 +119,7 @@ class Service(SchedulingItem):
         'business_impact_modulations':    StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
+        'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
