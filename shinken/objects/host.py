@@ -133,6 +133,9 @@ class Host(SchedulingItem):
         'trigger':         StringProp(default=''),
         'trigger_name':    ListProp(default=''),
 
+        # Trending
+        'trending_policies':    ListProp(default='', fill_brok=['full_status']),
+
     })
 
     # properties set only for running purpose
