@@ -518,6 +518,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('time_to_orphanage', '300'),        
         ])
 
     def setUp(self):
@@ -775,6 +776,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('time_to_orphanage', '300'),
         ])
 
     def setUp(self):
