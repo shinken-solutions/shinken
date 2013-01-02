@@ -236,5 +236,11 @@ if __name__ == '__main__':
             dump_metric(hname, sdesc, metric)
             sys.exit(0)
 
-        if not hname and not sdesc and not metric:
-            print "YOU ARE A MORON that want it's server to go down!"
+        if not hname and not sdesc and not metric and not full_dump:
+            print "WARNING : dumping all database info can be HUGE. Please confirm it's really what you want by using the --full option instead"
+            sys.exit(0)
+            
+        if full_dump:
+            for hname in list_hosts():
+                dump_host(hname)
+            
