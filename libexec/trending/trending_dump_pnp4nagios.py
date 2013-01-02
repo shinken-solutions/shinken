@@ -97,7 +97,6 @@ def save_metric_file(hname, sdesc, metric, datas):
     c.writerow(["#%s"%hname,"%s"%sdesc,"%s"%metric])
     
     for row in datas:
-        #print row
         c.writerow(row)
 
 
@@ -127,7 +126,6 @@ if __name__ == '__main__':
         sys.exit(2)
 
     x = parse_xml(xml_path)
-    #print x
 
     for ds in x['ds']:
         values = []

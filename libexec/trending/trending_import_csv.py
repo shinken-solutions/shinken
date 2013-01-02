@@ -37,7 +37,6 @@ import optparse
 import gzip
 
 
-MAX_DIFFS = []
 
 # Somre Global var
 # (we are in a script, so it's ok)
@@ -89,11 +88,13 @@ def open_connexion():
     debug("Connexion open with", coll)
 
 
-def open_csv(path, gzip_enabled):
+def open_csv(path):
     # Ok reopen it with
-    if gzip_enabled:
+    if path.endswith('.gz'):
+        debug('Opening gzip file', path)
         f = gzip.open(path, 'rb')
     else:
+        debug('Opening standard file', path)
         f = open(path, 'rb')
     reader = csv.reader(f, delimiter=';')
     return reader
@@ -216,13 +217,6 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
 
         # Ok and now last minutes trending
         new_VcurrentSmooth = quick_update(prev_val_short, l1, 1, 15)
-        global MAX_DIFFS
-        d = (abs(new_VcurrentSmooth - new_VtrendSmooth)/float(new_VtrendSmooth)) * 100
-        if d > 200:
-            MAX_DIFFS.append(d)
-            print len(MAX_DIFFS)
-            print new_VcurrentSmooth, new_VtrendSmooth
-            print "DIFF", (abs(new_VcurrentSmooth - new_VtrendSmooth)/float(new_VtrendSmooth)) * 100
         
         coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1  }})
 
@@ -387,9 +381,6 @@ if __name__ == '__main__':
                       help="Service description of the imported data")
     parser.add_option('-m', '--metric', dest='metric',
                       help="Metric name of the imported data")
-    parser.add_option('-z', '--enable-gip',
-                      dest="gzip_enabled", action='store_true',
-                      help="Enable the gzip compression to read csv.gz files")
     parser.add_option('-p', '--print',
                       dest='do_print', action='store_true',
                       help='Print the loaded trending')
@@ -412,7 +403,6 @@ if __name__ == '__main__':
     metric = opts.metric
     do_print = opts.do_print
     csv_file = opts.csv_file
-    gzip_enabled = opts.gzip_enabled
 
     if do_print and plt is None:
         print "ERROR : cannot import matplotlib, please install it"
@@ -420,7 +410,7 @@ if __name__ == '__main__':
         
 
     if csv_file:
-        reader = open_csv(csv_file, gzip_enabled)
+        reader = open_csv(csv_file)
         import_csv(reader, hname, sdesc, metric)
         compute_memory_smooth()
 
