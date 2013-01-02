@@ -27,7 +27,10 @@ import csv
 import time
 import sys
 import math
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 import pymongo
 import math
 import optparse
@@ -52,12 +55,11 @@ metric = None
 # 15min chunks
 CHUNK_INTERVAL = 900
 nb_chunks = int(math.ceil(86400.0/CHUNK_INTERVAL))
-print "NB_chunk", nb_chunks
 
 # Monday = 0
 for i in range(0, 7):
-    print "CREATING DAY", i
-    print "SHOULD CREATE", nb_chunks, "values by day"
+    #print "CREATING DAY", i
+    #print "SHOULD CREATE", nb_chunks, "values by day"
     datas[i] = [None for j in range(0, nb_chunks)]
     raw_datas[i] = [None for j in range(0, nb_chunks)]
 
@@ -71,13 +73,20 @@ ultra_raw = []
 _raw_t = []
 
 
+# By deault no debug messages
+do_debug = False
+
+def debug(*args):
+    if do_debug:
+        print ' '.join([str(s) for s in args])
+        
 
 def open_connexion():
     global con, coll
     # SAFE IS VERY VERY important!
     con = pymongo.Connection('localhost', safe=True)
     coll = con.shinken.trending
-    print coll
+    debug("Connexion open with", coll)
 
 
 def open_csv(path, gzip_enabled):
@@ -200,7 +209,7 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
             prev_val = prev_doc['VtrendSmooth']
             prev_val_short = prev_doc['VcurrentSmooth']
         else:
-            print "OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb
+            debug("OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb)
 
         # Ok really update the value now
         new_VtrendSmooth = quick_update(prev_val, new_Vtrend, 1, 5)
@@ -249,7 +258,7 @@ def import_csv(reader, _hname, _sdesc, _metric):
                 hname = row[0][1:]
                 sdesc = row[1]
                 metric = row[2]
-            print "VOIDING COLLECTION", coll, "from entries", hname, sdesc, metric
+            print "IMPORTANT : Removing all entries from ", coll, "for the metric", hname, sdesc, metric
             coll.remove({'hname':hname, 'sdesc':sdesc, 'metric':metric})
             i += 1
             _hname = hname
@@ -281,8 +290,6 @@ def import_csv(reader, _hname, _sdesc, _metric):
 def compute_memory_smooth():
     global _raw_t, datas, _t
     for (wday, day) in datas.iteritems():
-        print "wday", wday
-    
         #_t = []
         last_good = -1
         cur_l = None
@@ -308,7 +315,7 @@ def compute_memory_smooth():
         for d in raw_day:
             i += 1
             if not d:
-                print "No entry for", wday, i
+                debug("No entry for", wday, i)
                 _raw_t.append(last_good)
                 ultra_raw.append(last_good)
                 continue
@@ -331,9 +338,9 @@ def compute_memory_smooth():
                 pct_failed += abs(_raw_t[i] - _t[i]) / _t[i]
             except ZeroDivisionError:
                 pass
-        print "pct_failed", pct_failed
+        #print "pct_failed", pct_failed
         pct_failed /= len(_raw_t)
-        print "pct_failed", pct_failed
+        #print "pct_failed", pct_failed
 
 
 
@@ -348,14 +355,14 @@ def get_graph_values(hname, sdesc, metric, mkey):
                 # WAS 
                 _from_mongo.append(doc[mkey])
             else:
-                print "NO ENTRY FOR", key
+                debug("Warning : no db entry for", key)
                 prev_wday, prev_chunk_nb = get_previous_chunk(wday, chunk_nb)
                 key = get_key(hname, sdesc, metric, prev_wday, prev_chunk_nb)#hname+sdesc+metric+'week'+str(prev_wday)+'Vtrend'+str(prev_chunk_nb)
                 doc = coll.find_one({'_id':key})
                 if doc:
                     _from_mongo.append(doc[mkey])
                 else:
-                    print "Really ! ENTRY FOR", key
+                    debug("Warning : ok really no possible entry for", key)
                     _from_mongo.append(-1)
 
     return _from_mongo
@@ -386,9 +393,15 @@ if __name__ == '__main__':
     parser.add_option('-p', '--print',
                       dest='do_print', action='store_true',
                       help='Print the loaded trending')
+    parser.add_option('-d', '--debug',
+                      dest='do_debug', action='store_true',
+                      help='Enable debug output')
     
     opts, args = parser.parse_args()
 
+    
+    do_debug = opts.do_debug
+        
     
     # ok open the connexion
     open_connexion()
@@ -400,6 +413,11 @@ if __name__ == '__main__':
     do_print = opts.do_print
     csv_file = opts.csv_file
     gzip_enabled = opts.gzip_enabled
+
+    if do_print and plt is None:
+        print "ERROR : cannot import matplotlib, please install it"
+        sys.exit(2)
+        
 
     if csv_file:
         reader = open_csv(csv_file, gzip_enabled)
@@ -422,13 +440,9 @@ if __name__ == '__main__':
                 print "Was trying to get", i
             except TypeError:
                 print "Was trying to get", i
-        print "pct_failed MONGO:", pct_failed
         pct_failed /= len(_from_mongo)
-        print "pct_failed MONGO:", pct_failed
+        debug("pct_failed MONGO:", pct_failed)
 
-
-        print len(_times)
-        print len(_t)
         if csv_file:
             plt.plot(_times, _t, 'b', _times, ultra_raw, 'c', _times, _from_mongo, 'r', _times, _from_mongo_short, 'm')#, _times, _el_raw, 'y')
             plt.axis(ymin=0)
