@@ -29,12 +29,11 @@ backend. http://graphite.wikidot.com/start
 """
 
 import re
-import math
 
 from shinken.basemodule import BaseModule
 from shinken.util import get_sec_from_morning, get_wday
 from shinken.log import logger
-from shinken.load import Load
+from shinken.trending.trender import Trender
 
 try:
     from pymongo.connection import Connection
@@ -74,7 +73,6 @@ class Trending_broker(BaseModule):
 
         # 15min chunks
         self.chunk_interval = int(getattr(modconf, 'chunk_interval', '900'))
-        self.nb_chunks = int(math.ceil(86400.0/self.chunk_interval))
 
         # Some used varaible init
         self.con = None
@@ -83,6 +81,9 @@ class Trending_broker(BaseModule):
 
         self.host_dict = {}
         self.svc_dict = {}
+
+        # And our final trender object
+        self.trender = Trender(self.chunk_interval)
         
 
     # Called by Broker so we can do init stuff
@@ -146,22 +147,6 @@ class Trending_broker(BaseModule):
         return res
 
 
-    # Ok a quick and dirty load computation
-    def quick_update(self, prev_val, new_val, m, interval):
-        l = Load(m=m, initial_value=prev_val)
-        l.update_load(new_val, interval)
-        return l.get_load()
-
-
-    def get_previous_chunk(self, wday, chunk_nb):
-        if chunk_nb == 0:
-            chunk_nb = nb_chunks - 1
-            wday -= 1
-        else:
-            chunk_nb -= 1
-        wday = wday % 7
-        return (wday, chunk_nb)
-
     def get_key(self, hname, sdesc, metric, wday, chunk_nb):
         return hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
 
@@ -179,7 +164,7 @@ class Trending_broker(BaseModule):
         else:
             prev_val = doc['Vtrend']
         
-            new_Vtrend = self.quick_update(prev_val, l1, 5, 5)
+            new_Vtrend = self.trender.quick_update(prev_val, l1, 5, 5)
         
             # Now we smooth with the last value
             # And by default, we are using the current value
@@ -192,7 +177,7 @@ class Trending_broker(BaseModule):
             prev_val = doc['VtrendSmooth']
             prev_val_short = doc['VcurrentSmooth']
         
-            cur_wday, cur_chunk_nb = self.get_previous_chunk(cur_wday, cur_chunk_nb)
+            cur_wday, cur_chunk_nb = self.trender.get_previous_chunk(cur_wday, cur_chunk_nb)
             prev_key = self.get_key(hname, sdesc, metric, cur_wday, cur_chunk_nb)#hname+sdesc+metric+'week'+str(cur_wday)+'Vtrend'+str(cur_chunk_nb)
             prev_doc = coll.find_one({'_id' : prev_key})
             if prev_doc:
@@ -201,13 +186,10 @@ class Trending_broker(BaseModule):
             else:
                 print "OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb
 
-            # Ok really update the value now
-            print "WFT?", prev_val, new_Vtrend, type(prev_val), type(new_Vtrend)
-            
-            new_VtrendSmooth = self.quick_update(prev_val, new_Vtrend, 1, 5)
+            new_VtrendSmooth = self.trender.quick_update(prev_val, new_Vtrend, 1, 5)
 
             # Ok and now last minutes trending
-            new_VcurrentSmooth = self.quick_update(prev_val_short, l1, 1, 15)
+            new_VcurrentSmooth = self.trender.quick_update(prev_val_short, l1, 1, 15)
             d = (abs(new_VcurrentSmooth - new_VtrendSmooth)/float(new_VtrendSmooth)) * 100
         
             coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1  }})

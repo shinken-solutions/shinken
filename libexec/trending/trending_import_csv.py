@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import csv
 import time
 import sys
@@ -38,6 +39,20 @@ import gzip
 
 
 
+try:
+    from shinken.bin import VERSION
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("../.."), os.path.realpath("../../.."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+
+from shinken.trending.trender import Trender
+from shinken.load import Load
+from shinken.util import get_sec_from_morning, get_wday
+
 # Somre Global var
 # (we are in a script, so it's ok)
 
@@ -51,9 +66,12 @@ hname = None
 sdesc = None
 metric = None
 
+
 # 15min chunks
 CHUNK_INTERVAL = 900
 nb_chunks = int(math.ceil(86400.0/CHUNK_INTERVAL))
+
+trender = Trender(CHUNK_INTERVAL)
 
 # Monday = 0
 for i in range(0, 7):
@@ -102,7 +120,7 @@ def open_csv(path):
     
 
 
-class Load:
+class LoadOLD:
     def __init__(self, m=1, initial_value=0):
         self.exp = 0  # first exp
         self.m = m  # Number of minute of the avg
@@ -128,57 +146,12 @@ class Load:
         return self.val# / self.nb_update
 
 
-def quick_update(prev_val, new_val, m, interval):
-    l = Load(m=m, initial_value=prev_val)
-    l.update_load(new_val, interval)
-    return l.get_load()
-
-
-
-def get_sec_from_morning(t):
-    t_lt = time.localtime(t)
-    h = t_lt.tm_hour
-    m = t_lt.tm_min
-    s = t_lt.tm_sec
-    return h * 3600 + m * 60 + s
-
-
-def get_wday(t):
-    t_lt = time.localtime(t)
-    return  t_lt.tm_wday
-
-
-def get_day(t):
-    return int(t - get_sec_from_morning(t))
-
-
-def get_start_of_day(year, month_id, day):
-    start_time = (year, month_id, day, 00, 00, 00, 0, 0, -1)
-    try:
-        start_time_epoch = time.mktime(start_time)
-    except OverflowError:
-        # Windows mktime sometimes crashes on (1970, 1, 1, ...)
-        start_time_epoch = 0.0
-    
-    return start_time_epoch
-
-
-def get_previous_chunk(wday, chunk_nb):
-    if chunk_nb == 0:
-        chunk_nb = nb_chunks - 1
-        wday -= 1
-    else:
-        chunk_nb -= 1
-    wday = wday % 7
-    return (wday, chunk_nb)
-                                                                
-
-
 def get_key(hname, sdesc, metric, wday, chunk_nb):
     return hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
 
 
 def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
+    
     key = get_key(hname, sdesc, metric, wday, chunk_nb)#hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
     doc = coll.find_one({'_id' : key})
     if not doc:
@@ -190,7 +163,7 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
     else:
         prev_val = doc['Vtrend']
         
-        new_Vtrend = quick_update(prev_val, l1, 5, 5)
+        new_Vtrend = trender.quick_update(prev_val, l1, 5, 5)
         
         # Now we smooth with the last value
         # And by default, we are using the current value
@@ -203,7 +176,7 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
         prev_val = doc['VtrendSmooth']
         prev_val_short = doc['VcurrentSmooth']
         
-        cur_wday, cur_chunk_nb = get_previous_chunk(cur_wday, cur_chunk_nb)
+        cur_wday, cur_chunk_nb = trender.get_previous_chunk(cur_wday, cur_chunk_nb)
         prev_key = get_key(hname, sdesc, metric, cur_wday, cur_chunk_nb)#hname+'.'+sdesc+'.'metric+'.'+'week'+str(cur_wday)+'.'+'Vtrend'+str(cur_chunk_nb)
         prev_doc = coll.find_one({'_id' : prev_key})
         if prev_doc:
@@ -213,10 +186,10 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
             debug("OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb)
 
         # Ok really update the value now
-        new_VtrendSmooth = quick_update(prev_val, new_Vtrend, 1, 5)
+        new_VtrendSmooth = trender.quick_update(prev_val, new_Vtrend, 1, 5)
 
         # Ok and now last minutes trending
-        new_VcurrentSmooth = quick_update(prev_val_short, l1, 1, 15)
+        new_VcurrentSmooth = trender.quick_update(prev_val_short, l1, 1, 15)
         
         coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1  }})
 
@@ -350,7 +323,7 @@ def get_graph_values(hname, sdesc, metric, mkey):
                 _from_mongo.append(doc[mkey])
             else:
                 debug("Warning : no db entry for", key)
-                prev_wday, prev_chunk_nb = get_previous_chunk(wday, chunk_nb)
+                prev_wday, prev_chunk_nb = trender.get_previous_chunk(wday, chunk_nb)
                 key = get_key(hname, sdesc, metric, prev_wday, prev_chunk_nb)#hname+sdesc+metric+'week'+str(prev_wday)+'Vtrend'+str(prev_chunk_nb)
                 doc = coll.find_one({'_id':key})
                 if doc:
