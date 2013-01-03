@@ -123,10 +123,34 @@ def get_key(hname, sdesc, metric, wday, chunk_nb):
     return hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
 
 
+
+# Get the current doc and the previous one in just one query
+def get_doc_and_prev_doc(key, prev_key):
+    doc = None
+    prev_doc = None
+
+    cur = coll.find({'_id' : {'$in': [key, prev_key]}})
+    for d in cur:
+        if d['_id'] == key:
+            doc = d
+        if d['_id'] == prev_key:
+            prev_doc = d
+
+    return doc, prev_doc
+
+
+
+# Get the average entries, create them if need, and save the new computed value.
 def update_avg(vtime, wday, chunk_nb, l1, hname, sdesc, metric):
-    print "\n\n", vtime
-    key = get_key(hname, sdesc, metric, wday, chunk_nb)#hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
-    doc = coll.find_one({'_id' : key})
+
+    # Ok first try to see our current chunk, and get our doc entry, and the previous one to compute
+    # the averages
+    key = get_key(hname, sdesc, metric, wday, chunk_nb)
+    _prev_wday, _prev_chunk_nb = trender.get_previous_chunk(wday, chunk_nb)
+    prev_key = get_key(hname, sdesc, metric, _prev_wday, _prev_chunk_nb)
+    doc, prev_doc = get_doc_and_prev_doc(key, prev_key)
+    
+    # Maybe we are in a new chunk, if so, just create a new block and bail out
     if not doc:
         doc = {'hname':hname, 'sdesc':sdesc, 'metric':metric, 'cycle':'week',
                'wday':wday, 'chunk_nb':chunk_nb, 'Vtrend':l1, '_id':key,
@@ -134,99 +158,89 @@ def update_avg(vtime, wday, chunk_nb, l1, hname, sdesc, metric):
                'Vevolution' : 0, 'VevolutionSmooth' : 0, 'last_update' : vtime,
                'valid_evolution' : False
                }
-        print "INITIAL CREATION", key
         coll.save(doc)
     else:
-
+        
         # If evolution is already valid, keep it
         valid_evolution = doc['valid_evolution']
         
-        # Maybe we are just too early since the last update, if so, bail out
+        # Maybe we are just too early since the last update, if so, do not
+        # update the "evolution" part because by definition there won't be
+        # evolution since the last week value, but the current one, last minutes
+        # one....
         last_update = doc['last_update']
         update_evol = True
         if vtime - last_update < CHUNK_INTERVAL:
-            print "TOO early", vtime - last_update
             update_evol = False
 
+        #### Smoothing over the weeks part
         
-        #print "VALUE", l1
+        # Ok save some values
         prev_raw_val = doc['Vcurrent']
         prev_val = doc['Vtrend']
         prev_evolution = doc['Vevolution']
 
-        # Compute the trending and the evolution curve
+        # Compute the trending and the evolution curve since the last week so.
         new_Vtrend = trender.quick_update(prev_val, l1, 5, 5)
 
-        # Now the evolution one, but only one a chunk
+        # Now the evolution one, but only one a chunk time
         if update_evol:
+            # ok we will update it, so now it will be valid
             valid_evolution = True
+
+            # The new evolution diff value is
+            diff = l1 - prev_raw_val
             # maybe the doc we got is the first one, if so, do not use the Vevolution value
-            # but initialise it now
+            # but initialise it now instead
             if not doc['valid_evolution']:
-                new_Vevolution = l1 - prev_raw_val
+                new_Vevolution = diff
             else:
-                print "REAL UPDATE"
-                print "REAL UPDATE?", doc
-                new_Vevolution = trender.quick_update(prev_evolution, l1 - prev_raw_val, 5, 5)
-            print "EVOLUTION", l1, prev_raw_val, '**', l1 - prev_raw_val, '**', prev_evolution, new_Vevolution
-        else:
+                new_Vevolution = trender.quick_update(prev_evolution, diff, 5, 5)
+        else:            # ok, touch nothing
             new_Vevolution = prev_evolution
 
-        #new_Vevolution = l1 - prev_raw_val
+        ###  Smoothing over the chunks part
         
         # Now we smooth with the last value
         # And by default, we are using the current value
         new_VtrendSmooth = doc['VtrendSmooth']
         new_VevolutionSmooth = doc['VevolutionSmooth']
 
-        prev_doc = None
-        cur_wday = wday
-        cur_chunk_nb = chunk_nb
-        # Ok by default take the current avg
+        # We are looking for the previous chunk value, but by default we will use the
+        # current chunk one
         prev_val = doc['VtrendSmooth']
         prev_val_short = doc['VcurrentSmooth']
         prev_evolution_smooth = doc['VevolutionSmooth']
-        
-        cur_wday, cur_chunk_nb = trender.get_previous_chunk(cur_wday, cur_chunk_nb)
-        prev_key = get_key(hname, sdesc, metric, cur_wday, cur_chunk_nb)#hname+'.'+sdesc+'.'metric+'.'+'week'+str(cur_wday)+'.'+'Vtrend'+str(cur_chunk_nb)
-        prev_doc = coll.find_one({'_id' : prev_key})
+
         if prev_doc:
             prev_val = prev_doc['VtrendSmooth']
             prev_val_short = prev_doc['VcurrentSmooth']
             prev_evolution_smooth = doc['VevolutionSmooth']
         else:
-            debug("OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb)
+            debug("OUPS, the key", key, "do not have a previous entry", wday, chunk_nb)
 
+        
         # Ok really update the value now
         new_VtrendSmooth = trender.quick_update(prev_val, new_Vtrend, 1, 5)
 
-        # And the evolution parameter too if need
+        # We will also smooth the evolution parameter with the last chunk value, but only if we should
         if update_evol:
-            # Same here, do not start at 0
-            print "GO FROM", prev_evolution_smooth, "with", new_Vevolution
+            # Maybe we do not have a stable situation from our chunk or the previous, so
+            # put current value instead
             if not doc['valid_evolution'] or not prev_doc or not prev_doc['valid_evolution']:
-                print "DIRECT SMOOTH"*10, new_Vevolution
-                print "DOC", doc['_id'], doc
-                if prev_doc:
-                    print "PREV", prev_doc['_id'], prev_doc
-                else:
-                    print "NO PREV"
                 new_VevolutionSmooth = new_Vevolution
-            else:
-                print "DOC", doc['_id'], doc
-                print "PREV", prev_doc['_id'], prev_doc
-                print "OK real SMOOTH update", prev_evolution_smooth, new_Vevolution, new_VevolutionSmooth
+            else: # ok both chunks are stable, so really compute the average
                 new_VevolutionSmooth = trender.quick_update(prev_evolution_smooth, new_Vevolution, 1, 15)
-            print "TO", new_VevolutionSmooth
 
-        # Ok and now last minutes trending
+
+        # Ok and now last minutes trending smoothing over the chunks
         new_VcurrentSmooth = trender.quick_update(prev_val_short, l1, 1, 15)
 
-        print "UPDATING", key, str({'Vevolution' : new_Vevolution, 'VevolutionSmooth' : new_VevolutionSmooth, 'valid_evolution':valid_evolution})
-        
+        # All is ok? Let's update the DB value
         coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1,
                                                'Vevolution' : new_Vevolution, 'VevolutionSmooth' : new_VevolutionSmooth, 'last_update' : vtime,
                                                'valid_evolution': valid_evolution}})
+
 
 
 def update_in_memory(wday, chunk_nb, l1):
