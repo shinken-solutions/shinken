@@ -147,55 +147,6 @@ class Trending_broker(BaseModule):
         return res
 
 
-    def get_key(self, hname, sdesc, metric, wday, chunk_nb):
-        return hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
-
-
-    def update_avg(self, wday, chunk_nb, l1, hname, sdesc, metric):
-        coll = self.col
-        key = self.get_key(hname, sdesc, metric, wday, chunk_nb)#hname+sdesc+metric+'week'+str(wday)+'Vtrend'+str(chunk_nb)
-        doc = coll.find_one({'_id' : key})
-        if not doc:
-            doc = {'hname':hname, 'sdesc':sdesc, 'metric':metric, 'cycle':'week',
-                   'wday':wday, 'chunk_nb':chunk_nb, 'Vtrend':l1, '_id':key,
-                   'VtrendSmooth':l1, 'VcurrentSmooth':l1, 'Vcurrent':l1
-                   }
-            coll.save(doc)
-        else:
-            prev_val = doc['Vtrend']
-        
-            new_Vtrend = self.trender.quick_update(prev_val, l1, 5, 5)
-        
-            # Now we smooth with the last value
-            # And by default, we are using the current value
-            new_VtrendSmooth = doc['VtrendSmooth']
-
-            prev_doc = None
-            cur_wday = wday
-            cur_chunk_nb = chunk_nb
-            # Ok by default take the current avg
-            prev_val = doc['VtrendSmooth']
-            prev_val_short = doc['VcurrentSmooth']
-        
-            cur_wday, cur_chunk_nb = self.trender.get_previous_chunk(cur_wday, cur_chunk_nb)
-            prev_key = self.get_key(hname, sdesc, metric, cur_wday, cur_chunk_nb)#hname+sdesc+metric+'week'+str(cur_wday)+'Vtrend'+str(cur_chunk_nb)
-            prev_doc = coll.find_one({'_id' : prev_key})
-            if prev_doc:
-                prev_val = prev_doc['VtrendSmooth']
-                prev_val_short = prev_doc['VcurrentSmooth']
-            else:
-                print "OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb
-
-            new_VtrendSmooth = self.trender.quick_update(prev_val, new_Vtrend, 1, 5)
-
-            # Ok and now last minutes trending
-            new_VcurrentSmooth = self.trender.quick_update(prev_val_short, l1, 1, 15)
-            d = (abs(new_VcurrentSmooth - new_VtrendSmooth)/float(new_VtrendSmooth)) * 100
-        
-            coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1  }})
-
-
-
     # Prepare service custom vars
     def manage_initial_service_status_brok(self, b):
         policies = b.data['trending_policies']
@@ -263,7 +214,7 @@ class Trending_broker(BaseModule):
                     
                     # Now update mongodb
                     print "UPDATING DB", wday, chunk_nb, value, hname, sdesc, metric, type(value)
-                    self.update_avg(wday, chunk_nb, value, hname, sdesc, metric)
+                    self.trender.update_avg(self.col, check_time, wday, chunk_nb, value, hname, sdesc, metric, self.chunk_interval)
                     
                     
 
