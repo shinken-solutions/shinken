@@ -68,7 +68,7 @@ metric = None
 
 
 # 15min chunks
-CHUNK_INTERVAL = 900
+CHUNK_INTERVAL = 3600
 nb_chunks = int(math.ceil(86400.0/CHUNK_INTERVAL))
 
 trender = Trender(CHUNK_INTERVAL)
@@ -119,55 +119,65 @@ def open_csv(path):
 
     
 
-
-class LoadOLD:
-    def __init__(self, m=1, initial_value=0):
-        self.exp = 0  # first exp
-        self.m = m  # Number of minute of the avg
-        self.val = initial_value  # first value
-        self.nb_update = 1
-        
-
-    def update_load(self, new_val, interval):
-        try:
-            diff = interval
-            self.exp = 1 / math.exp(diff / (self.m * 60.0))
-            self.val = new_val + self.exp * (self.val - new_val)
-        except OverflowError:  # if the time change without notice, we overflow :(
-            pass
-        except ZeroDivisionError:  # do not care
-            pass
-        
-        
-        #self.val += new_val
-        #self.nb_update += 1
-
-    def get_load(self):
-        return self.val# / self.nb_update
-
-
 def get_key(hname, sdesc, metric, wday, chunk_nb):
     return hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
 
 
-def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
-    
+def update_avg(vtime, wday, chunk_nb, l1, hname, sdesc, metric):
+    print "\n\n", vtime
     key = get_key(hname, sdesc, metric, wday, chunk_nb)#hname+'.'+sdesc+'.'+metric+'.'+'week'+'.'+str(wday)+'.'+'Vtrend'+'.'+str(chunk_nb)
     doc = coll.find_one({'_id' : key})
     if not doc:
         doc = {'hname':hname, 'sdesc':sdesc, 'metric':metric, 'cycle':'week',
                'wday':wday, 'chunk_nb':chunk_nb, 'Vtrend':l1, '_id':key,
-               'VtrendSmooth':l1, 'VcurrentSmooth':l1, 'Vcurrent':l1
+               'VtrendSmooth':l1, 'VcurrentSmooth':l1, 'Vcurrent':l1,
+               'Vevolution' : 0, 'VevolutionSmooth' : 0, 'last_update' : vtime,
+               'valid_evolution' : False
                }
+        print "INITIAL CREATION", key
         coll.save(doc)
     else:
-        prev_val = doc['Vtrend']
+
+        # If evolution is already valid, keep it
+        valid_evolution = doc['valid_evolution']
         
+        # Maybe we are just too early since the last update, if so, bail out
+        last_update = doc['last_update']
+        update_evol = True
+        if vtime - last_update < CHUNK_INTERVAL:
+            print "TOO early", vtime - last_update
+            update_evol = False
+
+        
+        #print "VALUE", l1
+        prev_raw_val = doc['Vcurrent']
+        prev_val = doc['Vtrend']
+        prev_evolution = doc['Vevolution']
+
+        # Compute the trending and the evolution curve
         new_Vtrend = trender.quick_update(prev_val, l1, 5, 5)
+
+        # Now the evolution one, but only one a chunk
+        if update_evol:
+            valid_evolution = True
+            # maybe the doc we got is the first one, if so, do not use the Vevolution value
+            # but initialise it now
+            if not doc['valid_evolution']:
+                new_Vevolution = l1 - prev_raw_val
+            else:
+                print "REAL UPDATE"
+                print "REAL UPDATE?", doc
+                new_Vevolution = trender.quick_update(prev_evolution, l1 - prev_raw_val, 5, 5)
+            print "EVOLUTION", l1, prev_raw_val, '**', l1 - prev_raw_val, '**', prev_evolution, new_Vevolution
+        else:
+            new_Vevolution = prev_evolution
+
+        #new_Vevolution = l1 - prev_raw_val
         
         # Now we smooth with the last value
         # And by default, we are using the current value
         new_VtrendSmooth = doc['VtrendSmooth']
+        new_VevolutionSmooth = doc['VevolutionSmooth']
 
         prev_doc = None
         cur_wday = wday
@@ -175,6 +185,7 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
         # Ok by default take the current avg
         prev_val = doc['VtrendSmooth']
         prev_val_short = doc['VcurrentSmooth']
+        prev_evolution_smooth = doc['VevolutionSmooth']
         
         cur_wday, cur_chunk_nb = trender.get_previous_chunk(cur_wday, cur_chunk_nb)
         prev_key = get_key(hname, sdesc, metric, cur_wday, cur_chunk_nb)#hname+'.'+sdesc+'.'metric+'.'+'week'+str(cur_wday)+'.'+'Vtrend'+str(cur_chunk_nb)
@@ -182,16 +193,40 @@ def update_avg(wday, chunk_nb, l1, hname, sdesc, metric):
         if prev_doc:
             prev_val = prev_doc['VtrendSmooth']
             prev_val_short = prev_doc['VcurrentSmooth']
+            prev_evolution_smooth = doc['VevolutionSmooth']
         else:
             debug("OUPS, the key", key, "do not have a previous entry", cur_wday, cur_chunk_nb)
 
         # Ok really update the value now
         new_VtrendSmooth = trender.quick_update(prev_val, new_Vtrend, 1, 5)
 
+        # And the evolution parameter too if need
+        if update_evol:
+            # Same here, do not start at 0
+            print "GO FROM", prev_evolution_smooth, "with", new_Vevolution
+            if not doc['valid_evolution'] or not prev_doc or not prev_doc['valid_evolution']:
+                print "DIRECT SMOOTH"*10, new_Vevolution
+                print "DOC", doc['_id'], doc
+                if prev_doc:
+                    print "PREV", prev_doc['_id'], prev_doc
+                else:
+                    print "NO PREV"
+                new_VevolutionSmooth = new_Vevolution
+            else:
+                print "DOC", doc['_id'], doc
+                print "PREV", prev_doc['_id'], prev_doc
+                print "OK real SMOOTH update", prev_evolution_smooth, new_Vevolution, new_VevolutionSmooth
+                new_VevolutionSmooth = trender.quick_update(prev_evolution_smooth, new_Vevolution, 1, 15)
+            print "TO", new_VevolutionSmooth
+
         # Ok and now last minutes trending
         new_VcurrentSmooth = trender.quick_update(prev_val_short, l1, 1, 15)
+
+        print "UPDATING", key, str({'Vevolution' : new_Vevolution, 'VevolutionSmooth' : new_VevolutionSmooth, 'valid_evolution':valid_evolution})
         
-        coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1  }})
+        coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1,
+                                               'Vevolution' : new_Vevolution, 'VevolutionSmooth' : new_VevolutionSmooth, 'last_update' : vtime,
+                                               'valid_evolution': valid_evolution}})
 
 
 def update_in_memory(wday, chunk_nb, l1):
@@ -241,6 +276,12 @@ def import_csv(reader, _hname, _sdesc, _metric):
             continue
         except ValueError:
             continue
+
+        # If here we still do not have valid entries, we are not good at all!
+        if not hname or not sdesc or not metric:
+            print "ERROR : missing hostname, or service description or metric name, please check your input file or fill the values as arguments"
+            sys.exit(2)
+
         sec_from_morning = get_sec_from_morning(_time)
         wday = get_wday(_time)
     
@@ -249,7 +290,7 @@ def import_csv(reader, _hname, _sdesc, _metric):
         update_in_memory(wday, chunk_nb, l1)
 
         # Now update mongodb
-        update_avg(wday, chunk_nb, l1, _hname, _sdesc, _metric)
+        update_avg(_time, wday, chunk_nb, l1, _hname, _sdesc, _metric)
 
 
 
@@ -311,6 +352,18 @@ def compute_memory_smooth():
 
 
 
+def smooth_list(l):
+    res = []
+    cur_l = None
+    for v in l:
+        if not cur_l:
+            cur_l = Load(m=1, initial_value=v)
+        cur_l.update_load(v, 5)
+        res.append(cur_l.get_load())
+    return res
+
+
+
 
 def get_graph_values(hname, sdesc, metric, mkey):
     _from_mongo = []
@@ -360,6 +413,9 @@ if __name__ == '__main__':
     parser.add_option('-d', '--debug',
                       dest='do_debug', action='store_true',
                       help='Enable debug output')
+    parser.add_option('--projection',
+                      dest='projection',
+                      help='Number of weeks to show, by default 1. If >=2 will show the trending prevision over theses weeks.')
     
     opts, args = parser.parse_args()
 
@@ -376,6 +432,7 @@ if __name__ == '__main__':
     metric = opts.metric
     do_print = opts.do_print
     csv_file = opts.csv_file
+    projection = int(opts.projection or '1')
 
     if do_print and plt is None:
         print "ERROR : cannot import matplotlib, please install it"
@@ -391,6 +448,10 @@ if __name__ == '__main__':
         _from_mongo = get_graph_values(hname, sdesc, metric, 'VtrendSmooth')
         _from_mongo_short = get_graph_values(hname, sdesc, metric, 'VcurrentSmooth')
         _el_raw = get_graph_values(hname, sdesc, metric, 'Vcurrent')
+        _el_evolution = get_graph_values(hname, sdesc, metric, 'VevolutionSmooth')
+
+        print _el_evolution
+        
         #print "PYMONGO?", _from_mongo
         pct_failed = 0.0
         for i in xrange(len(_from_mongo)):
@@ -406,11 +467,34 @@ if __name__ == '__main__':
         pct_failed /= len(_from_mongo)
         debug("pct_failed MONGO:", pct_failed)
 
+        projections = []
+        _long_times = []
+        if projection > 1:
+            
+            for wnb in range(1, projection):
+                #wnb += 1
+                print "WEek projection", wnb
+                for i in xrange(len(_from_mongo)):
+                    trend = _from_mongo[i]
+                    evol  = _el_evolution[i]
+                    #print 'EVOL', evol
+                    proj_value = trend + wnb*evol
+                    #print i, trend, wnb, evol, proj_value
+                    projections.append(proj_value)
+                    _long_times.append( wnb  * len(_from_mongo) + i)
+
+            #projections = smooth_list(projections)
+            
+            #print projections
+            #print _long_times
+            #print len(_long_times)
+
         if csv_file:
-            plt.plot(_times, _t, 'b', _times, ultra_raw, 'c', _times, _from_mongo, 'r', _times, _from_mongo_short, 'm')#, _times, _el_raw, 'y')
-            plt.axis(ymin=0)
+            #plt.plot(_times, _t, 'b', _times, ultra_raw, 'c', _times, _from_mongo, 'r', _times, _from_mongo_short, 'm', _times, _el_evolution, 'b',_long_times, projections, 'y')
+            plt.plot(_from_mongo, 'r',  _times, _el_evolution, 'b',_long_times, projections, 'y')
+            #plt.axis(ymin=0)
             plt.show()
         else:
-            plt.plot(_times, _from_mongo, 'r', _times, _from_mongo_short, 'y')
+            plt.plot(_times, _from_mongo, 'r', _times, _from_mongo_short, 'y', _times, _el_evolution, 'b', _long_times, projections, 'c')
             plt.show()
             
