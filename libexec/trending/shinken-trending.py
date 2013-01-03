@@ -62,6 +62,7 @@ reader = None
 datas = {}
 raw_datas = {}
 
+do_regexp = False
 hname = None
 sdesc = None
 metric = None
@@ -153,7 +154,11 @@ def import_csv(reader, _hname, _sdesc, _metric):
 
 
 
-
+def get_regexp_param(fil):
+    if do_regexp:
+        return {'$regex':fil}
+    else:
+        return fil
 
 
 
@@ -200,10 +205,10 @@ def get_graph_values(hname, sdesc, metric, mkey):
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
-    "%prog [options]", version="%prog " + '0.1')
+        "%prog [options]", version="%prog " + '0.1')
     parser.add_option('-c', '--csv',
                       dest="csv_file",
-                      help='CSV to import')
+                      help='Import a CSV file')
     parser.add_option('-H', '--host_name',
                       dest="host_name",
                       help="Hostname of the imported data")
@@ -221,12 +226,26 @@ if __name__ == '__main__':
     parser.add_option('--projection',
                       dest='projection',
                       help='Number of weeks to show, by default 1. If >=2 will show the trending prevision over theses weeks.')
+    parser.add_option('--delete',
+                      dest='do_delete', action='store_true',
+                      help='Delete the values for the metric')
+    parser.add_option('-l', '--list',
+                      dest='do_list', action='store_true',
+                      help='List all metrics for an host or a service in the database')
+    parser.add_option('-r', '--regexp',
+                      dest='do_regexp', action='store_true',
+                      help='Enable regexp in listing and removing of metrics')
+    
+    if len(sys.argv) == 1:
+        sys.argv.append('-h')
     
     opts, args = parser.parse_args()
 
     
-    do_debug = opts.do_debug
-        
+    do_debug  = opts.do_debug
+    do_delete = opts.do_delete
+    do_list   = opts.do_list
+    do_regexp = opts.do_regexp
     
     # ok open the connexion
     open_connexion()
@@ -286,3 +305,43 @@ if __name__ == '__main__':
             plt.plot(_times, _from_mongo, 'r', _times, _from_mongo_short, 'y', _times, _el_evolution, 'b', _long_times, projections, 'c')
             plt.show()
             
+
+    if do_delete:
+        d = None
+        if hname and not sdesc and not metric:
+            print "Removing the entries for", hname
+            d = {'hname':get_regexp_param(hname)}
+        if hname and sdesc and not metric:
+            print "Removing the entries for", hname, sdesc
+            d = {'hname':get_regexp_param(hname), 'sdesc':get_regexp_param(sdesc)}
+        if hname and sdesc and metric:
+            print "Removing the entries for", hname, sdesc, metric
+            d = {'hname':get_regexp_param(hname), 'sdesc':get_regexp_param(sdesc), 'metric':get_regexp_param(metric)}
+        if d:
+            coll.remove(d)
+            print "Done"
+
+
+
+    if do_list:
+        if not hname and not sdesc:
+            r = coll.find({}, {'hname':1}).distinct('hname')
+            hosts = [e for e in r]
+            hosts.sort()
+            for h in hosts:
+                print h
+        
+
+        if hname and not sdesc:
+            r = coll.find({'hname': get_regexp_param(hname)}, {'sdesc':1}).distinct('sdesc')
+            services = [e for e in r]
+            services.sort()
+            for s in services:
+                print s
+
+        if hname and sdesc:
+            r = coll.find({'hname': hname, 'sdesc': get_regexp_param(sdesc)}, {'metric':1}).distinct('metric')
+            metrics = [e for e in r]
+            metrics.sort()
+            for m in metrics:
+                print m
