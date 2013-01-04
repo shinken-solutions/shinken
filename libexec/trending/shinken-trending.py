@@ -47,7 +47,7 @@ except ImportError:
     # or parent directory to support running without installation.
     # Submodules will then be loaded from there, too.
     import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("../.."), os.path.realpath("../../.."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("../.."), os.path.realpath("../../.."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../..")]))
 
 from shinken.trending.trender import Trender
 from shinken.load import Load
