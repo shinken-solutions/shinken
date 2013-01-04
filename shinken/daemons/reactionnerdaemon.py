@@ -26,7 +26,7 @@
 
 
 # This class is an application that launches actions for the schedulers
-# Acions can be:
+# Actions can be:
 #    Notifications
 #    Event handlers
 #
