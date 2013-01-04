@@ -136,7 +136,7 @@ class Android_reactionner(BaseModule):
                 # Under android we got a queue here
                 self.returns_queue.put(action)
             except IOError, exp:
-                 logger.error("[Android SMS] %d exiting: %s" % (self.id, str(exp)))
+                logger.error("[Android SMS] %d exiting: %s" % (self.id, str(exp)))
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)

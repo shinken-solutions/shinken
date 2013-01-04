@@ -74,8 +74,7 @@ def debug(*args):
 
 def open_connexion(uri):
     global con, coll
-    # SAFE IS VERY VERY important!
-    con = pymongo.Connection(uri)#   , safe=True)
+    con = pymongo.Connection(uri)
     coll = con.shinken.trending
     debug("Connexion open with", coll)
 
