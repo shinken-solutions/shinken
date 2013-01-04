@@ -83,8 +83,8 @@ class Glpi_arbiter(BaseModule):
 
         # Get commands
         all_commands = self.con.monitoring.shinkenCommands(arg)
-         logger.info("[GLPI Arbiter] Get all commands: %s" % str(all_commands))
-         for command_info in all_commands:
+        logger.info("[GLPI Arbiter] Get all commands: %s" % str(all_commands))
+        for command_info in all_commands:
             logger.info("[GLPI Arbiter] Command info in GLPI: " % str(command_info))
             h = {'command_name': command_info['command_name'],
                  'command_line': command_info['command_line'],
