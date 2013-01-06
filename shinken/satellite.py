@@ -888,14 +888,14 @@ class Satellite(BaseSatellite):
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers = 4
-            logger.info("Using max workers: %s" % self.max_workers)
+        logger.info("[%s] Using max workers: %s" % (self.name, self.max_workers))
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
                 self.min_workers = 4
-            logger.info("Using min workers: %s" % self.min_workers)
+        logger.info("[%s] Using min workers: %s" % (self.name, self.min_workers))
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
