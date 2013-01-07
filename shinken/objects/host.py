@@ -518,6 +518,10 @@ class Host(SchedulingItem):
         # and father list in mine
         self.parent_dependencies.remove(other)
 
+        # Delete parent from parents list
+        if other in self.parents:
+            self.parents.remove(other)
+
     # Add a dependency for action event handler, notification, etc)
     # and add ourself in it's dep list
     def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
@@ -528,6 +532,9 @@ class Host(SchedulingItem):
 
         # And the parent/child dep lists too
         h.register_son_in_parent_child_dependencies(self)
+
+        # Add parent in parents list
+        self.parents.append(h)
 
     # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
