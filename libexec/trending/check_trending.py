@@ -166,10 +166,10 @@ if __name__ == '__main__':
 
     if warning.endswith('%'):
         warning = warning[:-1]
-    warning = int(warning)
+    warning = float(warning)
     if critical.endswith('%'):
         critical = critical[:-1]
-    critical = int(critical)
+    critical = float(critical)
 
     if not hname and not sdesc:
         print "Missing host name and service description options (-H and -s), please fill them"
@@ -177,7 +177,10 @@ if __name__ == '__main__':
 
     
     doc = get_graph_value(hname, sdesc, metric, wday, chunk_nb)
-    #print "GOT DOC", doc
+
+    if not doc:
+        print "Unknown : the database entry is missing. Are you sure this metric is managed with the trending module?"
+        sys.exit(3)
 
     last_update = doc['last_update']
     oldiness = check_time - last_update
@@ -189,44 +192,71 @@ if __name__ == '__main__':
     VcurrentSmooth = doc['VcurrentSmooth']
     VevolutionSmooth = doc['VevolutionSmooth']
 
-    #print VcurrentSmooth, 'will be compared to', VtrendSmooth
-    #print "With the warning/critical pct", warning, critical
+    # If no prevision asked, take the real time :)
+    if prevision == 0:
+        s_perf = 'trend=%.2f current=%.2f' % (VtrendSmooth, VcurrentSmooth)
 
-    s_perf = 'trend=%.2f current=%.2f' % (VtrendSmooth, VcurrentSmooth)
+        if VtrendSmooth == 0 and VcurrentSmooth != 0:
+            print "Unknown : the current value is not zero when the trending is, cannot compare with percent | %s" % s_perf
+            sys.exit(3)
 
-    if VtrendSmooth == 0 and VcurrentSmooth != 0:
-        print "Unknown : the current value is not zero when the trending is, cannot compare with percent | %s" % s_perf
-        sys.exit(3)
+        # Ok manage the both 0 cases
+        if VtrendSmooth == VcurrentSmooth:
+            print "OK : values are equal | %s" % s_perf
 
-    # Ok manae the both 0 cases
-    if VtrendSmooth == VcurrentSmooth:
-        print "OK : values are equal | %s" % s_perf
+        pct_diff = float(100 * (VcurrentSmooth - VtrendSmooth) / VtrendSmooth)
 
-    pct_diff = float(100 * (VcurrentSmooth - VtrendSmooth) / VtrendSmooth)
-    #print "PCT diff", pct_diff
+        s_perf += ' variation=%.2f%%' % pct_diff
 
-    s_perf += ' variation=%.2f%%' % pct_diff
+        abs_pct_diff = abs(pct_diff)
+        
+        rc = 0
 
-    abs_pct_diff = abs(pct_diff)
+        if abs_pct_diff > warning:
+            rc = 1
 
-    rc = 0
+        if abs_pct_diff > critical:
+            rc = 2
 
-    if abs_pct_diff > warning:
-        rc = 1
+        if rc == 0:
+            print "OK : current variation (%d%%) is within the limits | %s" % (pct_diff, s_perf)
 
-    if abs_pct_diff > critical:
-        rc = 2
+        if rc == 1:
+            print "Warning : current variation (%d%%) is in the warning band| %s" % (pct_diff, s_perf)
 
-    if rc == 0:
-        print "OK : current variation (%d%%) is within the limits | %s" % (pct_diff, s_perf)
+        if rc == 2:
+            print "Critical : current varitation (%d%%) is in the critical band! | %s" % (pct_diff, s_perf)
 
-    if rc == 1:
-        print "Warning : current variation (%d%%) is in the warning band| %s" % (pct_diff, s_perf)
+        if rc == 3:
+            print "Unknown : the current value cannot be compared with the reference | %s" % (pct_diff, s_perf)
 
-    if rc == 2:
-        print "Critical : current varitation (%d%%) is in the critical band! | %s" % (pct_diff, s_perf)
+        sys.exit(rc)
 
-    if rc == 3:
-        print "Unknown : the current value cannot be compared with the reference | %s" % (pct_diff, s_perf)
+    else:
+        # The value is a prevision based on last weeks evolutions
+        v_planned = VtrendSmooth + prevision*VevolutionSmooth
 
-    sys.exit(rc)
+        # Oh we are in a nostradamus mode!
+        s_perf = 'planned=%.2f weekly_evolution=%.2f' % (v_planned, VevolutionSmooth)
+
+        s_date = time.asctime(time.localtime(check_time + prevision*86400*7))
+        
+        rc = 0
+
+        if v_planned > warning:
+            rc = 1
+
+        if v_planned > critical:
+            rc = 2
+
+        if rc == 0:
+            print "OK : the %d weeks prevision (at %s) is %.2f and is within the limits | %s" % (prevision, s_date, v_planned, s_perf)
+
+        if rc == 1:
+            print "Warning : the %d weeks prevision (at %s) is %.2f and is in the warning band| %s" % (prevision, s_date, v_planned, s_perf)
+
+        if rc == 2:
+            print "Critical : the %d weeks prevision (at %s) is %.2f and is in the critical band! | %s" % (prevision, s_date, v_planned, s_perf)
+
+        sys.exit(rc)
+        
