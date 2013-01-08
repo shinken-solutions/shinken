@@ -87,7 +87,18 @@ class Trender:
 
 
     # Get the average entries, create them if need, and save the new computed value.
-    def update_avg(self, coll, vtime, wday, chunk_nb, l1, hname, sdesc, metric, CHUNK_INTERVAL):
+    def update_avg(self, coll, vtime, wday, chunk_nb, l1, hname, sdesc, metric, CHUNK_INTERVAL, warningLvl=None, criticalLvl=None):
+
+        if warningLvl is not None:
+            try:
+                warningLvl = float(warningLvl)
+            except ValueError:
+                pass
+        if criticalLvl is not None:
+            try:
+                criticalLvl = float(criticalLvl)
+            except ValueError:
+                pass
 
         # Ok first try to see our current chunk, and get our doc entry, and the previous one to compute
         # the averages
@@ -102,7 +113,7 @@ class Trender:
                    'wday':wday, 'chunk_nb':chunk_nb, 'Vtrend':l1, '_id':key,
                    'VtrendSmooth':l1, 'VcurrentSmooth':l1, 'Vcurrent':l1,
                    'Vevolution' : 0, 'VevolutionSmooth' : 0, 'last_update' : vtime,
-                   'valid_evolution' : False
+                   'valid_evolution' : False, 'warningLvl':warningLvl, 'criticalLvl':criticalLvl
                    }
             coll.save(doc)
             return
@@ -187,7 +198,7 @@ class Trender:
         # All is ok? Let's update the DB value
         coll.update({'_id' : key}, {'$set' : { 'Vtrend': new_Vtrend, 'VtrendSmooth': new_VtrendSmooth, 'VcurrentSmooth' : new_VcurrentSmooth, 'Vcurrent':l1,
                                                'Vevolution' : new_Vevolution, 'VevolutionSmooth' : new_VevolutionSmooth, 'last_update' : vtime,
-                                               'valid_evolution': valid_evolution}})
+                                               'valid_evolution': valid_evolution, 'warningLvl':warningLvl, 'criticalLvl':criticalLvl}})
 
 
 

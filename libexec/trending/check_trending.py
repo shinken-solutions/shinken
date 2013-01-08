@@ -161,15 +161,31 @@ if __name__ == '__main__':
     wday = get_wday(check_time)
     chunk_nb = sec_from_morning / CHUNK_INTERVAL
 
-    warning = opts.warning or '20%'
-    critical = opts.critical or '50%'
+    if prevision == 0:
+        def_warn = '20%'
+        def_crit = '50%'
+    else:
+        def_warn = def_crit = ''
+    warning = opts.warning or def_warn
+    critical = opts.critical or def_crit
 
     if warning.endswith('%'):
         warning = warning[:-1]
-    warning = float(warning)
+    try:
+        warning = float(warning)
+    except ValueError:
+        warning = None
     if critical.endswith('%'):
         critical = critical[:-1]
-    critical = float(critical)
+    try:
+        critical = float(critical)
+    except ValueError:
+        critical = None
+
+    # Warning and crit should be valid for now check
+    if prevision == 0 and (warning is None or critical is None):
+        print "ERROR : wrong warninig or critical value, please fix them"
+        sys.exit(2)
 
     if not hname and not sdesc:
         print "Missing host name and service description options (-H and -s), please fill them"
@@ -233,11 +249,23 @@ if __name__ == '__main__':
         sys.exit(rc)
 
     else:
+
+        if not warning:
+            warning = doc['warningLvl']
+        if not warning:
+            print 'Error : no warning level available in the arguments or in the trending db'
+            sys.exit(2)
+        if not critical:
+            critical = doc['criticalLvl']
+        if not critical:
+            print 'Error : no critical level available in the arguments or in the trending db'
+            sys.exit(2)
+
         # The value is a prevision based on last weeks evolutions
         v_planned = VtrendSmooth + prevision*VevolutionSmooth
 
         # Oh we are in a nostradamus mode!
-        s_perf = 'planned=%.2f weekly_evolution=%.2f' % (v_planned, VevolutionSmooth)
+        s_perf = 'planned=%.2f;%.2f;%.2f weekly_evolution=%.2f' % (v_planned,warning, critical, VevolutionSmooth)
 
         s_date = time.asctime(time.localtime(check_time + prevision*86400*7))
         

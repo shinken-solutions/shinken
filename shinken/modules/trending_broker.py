@@ -106,7 +106,7 @@ class Trending_broker(BaseModule):
 
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
-    # return ('/', '30'), ('/var', '50')
+    # return ('/', {'value' : '30', 'warning':4899, 'critical':4568}), ('/var', {'value' : '50', 'warning':'4899', 'critical':'1234'})
     def get_metric_and_value(self, perf_data):
         res = []
         s = perf_data.strip()
@@ -125,20 +125,21 @@ class Trending_broker(BaseModule):
             # get metric value and its thresholds values if they exist
             if ';' in raw and len(filter(None, raw.split(';'))) >= 3:
                 elts = raw.split(';')
-                name_value = {name: elts[0]}#, name + '_warn': elts[1], name + '_crit': elts[2]}
+                name_value = {name: {'value' : elts[0], 'warning': elts[1], 'critical': elts[2]}}
             # get the first value of ;
             else:
                 value = raw
-                name_value = {name: raw}
+                name_value = {name: raw, 'warning': None, 'critical':None}
             # bailout if need
-            if name_value[name] == '':
+            if name_value[name]['value'] == '':
                 continue
 
             # Try to get the int/float in it :)
-            for key, value in name_value.items():
+            for key, d in name_value.items():
+                value = d['value']
                 m = re.search("(-?\d*\.?\d*)(.*)", value)
                 if m:
-                    name_value[key] = m.groups(0)[0]
+                    name_value[key]['value'] = m.groups(0)[0]
                 else:
                     continue
             logger.debug("[Trending broker] End of grok: %s, %s" % (name, str(value)))
@@ -199,7 +200,10 @@ class Trending_broker(BaseModule):
 
         # Ok now the real stuff is here
         for p in policies:
-            for (metric, value) in couples:
+            for (metric, d) in couples:
+                value = d['value']
+                warning = d['warning']
+                critical = d['critical']
                 try:
                     value = float(value)
                 except ValueError:
@@ -213,8 +217,8 @@ class Trending_broker(BaseModule):
                     chunk_nb = sec_from_morning / self.chunk_interval
                     
                     # Now update mongodb
-                    print "UPDATING DB", wday, chunk_nb, value, hname, sdesc, metric, type(value)
-                    self.trender.update_avg(self.col, check_time, wday, chunk_nb, value, hname, sdesc, metric, self.chunk_interval)
+                    print "UPDATING DB", wday, chunk_nb, value, hname, sdesc, metric, type(value), warning, critical
+                    self.trender.update_avg(self.col, check_time, wday, chunk_nb, value, hname, sdesc, metric, self.chunk_interval, warning, critical)
                     
                     
 
