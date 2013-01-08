@@ -22,7 +22,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#set -x
 
 
 
@@ -74,6 +73,9 @@ function remove(){
         esac
     fi
 
+    # Remove sudo file used for shinken
+    rm -f /etc/sudoers.d/shinken
+
     if [ -d "$PNPPREFIX" ]
     then
         doremove="n"
@@ -104,10 +106,6 @@ function remove(){
             then
                 rm -Rf $PNPPREFIX.MK
             fi
-            cecho " > Remove sudoers configuration" green
-            sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers.d/shinken
-            cecho " > Remove webserver configuration" green
-            rm -f /etc/${WEBSERVER}/conf.d/zzz_check_mk.conf >> ${LOGFILE} 2>&1
             manage_service ${WEBSERVER} restart
         else
             cecho " > Aborting uninstallation of check_mk multisite" yellow
@@ -788,8 +786,12 @@ function fix(){
     chmod -R g+w $TARGET
     chmod -R g+w $ETC
 
+    cecho " > Fix /etc/sudoers file for shinken integration" green
+    cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
+    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
     cecho " > Add Shinken entry for skonf in sudoers" green
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
+    [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
 }
 
 function enable_initd(){
@@ -1220,14 +1222,6 @@ function cleanconf(){
     fi
 }
 
-function fixsudoers(){
-    cecho " > Fix /etc/sudoers file for shinken integration" green
-    cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
-    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
-    sed -i -r 's/^#(includedir \/etc\/sudoers\.d)/\1/' /etc/sudoers
-    [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
-}
-
 function fixcentreondb(){
     cecho " > Fix centreon database path for shinken integration" green
 
@@ -1605,6 +1599,9 @@ function install_multisite(){
         movepnp=1
     fi
 
+    # Fix sudo configuration in multisite installer script
+    sed -i 's/\/etc\/sudoers/&.d\/shinken/' ./setup.sh
+
     cecho " > Install multisite" green
     ./setup.sh --yes >> ${LOGFILE} 2>&1
 
@@ -1639,14 +1636,6 @@ function install_multisite(){
     chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
     chmod -R g+rwx $MKPREFIX/etc/conf.d
     $HTTPDINIT restart >> ${LOGFILE} 2>&1
-    exist=$(cat /etc/sudoers | grep "WATO")
-    if [ -z "$exist" ]
-    then
-        cecho " > Enable sudoers commands for check_mk" green
-        echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers.d/shinken
-        echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers.d/shinken
-        echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers.d/shinken
-    fi
 #    if [ $movepnp -eq 1 ]
 #    then
 #        mv $PNPPREFIX $PNPPREFIX.MK
@@ -1938,7 +1927,6 @@ function install_nconf(){
     if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
     then
         echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers.d/shinken
-        echo "$HTTPDUSER ALL=NOPASSWD: $TARGET/bin/nagios" >> /etc/sudoers.d/shinken
     fi
 
     cecho " -> Create nconf user and database" green
@@ -1973,7 +1961,7 @@ function install_nconf(){
 
     cecho " > Patching nconf for shinken support" green
     cd $NCONFTARGET/include/ajax
-    patch < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
+    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
 
     cecho " > Configure deployment.ini file" green
     cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
@@ -1998,11 +1986,15 @@ function install_nconf(){
     sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
 
-    cecho " > Nconf is installed, you must go to http://localhost/nconf/INSTALL.php and finalize installation" yellow
-    cecho " > Just click next button until process is done" yellow
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" yellow
+    cecho " > mysql credentials and database are:" yellow
+    cecho " --> user: nconf" yellow
+    cecho " --> password: $NCONFP" yellow
+    cecho " --> database: nconf" yellow
+    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is': $TARGET/bin/nagios" yellow
     cecho " > Hit ENTER when you are done with this step" red
     read
-    cecho " > Nconf is ready to use. Point your browser to http://localhost/nconf." yellow
+
     rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
 
 }
