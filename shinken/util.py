@@ -92,6 +92,12 @@ def get_day(t):
     return int(t - get_sec_from_morning(t))
 
 
+# Same but for week day
+def get_wday(t):
+    t_lt = time.localtime(t)
+    return  t_lt.tm_wday
+
+
 # @memoized
 def get_sec_from_morning(t):
     t_lt = time.localtime(t)

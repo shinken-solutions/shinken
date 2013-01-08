@@ -81,6 +81,7 @@ class Graphite_broker(BaseModule):
         self.con = socket()
         self.con.connect((self.host, self.port))
 
+
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
     def get_metric_and_value(self, perf_data):
@@ -122,15 +123,18 @@ class Graphite_broker(BaseModule):
                 res.append((key, value))
         return res
 
+
     # Prepare service custom vars
     def manage_initial_service_status_brok(self, b):
         if '_GRAPHITE_POST' in b.data['customs']:
             self.svc_dict[(b.data['host_name'], b.data['service_description'])] = b.data['customs']
 
+
     # Prepare host custom vars
     def manage_initial_host_status_brok(self, b):
         if '_GRAPHITE_PRE' in b.data['customs']:
             self.host_dict[b.data['host_name']] = b.data['customs']
+
 
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -183,6 +187,7 @@ class Graphite_broker(BaseModule):
             logger.debug("[Graphite broker] Launching: %s" % packet)
             self.con.sendall(packet)
 
+
     # A host check result brok has just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):
         data = b.data
@@ -216,7 +221,6 @@ class Graphite_broker(BaseModule):
                     self.buffer.append(("%s.__HOST__.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
-
         else:
             lines = []
             # Send a bulk of all metrics at once
@@ -227,6 +231,7 @@ class Graphite_broker(BaseModule):
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
             logger.debug("[Graphite broker] Launching: %s" % packet)
             self.con.sendall(packet)
+
 
     def hook_tick(self, brok):
         """Each second the broker calls the hook_tick function
