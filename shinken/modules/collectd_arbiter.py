@@ -28,6 +28,7 @@ import time
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter', 'receiver'],
@@ -94,7 +95,7 @@ def decode_values(pktype, plen, buf):
             result.append(v)
             off += valskip
         else:
-            print "DS type %i unsupported" % dstype
+            logger.warning("[Collectd] DS type %i unsupported" % dstype)
 
     return result
 
@@ -203,7 +204,7 @@ class CollectdServer(object):
         self.host = host
         self.port = port
 
-        print "[Collectd] Opening socket"
+        logger.info("[Collectd] Opening socket")
         family, socktype, proto, _, sockaddr = socket.getaddrinfo(
                 None if multicast else self.host, self.port,
                 socket.AF_UNSPEC, socket.SOCK_DGRAM, 0, socket.AI_PASSIVE)[0]
@@ -211,7 +212,7 @@ class CollectdServer(object):
         self._sock = socket.socket(family, socktype, proto)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind(sockaddr)
-        print "[Collectd] Socket open"
+        logger.info("[Collectd] Socket open")
 
         if multicast:
             if hasattr(socket, "SO_REUSEPORT"):
@@ -304,7 +305,6 @@ class Collectd_arbiter(BaseModule):
 
         cs = CollectdServer()
         while True:
-            print "-" * 80
             # Each second we are looking at sending old elements
             if time.time() > last_check + 1:
                 for e in elements.values():
@@ -324,4 +324,4 @@ class Collectd_arbiter(BaseModule):
                     e.add_perf_data(item.get_metric_name(), item.get_metric_value())
 
             except ValueError, exp:
-                print "Collectd read error: ", exp
+                logger.error("[Collectd] Read error: %s" % exp)

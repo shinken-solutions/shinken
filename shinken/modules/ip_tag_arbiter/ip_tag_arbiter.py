@@ -45,7 +45,7 @@ class Ip_Tag_Arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the ip range tagguer module"
+        logger.info("[IP Tag] Initilisation of the ip range tagguer module")
 
     def hook_early_configuration(self, arb):
         logger.info("[IpTag] in hook late config")
@@ -61,8 +61,8 @@ class Ip_Tag_Arbiter(BaseModule):
             else:
                 addr = h.address
 
-            print "Looking for h", h.get_name()
-            print addr
+            logger.info("[IP Tag] Looking for %s" % h.get_name())
+            logger.info("[IP Tag] Address is %s" % str(addr))
             h_ip = None
             try:
                 IP(addr)
@@ -79,19 +79,19 @@ class Ip_Tag_Arbiter(BaseModule):
                     pass
 
             # Ok, maybe we succeed :)
-            print "Host ip is:", h_ip
+            logger.info("[IP Tag] Host ip is: %s" % str(h_ip))
             # If we got an ip that match and the object do not already got
             # the property, tag it!
             if h_ip and h_ip in self.ip_range:
-                print "Is in the range"
+                logger.info("[IP Tag] Is in the range")
                 # 2 cases: append or replace.
                 # append will join with the value if exist
                 # replace will replace it if NOT existing
                 if self.method == 'append':
                     orig_v = getattr(h, self.property, '')
-                    print "Orig_v", orig_v
+                    logger.info("[IP Tag] Orig_v: %s" % str(orig_v))
                     new_v = ','.join([orig_v, self.value])
-                    print "Newv", new_v
+                    logger.info("[IP Tag] Newv %s" % new_v)
                     setattr(h, self.property, new_v)
 
                 if self.method == 'replace':

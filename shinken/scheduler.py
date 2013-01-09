@@ -1366,23 +1366,30 @@ class Scheduler:
     # Check for orphaned checks: checks that never returns back
     # so if inpoller and t_to_go < now - 300s: pb!
     # Warn only one time for each "worker"
+    # XXX I think we should make "time_to_orphanage" configurable
+    #     each action type, each for notification, event_handler & check
+    #     I think it will be a little more useful that way, not sure tho
     def check_orphaned(self):
         worker_names = {}
         now = int(time.time())
         for c in self.checks.values():
-            if c.status == 'inpoller' and c.t_to_go < now - 300:
-                c.status = 'scheduled'
-                if c.worker not in worker_names:
-                    worker_names[c.worker] = 1
-                    continue
-                worker_names[c.worker] += 1
+            time_to_orphanage = c.ref.get_time_to_orphanage()
+            if time_to_orphanage:
+                if c.status == 'inpoller' and c.t_to_go < now - time_to_orphanage:
+                    c.status = 'scheduled'
+                    if c.worker not in worker_names:
+                        worker_names[c.worker] = 1
+                        continue
+                    worker_names[c.worker] += 1
         for a in self.actions.values():
-            if a.status == 'inpoller' and a.t_to_go < now - 300:
-                a.status = 'scheduled'
-                if a.worker not in worker_names:
-                    worker_names[a.worker] = 1
-                    continue
-                worker_names[a.worker] += 1
+            time_to_orphanage = a.ref.get_time_to_orphanage()
+            if time_to_orphanage:
+                if a.status == 'inpoller' and a.t_to_go < now - time_to_orphanage:
+                    a.status = 'scheduled'
+                    if a.worker not in worker_names:
+                        worker_names[a.worker] = 1
+                        continue
+                    worker_names[a.worker] += 1
 
         for w in worker_names:
             logger.warning("%d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))

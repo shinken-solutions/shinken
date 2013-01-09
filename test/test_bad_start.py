@@ -37,29 +37,26 @@ from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.reactionnerdaemon import Reactionner
 from shinken.daemons.arbiterdaemon import Arbiter
-try:                                                                                                              
-    import pwd, grp                                                                                               
-    from pwd import getpwnam                                                                                      
-    from grp import getgrnam                                                                                      
-                                                                                                                  
-                                                                                                                  
-    def get_cur_user():                                                                                           
-        return pwd.getpwuid(os.getuid()).pw_name                                                                  
-                                                                                                                  
-                                                                                                                  
-    def get_cur_group():                                                                                          
-        return grp.getgrgid(os.getgid()).gr_name                                                                  
-except ImportError, exp:  # Like in nt system or Android                 
-                                                                                                                 
-                                                                                                                  
-    # temporary workaround:                                                                                      
-    def get_cur_user():                                                                                           
+try:
+    import pwd, grp
+    from pwd import getpwnam
+    from grp import getgrnam
+
+
+    def get_cur_user():
+        return pwd.getpwuid(os.getuid()).pw_name
+
+    def get_cur_group():
+        return grp.getgrgid(os.getgid()).gr_name
+
+except ImportError, exp:  # Like in nt system or Android
+    # temporary workaround:
+    def get_cur_user():
         return os.getlogin()
-                                                                                                                  
-                                                                                                                  
-    def get_cur_group():                                                                                          
+
+    def get_cur_group():
         return os.getlogin()
-                  
+
 curdir = os.getcwd()
 
 daemons_config = {
@@ -78,12 +75,11 @@ class template_Test_Daemon_Bad_Start():
 
     def get_login_and_group(self, p):
         try:
-            #user = os.getlogin()
-            user = get_cur_user()
+            p.user = get_cur_user()
+            p.group = get_cur_group()
         except OSError:  # on some rare case, we can have a problem here
             # so bypass it and keep default value
             return
-        p.user = p.group = user
 
     def create_daemon(self):
         cls = self.daemon_cls

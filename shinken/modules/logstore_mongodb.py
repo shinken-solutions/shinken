@@ -62,7 +62,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    logger.info("Get an LogStore MongoDB module for plugin %s" % plugin.get_name())
+    logger.info("[LogstoreMongoDB] Get an LogStore MongoDB module for plugin %s" % plugin.get_name())
     instance = LiveStatusLogStoreMongoDB(plugin)
     return instance
 
@@ -263,11 +263,12 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             mongo_filter_func = self.mongo_time_filter_stack.get_stack()
         result = []
         mongo_filter = mongo_filter_func()
+        logger.debug("[Logstore MongoDB] Mongo filter is %s" % str(mongo_filter))
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
         filter_element = eval('{ ' + mongo_filter + ' }')
-        dbresult = []
+        logger.debug("[LogstoreMongoDB] Mongo filter is %s" % str(filter_element))
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected == CONNECTED:
             logger.warning("[LogStoreMongoDB] sorry, not connected")
@@ -411,7 +412,9 @@ class LiveStatusMongoStack(LiveStatusStack):
             # Take from the stack:
             # Make a combined anded function
             # Put it on the stack
+            logger.debug("[Logstore MongoDB] Filter is %s" % str(filters))
             and_clause = lambda: '\'$and\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
+            logger.debug("[Logstore MongoDB] and_elements %s" % str(and_clause))
             self.put_stack(and_clause)
 
     def or_elements(self, num):
