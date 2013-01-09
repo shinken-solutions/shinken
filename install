@@ -446,7 +446,31 @@ function prerequisites(){
     export PYEI="easy_install"
     if [ "$CODE" = "REDHAT" ]
     then
-        PYLIBS=$PYLIBSRHEL6
+        case $VERS in
+            5)
+                if [ $SKIPPREREQUISITES -eq 1 ]
+                then
+                    cecho " > SKIPPREQUISITES enabled: won't install $RHELSETUPTOOLS " red
+                else
+                    # install setup tools for python 26
+                    export PY="python26"
+                    export PYEI="easy_install-2.6"
+                    if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
+                    then
+                        cecho " > Downloading setuptools for python 2.6" green
+                        wget $WGETPROXY $RHELSETUPTOOLS >> ${LOGFILE} 2>&1
+                        tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
+                    fi
+                    cecho " > Installing setuptools for python 2.6" green
+                    cd setuptools-$SETUPTOOLSVERS >> ${LOGFILE} 2>&1
+                    python26 setup.py install >> ${LOGFILE} 2>&1
+                fi
+                PYLIBS=$PYLIBSRHEL
+                ;;
+            6)
+                PYLIBS=$PYLIBSRHEL6
+                ;;
+        esac
     elif [ "$CODE" = "Fedora" ]
     then
         case $VERS in
@@ -694,6 +718,27 @@ function relocate(){
             sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
         done
         cd $TARGET
+    fi
+
+    # when read hat 5 try to use python26
+    if [ "$CODE" = "REDHAT" ]
+    then
+        if [ "$VERS" = "5" ]
+        then
+            cecho " > Translating python version to python26" green
+            for fic in $(find $TARGET | grep "\.py$")
+            do
+                sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+            done
+            # also try to translate python script without py extension
+            for fic in $(find $TARGET/bin)
+            do
+                if [ ! -z "$(file $fic | grep "python")" ]
+                then
+                    sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+                fi
+            done
+        fi
     fi
 
     # set some directives
