@@ -137,7 +137,7 @@ class Dummy_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    logger.info("[Dummy Poller] %d : Dad say we are diing..." % self.id)
+                    logger.info("[Dummy Poller] %d : Dad say we are dying..." % self.id)
                     break
             except:
                 pass
