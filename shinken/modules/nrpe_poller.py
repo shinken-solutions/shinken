@@ -492,7 +492,7 @@ class Nrpe_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self.id
+                    print "[%d]Dad say we are dying..." % self.id
                     break
             except:
                 pass
