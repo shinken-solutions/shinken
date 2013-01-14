@@ -40,7 +40,7 @@ import cPickle
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
-from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
+from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, template
 from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
@@ -156,6 +156,8 @@ class Webui_broker(BaseModule, Daemon):
 
         self.request = request
         self.response = response
+        self.template_call = template
+        
         try:
             #import cProfile
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/webui.profile')

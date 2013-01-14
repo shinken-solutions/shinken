@@ -71,6 +71,8 @@ $(document).ready(function(){
 
   %#  "Content Container Start"
   
+  %# app.template_call('linux_detail', globals())
+
   <div id="content_container" class="row-fluid">
   	<div class="row-fluid">
   		<h1 class="span7 state_{{elt.state.lower()}} icon_down no-margin"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
