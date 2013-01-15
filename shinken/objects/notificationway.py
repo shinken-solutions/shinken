@@ -102,6 +102,7 @@ class NotificationWay(Item):
 
         return False
 
+
     # Search for notification_options with state and if t is in
     # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
@@ -137,12 +138,14 @@ class NotificationWay(Item):
 
         return False
 
+
     # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         # service_notification_commands for service
         notif_commands_prop = type + '_notification_commands'
         notif_commands = getattr(self, notif_commands_prop)
         return notif_commands
+
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -207,6 +210,7 @@ class NotificationWay(Item):
 
         return state
 
+
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_nw_by_commands(self, commands):
@@ -220,11 +224,13 @@ class NotificationWays(Items):
     name_property = "notificationway_name"
     inner_class = NotificationWay
 
+
     def linkify(self, timeperiods, commands):
         self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
         self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
+
 
     def new_inner_member(self, name=None, params={}):
         if name is None:
