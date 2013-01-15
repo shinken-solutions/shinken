@@ -344,6 +344,10 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical'
     }
 
+    # Manage ADDRESSX macros by adding them dynamically
+    for _i in range(32):
+        macros['HOSTADDRESS%d'%_i] = 'address%d'% _i
+
     # This tab is used to transform old parameters name into new ones
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
