@@ -732,7 +732,6 @@ class Ndodb_Mysql_broker(BaseModule):
         where_clause = {'host_object_id': host_id}
         host_check_data = {
             'instance_id': data['instance_id'],
-            'host_object_id': host_id,
             'check_type': 0, 'is_raw_check': 0,
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
@@ -749,7 +748,7 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             host_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_insert_query('hostchecks', host_check_data)
+        query = self.db.create_insert_query('hostchecks', host_check_data, where_clause)
 
         # Now servicestatus
         hoststatus_data = {
@@ -803,7 +802,6 @@ class Ndodb_Mysql_broker(BaseModule):
         where_clause = {'service_object_id': service_id}
         service_check_data = {
             'instance_id': data['instance_id'],
-            'service_object_id': service_id,
             'check_type': 0,
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
@@ -821,8 +819,7 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             service_check_data['long_output'] = data['long_output']
 
-        #query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
-        query = self.db.create_insert_query('servicechecks', service_check_data)
+        query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
 
         # Now servicestatus
         servicestatus_data = {
