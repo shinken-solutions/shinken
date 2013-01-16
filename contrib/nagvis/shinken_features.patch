@@ -1,0 +1,291 @@
+diff --git a/share/server/core/classes/GlobalBackendTest.php b/share/server/core/classes/GlobalBackendTest.php
+index 493dad1..bb17e21 100644
+--- a/share/server/core/classes/GlobalBackendTest.php
++++ b/share/server/core/classes/GlobalBackendTest.php
+@@ -772,5 +772,28 @@ class GlobalBackendTest implements GlobalBackendInterface {
+         else
+             return Array();
+     }
++
++    /**
++     * PUBLIC getDirectChildDependenciesNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++     * @author  Thibault Cohen <thibault.cohen@savoirfairelinux.com>
++     */
++    public function getDirectChildDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectChildNamesByHostName($hostName);
++    }
++
++    /*
++     * PUBLIC getDirectParentNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++   * @author  Mathias Kettner <mk@mathias-kettner.de>
++     * @author  Lars Michelsen <lars@vertical-visions.de>
++     */
++    public function getDirectParentDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectParentNamesByHostName($hostName);
++    }
+ }
+ ?>
+diff --git a/share/server/core/classes/GlobalBackendmerlinmy.php b/share/server/core/classes/GlobalBackendmerlinmy.php
+index febcdee..c6fba02 100644
+--- a/share/server/core/classes/GlobalBackendmerlinmy.php
++++ b/share/server/core/classes/GlobalBackendmerlinmy.php
+@@ -882,5 +882,28 @@ class GlobalBackendmerlinmy implements GlobalBackendInterface {
+ 
+         return $arrReturn;
+     }
++
++    /**
++     * PUBLIC getDirectChildDependenciesNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++     * @author  Thibault Cohen <thibault.cohen@savoirfairelinux.com>
++     */
++    public function getDirectChildDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectChildNamesByHostName($hostName);
++    }
++
++    /*
++     * PUBLIC getDirectParentNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++   * @author  Mathias Kettner <mk@mathias-kettner.de>
++     * @author  Lars Michelsen <lars@vertical-visions.de>
++     */
++    public function getDirectParentDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectParentNamesByHostName($hostName);
++    }
+ }
+-?>
+\ No newline at end of file
++?>
+diff --git a/share/server/core/classes/GlobalBackendmklivestatus.php b/share/server/core/classes/GlobalBackendmklivestatus.php
+index 935a2cf..15669a4 100644
+--- a/share/server/core/classes/GlobalBackendmklivestatus.php
++++ b/share/server/core/classes/GlobalBackendmklivestatus.php
+@@ -1387,5 +1387,68 @@ class GlobalBackendmklivestatus implements GlobalBackendInterface {
+ 
+         $this->command('ACKNOWLEDGE_'.$what.'_PROBLEM;'.$spec.';'.$sticky.';'.$notify.';'.$persist.';'.$user.';'.$comment);
+     }
++    /**
++     * PUBLIC getDirectChildDependenciesNamesByHostName()
++     *
++     * Queries the livestatus socket for all direct childs dependencies of a host
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++     * @author  Thibault Cohen <thibault.cohen@savoirfairelinux.com>
++     */
++    public function getDirectChildDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        $query = "GET hosts\nColumns: child_dependencies\nFilter: name = ".$hostName."\n";
++        $raw_result = $this->queryLivestatusSingleColumn($query);
++        if ($min_business_impact) {
++            $query = "GET hosts\nColumns:host_name\nFilter: name = $raw_result[0][1]\n";
++            foreach ($raw_result[0] as &$value) {
++                $query = $query . "Filter: name = $value\nOr: 2\n";
++            }
++            $query = $query . "Filter: business_impact >= $min_business_impact\nAnd: 2\n";
++            $result = $this->queryLivestatusSingleColumn($query);
++        }
++        else {
++            $result = array();
++            foreach ($raw_result[0] as &$value) {
++                if (strpos($value, "/") == False) {
++                    array_push($result, $value);
++                }
++            }
++        }
++        return $result;
++    }
++
++    /*
++     * PUBLIC getDirectParentNamesByHostName()
++     *
++     * Queries the livestatus socket for all direct parents of a host
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++   * @author  Mathias Kettner <mk@mathias-kettner.de>
++     * @author  Lars Michelsen <lars@vertical-visions.de>
++     */
++    public function getDirectParentDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        $query = "GET hosts\nColumns: parent_dependencies\nFilter: name = ".$hostName."\n";
++        $raw_result = $this->queryLivestatusSingleColumn($query);
++        if ($min_business_impact) {
++            $query = "GET hosts\nColumns:host_name\nFilter: name = $raw_result[0][1]\n";
++            foreach ($raw_result[0] as &$value) {
++                $query = $query . "Filter: name = $value\nOr: 2\n";
++            }
++            $query = $query . "Filter: business_impact >= $min_business_impact\nAnd: 2\n";
++            $result = $this->queryLivestatusSingleColumn($query);
++        }
++        else {
++            $result = array();
++            foreach ($raw_result[0] as &$value) {
++                if (strpos($value, "/") == False) {
++                    array_push($result, $value);
++                }
++            }
++        }
++        return $result;
++    }
++
+ }
+ ?>
+diff --git a/share/server/core/classes/GlobalBackendnagiosbp.php b/share/server/core/classes/GlobalBackendnagiosbp.php
+index def09c7..99ed2f5 100644
+--- a/share/server/core/classes/GlobalBackendnagiosbp.php
++++ b/share/server/core/classes/GlobalBackendnagiosbp.php
+@@ -369,6 +369,10 @@ class GlobalBackendnagiosbp implements GlobalBackendInterface {
+     public function getDirectParentNamesByHostName($hostName) {
+         return Array();
+     }
++
++    public function getDirectChildDependenciesNamesByHostName($hostName) {
++        return Array();
++    }
+ }
+ 
+ if(!function_exists('l')) {
+diff --git a/share/server/core/classes/GlobalBackendndomy.php b/share/server/core/classes/GlobalBackendndomy.php
+index 8fe1f96..85fc4ec 100644
+--- a/share/server/core/classes/GlobalBackendndomy.php
++++ b/share/server/core/classes/GlobalBackendndomy.php
+@@ -1311,5 +1311,29 @@ class GlobalBackendndomy implements GlobalBackendInterface {
+ 
+         return $arrReturn;
+     }
++
++        /**
++     * PUBLIC getDirectChildDependenciesNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++     * @author  Thibault Cohen <thibault.cohen@savoirfairelinux.com>
++     */
++    public function getDirectChildDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectChildNamesByHostName($hostName);
++    }
++    
++    /*  
++     * PUBLIC getDirectParentNamesByHostName()
++     *
++     * @param   String   Hostname
++     * @return  Array    List of hostnames
++   * @author  Mathias Kettner <mk@mathias-kettner.de>
++     * @author  Lars Michelsen <lars@vertical-visions.de>
++     */
++    public function getDirectParentDependenciesNamesByHostName($hostName, $min_business_impact=false) {
++        return $this->getDirectParentNamesByHostName($hostName);
++    }
++
+ }
+ ?>
+diff --git a/share/server/core/classes/GlobalMainCfg.php b/share/server/core/classes/GlobalMainCfg.php
+index b63f707..61f61d1 100644
+--- a/share/server/core/classes/GlobalMainCfg.php
++++ b/share/server/core/classes/GlobalMainCfg.php
+@@ -234,6 +234,11 @@ class GlobalMainCfg {
+                     'editable'    => 1,
+                     'default'     => '86400',
+                     'match'       => MATCH_STRING),
++                'shinken_features' => Array('must' => 1,
++                    'editable'    => 1,
++                    'default'     => '0',
++                    'field_type'    => 'boolean',
++                    'match'         => MATCH_BOOLEAN),
+                 'startmodule' => Array('must' => 1,
+                     'editable'    => 1,
+                     'default'     => 'Overview',
+diff --git a/share/server/core/defines/matches.php b/share/server/core/defines/matches.php
+index f765ca4..36d2392 100644
+--- a/share/server/core/defines/matches.php
++++ b/share/server/core/defines/matches.php
+@@ -81,6 +81,7 @@ define('MATCH_OBJECT_TYPES', '/^(host|service|hostgroup|servicegroup|map)$/');
+ define('MATCH_AUTOMAP_RENDER_MODE', '/^(directed|undirected|radial|circular|undirected2|undirected3)?$/');
+ define('MATCH_AUTOMAP_RANKDIR', '/^(TB|LR|BT|RL)?$/');
+ define('MATCH_AUTOMAP_OVERLAP', '/^(true|false|scale|scalexy|ortho|orthoxy|orthoyx|compress|ipsep|vpsc)?$/');
++define('MATCH_AUTOMAP_BUSINESS_IMPACT', '/^(0_development|1_testing|2_standard|3_production|4_top_production|5_business_critical)?$/');
+ define('MATCH_LINE_TYPE', '/^(10|11|12|13|14|15)?$/');
+ define('MATCH_LINE_ARROW', '/^(none|forward|back|both)?$/');
+ define('MATCH_USER_NAME', '/^[0-9A-Za-z_\-\.\@\s]+$/');
+diff --git a/share/server/core/sources/automap.php b/share/server/core/sources/automap.php
+index 0030002..2955964 100644
+--- a/share/server/core/sources/automap.php
++++ b/share/server/core/sources/automap.php
+@@ -17,6 +17,9 @@ $viewParams = array(
+         'overlap',
+     ),
+ );
++if (cfg('global', 'shinken_features')) {
++    array_push($viewParams['automap'], 'min_business_impact');
++}
+ 
+ function list_automap_render_modes() {
+     return Array(
+@@ -134,6 +137,30 @@ $configVars = array(
+     ),
+ );
+ 
++
++if (cfg('global', 'shinken_features')) {
++    function list_business_impact() {
++        return Array(
++            '0'          => '0_development',
++            '1'          => '1_testing',
++            '2'          => '2_standard',
++            '3'          => '3_production',
++            '4'          => '4_top_production',
++            '5'          => '5_business_critical',
++        );
++    }
++    $configVars['min_business_impact'] = array(
++        'must'       => false,
++        'default'    => '0_development',
++        'match'      => MATCH_AUTOMAP_BUSINESS_IMPACT,
++        'field_type' => 'dropdown',
++        'list'       => 'list_business_impact',
++    );
++}
++
++
++
++
+ /**
+  * Get root host object by NagVis configuration or by backend.
+  */
+@@ -301,9 +328,25 @@ function automap_fetch_tree($dir, $MAPCFG, $params, &$saved_config, $obj_name, $
+         try {
+             global $_BACKEND;
+             if($dir == 'childs')
+-                $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectChildNamesByHostName($obj_name);
++                if (cfg('global', 'shinken_features')) {
++                    if ($params['min_business_impact']){
++                        $tmp_array = array_flip(list_business_impact());
++                        $min_business_impact = $tmp_array[$params['min_business_impact']];
++                    }
++                    $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectChildDependenciesNamesByHostName($obj_name, $min_business_impact);
++                } else { 
++                    $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectChildNamesByHostName($obj_name);
++                }
+             else
+-                $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectParentNamesByHostName($obj_name);
++                if (cfg('global', 'shinken_features')) {
++                    if ($params['min_business_impact']){
++                        $tmp_array = array_flip(list_business_impact());
++                        $min_business_impact = $tmp_array[$params['min_business_impact']];
++                    }
++                    $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectParentDependenciesNamesByHostName($obj_name, $min_business_impact);
++                } else {
++                    $relations = $_BACKEND->getBackend($params['backend_id'])->getDirectParentNamesByHostName($obj_name);
++                }
+         } catch(BackendException $e) {
+             $relations = array();
+         }
