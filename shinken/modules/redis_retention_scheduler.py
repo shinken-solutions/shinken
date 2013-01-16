@@ -63,7 +63,7 @@ class Redis_retention_scheduler(BaseModule):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
-        logger.debug("[RedisRetention] Initialisation of the redis module")
+        logger.debug("[RedisRetention] Initialization of the redis module")
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 

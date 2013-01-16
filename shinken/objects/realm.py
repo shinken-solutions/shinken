@@ -31,7 +31,7 @@ from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 
 # It change from hostgroup Class because there is no members
-# propertie, just the realm_members that we rewrite on it.
+# properties, just the realm_members that we rewrite on it.
 
 class Realm(Itemgroup):
     id = 1  # zero is always a little bit special... like in database
@@ -75,7 +75,7 @@ class Realm(Itemgroup):
         else:
             return []
 
-    # Use to make pyton properties
+    # Use to make python properties
     # TODO: change itemgroup function pythonize?
     def pythonize(self):
         cls = self.__class__
@@ -96,8 +96,8 @@ class Realm(Itemgroup):
         # if a son of it already call it
         self.already_explode = True
 
-        # Now the recursiv part
-        # rec_tag is set to False avery HG we explode
+        # Now the recursive part
+        # rec_tag is set to False every HG we explode
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
@@ -366,7 +366,7 @@ class Realms(Itemgroups):
                 new_mbr = self.find_by_name(mbr)
                 if new_mbr is not None:
                     new_mbrs.append(new_mbr)
-            # We find the id, we remplace the names
+            # We find the id, we replace the names
             p.realm_members = new_mbrs
 
         # Now put higher realm in sub realms

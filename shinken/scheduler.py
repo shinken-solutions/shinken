@@ -66,7 +66,7 @@ class Scheduler:
         self.must_run = True
 
         self.waiting_results = []  # satellites returns us results
-        # and to not wait for them, we putthem here and
+        # and to not wait for them, we put them here and
         # use them later
 
         # Every N seconds we call functions like consume, del zombies
@@ -77,7 +77,7 @@ class Scheduler:
         self.recurrent_works = {
             0: ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
             1: ('schedule', self.schedule, 1), # just schedule
-            2: ('consume_results', self.consume_results, 1), # incorpore checks and dependencies
+            2: ('consume_results', self.consume_results, 1), # incorporate checks and dependencies
             3: ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
             4: ('get_new_broks', self.get_new_broks, 1), # and broks
             5: ('delete_zombie_checks', self.delete_zombie_checks, 1),
@@ -87,14 +87,14 @@ class Scheduler:
             8: ('clean_caches', self.clean_caches, 1),
             9: ('update_retention_file', self.update_retention_file, 3600),
             10: ('check_orphaned', self.check_orphaned, 60),
-            # For NagVis like tools: udpdate our status every 10s
+            # For NagVis like tools: update our status every 10s
             11: ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             # Check for system time change. And AFTER get new checks
             # so they are changed too.
             12: ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
             13: ('manage_internal_checks', self.manage_internal_checks, 1),
-            # clean some times possible overriden Queues, to do not explode in memory usage
+            # clean some times possible overridden Queues, to do not explode in memory usage
             # every 1/4 of hour
             14: ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
@@ -181,7 +181,7 @@ class Scheduler:
 
         # self.status_file = StatusFile(self)        # External status file
         self.instance_id = conf.instance_id  # From Arbiter. Use for
-                                            # Broker to differenciate
+                                            # Broker to differentiate
                                             # schedulers
         # Tag our hosts with our instance_id
         for h in self.hosts:
@@ -193,7 +193,7 @@ class Scheduler:
         # and push flavor
         self.push_flavor = conf.push_flavor
 
-        # Now we can updte our 'ticks' for special calls
+        # Now we can update our 'ticks' for special calls
         # like the retention one, etc
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval * 60)
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
@@ -389,7 +389,7 @@ class Scheduler:
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
-                # Remeber to delete reference of notification in service/host
+                # Remember to delete reference of notification in service/host
                 a = self.actions[i]
                 if a.is_a == 'notification':
                     a.ref.remove_in_progress_notification(a)
@@ -401,7 +401,7 @@ class Scheduler:
             logger.warning("We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
     # For tunning purpose we use caches but we do not want them to explode
-    # So we clean thems
+    # So we clean them
     def clean_caches(self):
         for tp in self.timeperiods:
             tp.clean_cache()
@@ -504,7 +504,7 @@ class Scheduler:
         if do_actions:
             for a in self.actions.values():
                 # if do_action, call the reactionner, and so reactionner_tags by default is ['None']
-                # by default reactionner_tag is 'None' and ractioner_tags is ['None'] too
+                # by default reactionner_tag is 'None' and reactionner_tags is ['None'] too
                 # So if not the good one, loop for next :)
                 if not a.reactionner_tag in reactionner_tags:
                     continue
@@ -681,21 +681,21 @@ class Scheduler:
         uri = links[id]['uri']
         try:
             # But the multiprocessing module is not compatible with it!
-            # so we must disable it imediatly after
+            # so we must disable it immediately after
             socket.setdefaulttimeout(3)
             links[id]['con'] = Pyro.core.getProxyForURI(uri)
             con = links[id]['con']
             socket.setdefaulttimeout(None)
         except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not copatible with it!
-            # so we must disable it imadiatly after
+            # But the multiprocessing module is not compatible with it!
+            # so we must disable it immediately after
             socket.setdefaulttimeout(None)
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
         try:
-            # intial ping must be quick
+            # initial ping must be quick
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
@@ -728,7 +728,7 @@ class Scheduler:
                 # get actions
                 lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
-                    # intial ping must be quick
+                    # initial ping must be quick
                     pyro.set_timeout(con, 120)
                     logger.debug("Sending %s actions" % len(lst))
                     con.push_actions(lst, self.instance_id)
@@ -764,7 +764,7 @@ class Scheduler:
             # get actions
                 lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
                 try:
-                    # intial ping must be quick
+                    # initial ping must be quick
                     pyro.set_timeout(con, 120)
                     logger.debug("Sending %d actions" % len(lst))
                     con.push_actions(lst, self.instance_id)
@@ -799,7 +799,7 @@ class Scheduler:
             poller_tags = p['poller_tags']
             if con is not None:
                 try:
-                    # intial ping must be quick
+                    # initial ping must be quick
                     pyro.set_timeout(con, 120)
                     results = con.get_returns(self.instance_id)
                     nb_received = len(results)
@@ -836,7 +836,7 @@ class Scheduler:
             reactionner_tags = p['reactionner_tags']
             if con is not None:
                 try:
-                    # intial ping must be quick
+                    # initial ping must be quick
                     pyro.set_timeout(con, 120)
                     results = con.get_returns(self.instance_id)
                     nb_received = len(results)
@@ -897,7 +897,7 @@ class Scheduler:
 
     # Update the retention file and give all te data in
     # a dict so the read function can pickup what it wants
-    # For now compression is not used, but it can be added easylly
+    # For now compression is not used, but it can be added easily
     # just uncomment :)
     def update_retention_file(self, forced=False):
         # If we set the update to 0, we do not want of this
@@ -976,7 +976,7 @@ class Scheduler:
         # Now load interesting properties in hosts/services
         # Tagging retention=False prop that not be directly load
         # Items will be with theirs status, but not in checking, so
-        # a new check will be launched like with a normal begining (random distributed
+        # a new check will be launched like with a normal beginning (random distributed
         # scheduling)
 
         ret_hosts = data['hosts']
@@ -1036,7 +1036,7 @@ class Scheduler:
                     new_notified_contacts = set()
                     for cname in h.notified_contacts:
                         c = self.contacts.find_by_name(cname)
-                        # Mayeb the contact is gone. Skip it
+                        # Maybe the contact is gone. Skip it
                         if c:
                             new_notified_contacts.add(c)
                     h.notified_contacts = new_notified_contacts
@@ -1099,7 +1099,7 @@ class Scheduler:
                     new_notified_contacts = set()
                     for cname in s.notified_contacts:
                         c = self.contacts.find_by_name(cname)
-                        # Mayeb the contact is gone. Skip it
+                        # Maybe the contact is gone. Skip it
                         if c:
                             new_notified_contacts.add(c)
                     s.notified_contacts = new_notified_contacts
@@ -1195,7 +1195,7 @@ class Scheduler:
         return b
 
     # Called every 1sec to consume every result in services or hosts
-    # with these results, they are OK, CRITCAL, UP/DOWN, etc...
+    # with these results, they are OK, CRITICAL, UP/DOWN, etc...
     def consume_results(self):
         # All results are in self.waiting_results
         # We need to get them first
@@ -1217,7 +1217,7 @@ class Scheduler:
                 for dependent_checks in c.depend_on_me:
                     # Ok, now dependent will no more wait c
                     dependent_checks.depend_on.remove(c.id)
-                # REMOVE OLD DEP CHECL -> zombie
+                # REMOVE OLD DEP CHECK -> zombie
                 c.status = 'zombie'
 
         # Now, reinteger dep checks
@@ -1240,7 +1240,7 @@ class Scheduler:
             del self.checks[id]  # ZANKUSEN!
 
     # Called every 1sec to delete all actions in a zombie state
-    # zombie = not usefull anymore
+    # zombie = not useful anymore
     def delete_zombie_actions(self):
         #print "**********Delete zombies actions****"
         id_to_del = []
@@ -1258,7 +1258,7 @@ class Scheduler:
         broks = []
         now = time.time()
 
-        # Look for in objects comments, and look if we alrady got them
+        # Look for in objects comments, and look if we already got them
         for elt in [y for y in [x for x in self.hosts] + [x for x in self.services]]:
             for c in elt.comments:
                 if not c.id in self.comments:
@@ -1356,7 +1356,7 @@ class Scheduler:
 
     # Raises checks for no fresh states for services and hosts
     def check_freshness(self):
-        #print "********** Check freshnesh******"
+        #print "********** Check freshness******"
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 c = i.do_check_freshness()
@@ -1412,7 +1412,7 @@ class Scheduler:
 
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
-    # for a moduls like livestatus to raise external
+    # for a module like livestatus to raise external
     # commands for example
     def get_objects_from_from_queues(self):
         for f in self.sched_daemon.modules_manager.get_external_from_queues():
@@ -1433,7 +1433,7 @@ class Scheduler:
         self.hook_point('pre_scheduler_mod_start')
         self.sched_daemon.modules_manager.start_external_instances(late_start=True)
 
-        # Ok, now all is initialized, we can make the inital broks
+        # Ok, now all is initialized, we can make the initial broks
         logger.debug("Starting initial broks")
         t0 = time.time()
         self.fill_initial_broks(with_logs=True)
@@ -1479,7 +1479,7 @@ class Scheduler:
             timeout = 1.0
             ticks += 1
 
-            # Do reccurent works like schedule, consume
+            # Do recurrent works like schedule, consume
             # delete_zombie_checks
             for i in self.recurrent_works:
                 (name, f, nb_ticks) = self.recurrent_works[i]

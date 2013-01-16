@@ -116,7 +116,7 @@ class MySQL_importer_arbiter(BaseModule):
                 except MySQLdb.Error, e:
                     print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
 
-                # Create set whith result
+                # Create set with result
                 for row in result_set:
                     h = {}
                     for column in row:

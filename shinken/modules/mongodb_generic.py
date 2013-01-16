@@ -68,7 +68,7 @@ class Mongodb_generic(BaseModule):
         BaseModule.__init__(self, mod_conf)
         self.uri = uri
         self.database = database
-        # Some used varaible init
+        # Some used variable init
         self.con = None
         self.db = None
 
@@ -228,7 +228,7 @@ class Mongodb_generic(BaseModule):
         print '[Mongodb]: saving user pref', "'$set': { %s: %s }" % (key, value)
         r = self.db.ui_user_preferences.update({'_id': user.get_name()}, {'$set': {key: value}})
         print "[Mongodb] Return from update", r
-        # Mayeb there was no doc there, if so, create an empty one
+        # Maybe there was no doc there, if so, create an empty one
         if not r:
             # Maybe the user exist, if so, get the whole user entry
             u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})

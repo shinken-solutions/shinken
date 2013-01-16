@@ -53,7 +53,7 @@ class Dummy_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Dummy Arbiter] Initilisation of the dummy arbiter module")
+        logger.info("[Dummy Arbiter] Initialization of the dummy arbiter module")
         #self.return_queue = self.properties['from_queue']
 
 

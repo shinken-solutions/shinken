@@ -54,7 +54,7 @@ class Hack_cmds_pt(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Hack command poller tag] Initilisation of the hack commands poller tag module")
+        logger.info("[Hack command poller tag] Initialization of the hack commands poller tag module")
         #self.return_queue = self.properties['from_queue']
 
 
@@ -74,6 +74,6 @@ class Hack_cmds_pt(BaseModule):
         for c in arb.conf.commands:
             m = p.match(c.command_line)
             if m is not None and c.poller_tag is 'None':
-                logger.info("[Hack command poller tag] Match! Chaging the poller tag of %s by %s " % (c.command_name, self.poller_tag))
+                logger.info("[Hack command poller tag] Match! Changing the poller tag of %s by %s " % (c.command_name, self.poller_tag))
                 c.poller_tag = self.poller_tag
                 self.update_service_and_hosts_commandCall(arb, c, self.poller_tag)

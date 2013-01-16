@@ -69,7 +69,7 @@ class Android_reactionner(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        logger.debug("[Android SMS] Initilisation of the android module")
+        logger.debug("[Android SMS] Initialization of the android module")
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -78,7 +78,7 @@ class Android_reactionner(BaseModule):
     def get_new_checks(self):
         try:
             while(True):
-                logger.debug("[Adnroid SMS] I %d wait for a message" % self.id)
+                logger.debug("[Android SMS] I %d wait for a message" % self.id)
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
@@ -212,7 +212,7 @@ class Android_reactionner(BaseModule):
             msg = None
             cmsg = None
 
-            # If we are diyin (big problem!) we do not
+            # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
                 # REF: doc/shinken-action-queues.png (3)

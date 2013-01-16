@@ -90,6 +90,6 @@ class DBOracle(DB):
             logger.warning("[DBOracle] Warning: a query raise an operational error:" \
                   " %s, %s" % (query, exp))
         except Exception, exp:
-            logger.warning("[DBOracle] Warning: a query raise an unknow error:" \
+            logger.warning("[DBOracle] Warning: a query raise an unknown error:" \
                   " %s, %s" % (query, exp))
             logger.warning(exp.__dict__)

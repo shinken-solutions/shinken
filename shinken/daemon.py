@@ -68,7 +68,7 @@ try:
 except ImportError, exp:  # Like in nt system or Android
 
 
-    # temporary workarround:
+    # temporary workaround:
     def get_cur_user():
         return "shinken"
 
@@ -191,7 +191,7 @@ class Daemon(object):
         # when we will be in daemon
         self.debug_output = []
 
-        # We will inialize the Manager() when we load modules
+        # We will initialize the Manager() when we load modules
         # and be really forked()
         self.manager = None
 
@@ -328,7 +328,7 @@ class Daemon(object):
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
-            else:  # If it doesnt exist too, we create it as void
+            else:  # If it doesn't exist too, we create it as void
                 self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)
@@ -435,7 +435,7 @@ class Daemon(object):
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
             # In the father: we check if our child exit correctly
-            # it has to write the pid of our futur little child..
+            # it has to write the pid of our future little child..
             def do_exit(sig, frame):
                 logger.error("Timeout waiting child while it should have quickly returned ; something weird happened")
                 os.kill(pid, 9)
@@ -465,7 +465,7 @@ class Daemon(object):
         del self.fpid
         self.pid = os.getpid()
         self.debug_output.append("We are now fully daemonized :) pid=%d" % self.pid)
-        # We can now output some previously silenced debug ouput
+        # We can now output some previously silenced debug output
         logger.warning("Printing stored debug messages prior to our daemonization")
         for s in self.debug_output:
             logger.debug(s)
@@ -531,8 +531,8 @@ class Daemon(object):
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK = 0
 
-        # create the server, but Pyro > 4.8 veersion
-        # do not have such objets...
+        # create the server, but Pyro > 4.8 version
+        # do not have such objects...
         try:
             Pyro.config.PYRO_STORAGE = "."
             Pyro.config.PYRO_COMPRESSION = 1
@@ -627,11 +627,11 @@ class Daemon(object):
         # Maybe the os module got the initgroups function. If so, try to call it.
         # Do this when we are still root
         if hasattr(os, 'initgroups'):
-            logger.info('Trying to initialize additonnal groups for the daemon')
+            logger.info('Trying to initialize additional groups for the daemon')
             try:
                 os.initgroups(self.user, gid)
             except OSError, e:
-                logger.warning('Cannot call the additonnal groups setting with initgroups (%s)' % e.strerror)
+                logger.warning('Cannot call the additional groups setting with initgroups (%s)' % e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
@@ -755,7 +755,7 @@ class Daemon(object):
     # Check for a possible system time change and act correspondingly.
     # If such a change is detected then we return the number of seconds that changed. 0 if no time change was detected.
     # Time change can be positive or negative:
-    # positive when we have been sent in the futur and negative if we have been sent in the past.
+    # positive when we have been sent in the future and negative if we have been sent in the past.
     def check_for_system_time_change(self):
 
         now = time.time()

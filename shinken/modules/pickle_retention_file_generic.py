@@ -33,7 +33,7 @@ import traceback
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
-# Hack for making 0.5 retetnion file load in a 0.6 version
+# Hack for making 0.5 retention file load in a 0.6 version
 # because the commandCall class was moved
 import shinken
 from shinken.commandcall import CommandCall
@@ -100,7 +100,7 @@ class Pickle_retention_generic(BaseModule):
             logger.warning(repr(exp))
             return False
         except (IndexError, TypeError), exp:
-            logger.warning("Sorry, the ressource file is not compatible")
+            logger.warning("Sorry, the resource file is not compatible")
             return False
 
         # Ok, we send back the data to the daemon

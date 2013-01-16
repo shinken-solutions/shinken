@@ -99,7 +99,7 @@ class IForArbiter(Interface):
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, then F**K YOU!
+        # If I'm the master, then F**K YOU!
         if self.app.is_master:
             print "Some f***ing idiot asks me not to run. I'm a proud master, so I decide to run anyway"
         # Else, I'm just a spare, so I listen to my master
@@ -313,7 +313,7 @@ class Skonf(Daemon):
         else:
             logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
-        # Now clean objects of temporary/unecessary attributes for live work:
+        # Now clean objects of temporary/unnecessary attributes for live work:
         self.conf.clean()
 
         # Exit if we are just here for config checking
@@ -638,7 +638,7 @@ class Skonf(Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber: really static! because there is no lock
+                    # and remember: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -663,9 +663,9 @@ class Skonf(Daemon):
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
 
-    # We want a lock manager version of the plugin fucntions
+    # We want a lock manager version of the plugin functions
     def lockable_function(self, f):
-        #print "We create a lock verion of", f
+        #print "We create a lock version of", f
         def lock_version(**args):
             #self.wait_for_no_writers()
             t = time.time()
@@ -764,7 +764,7 @@ class Skonf(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present?
+        # shouldn't the 'daemon_types' (whatever it is above) be always present?
         return getattr(self.conf, daemon_type + 's', None)
 
     # Helper functions for retention modules

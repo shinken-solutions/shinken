@@ -113,7 +113,7 @@ class Landscape_importer_arbiter(BaseModule):
             ip = ''
             if len(ips) > 0:
                 ip = ips[0]
-            # By default take the IP as teh address
+            # By default take the IP as the address
             address = ip
             # But if not available, use the hostname
             if not address:

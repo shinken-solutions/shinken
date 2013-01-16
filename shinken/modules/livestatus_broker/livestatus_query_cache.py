@@ -135,7 +135,7 @@ class LiveStatusQueryCache(object):
         """
         if not self.enabled:
             return (False, False, [])
-        logger.debug("[Livestatus Broker Query Cache] I search the cache for categorie %s with key %s and data %s" % (str(query.cache_category), str(query.key), str(query.data)))
+        logger.debug("[Livestatus Broker Query Cache] I search the cache for categories %s with key %s and data %s" % (str(query.cache_category), str(query.key), str(query.data)))
         try:
             return (query.cache_category != cache_IMPOSSIBLE, True, self.categories[query.cache_category].get(query.key))
         except LFUCacheMiss:

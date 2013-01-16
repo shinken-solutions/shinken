@@ -214,7 +214,7 @@ class Ndodb_Mysql_broker(BaseModule):
             # we are using the in-brok instance_id
             if self.synchronize_database_id == '0':
                 data_id = brok_id
-            # Else: we are quering the database and get a new one
+            # Else: we are querying the database and get a new one
             else:
                 data_id = self.get_instance_id(name)
             # cache this!
@@ -336,7 +336,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # Ok, we are at launch time and a scheduler want him only, OK...
     # So create several queries with all tables we need to delete with
     # our instance_id
-    # This brob must be send at the begining of a scheduler session,
+    # This brok must be send at the beginning of a scheduler session,
     # if not, BAD THINGS MAY HAPPEN :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
@@ -363,7 +363,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
     # Program status is .. status of program?:)
     # Like pid, daemon mode, last activity, etc
-    # We aleady clean database, so insert
+    # We already clean database, so insert
     # TODO: fill nagios_instances
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
@@ -732,6 +732,7 @@ class Ndodb_Mysql_broker(BaseModule):
         where_clause = {'host_object_id': host_id}
         host_check_data = {
             'instance_id': data['instance_id'],
+            'host_object_id': host_id,
             'check_type': 0, 'is_raw_check': 0,
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
@@ -748,7 +749,7 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             host_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
+        query = self.db.create_insert_query('hostchecks', host_check_data)
 
         # Now servicestatus
         hoststatus_data = {
@@ -782,7 +783,7 @@ class Ndodb_Mysql_broker(BaseModule):
         # Only the host is impacted
         where_clause = {'host_object_id': host_id}
 
-        # Just update teh host status
+        # Just update the host status
         hoststatus_data = {'next_check': de_unixify(data['next_chk'])}
         hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
@@ -791,7 +792,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # Same than host result, but for service result
     def manage_service_check_result_brok(self, b):
         data = b.data
-        #print "DATA", data
+        logger.debug("DATA %s" % data)
         service_id = self.get_service_object_id_by_name_sync(
             data['host_name'], \
             data['service_description'], \
@@ -802,6 +803,7 @@ class Ndodb_Mysql_broker(BaseModule):
         where_clause = {'service_object_id': service_id}
         service_check_data = {
             'instance_id': data['instance_id'],
+            'service_object_id': service_id,
             'check_type': 0,
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
@@ -819,7 +821,8 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             service_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
+        #query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
+        query = self.db.create_insert_query('servicechecks', service_check_data)
 
         # Now servicestatus
         servicestatus_data = {

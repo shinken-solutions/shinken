@@ -160,7 +160,7 @@ def get_objects(ref):
     if not '*' in name:
         return get_object(name)
 
-    # Ok we look for sliting the host or service thing
+    # Ok we look for spliting the host or service thing
     hname = ''
     sdesc = ''
     if not '/' in name:

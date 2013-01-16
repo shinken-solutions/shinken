@@ -32,7 +32,7 @@ import time
 import os
 import subprocess
 from shinken.log import logger
-# Try to load the json (2.5 and higer) or
+# Try to load the json (2.5 and higher) or
 # the simplejson if failed (python2.4)
 try:
     import json
@@ -100,7 +100,7 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError, exp:  # Maybe the file got problem, we bypaass here
+        except OSError, exp:  # Maybe the file got problem, we bypass here
             logger.error("[Hot dependencies] Error: %s" % str(exp))
         return False
 
@@ -162,7 +162,7 @@ class Hot_dependencies_arbiter(BaseModule):
         if self.process is None:
             if now - self.last_cmd_launch > self.mapping_command_interval:
                 if self.mapping_command_interval != 0 and self.mapping_command != '':
-                    logger.debug("[Hot dependencies] The command lunach is too old, launch a new one")
+                    logger.debug("[Hot dependencies] The command launch is too old, launch a new one")
                     self._launch_command()
 #            else:
 #                print "The last cmd launch is too early", now - self.last_cmd_launch, self.mapping_command_interval
@@ -194,7 +194,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 son = arb.conf.hosts.find_by_name(son_name)
                 father = arb.conf.hosts.find_by_name(father_name)
                 if son is not None and father is not None:
-                    logger.debug("[Hot dependencies] Finded! %s %s" % (son_name, father_name))
+                    logger.debug("[Hot dependencies] Found! %s %s" % (son_name, father_name))
                     if not son.is_linked_with_host(father):
                         logger.debug("[Hot dependencies] Doing simple link between %s and %s" % (son.get_name(), father.get_name()))
                         # Add a dep link between the son and the father
