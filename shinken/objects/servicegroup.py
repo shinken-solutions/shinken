@@ -74,8 +74,8 @@ class Servicegroup(Itemgroup):
         # if a son of it already call it
         self.already_explode = True
 
-        # Now the recursiv part
-        # rec_tag is set to False avery HG we explode
+        # Now the recursive part
+        # rec_tag is set to False every HG we explode
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
@@ -138,7 +138,7 @@ class Servicegroups(Itemgroups):
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-            # We find the id, we remplace the names
+            # We find the id, we replace the names
             sg.replace_members(new_mbrs)
             for s in sg.members:
                 s.servicegroups.append(sg)

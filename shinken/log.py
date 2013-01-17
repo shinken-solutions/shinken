@@ -148,7 +148,7 @@ class Log:
 
         # We create the brok and load the log message
         # DEBUG level logs are logged by the daemon locally
-        # and must not be forwarded to other satelittes, or risk overloading them.
+        # and must not be forwarded to other satellites, or risk overloading them.
         if level != logging.DEBUG:
             b = Brok('log', {'log': s})
             obj.add(b)
@@ -158,7 +158,7 @@ class Log:
             logging.log(level, s.strip())
 
     def register_local_log(self, path, level=None):
-        """The shiken logging wrapper can write to a local file if needed
+        """The shinken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
         close it.
         """
@@ -193,7 +193,7 @@ class Log:
         """
         Set the output as human format.
 
-        If the optional parameter `on` is False, the timestamp format
+        If the optional parameter `on` is False, the timestamps format
         will be reset to the default format.
         """
         global human_timestamp_log
@@ -206,7 +206,7 @@ class __ConsoleLogger:
     This wrapper class for logging and printing messages to stdout, too.
 
     :fixme: Implement this using an additional stream-handler, as soon
-    as the logging system is based on the standard Pytthon logging
+    as the logging system is based on the standard Python logging
     module.
     """
     def debug(self, msg, *args, **kwargs):

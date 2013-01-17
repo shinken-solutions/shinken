@@ -65,9 +65,9 @@ class IForArbiter(Interface):
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, ignore the command
+        # If I'm the master, ignore the command
         if self.app.is_master:
-            logger.debug("Received message to not run. I am the Master, ignore and continue running.")
+            logger.debug("Received message to not run. I am the Master, ignore and continue to run.")
         # Else, I'm just a spare, so I listen to my master
         else:
             logger.debug("Received message to not run. I am the spare, stopping.")
@@ -280,7 +280,7 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
-                    logger.error("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
+                    logger.error("Instance %s raised an exception %s. Log and continue to run" % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Back trace of this remove: %s" % (output.getvalue()))
@@ -409,7 +409,7 @@ class Arbiter(Daemon):
 
         logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
-        # Clean objects of temporary/unecessary attributes for live work:
+        # Clean objects of temporary/unnecessary attributes for live work:
         self.conf.clean()
 
         # Exit if we are just here for config checking
@@ -499,7 +499,7 @@ class Arbiter(Daemon):
         self.do_load_modules()
         print self.modules_manager.instances
         if len(self.modules_manager.instances) == 0:
-            print "Error duringthe initialization of the import module. Bailing out"
+            print "Error during the initialization of the import module. Bailing out"
             sys.exit(2)
         print "Configuration migrating in progress..."
         mod  = self.modules_manager.instances[0]

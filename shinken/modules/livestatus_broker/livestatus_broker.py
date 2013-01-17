@@ -60,7 +60,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
-        # We can be in a scheduler. If so, we keep a link to it to speed up regnerator phase
+        # We can be in a scheduler. If so, we keep a link to it to speed up regenerator phase
         self.scheduler = None
         self.plugins = []
         self.use_threads = (getattr(modconf, 'use_threads', '0') == '1')
@@ -172,7 +172,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         self.modules_manager = ModulesManager('livestatus', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
-        # We can now output some previouly silented debug ouput
+        # We can now output some previously silenced debug output
         self.do_load_modules()
         for inst in self.modules_manager.instances:
             if inst.properties["type"].startswith('logstore'):

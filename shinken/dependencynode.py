@@ -168,7 +168,7 @@ class DependencyNode(object):
     # if so, change them with NB sons instead
     def switch_zeros_of_values(self):
         nb_sons = len(self.sons)
-        # Need a list for assignement
+        # Need a list for assignment
         self.of_values = list(self.of_values)
         for i in [0, 1, 2]:
             if self.of_values[i] == 0:
@@ -202,8 +202,8 @@ class DependencyNodeFactory(object):
         #print "*****Loop", patern
         complex_node = False
 
-        # Look if it's a complex patern (with rule) or
-        # if it's a leef ofit, like a host/service
+        # Look if it's a complex pattern (with rule) or
+        # if it's a leaf ofit, like a host/service
         for m in '()+&|':
             if m in patern:
                 complex_node = True
@@ -265,7 +265,7 @@ class DependencyNodeFactory(object):
                 in_par = False
                 tmp = tmp.strip()
                 if tmp != '':
-                    #print "Evaling sub pat", tmp
+                    #print "Evaluating sub pat", tmp
                     o = self.eval_cor_patern(tmp, hosts, services)
                     #print "2) I've %s got new sons" % patern , o
                     node.sons.append(o)

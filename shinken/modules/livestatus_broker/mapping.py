@@ -219,7 +219,7 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.alias,
         },
         'business_impact': {
-            'description': 'The importance we gave to this host between hte minimum 0 and the maximum 5',
+            'description': 'The importance we gave to this host between the minimum 0 and the maximum 5',
             'function': lambda item, req: item.business_impact,
             'datatype': int,
         },
@@ -292,7 +292,7 @@ livestatus_attribute_map = {
             'datatype': list,
         },
         'criticity': {
-            'description': 'The importance we gave to this host between hte minimum 0 and the maximum 5',
+            'description': 'The importance we gave to this host between the minimum 0 and the maximum 5',
             'function': lambda item, req: item.business_impact,
             'datatype': int,
         },
@@ -404,7 +404,7 @@ livestatus_attribute_map = {
         },
         'impacts': {
             'description': 'List of what the source impact (list of hosts and services)',
-            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.impacts],  # REPAIRME MAYBE (separators in oython and csv)
+            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.impacts],  # REPAIRME MAYBE (separators in python and csv)
             'datatype': list,
         },
         'in_check_period': {
@@ -684,7 +684,7 @@ livestatus_attribute_map = {
         },
         'source_problems': {
             'description': 'The name of the source problems (host or service)',
-            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.source_problems],  # REPAIRME MAYBE (separators in oython and csv)
+            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.source_problems],  # REPAIRME MAYBE (separators in python and csv)
             'datatype': list,
         },
         'state': {
@@ -763,7 +763,7 @@ livestatus_attribute_map = {
             'datatype': bool,
         },
         'business_impact': {
-            'description': 'The importance we gave to this service between hte minimum 0 and the maximum 5',
+            'description': 'The importance we gave to this service between the minimum 0 and the maximum 5',
             'function': lambda item, req: item.business_impact,
             'datatype': int,
         },
@@ -821,7 +821,7 @@ livestatus_attribute_map = {
             'datatype': list,
         },
         'criticity': {
-            'description': 'The importance we gave to this service between hte minimum 0 and the maximum 5',
+            'description': 'The importance we gave to this service between the minimum 0 and the maximum 5',
             'function': lambda item, req: item.business_impact,
             'datatype': int,
         },
@@ -836,7 +836,7 @@ livestatus_attribute_map = {
             'datatype': int,
         },
         'custom_variables': {
-            'description': 'A dictorionary of the custom variables',
+            'description': 'A dictionary of the custom variables',
             'function': lambda item, req: [join_with_separators(req, k[1:], v) for k, v in item.customs.iteritems()],
             'datatype': list,
         },
@@ -1239,7 +1239,7 @@ livestatus_attribute_map = {
         },
         'impacts': {
             'description': 'List of what the source impact (list of hosts and services)',
-            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.impacts],  # REPAIRME MAYBE (separators in oython and csv)
+            'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.impacts],  # REPAIRME MAYBE (separators in python and csv)
             'datatype': list,
         },
         'in_check_period': {
@@ -1785,7 +1785,7 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.alias,
         },
         'in': {
-            'description': 'Wether we are currently in this period (0/1)',
+            'description': 'Whether we are currently in this period (0/1)',
             'function': lambda item, req: item.is_in,  # CONTROLME REPAIRME
             'datatype': int,
         },
@@ -1806,7 +1806,7 @@ livestatus_attribute_map = {
     },
     'SchedulerLink': {
         'address': {
-            'description': 'The ip or dns adress ofthe scheduler',
+            'description': 'The ip or dns address of the scheduler',
             'function': lambda item, req: item.address,  # REPAIRME
         },
         'alive': {
@@ -1836,7 +1836,7 @@ livestatus_attribute_map = {
     },
     'PollerLink': {
         'address': {
-            'description': 'The ip or dns adress of the poller',
+            'description': 'The ip or dns address of the poller',
             'function': lambda item, req: item.address,  # REPAIRME
         },
         'alive': {
@@ -1861,7 +1861,7 @@ livestatus_attribute_map = {
     },
     'ReactionnerLink': {
         'address': {
-            'description': 'The ip or dns adress of the reactionner',
+            'description': 'The ip or dns address of the reactionner',
             'function': lambda item, req: item.address,  # REPAIRME
         },
         'alive': {
@@ -1886,7 +1886,7 @@ livestatus_attribute_map = {
     },
     'BrokerLink': {
         'address': {
-            'description': 'The ip or dns adress of the broker',
+            'description': 'The ip or dns address of the broker',
             'function': lambda item, req: item.address,  # REPAIRME
         },
         'alive': {
@@ -2325,7 +2325,7 @@ livestatus_attribute_map = {
             'description': 'The number of the current notification',
         },
         'service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
+            'description': 'A dictionary of the custom variables',
         },
         'service_custom_variable_names': {
             'description': 'A list of the names of all custom variables of the service',
@@ -2934,7 +2934,7 @@ livestatus_attribute_map = {
             'description': 'A list of the values of all custom variable of the service',
         },
         'service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
+            'description': 'A dictionary of the custom variables',
         },
         'service_description': {
             'description': 'Description of the service (also used as key)',
@@ -4113,7 +4113,7 @@ livestatus_attribute_map = {
             'description': 'A list of the names of all custom variables of the service',
         },
         'current_service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
+            'description': 'A dictionary of the custom variables',
         },
         'current_service_custom_variable_values': {
             'description': 'A list of the values of all custom variable of the service',
@@ -4429,7 +4429,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
                 #getattr(cls, 'lsm_'+attribute).im_func.datatype = entry['datatype']
                 getattr(cls, 'lsm_'+attribute).im_func.datatype = entry['datatype']
             elif attribute.startswith('num_'):
-                # With this, we don't need to explicitely set int datatype for attributes like num_services_hard_state_ok
+                # With this, we don't need to explicitly set int datatype for attributes like num_services_hard_state_ok
                 getattr(cls, 'lsm_'+attribute).im_func.datatype = int
             else:
                 getattr(cls, 'lsm_'+attribute).im_func.datatype = str

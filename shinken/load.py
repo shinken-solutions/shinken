@@ -50,7 +50,7 @@ class Load:
     # 
     def update_load(self, new_val, forced_interval=None):
         # The first call do not change the value, just tag
-        # the begining of last_update
+        # the beginning of last_update
         # IF  we force : bail out all time thing
         if not forced_interval and self.last_update == 0:
             self.last_update = time.time()

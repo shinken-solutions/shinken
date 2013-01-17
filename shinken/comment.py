@@ -84,7 +84,7 @@ class Comment:
                 res[prop] = getattr(self, prop)
         return res
 
-    # Inverted funtion of getstate
+    # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
 
@@ -105,7 +105,7 @@ class Comment:
 
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
-    # Inverted funtion of getstate
+    # Inverted function of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
         # Check if the len of this state is like the previous,

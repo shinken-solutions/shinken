@@ -53,7 +53,7 @@ class Dummy_scheduler(BaseModule):
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Dummy Scheduler] Initilisation of the dummy scheduler module")
+        logger.info("[Dummy Scheduler] Initialization of the dummy scheduler module")
         # self.return_queue = self.properties['from_queue']
 
 

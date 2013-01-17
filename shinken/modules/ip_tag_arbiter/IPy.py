@@ -275,7 +275,7 @@ class IPint:
             raise TypeError("Unsupported data type: %s" % type(data))
 
     def int(self):
-        """Return the first / base / network addess as an (long) integer.
+        """Return the first / base / network address as an (long) integer.
 
         The same as IP[0].
 
@@ -350,7 +350,7 @@ class IPint:
         else:
             return ''
 
-        # We have different flavours to convert to:
+        # We have different flavors to convert to:
         # strFullsize   127.0.0.1    2001:0658:022a:cafe:0200:c0ff:fe8d:08fa
         # strNormal     127.0.0.1    2001:658:22a:cafe:200:c0ff:fe8d:08fa
         # strCompressed 127.0.0.1    2001:658:22a:cafe::1
@@ -408,7 +408,7 @@ class IPint:
             # compressionpos is the position where we can start removing zeros
             compressionpos = followingzeros.index(max(followingzeros))
             if max(followingzeros) > 1:
-                # genererate string with the longest number of zeros cut out
+                # generate string with the longest number of zeros cut out
                 # now we need hextets as strings
                 hextets = [x for x in self.strNormal(0).split(':')]
                 while compressionpos < len(hextets) and hextets[compressionpos] == '0':
@@ -672,7 +672,7 @@ class IPint:
             return 0
 
     def __str__(self):
-        """Dispatch to the prefered String Representation.
+        """Dispatch to the preferred String Representation.
 
         Used to implement str(IP)."""
 
@@ -722,7 +722,7 @@ class IPint:
 
             # The bug is quite obvious really (as 99% bugs are once
             # spotted, isn't it? ;-) Because of precedence of
-            # multiplication by -1 over the substraction, prefixlen
+            # multiplication by -1 over the subtraction, prefixlen
             # differences were causing the __cmp__ function to always
             # return positive numbers, thus the function was failing
             # the basic assumptions for a __cmp__ function.
@@ -731,7 +731,7 @@ class IPint:
             # prefixlen of a and b are different.  (eg let
             # a=IP("1.0.0.0/24"); b=IP("2.0.0.0/16");) thus, anything
             # could happen when launching a sort algorithm..
-            # everything's in order with the trivial, attached patch.
+            # everything in order with the trivial, attached patch.
 
             return other.prefixlen() - self._prefixlen
         else:
@@ -1194,8 +1194,8 @@ def parseAddress(ipstr):
         return ((bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3], 4)
 
     else:
-        # we try to interprete it as a decimal digit -
-        # this ony works for numbers > 255 ... others
+        # we try to interpret it as a decimal digit -
+        # this only works for numbers > 255 ... others
         # will be interpreted as IPv4 first byte
         ret = long(ipstr, 10)
         if ret > 0xffffffffffffffffffffffffffffffff:
@@ -1377,7 +1377,7 @@ def _checkNetmask(netmask, masklen):
 
 
 def _checkNetaddrWorksWithPrefixlen(net, prefixlen, version):
-    """Check if a base addess of a network is compatible with a prefixlen"""
+    """Check if a base address of a network is compatible with a prefixlen"""
     return (net & _prefixlenToNetmask(prefixlen, version) == net)
 
 

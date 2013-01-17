@@ -45,7 +45,7 @@ class Brok:
         return str(self.__dict__) + '\n'
 
     # We unserialize the data, and if some prop were
-    # add after teh serialize pass, we integer them in the data
+    # add after the serialize pass, we integer them in the data
     def prepare(self):
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok

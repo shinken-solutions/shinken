@@ -204,7 +204,7 @@ class DataManager(object):
 
     def get_important_elements(self):
         res = []
-        # We want REALLY important things, so business_impact > 2, but not just IT elments that are
+        # We want REALLY important things, so business_impact > 2, but not just IT elements that are
         # root problems, so we look only for config defined my_own_business_impact value too
         res.extend([s for s in self.rg.services if (s.business_impact > 2 and not 0 <= s.my_own_business_impact <= 2)])
         res.extend([h for h in self.rg.hosts if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)])

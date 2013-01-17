@@ -287,7 +287,7 @@ class Nagios_retention_scheduler(BaseModule):
             logger.warning(repr(exp))
             return False
         except (IndexError, TypeError), exp:
-            logger.warning("Sorry, the ressource file is not compatible")
+            logger.warning("Sorry, the resource file is not compatible")
             return False
         logger.debug("Finished reading config")
         raw_objects = self.read_retention_buf(buf)

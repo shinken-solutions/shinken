@@ -28,7 +28,7 @@ import copy
 couchdb = None
 socket = None
 
-# Failed import will be cought by __init__.py
+# Failed import will be caught by __init__.py
 import couchdb as couchdb_imp
 couchdb = couchdb_imp
 import socket as socket_imp  # For Nagle HACK
@@ -73,8 +73,8 @@ class Couchdb_broker(BaseModule):
         #db.resource.http.add_credentials
 
         # Hack because of the Nagle TCP algorithm: couchdb make
-        # very small paquets, so Nagle wait 40ms for more bits that will
-        # never happend, so make a 40ms latency for all pakets!
+        # very small packets, so Nagle wait 40ms for more bits that will
+        # never happen, so make a 40ms latency for all packets!
         # So: NO_DELAY :)
         for con in s.resource.http.connections:
             sock = s.resource.http.connections[con].sock
@@ -88,7 +88,7 @@ class Couchdb_broker(BaseModule):
 
         # OK, now we store ours dbs
         self.dbs = {}
-        # An we clean thems
+        # An we clean them
         for table in tables:
             # We get the database. From now, we drop all the database and recreate a new one
             # TODO: cleaner way of doing it!!
@@ -146,7 +146,7 @@ class Couchdb_broker(BaseModule):
     # Ok, we are at launch and a scheduler want him only, OK...
     # So it creates several queries with all tables we need to delete with
     # our instance_id
-    # This brok must be sent at the begining of a scheduler session,
+    # This brok must be sent at the beginning of a scheduler session,
     # if not, BAD THINGS MAY HAPPEN :)
     # TODO: Modify this comment to explain why we only do one thing here.
     def manage_clean_all_my_instance_id_brok(self, b):
@@ -156,7 +156,7 @@ class Couchdb_broker(BaseModule):
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
-    # We aleady clean database, so insert
+    # We already clean database, so insert
     def manage_program_status_brok(self, b):
         #instance_id = b.data['instance_id']
         self.create_document('program_status', b.data, b.data['instance_name'])
@@ -164,7 +164,7 @@ class Couchdb_broker(BaseModule):
     # Initial service status is at start. We need to insert because we
     # clean the base
     def manage_initial_service_status_brok(self, b):
-        # It's a initial entry, so we need creat
+        # It's a initial entry, so we need to create
         key = '%s,%s' % (b.data['host_name'], b.data['service_description'])
         self.create_document('services', b.data, key)
 
@@ -193,7 +193,7 @@ class Couchdb_broker(BaseModule):
         data = b.data
 
         # Here we've got a special case: in data, there is members
-        # and we do not want it in the INSERT query, so we crate a
+        # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
