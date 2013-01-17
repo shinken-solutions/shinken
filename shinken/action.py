@@ -69,6 +69,14 @@ class __Action(object):
     """
     id = 0
 
+    # Ok when we load a previous created element, we should
+    # not start at 0 for new object, so we must raise the Action.id
+    # if need
+    @staticmethod
+    def assume_at_least_id(_id):
+        Action.id = max(Action.id, _id)
+
+
     def set_type_active(self):
         "Dummy function, only useful for checks"
         pass

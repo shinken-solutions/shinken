@@ -133,6 +133,7 @@ class Scheduler:
         # And a dummy push flavor
         self.push_flavor = 0
 
+
     def reset(self):
         self.must_run = True
         del self.waiting_results[:]
@@ -1002,12 +1003,12 @@ class Scheduler:
                         # we just bypass this
                         if prop in d:
                             setattr(h, prop, d[prop])
+                # Now manage all linked objects load from previous run
                 for a in h.notifications_in_progress.values():
                     a.ref = h
                     self.add(a)
                     # Also raises the action id, so do not overlap ids
-                    cls = a.__class__
-                    cls.id = max(cls.id, a.id + 1)
+                    a.assume_at_least_id(a.id)
                 h.update_in_checking()
                 # And also add downtimes and comments
                 for dt in h.downtimes:
@@ -1017,7 +1018,7 @@ class Scheduler:
                     else:
                         dt.extra_comment = None
                     # raises the downtime id to do not overlap
-                    Downtime.id = max(Comment.id, dt.id + 1)
+                    Downtime.id = max(Downtime.id, dt.id + 1)
                     self.add(dt)
                 for c in h.comments:
                     c.ref = h
@@ -1041,6 +1042,7 @@ class Scheduler:
                             new_notified_contacts.add(c)
                     h.notified_contacts = new_notified_contacts
 
+        # SAme for services
         ret_services = data['services']
         for (ret_s_h_name, ret_s_desc) in ret_services:
             # We take our dict to load
@@ -1064,13 +1066,12 @@ class Scheduler:
                         # we just bypass this
                         if prop in d:
                             setattr(s, prop, d[prop])
-
+                # Ok now manage all linked objects
                 for a in s.notifications_in_progress.values():
                     a.ref = s
                     self.add(a)
-                    # Also raises the action id, so do not overlap ids
-                    cls = a.__class__
-                    cls.id = max(cls.id, a.id + 1)
+                    # Also raises the action id, so do not overlap id
+                    a.assume_at_least_id(a.id)
                 s.update_in_checking()
                 # And also add downtimes and comments
                 for dt in s.downtimes:
@@ -1080,7 +1081,7 @@ class Scheduler:
                     else:
                         dt.extra_comment = None
                     # raises the downtime id to do not overlap
-                    Downtime.id = max(Comment.id, dt.id + 1)
+                    Downtime.id = max(Downtime.id, dt.id + 1)
                     self.add(dt)
                 for c in s.comments:
                     c.ref = s
@@ -1103,6 +1104,7 @@ class Scheduler:
                         if c:
                             new_notified_contacts.add(c)
                     s.notified_contacts = new_notified_contacts
+
 
     # Fill the self.broks with broks of self (process id, and co)
     # broks of service and hosts (initial status)
