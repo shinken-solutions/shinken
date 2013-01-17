@@ -36,7 +36,7 @@ def get_page():
         redirect("/user/login")
         return
 
-    # We are looking for hosts taht got valid GPS coordonates,
+    # We are looking for hosts that got valid GPS coordinates,
     # and we just give them to the template to print them.
     all_hosts = app.datamgr.get_hosts()
     valid_hosts = []

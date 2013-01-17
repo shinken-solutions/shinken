@@ -44,7 +44,7 @@ from shinken.webui.bottle import redirect
 app = None
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
+# Our page. If the user call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def get_packs():
     # First we look for the user sid
@@ -56,8 +56,8 @@ def get_packs():
         return
 
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user}
 
 
@@ -69,7 +69,7 @@ def get_new_packs():
         redirect("/user/login")
         return
 
-    # We need an api_key to launc hthe query
+    # We need an api_key to launch the query
     api_key = app.get_api_key()
 
     categories = ''
@@ -158,8 +158,8 @@ def get_new_packs():
     error = ''
 
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags, 'print_cat_tree': print_cat_tree}
 
 
@@ -168,7 +168,7 @@ def launch_search(search):
     results = ''
     status_code = 500
 
-    # We need an api_key to launc hthe query
+    # We need an api_key to launch the query
     api_key = app.get_api_key()
     if not api_key:
         return ('', "You didn't configured your api key!")
@@ -224,8 +224,8 @@ def get_new_packs_result(search):
 
     print "get_new_packs_result::", results, error
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
@@ -248,8 +248,8 @@ def get_new_packs_result_post():
 
     print "get_new_packs_result_post::", results, error
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 

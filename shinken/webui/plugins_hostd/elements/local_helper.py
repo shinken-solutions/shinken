@@ -35,7 +35,7 @@ def find(value, lst, key):
 
     for i in lst:
         v = i.get(key, None)
-        print 'MAtch with', v, value
+        print 'Match with', v, value
         if v == value:
             return i
     return None
@@ -61,7 +61,7 @@ def find_several(lst, elt, prop, key):
         if v is None:
             continue
         v = v.strip()
-        print 'MAtch with db', v
+        print 'Match with db', v
         if v  in values:
             res.append(dbi)
     print "Return find_several::", res
@@ -357,7 +357,7 @@ class Helper(object):
                     if founded:
                         break
                     for (m, mv) in p.macros.iteritems():
-                        print "COmpare", k, m
+                        print "Compare", k, m
                         if k.upper() == m.upper():
                             print 'Match a pack', mv
                             ctype = mv.get('type', 'string').strip()

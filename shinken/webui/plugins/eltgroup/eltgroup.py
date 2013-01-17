@@ -27,7 +27,7 @@ from shinken.webui.bottle import redirect
 app = None
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
+# Our page. If the user call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def get_page(arg1='nothing'):
     # First we look for the user sid
@@ -38,21 +38,21 @@ def get_page(arg1='nothing'):
         redirect("/user/login")
         return
 
-    # Here we can call app.datamgr beause when the webui "loaded" us, it
-    # populated app with it's own value.
+    # Here we can call app.datamgr because when the webui "loaded" us, it
+    # populate app with it's own value.
     my_host = app.datamgr.get_host(arg1)
 
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user, 'host': my_host}
 
-# This is the dict teh webui will try to "load".
-#  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
+# This is the dict the webui will try to "load".
+#  *here we register one page with both addresses /dummy/:arg1 and /dummy/, both addresses
 #   will call the function get_page.
-#  * we say taht for this page, we are using the template file dummy (so view/dummy.tpl)
+#  * we say that for this page, we are using the template file dummy (so view/dummy.tpl)
 #  * we said this page got some static stuffs. So the webui will match /static/dummy/ to
-#    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
-#  * optional: you can add 'method': 'POST' so this adress will be only available for
+#    the dummy/htdocs/ directory. Beware: it will take the plugin name to match.
+#  * optional: you can add 'method': 'POST' so this address will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
 pages = {get_page: {'routes': ['/eltgroup/:arg1', '/eltgroup/'], 'view': 'eltgroup', 'static': True}}
