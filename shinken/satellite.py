@@ -223,8 +223,6 @@ class Satellite(BaseSatellite):
 
         self.workers = {}   # dict of active workers
 
-        self.nb_actions_in_workers = 0
-
         # Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
@@ -325,8 +323,6 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
 
-        # We update stats
-        self.nb_actions_in_workers = -1
 
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
@@ -583,9 +579,6 @@ class Satellite(BaseSatellite):
             a.sched_id = sched_id
             a.status = 'queue'
             self.assign_to_a_queue(a)
-
-            # Update stats
-            self.nb_actions_in_workers += 1
 
     # Take an action and put it into one queue
     def assign_to_a_queue(self, a):
