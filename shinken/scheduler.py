@@ -133,6 +133,7 @@ class Scheduler:
         # And a dummy push flavor
         self.push_flavor = 0
 
+
     def reset(self):
         self.must_run = True
         del self.waiting_results[:]
