@@ -748,7 +748,7 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             host_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_insert_query('hostchecks', host_check_data, where_clause)
+        query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
 
         # Now servicestatus
         hoststatus_data = {
@@ -791,7 +791,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # Same than host result, but for service result
     def manage_service_check_result_brok(self, b):
         data = b.data
-        logger.debug("DATA %s" % data)
+        #logger.debug("DATA %s" % data)
         service_id = self.get_service_object_id_by_name_sync(
             data['host_name'], \
             data['service_description'], \
