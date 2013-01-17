@@ -106,7 +106,6 @@ class Notification(Action):
         if id is None:  # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
-
         self._in_timeout = False
         self.timeout = timeout
         self.status = status

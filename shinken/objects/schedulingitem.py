@@ -71,6 +71,7 @@ class SchedulingItem(Item):
                 res[prop] = getattr(self, prop)
         return res
 
+
     # Inversed function of __getstate__
     def __setstate__(self, state):
         cls = self.__class__
@@ -82,6 +83,7 @@ class SchedulingItem(Item):
             if prop in state:
                 setattr(self, prop, state[prop])
 
+
     # Register the son in my child_dependencies, and
     # myself in its parent_dependencies
     def register_son_in_parent_child_dependencies(self, son):
@@ -90,6 +92,7 @@ class SchedulingItem(Item):
 
         # and us to its parents
         son.parent_dependencies.add(self)
+
 
     # Add a flapping change, but no more than 20 states
     # Then update the self.is_flapping bool by calling update_flapping
@@ -111,6 +114,7 @@ class SchedulingItem(Item):
 
         # Now we add a value, we update the is_flapping prop
         self.update_flapping()
+
 
     # We update the is_flapping prop with value in self.flapping_states
     # Old values have less weight than new ones
@@ -167,14 +171,17 @@ class SchedulingItem(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
+
     # Add an attempt but cannot be more than max_check_attempts
     def add_attempt(self):
         self.attempt += 1
         self.attempt = min(self.attempt, self.max_check_attempts)
 
+
     # Return True if attempt is at max
     def is_max_attempts(self):
         return self.attempt >= self.max_check_attempts
+
 
     # Call by scheduler to see if last state is older than
     # freshness_threshold if check_freshness, then raise a check
@@ -193,6 +200,7 @@ class SchedulingItem(Item):
                         # And a new check
                         return self.launch_check(now)
         return None
+
 
     # Raise all impact from my error. I'm setting myself
     # as a problem, and I register myself as this in all
@@ -223,6 +231,7 @@ class SchedulingItem(Item):
         # And we register a new broks for update status
         b = self.get_update_status_brok()
         self.broks.append(b)
+
 
     # We update our 'business_impact' value with the max of
     # the impacts business_impact if we got impacts. And save our 'configuration'
@@ -257,6 +266,7 @@ class SchedulingItem(Item):
         if self.my_own_business_impact != -1 and not in_modulation:
             self.business_impact = self.my_own_business_impact
 
+
     # Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
         was_pb = self.is_problem
@@ -279,6 +289,7 @@ class SchedulingItem(Item):
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
+
 
     # Call recursively by potentials impacts so they
     # update their source_problems list. But do not
@@ -332,6 +343,7 @@ class SchedulingItem(Item):
         # now we return all impacts (can be void of course)
         return impacts
 
+
     # Just remove the problem from our problems list
     # and check if we are still 'impacted'. It's not recursif because problem
     # got the lsit of all its impacts
@@ -349,6 +361,7 @@ class SchedulingItem(Item):
         # And we register a new broks for update status
         b = self.get_update_status_brok()
         self.broks.append(b)
+
 
     # When all dep are resolved, this function say if
     # action can be raise or not by viewing dep status
@@ -382,6 +395,7 @@ class SchedulingItem(Item):
         else:  # every parents are dead, so... It's not my fault :)
             return True
 
+
     # We check if we are no action just because of ours parents (or host for
     # service)
     # TODO: factorize with previous check?
@@ -404,6 +418,7 @@ class SchedulingItem(Item):
         else:  # every parents are dead, so... It's not my fault :)
             self.set_unreachable()
             return
+
 
     # Use to know if I raise dependency for soneone else (with status)
     # If I do not raise dep, maybe my dep raise me. If so, I raise dep.
@@ -428,6 +443,7 @@ class SchedulingItem(Item):
         # No, I relly do not raise...
         return False
 
+
     # Use to know if my dep force me not to be checked
     # So check the chk_depend_of if they raise me
     def is_no_check_dependent(self):
@@ -437,6 +453,7 @@ class SchedulingItem(Item):
                 if dep.do_i_raise_dependency(status, inh_parent):
                     return True
         return False
+
 
     # call by a bad consume check where item see that he have dep
     # and maybe he is not in real fault.
@@ -457,6 +474,7 @@ class SchedulingItem(Item):
 #                else:
 #                    print "DBG: **************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
+
 
     # Main scheduling function
     # If a check is in progress, or active cehck are disabled, do
@@ -549,6 +567,7 @@ class SchedulingItem(Item):
         # Get the command to launch, and put it in queue
         self.launch_check(self.next_chk)
 
+
     # If we've got a system time change, we need to compensate it
     # If modify all past value. For active one like next_chk, it's the current
     # checks that will give us the new value
@@ -559,6 +578,7 @@ class SchedulingItem(Item):
             # Do not go below 1970 :)
             val = max(0, val + difference)  # diff may be negative
             setattr(self, p, val)
+
 
     # For disabling active checks, we need to set active_checks_enabled
     # to false, but also make a dummy current checks attempts so the
@@ -573,15 +593,18 @@ class SchedulingItem(Item):
             c.execution_time = 0
             c.perf_data = self.perf_data
 
+
     def remove_in_progress_check(self, c):
         # The check is consume, uptade the in_checking propertie
         if c in self.checks_in_progress:
             self.checks_in_progress.remove(c)
         self.update_in_checking()
 
+
     # Is in checking if and ony if there are still checks no consumed
     def update_in_checking(self):
         self.in_checking = (len(self.checks_in_progress) != 0)
+
 
     # Del just a notification that is retured
     def remove_in_progress_notification(self, n):
@@ -589,11 +612,13 @@ class SchedulingItem(Item):
             n.status = 'zombie'
             del self.notifications_in_progress[n.id]
 
+
     # We do not need ours currents pending notifications,
     # so we zombify them and clean our list
     def remove_in_progress_notifications(self):
         for n in self.notifications_in_progress.values():
             self.remove_in_progress_notification(n)
+
 
     # Get a event handler if item got an event handler
     # command. It must be enabled locally and globally
@@ -623,6 +648,7 @@ class SchedulingItem(Item):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
+
     # Whenever a non-ok hard state is reached, we must check whether this
     # host/service has a flexible downtime waiting to be activated
     def check_for_flexible_downtime(self):
@@ -636,6 +662,7 @@ class SchedulingItem(Item):
                 status_updated = True
         if status_updated == True:
             self.broks.append(self.get_update_status_brok())
+
 
     # UNKNOWN during a HARD state are not so important, and they should
     # ot raise notif about it
@@ -668,6 +695,7 @@ class SchedulingItem(Item):
         if not self.in_hard_unknown_reach_phase and self.was_in_hard_unknown_reach_phase:
             if self.state != self.state_before_hard_unknown_reach_phase:
                 self.was_in_hard_unknown_reach_phase = False
+
 
     # consume a check return and send action in return
     # main function of reaction of checks like raise notifications
@@ -973,6 +1001,7 @@ class SchedulingItem(Item):
         self.get_obsessive_compulsive_processor_command()
         self.get_perfdata_command()
 
+
     def update_event_and_problem_id(self):
         OK_UP = self.__class__.ok_up  # OK for service, UP for host
         if (self.state != self.last_state and self.last_state != 'PENDING'
@@ -1004,6 +1033,7 @@ class SchedulingItem(Item):
                 self.last_problem_id = self.current_problem_id
                 self.current_problem_id = SchedulingItem.current_problem_id
 
+
     # Called by scheduler when a notification is
     # ok to be send (so fuilly prepared to be send
     # to reactionner). Here we update the command with
@@ -1015,6 +1045,7 @@ class SchedulingItem(Item):
             self.notified_contacts.add(n.contact)
             self.raise_notification_log_entry(n)
 
+
     # Just update the notification command by resolving Macros
     # And because we are just launching the notification, we can say
     # that this contact have been notified
@@ -1025,6 +1056,7 @@ class SchedulingItem(Item):
         n.command = m.resolve_command(n.command_call, data)
         if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
             n.env = m.get_env_macros(data)
+
 
     # See if an escalation is eligible at t and notif nb=n
     def is_escalable(self, n):
@@ -1040,6 +1072,7 @@ class SchedulingItem(Item):
                 return True
 
         return False
+
 
     # Give for a notification the next notification time
     # by taking the standard notification_interval or ask for
@@ -1076,6 +1109,7 @@ class SchedulingItem(Item):
 
         # And we take the minimum of this result. Can be standard or escalation asked
         return res
+
 
     # Get all contacts (uniq) from eligible escalations
     def get_escalable_contacts(self, n):
@@ -1149,6 +1183,7 @@ class SchedulingItem(Item):
         # and put it in the temp queue for scheduler
         self.actions.append(n)
 
+
     # In create_notifications we created a notification "template". When it's
     # time to hand it over to the reactionner, this master notification needs
     # to be split in several child notifications, one for each contact
@@ -1199,11 +1234,12 @@ class SchedulingItem(Item):
                     childnotifications.append(child_n)
 
                     if n.type == 'PROBLEM':
-                    # Remember the contacts. We might need them later in the
-                    # recovery code some lines above
+                        # Remember the contacts. We might need them later in the
+                        # recovery code some lines above
                         self.notified_contacts.add(contact)
 
         return childnotifications
+
 
     # return a check to check the host/service
     # and return id of the check
@@ -1266,6 +1302,7 @@ class SchedulingItem(Item):
         # None mean I already take it into account
         return None
 
+
     # returns either 0 or a positive number
     # 0 == don't check for orphans
     # non-zero == number of secs that can pass before
@@ -1278,6 +1315,7 @@ class SchedulingItem(Item):
         if self.time_to_orphanage <= 0:
             return 0
         return self.time_to_orphanage
+
 
     # Get the perfdata command with macro resolved for this
     def get_perfdata_command(self):
@@ -1295,6 +1333,7 @@ class SchedulingItem(Item):
 
             # ok we can put it in our temp action queue
             self.actions.append(e)
+
 
     # Create the whole business rule tree
     # if we need it
@@ -1323,6 +1362,7 @@ class SchedulingItem(Item):
             node = fact.eval_cor_patern(rule, hosts, services)
             #print "got node", node
             self.business_rule = node
+
 
     # We ask us to manage our own internal check,
     # like a business based one
@@ -1359,11 +1399,13 @@ class SchedulingItem(Item):
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
 
+
     def rebuild_ref(self):
         """ Rebuild the possible reference a schedulingitem can have """
         for g in self.comments, self.downtimes:
             for o in g:
                 o.ref = self
+
 
     # Go launch all our triggers
     def eval_triggers(self):
