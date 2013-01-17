@@ -51,10 +51,10 @@ class HostExtInfo(Item):
     # properties defined by configuration
     # *required: is required in conf
     # *default: default value if no set in conf
-    # *pythonize: function to call when transfort string to python object
+    # *pythonize: function to call when transforming string to python object
     # *fill_brok: if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
     # *no_slots: do not take this property for __slots__
-    #  Only for the inital call
+    #  Only for the initial call
     # conf_send_preparation: if set, will pass the property to this function. It's used to "flatten"
     #  some dangerous properties like realms that are too 'linked' to be send like that.
     # brok_transformation: if set, will call the function with the value of the property
@@ -116,7 +116,7 @@ class HostExtInfo(Item):
             except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
-    # For debugin purpose only
+    # For debugging purpose only
     def get_dbg_name(self):
         return self.host_name
 

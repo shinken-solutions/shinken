@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 # This Class is an Arbiter module for having a webservice
-# wher you can push external commands
+# where you can push external commands
 
 import os
 import sys
@@ -72,7 +72,7 @@ def get_page():
         if basic[0] != app.username or basic[1] != app.password:
             abort(403, 'Authentication denied')
 
-    # Ok, here it's an anonymouscall, or a registred one, but mayeb teh query is false
+    # Ok, here it's an anonymouscall, or a registered one, but maybe the query is false
     if time_stamp == 0 or not host_name or not output or return_code == -1:
         abort(400, "Incorrect syntax")
 
@@ -105,7 +105,7 @@ class Ws_arbiter(BaseModule):
             logger.error("[Ws_arbiter] The module is missing a property, check module declaration in shinken-specific.cfg")
             raise
 
-    # We initialise the HTTP part. It's a simple wsgi backend
+    # We initialize the HTTP part. It's a simple wsgi backend
     # with a select hack so we can still exit if someone ask it
     def init_http(self):
         logger.info("[Ws_arbiter] Starting WS arbiter http socket")

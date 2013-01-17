@@ -25,7 +25,7 @@
 
 from Queue import Empty
 
-# In android, we sgould use threads, not process
+# In android, we should use threads, not process
 is_android = True
 try:
     import android
@@ -185,7 +185,7 @@ class SkonfUIWorker(Worker):
             except:
                 pass
 
-            # Manage a possible time change (our evant will be change with the diff)
+            # Manage a possible time change (our event will be change with the diff)
             diff = self.check_for_system_time_change()
             begin += diff
 

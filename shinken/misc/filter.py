@@ -49,7 +49,7 @@ def only_related_to(lst, user):
             if user in s.contacts:
                 r.add(i)
                 is_find = True
-        # Ok skeep this object now
+        # Ok skip this object now
         if is_find:
             continue
         # Now impacts related maybe?

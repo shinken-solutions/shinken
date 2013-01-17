@@ -201,7 +201,7 @@ def to_list_string_of_names(ref, tab):
     return ",".join([e.get_name() for e in tab])
 
 
-# Just a lsit of names
+# Just a list of names
 def to_list_of_names(ref, tab):
     return [e.get_name() for e in tab]
 
@@ -249,7 +249,7 @@ def expand_with_macros(ref, value):
 # Just get the string name of the object
 # (like for realm)
 def get_obj_name(obj):
-    # Maybe we do not have a real object but already a stirng. If so
+    # Maybe we do not have a real object but already a string. If so
     # return the string
     if isinstance(obj, basestring):
         return obj
@@ -326,7 +326,7 @@ def sort_by_ids(x, y):
 
 # From a tab, get the avg, min, max
 # for the tab values, but not the lower ones
-# and higer ones that are too distinct
+# and higher ones that are too distinct
 # than major ones
 def nighty_five_percent(t):
     t2 = copy.copy(t)
@@ -399,11 +399,11 @@ def got_generation_rule_patern_change(xy_couples):
     return res
 
 
-# this fuction apply a recursive pattern change
-# generate by the got_generation_rule_patern_change
+# this function apply a recursive pattern change
+# generate by the got_generation_rule_pattern_change
 # function.
 # It take one entry of this list, and apply
-# recursivly the change to s like:
+# recursively the change to s like:
 # s = "Unit [1-3] Port [1-4] Admin [1-5]"
 # rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
 # output = Unit 3 Port 2 Admin 1
@@ -569,7 +569,7 @@ def get_key_value_sequence(entry, default_value=None):
 
 
 ############################### Files management #######################
-# We got a file like /tmp/toto/toto2/bob.png And we want to be sur the dir
+# We got a file like /tmp/toto/toto2/bob.png And we want to be sure the dir
 # /tmp/toto/toto2/ will really exists so we can copy it. Try to make if if need
 # and return True/False if succeed
 def expect_file_dirs(root, path):

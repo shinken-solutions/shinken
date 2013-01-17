@@ -76,7 +76,7 @@ class ModulesManager(object):
         modules_files.extend([fname for fname in os.listdir(self.modules_path)
                                if os.path.isdir(os.path.join(self.modules_path, fname))])
 
-        # Now we try to load thems
+        # Now we try to load them
         # So first we add their dir into the sys.path
         if not self.modules_path in sys.path:
             sys.path.append(self.modules_path)
@@ -112,7 +112,7 @@ class ModulesManager(object):
 
     # Try to "init" the given module instance.
     # If late_start, don't look for last_init_try
-    # Returns: True on successfull init. False if instance init method raised any Exception.
+    # Returns: True on successful init. False if instance init method raised any Exception.
     def try_instance_init(self, inst, late_start=False):
         try:
             logger.info("Trying to init module: %s" % inst.get_name())
@@ -185,7 +185,7 @@ class ModulesManager(object):
 
         return self.instances
 
-    # Launch external instaces that are load corectly
+    # Launch external instances that are load correctly
     def start_external_instances(self, late_start=False):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
@@ -218,7 +218,7 @@ class ModulesManager(object):
         for inst in self.instances:
             if not inst in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
-                    logger.error("The external module %s goes down unexpectly!" % inst.get_name())
+                    logger.error("The external module %s goes down unexpectedly!" % inst.get_name())
                     logger.info("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)

@@ -88,7 +88,7 @@ class __Action(object):
     def get_local_environnement(self):
         """
 
-        Mix the env and the environnment variables into a new local
+        Mix the env and the environment variables into a new local
         env dict.
 
         Note: We cannot just update the global os.environ because this
@@ -112,7 +112,7 @@ class __Action(object):
         self.check_time = time.time()
         self.wait_time = 0.0001
         self.last_poll = self.check_time
-        # Get a local env variables with our additionnal values
+        # Get a local env variables with our additional values
         self.local_env = self.get_local_environnement()
 
         # Initialize stdout and stderr. we will read them in small parts
@@ -124,7 +124,7 @@ class __Action(object):
 
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
-        # Squize all output after max_plugins_output_length
+        # Squeeze all output after max_plugins_output_length
         out = out[:max_plugins_output_length]
         # Then cuts by lines
         elts = out.split('\n')
@@ -168,7 +168,7 @@ class __Action(object):
             now = time.time()
 
             # If the fcntl is available (unix) we try to read in a
-            # asyncronous mode, so we won't block the PIPE at 64K buffer
+            # asynchronous mode, so we won't block the PIPE at 64K buffer
             # (deadlock...)
             if fcntl:
                 self.stdoutdata += no_block_read(self.process.stdout)
@@ -203,8 +203,8 @@ class __Action(object):
         # we should not keep the process now
         del self.process
 
-        # if the exit status is anormal, we add stderr to the output
-        # TODO: Anormal should be logged properly no?
+        # if the exit status is abnormal, we add stderr to the output
+        # TODO: Abnormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
             self.stdoutdata = self.stdoutdata + self.stderrdata
         elif ('sh: -c: line 0: unexpected EOF while looking for matching'
@@ -230,7 +230,7 @@ class __Action(object):
 
     def copy_shell__(self, new_i):
         """
-        Coppy all attributes listed in 'only_copy_prop' from `self` to
+        Copy all attributes listed in 'only_copy_prop' from `self` to
         `new_i`.
         """
         for prop in only_copy_prop:
@@ -261,7 +261,7 @@ if os.name != 'nt':
             # in a shell mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
 
-            # 2.7 and higer Python version need a list of args for cmd
+            # 2.7 and higher Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7) or force_shell:
@@ -322,7 +322,7 @@ else:
     class Action(__Action):
 
         def execute__(self):
-            # 2.7 and higer Python version need a list of args for cmd
+            # 2.7 and higher Python version need a list of args for cmd
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7):
                 cmd = self.command

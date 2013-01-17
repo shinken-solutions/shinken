@@ -25,7 +25,7 @@
 
 LOGCLASS_INFO = 0          # all messages not in any other class
 LOGCLASS_ALERT = 1         # alerts: the change service/host state
-LOGCLASS_PROGRAM = 2       # important programm events (restart, ...)
+LOGCLASS_PROGRAM = 2       # important program events (restart, ...)
 LOGCLASS_NOTIFICATION = 3  # host/service notifications
 LOGCLASS_PASSIVECHECK = 4  # passive checks
 LOGCLASS_COMMAND = 5       # external commands

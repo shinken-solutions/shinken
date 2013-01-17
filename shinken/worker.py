@@ -25,7 +25,7 @@
 
 from Queue import Empty
 
-# In android, we sould use threads, not process
+# In android, we should use threads, not process
 is_android = True
 try:
     import android
@@ -155,7 +155,7 @@ class Worker:
                 self._idletime = 0
                 r = chk.execute()
                 # Maybe we got a true big problem in the
-                # action lanching
+                # action launching
                 if r == 'toomanyopenfiles':
                     # We should die as soon as we return all checks
                     self.i_am_dying = True
@@ -253,9 +253,9 @@ class Worker:
                 # The master must be dead and we are lonely, we must die
                 break
 
-            # Look if we are dying, and if we finishe all current checks
+            # Look if we are dying, and if we finish all current checks
             # if so, we really die, our master poller will launch a new
-            # worker because we were too weack to manage our job :(
+            # worker because we were too weak to manage our job :(
             if len(self.checks) == 0 and self.i_am_dying:
                 logger.warning("[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id)
                 break

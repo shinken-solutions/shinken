@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# The resultmodulation class is used for in scheduler modulation of resulsts
+# The resultmodulation class is used for in scheduler modulation of results
 # like the return code or the output.
 
 import time

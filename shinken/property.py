@@ -79,7 +79,7 @@ class Property(object):
         `retention_preparation`: function, if set, will go this function before
                      being save to the retention data
 
-        Only for the inital call:
+        Only for the initial call:
 
         conf_send_preparation: if set, will pass the property to this
                      function. It's used to 'flatten' some dangerous
@@ -118,7 +118,7 @@ class Property(object):
 
 class UnusedProp(Property):
     """A unused Property. These are typically used by Nagios but
-    no longer usefull/used by Shinken.
+    no longer useful/used by Shinken.
 
     This is just to warn the user that the option he uses is no more used
     in Shinken.
@@ -253,7 +253,7 @@ class AddrProp(Property):
     def pythonize(self, val):
         """
             i.e: val = "192.168.10.24:445"
-            NOTE: port is facultative
+            NOTE: port is optional
         """
         m = re.match("^([^:]*)(?::(\d+))?$", val)
         if m is None:

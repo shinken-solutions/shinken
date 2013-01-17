@@ -168,7 +168,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
         self.timeout = timeout
         self.unknown_on_timeout = unknown_on_timeout
 
-        # Instanciate our nrpe helper
+        # Instantiate our nrpe helper
         self.nrpe = NRPE()
         self.nrpe.init_query(host, 5666, use_ssl, msg)
 
@@ -478,7 +478,7 @@ class Nrpe_poller(BaseModule):
             msg = None
             cmsg = None
 
-            # If we are diyin (big problem!) we do not
+            # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
                 # REF: doc/shinken-action-queues.png (3)

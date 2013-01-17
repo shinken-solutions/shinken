@@ -120,7 +120,7 @@ class Escalation(Item):
         if status in small_states and small_states[status] not in self.escalation_options:
             return None
 
-        # Look for the min of our future validify
+        # Look for the min of our future validity
         start = self.first_notification_time * interval + creation_time
 
         # If we are after the classic next time, we are not asking for a smaller interval
@@ -197,7 +197,7 @@ class Escalations(Items):
     def add_escalation(self, es):
         self.items[es.id] = es
 
-    # Will register esclations into service.escalations
+    # Will register escalations into service.escalations
     def linkify_es_by_s(self, services):
         for es in self:
             # If no host, no hope of having a service
@@ -215,14 +215,14 @@ class Escalations(Items):
                                 #print "Now service", s.get_name(), 'have', s.escalations
 
 
-    # Will rgister escalations into host.escalations
+    # Will register escalations into host.escalations
     def linkify_es_by_h(self, hosts):
         for es in self:
             # If no host, no hope of having a service
             if (not hasattr(es, 'host_name') or es.host_name.strip() == ''
                     or (hasattr(es, 'service_description') and es.service_description.strip() != '')):
                 continue
-            # I must be NOT a escalati on for service
+            # I must be NOT a escalation on for service
             for hname in strip_and_uniq(es.host_name.split(',')):
                 h = hosts.find_by_name(hname)
                 if h is not None:

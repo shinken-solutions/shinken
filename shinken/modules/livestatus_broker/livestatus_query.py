@@ -322,14 +322,14 @@ class LiveStatusQuery(object):
                 if self.stats_group_by:
                     self.columns = tuple(list(self.stats_group_by) + list(self.columns))
                 if len(self.aliases) == 0:
-                    # If there were Stats: staments without "as", show no column headers at all
+                    # If there were Stats: statements without "as", show no column headers at all
                     self.response.columnheaders = 'off'
                 else:
                     self.response.columnheaders = 'on'
 
             if self.stats_query:
                 result = self.statsify_result(result)
-                # statsify_result returns a dict with column numers as keys
+                # statsify_result returns a dict with column numbers as keys
             elif self.table == 'columns':
                 # With stats_request set to True, format_output expects result
                 # to be a list of dicts instead a list of objects
@@ -472,7 +472,7 @@ class LiveStatusQuery(object):
         return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
 
     def get_problem_livedata(self, cs):
-        # We will crate a problems list first with all problems and source in it
+        # We will create a problems list first with all problems and source in it
         # TODO: create with filter
         problems = []
         for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
@@ -595,7 +595,7 @@ class LiveStatusQuery(object):
         """Convert an object to a dict with selected keys."""
         output = {}
         # what to do with empty?
-        logger.debug("[Livestatus Query] Prepare coluns %s" % str(self.outputcolumns))
+        logger.debug("[Livestatus Query] Prepare columns %s" % str(self.outputcolumns))
         for column in self.outputcolumns:
             try:
                 value = getattr(item, 'lsm_'+column)(self)
