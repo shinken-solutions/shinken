@@ -85,7 +85,7 @@ def user_auth():
 
 
 # manage the /. If the user is known, go to problems page.
-# Should be /dashboad in the future. If not, go login :)
+# Should be /dashboard in the future. If not, go login :)
 def get_root():
     user = app.request.get_cookie("user", secret=app.auth_secret)
     print "USER IS FOUND", user

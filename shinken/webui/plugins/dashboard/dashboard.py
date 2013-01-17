@@ -64,7 +64,7 @@ def get_page():
         if not 'id' in w or not 'position' in w:
             continue
 
-        # by default hte widget is for /dashboard
+        # by default the widget is for /dashboard
         w['for'] = w.get('for', 'dashboard')
         if not w['for'] == 'dashboard':
             # Not a dashboard widget? I don't want it so

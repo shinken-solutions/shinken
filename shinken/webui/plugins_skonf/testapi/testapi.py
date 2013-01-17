@@ -78,7 +78,7 @@ def check_api_server(api_key):
     return (results, error)
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
+# Our page. If the user call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def get_page():
     # First we look for the user sid
@@ -99,16 +99,16 @@ def get_page():
         api_error = "You don't have configured your API KEY"
 
     # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
+    # only one the template will have, so we must give it an app link and the
+    # user we are logged with (it's a contact object in fact)
     return {'app': app, 'user': user, 'results': results, 'api_error': api_error}
 
-# This is the dict teh webui will try to "load".
-#  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
+# This is the dict the webui will try to "load".
+#  *here we register one page with both addresses /dummy/:arg1 and /dummy/, both addresses
 #   will call the function get_page.
-#  * we say taht for this page, we are using the template file dummy (so view/dummy.tpl)
+#  * we say that for this page, we are using the template file dummy (so view/dummy.tpl)
 #  * we said this page got some static stuffs. So the webui will match /static/dummy/ to
-#    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
-#  * optional: you can add 'method': 'POST' so this adress will be only available for
+#    the dummy/htdocs/ directory. Beware: it will take the plugin name to match.
+#  * optional: you can add 'method': 'POST' so this address will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
 pages = {get_page: {'routes': ['/testapi'], 'view': 'testapi', 'static': True}}

@@ -36,7 +36,7 @@ def forge_response(callback, status, text):
         return "{'status':%s,'text':'%s'}" % (status, text)
 
 
-# We will always answser pong to a ping.
+# We will always answer pong to a ping.
 def get_ping():
 
     app.response.content_type = 'application/json'
