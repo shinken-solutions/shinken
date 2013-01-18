@@ -27,6 +27,7 @@ import re
 import time
 from counter import Counter
 from livestatus_stack import LiveStatusStack
+from shinken.log import logger
 
 
 def has_not_more_than(list1, list2):
@@ -51,7 +52,7 @@ invalidated by a state change
 invalidated by a state_type change
 
 - CACHE_GLOBAL_STATS_WITH_STATUS
-applies to queries which ask for status (in_downtime/active/pasive/...)
+applies to queries which ask for status (in_downtime/active/passive/...)
 invalidated by changes in status update broks
 
 - CACHE_HOST_STATS
@@ -272,7 +273,7 @@ class LiveStatusQueryMetainfo(object):
                 _, self.client_localtime = self.split_option(line)
                 # NO # self.structured_data.append((keyword, client_localtime))
             else:
-                print "Received a line of input which i can't handle: '%s'" % line
+                logger.warning("[Livestatus Query Metainfo] Received a line of input which i can't handle: '%s'" % line)
                 self.structured_data.append((keyword, 'Received a line of input which i can\'t handle: %s' % line))
             self.keyword_counter[keyword] += 1
         self.metainfo_filter_stack.and_elements(self.metainfo_filter_stack.qsize())
@@ -340,7 +341,7 @@ class LiveStatusQueryMetainfo(object):
             self.cache_category = CACHE_SERVICE_STATS
         else:
             pass
-            #print "i cannot cache this", self
+            logger.debug("[Livestatus Query Metainfo] I cannot cache this %s" % str(self))
 
         # Initial implementation only respects the = operator (~ may be an option in the future)
         all_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter')])
@@ -348,8 +349,8 @@ class LiveStatusQueryMetainfo(object):
         unique_eq_filters = sorted({}.fromkeys(eq_filters).keys())
         ge_contains_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')])
         unique_ge_contains_filters = sorted({}.fromkeys(ge_contains_filters).keys())
-        #print "ge_contains_filters", ge_contains_filters
-        #print "unique_ge_contains_filters", unique_ge_contains_filters
+        logger.debug("[Livestatus Query Metainfo] ge_contains_filters: %s" % str(ge_contains_filters))
+        logger.debug("[Livestatus Query Metainfo] unique_ge_contains_filters: %s" % str(unique_ge_contains_filters))
         if [f for f in self.structured_data if f[0] == 'Negate']:
             # HANDS OFF!!!!
             # This might be something like:
@@ -478,7 +479,7 @@ class LiveStatusQueryMetainfo(object):
                             self.query_hints['host_names_service_descriptions'] = services
             elif ge_contains_filters == ['groups']:
                 # we want the all the services in a servicegroup
-                #print self.structured_data
+                logger.debug("[Livestatus Query Metainfo] structure_date: %s" % str(self.structured_data))
                 if len(ge_contains_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and (f[1] == 'groups' or f[1] == 'description'))]):
                     self.query_hints['target'] = HINT_SERVICES_BY_GROUP
                     self.query_hints['servicegroup_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')][0]

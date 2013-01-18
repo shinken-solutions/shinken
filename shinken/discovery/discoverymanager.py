@@ -202,7 +202,7 @@ class DiscoveredHost(object):
     def match_rules(self):
         print 'And our data?', self.data
         for r in self.rules:
-            # If the rule was already sucessfuly for this host, skip it
+            # If the rule was already successfully for this host, skip it
             if r in self.matched_rules:
                 print 'We already apply the rule', r.get_name(), 'for the host', self.name
                 continue
@@ -374,7 +374,7 @@ class DiscoveryManager:
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.dbmod:
                 if Connection is None:
-                    print "ERROR : cannot use Mongodb database : please install the pymongo librairy"
+                    print "ERROR : cannot use Mongodb database : please install the pymongo library"
                     break
                 # Now try to connect
                 try:
@@ -475,7 +475,7 @@ class DiscoveryManager:
     def match_rules(self):
         for (name, dh) in self.disco_data.iteritems():
             for r in self.discoveryrules:
-                # If the rule was already sucessfuly for this host, skip it
+                # If the rule was already successfully for this host, skip it
                 if r in dh.matched_rules:
                     print 'We already apply the rule', r.get_name(), 'for the host', name
                     continue
@@ -570,7 +570,7 @@ class DiscoveryManager:
                     # When same host but different properties are detected
                     if dha.name == dhb.name and dha.properties != dhb.properties:
                         for (k,v) in dhb.properties.iteritems():
-                            # Merge host macros is their are differents
+                            # Merge host macros if their properties are different
                             if k.startswith('_') and dha.properties.has_key(k) and dha.properties[k] != dhb.properties[k]:
                                 dha.data[k] = dha.properties[k] + ',' + v
                                 print('Merged host macro:', k, dha.properties[k])

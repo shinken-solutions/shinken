@@ -23,7 +23,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This is a scheduler module to save host/sevice retention data into a mongodb databse
+This is a scheduler module to save host/service retention data into a mongodb database
 """
 
 import cPickle
@@ -85,7 +85,7 @@ class Mongodb_retention_scheduler(BaseModule):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
-        logger.debug("Initilisation of the mongodb  module")
+        logger.debug("Initialization of the mongodb  module")
 
         if self.replica_set:
             self.con = ReplicaSetConnection(self.uri, replicaSet=self.replica_set, fsync=True)

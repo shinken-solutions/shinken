@@ -25,7 +25,7 @@
 
 """
 This Class is a plugin for the Shinken Broker. It is in charge
-to get brok and recreate real objects, and propose a Web intnerface :)
+to get brok and recreate real objects, and propose a Web interface :)
 """
 
 import traceback
@@ -137,7 +137,7 @@ class Webui_broker(BaseModule, Daemon):
 
         self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
-        # We can now output some previouly silented debug ouput
+        # We can now output some previously silenced debug output
         self.do_load_modules()
         for inst in self.modules_manager.instances:
             f = getattr(inst, 'load', None)
@@ -206,7 +206,7 @@ class Webui_broker(BaseModule, Daemon):
         # TODO: look for alive and killing
 
         # Ok, you want to know why we are using a data thread instead of
-        # just call for a select with q._reader, the underliying file
+        # just call for a select with q._reader, the underlying file
         # handle of the Queue()? That's just because under Windows, select
         # only manage winsock (so network) file descriptor! What a shame!
         print "Starting WebUI application"
@@ -342,13 +342,13 @@ class Webui_broker(BaseModule, Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber: really static! because there is no lock
+                    # and remember: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
 
                     # It's a valid widget entry if it got all data, and at least one route
-                    # ONLY the first route wil be used for Add!
+                    # ONLY the first route will be used for Add!
                     #print "Should I load a widget?",widget_name, widget_desc, widget_lst!=[], routes
                     if widget_name and widget_desc and widget_lst != [] and routes:
                         for place in widget_lst:
@@ -421,9 +421,9 @@ class Webui_broker(BaseModule, Daemon):
                 print "WARNING: we are in lock/read since more than 30s!"
                 start = time.time()
 
-    # We want a lock manager version of the plugin fucntions
+    # We want a lock manager version of the plugin functions
     def lockable_function(self, f):
-        print "We create a lock verion of", f
+        print "We create a lock version of", f
 
         def lock_version(**args):
             self.wait_for_no_writers()

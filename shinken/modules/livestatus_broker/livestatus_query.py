@@ -32,6 +32,7 @@ from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
 from livestatus_query_metainfo import LiveStatusQueryMetainfo
+from shinken.log import logger
 
 
 class LiveStatusQueryError(Exception):
@@ -174,7 +175,7 @@ class LiveStatusQuery(object):
                     if self.table == 'log':
                         self.db.add_filter(operator, attribute, reference)
                 else:
-                    print "illegal operation", operator
+                    logger.warning("[Livestatus Query] Illegal operation: %s" % str(operator))
                     pass  # illegal operation
             elif keyword == 'And':
                 _, andnum = self.split_option(line)
@@ -232,7 +233,7 @@ class LiveStatusQuery(object):
                     self.stats_filter_stack.put_stack(self.make_filter('dummy', attribute, None))
                     self.stats_postprocess_stack.put_stack(self.make_filter(operator, attribute, None))
                 else:
-                    print "illegal operation", operator
+                    logger.warning("[Livestatus Query] Illegal operation: %s" % str(operator))
                     pass  # illegal operation
             elif keyword == 'StatsAnd':
                 _, andnum = self.split_option(line)
@@ -249,7 +250,7 @@ class LiveStatusQuery(object):
                 _, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle: '%s'" % line
+                logger.error("[Livestatus Query] Received a line of input which i can't handle: '%s'" % line)
                 pass
         self.metainfo = LiveStatusQueryMetainfo(data)
 
@@ -321,14 +322,14 @@ class LiveStatusQuery(object):
                 if self.stats_group_by:
                     self.columns = tuple(list(self.stats_group_by) + list(self.columns))
                 if len(self.aliases) == 0:
-                    # If there were Stats: staments without "as", show no column headers at all
+                    # If there were Stats: statements without "as", show no column headers at all
                     self.response.columnheaders = 'off'
                 else:
                     self.response.columnheaders = 'on'
 
             if self.stats_query:
                 result = self.statsify_result(result)
-                # statsify_result returns a dict with column numers as keys
+                # statsify_result returns a dict with column numbers as keys
             elif self.table == 'columns':
                 # With stats_request set to True, format_output expects result
                 # to be a list of dicts instead a list of objects
@@ -336,10 +337,8 @@ class LiveStatusQuery(object):
 
         except Exception, e:
             import traceback
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            print e
+            logger.error("[Livestatus Query] Error: %s" % e)
             traceback.print_exc(32)
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
 
         if cacheable and not cache_hit:
@@ -473,7 +472,7 @@ class LiveStatusQuery(object):
         return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
 
     def get_problem_livedata(self, cs):
-        # We will crate a problems list first with all problems and source in it
+        # We will create a problems list first with all problems and source in it
         # TODO: create with filter
         problems = []
         for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
@@ -578,7 +577,7 @@ class LiveStatusQuery(object):
 
         handler = self.objects_get_handlers.get(self.table, None)
         if not handler:
-            print("Got unhandled table: %s" % (self.table))
+            logger.warning("[Livestatus Query] Got unhandled table: %s" % (self.table))
             return []
 
         result = handler(self, cs)
@@ -596,16 +595,16 @@ class LiveStatusQuery(object):
         """Convert an object to a dict with selected keys."""
         output = {}
         # what to do with empty?
-        #print "prepare coluns %s" % self.outputcolumns
+        logger.debug("[Livestatus Query] Prepare columns %s" % str(self.outputcolumns))
         for column in self.outputcolumns:
             try:
                 value = getattr(item, 'lsm_'+column)(self)
             except Exception:
                 if hasattr(item, 'lsm_'+column):
-                    print "THIS LOOKS LIKE A SERIOUS ERROR", column
+                    logger.error("[Livestatus Query] This looks like a serious error: %s" % column)
                     value = getattr(item, 'lsm_'+column).im_func.default
                 else:
-                    print "THIS LOOKS LIKE A SERIOUS ERROR I CAN CATCH"
+                    logger.error("[Livestatus Query] This looks like a serious error i can catch")
                     value = getattr(item, 'lsm_'+column).im_func.default
             output[column] = value
         return output

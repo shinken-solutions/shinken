@@ -221,7 +221,7 @@ class ShinkenAdmin(cmd.Cmd):
         The column Default show that we are using default values when D is present
         Ex: show config poller will display configuration for all pollers
         '''
-        from shinken.objects import Config
+        from shinken.objects.config import Config
 
         from shinken.arbiterlink import ArbiterLink
         from shinken.schedulerlink import SchedulerLink

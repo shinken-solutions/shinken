@@ -93,13 +93,13 @@ class ContactDowntime:
         self.ref.raise_exit_downtime_log_entry()
         self.can_be_deleted = True
 
-    # A scheduled downtime was prematurely cancelled
+    # A scheduled downtime was prematurely canceled
     def cancel(self):
         self.is_in_effect = False
         self.ref.raise_cancel_downtime_log_entry()
         self.can_be_deleted = True
 
-    # Call by pickle for dataify the coment
+    # Call by pickle to dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         #print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
@@ -113,7 +113,7 @@ class ContactDowntime:
         res.reverse()
         return res
 
-    # Inverted funtion of getstate
+    # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state.pop()

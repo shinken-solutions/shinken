@@ -155,7 +155,7 @@ class Helper(object):
         else:  # past :)
             return ' '.join(duration) + ' ago'
 
-    # Need to create a X level higer and lower to the element
+    # Need to create a X level higher and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
         # First we need ALL elements
@@ -244,7 +244,7 @@ class Helper(object):
         return d
 
     # Return all linked elements of this elt, and 2 level
-    # higer and lower :)
+    # higher and lower :)
     def get_all_linked_elts(self, elt, levels=3):
         if levels == 0:
             return set()
@@ -337,7 +337,7 @@ class Helper(object):
                 sub_s = self.print_business_rules_mobile(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returing s:", s)
+        safe_print("Returning s:", s)
         return s
 
     def print_business_rules(self, tree, level=0, source_problems=[]):
@@ -382,7 +382,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returing s:", s)
+        safe_print("Returning s:", s)
         return s
 
     # Mockup helper
@@ -423,7 +423,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returing s:", s)
+        safe_print("Returning s:", s)
         return s
 
     # Get the small state for host/service icons
@@ -467,7 +467,7 @@ class Helper(object):
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
 
-    # We will outpout as a ul/li list the impacts of this
+    # We will output as a ul/li list the impacts of this
     def got_impacts_list_as_li(self, obj):
         impacts = obj.impacts
         r = '<ul>\n'
@@ -513,7 +513,7 @@ class Helper(object):
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
-    # For an host, give it's own link, for a servies, give the link of its host
+    # For an host, give it's own link, for a services, give the link of its host
     def get_host_link(self, obj):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)

@@ -144,8 +144,8 @@ class Receiver(Satellite):
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
-    # for a moduel like livestatus to raise external
-    # commandsfor example
+    # for a module like livestatus to raise external
+    # commands for example
     def get_objects_from_from_queues(self):
         for f in self.modules_manager.get_external_from_queues():
             full_queue = True
@@ -312,7 +312,7 @@ class Receiver(Satellite):
             # If we sent or not the commands, just clean the scheduler list.
             self.schedulers[sched_id]['external_commands'] = []
             
-            # If we sent them, remove the commands of this scehduler of the arbiter list
+            # If we sent them, remove the commands of this scheduler of the arbiter list
             if sent:
                 # and remove them from the list for the arbiter (if not, we will send it twice
                 for extcmd in extcmds:
@@ -326,7 +326,7 @@ class Receiver(Satellite):
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speek to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the pyro_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)
@@ -334,8 +334,8 @@ class Receiver(Satellite):
             self.setup_new_conf()
 
 #        # Maybe the last loop we raised some broks internally
-#        # we should interger them in broks
-#        self.interger_internal_broks()
+#        # we should integrate them in broks
+#        self.integer_internal_broks()
 
 #        # And from schedulers
 #        self.get_new_broks(type='scheduler')
@@ -375,13 +375,13 @@ class Receiver(Satellite):
         ##     # Ok we manage brok, but we still want to listen to arbiter
         ##     self.watch_for_new_conf(0.0)
         ##
-        ##     # if we got new broks here from arbiter, we should breack the loop
+        ##     # if we got new broks here from arbiter, we should break the loop
         ##     # because such broks will not be managed by the
         ##     # external modules before this loop (we pop them!)
         ##     if len(self.broks) != nb_broks:
         ##         break
 
-        # Maybe external modules raised 'objets'
+        # Maybe external modules raised 'objects'
         # we should get them
         self.get_objects_from_from_queues()
 

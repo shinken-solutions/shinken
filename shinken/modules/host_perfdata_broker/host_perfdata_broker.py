@@ -28,12 +28,13 @@
 # to brok information of the service perfdata into the file
 # var/service-perfdata
 # So it just manage the service_check_return
-# Maybe one day host data will be usefull too
+# Maybe one day host data will be useful too
 # It will need just a new file, and a new manager :)
 
 import codecs
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 
 # Class for the Merlindb Broker
@@ -57,7 +58,7 @@ class Host_perfdata_broker(BaseModule):
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "I open the host-perfdata file '%s'" % self.path
+        logger.info("[Host Perfdata broker] I open the host-perfdata file '%s'" % self.path)
         self.file = codecs.open(self.path, self.mode, "utf-8")
 
     # We've got a 0, 1, 2 or 3 (or something else? ->3

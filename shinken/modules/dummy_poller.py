@@ -32,6 +32,7 @@ import time
 from Queue import Empty
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['poller'],
@@ -44,7 +45,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    print "Get a Dummy poller module for plugin %s" % mod_conf.get_name()
+    logger.info("[Dummy Poller] Get a Dummy poller module for plugin %s" % mod_conf.get_name())
     instance = Dummy_poller(mod_conf)
     return instance
 
@@ -57,7 +58,7 @@ class Dummy_poller(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the dummy poller module"
+        logger.info("[Dummy Poller] Initialization of the dummy poller module")
         self.i_am_dying = False
 
     # Get new checks if less than nb_checks_max
@@ -67,11 +68,11 @@ class Dummy_poller(BaseModule):
     def get_new_checks(self):
         try:
             while(True):
-                #print "I", self.id, "wait for a message"
+                logger.debug("[Dummy Poller] I %d wait for a message" % self.id)
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                #print "I", self.id, "I've got a message!"
+                logger.debug("[Dummy Poller] I, %d, got a message!" % self.id)
         except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
@@ -82,7 +83,7 @@ class Dummy_poller(BaseModule):
         # queue
         for chk in self.checks:
             if chk.status == 'queue':
-                print "Dummy (bad) check for", chk.command
+                logger.warning("[Dummy Poller] Dummy (bad) check for %s" % str(chk.command))
                 chk.exit_status = 2
                 chk.get_outputs('All is NOT SO well', 8012)
                 chk.status = 'done'
@@ -98,7 +99,7 @@ class Dummy_poller(BaseModule):
             try:
                 self.returns_queue.put(action)
             except IOError, exp:
-                print "[%d]Exiting: %s" % (self.id, exp)
+                logger.info("[Dummy Poller] %d exiting: %s" % (self.id, exp))
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
@@ -109,7 +110,7 @@ class Dummy_poller(BaseModule):
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
-        print "Module Dummy started!"
+        logger.info("[Dummy Poller] Module Dummy started!")
         ## restore default signal handler for the workers:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
@@ -122,7 +123,7 @@ class Dummy_poller(BaseModule):
             msg = None
             cmsg = None
 
-            # If we are diyin (big problem!) we do not
+            # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
                 # REF: doc/shinken-action-queues.png (3)
@@ -136,7 +137,7 @@ class Dummy_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self.id
+                    logger.info("[Dummy Poller] %d : Dad say we are dying..." % self.id)
                     break
             except:
                 pass

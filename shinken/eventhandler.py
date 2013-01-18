@@ -122,7 +122,7 @@ class EventHandler(Action):
     def get_id(self):
         return self.id
 
-    # Call by pickle for dataify the coment
+    # Call by pickle to dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
@@ -134,7 +134,7 @@ class EventHandler(Action):
 
         return res
 
-    # Inverted funtion of getstate
+    # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state['id']

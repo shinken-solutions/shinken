@@ -1,43 +1,105 @@
---- exec_generate_config.php.orig	2012-05-08 12:16:03.607988620 +0200
-+++ exec_generate_config.php	2012-05-08 13:40:52.848160516 +0200
-@@ -52,15 +52,23 @@
-
+--- /home/frogx/exec_generate_config.php.orig	2012-12-28 09:35:39.651278576 +0100
++++ /home/frogx/exec_generate_config.php	2012-12-28 09:34:57.059276680 +0100
+@@ -52,7 +52,7 @@
+ 
      // check if the Nagios / Icinga binary is executable
      exec(NAGIOS_BIN,$bin_out);
 -    if(!preg_match('/Nagios|Icinga/',implode(' ',$bin_out))){
--        $content = "Error accessing or executing Nagios / Icinga binary '".NAGIOS_BIN."'. <br>Cannot run the mandatory syntax check.";
-+    $engine = "nagios";
 +    if(!preg_match('/Nagios|Icinga|Shinken/',implode(' ',$bin_out))){
-+
-+        $content = "Error accessing or executing Nagios / Icinga / Shinken binary '".NAGIOS_BIN."'. <br>Cannot run the mandatory syntax check.";
+         $content = "Error accessing or executing Nagios / Icinga binary '".NAGIOS_BIN."'. <br>Cannot run the mandatory syntax check.";
          NConf_DEBUG::set($content, 'ERROR');
          echo NConf_HTML::limit_space(
-             NConf_HTML::show_error('Error')
-         );
-         remove_lock();
+@@ -62,6 +62,13 @@
          exit;
--	}
-+	}else{
-+    if (preg_match('/Shinken/',implode(' ',$bin_out))){
-+            $engine = "shinken";
-+        }else{
-+            $engine = "nagios";
-+        }
+ 	}
+ 
++    // set engine
++    if(preg_match('/Shinken/',implode(' ',$bin_out))){    
++        $engine = "shinken";
++    }else{
++        $engine = "nagios";
 +    }
-
++
      // check if existing "output/NagiosConfig.tgz" is writable
      if(file_exists(NCONFDIR."/output/NagiosConfig.tgz" and !is_writable(NCONFDIR."/output/NagiosConfig.tgz"))){
-@@ -103,7 +111,7 @@
+         $content = "Cannot rename ".NCONFDIR."/output/NagiosConfig.tgz. Access denied.";
+@@ -103,7 +110,7 @@
          $renamed = preg_replace('/-|\s/','_',$entry["attr_value"]);
-
+ 
          if($entry["config_class"] == 'nagios-collector'){
 -            $renamed = preg_replace('/Nagios|Icinga/i','collector',$renamed);
 +            $renamed = preg_replace('/Nagios|Icinga|Shinken/i','collector',$renamed);
          }
          array_push($servers, $renamed);
      }
-@@ -177,14 +185,24 @@
+@@ -111,35 +118,31 @@
+     # GENERATE CONFIG
+     echo NConf_HTML::title('Generate config log:');
+ 
+-    echo '<div>
+-            <pre>';
+-            //system(NCONFDIR."/bin/generate_config.pl");
+-            $command = NCONFDIR."/bin/generate_config.pl";
+-            $output = array();
+-            exec($command, $output);
+-
+-
+-            // print each line
+-            foreach ($output AS $line){
+-                // Filter some lines:
+-                if ( empty($line)) continue;
+-                if ( strpos($line, "Copyright")) continue;
+-                if ( strpos($line, "Initializing")) continue;
+-
+-                // Look for error
+-                if ( strstr($line, "ERROR") ){
+-                    $status = "error";
+-                    echo '<br><span class="red">'.$line.'</span>';
+-                }elseif ( strstr($line, "WARN") ){
+-                    echo '<br><span class="orange">'.$line.'</span>';
+-                }else{
+-                    echo "<br>$line";
+-                }
+-            }
++    echo '<div><pre>';
++    //system(NCONFDIR."/bin/generate_config.pl");
++    $command = NCONFDIR."/bin/generate_config.pl";
++    $output = array();
++    exec($command, $output);
++
++    // print each line
++    foreach ($output AS $line){
++        // Filter some lines:
++        if ( empty($line)) continue;
++        if ( strpos($line, "Copyright")) continue;
++        if ( strpos($line, "Initializing")) continue;
+ 
++        // Look for error
++        if ( strstr($line, "ERROR") ){
++            $status = "error";
++            echo '<br><span class="red">'.$line.'</span>';
++        }elseif ( strstr($line, "WARN") ){
++            echo '<br><span class="orange">'.$line.'</span>';
++        }else{
++            echo "<br>$line";
++        }
++    }
+             
+-    echo    '</pre>
+-        </div>';
++    echo '</pre></div>';
+ 
+         
+     // create tar file
+@@ -172,19 +175,39 @@
+ 
+         # run test
+         exec(NAGIOS_BIN." -v ".NCONFDIR."/temp/test/".$server.".cfg",$srv_summary[$server]);
+-
+         $total_msg = '';
          $count=0;
++        $error_count=0;
++        $warning_count=0;
          $i = 0;
          foreach($srv_summary[$server] as $line){
 -            if( preg_match("/^Total/",$line) ){
@@ -48,10 +110,14 @@
                  $total_msg .= $line;
                  $count++;
 -                if( preg_match("/Errors/",$line) && !preg_match('/Total Errors:\s+0/',$line)){
--                    $status = "error";
 +                if( preg_match("/Error/",$line)){
-+                        $status = "error";
+                     $status = "error";
++                    $error_count++;
 +                }
++                if( preg_match("/Warning/",$line)){
++                    $warning_count++;
++                }
++
 +            }else{
 +                if( preg_match("/^Total/",$line) ){
 +                    # add splitter between messages
@@ -61,11 +127,69 @@
 +                    $count++;
 +                    if( preg_match("/Errors/",$line) && !preg_match('/Total Errors:\s+0/',$line)){
 +                        $status = "error";
++                        $error_count++;
++                    }
++                    if( preg_match("/Warning/",$line)){
++                        $warning_count++;
 +                    }
                  }
              }
          }
-@@ -271,7 +289,7 @@
+@@ -196,13 +219,30 @@
+ 
+         $total_msg = '<span class="notBold accordion_header_right">'.$total_msg.'</span>';
+         // print server info
+-        $title = '<span class="ui-icon ui-icon-triangle-1-e"></span><a href="#">'.$server_str.$total_msg.'</a>';
++        #$title = '<span class="ui-icon ui-icon-triangle-1-e"></span><a href="#">'.$server_str.$total_msg.'</a>';
++        #$title = '<span class="ui-icon ui-icon-triangle-1-e"></span><a href="#">'."Errors: ".$error_count." Warning: ".$warning_count.'</a>';
++        $title = '<span class="ui-icon ui-icon-triangle-1-e"></span><a href="#">'.'<span class="red">Errors: '.$error_count.'</span><span class="orange"> &emsp;Warning: '.$warning_count.'</span></a>';
+         echo NConf_HTML::title($title, 3, 'class="accordion_title ui-accordion-header ui-helper-reset ui-state-default ui-corner-top ui-corner-bottom"');
+         echo '<div class="accordion_content ui-widget-content ui-corner-bottom monospace" style="display: none;">';
++
++        if ($engine == "shinken"){
++            foreach($srv_summary[$server] as $line){
++                if ( preg_match("/Error :/",$line) ){
++                    echo '<span class="red">'.$line.'</span>';
++                }elseif ( preg_match("/Warning :/",$line) ){
++                    echo '<span class="orange">'.$line.'</span>';
++                }else{
++                    echo $line;
++                }
++                echo '<br>';
++            }
++            echo '<br>';
++            echo '</div>';
++        }else{
+             foreach($srv_summary[$server] as $line){
+-                if ( preg_match("/^Error:/",$line) ){
++                if ( preg_match("/^Error :/",$line) ){
+                     echo '<span class="red">'.$line.'</span>';
+-                }elseif ( preg_match("/^Warning:/",$line) ){
++                }elseif ( preg_match("/^Warning :/",$line) ){
+                     echo '<span class="orange">'.$line.'</span>';
+                 }else{
+                     echo $line;
+@@ -210,14 +250,17 @@
+                 echo '<br>';
+             }
+             echo '<br>';
+-        echo '</div>';
++            echo '</div>';
++
++        }
++
+         
+     }
+ 
+ 
+     echo '</div><br>';
+-
+     if($status == "OK"){
++
+         history_add("general", "config", "generated successfully");
+ 
+         // Move generated config to "output" dir
+@@ -271,7 +314,7 @@
          }
          // Remove generated config
          system("rm -rf ".NCONFDIR."/temp/*");

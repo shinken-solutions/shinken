@@ -216,7 +216,7 @@ def save_object(cls, name):
     if key == '':
         new_name = name
 
-    print "NEw and old", new_name, old_name
+    print "New and old", new_name, old_name
     # For service we must avoid the key check :(
     if not new_name:
         print 'Missing the property %s' % key
@@ -227,7 +227,7 @@ def save_object(cls, name):
     d = t.find_one({'_id': old_name})
 
     # Maybe we renamed the element? If so, we
-    # must delete the old entry before saving teh new one
+    # must delete the old entry before saving the new one
     if new_name != old_name:
         t.remove({'_id': old_name})
 

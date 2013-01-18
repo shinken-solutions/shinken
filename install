@@ -1946,6 +1946,7 @@ function install_nconf(){
     if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
     then
         echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
+        echo "$HTTPDUSER ALL=NOPASSWD: $TARGET/bin/nagios" >> /etc/sudoers        
     fi
     sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
 
@@ -1981,7 +1982,7 @@ function install_nconf(){
 
     cecho " > Patching nconf for shinken support" green
     cd $NCONFTARGET/include/ajax
-    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
+    patch < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
 
     cecho " > Configure deployment.ini file" green
     cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
@@ -2006,15 +2007,11 @@ function install_nconf(){
     sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
 
-    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" yellow
-    cecho " > mysql credentials and database are:" yellow
-    cecho " --> user: nconf" yellow
-    cecho " --> password: $NCONFP" yellow
-    cecho " --> database: nconf" yellow
-    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is': $TARGET/bin/nagios" yellow
+    cecho " > Nconf is installed, you must go to http://localhost/nconf/INSTALL.php and finalize installation" yellow
+    cecho " > Just click next button until process is done" yellow
     cecho " > Hit ENTER when you are done with this step" red
     read
-
+    cecho " > Nconf is ready to use. Point your browser to http://localhost/nconf." yellow
     rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
 
 }

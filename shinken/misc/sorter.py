@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Helper functions for some sortings
+Helper functions for some sorting
 """
 
 

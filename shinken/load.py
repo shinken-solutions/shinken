@@ -47,15 +47,20 @@ class Load:
         self.last_update = 0  # last update of the value
         self.val = initial_value  # first value
 
-    def update_load(self, new_val):
+    # 
+    def update_load(self, new_val, forced_interval=None):
         # The first call do not change the value, just tag
-        # the begining of last_update
-        if self.last_update == 0:
+        # the beginning of last_update
+        # IF  we force : bail out all time thing
+        if not forced_interval and self.last_update == 0:
             self.last_update = time.time()
             return
         now = time.time()
         try:
-            diff = now - self.last_update
+            if forced_interval:
+                diff = forced_interval
+            else:
+                diff = now - self.last_update
             self.exp = 1 / math.exp(diff / (self.m * 60.0))
             self.val = new_val + self.exp * (self.val - new_val)
             self.last_update = now

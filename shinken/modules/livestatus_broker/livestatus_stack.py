@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import Queue
+from shinken.log import logger
 
 
 class MyLifoQueue(Queue.Queue):
@@ -74,9 +75,9 @@ class LiveStatusStack(TopBaseLiveStatusStack):
 
     def __xinit__(self, *args, **kw):
         self.type = 'lambda'
-        print "i am a", type(self)
-        print "my parents are", [c.__name__ for c in self.__class__.__bases__]
-        print "my first parent is", self.__class__.__bases__[0].__name__
+        logger.info("[Livestatus Stack] I am a %s" % type(self))
+        logger.info("[Livestatus Stack] My parents are %s" % str([c.__name__ for c in self.__class__.__bases__]))
+        logger.info("[Livestatus Stack] My first parent is %s", str(self.__class__.__bases__[0].__name__))
         if self.__class__.__name__ == 'LiveStatusStack':
             self.__class__.__bases__[0].__init__(self, *args, **kw)
 
@@ -146,7 +147,7 @@ try:
     TopBaseLiveStatusStack.__bases__ = (Queue.LifoQueue, object)
     #LiveStatusStack.__bases__ += (Queue.LifoQueue, )
 except AttributeError:
-    # Ptyhon 2.4 and 2.5 do not have it.
+    # Python 2.4 and 2.5 do not have it.
     # Use our own implementation.
     TopBaseLiveStatusStack.__bases__ = (MyLifoQueue, object)
     #LiveStatusStack.__bases__ += (MyLifoQueue, )

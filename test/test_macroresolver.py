@@ -28,8 +28,12 @@ from shinken.commandcall import CommandCall
 from shinken.objects import Command
 
 
-class TestConfig(ShinkenTest):
+class TestMacroResolver(ShinkenTest):
     # setUp is inherited from ShinkenTest
+
+    def setUp(self):
+        self.setup_with_file('etc/nagios_macroresolver.cfg')
+                
 
     def get_mr(self):
         mr = MacroResolver()
@@ -48,6 +52,7 @@ class TestConfig(ShinkenTest):
         com = mr.resolve_command(svc.check_command, data)
         print com
         self.assert_(com == "plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue")
+
 
     # Here call with a special macro TOTALHOSTSUP
     # but call it as arg. So will need 2 pass in macro resolver
@@ -137,6 +142,82 @@ class TestConfig(ShinkenTest):
 
 
 
+    # Look at on demand macros
+    def test_ondemand_macros(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = hst.get_data_for_checks()
+        hst.state = 'UP'
+        svc.state = 'UNKNOWN'
+
+        # Ok sample host call
+        dummy_call = "special_macro!$HOSTSTATE:test_host_0$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing UP')
+
+        # Call with a void host name, means : myhost
+        data = hst.get_data_for_checks()
+        dummy_call = "special_macro!$HOSTSTATE:$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing UP')
+
+        # Now with a service, for our implicit host state
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$HOSTSTATE:test_host_0$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing UP')
+                                                        
+                                        
+        # Now with a service, for our implicit host state
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$HOSTSTATE:$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing UP')
+
+        # Now prepare another service
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_another_service")
+        svc2.output = 'you should not pass'
+
+        # Now call this data from our previous service
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$SERVICEOUTPUT:test_host_0:test_another_service$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing you should not pass')
+
+        # Ok now with an host implicit way
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$SERVICEOUTPUT::test_another_service$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing you should not pass')
+                                                
+                                                
+
+    # Look at on demand macros
+    def test_hostadressX_macros(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = hst.get_data_for_checks()
+
+        # Ok sample host call
+        dummy_call = "special_macro!$HOSTADDRESS6$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing ::1')
+
+        
 
 if __name__ == '__main__':
     unittest.main()

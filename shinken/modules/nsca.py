@@ -80,7 +80,7 @@ def get_instance(plugin):
         password = ""
 
     if password == "" and encryption_method != 0:
-        logger.error("[NSCA] No password specified wheras there is a encryption_method defined")
+        logger.error("[NSCA] No password specified whereas there is a encryption_method defined")
         logger.warning("[NSCA] Setting password to dummy to avoid crash!")
         password = "dummy"
 

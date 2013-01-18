@@ -29,13 +29,14 @@ from shinken.objects import Contact
 from shinken.objects import NotificationWay
 from shinken.misc.regenerator import Regenerator
 from shinken.util import safe_print, get_obj_full_name
+from shinken.log import logger
 from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SERVICES_BY_HOST, HINT_SERVICE, HINT_SERVICES_BY_HOSTS, HINT_SERVICES, HINT_HOSTS_BY_GROUP, HINT_SERVICES_BY_GROUP, HINT_SERVICES_BY_HOSTGROUP
 
 
 def itersorted(self, hints=None):
     preselected_ids = []
     preselection = False
-    #print "hint is", hints["target"]
+    logger.debug("[Livestatus Regenerator] Hint is %s" % hints["target"])
     if hints == None:
         # return all items
         hints = {}
@@ -78,7 +79,7 @@ def itersorted(self, hints=None):
             preselected_ids = [self._id_by_service_name_heap[host_name + '/' + service_description] for host_name, service_description in hints['host_names_service_descriptions'] if host_name + '/' + service_description in self._id_by_service_name_heap]
             preselection = True
         except Exception, exp:
-            print "HINT_SERVICESexc", exp
+            logger.error("[Livestatus Regenerator] Hint_services exception: %s" % exp)
             pass
     elif hints['target'] == HINT_SERVICES_BY_HOSTS:
         try:
@@ -178,7 +179,7 @@ class LiveStatusRegenerator(Regenerator):
         for c in self.hosts._id_contact_heap.keys():
             self.hosts._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hosts.items[x]))
 
-        # strict: one must be an explicity contact of a service in order to see it.
+        # strict: one must be an explicitly contact of a service in order to see it.
         if self.service_authorization_strict:
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
@@ -243,7 +244,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()]))
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
-        # print self.services._id_by_host_name_heap
+        logger.debug("[Livestatus Regenerator] Id by Hostname heap: %s" % str(self.services._id_by_host_name_heap))
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 

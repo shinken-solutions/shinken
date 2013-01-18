@@ -55,7 +55,7 @@ class Hostdependency(Item):
         'dependency_period':             StringProp(default='')
     })
 
-    # Give a nice name output, for debbuging purpose
+    # Give a nice name output, for debugging purpose
     # (debugging happens more often than expected...)
     def get_name(self):
         dependent_host_name = 'unknown'
@@ -72,7 +72,7 @@ class Hostdependencies(Items):
         for id in ids:
             del self[id]
 
-    # We create new hostdep if necessery (host groups and co)
+    # We create new hostdep if necessary (host groups and co)
     def explode(self, hostgroups):
         # The "old" dependencies will be removed. All dependencies with
         # more than one host or a host group will be in it
@@ -94,7 +94,7 @@ class Hostdependencies(Items):
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
-                        err = "ERROR: the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
+                        err = "ERROR: the hostdependency got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
                     dephnames.extend(dephg.members.split(','))
@@ -102,7 +102,7 @@ class Hostdependencies(Items):
             if hasattr(hd, 'dependent_host_name'):
                 dephnames.extend(hd.dependent_host_name.split(','))
 
-            # Ok, and nowthe fatehr part :)
+            # Ok, and now the father part :)
             hnames = []
             if hasattr(hd, 'hostgroup_name'):
                 hg_names = hd.hostgroup_name.split(',')
@@ -110,7 +110,7 @@ class Hostdependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the hostdependency got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))

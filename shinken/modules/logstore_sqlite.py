@@ -36,6 +36,7 @@ import time
 import datetime
 import re
 from shinken.objects.service import Service
+from shinken.log import logger
 from livestatus_broker.livestatus_stack import LiveStatusStack
 from livestatus_broker.mapping import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
@@ -62,7 +63,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an LogStore Sqlite module for plugin %s" % plugin.get_name()
+    logger.info("[Logstore SQLite] Get an LogStore Sqlite module for plugin %s" % plugin.get_name())
     instance = LiveStatusLogStoreSqlite(plugin)
     return instance
 
@@ -82,8 +83,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         BaseModule.__init__(self, modconf)
         self.plugins = []
         # Change. The var folder is not defined based upon '.', but upon ../var from the process name (shinken-broker)
-        # When the database_file variable, the defaukt variable was calculated from '.'... Depending on where you were 
-        # when you ran the commmand the behavior changed.
+        # When the database_file variable, the default variable was calculated from '.'... Depending on where you were 
+        # when you ran the command the behavior changed.
         self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'livestatus.db'))
         self.archive_path = getattr(modconf, 'archive_path', os.path.join(os.path.dirname(self.database_file), 'archives'))
         try:
@@ -93,7 +94,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            logger.warning("[Logstore SQLite] Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s" % max_logs_age)
             return None
         else:
             if not maxmatch.group(2):
@@ -126,7 +127,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         self.old_implementation = old_implementation
 
     def open(self):
-        print "Openning LiveStatusLogStoreSqlite ok : %s" % self.database_file
+        logger.info("[Logstore SQLite] Open LiveStatusLogStoreSqlite ok : %s" % self.database_file)
         self.dbconn = sqlite3.connect(self.database_file, check_same_thread=False)
         # Get no problem for utf8 insert
         self.dbconn.text_factory = str
@@ -191,10 +192,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
         now = time.time()
         if self.next_log_db_commit <= now:
             self.commit()
-            print "commit....."
+            logger.info("[Logstore SQLite] commit.....")
             self.next_log_db_commit = now + 1
         if self.next_log_db_rotate <= now:
-            print "at %s we rotate the database file" % time.asctime(time.localtime(now))
+            logger.info("[Logstore SQLite] at %s we rotate the database file" % time.asctime(time.localtime(now)))
             # Take the current database file
             # Move the messages into daily files
             self.log_db_do_archive()
@@ -208,7 +209,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
 
             # See you tomorrow
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
-            print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
+            logger.info("[Logstore SQLite] next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate)))
 
     def log_db_historic_contents(self):
         """
@@ -221,7 +222,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             mintime = dbresult[0][0]
             maxtime = dbresult[0][1]
         except sqlite3.Error, e:
-            print "An error occurred:", e.args[0]
+            logger.error("[Logstore SQLite] An error occurred: %s" % str(e.args[0]))
         except IndexError, e:
             mintime = int(time.time())
             maxtime = int(time.time())
@@ -312,7 +313,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 tmpconn.close()
 
             self.commit()
-            print "move logs from %s - %s to database %s" % (time.asctime(time.localtime(starttime)), time.asctime(time.localtime(stoptime)), archive)
+            logger.info("[Logstore SQLite] move logs from %s - %s to database %s" % (time.asctime(time.localtime(starttime)), time.asctime(time.localtime(stoptime)), archive))
             cmd = "ATTACH DATABASE '%s' AS %s" % (archive, handle)
             self.execute_attach(cmd)
             cmd = "INSERT INTO %s.logs SELECT * FROM logs WHERE time >= %d AND time < %d" % (handle, starttime, stoptime)
@@ -326,7 +327,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             try:
                 self.execute('VACUUM')
             except sqlite3.DatabaseError, exp:
-                print "WARNING: it seems your database is corrupted. Please recreate it"
+                logger.error("[Logstore SQLite] WARNING: it seems your database is corrupted. Please recreate it")
             self.commit()
 
     def execute(self, cmd, values=None, row_factory=None):
@@ -366,7 +367,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             else:
                 self.dbcursor.execute(cmd, values)
         except sqlite3.Error, e:
-            print "execute error", e
+            logger.error("[Logstore SQLite] execute error %s" % str(e))
             raise LiveStatusLogStoreError(e)
 
     def execute_attach(self, cmd):
@@ -416,10 +417,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
             if logline.logclass != LOGCLASS_INVALID:
                 self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
         except LiveStatusLogStoreError, exp:
-            print "An error occurred:", exp.args[0]
-            print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+            logger.error("[Logstore SQLite] An error occurred: %s", str(exp.args[0]))
+            logger.error("[Logstore SQLite] DATABASE ERROR!!!!!!!!!!!!!!!!!")
         except Exception, exp:
-            print "Unexpected in manage_log_brok:", exp
+            logger.error("[Logstore SQLite] Unexpected in manage_log_brok: %s" % str(exp))
         # FIXME need access to this #self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
@@ -494,7 +495,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 dbresult = self.execute('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause), filter_values, row_factory)
                 self.execute("DETACH DATABASE %s" % handle)
         except LiveStatusLogStoreError, e:
-            print "An error occurred:", e.args[0]
+            logger.error("[Logstore SQLite] An error occurred: %s" % str(e.args[0]))
         return dbresult
 
     def make_sql_filter(self, operator, attribute, reference):
@@ -612,7 +613,7 @@ class LiveStatusSqlStack(LiveStatusStack):
             and_clause = '(' + (' AND ').join([x()[0] for x in filters]) + ')'
             and_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
             and_filter = lambda: [and_clause, and_values]
-            #  print "and_elements", and_clause, and_values
+            logger.debug("[Logstore SQLite] and_elements %s, %s" % (and_clause, and_values))
             self.put_stack(and_filter)
 
     def or_elements(self, num):
@@ -624,7 +625,7 @@ class LiveStatusSqlStack(LiveStatusStack):
             or_clause = '(' + (' OR ').join([x()[0] for x in filters]) + ')'
             or_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
             or_filter = lambda: [or_clause, or_values]
-            #  print "or_elements", or_clause
+            logger.debug("[Logstore SQLite] or_elements %s" % str(or_clause))
             self.put_stack(or_filter)
 
     def get_stack(self):

@@ -63,7 +63,7 @@ class OpenLDAP_Webui(BaseModule):
 
 
     def connect(self):
-        print "Trying to initalize the Ldap connection"
+        print "Trying to initialize the Ldap connection"
         self.con = ldap.initialize(self.ldap_uri)
         self.con.set_option(ldap.OPT_REFERRALS,0)
 
