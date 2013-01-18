@@ -519,30 +519,46 @@ class SchedulingItem(Item):
             # At the start, we cannot have an interval more than cls.max_check_spread
             # is service_max_check_spread or host_max_check_spread in config
             interval = min(interval, cls.max_check_spread * cls.interval_length)
-            time_add_rnd = interval * random.uniform(0.0,0.80)
+            time_add_rnd = interval * random.uniform(0.0, 0.80)
             time_add_offset = abs(datetime.now().second - 60)
             time_add = time_add_offset + time_add_rnd
         else:
             time_add = interval
-
-        # Do the actual Scheduling
+            
+        ## Do the actual Scheduling now
 
         # If not force_time, try to schedule
         if force_time is None:
             now = time.time()
-            # Maybe we already got a next_chk that is in the future
-            # like from a previous run (load from retention). If so, use it
-            # by default it's 0, so there is no problem
-            if self.next_chk < now:
-                # Do not calculate next_chk based on current time, but based on the last check execution time.
-                # Important for consistency of data for trending.
-                if self.next_chk == 0 or self.next_chk is None:
-                    self.next_chk = now
+            
+            # Do not calculate next_chk based on current time, but based on the last check execution time.
+            # Important for consistency of data for trending.
+            if self.next_chk == 0 or self.next_chk is None:
+                self.next_chk = now
+
+            # If the neck_chk is already in the future, do not touch it.
+            # But if ==0, means was 0 in fact, schedule it too
+            if self.next_chk <= now:
                 # maybe we do not have a check_period, if so, take always good (24x7)
                 if self.check_period:
                     self.next_chk = self.check_period.get_next_valid_time_from_t(self.next_chk + time_add)
                 else:
                     self.next_chk = int(self.next_chk + time_add)
+
+            # Maybe we load next_chk from retention and  the value of the next_chk is still the past even
+            # after add an interval
+            if self.next_chk < now:
+                interval = min(interval, cls.max_check_spread * cls.interval_length)
+                time_add_rnd = interval * random.uniform(0.0, 0.80)
+                time_add_offset = abs(datetime.now().second - 60)
+                time_add = time_add_offset + time_add_rnd
+
+                # if we got a check period, use it, if now, use now
+                if self.check_period:
+                    self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
+                else:
+                    self.next_chk = int(now + time_add)
+
                 # If check interval is a multiple of 60 (seconds), the check must be scheduler 
                 # between 0 et 48 absolute seconds.
                 # Else re-schedule if the check is scheduled between 49 et 59 inclusively in absolute seconds.
@@ -550,10 +566,10 @@ class SchedulingItem(Item):
                 # We also do not make a distinction between the last absolute 11 seconds of a minute
                 # in the middle of a 5 minute interval versus the last 10 seconds of the check_interval.
                 # The algorithm is imperfect.
-                if self.next_chk and ((self.check_interval * cls.interval_length) % 60) == 0:
-                    second = datetime.fromtimestamp(self.next_chk).second
-                    if second > 48:
-                        self.next_chk = self.next_chk - ((second % 48) + 48 * random.uniform(0.1,1.0))
+            if self.next_chk and ((self.check_interval * cls.interval_length) % 60) == 0:
+                second = datetime.fromtimestamp(self.next_chk).second
+                if second > 48:
+                    self.next_chk = self.next_chk - ((second % 48) + 48 * random.uniform(0.1, 1.0))
             # else: keep the self.next_chk value in the future
         else:
             self.next_chk = int(force_time)
