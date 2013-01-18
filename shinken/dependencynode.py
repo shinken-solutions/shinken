@@ -197,15 +197,15 @@ class DependencyNodeFactory(object):
         pass
 
     # the () will be eval in a recursiv way, only one level of ()
-    def eval_cor_patern(self, patern, hosts, services):
-        patern = patern.strip()
-        #print "*****Loop", patern
+    def eval_cor_pattern(self, pattern, hosts, services):
+        pattern = pattern.strip()
+        #print "*****Loop", pattern
         complex_node = False
 
         # Look if it's a complex pattern (with rule) or
         # if it's a leaf ofit, like a host/service
         for m in '()+&|':
-            if m in patern:
+            if m in pattern:
                 complex_node = True
 
         is_of_nb = False
@@ -213,7 +213,7 @@ class DependencyNodeFactory(object):
         node = DependencyNode()
         p = "^(\d+),*(\d*),*(\d*) *of: *(.+)"
         r = re.compile(p)
-        m = r.search(patern)
+        m = r.search(pattern)
         if m is not None:
             #print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
@@ -226,20 +226,20 @@ class DependencyNodeFactory(object):
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
             else:  # if not, use A,0,0, we will change 0 after to put MAX
                 node.of_values = (int(g[0]), 0, 0)
-            patern = m.groups()[3]
+            pattern = m.groups()[3]
 
-        #print "Is so complex?", patern, complex_node
+        #print "Is so complex?", pattern, complex_node
 
         # if it's a single host/service
         if not complex_node:
-            #print "Try to find?", patern
+            #print "Try to find?", pattern
             # If it's a not value, tag the node and find
             # the name without this ! operator
-            if patern.startswith('!'):
+            if pattern.startswith('!'):
                 node.not_value = True
-                patern = patern[1:]
+                pattern = pattern[1:]
             node.operand = 'object'
-            obj, error = self.find_object(patern, hosts, services)
+            obj, error = self.find_object(pattern, hosts, services)
             if obj is not None:
                 # Set host or service
                 node.operand = obj.__class__.my_type
@@ -252,13 +252,13 @@ class DependencyNodeFactory(object):
 
         in_par = False
         tmp = ''
-        for c in patern:
+        for c in pattern:
             if c == '(':
                 in_par = True
                 tmp = tmp.strip()
                 if tmp != '':
-                    o = self.eval_cor_patern(tmp, hosts, services)
-                    #print "1( I've %s got new sons" % patern , o
+                    o = self.eval_cor_pattern(tmp, hosts, services)
+                    #print "1( I've %s got new sons" % pattern , o
                     node.sons.append(o)
                 continue
             if c == ')':
@@ -266,8 +266,8 @@ class DependencyNodeFactory(object):
                 tmp = tmp.strip()
                 if tmp != '':
                     #print "Evaluating sub pat", tmp
-                    o = self.eval_cor_patern(tmp, hosts, services)
-                    #print "2) I've %s got new sons" % patern , o
+                    o = self.eval_cor_pattern(tmp, hosts, services)
+                    #print "2) I've %s got new sons" % pattern , o
                     node.sons.append(o)
                 ## else:
                 ##     print "Fuck a node son!"
@@ -286,8 +286,8 @@ class DependencyNodeFactory(object):
                         node.operand = c
                     tmp = tmp.strip()
                     if tmp != '':
-                        o = self.eval_cor_patern(tmp, hosts, services)
-                        #print "3&| I've %s got new sons" % patern , o
+                        o = self.eval_cor_pattern(tmp, hosts, services)
+                        #print "3&| I've %s got new sons" % pattern , o
                         node.sons.append(o)
                     tmp = ''
                     continue
@@ -298,8 +298,8 @@ class DependencyNodeFactory(object):
 
         tmp = tmp.strip()
         if tmp != '':
-            o = self.eval_cor_patern(tmp, hosts, services)
-            #print "4end I've %s got new sons" % patern , o
+            o = self.eval_cor_pattern(tmp, hosts, services)
+            #print "4end I've %s got new sons" % pattern , o
             node.sons.append(o)
 
         # We got our nodes, so we can update 0 values of of_values
@@ -307,20 +307,20 @@ class DependencyNodeFactory(object):
         node.switch_zeros_of_values()
 
         #print "End, tmp", tmp
-        #print "R %s:" % patern, node
+        #print "R %s:" % pattern, node
         return node
 
 
     # We've got an object, like h1,db1 that mean the
     # db1 service of the host db1, or just h1, that mean
     # the host h1.
-    def find_object(self, patern, hosts, services):
-        #print "Finding object", patern
+    def find_object(self, pattern, hosts, services):
+        #print "Finding object", pattern
         obj = None
         error = None
         is_service = False
         # h_name, service_desc are , separated
-        elts = patern.split(',')
+        elts = pattern.split(',')
         host_name = elts[0].strip()
         # Look if we have a service
         if len(elts) > 1:

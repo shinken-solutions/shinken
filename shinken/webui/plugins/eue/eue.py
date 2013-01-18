@@ -7,7 +7,7 @@
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-#    Davif GUENAULT, david.guenault@gmail.com
+#    David GUENAULT, david.guenault@gmail.com
 #
 # This file is part of Shinken.
 #

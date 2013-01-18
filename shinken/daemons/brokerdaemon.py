@@ -663,7 +663,7 @@ class Broker(BaseSatellite):
 
             self.setup_new_conf()
 
-            # We already init modules durint the new conf thing
+            # We already init modules during the new conf thing
             # Set modules, init them and start external ones
             #self.modules_manager.set_modules(self.modules)
             #self.do_load_modules()

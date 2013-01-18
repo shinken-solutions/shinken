@@ -460,7 +460,7 @@ class Config(Item):
                     self.packs_dirs.append(cfg_dir_name)
 
                     # Now walk for it.
-                    # BEWARE : we can follow simlinks only for python 2.6 and higher
+                    # BEWARE : we can follow symlinks only for python 2.6 and higher
                     args = {}
                     if sys.version_info >= (2, 6):
                         args['followlinks'] = True

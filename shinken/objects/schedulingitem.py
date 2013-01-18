@@ -1359,7 +1359,7 @@ class SchedulingItem(Item):
                 rule = '!'.join(elts[1:])
 
             fact = DependencyNodeFactory()
-            node = fact.eval_cor_patern(rule, hosts, services)
+            node = fact.eval_cor_pattern(rule, hosts, services)
             #print "got node", node
             self.business_rule = node
 

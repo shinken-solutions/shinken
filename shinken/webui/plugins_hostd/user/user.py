@@ -41,7 +41,7 @@ from shinken.webui.bottle import redirect, abort
 app = None
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
+# Our page. If the user call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def get_page(username):
     # First we look for the user sid
@@ -81,7 +81,7 @@ def post_user():
         return
 
     # Take the user that send the post and not the
-    # form value for secutiry reason of course :)
+    # form value for security reason of course :)
     username = user.get('username')
     email = app.request.forms.get('email')
     password = app.request.forms.get('password')
