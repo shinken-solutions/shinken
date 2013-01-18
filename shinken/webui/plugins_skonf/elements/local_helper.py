@@ -36,7 +36,7 @@ def find(value, lst, key):
     for i in lst:
         v = i.get(key, None)
         try:
-            print 'MAtch with', v, value
+            print 'Match with', v, value
         except:
             pass
         if v == value:
