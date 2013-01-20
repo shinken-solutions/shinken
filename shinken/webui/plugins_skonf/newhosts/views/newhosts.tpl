@@ -13,7 +13,8 @@ function submitform() {
       <label for="names">Scan:</label>
       <textarea name="names" type="textarea" class="span12" tabindex="1" rows="4" placeholder='Please type your hosts IP/FQDN here' value=''></textarea>
     </div>
-    <a id='btn_adv_options' class='btn btn-info' href="javascript:newhosts_show_adv_options()"><i class="icon-chevron-down"></i> Show advanced options</a>
+
+<!--     <a id='btn_adv_options' class='btn btn-info' href="javascript:newhosts_show_adv_options()"><i class="icon-chevron-down"></i> Show advanced options</a>
     <div id="adv_options">
       %print 'DATAMGR', app.conf.discoveryruns.__dict__
       %i = 0
@@ -28,7 +29,30 @@ function submitform() {
         <p class="help-block" for="enable-runner-{{r.get_name()}}"> </p>
       </div>
       %end
+    </div> -->
+
+    <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#demo">
+    <span class="icon-caret-down"></span> More Options
+    </button>
+     
+    <div id="demo" class="collapse"> 
+
+      %print 'DATAMGR', app.conf.discoveryruns.__dict__
+      %i = 0
+      %# """ Only take the first level discovery runners here"""
+      %for r in [r for r in app.conf.discoveryruns if r.is_first_level()]:
+      %i += 1
+      
+      <input type="hidden" value="1" name="runner-{{r.get_name()}}">
+      <div class="check-field">
+        <span class="help-inline">Enable the {{r.get_name().capitalize()}} based discovery</span>
+        <input type="checkbox" id="enable-runner-{{r.get_name()}}" tabindex="{{i}}" checked name="enable-runner-{{r.get_name()}}">
+        <p class="help-block" for="enable-runner-{{r.get_name()}}"> </p>
+      </div>
+      %end  
+
     </div>
+
     <div class="pull-right">
       <a class="btn btn-success" tabindex="4" href="javascript: submitform()"><i class="icon-play"></i> Scan</a>
     </div>
