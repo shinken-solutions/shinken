@@ -151,6 +151,17 @@ class Graphite_Webui(BaseModule):
         t = elt.__class__.my_type
         r = []
 
+        # Hanling Graphite variables
+        data_source=""
+        graphite_pre=""
+        graphite_post=""
+        if self.graphite_data_source:
+            data_source = ".%s" % self.graphite_data_source
+        if "_GRAPHITE_PRE" in elt.customs:
+            graphite_pre = "%s." % self.illegal_char.sub("_", elt.customs["_GRAPHITE_PRE"])
+        if "_GRAPHITE_POST" in elt.customs:
+            graphite_post = ".%s" % self.illegal_char.sub("_", elt.customs["_GRAPHITE_POST"])
+
         # Format the start & end time (and not only the date)
         d = datetime.fromtimestamp(graphstart)
         d = d.strftime('%H:%M_%Y%m%d')
@@ -176,11 +187,11 @@ class Graphite_Webui(BaseModule):
             # Build the dict to instantiate the template string
             values = {}
             if t == 'host':
-                values['host'] = self.illegal_char.sub("_", elt.host_name)
+                values['host'] = graphite_pre + self.illegal_char.sub("_", elt.host_name) + data_source
                 values['service'] = '__HOST__'
             if t == 'service':
-                values['host'] = self.illegal_char.sub("_", elt.host.host_name)
-                values['service'] = self.illegal_char.sub("_", elt.service_description)
+                values['host'] = graphite_pre + self.illegal_char.sub("_", elt.host.host_name) + data_source
+                values['service'] = self.illegal_char.sub("_", elt.service_description) + graphite_post
             values['uri'] = self.uri
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
@@ -210,10 +221,10 @@ class Graphite_Webui(BaseModule):
                 uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
-                if self.graphite_data_source:
-                    target = "&target=%s.%s.__HOST__.%s" % (host_name, self.graphite_data_source, metric)
-                else:
-                    target = "&target=%s.__HOST__.%s" % (host_name, metric)
+                target = "&target=%s%s%s.__HOST__.%s" % (graphite_pre,
+                                                         host_name,
+                                                         data_source,
+                                                         metric)
                 uri += target + target + "?????"
                 v = {}
                 v['link'] = self.uri
@@ -240,12 +251,12 @@ class Graphite_Webui(BaseModule):
                     continue
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
-                if self.graphite_data_source:
-                    target = "&target=%s.%s.%s.%s" % (host_name,
-                                                    self.graphite_data_source,
-                                                    desc, metric)
-                else:
-                    target = "&target=%s.%s.%s" % (host_name, desc, metric)
+                target = "&target=%s%s%s.%s.%s%s" % (graphite_pre,
+                                                  host_name,
+                                                  data_source,
+                                                  desc,
+                                                  metric,
+                                                  graphite_post )
                 uri += target + target + "?????"
                 v = {}
                 v['link'] = self.uri
