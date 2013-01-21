@@ -482,7 +482,7 @@ class Merlindb_broker(BaseModule):
     # Ok, we are at launch and a scheduler want him only, OK...
     # So ca create several queries with all tables we need to delete with
     # our instance_id
-    # This brob must be send at the begining of a scheduler session,
+    # This brok must be send at the beginning of a scheduler session,
     # if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
@@ -498,7 +498,7 @@ class Merlindb_broker(BaseModule):
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
-    # We aleady clean database, so insert
+    # We already clean database, so insert
     def manage_program_status_brok(self, b):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
@@ -507,7 +507,7 @@ class Merlindb_broker(BaseModule):
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
-    # We aleady clean database, so insert
+    # We already clean database, so insert
     def manage_update_program_status_brok(self, b):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
@@ -570,7 +570,7 @@ class Merlindb_broker(BaseModule):
         data = b.data
 
         # Here we've got a special case: in data, there is members
-        # and we do not want it in the INSERT query, so we crate a
+        # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']

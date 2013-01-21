@@ -60,7 +60,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
-        # We can be in a scheduler. If so, we keep a link to it to speed up regnerator phase
+        # We can be in a scheduler. If so, we keep a link to it to speed up regenerator phase
         self.scheduler = None
         self.plugins = []
         self.use_threads = (getattr(modconf, 'use_threads', '0') == '1')
@@ -172,7 +172,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         self.modules_manager = ModulesManager('livestatus', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
-        # We can now output some previouly silented debug ouput
+        # We can now output some previously silenced debug output
         self.do_load_modules()
         for inst in self.modules_manager.instances:
             if inst.properties["type"].startswith('logstore'):
@@ -650,7 +650,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
                 # Now the work is done. Cleanup
                 for socketid in open_connections:
-                    logger.info("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state']))
+                    logger.debug("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state']))
                     if now - open_connections[socketid]['lastseen'] > 300:
                         # After 5 minutes of inactivity we close connections
                         open_connections[socketid]['keepalive'] = False
@@ -668,7 +668,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                             kick_socket.shutdown(2)
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
-                            logger.info("[Livestatus Broker] Shutdown socket %d" % socketid)
+                            logger.debug("[Livestatus Broker] Shutdown socket %d" % socketid)
                         except Exception, exp:
                             logger.warning("[Livestatus Broker] Closing socket failed: %s" % exp)
                             kick_socket.close()

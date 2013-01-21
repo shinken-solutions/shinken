@@ -82,7 +82,7 @@ class Graph:
     # DFS_NEAR_LOOP has trouble sons
     # DFS_LOOP_INSIDE is a part of a loop!
     def dfs_loop_search(self, root):
-        # Make the root temporary checkded
+        # Make the root temporary checked
         root.dfs_loop_status = 'DFS_TEMPORARY_CHECKED'
 
         # We are scanning the sons
@@ -116,7 +116,7 @@ class Graph:
     # Get accessibility packs of the graph: in one pack,
     # element are related in a way. Between packs, there is no relation
     # at all.
-    # TODO: Make it work for directionnal graph too
+    # TODO: Make it work for directional graph too
     # Because for now, edge must be father->son AND son->father
     def get_accessibility_packs(self):
         packs = []

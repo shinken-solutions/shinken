@@ -70,8 +70,8 @@ class Contactgroup(Itemgroup):
         # if a son of it already call it
         self.already_explode = True
 
-        # Now the recursiv part
-        # rec_tag is set to False avery CG we explode
+        # Now the recursive part
+        # rec_tag is set to False every CG we explode
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
@@ -131,7 +131,7 @@ class Contactgroups(Itemgroups):
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-            # We find the id, we remplace the names
+            # We find the id, we replace the names
             cg.replace_members(new_mbrs)
 
     # Add a contact string to a contact member

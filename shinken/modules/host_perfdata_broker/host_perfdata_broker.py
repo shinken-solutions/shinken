@@ -28,7 +28,7 @@
 # to brok information of the service perfdata into the file
 # var/service-perfdata
 # So it just manage the service_check_return
-# Maybe one day host data will be usefull too
+# Maybe one day host data will be useful too
 # It will need just a new file, and a new manager :)
 
 import codecs

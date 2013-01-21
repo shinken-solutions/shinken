@@ -45,7 +45,7 @@ class Ip_Tag_Arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[IP Tag] Initilisation of the ip range tagguer module")
+        logger.info("[IP Tag] Initialization of the ip range tagger module")
 
     def hook_early_configuration(self, arb):
         logger.info("[IpTag] in hook late config")

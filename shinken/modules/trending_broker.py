@@ -56,7 +56,7 @@ properties = {
 
 # Called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    logger.info("[Trengind broker] Get a trending data module for plugin %s" % mod_conf.get_name())
+    logger.info("[Trending broker] Get a trending data module for plugin %s" % mod_conf.get_name())
     instance = Trending_broker(mod_conf)
     return instance
 
@@ -74,7 +74,7 @@ class Trending_broker(BaseModule):
         # 15min chunks
         self.chunk_interval = int(getattr(modconf, 'chunk_interval', '900'))
 
-        # Some used varaible init
+        # Some used variable init
         self.con = None
         self.db = None
         self.col = None

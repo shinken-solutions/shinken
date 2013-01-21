@@ -309,7 +309,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
     def readable(self):
         b = self.current is not None
-        #print "Redable", b
+        #print "Readable", b
         return True
 
     # We can write to the socket. If we are in the ssl handshake phase

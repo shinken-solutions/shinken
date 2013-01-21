@@ -25,7 +25,7 @@
 
 import time
 
-# Import all obejcts we will need
+# Import all objects we will need
 from shinken.objects.host import Host, Hosts
 from shinken.objects.hostgroup import Hostgroup, Hostgroups
 from shinken.objects.service import Service, Services
@@ -45,7 +45,7 @@ from shinken.util import safe_print
 from shinken.message import Message
 
 
-# Class for a Regenerator. It will get broks, and "regenerate" real obejcts
+# Class for a Regenerator. It will get broks, and "regenerate" real objects
 # from them :)
 class Regenerator(object):
     def __init__(self):
@@ -213,7 +213,7 @@ class Regenerator(object):
                 hg.members.extend(inphg.members)
             else:  # else take the new one
                 self.hostgroups[inphg.id] = inphg
-        # We can delare hostgroups done
+        # We can declare hostgroups done
         self.hostgroups.create_reversed_list()
 
         # Now link HOSTS with hostgroups, and commands
@@ -269,7 +269,7 @@ class Regenerator(object):
                 sg.members.extend(inpsg.members)
             else:  # else take the new one
                 self.servicegroups[inpsg.id] = inpsg
-        # We can delare servicegroups done
+        # We can declare servicegroups done
         self.servicegroups.create_reversed_list()
 
         # Now link SERVICES with hosts, servicesgroups, and commands
@@ -356,7 +356,7 @@ class Regenerator(object):
                 cg.members.extend(inpcg.members)
             else:  # else take the new one
                 self.contactgroups[inpcg.id] = inpcg
-        # We can delare contactgroups done
+        # We can declare contactgroups done
         self.contactgroups.create_reversed_list()
 
         safe_print("ALL LINKING TIME"*10, time.time() - start)
@@ -531,7 +531,7 @@ class Regenerator(object):
         for sg in self.servicegroups:
             sg.members = [s for s in sg.members if s.instance_id != c_id]
 
-        # We now regererate reversed list so the client will find only real objects
+        # We now regenerate reversed list so the client will find only real objects
         self.create_reversed_list()
 
     # Get a new host. Add in in in progress tab
@@ -636,7 +636,7 @@ class Regenerator(object):
 
     # For Contacts, it's a global value, so 2 cases:
     # We got it -> we update it
-    # We don't -> we crete it
+    # We don't -> we create it
     # In both cases we need to relink it
     def manage_initial_contact_status_brok(self, b):
         data = b.data
@@ -658,7 +658,7 @@ class Regenerator(object):
         del c.service_notification_period
 
         # Now manage notification ways too
-        # Same than for cotnacts. We create or
+        # Same than for contacts. We create or
         # update
         nws = c.notificationways
         safe_print("Got notif ways", nws)
@@ -720,15 +720,15 @@ class Regenerator(object):
 
     # For Timeperiods we got 2 cases: do we already got the command or not.
     # if got: just update it
-    # if not: create it and delacre it in our main commands
+    # if not: create it and declare it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        #print "Creatin timeperiod", data
+        #print "Creating timeperiod", data
         tpname = data['timeperiod_name']
 
         tp = self.timeperiods.find_by_name(tpname)
         if tp:
-            # print "Already exisintg timeperiod", tpname
+            # print "Already existing timeperiod", tpname
             self.update_element(tp, data)
         else:
             #print "Creating Timeperiod:", tpname
@@ -740,7 +740,7 @@ class Regenerator(object):
 
     # For command we got 2 cases: do we already got the command or not.
     # if got: just update it
-    # if not: create it and delacre it in our main commands
+    # if not: create it and declare it in our main commands
     def manage_initial_command_status_brok(self, b):
         data = b.data
         cname = data['command_name']
@@ -847,7 +847,7 @@ class Regenerator(object):
         data = b.data
         c_id = data['instance_id']
 
-        # If we got an update about an unknow isntance, cry and ask for a full
+        # If we got an update about an unknown instance, cry and ask for a full
         # version!
         if not c_id in self.configs.keys():
             # Do not ask data too quickly, very dangerous

@@ -31,7 +31,7 @@ import math
 from shinken.load import Load
 
 
-# By deault no debug messages
+# By default no debug messages
 do_debug = False
 
 def debug(*args):
@@ -150,7 +150,7 @@ class Trender:
             # The new evolution diff value is
             diff = l1 - prev_raw_val
             # maybe the doc we got is the first one, if so, do not use the Vevolution value
-            # but initialise it now instead
+            # but initialize it now instead
             if not doc['valid_evolution']:
                 new_Vevolution = diff
             else:

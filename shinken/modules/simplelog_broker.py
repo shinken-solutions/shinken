@@ -27,7 +27,7 @@
 # to brok information of the service perfdata into the file
 # var/service-perfdata
 # So it just manage the service_check_return
-# Maybe one day host data will be usefull too
+# Maybe one day host data will be useful too
 # It will need just a new file, and a new manager :)
 
 import time
@@ -89,7 +89,7 @@ class Simple_log_broker(BaseModule):
         #print "Ctime %d" % os.path.getctime(self.path)
         t_last_mod_day = get_day(t_last_mod)
         today = get_day(now)
-        # Will be saved with the date of yesterday because all elemetns arefrom yesterday
+        # Will be saved with the date of yesterday because all elements are from yesterday
         yesterday = get_day(now - 3600)
         #print "Dates: t_last_mod: %d, t_last_mod_day: %d, today: %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:

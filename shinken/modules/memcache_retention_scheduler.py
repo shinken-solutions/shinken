@@ -64,7 +64,7 @@ class Memcache_retention_scheduler(BaseModule):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
-        logger.debug("Initilisation of the memcache module")
+        logger.debug("Initialization of the memcache module")
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 

@@ -83,8 +83,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         BaseModule.__init__(self, modconf)
         self.plugins = []
         # Change. The var folder is not defined based upon '.', but upon ../var from the process name (shinken-broker)
-        # When the database_file variable, the defaukt variable was calculated from '.'... Depending on where you were 
-        # when you ran the commmand the behavior changed.
+        # When the database_file variable, the default variable was calculated from '.'... Depending on where you were 
+        # when you ran the command the behavior changed.
         self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'livestatus.db'))
         self.archive_path = getattr(modconf, 'archive_path', os.path.join(os.path.dirname(self.database_file), 'archives'))
         try:
@@ -192,7 +192,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         now = time.time()
         if self.next_log_db_commit <= now:
             self.commit()
-            logger.info("[Logstore SQLite] commit.....")
+            logger.debug("[Logstore SQLite] commit.....")
             self.next_log_db_commit = now + 1
         if self.next_log_db_rotate <= now:
             logger.info("[Logstore SQLite] at %s we rotate the database file" % time.asctime(time.localtime(now)))

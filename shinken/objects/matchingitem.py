@@ -48,14 +48,14 @@ class MatchingItem(Item):
         if not key.strip() in d:
             return False
 
-        # Get my matching patern
+        # Get my matching pattern
         m = d[key]
         if ',' in m:
             matchings = [mt.strip() for mt in m.split(',')]
         else:
             matchings = [m]
 
-        # Split the alue by , too
+        # Split the value by , too
         values = value.split(',')
         for m in matchings:
             for v in values:
@@ -85,7 +85,7 @@ class MatchingItem(Item):
                         continue
             if not match_one:
                 # It match none
-                #print "Match none, FAlse"
+                #print "Match none, False"
                 return False
         #print "It's possible to be OK"
 

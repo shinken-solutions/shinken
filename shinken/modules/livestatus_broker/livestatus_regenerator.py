@@ -179,7 +179,7 @@ class LiveStatusRegenerator(Regenerator):
         for c in self.hosts._id_contact_heap.keys():
             self.hosts._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hosts.items[x]))
 
-        # strict: one must be an explicity contact of a service in order to see it.
+        # strict: one must be an explicitly contact of a service in order to see it.
         if self.service_authorization_strict:
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:

@@ -203,6 +203,20 @@ class TestMacroResolver(ShinkenTest):
         self.assert_(com == 'plugins/nothing you should not pass')
                                                 
                                                 
+
+    # Look at on demand macros
+    def test_hostadressX_macros(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = hst.get_data_for_checks()
+
+        # Ok sample host call
+        dummy_call = "special_macro!$HOSTADDRESS6$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing ::1')
+
         
 
 if __name__ == '__main__':

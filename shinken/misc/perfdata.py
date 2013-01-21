@@ -26,7 +26,7 @@
 import re
 from shinken.util import to_best_int_float
 
-metric_patern = re.compile('^([^=]+)=([\d\.\-]+)([\w\/%]*);?([\d\.\-:~@]+)?;?([\d\.\-:~@]+)?;?([\d\.\-]+)?;?([\d\.\-]+)?;?\s*')
+metric_pattern = re.compile('^([^=]+)=([\d\.\-]+)([\w\/%]*);?([\d\.\-:~@]+)?;?([\d\.\-:~@]+)?;?([\d\.\-]+)?;?([\d\.\-]+)?;?\s*')
 
 
 # If we can return an int or a float, or None
@@ -44,7 +44,7 @@ class Metric:
         self.name = self.value = self.uom = self.warning = self.critical = self.min = self.max = None
         s = s.strip()
         print "Analysis string", s
-        r = metric_patern.match(s)
+        r = metric_pattern.match(s)
         if r:
             # Get the name but remove all ' in it
             self.name = r.group(1).replace("'", "")

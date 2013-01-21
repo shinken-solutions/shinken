@@ -151,7 +151,7 @@ class Timeperiod(Item):
             self.unresolved.extend(i.unresolved)
 
     # Ok timeperiods are a bit different from classic items, because we do not have a real list
-    # of our raw rpoperties, like if we got february 1 - 15 / 3 for example
+    # of our raw properties, like if we got february 1 - 15 / 3 for example
     def get_raw_import_values(self):
         properties = ['timeperiod_name', 'alias', 'use', 'register']
         r = {}
@@ -272,14 +272,14 @@ class Timeperiod(Item):
             #for o in dr_mins:
             #    print "FUCK",time.asctime(time.localtime(o)), "\n"
 
-            # Min but not the None valus...
+            # Min but not the None values...
             try:
                 local_min = min([d for d in dr_mins if d is not None])
             except ValueError:  # dr_mins if full of None, not good
                 local_min = None
 
             #if local_min != None:
-            #    print "Poposed?", local_min
+            #    print "Proposed?", local_min
             #    print "Proposed local min", time.asctime(time.localtime(local_min))
 
 
@@ -341,7 +341,7 @@ class Timeperiod(Item):
             dr_mins = []
             #val_valids = []
             #val_inval = []
-            # But maybe we can find a better solution with next invalid of standart dateranges
+            # But maybe we can find a better solution with next invalid of standard dateranges
             # print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
                 #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
@@ -455,7 +455,7 @@ class Timeperiod(Item):
 
         res = re.search('(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 1"
+            #print "Good catch 1"
             (syear, smon, smday, eyear, emon, emday, skip_interval, other) = res.groups()
             dateranges.append(CalendarDaterange(syear, smon, smday, 0, 0, eyear, emon, emday, 0, 0, skip_interval, other))
             return
@@ -472,14 +472,14 @@ class Timeperiod(Item):
 
         res = re.search('(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2})[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 3"
+            #print "Good catch 3"
             (syear, smon, smday, eyear, emon, emday, other) = res.groups()
             dateranges.append(CalendarDaterange(syear, smon, smday, 0, 0, eyear, emon, emday, 0, 0, 0, other))
             return
 
         res = re.search('(\d{4})-(\d{2})-(\d{2})[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 4"
+            #print "Good catch 4"
             (syear, smon, smday, other) = res.groups()
             eyear = syear
             emon = smon
@@ -489,14 +489,14 @@ class Timeperiod(Item):
 
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 5"
+            #print "Good catch 5"
             (swday, swday_offset, smon, ewday, ewday_offset, emon, skip_interval, other) = res.groups()
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, skip_interval, other))
             return
 
         res = re.search('([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 6"
+            #print "Good catch 6"
             (t0, smday, t1, emday, skip_interval, other) = res.groups()
             if t0 in Daterange.weekdays and t1 in Daterange.weekdays:
                 swday = t0
@@ -516,7 +516,7 @@ class Timeperiod(Item):
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 7"
+            #print "Good catch 7"
             (t0, smday, emday, skip_interval, other) = res.groups()
             if t0 in Daterange.weekdays:
                 swday = t0
@@ -536,7 +536,7 @@ class Timeperiod(Item):
 
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) [\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 8"
+            #print "Good catch 8"
             (swday, swday_offset, smon, ewday, ewday_offset, emon, other) = res.groups()
             #print "Debug:", (swday, swday_offset, smon, ewday, ewday_offset, emon, other)
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
@@ -544,7 +544,7 @@ class Timeperiod(Item):
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 9"
+            #print "Good catch 9"
             (t0, smday, emday, other) = res.groups()
             if t0 in Daterange.weekdays:
                 swday = t0
@@ -564,7 +564,7 @@ class Timeperiod(Item):
 
         res = re.search('([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
-            #print "Googd catch 10"
+            #print "Good catch 10"
             (t0, smday, t1, emday, other) = res.groups()
             if t0 in Daterange.weekdays and t1 in Daterange.weekdays:
                 swday = t0
@@ -666,7 +666,7 @@ class Timeperiod(Item):
         cls = self.__class__
         # Now config properties
         for prop, entry in cls.properties.items():
-            # Is this property intended for brokking?
+            # Is this property intended for broking?
             #if 'fill_brok' in entry:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
@@ -727,7 +727,7 @@ class Timeperiods(Items):
         for tp in self.items.values():
             del tp.rec_tag
 
-        # And check all timeperiods for correct (sounday is false)
+        # And check all timeperiods for correct (sunday is false)
         for tp in self:
             r &= tp.is_correct()
 

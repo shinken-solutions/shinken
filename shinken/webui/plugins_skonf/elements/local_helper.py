@@ -36,7 +36,7 @@ def find(value, lst, key):
     for i in lst:
         v = i.get(key, None)
         try:
-            print 'MAtch with', v, value
+            print 'Match with', v, value
         except:
             pass
         if v == value:
@@ -65,7 +65,7 @@ def find_several(lst, elt, prop, key):
             continue
         v = v.strip()
         try:
-            print 'MAtch with db', v
+            print 'Match with db', v
         except:
             pass
         if v  in values:
@@ -365,7 +365,7 @@ class Helper(object):
                     if founded:
                         break
                     for (m, mv) in p.macros.iteritems():
-                        print "COmpare", k, m
+                        print "Compare", k, m
                         if k.upper() == m.upper():
                             print 'Match a pack', mv
                             ctype = mv.get('type', 'string').strip()

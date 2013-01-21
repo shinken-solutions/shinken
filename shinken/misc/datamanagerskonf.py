@@ -60,7 +60,7 @@ class DataManagerSKonf(DataManager):
         for (k, v) in customs.iteritems():
             print "SET CUSTOM", k, v
             d[k] = v
-        # Inner object are NOT ediable by skonf!
+        # Inner object are NOT editable by skonf!
         d['editable'] = '0'
 
         # For service we must set the _id like it should :)
@@ -126,7 +126,7 @@ class DataManagerSKonf(DataManager):
         r = self.rg.contacts.find_by_name(cname)
         if r:
             r = self.unclass(r)
-            print "Will finallyu give un unclass", r
+            print "Will finally give an unclass", r
             return r
         r = self.get_in_db('contacts', 'contact_name', cname)
         return r
@@ -137,7 +137,7 @@ class DataManagerSKonf(DataManager):
         r = self.rg.hosts.find_by_name(hname)
         if r:
             r = self.unclass(r)
-            print "Will finallyu give un unclass", r
+            print "Will finally give an unclass", r
             return r
         r = self.get_in_db('hosts', 'host_name', hname)
         return r
@@ -148,7 +148,7 @@ class DataManagerSKonf(DataManager):
         r = self.rg.commands.find_by_name(cname)
         if r:
             r = self.unclass(r)
-            print "Will finallyu give un unclass", r
+            print "Will finally give un unclass", r
             return r
         r = self.get_in_db('commands', 'command_name', cname)
         return r

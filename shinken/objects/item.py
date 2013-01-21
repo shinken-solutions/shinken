@@ -218,7 +218,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
         # If I have the prop, I take mine but I check if I must
-        # add a plus porperty
+        # add a plus property
         if hasattr(self, prop):
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
@@ -230,7 +230,7 @@ Like temporary attributes such as "imported_from", etc.. """
             #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
-            # Template should keep the '+' at the begining of the chain
+            # Template should keep the '+' at the beginning of the chain
             if self.has_plus(prop):
                 value = self.get_plus_and_delete(prop) + ',' + value
                 if self.is_tpl():
@@ -248,7 +248,7 @@ Like temporary attributes such as "imported_from", etc.. """
                     value = value[1:]
                     still_loop = True
 
-                # Maybe in the prvious loop, we set a value, use it too
+                # Maybe in the previous loop, we set a value, use it too
                 if hasattr(self, prop):
                     value = ','.join([getattr(self, prop), value])
 
@@ -457,7 +457,7 @@ Like temporary attributes such as "imported_from", etc.. """
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
 
-    # Will flatten some parameters taggued by the 'conf_send_preparation'
+    # Will flatten some parameters tagged by the 'conf_send_preparation'
     # property because they are too "linked" to be send like that (like realms)
     def prepare_for_conf_sending(self):
         cls = self.__class__
@@ -495,12 +495,12 @@ Like temporary attributes such as "imported_from", etc.. """
         return value
 
     # Fill data with info of item by looking at brok_type
-    # in props of properties or running_propterties
+    # in props of properties or running_properties
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
         for prop, entry in cls.properties.items():
-            # Is this property intended for brokking?
+            # Is this property intended for broking?
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 
@@ -721,7 +721,7 @@ class Items(object):
             i.templates = new_tpls
 
         # Now we will create the template graph, so
-        # we look only for templates here. First we sould declare our nodes
+        # we look only for templates here. First we should declare our nodes
         for tpl in self.templates.values():
             self.templates_graph.add_node(tpl)
         # And then really create our edge
@@ -730,7 +730,7 @@ class Items(object):
                 self.templates_graph.add_edge(father, tpl)
 
     def is_correct(self):
-        # we are ok at the begining. Hope we still ok at the end...
+        # we are ok at the beginning. Hope we still ok at the end...
         r = True
         # Some class do not have twins, because they do not have names
         # like servicedependencies
@@ -778,7 +778,7 @@ class Items(object):
         del self.templates_graph
 
     def clean(self):
-        """ Request to remove the unecessary attributes/others from our items """
+        """ Request to remove the unnecessary attributes/others from our items """
         for i in self:
             i.clean()
         Item.clean(self)
@@ -795,7 +795,7 @@ class Items(object):
             s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
         return s
 
-    # Inheritance forjust a property
+    # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
         for i in self:
             i.get_property_by_inheritance(self, prop)
@@ -943,7 +943,7 @@ class Items(object):
 
                 # Ok, get a real name, search for it
                 tp = timeperiods.find_by_name(tpname)
-                # If nto fidn, it's an error
+                # If not found, it's an error
                 if tp is None:
                     err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname)
                     i.configuration_errors.append(err)
@@ -1003,6 +1003,7 @@ class Items(object):
         begin = 0
         end = len(expr)
         ctxres = hg_name_parse_EXPR(expr, begin, end)
+
         if ctxres.rc:
             err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
@@ -1051,7 +1052,7 @@ class Items(object):
                 hst = i.host_name.split(',')
                 for h in hst:
                     h = h.strip()
-                    # If the host start with a !, it's to be remvoed from
+                    # If the host start with a !, it's to be removed from
                     # the hostgroup get list
                     if h.startswith('!'):
                         hst_to_remove = h[1:].strip()
@@ -1070,7 +1071,7 @@ class Items(object):
 
             i.host_name = ','.join(list(set(hnames_list)))
 
-            # Ok, enven with all of it, there is still no host, put it as a template
+            # Ok, even with all of it, there is still no host, put it as a template
             if i.host_name == '':
                 i.register = '0'
 
@@ -1127,7 +1128,7 @@ def skip_space(expr, begin, end):
 
 
 def find_matching_closing(expr, begin, end):
-    # special case, need to find matching closing parenthese for this opening one..
+    # special case, need to find matching closing parenthesis for this opening one..
     n_opening = 0
     i = begin
     while i < end:
@@ -1307,7 +1308,7 @@ tabs_hg_name_list_operators = {
 
 def hg_name_parse_expr(ctx, expr, begin, end):
     """ Parse a hostgroup_name expression,
-If parse successfull:
+If parse successful:
     ctx.rc == 0
     ctx.full_res is the tuple result.
     a tuple of 2 item. each one is a list.

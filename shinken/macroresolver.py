@@ -24,10 +24,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# This class revolv Macro in commands by looking at the macros list
-# in Class of elements. It give a propertie that call be callable or not.
-# It not callable, it's a simple properties and remplace the macro with the value
-# If callable, it's a method that is call for getting the value. for exemple, to
+# This class resolve Macro in commands by looking at the macros list
+# in Class of elements. It give a property that call be callable or not.
+# It not callable, it's a simple property and replace the macro with the value
+# If callable, it's a method that is called to get the value. for example, to
 # get the number of service in a host, you call a method to get the
 # len(host.services)
 
@@ -45,9 +45,9 @@ class MacroResolver(Borg):
     macros = {
         'TOTALHOSTSUP':         '_get_total_hosts_up',
         'TOTALHOSTSDOWN':       '_get_total_hosts_down',
-        'TOTALHOSTSUNREACHABLE': '_get_total_hosts_unreacheable',
+        'TOTALHOSTSUNREACHABLE': '_get_total_hosts_unreachable',
         'TOTALHOSTSDOWNUNHANDLED': '_get_total_hosts_unhandled',
-        'TOTALHOSTSUNREACHABLEUNHANDLED': '_get_total_hosts_unreacheable_unhandled',
+        'TOTALHOSTSUNREACHABLEUNHANDLED': '_get_total_hosts_unreachable_unhandled',
         'TOTALHOSTPROBLEMS':    '_get_total_host_problems',
         'TOTALHOSTPROBLEMSUNHANDLED': '_get_total_host_problems_unhandled',
         'TOTALSERVICESOK':      '_get_total_service_ok',
@@ -119,8 +119,8 @@ class MacroResolver(Borg):
             del macros['']
         return macros
 
-    # Get a value from a propertie of a element
-    # Prop can be a function or a propertie
+    # Get a value from a property of a element
+    # Prop can be a function or a property
     # So we call it or not
     def _get_value_from_element(self, elt, prop):
         try:
@@ -133,13 +133,13 @@ class MacroResolver(Borg):
             # Return no value
             return ''
 
-    # For some macros, we need to delete unwanted caracters
+    # For some macros, we need to delete unwanted characters
     def _delete_unwanted_caracters(self, s):
         for c in self.illegal_macro_output_chars:
             s = s.replace(c, '')
         return s
 
-    # return a dict with all environement variable came from
+    # return a dict with all environment variable came from
     # the macros of the datas object
     def get_env_macros(self, data):
         env = {}
@@ -174,7 +174,7 @@ class MacroResolver(Borg):
         # we should do some loops for nested macros
         # like $USER1$ hiding like a ninja in a $ARG2$ Macro. And if
         # $USER1$ is pointing to $USER34$ etc etc, we should loop
-        # until we reach the botom. So the last loop is when we do
+        # until we reach the bottom. So the last loop is when we do
         # not still have macros :)
         still_got_macros = True
         nb_loop = 0
@@ -203,16 +203,16 @@ class MacroResolver(Borg):
                             prop = cls.macros[macro]
                             macros[macro]['val'] = self._get_value_from_element(elt, prop)
                             # Now check if we do not have a 'output' macro. If so, we must
-                            # delete all special caracters that can be dangerous
+                            # delete all special characters that can be dangerous
                             if macro in self.output_macros:
                                 macros[macro]['val'] = self._delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
-                    # Beware : only cut the frst _HOST value, so the macro name can have it on it...
+                    # Beware : only cut the first _HOST value, so the macro name can have it on it...
                     macro_name = re.split('_' + cls_type, macro, 1)[1].upper()
                     # Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
                     # Now we get the element in data that have the type HOST
-                    # and we check if it gots the custom value
+                    # and we check if it got the custom value
                     for elt in data:
                         if elt is not None and elt.__class__.my_type.upper() == cls_type:
                             if '_' + macro_name in elt.customs:
@@ -225,10 +225,10 @@ class MacroResolver(Borg):
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
 
             # A $$ means we want a $, it's not a macro!
-            # We replace $$ by a big dirty thing to be sur to not misinterpret it
+            # We replace $$ by a big dirty thing to be sure to not misinterpret it
             c_line = c_line.replace("$$", "DOUBLEDOLLAR")
 
-            if nb_loop > 32:  # too mouch loop, we exit
+            if nb_loop > 32:  # too much loop, we exit
                 still_got_macros = False
 
         # We now replace the big dirty token we made by only a simple $
@@ -374,11 +374,11 @@ class MacroResolver(Borg):
     def _get_total_hosts_down(self):
         return len([h for h in self.hosts if h.state == 'DOWN'])
 
-    def _get_total_hosts_unreacheable(self):
+    def _get_total_hosts_unreachable(self):
         return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
 
     # TODO
-    def _get_total_hosts_unreacheable_unhandled(self):
+    def _get_total_hosts_unreachable_unhandled(self):
         return 0
 
     def _get_total_hosts_problems(self):

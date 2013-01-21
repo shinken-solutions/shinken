@@ -395,7 +395,7 @@ class LiveStatusMongoStack(LiveStatusStack):
         #negate_filter = lambda: '\'$not\': { %s }' % top_filter()
         # mongodb doesn't have the not-operator like sql, which can negate
         # a complete expression. Mongodb $not can only reverse one operator
-        # at a time. This qould require rewriting of the whole expression.
+        # at a time. This would require rewriting of the whole expression.
         # So instead of deciding whether a record can pass the filter or not,
         # we let it pass in any case. That's no problem, because the result
         # of the database query will have to go through the in-memory-objects
