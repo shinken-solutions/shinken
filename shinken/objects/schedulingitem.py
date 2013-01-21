@@ -1109,6 +1109,11 @@ class SchedulingItem(Item):
                     notification_interval = es.notification_interval
         # So take the by default time
         std_time = n.t_to_go + notification_interval * cls.interval_length
+
+        # Maybe the notification comes from retention data and next notification alert is in the past
+        if std_time < now:
+            std_time = now + notification_interval * cls.interval_length
+
         # standard time is a good one
         res = std_time
 
