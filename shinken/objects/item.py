@@ -1003,6 +1003,7 @@ class Items(object):
         begin = 0
         end = len(expr)
         ctxres = hg_name_parse_EXPR(expr, begin, end)
+
         if ctxres.rc:
             err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
