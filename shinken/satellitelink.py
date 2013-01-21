@@ -38,7 +38,8 @@ from shinken.log import logger
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
+                    Pyro.errors.TimeoutError, Pyro.errors.NamingError)
 
 
 class SatelliteLink(Item):

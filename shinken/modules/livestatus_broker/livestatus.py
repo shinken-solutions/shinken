@@ -129,7 +129,7 @@ class LiveStatus(object):
             logger.error("[Livestatus] We currently do not handle this kind of composed request")
             print sorted([q.my_type for q in request.queries])
 
-        logger.info("DURATION %.4fs" % (time.time() - request.tic))
+        logger.debug("[Livestatus] Request duration %.4fs" % (time.time() - request.tic))
         return output, keepalive
 
     def count_event(self, counter):
