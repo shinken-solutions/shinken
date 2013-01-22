@@ -51,36 +51,16 @@ class ComplexExpressionNode(object):
             return 'IS LEAF %s' % self.content
 
 
-    def resolve_elements(self, all_hosts):
-        #print "Resolving a complex expression node", self
+    def resolve_elements(self):
+        print "Resolving a complex expression node", self
 
+        # If it's a leaf, we just need to dump a set with the content of the node
         if self.leaf:
             #print "Is a leaf", self.content
             if not self.content:
                 return set()
 
-            # Maybe it's already a list of hosts, if so, just take it
-            if isinstance(self.content, list):
-                elts = self.content
-            else:
-                # Or maybe it's a classic hostgroup, if so, take it's members
-                # and split them
-                
-                elts = self.content.get_hosts().split(',')
-                #print "ELEMENTS"*1000
-                #print elts
-                elts = strip_and_uniq(elts)
-
-            add_full = False
-            if '*' in elts:
-                elts.extend([h.host_name for h in all_hosts.items.values()
-                        if getattr(h, 'host_name', '') != '' and not h.is_tpl()])
-                while '*' in elts:
-                    elts.remove('*')
-                
-            elts = set(elts)
-            #print "Returning",elts
-            return elts
+            return set(self.content)
         
         
         # first got the not ones in a list, and the other in the other list
@@ -101,7 +81,7 @@ class ComplexExpressionNode(object):
         # The operand will change the positiv loop only
         i = 0
         for n in positiv_nodes:
-            node_members = n.resolve_elements(all_hosts)
+            node_members = n.resolve_elements()
             if self.operand == '|':
                 #print "OR rule", node_members
                 res = res.union(node_members)
@@ -114,39 +94,13 @@ class ComplexExpressionNode(object):
                     res = res.intersection(node_members)
             i += 1
 
+        # And we finally remove all NOT elements from the result
         for n in not_nodes:
-            node_members = n.resolve_elements(all_hosts)
+            node_members = n.resolve_elements()
             res = res.difference(node_members)
         
         return res
     
-
-
-    # return a list of all host/service in our node and below
-    def list_all_elements(self):
-        r = []
-
-        # We are a host/service
-        if self.operand in ['host', 'service']:
-            return [self.sons[0]]
-
-        for s in self.sons:
-            r.extend(s.list_all_elements())
-
-        # and uniq the result
-        return list(set(r))
-
-    # If we are a of: rule, we can get some 0 in of_values,
-    # if so, change them with NB sons instead
-    def switch_zeros_of_values(self):
-        nb_sons = len(self.sons)
-        # Need a list for assignment
-        self.of_values = list(self.of_values)
-        for i in [0, 1, 2]:
-            if self.of_values[i] == 0:
-                self.of_values[i] = nb_sons
-        self.of_values = tuple(self.of_values)
-
 
     # Check for empty (= not found) leaf nodes
     def is_valid(self):
@@ -186,7 +140,8 @@ class ComplexExpressionFactory(object):
         node = ComplexExpressionNode()
         #print "Is so complex?", complex_node, pattern, node
         
-        # if it's a single host/service
+        # if it's a single expression like !linux or production
+        # we will get the objects from it and return a leaf node
         if not complex_node:
             # If it's a not value, tag the node and find
             # the name without this ! operator
@@ -203,8 +158,6 @@ class ComplexExpressionFactory(object):
                 node.configuration_errors.append(error)
             return node
 
-
-        
         in_par = False
         tmp = ''
         stacked_par = 0
@@ -319,13 +272,27 @@ class ComplexExpressionFactory(object):
         #print "GRPS", self.grps
         
         if self.ctx == 'hostgroups':
-            obj = self.grps.find_by_name(pattern)
+            # Ok try to find this hostgroup
+            hg = self.grps.find_by_name(pattern)
+            # Maybe it's an known one?
+            if not hg:
+                error = "Error : cannot find the %s of the expression '%s'" % (self.ctx, pattern)
+                return hg, error
+            # Ok the group is found, get the elements!
+            elts = hg.get_hosts().split(',')
+            elts = strip_and_uniq(elts)
+
+            # Maybe the hostgroup memebrs is '*', if so expand with all hosts
+            if '*' in elts:
+                elts.extend([h.host_name for h in self.all_elements.items.values()
+                             if getattr(h, 'host_name', '') != '' and not h.is_tpl()])
+                # And remove this strange hostname too :)
+                elts.remove('*')
+            return elts, error
+                
         else: #templates
             obj = self.grps.find_hosts_that_use_template(pattern)
         
-        #print "Found object", obj
-        if not obj:
-            error = "Error : cannot find the %s of the expression '%s'" % (self.ctx, pattern)
         return obj, error
 
     

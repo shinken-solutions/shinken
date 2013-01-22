@@ -1014,43 +1014,12 @@ class Items(object):
         #print expr_tree
 
         #print "Try to resolve the Tree"
-        set_res = expr_tree.resolve_elements(hosts)
+        set_res = expr_tree.resolve_elements()
         #print "R2d2 final is", set_res
 
         # HOOK DBG
         return list(set_res)
 
-        '''
-        if ctxres.rc:
-            err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
-            self.configuration_errors.append(err)
-            return []
-
-        str_setexpr = hg_name_rebuild_str(ctxres.full_res)
-        # We must protect the eval() against some names that will be match as
-        # Python things like - or print and not real names. So we "change" them with __OTHERNAME__
-        # values in the HostGroup_Name_Parse_Ctx class.
-        groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups, look_in=look_in)
-        newgroupname2hostnames = {}
-        for gn, val in groupsname2hostsnames.items():
-            gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
-            gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
-            gn = gn.replace('.', HostGroup_Name_Parse_Ctx.dot_in_name)
-            gn = gn.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
-            newgroupname2hostnames[gn] = val
-
-        set_res = []
-        try:
-            set_res = set(eval(str_setexpr, newgroupname2hostnames, {}))
-        except SyntaxError, e:
-            err = "the syntax of '%s' is invalid (%s)" % (expr, e)
-            self.configuration_errors.append(err)
-        except NameError, e:
-            err = "there is an unknown name in '%s' (names=%s), err=%s" % (expr, groupsname2hostsnames, e)
-            self.configuration_errors.append(err)
-
-        return list(set_res)
-        '''
 
 
     # If we've got a hostgroup_name property, we search for all
