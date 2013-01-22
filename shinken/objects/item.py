@@ -44,7 +44,9 @@ from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
+from shinken.complexexpression import ComplexExpressionFactory
 from shinken.log import logger
+
 
 
 class Item(object):
@@ -380,7 +382,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                print prop, ":", v
+                #print prop, ":", v
                 r[prop] = v
         return r
 
@@ -999,11 +1001,26 @@ class Items(object):
         for i in self:
             i.linkify_with_triggers(triggers)
 
-    def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
-        begin = 0
-        end = len(expr)
-        ctxres = hg_name_parse_EXPR(expr, begin, end)
 
+    def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
+        #print "\n"*10, "looking for expression", expr
+        if look_in=='hostgroups':
+            f = ComplexExpressionFactory(look_in, hostgroups, hosts)
+        else: # templates
+            f = ComplexExpressionFactory(look_in, hosts, hosts)
+        expr_tree = f.eval_cor_pattern(expr)
+
+        #print "RES of ComplexExpressionFactory"
+        #print expr_tree
+
+        #print "Try to resolve the Tree"
+        set_res = expr_tree.resolve_elements(hosts)
+        #print "R2d2 final is", set_res
+
+        # HOOK DBG
+        return list(set_res)
+
+        '''
         if ctxres.rc:
             err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
@@ -1033,6 +1050,8 @@ class Items(object):
             self.configuration_errors.append(err)
 
         return list(set_res)
+        '''
+
 
     # If we've got a hostgroup_name property, we search for all
     # theses groups and ask them their hosts, and then add them
@@ -1061,7 +1080,7 @@ class Items(object):
                         # was not in it
                         except ValueError:
                             pass
-                    # Else it's an host to add
+                    # Else it's an host to add, but maybe it's ALL
                     elif h == '*':
                         for newhost in get_all_host_names_set(hosts):
                             hnames_list.append(newhost)
@@ -1075,13 +1094,14 @@ class Items(object):
             if i.host_name == '':
                 i.register = '0'
 
+
     # Take our trigger strings and create true objects with it
     def explode_trigger_string_into_triggers(self, triggers):
         for i in self:
             i.explode_trigger_string_into_triggers(triggers)
 
 
-class HostGroup_Name_Parse_Ctx(object):
+class HostGroup_Name_Parse_Ctx_OLD_TO_DELETE(object):
 
     hgn_chars_separator = ('|', ',', '&', '^',)
     specials_hostgroup_name_chars = ('*', '(', ')', '!',) + hgn_chars_separator
@@ -1118,7 +1138,7 @@ class HostGroup_Name_Parse_Ctx(object):
     __repr__ = __str__
 
 
-def skip_space(expr, begin, end):
+def OLD_skip_space(expr, begin, end):
     i = begin
     while i < end:
         if expr[i] not in HostGroup_Name_Parse_Ctx.space_chars:
@@ -1127,7 +1147,7 @@ def skip_space(expr, begin, end):
     return i
 
 
-def find_matching_closing(expr, begin, end):
+def OLD_find_matching_closing(expr, begin, end):
     # special case, need to find matching closing parenthesis for this opening one..
     n_opening = 0
     i = begin
@@ -1146,7 +1166,7 @@ def find_matching_closing(expr, begin, end):
     return None
 
 
-def hg_name_parse_item(ctx, expr, begin, end):
+def OLD_hg_name_parse_item(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
         ctx.reason = "2 consecutive items without valid separator: '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
@@ -1176,7 +1196,7 @@ def hg_name_parse_item(ctx, expr, begin, end):
     return res
 
 
-def hg_name_parse_single_expr(ctx, expr, begin, end):
+def OLD_hg_name_parse_single_expr(ctx, expr, begin, end):
     """ Parse a "single" expression: either an item, or a "subexpression" """
     i = skip_space(expr, begin, end)
     if end - i > 0 and expr[i] == '(':
@@ -1186,7 +1206,7 @@ def hg_name_parse_single_expr(ctx, expr, begin, end):
     return res
 
 
-def hg_name_parse_all(ctx, expr, begin, end):
+def OLD_hg_name_parse_all(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
         ctx.reason = "* must be on its own, near '%s'" % (expr[begin:begin+10])
@@ -1196,7 +1216,7 @@ def hg_name_parse_all(ctx, expr, begin, end):
     ctx.res_i = begin + 1  # just skip the '*'
 
 
-def hg_name_parse_expr_operator(ctx, expr, begin, end):
+def OLD_hg_name_parse_expr_operator(ctx, expr, begin, end):
     op = expr[begin]
     if not ctx.last_is_expr:
         ctx.rc = -1
@@ -1206,7 +1226,7 @@ def hg_name_parse_expr_operator(ctx, expr, begin, end):
     ctx.res_i = begin + 1  # just skip the operator
 
 
-def hg_name_parse_or(ctx, expr, begin, end):  # '|' or ','
+def OLD_hg_name_parse_or(ctx, expr, begin, end):  # '|' or ','
     if not ctx.last_is_expr:
         ctx.rc = -1
         ctx.reason = "'%s' must follow a valid expression, near '%s'" % (expr[0], expr[0:10])
@@ -1217,7 +1237,7 @@ def hg_name_parse_or(ctx, expr, begin, end):  # '|' or ','
     ctx.res_i = begin + 1
 
 
-def hg_name_parse_not(ctx, expr, begin, end):
+def OLD_hg_name_parse_not(ctx, expr, begin, end):
     i = s = skip_space(expr, begin, end)
     if i >= end:
         ctx.rc = -1
@@ -1261,7 +1281,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
     return
 
 
-def parse_neg_or_not__(ctx, expr, begin, end):
+def OLD_parse_neg_or_not__(ctx, expr, begin, end):
     begin += 1
     if not ctx.last_is_expr:
         # "! X" case:
@@ -1274,7 +1294,7 @@ def parse_neg_or_not__(ctx, expr, begin, end):
     return res
 
 
-def hg_name_parse_subexpr(ctx, expr, begin, end):
+def OLD_hg_name_parse_subexpr(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
         ctx.reason = "'(' following directly an expression, prev_item='%s', near '%s'" % (ctx.prev_res, expr[begin:begin+10])
@@ -1295,7 +1315,8 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     ctx.prev_res = subctx.prev_res
     return subctx.full_res
 
-tabs_hg_name_list_operators = {
+"""
+OLD_tabs_hg_name_list_operators = {
     '*': hg_name_parse_all,
     ',': hg_name_parse_or,
     '|': hg_name_parse_or,
@@ -1304,9 +1325,9 @@ tabs_hg_name_list_operators = {
     '^': hg_name_parse_expr_operator,
     '(': hg_name_parse_subexpr,
 }
+"""
 
-
-def hg_name_parse_expr(ctx, expr, begin, end):
+def OLD_hg_name_parse_expr(ctx, expr, begin, end):
     """ Parse a hostgroup_name expression,
 If parse successful:
     ctx.rc == 0
@@ -1341,7 +1362,7 @@ A "sub-parse_expr_result" is either:
 
 
 # Return a set with ALL hosts (used in ! expressions)
-def get_all_host_names_set(hosts):
+def OLD_get_all_host_names_set(hosts):
     return set(
         h.host_name
         for h in hosts.items.values()
@@ -1351,7 +1372,7 @@ def get_all_host_names_set(hosts):
 
 # Get the groups (or templates) that match this. We can look for hostgroups
 # or templates.
-def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgroups'):
+def OLD_hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgroups'):
     if res is None:
         res = {}
 
@@ -1409,7 +1430,7 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
     return res
 
 
-def hg_name_rebuild_str(parse_res):
+def OLD_hg_name_rebuild_str(parse_res):
     """ Rebuild a hostgroup_name expression based on 'parse_res'.
 parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' object. """
     # trivial case:
@@ -1464,7 +1485,7 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
     return res
 
 
-def hg_name_parse_EXPR(expr, begin, end, flags=None):
+def OLD_hg_name_parse_EXPR(expr, begin, end, flags=None):
     ctx = HostGroup_Name_Parse_Ctx(expr, flags)
     hg_name_parse_expr(ctx, expr, begin, end)
     for g in ctx.pos_res, ctx.neg_res:

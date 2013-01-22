@@ -113,6 +113,7 @@ test_python_crash_with_recursive_bp_rules.py
 test_missing_timeperiod.py
 test_livestatus_allowedhosts.py
 test_module_trending.py
+test_multiple_not_hostgroups.py
 
 # takes long
 test_livestatus.py

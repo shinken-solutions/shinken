@@ -157,6 +157,7 @@ launch_and_assert test_timeout.py
 launch_and_assert test_python_crash_with_recursive_bp_rules.py
 launch_and_assert test_missing_timeperiod.py
 launch_and_assert test_module_trending.py
+launch_and_assert test_multiple_not_hostgroups.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.

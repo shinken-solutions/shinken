@@ -569,6 +569,7 @@ class SchedulingItem(Item):
             if self.next_chk and ((self.check_interval * cls.interval_length) % 60) == 0:
                 second = datetime.fromtimestamp(self.next_chk).second
                 if second > 48:
+                    # TODO : this part is useless, remove it.
                     self.next_chk = self.next_chk - ((second % 48) + 48 * random.uniform(0.1, 1.0))
             # else: keep the self.next_chk value in the future
         else:
