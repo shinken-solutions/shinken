@@ -157,10 +157,14 @@ class Graphite_Webui(BaseModule):
         graphite_post=""
         if self.graphite_data_source:
             data_source = ".%s" % self.graphite_data_source
-        if "_GRAPHITE_PRE" in elt.customs:
-            graphite_pre = "%s." % self.illegal_char.sub("_", elt.customs["_GRAPHITE_PRE"])
-        if "_GRAPHITE_POST" in elt.customs:
-            graphite_post = ".%s" % self.illegal_char.sub("_", elt.customs["_GRAPHITE_POST"])
+        if t == 'host':
+            if "_GRAPHITE_PRE" in elt.customs:
+                graphite_pre = "%s." % self.illegal_char.sub("_", elt.customs["_GRAPHITE_PRE"])
+        elif t == 'service':
+            if "_GRAPHITE_PRE" in elt.host.customs:
+                graphite_pre = "%s." % self.illegal_char.sub("_", elt.host.customs["_GRAPHITE_PRE"])
+            if "_GRAPHITE_POST" in elt.customs:
+                graphite_post = ".%s" % self.illegal_char.sub("_", elt.customs["_GRAPHITE_POST"])
 
         # Format the start & end time (and not only the date)
         d = datetime.fromtimestamp(graphstart)
