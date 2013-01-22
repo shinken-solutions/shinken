@@ -127,6 +127,10 @@ class TestComplexHostgroups(ShinkenTest):
         r = self.srv_define_only_on('linux_OR_web_PAR_AND_prod0_AND_NOT_test_linux_file_prod_0', [test_linux_web_prod_0, test_win_web_prod_0])
         self.assert_(r == True)
 
+        print "win&((linux|web)&prod) AND not test_linux_file_prod_0"
+        r = self.srv_define_only_on('WINDOWS_AND_linux_OR_web_PAR_AND_prod0_AND_NOT_test_linux_file_prod_0', [test_win_web_prod_0])
+        self.assert_(r == True)
+
 
 if __name__ == '__main__':
     unittest.main()
