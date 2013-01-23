@@ -1091,12 +1091,14 @@ class SchedulingItem(Item):
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 if es.notification_interval != -1 and es.notification_interval < notification_interval:
                     notification_interval = es.notification_interval
+
         # So take the by default time
         std_time = n.t_to_go + notification_interval * cls.interval_length
 
         # Maybe the notification comes from retention data and next notification alert is in the past
+        # if so let use the now value instead
         if std_time < now:
-            std_time = now + notification_interval * cls.interval_length
+            std_time = now
 
         # standard time is a good one
         res = std_time

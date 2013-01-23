@@ -552,7 +552,7 @@ class Scheduler:
                                 # a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # or maybe before because we have an escalation that need to raise up before
                                 a.t_to_go = item.get_next_notification_time(a)
-
+                                
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
                             else:
