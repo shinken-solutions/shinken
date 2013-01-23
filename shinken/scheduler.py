@@ -536,7 +536,6 @@ class Scheduler:
                                 new_c = c.copy_shell()
                                 res.append(new_c)
 
-
                         # If we have notification_interval then schedule the next notification (problems only)
                         if a.type == 'PROBLEM':
                             # Update the ref notif number after raise the one of the notification

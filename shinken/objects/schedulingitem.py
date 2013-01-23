@@ -1098,7 +1098,7 @@ class SchedulingItem(Item):
         # Maybe the notification comes from retention data and next notification alert is in the past
         # if so let use the now value instead
         if std_time < now:
-            std_time = now
+            std_time = now + notification_interval * cls.interval_length
 
         # standard time is a good one
         res = std_time
