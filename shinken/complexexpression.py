@@ -52,8 +52,6 @@ class ComplexExpressionNode(object):
 
 
     def resolve_elements(self):
-        print "Resolving a complex expression node", self
-
         # If it's a leaf, we just need to dump a set with the content of the node
         if self.leaf:
             #print "Is a leaf", self.content
