@@ -75,7 +75,7 @@ They connect here and see if they are still OK with our running_id, if not, they
 
 class IBroks(Interface):
     """ Interface for Brokers:
-They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE uodate...) """
+They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE update...) """
 
     # poller or reactionner ask us actions
     def get_broks(self):
@@ -101,7 +101,7 @@ class IForArbiter(IArb):
         from the arbiter. The arbiter is the interface to the administrator, so we must listen
         carefully and give him the information he wants. Which could be for another scheduler """
 
-    # arbiter is send us a external coomand.
+    # arbiter is sending us a external command.
     # it can send us global command, or specific ones
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
@@ -171,7 +171,7 @@ class Shinken(BaseSatellite):
         # We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
-        # Then we compasate all host/services
+        # Then we compensate all host/services
         for h in self.sched.hosts:
             h.compensate_system_time_change(difference)
         for s in self.sched.services:
@@ -344,7 +344,7 @@ class Shinken(BaseSatellite):
         # We must update our Config dict macro with good value
         # from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
-        #print "DBG: got macors", self.sched.conf.macros
+        #print "DBG: got macros", self.sched.conf.macros
 
         # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
@@ -359,7 +359,7 @@ class Shinken(BaseSatellite):
         e = ExternalCommandManager(self.conf, 'applyer')
 
         # Scheduler need to know about external command to
-        # activate it if necessery
+        # activate it if necessary
         self.sched.load_external_command(e)
 
         # External command need the sched because he can raise checks

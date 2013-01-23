@@ -101,7 +101,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         instance_id = data['instance_id']
 
-        #print 'DBG: Cleann all my instance with brok:', b.id
+        #print 'DBG: Clean all my instance with brok:', b.id
 
         # We clean all previous hosts and services from this instance_id
         h_to_del = []
@@ -126,7 +126,7 @@ class Status_dat_broker(BaseModule):
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
-        #print 'DBG: Creacting host with with brok:', b.id
+        #print 'DBG: Creating host with with brok:', b.id
         #print "Creating host:", h_id, b.__dict__
 
         h = Host({})
@@ -274,7 +274,7 @@ class Status_dat_broker(BaseModule):
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
         data = b.data
-        # In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink them
         s = self.find_service(data['host_name'], data['service_description'])
         if s is not None:
             s.check_period = self.get_timeperiod(s.check_period)
@@ -301,7 +301,7 @@ class Status_dat_broker(BaseModule):
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
         data = b.data
-        # In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink them
         h = self.find_host(data['host_name'])
         if h is not None:
             h.check_period = self.get_timeperiod(h.check_period)

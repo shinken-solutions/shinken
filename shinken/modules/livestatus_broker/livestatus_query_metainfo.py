@@ -52,7 +52,7 @@ invalidated by a state change
 invalidated by a state_type change
 
 - CACHE_GLOBAL_STATS_WITH_STATUS
-applies to queries which ask for status (in_downtime/active/pasive/...)
+applies to queries which ask for status (in_downtime/active/passive/...)
 invalidated by changes in status update broks
 
 - CACHE_HOST_STATS

@@ -105,7 +105,7 @@ class IForArbiter(Interface):
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, then F**K YOU!
+        # If I'm the master, then F**K YOU!
         if self.app.is_master:
             print "Some f***ing idiot asks me not to run. I'm a proud master, so I decide to run anyway"
         # Else, I'm just a spare, so I listen to my master
@@ -230,7 +230,7 @@ class Hostd(Daemon):
         self.override_modules_path = getattr(self.conf, 'override_modules_path', '')
         if self.override_modules_path:
             # We override the module manager
-            print "Overring module manager"
+            print "Overriding module manager"
             self.modules_manager = ModulesManager('hostd', self.override_modules_path, [])
 
         # we request the instances without them being *started*
@@ -310,14 +310,14 @@ class Hostd(Daemon):
         # or nagios.log one if there are no already available
         #self.conf.hack_old_nagios_parameters()
 
-        # Raise warning about curently unmanaged parameters
+        # Raise warning about currently unmanaged parameters
         #if self.verify_only:
         #    self.conf.warn_about_unmanaged_parameters()
 
-        # Exlode global conf parameters into Classes
+        # Explode global conf parameters into Classes
         #self.conf.explode_global_conf()
 
-        # set ourown timezone and propagate it to other satellites
+        # set our own timezone and propagate it to other satellites
         #self.conf.propagate_timezone_option()
 
         # Look for business rules, and create the dep tree
@@ -351,7 +351,7 @@ class Hostd(Daemon):
         else:
             logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
-        # Now clean objects of temporary/unecessary attributes for live work:
+        # Now clean objects of temporary/unnecessary attributes for live work:
         self.conf.clean()
 
         # Exit if we are just here for config checking
@@ -662,7 +662,7 @@ class Hostd(Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber: really static! because there is no lock
+                    # and remember: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -687,9 +687,9 @@ class Hostd(Daemon):
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
 
-    # We want a lock manager version of the plugin fucntions
+    # We want a lock manager version of the plugin functions
     def lockable_function(self, f):
-        #print "We create a lock verion of", f
+        #print "We create a lock version of", f
         def lock_version(**args):
             #self.wait_for_no_writers()
             t = time.time()
@@ -788,7 +788,7 @@ class Hostd(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present?
+        # shouldn't the 'daemon_types' (whatever it is above) be always present?
         return getattr(self.conf, daemon_type + 's', None)
 
     # Helper functions for retention modules
@@ -901,7 +901,7 @@ class Hostd(Daemon):
         f.close()
         print "File %s is saved" % p
         _id = uuid.uuid4().get_hex()
-        d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user': user,
+        d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalyzed', 'user': user,
             'state': 'pending', 'pack_name': short_name, 'moderation_comment': '', 'link_id': _id}
         # Get all previously sent packs for the same user/filename, and put them as obsolete
         obs = self.db.packs.find({'filepath': p})
@@ -919,7 +919,7 @@ class Hostd(Daemon):
     def load_pack_file(self, pack):
         p = self.db.packs.find_one({'_id': pack})
         filepath = p['filepath']
-        print "Analysing pack"
+        print "Analyzing pack"
         if not zipfile.is_zipfile(filepath):
             print "ERROR: the pack %s is not a zip file!" % filepath
             p['state'] = 'refused'
@@ -1003,7 +1003,7 @@ class Hostd(Daemon):
         msg += 'Thanks %s for registering in the Shinken community site and welcome! Please click on the link below to enable your account so you can start to get packs and submit new ones.\n' % username
         msg += ' %s/validate?activating_key=%s' % (srvuri, ak)
         print "Message length is " + repr(len(msg))
-        print "MEssage is", msg
+        print "Message is", msg
         print "Go to send mail"
         try:
             server = smtplib.SMTP('localhost')

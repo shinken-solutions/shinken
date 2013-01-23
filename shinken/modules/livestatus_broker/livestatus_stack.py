@@ -147,7 +147,7 @@ try:
     TopBaseLiveStatusStack.__bases__ = (Queue.LifoQueue, object)
     #LiveStatusStack.__bases__ += (Queue.LifoQueue, )
 except AttributeError:
-    # Ptyhon 2.4 and 2.5 do not have it.
+    # Python 2.4 and 2.5 do not have it.
     # Use our own implementation.
     TopBaseLiveStatusStack.__bases__ = (MyLifoQueue, object)
     #LiveStatusStack.__bases__ += (MyLifoQueue, )

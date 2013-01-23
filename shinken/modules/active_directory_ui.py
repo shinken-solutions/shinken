@@ -101,7 +101,7 @@ class AD_Webui(BaseModule):
 #        self.connect()
 
     def connect(self):
-        logger.debug("[Active Directory UI] Trying to initalize the AD/Ldap connection")
+        logger.debug("[Active Directory UI] Trying to initialize the AD/Ldap connection")
         self.con = ldap.initialize(self.ldap_uri)
         self.con.set_option(ldap.OPT_REFERRALS, 0)
 

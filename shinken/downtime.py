@@ -155,7 +155,7 @@ class Downtime:
         self.ref.in_scheduled_downtime_during_last_check = True
         return res
 
-    # A scheduled downtime was prematurely cancelled
+    # A scheduled downtime was prematurely canceled
     def cancel(self):
         res = []
         self.is_in_effect = False
@@ -166,7 +166,7 @@ class Downtime:
         self.del_automatic_comment()
         self.can_be_deleted = True
         self.ref.in_scheduled_downtime_during_last_check = True
-        # Nagios does not notify on cancelled downtimes
+        # Nagios does not notify on canceled downtimes
         #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
         # Also cancel other downtimes triggered by me
         for dt in self.activate_me:
@@ -199,7 +199,7 @@ class Downtime:
 
 
     # Fill data with info of item by looking at brok_type
-    # in props of properties or running_propterties
+    # in props of properties or running_properties
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
@@ -227,7 +227,7 @@ class Downtime:
                 res[prop] = getattr(self, prop)
         return res
 
-    # Inverted funtion of getstate
+    # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
 
@@ -248,7 +248,7 @@ class Downtime:
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
 
-    # Inversed funtion of getstate
+    # Inversed function of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
         # Check if the len of this state is like the previous,

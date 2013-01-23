@@ -58,7 +58,7 @@ class Dummy_poller(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Dummy Poller] Initilisation of the dummy poller module")
+        logger.info("[Dummy Poller] Initialization of the dummy poller module")
         self.i_am_dying = False
 
     # Get new checks if less than nb_checks_max
@@ -123,7 +123,7 @@ class Dummy_poller(BaseModule):
             msg = None
             cmsg = None
 
-            # If we are diyin (big problem!) we do not
+            # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
                 # REF: doc/shinken-action-queues.png (3)
@@ -137,7 +137,7 @@ class Dummy_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    logger.info("[Dummy Poller] %d : Dad say we are diing..." % self.id)
+                    logger.info("[Dummy Poller] %d : Dad say we are dying..." % self.id)
                     break
             except:
                 pass

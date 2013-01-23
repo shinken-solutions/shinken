@@ -26,7 +26,7 @@
 """
  This is the class of the dispatcher. Its role is to dispatch
  configurations to other elements like schedulers, reactionner,
- pollers, receivers and brokers. It is responsible for hight avaibility part. If an
+ pollers, receivers and brokers. It is responsible for high availability part. If an
  element dies and the element type has a spare, it sends the config of the
  dead one to the spare
 """
@@ -52,7 +52,7 @@ class Dispatcher:
         # Pointer to the whole conf
         self.conf = conf
         self.realms = conf.realms
-        # Direct pointer to importants elements for us
+        # Direct pointer to important elements for us
 
         for sat_type in ('arbiters', 'schedulers', 'reactionners', 'brokers', 'receivers', 'pollers'):
             setattr(self, sat_type, getattr(self.conf, sat_type))
@@ -75,7 +75,7 @@ class Dispatcher:
         for cfg in self.conf.confs.values():
             cfg.is_assigned = False
             cfg.assigned_to = None
-            # We try to remeber each "push", so we
+            # We try to remember each "push", so we
             # can know with configuration ids+flavor
             # if a satellite already got it or not :)
             cfg.push_flavor = 0
@@ -150,7 +150,7 @@ class Dispatcher:
                     arb.do_not_run()
 
         # We check for confs to be dispatched on alive scheds. If not dispatched, need dispatch :)
-        # and if dipatch on a failed node, remove the association, and need a new disaptch
+        # and if dispatch on a failed node, remove the association, and need a new dispatch
         for r in self.realms:
             for cfg_id in r.confs:
                 push_flavor = r.confs[cfg_id].push_flavor
@@ -182,9 +182,9 @@ class Dispatcher:
                         sched.conf = None
                     # Else: ok the conf is managed by a living scheduler
 
-        # Maybe satelite are alive, but do not have a cfg yet.
+        # Maybe satellites are alive, but do not have a cfg yet.
         # I think so. It is not good. I ask a global redispatch for
-        # the cfg_id I think is not corectly dispatched.
+        # the cfg_id I think is not correctly dispatched.
         for r in self.realms:
             for cfg_id in r.confs:
                 push_flavor = r.confs[cfg_id].push_flavor
@@ -375,7 +375,7 @@ class Dispatcher:
 
                         # We tag conf with the instance_name = scheduler_name
                         instance_name = sched.scheduler_name
-                        # We give this configuraton a new 'flavor'
+                        # We give this configuration a new 'flavor'
                         conf.push_flavor = random.randint(1, 1000000)
                         # REF: doc/shinken-conf-dispatching.png (3)
                         # REF: doc/shinken-scheduler-lost.png (2)

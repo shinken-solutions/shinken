@@ -47,7 +47,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    logger.debug("[Graphite UI]Get an GRAPITE UI module for plugin %s" % plugin.get_name())
+    logger.debug("[Graphite UI]Get an GRAPHITE UI module for plugin %s" % plugin.get_name())
 
     instance = Graphite_Webui(plugin)
     return instance
@@ -130,7 +130,7 @@ class Graphite_Webui(BaseModule):
     # or add it if not present.
     def _replaceFontSize ( self, url, newsize ):
 
-    # Do we have fontSize in the url alreadu, or not ?
+    # Do we have fontSize in the url already, or not ?
         if re.search('fontSize=',url) is None:
             url = url + '&fontSize=' + newsize
         else:
@@ -173,7 +173,7 @@ class Graphite_Webui(BaseModule):
             # Read the template file, as template string python object
            
             html = Template(template_html)
-            # Build the dict to instanciate the template string
+            # Build the dict to instantiate the template string
             values = {}
             if t == 'host':
                 values['host'] = self.illegal_char.sub("_", elt.host_name)

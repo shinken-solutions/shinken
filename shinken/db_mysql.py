@@ -69,7 +69,7 @@ class DBMysql(DB):
         """Just run the query
         TODO: finish catch
         """
-        #print "[MysqlDB]I run query", query, "\n"
+        logger.debug("[MysqlDB]I run query %s" % query)
         try:
             self.db_cursor.execute(query)
             self.db.commit()

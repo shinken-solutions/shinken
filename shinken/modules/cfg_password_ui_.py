@@ -55,7 +55,7 @@ class Cfg_Password_Webui(BaseModule):
 
     # Try to connect if we got true parameter
     def init(self):
-        logger.info("[Cfg Password UI] Trying to initalize the CFG/Password auth")
+        logger.info("[Cfg Password UI] Trying to initialize the CFG/Password auth")
 
     # To load the webui application
     def load(self, app):

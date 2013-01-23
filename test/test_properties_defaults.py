@@ -101,7 +101,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use_local_log', '1'),
         ('log_level', 'WARNING'),
         ('local_log', 'arbiterd.log'),
-        ('resource_file', '/tmp/ressources.txt'),
+        ('resource_file', '/tmp/resources.txt'),
         ('shinken_user', shinken.daemon.get_cur_user()),
         ('shinken_group', shinken.daemon.get_cur_group()),
         ('enable_notifications', '1'),

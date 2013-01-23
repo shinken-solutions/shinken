@@ -94,7 +94,7 @@ class Discoveryrun(MatchingItem):
             else:
                 setattr(self, prop, val)
 
-            # each istance to have his own running prop!
+            # each instance to have his own running prop!
 
 
     # Output name

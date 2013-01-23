@@ -132,13 +132,13 @@ def get_view(page):
             t = elts[0]
             s = elts[1]
 
-        print 'Search for type %s and patern %s' % (t, s)
+        print 'Search for type %s and pattern %s' % (t, s)
         if not t in filters:
             filters[t] = []
         filters[t].append(s)
 
         if t == 'hst_srv':
-            # We compile the patern
+            # We compile the pattern
             pat = re.compile(s, re.IGNORECASE)
             new_items = []
             for i in items:
@@ -265,7 +265,7 @@ def get_pbs_widget():
     if search:
         print "SEARCHING FOR", search
         print "Before filtering", len(pbs)
-        # We compile the patern
+        # We compile the pattern
         pat = re.compile(search, re.IGNORECASE)
         new_pbs = []
         for p in pbs:
