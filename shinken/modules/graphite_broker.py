@@ -86,7 +86,7 @@ class Graphite_broker(BaseModule):
             self.con.connect((self.host, self.port))
         except IOError, err:
                 logger.error("[Graphite broker] Graphite Carbon instance network socket! IOError:%s" % str(err))
-		raise
+                raise
         logger.info("[Graphite broker] Connection successful to  %s:%d" % (str(self.host), self.port))
         self.ticks = 0
 
