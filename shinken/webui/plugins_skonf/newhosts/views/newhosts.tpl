@@ -13,26 +13,7 @@ function submitform() {
       <label for="names">Scan:</label>
       <textarea name="names" type="textarea" class="span12" tabindex="1" rows="4" placeholder='Please type your hosts IP/FQDN here' value=''></textarea>
     </div>
-
-<!--     <a id='btn_adv_options' class='btn btn-info' href="javascript:newhosts_show_adv_options()"><i class="icon-chevron-down"></i> Show advanced options</a>
-    <div id="adv_options">
-      %print 'DATAMGR', app.conf.discoveryruns.__dict__
-      %i = 0
-      %# """ Only take the first level discovery runners here"""
-      %for r in [r for r in app.conf.discoveryruns if r.is_first_level()]:
-      %i += 1
-      
-      <input type="hidden" value="1" name="runner-{{r.get_name()}}">
-      <div class="check-field">
-        <span class="help-inline">Enable the {{r.get_name().capitalize()}} based discovery</span>
-        <input type="checkbox" id="enable-runner-{{r.get_name()}}" tabindex="{{i}}" checked name="enable-runner-{{r.get_name()}}">
-        <p class="help-block" for="enable-runner-{{r.get_name()}}"> </p>
-      </div>
-      %end
-    </div> -->
-
-
-     
+    
     <div id="moreoptions" class="collapse">
       <div class="well well-small">
         %print 'DATAMGR', app.conf.discoveryruns.__dict__
@@ -56,9 +37,7 @@ function submitform() {
        More Options
       </button>
       <a class="btn btn-success pull-right" tabindex="4" href="javascript: submitform()"><i class="icon-play"></i> Scan</a>
-    </div>
-    
-    
+    </div>       
   </form>
 </div>
 
