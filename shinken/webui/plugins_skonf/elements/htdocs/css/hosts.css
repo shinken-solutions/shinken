@@ -37,4 +37,6 @@
     background: white;
 }
 
-
+.table tbody + tbody {
+    border-top: none !important;
+}
