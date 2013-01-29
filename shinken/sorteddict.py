@@ -152,7 +152,7 @@ class SortedDict(dict):
             # mapping
             newkeys = [key for key in other if key not in self]
         else:
-            # iterator/seqence of pairs
+            # iterator/sequence of pairs
             other = list(other)
             newkeys = [key for key, _ in other if key not in self]
         dict.update(self, other)

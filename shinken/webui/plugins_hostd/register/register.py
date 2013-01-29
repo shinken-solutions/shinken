@@ -32,7 +32,7 @@ from shinken.webui.bottle import redirect, abort
 app = None
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
+# Our page. If the user call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
     error = app.request.GET.get('error', '')

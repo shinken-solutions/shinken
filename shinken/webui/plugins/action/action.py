@@ -38,7 +38,7 @@ def subsNOW():
 def subsSLASH():
     return '/'
 
-# This dictionnary associate macros with expansion function
+# This dictionary associate macros with expansion function
 subs = {'$NOW$': subsNOW,
         '$SLASH$' : subsSLASH,
         # Add new macros here

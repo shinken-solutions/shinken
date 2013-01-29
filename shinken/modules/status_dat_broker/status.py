@@ -265,7 +265,7 @@ class StatusFile:
                             value = f(value)
                         else:
                             #print "Elt: ", elt, "prop", prop
-                            # ok not a direct function, maybe a functin provided by value...
+                            # ok not a direct function, maybe a function provided by value...
                             if value is not None:
                                 f = getattr(value, f)
                                 value = f()

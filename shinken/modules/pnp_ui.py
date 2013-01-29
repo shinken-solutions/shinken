@@ -90,7 +90,7 @@ class PNP_Webui(BaseModule):
     # for now, the source variable does nothing. Values passed to this variable can be : 
     # 'detail' for the element detail page
     # 'dashboard' for the dashboard widget
-    # you can cutomize the url depending on this value. (or not)
+    # you can customize the url depending on this value. (or not)
     def get_graph_uris(self, elt, graphstart, graphend, source = 'detail'):
         if not elt:
             return []

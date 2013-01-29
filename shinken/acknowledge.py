@@ -84,7 +84,7 @@ class Acknowledge:
                 res[prop] = getattr(self, prop)
         return res
 
-    # Inversed funtion of getstate
+    # Inversed function of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state['id']

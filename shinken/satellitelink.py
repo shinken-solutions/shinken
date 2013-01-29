@@ -38,7 +38,8 @@ from shinken.log import logger
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
+                    Pyro.errors.TimeoutError, Pyro.errors.NamingError)
 
 
 class SatelliteLink(Item):
@@ -106,13 +107,13 @@ class SatelliteLink(Item):
             # call. So we change the whole default connect() timeout
             socket.setdefaulttimeout(self.timeout)
             self.con = pyro.getProxy(self.uri)
-            # But the multiprocessing module is not copatible with it!
-            # so we must disable it imadiatly after
+            # But the multiprocessing module is not compatible with it!
+            # so we must disable it immediately after
             socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack, exp:
             # But the multiprocessing module is not compatible with it!
-            # so we must disable it imadiatly after
+            # so we must disable it immediately after
             socket.setdefaulttimeout(None)
             self.con = None
             logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
@@ -145,7 +146,7 @@ class SatelliteLink(Item):
         self.broks = []
         return res
 
-    # Set alive, reachable, and reset attemps.
+    # Set alive, reachable, and reset attempts.
     # If we change state, raise a status brok update
     def set_alive(self):
         was_alive = self.alive
@@ -327,9 +328,9 @@ class SatelliteLink(Item):
             #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
-    # Return True if the satelltie said to managed a configuration
+    # Return True if the satellite said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
-        # If not even the cfg_id in the managed_conf, baid out
+        # If not even the cfg_id in the managed_conf, bail out
         if not cfg_id in self.managed_confs:
             return False
 
@@ -429,7 +430,7 @@ class SatelliteLink(Item):
         for prop in cls.running_properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-        # con needs to be explicitely set:
+        # con needs to be explicitly set:
         self.con = None
 
 

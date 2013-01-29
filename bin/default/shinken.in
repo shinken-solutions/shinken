@@ -145,3 +145,4 @@ NICENESS=5
 # user/group for the var/run rights
 SHINKENUSER=shinken
 SHINKENGROUP=shinken
+HOME=`grep ^$SHINKENUSER: /etc/passwd | cut -d: -f 6`

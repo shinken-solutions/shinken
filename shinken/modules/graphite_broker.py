@@ -28,6 +28,9 @@ to brok information of the service/host perfdatas into the Graphite
 backend. http://graphite.wikidot.com/start
 """
 
+# TODO : Also buffering raw data, not only cPickle
+# TODO : Better buffering like FIFO Buffer
+
 import re
 from socket import socket
 import cPickle
@@ -78,9 +81,27 @@ class Graphite_broker(BaseModule):
     # Conf from arbiter!
     def init(self):
         logger.info("[Graphite broker] I init the %s server connection to %s:%d" % (self.get_name(), str(self.host), self.port))
-        self.con = socket()
-        self.con.connect((self.host, self.port))
+        try:
+            self.con = socket()
+            self.con.connect((self.host, self.port))
+        except IOError, err:
+                logger.error("[Graphite broker] Graphite Carbon instance network socket! IOError:%s" % str(err))
+                raise
+        logger.info("[Graphite broker] Connection successful to  %s:%d" % (str(self.host), self.port))
+        self.ticks = 0
 
+    # Sending data to Carbon. In case of failure, try to reconnect and send again. If carbon instance is down
+    # Data are buffered.
+    def send_packet(self, p):
+        try:
+            self.con.sendall(p)
+        except IOError, err:
+            logger.error("[Graphite broker] Failed sending data to the Graphite Carbon instance ! Trying to reconnect ... ")
+            try:
+                self.init()
+                self.con.sendall(p)
+            except IOError:
+                raise
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -185,7 +206,10 @@ class Graphite_broker(BaseModule):
                                                   value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
             logger.debug("[Graphite broker] Launching: %s" % packet)
-            self.con.sendall(packet)
+            try:
+                self.send_packet(packet)
+            except IOError, err:
+                logger.error("[Graphite broker] Failed sending to the Graphite Carbon. Data are lost")
 
 
     # A host check result brok has just arrived, we UPDATE data info with this
@@ -230,8 +254,11 @@ class Graphite_broker(BaseModule):
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
             logger.debug("[Graphite broker] Launching: %s" % packet)
-            self.con.sendall(packet)
-
+            try:
+                self.send_packet(packet)
+            except IOError, err:
+                logger.error("[Graphite broker] Failed sending to the Graphite Carbon. Data are lost")
+             
 
     def hook_tick(self, brok):
         """Each second the broker calls the hook_tick function
@@ -242,22 +269,21 @@ class Graphite_broker(BaseModule):
                 # If the number of ticks where data was not
                 # sent successfully to Graphite reaches the bufferlimit.
                 # Reset the buffer and reset the ticks
+                logger.error("[Graphite broker] Buffering time exceeded. Freeing buffer")
                 self.buffer = []
                 self.ticks = 0
                 return
-
-            self.ticks += 1
-
+           
             # Format the data
             payload = cPickle.dumps(self.buffer)
             header = struct.pack("!L", len(payload))
             packet = header + payload
 
             try:
-                self.con.sendall(packet)
+	        self.send_packet(packet)
+                # Flush the buffer after a successful send to Graphite
+                self.buffer = []   
             except IOError, err:
-                logger.error("[Graphite broker] Failed sending to the Graphite Carbon instance network socket! IOError:%s" % str(err))
-                return
-
-            # Flush the buffer after a successful send to Graphite
-            self.buffer = []
+                self.ticks += 1
+                logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s" % ( self.ticks , self.tick_limit ))
+            

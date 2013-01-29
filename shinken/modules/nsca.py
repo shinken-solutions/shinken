@@ -80,7 +80,7 @@ def get_instance(plugin):
         password = ""
 
     if password == "" and encryption_method != 0:
-        logger.error("[NSCA] No password specified wheras there is a encryption_method defined")
+        logger.error("[NSCA] No password specified whereas there is a encryption_method defined")
         logger.warning("[NSCA] Setting password to dummy to avoid crash!")
         password = "dummy"
 
@@ -187,6 +187,7 @@ class NSCA_arbiter(BaseModule):
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setblocking(0)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind((self.host, self.port))
         server.listen(backlog)
         input = [server]

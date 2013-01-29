@@ -31,7 +31,7 @@ import shutil
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
-# Hack for making 0.5 retetnion file load in a 0.6 version
+# Hack to make 0.5 retention file loading in a 0.6 version
 # because the commandCall class was moved
 import shinken
 from shinken.commandcall import CommandCall
@@ -73,11 +73,11 @@ class Pickle_retention_scheduler(BaseModule):
             # Open a file near the path, with .tmp extension
             # so in case of a problem, we do not lose the old one
             f = open(self.path + '.tmp', 'wb')
-            # Just put hosts/services becauses checks and notifications
+            # Just put hosts/services because checks and notifications
             # are already link into
             # all_data = {'hosts': sched.hosts, 'services': sched.services}
 
-            # We create a all_data dict with lsit of dict of retention useful
+            # We create a all_data dict with list of dict of retention useful
             # data of our hosts and services
             all_data = sched.get_retention_data()
 
@@ -110,7 +110,7 @@ class Pickle_retention_scheduler(BaseModule):
             logger.warning(repr(exp))
             return False
         except (IndexError, TypeError), exp:
-            logger.warning("Sorry, the ressource file is not compatible")
+            logger.warning("Sorry, the resource file is not compatible")
             return False
 
         # call the scheduler helper function for restoring values

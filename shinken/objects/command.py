@@ -64,7 +64,7 @@ class Command(Item):
         self.customs = {}
 
         for key in params:
-            # Manabe customs values
+            # Manage customs values
             if key.startswith('_'):
                 self.customs[key.upper()] = params[key]
             else:
@@ -112,7 +112,7 @@ class Command(Item):
         cls = self.__class__
         # Now config properties
         for prop, entry in cls.properties.items():
-            # Is this property intended for brokking?
+            # Is this property intended for broking?
             #if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
@@ -122,7 +122,7 @@ class Command(Item):
 
 
 
-    # Call by pickle for dataify the coment
+    # Call by pickle to dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
@@ -134,7 +134,7 @@ class Command(Item):
 
         return res
 
-    # Inversed funtion of getstate
+    # Inversed function of getstate
     def __setstate__(self, state):
         cls = self.__class__
         # We move during 1.0 to a dict state

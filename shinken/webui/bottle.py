@@ -452,7 +452,7 @@ class Bottle(object):
 
         self.mounts = {}
         self.error_handler = {}
-        #: If true, most exceptions are catched and returned as :exc:`HTTPError`
+        #: If true, most exceptions are caught and returned as :exc:`HTTPError`
         self.catchall = catchall
         self.config = config or {}
         self.serve = True
@@ -488,7 +488,7 @@ class Bottle(object):
             return app._handle(request.environ)
 
     def install(self, plugin):
-        ''' Add a plugin to the list of plugins and prepare it for beeing
+        ''' Add a plugin to the list of plugins and prepare it for being
             applied to all routes of this application. A plugin may be a simple
             decorator or an object that implements the :class:`Plugin` API.
         '''
@@ -664,8 +664,8 @@ class Bottle(object):
 
     def handle(self, path, method='GET'):
         """ (deprecated) Execute the first matching route callback and return
-            the result. :exc:`HTTPResponse` exceptions are catched and returned.
-            If :attr:`Bottle.catchall` is true, other exceptions are catched as
+            the result. :exc:`HTTPResponse` exceptions are caught and returned.
+            If :attr:`Bottle.catchall` is true, other exceptions are caught as
             well and returned as :exc:`HTTPError` instances (500).
         """
         depr("This method will change semantics in 0.10. Try to avoid it.")
@@ -865,7 +865,7 @@ class BaseRequest(DictMixin):
     @DictProperty('environ', 'bottle.request.forms', read_only=True)
     def forms(self):
         """ Form values parsed from an `url-encoded` or `multipart/form-data`
-            encoded POST or PUT request body. The result is retuned as a
+            encoded POST or PUT request body. The result is returned as a
             :class:`MultiDict`. All keys and values are strings. File uploads
             are stored separately in :attr:`files`. """
         forms = MultiDict()
@@ -2116,7 +2116,7 @@ server_names = {
 ###############################################################################
 
 def _load(target, **vars):
-    """ Fetch something from a module. The exact behaviour depends on the the
+    """ Fetch something from a module. The exact behavior depends on the
         target string:
 
         If the target is a valid python import path (e.g. `package.module`),
@@ -2568,7 +2568,7 @@ class SimpleTemplate(BaseTemplate):
                 line = line.split('%', 1)[1].lstrip()  # Full line following the %
                 cline = self.split_comment(line).strip()
                 cmd = re.split(r'[^a-zA-Z0-9_]', cline)[0]
-                flush() ## encodig (TODO: why?)
+                flush() ## encoding (TODO: why?)
                 if cmd in self.blocks or multiline:
                     cmd = multiline or cmd
                     dedent = cmd in self.dedent_blocks  # "else:"
@@ -2753,7 +2753,7 @@ request = Request()
 #: A thread-save instance of :class:`Response` used to build the HTTP response.
 response = Response()
 
-#: A thread-save namepsace. Not used by Bottle.
+#: A thread-save namespace. Not used by Bottle.
 local = threading.local()
 
 # Initialize app stack (create first empty Bottle app)

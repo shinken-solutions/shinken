@@ -91,7 +91,7 @@ class SQLite_generic(BaseModule):
     def get_ui_common_preference(self, key):
         return self._get_ui_user_preference('shinken-global', key)
 
-    # Query user preference entre from database
+    # Query user preference entry from database
     def get_ui_user_preference(self, user, key):
         if not self.db:
             logger.error("Problem during init phase")

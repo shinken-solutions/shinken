@@ -57,8 +57,8 @@ class Servicedependency(Item):
         'explode_hostgroup':             BoolProp(default='0')
     })
 
-    # Give a nice name output, for debbuging purpose
-    # (Yes, debbuging CAN happen...)
+    # Give a nice name output, for debugging purpose
+    # (Yes, debugging CAN happen...)
     def get_name(self):
         return getattr(self, 'dependent_host_name', '') + '/' + getattr(self, 'dependent_service_description', '') + '..' + getattr(self, 'host_name', '') + '/' + getattr(self, 'service_description', '')
 
@@ -82,7 +82,7 @@ class Servicedependencies(Items):
         sd = Servicedependency(prop)
         self.items[sd.id] = sd
 
-    # If we have explode_hostgroup parameter whe have to create a service dependency for each host of the hostgroup
+    # If we have explode_hostgroup parameter we have to create a service dependency for each host of the hostgroup
     def explode_hostgroup(self, sd, hostgroups):
         # We will create a service dependency for each host part of the host group
 
@@ -112,7 +112,7 @@ class Servicedependencies(Items):
                         new_sd.dependent_service_description = dep_sname
                         self.items[new_sd.id] = new_sd
 
-    # We create new servicedep if necessery (host groups and co)
+    # We create new servicedep if necessary (host groups and co)
     def explode(self, hostgroups):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it

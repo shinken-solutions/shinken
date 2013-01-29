@@ -51,7 +51,7 @@ class Dummy_broker(BaseModule):
 
     # Called by Broker to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Dummy Broker] Initilisation of the dummy broker module")
+        logger.info("[Dummy Broker] Initialization of the dummy broker module")
 
 
       

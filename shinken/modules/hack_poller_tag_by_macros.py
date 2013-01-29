@@ -55,7 +55,7 @@ class Hack_pt_by_macros(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[Hack poller tag by macros] Initilisation of the hack poller tag by macro module")
+        logger.info("[Hack poller tag by macros] Initialization of the hack poller tag by macro module")
 
     def hook_late_configuration(self, arb):
         logger.info("[HackPollerTagByMacros in hook late config")

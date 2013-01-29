@@ -95,11 +95,11 @@ class CommandCall(DummyCommandCall):
         """
 
         # First protect
-        p_call = self.call.replace('\!', '___PROTECT_ESCLAMATION___')
+        p_call = self.call.replace('\!', '___PROTECT_EXCLAMATION___')
         tab = p_call.split('!')
         self.command = tab[0]
         # Reverse the protection
-        self.args = [s.replace('___PROTECT_ESCLAMATION___', '!')
+        self.args = [s.replace('___PROTECT_EXCLAMATION___', '!')
                      for s in tab[1:]]
 
     # If we didn't already lately relink us, do it
@@ -120,7 +120,7 @@ class CommandCall(DummyCommandCall):
         return self.call
 
     def __getstate__(self):
-        """Call by pickle for dataify the coment
+        """Call by pickle to dataify the comment
         because we DO NOT WANT REF in this pickleisation!
         """
         cls = self.__class__
@@ -145,7 +145,7 @@ class CommandCall(DummyCommandCall):
         return res
 
     def __setstate__(self, state):
-        """Inverted funtion of getstate"""
+        """Inverted function of getstate"""
         cls = self.__class__
         # We move during 1.0 to a dict state
         # but retention file from 0.8 was tuple

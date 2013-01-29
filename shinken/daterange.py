@@ -29,10 +29,10 @@ import time, calendar
 from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
 from shinken.log import logger
 
-# Get the day number (like 27 in July tuesday 27 2010 for call:
-# 2010, july, tuesday, -1 (last tuesday of july 2010)
+# Get the day number (like 27 in July Tuesday 27 2010 for call:
+# 2010, July, Tuesday, -1 (last Tuesday of July 2010)
 def find_day_by_weekday_offset(year, month, weekday, offset):
-    # get the id of the weekday (1 for tuesday)
+    # get the id of the weekday (1 for Tuesday)
     weekday_id = Daterange.get_weekday_id(weekday)
     if weekday_id is None:
         return None
@@ -305,7 +305,7 @@ class Daterange:
         #print "Look in", self.__dict__
         #print 'DR: get_next_invalid_day for', time.asctime(time.localtime(t))
         if self.is_time_day_invalid(t):
-            #print "EARLEY RETURN"
+            #print "EARLY RETURN"
             return t
 
         next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
@@ -334,7 +334,7 @@ class Daterange:
                 return get_day(start_time)
         else:
             # Else, there is no possibility than in our start_time<->end_time we got
-            # any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
+            # any invalid time (full period out). So it's end_time+1 sec (tomorrow of end_time)
             # print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
             return get_day(end_time + 1)
 
@@ -356,7 +356,7 @@ class Daterange:
             sec_from_morning = self.get_next_future_timerange_invalid(t)
         #print "DR: sec from morning", sec_from_morning
 
-        # tr can't be valid, or it will be return at the begining
+        # tr can't be valid, or it will be return at the beginning
         #sec_from_morning = self.get_next_future_timerange_invalid(t)
 
         # Ok we've got a next invalid day and a invalid possibility in
@@ -406,7 +406,7 @@ class StandardDaterange(Daterange):
             self.timeranges.append(Timerange(timeinterval.strip()))
         self.day = day
 
-    # It's correct only if the weekday (sunday, etc) is a valid one
+    # It's correct only if the weekday (Sunday, etc) is a valid one
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
@@ -430,7 +430,7 @@ class StandardDaterange(Daterange):
 """ TODO: Add some comment about this class for the doc"""
 class MonthWeekDayDaterange(Daterange):
 
-    # It's correct only if the weekday (sunday, etc) is a valid one
+    # It's correct only if the weekday (Sunday, etc) is a valid one
     def is_correct(self):
         b = True
         b &= self.swday in Daterange.weekdays
@@ -469,7 +469,7 @@ class MonthWeekDayDaterange(Daterange):
                 start_time = get_start_of_day(self.syear - 1, month_id, day_start)
         else:
             if now_epoch > end_time:
-                # just have to check for next year if necessery
+                # just have to check for next year if necessary
                 day_start = find_day_by_weekday_offset(self.syear + 1, self.smon, self.swday, self.swday_offset)
                 start_time = get_start_of_day(self.syear + 1, month_id, day_start)
                 day_end = find_day_by_weekday_offset(self.eyear + 1, self.emon, self.ewday, self.ewday_offset)
@@ -506,7 +506,7 @@ class MonthDateDaterange(Daterange):
                 start_time = get_start_of_day(self.syear-1, month_start_id, day_start)
         else:
             if now_epoch > end_time:
-                # just have to check for next year if necessery
+                # just have to check for next year if necessary
                 day_start = find_day_by_offset(self.syear+1, self.smon, self.emday)
                 start_time = get_start_of_day(self.syear+1, month_start_id, day_start)
                 day_end = find_day_by_offset(self.eyear+1, self.emon, self.emday)
@@ -548,7 +548,7 @@ class WeekDayDaterange(Daterange):
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch = time.mktime(now)
-        # But maybe we look not ethouth far. We should add a month
+        # But maybe we look not enought far. We should add a month
         if end_time < now_epoch:
             month_end_id = month_end_id + 1
             month_start_id = month_start_id + 1

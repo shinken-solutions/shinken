@@ -73,8 +73,8 @@ class Hostgroup(Itemgroup):
         # if a son of it already call it
         self.already_explode = True
 
-        # Now the recursiv part
-        # rec_tag is set to False avery HG we explode
+        # Now the recursive part
+        # rec_tag is set to False every HG we explode
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
@@ -132,7 +132,7 @@ class Hostgroups(Itemgroups):
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-            # We find the id, we remplace the names
+            # We find the id, we replace the names
             hg.replace_members(new_mbrs)
 
             # Now register us in our members
@@ -143,11 +143,11 @@ class Hostgroups(Itemgroups):
 
     # More than an explode function, but we need to already
     # have members so... Will be really linkify just after
-    # And we explode realm in ours members, but do not overide
+    # And we explode realm in ours members, but do not override
     # a host realm value if it's already set
     def linkify_hg_by_realms(self, realms):
         # Now we explode the realm value if we've got one
-        # The group realm must not overide a host one (warning?)
+        # The group realm must not override a host one (warning?)
         for hg in self:
             if not hasattr(hg, 'realm'):
                 continue
