@@ -104,6 +104,7 @@ class TestPickleRetention(ShinkenTest):
         # Lie about us in checking or not
         svc.in_checking = False
         diff = svc.next_chk - now
+        print "DIFF 1 is", diff
         # should be near 500 seconds ahead
         self.assert_(499 < diff < 501)
 
@@ -111,6 +112,7 @@ class TestPickleRetention(ShinkenTest):
         svc.schedule()
         # should be the same value in the future, we want to keep it
         diff = svc.next_chk - now
+        print "DIFF 2 IS", diff
         self.assert_(499 < diff < 501)
 
         # Now make real loops with notifications

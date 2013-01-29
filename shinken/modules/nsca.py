@@ -187,6 +187,7 @@ class NSCA_arbiter(BaseModule):
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setblocking(0)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind((self.host, self.port))
         server.listen(backlog)
         input = [server]

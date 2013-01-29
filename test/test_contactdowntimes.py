@@ -61,7 +61,7 @@ class TestContactDowntime(ShinkenTest):
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;STARTED'))
         self.show_and_clear_logs()
 
-        print "downtime was scheduled. check its activity and the comment"
+        print "downtime was scheduled. check its activity and the comment\n"*5
         self.assert_(len(self.sched.contact_downtimes) == 1)
         self.assert_(len(test_contact.downtimes) == 1)
         self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
@@ -89,16 +89,24 @@ class TestContactDowntime(ShinkenTest):
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;STOPPED'))
         self.show_and_clear_logs()
 
-        print "Downtime was ended. Check it is really stopped"
+        print "\n\nDowntime was ended. Check it is really stopped"
         self.assert_(len(self.sched.contact_downtimes) == 0)
         self.assert_(len(test_contact.downtimes) == 0)
+
+        for n in svc.notifications_in_progress.values():
+            print "NOTIF", n, n.t_to_go, time.time()
 
         # Now we want this contact to be really notify!
         # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
+        time.sleep(1)
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
+
+        for n in svc.notifications_in_progress.values():
+            print "NOTIF", n, n.t_to_go, time.time(), time.time() - n.t_to_go
+
 
     def test_contact_downtime_and_cancel(self):
         self.print_header()

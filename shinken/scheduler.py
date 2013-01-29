@@ -536,7 +536,6 @@ class Scheduler:
                                 new_c = c.copy_shell()
                                 res.append(new_c)
 
-
                         # If we have notification_interval then schedule the next notification (problems only)
                         if a.type == 'PROBLEM':
                             # Update the ref notif number after raise the one of the notification
@@ -552,7 +551,7 @@ class Scheduler:
                                 # a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # or maybe before because we have an escalation that need to raise up before
                                 a.t_to_go = item.get_next_notification_time(a)
-
+                                
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
                             else:
