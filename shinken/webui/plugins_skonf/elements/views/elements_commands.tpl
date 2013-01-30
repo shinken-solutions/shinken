@@ -5,10 +5,6 @@
   <a class="span2 btn btn-small btn-spezial btn-success" href="/elements/add/command"><i class="icon-plus"></i> Add new command</a>
 </div>
 
-<!-- <div class='span2 pull-right'>
-  <a class='btn btn-info' href="/elements/add/command"><i class="icon-plus"></i> Add new command</a>
-</div> -->
-
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-hover">
