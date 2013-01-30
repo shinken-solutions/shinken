@@ -111,6 +111,7 @@ class TestAction(ShinkenTest):
         self.wait_finished(a)
         self.assertEqual(a.output, 'TITI=est en vacance')
 
+
     def test_environment_variables(self):
 
         class ActionWithoutPerfData(Action):
@@ -250,6 +251,23 @@ class TestAction(ShinkenTest):
         self.assert_(a.status == 'done')
         self.assert_(a.output == "A"*100000)
         self.assert_(a.perf_data == "")
+
+
+
+    def test_execve_fail_with_utf8(self):
+        if os.name == 'nt':
+            return
+
+        a = Action()
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+
+        a.command = u"/bin/echo Wiadomo\u015b\u0107"
+
+        a.execute()
+        self.wait_finished(a)
+        #print a.output
+        self.assertEqual(a.output.decode('utf8'), u"Wiadomo\u015b\u0107")
 
 
 
