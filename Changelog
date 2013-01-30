@@ -2,10 +2,74 @@
 Shinken ChangeLog
 #######################
 
+1.2.3 - 30/01/2013
+------------------
+        CORE FIXES
+	* Fix : (Romain Forlot) wrong plugin owners after installation
+	* Fix : (Romain Forlot) add mysql-client for Debian when install the server.
+	* Fix : (Romain Forlot) Make arbiter last after all daemons except skonf because of issue 647
+	* Fix : (reported by: opc and ppj) get back the arbiter spare management.
+	* Fix : Manage sudoers to use nmap by discovery process
+	* Fix : Set the HOME var to use the home of shinken, instead of the root's.
+	* FIX : #689 add sudo prerequisite
+	* Fix : Poller handling of abnormal plugin failures. Non-english shell stderr is captured too
+	* Fix : Honor check_for_orphaned_* config params + add time_to_orphanage support for service and host
+	* Fix : bad_start test for environments where groupname != username
+	* Fix : Daemon timeout and receiver module options descriptions
+	* Fix : bad import in shinken-admin
+	* Fix : add default pack_distribution_file to nagios.cfg file, so it fix #576
+	* Fix : (reported by: ethtricks) manage hosts macros addressX. Fix #640
+	* Fix : (reported by: Rémi BUISSON, fixed by Olivier Hanesse) the "too much notification" bug after a restart, and also a potential bug for hosts downtimes overlap.
+	* Fix : (By : Olivier Hanesse) schedule times load from retention were used even if the time was past, and make launch a bunch of useless checks.
+	* Fix : (from rdumonnet) and remove alias for generic-host, so the value will be used from real hosts instead.
+	* Fix : more Pyro exceptions handling
+	* Fix : new way of parsing the complex expressions for hostgroups and templates. Fix #676
+
+	CORE ENHANCEMENTS
+	* Add : (Jean-francois BUTKIEWICZ) Windows installation for shinken, using .net services instead of instsrv.
+	* Add : (Romain Forlot) distro support to install notify_by_xmpp
+	* Add : (Romain Forlot) Added pnp4nagios, multisite and nagvis add-on's config folders into restore function (prior version didn't restore them)
+	* Add : (from : Joel Ramat) include the -property feature in discovery.
+	* Add : making orphanage time configurable
+	* Add : first version of a Trending broker module, and libexec scripts.
+	* Add : auto-magically add the shinken root dir parent to the PYTHONPATH environ variable in the daemons if the shinken lib is nout found.
+	
+	MODULES FIXES
+	* Fix : Canopsis module - File handler and os path join
+	* Fix : LiveStatus Correct bug with indexed access connected to issue #648.
+	* Fix : let livestatus handle display_name correctly
+	* Fix : (from Nicolas Pichon) Graphite, URI generation when using datasource, _GRAPHITE_PRE and _GRAPHITE_post
+
+	MODULES ENHANCEMENTS
+	* Add : (from Thibault Cohen) realm and poller_tag attributes in Livestatus module
+	* Add : mongodb replicat set management in the scehduler retention module.
+	* Add : hot host dependencies with libvirt
+	* Add : Better handling of Carbon connection.
+	* Add : (from Nicolas DUPEUX) SO_REUSEADDR to nsca sock to allow fast stop/start
+	
+	UI FIXES
+	* Fix : WebUI manage service description with / for actions.
+	* Fix : skonf stop script
+	* Fix : (reported by:sebguilbaud) fix #668  : was not managed in webui for names.
+
+	UI ENHANCEMENTS
+	* Add : (from : Caez) webui,auth manage the $1$ htpasswd md5 way.
+	* Add : (From Frescha) shinken informations
+	* Add : (from Frescha) Logout link moved to admin submenu and submenu moved to the right
+	* Add : (from Steve Schnepp) dashboard/currently, use a 24H clock format
+	* Add : "Beta" badge
+	* Add : caps lock detection login form
+
+	DEFAULT PACKS
+	* Fix : discovery for safekit cluster
+	* Add : postgreSQL monitoring pack
+	* Add : first part of tomcat pack. This pack need a proper installation of jmx4perl on shinken server (or poller) and a proper installation off jolokia
+	
+	
 1.2.2 - 22/10/2012
 ------------------
 	CORE FIXES
-	* Fix : bug in scheduler hwne next check was impossible.
+	* Fix : bug in scheduler when next check was impossible.
 	
 
 
@@ -13,6 +77,7 @@ Shinken ChangeLog
 ------------------
         CORE ENHANCEMENTS
         * Add : Landscape (ubuntu SaaS) arbiter importer module
+
 
 	CORE FIXES
         * Fix : (reported by: Yannig Perre) bad contacts/notifways notif periods were not caught
