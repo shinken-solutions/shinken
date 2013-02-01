@@ -495,7 +495,7 @@ config_objects_file = (
                         'contacts.cfg',
                         'discovery_rules.cfg',
                         'hosts/localhost.cfg',
-                        'services/linux_local.cfg',
+                        'services/services.cfg',
                         'contactgroups.cfg',
                         'escalations.cfg',
                         'commands.cfg',
@@ -555,9 +555,6 @@ data_files = [
          'bin/init.d/shinken-scheduler',
          'bin/init.d/shinken-skonf',
          ]
-        ),
-    (
-        default_paths['libexec'], ['libexec/check.sh']
         )
     ]
 
