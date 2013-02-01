@@ -35,7 +35,7 @@ import datetime
 import re
 from shinken.objects.service import Service
 
-from shinken.log import log
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 
