@@ -551,7 +551,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 # don't know yet how to handle this case
                                 pass
                             else:
-                                logger.error("[Livestatus Broker] other error" % str(errno))
+                                logger.error("[Livestatus Broker] other error %s" % str(errno))
 
                         # These two flags decide whether the databuffer is
                         # passed to the livestatus module for execution
