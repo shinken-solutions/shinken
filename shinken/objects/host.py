@@ -341,7 +341,8 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
         'TOTALHOSTSERVICESUNKNOWN': 'get_total_services_unknown',
-        'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical'
+        'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical',
+        'HOSTBUSINESSIMPACT': 'get_business_impact'
     }
 
     # Manage ADDRESSX macros by adding them dynamically
@@ -830,6 +831,9 @@ class Host(SchedulingItem):
         m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
+
+    def get_business_impact(self):
+        return str(self.business_impact)
 
     # Check if a notification for this host is suppressed at this time
     # This is a check at the host level. Do not look at contacts here
