@@ -308,7 +308,7 @@ class Service(SchedulingItem):
         'SERVICEACTIONURL':       'action_url',
         'SERVICENOTESURL':        'notes_url',
         'SERVICENOTES':           'notes',
-        'SERVICEBUSINESSIMPACT':  'get_business_impact'
+        'SERVICEBUSINESSIMPACT':  'business_impact'
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -836,9 +836,6 @@ class Service(SchedulingItem):
 
     def get_check_command(self):
         return self.check_command.get_name()
-
-    def get_business_impact(self):
-        return str(self.business_impact)
 
     # Check if a notification for this service is suppressed at this time
     def notification_is_blocked_by_item(self, type, t_wished = None):
