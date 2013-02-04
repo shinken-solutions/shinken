@@ -135,6 +135,9 @@ class Service(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+        
 
     })
 

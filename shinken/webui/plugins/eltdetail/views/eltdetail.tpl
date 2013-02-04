@@ -26,7 +26,7 @@ Invalid element name
 %end
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js'], css=['eltdetail/css/iphonebuttons.css_', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js', 'eltdetail/js/custom_views.js' ], css=['eltdetail/css/iphonebuttons.css_', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
@@ -70,8 +70,8 @@ $(document).ready(function(){
 </script>
 
   %#  "Content Container Start"
-  
-  %# app.template_call('linux_detail', globals())
+
+  %#app.insert_template('cv_linux', globals())
 
   <div id="content_container" class="row-fluid">
   	<div class="row-fluid">
@@ -425,7 +425,13 @@ $(document).ready(function(){
 		<!-- Detail info box start -->
 		<div class="span9 tabbable">
 			<ul class="nav nav-tabs"  style="margin-bottom: 12px;">
-				<li class="active"><a href="#impacts" data-toggle="tab">Services</a></li>
+			  %_go_active = 'active'
+			  %for cvname in elt.custom_views:
+			     <li class="{{_go_active}}"><a href="#cv{{cvname}}" data-toggle="tab">{{cvname.capitalize()}}</a></li>
+			     %_go_active = ''
+			  %end
+
+				<li class="{{_go_active}}"><a href="#impacts" data-toggle="tab">Services</a></li>
 				<li><a href="#comments" data-toggle="tab">Comments</a></li>
 				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
@@ -433,8 +439,18 @@ $(document).ready(function(){
 				<!--<li><a href="/depgraph/{{elt.get_full_name()}}" title="Impact map of {{elt.get_full_name()}}">Impact map</a></li> -->
 			</ul>
 			<div class="tab-content">
+
+			  <!-- First custom views -->
+			  %_go_active = 'active'
+			  %for cvname in elt.custom_views:
+			     <div class="tab-pane {{_go_active}} cv_pane" data-elt-name='{{elt.get_full_name()}}' id="cv{{cvname}}">
+			       Cannot load the pane {{cvname}}.
+			     </div>
+			     %_go_active = ''
+			  %end
+
 				<!-- Tab Summary Start-->
-				<div class="tab-pane active" id="impacts">
+				<div class="tab-pane {{_go_active}}" id="impacts">
 		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
 		      left is information, right is related elements -->
 		      <div class="row-fluid">

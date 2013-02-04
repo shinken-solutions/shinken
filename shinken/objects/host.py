@@ -136,6 +136,9 @@ class Host(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+
     })
 
     # properties set only for running purpose
@@ -291,6 +294,8 @@ class Host(SchedulingItem):
 
         # Trigger list
         'triggers':  StringProp(default=[])
+
+        
     })
 
     # Hosts macros and prop that give the information

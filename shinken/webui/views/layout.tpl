@@ -49,6 +49,9 @@
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <link href="/static/css/custom/datepicker.css" rel="stylesheet">
 
+    <!-- Canvas and gauge ones -->
+    <link href="/static/css/shinken-gauge.css" rel="stylesheet">
+
     %# And now for css files
       %for p in css:
     <link rel="stylesheet" type="text/css" href="/static/{{p}}">
@@ -91,6 +94,8 @@
     <script src="/static/js/shinken-opacity.js"></script>
     <script src="/static/js/shinken-modals.js"></script>
     <script src="/static/js/shinken-widgets.js"></script>
+    <script src="/static/js/shinken-canvas.js"></script>
+    <script src="/static/js/shinken-gauge.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

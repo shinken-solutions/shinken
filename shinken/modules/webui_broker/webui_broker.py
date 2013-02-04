@@ -643,3 +643,13 @@ class Webui_broker(BaseModule, Daemon):
 
         safe_print("Will return external_ui_link::", lst)
         return lst
+
+
+
+    def insert_template(self, tpl_name, d):
+        try:
+            r = template(tpl_name, d)
+        except Exception, exp:
+            pass#print "Exception?", exp
+
+
