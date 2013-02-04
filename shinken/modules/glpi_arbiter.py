@@ -194,7 +194,7 @@ class Glpi_arbiter(BaseModule):
 
         # Get contacts
         all_contacts = self.con.monitoring.shinkenContacts(arg)
-         logger.info("[GLPI Arbiter] Get all contacts: %s" % str(all_contacts))
+        logger.info("[GLPI Arbiter] Get all contacts: %s" % str(all_contacts))
         for contact_info in all_contacts:
             logger.info("[GLPI Arbiter] Contact info in GLPI:" % contact_info)
             h = {'contact_name': contact_info['contact_name'],

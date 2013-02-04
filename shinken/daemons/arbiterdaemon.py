@@ -248,7 +248,10 @@ class Arbiter(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter: %s" % (('master', 'spare')[self.is_master], arb.get_name()))
+                if self.is_master:
+                    logger.info("I am the master Arbiter: %s" % arb.get_name())
+                else:
+                    logger.info("I am a spare Arbiter: %s" % arb.get_name())
 
                 # Set myself as alive ;)
                 self.me.alive = True

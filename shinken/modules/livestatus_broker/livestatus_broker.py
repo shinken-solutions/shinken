@@ -551,7 +551,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 # don't know yet how to handle this case
                                 pass
                             else:
-                                logger.error("[Livestatus Broker] other error" % str(errno))
+                                logger.error("[Livestatus Broker] other error %s" % str(errno))
 
                         # These two flags decide whether the databuffer is
                         # passed to the livestatus module for execution
@@ -650,7 +650,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
                 # Now the work is done. Cleanup
                 for socketid in open_connections:
-                    logger.info("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state']))
+                    logger.debug("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state']))
                     if now - open_connections[socketid]['lastseen'] > 300:
                         # After 5 minutes of inactivity we close connections
                         open_connections[socketid]['keepalive'] = False
@@ -668,7 +668,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                             kick_socket.shutdown(2)
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
-                            logger.info("[Livestatus Broker] Shutdown socket %d" % socketid)
+                            logger.debug("[Livestatus Broker] Shutdown socket %d" % socketid)
                         except Exception, exp:
                             logger.warning("[Livestatus Broker] Closing socket failed: %s" % exp)
                             kick_socket.close()

@@ -1187,7 +1187,6 @@ class Services(Items):
                 hnames = strip_and_uniq(hnames)
                 # We will duplicate if we have multiple host_name
                 # or if we are a template (so a clean service)
-                # print "Where", len(hnames) >= 2 or s.is_tpl()
                 if len(hnames) >= 2 or s.is_tpl() \
                         or (hasattr(s, 'duplicate_foreach') and s.duplicate_foreach != ''):
                     for hname in hnames:
@@ -1195,7 +1194,7 @@ class Services(Items):
 
                         # If the name begin with a !, we put it in
                         # the not list
-                        if len(hname) > 0 and hname[0] == '!':
+                        if hname.startswith('!'):
                             not_hosts.append(hname[1:])
                         else:  # the standard list
                             duplicate_for_hosts.append(hname)

@@ -1,6 +1,7 @@
 [Unit]
 Description=Shinken Skonf
-After=syslog.target
+Requires=mongod.service
+After=syslog.target mongod.service
 
 [Service]
 Type=forking

@@ -192,7 +192,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         now = time.time()
         if self.next_log_db_commit <= now:
             self.commit()
-            logger.info("[Logstore SQLite] commit.....")
+            logger.debug("[Logstore SQLite] commit.....")
             self.next_log_db_commit = now + 1
         if self.next_log_db_rotate <= now:
             logger.info("[Logstore SQLite] at %s we rotate the database file" % time.asctime(time.localtime(now)))

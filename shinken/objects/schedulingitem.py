@@ -498,6 +498,8 @@ class SchedulingItem(Item):
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
 
+        now = time.time()
+
         # If check_interval is 0, we should not add it for a service
         # but suppose a 5min sched for hosts
         if self.check_interval == 0 and not force:
@@ -514,14 +516,12 @@ class SchedulingItem(Item):
             interval = self.retry_interval * cls.interval_length
 
         # Determine when a new check (randomize and distribute next check time)
-        # or recurring check should happen. Always start at hour.minute.0 to schedule.
+        # or recurring check should happen.
         if self.next_chk == 0:
             # At the start, we cannot have an interval more than cls.max_check_spread
             # is service_max_check_spread or host_max_check_spread in config
             interval = min(interval, cls.max_check_spread * cls.interval_length)
-            time_add_rnd = interval * random.uniform(0.0, 0.80)
-            time_add_offset = abs(datetime.now().second - 60)
-            time_add = time_add_offset + time_add_rnd
+            time_add = interval * random.uniform(0.0, 1.0)
         else:
             time_add = interval
             
@@ -529,7 +529,6 @@ class SchedulingItem(Item):
 
         # If not force_time, try to schedule
         if force_time is None:
-            now = time.time()
             
             # Do not calculate next_chk based on current time, but based on the last check execution time.
             # Important for consistency of data for trending.
@@ -549,27 +548,13 @@ class SchedulingItem(Item):
             # after add an interval
             if self.next_chk < now:
                 interval = min(interval, cls.max_check_spread * cls.interval_length)
-                time_add_rnd = interval * random.uniform(0.0, 0.80)
-                time_add_offset = abs(datetime.now().second - 60)
-                time_add = time_add_offset + time_add_rnd
+                time_add = interval * random.uniform(0.0, 1.0)
 
                 # if we got a check period, use it, if now, use now
                 if self.check_period:
                     self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
                 else:
                     self.next_chk = int(now + time_add)
-
-                # If check interval is a multiple of 60 (seconds), the check must be scheduler 
-                # between 0 et 48 absolute seconds.
-                # Else re-schedule if the check is scheduled between 49 et 59 inclusively in absolute seconds.
-                # We assume here that checks do not take more than 11 seconds to execute.
-                # We also do not make a distinction between the last absolute 11 seconds of a minute
-                # in the middle of a 5 minute interval versus the last 10 seconds of the check_interval.
-                # The algorithm is imperfect.
-            if self.next_chk and ((self.check_interval * cls.interval_length) % 60) == 0:
-                second = datetime.fromtimestamp(self.next_chk).second
-                if second > 48:
-                    self.next_chk = self.next_chk - ((second % 48) + 48 * random.uniform(0.1, 1.0))
             # else: keep the self.next_chk value in the future
         else:
             self.next_chk = int(force_time)
@@ -577,7 +562,6 @@ class SchedulingItem(Item):
         # If next time is None, do not go
         if self.next_chk is None:
             # Nagios do not raise it, I'm wondering if we should
-            # self.raise_no_next_check_log_entry()
             return None
 
         # Get the command to launch, and put it in queue
@@ -1107,8 +1091,15 @@ class SchedulingItem(Item):
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 if es.notification_interval != -1 and es.notification_interval < notification_interval:
                     notification_interval = es.notification_interval
+
         # So take the by default time
         std_time = n.t_to_go + notification_interval * cls.interval_length
+
+        # Maybe the notification comes from retention data and next notification alert is in the past
+        # if so let use the now value instead
+        if std_time < now:
+            std_time = now + notification_interval * cls.interval_length
+
         # standard time is a good one
         res = std_time
 
