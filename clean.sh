@@ -21,7 +21,7 @@ rm -fr var/*.dat
 rm -fr var/*.profile
 rm -fr var/*.cache
 rm -fr var/rw/*cmd
-rm -fr /tmp/retention.dat
+#rm -fr /tmp/retention.dat
 rm -fr /tmp/*debug
 rm -fr test/tmp/livelogs*
 rm -fr bin/default/shinken

@@ -337,7 +337,7 @@ class Helper(object):
                 sub_s = self.print_business_rules_mobile(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returning s:", s)
+        #safe_print("Returning s:", s)
         return s
 
     def print_business_rules(self, tree, level=0, source_problems=[]):
@@ -382,7 +382,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returning s:", s)
+        #safe_print("Returning s:", s)
         return s
 
     # Mockup helper
@@ -423,7 +423,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        safe_print("Returning s:", s)
+        #safe_print("Returning s:", s)
         return s
 
     # Get the small state for host/service icons
