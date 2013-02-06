@@ -28,7 +28,9 @@ $(window).ready(function(){
     for(var i=0; i<cv_panes.length; i++){
 	var p = $(cv_panes[i]);
 	var n = p.attr('data-elt-name');
+	var cvname = p.attr('data-cv-name');
+	var _t = new Date().getTime();
 	console.log('GOGOGO'+n);
-	p.load('/cv/linux/'+n);
+	p.load('/cv/'+cvname+'/'+n+"?_t="+_t);
     }
 });

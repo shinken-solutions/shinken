@@ -443,7 +443,7 @@ $(document).ready(function(){
 			  <!-- First custom views -->
 			  %_go_active = 'active'
 			  %for cvname in elt.custom_views:
-			     <div class="tab-pane {{_go_active}} cv_pane" data-elt-name='{{elt.get_full_name()}}' id="cv{{cvname}}">
+			     <div class="tab-pane {{_go_active}} cv_pane" data-cv-name="{{cvname}}" data-elt-name='{{elt.get_full_name()}}' id="cv{{cvname}}">
 			       Cannot load the pane {{cvname}}.
 			     </div>
 			     %_go_active = ''
