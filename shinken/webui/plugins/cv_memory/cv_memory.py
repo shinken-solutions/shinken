@@ -64,7 +64,11 @@ def get_page(hname):
     return {'app': app, 'elt': h, 'ps':ps}
 
 
+def get_page_proc(hname):
+    return get_page(hname)
 
 
 # Void plugin
-pages = {get_page: {'routes': ['/cv/memory/:hname'], 'view': 'cv_memory', 'static': True}}
+pages = {get_page: {'routes': ['/cv/memory/:hname'], 'view': 'cv_memory', 'static': True},
+         get_page_proc: {'routes': ['/cv/processes/:hname'], 'view': 'cv_processes', 'static': True}
+         }
