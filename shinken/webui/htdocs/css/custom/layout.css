@@ -389,3 +389,10 @@ a.disabled-link:hover {
 .row-fluid .offset1 {
   margin-left: 3%;
 }
+
+
+
+/* With the SORTER javascript plugin */
+th[data-sort]{
+  cursor:pointer;
+}

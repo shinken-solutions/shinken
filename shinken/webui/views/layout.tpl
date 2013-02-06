@@ -84,7 +84,8 @@
     <script src="/static/js/jquery.meow.js"></script>
     <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
     <script src="/static/js/jquery.hotkeys.js"></script>
-    
+    <!-- From http://joequery.github.com/Stupid-Table-Plugin/ -->
+    <script src="/static/js/jquery-stupidtable.min.js"></script>
 
     <!--Shinken ones-->
     <script src="/static/js/shinken-refresh.js"></script>
