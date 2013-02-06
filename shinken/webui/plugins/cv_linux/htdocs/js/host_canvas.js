@@ -115,7 +115,7 @@ $(function(){
 	}
     };
 
-    img.src = 'http://static.mymonitoringbox.com/img/bar_horizontal.png';
+    img.src = '/static/images/bar_horizontal.png';
     //Now the right par ofthe disks to go to the CPU
     draw_line(ctx, 160, 200, 200, 200, line_color, 1, 0.5);
     // Now the part that is going upper to the center

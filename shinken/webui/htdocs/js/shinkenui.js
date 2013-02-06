@@ -53,6 +53,7 @@ Array.prototype.remove=function(s){
 
 
 
+
 /**
  * Description:
  * Example: <div class="pulsate"> <p> Example DIV </p> </div>

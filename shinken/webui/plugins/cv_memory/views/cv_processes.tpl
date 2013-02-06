@@ -2,7 +2,8 @@
 <link href="/static/cv_memory/css/memory.css" rel="stylesheet">
 
 <div id='cv_processes_cont'>
-  <table>
+  <table class='table-bordered table-striped table-hover table-condensed'>
+  <thead>
     <th>User</th>
     <th>Pid</th>
     <th>%CPU</th>
@@ -11,6 +12,7 @@
     <th>RSS</th>
     <th>Status</th>
     <th>Command</th>
+  </thead>
     <tbody>
       %for p in ps:
       <tr>
