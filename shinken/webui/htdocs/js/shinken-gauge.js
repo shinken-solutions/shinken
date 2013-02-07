@@ -46,14 +46,14 @@ function DonutChart(canv_id){
     // Warning : orange
     // Critical : red
     // unknown or other : purple
-    if(this.state == 'ok'){
+    if(this.state == 'OK'){
 	this.grd.addColorStop(0, '#A6CE8D');
         this.grd.addColorStop(1, '#81BA6B');
-    }else if(this.state == 'warning') {
+    }else if(this.state == 'WARNING') {
 	this.grd.addColorStop(0, '#F1B16E');
         this.grd.addColorStop(1, '#EC9054');
 
-    }else if(this.state == 'critical') {
+    }else if(this.state == 'CRITICAL') {
         this.grd.addColorStop(0, '#dc4950');
         this.grd.addColorStop(1, '#e05e65');
     }else{

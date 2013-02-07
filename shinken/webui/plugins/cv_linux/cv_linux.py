@@ -31,10 +31,12 @@ app = None
 
 def find_disks(h):
     all_disks = []
+    disks_state = 'UNKNOWN'
     s = h.find_service_by_name('Disks')
     print "Service found", s.get_full_name()
     if not s:
-        return all_disks
+        return disks_state,all_disks
+    disks_state = s.state
     p = PerfDatas(s.perf_data)
     print "PERFDATA", p, p.__dict__
     for m in p:
@@ -52,14 +54,20 @@ def find_disks(h):
         
         all_disks.append((m.name, pct))
 
-    return all_disks
+    return disks_state,all_disks
 
 
 def get_memory(h):
+
+    mem_state = swap_state = 'UNKNOWN'
+    
     s = h.find_service_by_name('Memory')
     print "Service found", s.get_full_name()
     if not s:
-        return (0,0)
+        return (mem_state,swap_state,0,0)
+
+    mem_state = swap_state = s.state
+    # Now grep perfdata in it
     p = PerfDatas(s.perf_data)
     print "PERFDATA", p, p.__dict__
     mem = 0
@@ -83,15 +91,19 @@ def get_memory(h):
             swap = int(pct)
             print "Swap", m.value, m.max, pct
 
-    return mem,swap
+    return mem_state,swap_state,mem,swap
 
 
 
 def get_cpu(h):
+    cpu_state = 'UNKNOWN'
     s = h.find_service_by_name('Cpu')
     print "Service found", s.get_full_name()
     if not s:
-        return (0,0)
+        return cpu_state,0
+
+    cpu_state = s.state
+    # Now perfdata
     p = PerfDatas(s.perf_data)
     print "PERFDATA", p, p.__dict__
     cpu = 0
@@ -103,9 +115,16 @@ def get_cpu(h):
             cpu = m.value
             print "Cpu", m.value
 
-    return cpu
+    return cpu_state, cpu
 
 
+def compute_worst_state(d):
+    _ref = {'OK':0, 'UP':0, 'DOWN':3, 'UNREACHABLE':1, 'UNKNOWN':1, 'CRITICAL':3, 'WARNING':2}
+    cur_level = _ref[d['global']]
+    for (k,v) in d.iteritems():
+        level = _ref[v]
+        cur_level = max(cur_level, level)
+    return {3:'CRITICAL', 2:'WARNING', 1:'UNKNOWN', 0:'OK'}[cur_level]
 
 
 def get_page(hname):
@@ -120,19 +139,30 @@ def get_page(hname):
     h = app.datamgr.get_host(hname)
 
     all_perfs = {"swap": 0, "all_disks": [], "cpu": 0, "memory": 0}
+    all_states = {"disks": "UNKNOWN", "global": "UNKNOWN", "swap": "UNKNON", "memory": "UNKNOWN", "cpu": "UNKNOWN"}
+
     print "\n"*5, "Find host?", h
     if h:
-        all_disks = find_disks(h)
+        # Set the host state firt
+        all_states["global"] = h.state
+        # First look at disks
+        disks_state, all_disks = find_disks(h)
         all_perfs['all_disks'] = all_disks
-        mem,swap = get_memory(h)
+        all_states["disks"] = disks_state
+        # Then memory
+        mem_state, swap_state, mem,swap = get_memory(h)
         all_perfs["memory"] = mem
         all_perfs["swap"] = swap
-        all_perfs['cpu'] = get_cpu(h)
+        all_states['swap'] = swap_state
+        all_states['memory'] = mem_state
+        # And CPU too
+        all_states['cpu'], all_perfs['cpu'] = get_cpu(h)
+        all_states["global"] = compute_worst_state(all_states)
         
 
     print "ALL PERFS", all_perfs
     
-    return {'app': app, 'elt': h, 'all_perfs':all_perfs}
+    return {'app': app, 'elt': h, 'all_perfs':all_perfs, 'all_states':all_states}
 
 
 

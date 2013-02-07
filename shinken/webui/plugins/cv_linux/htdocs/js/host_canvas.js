@@ -8,6 +8,7 @@ $(function(){
 
     // Draw the host name
     var hname = $('#host_canvas').data('hname');
+    var global_state = $('#host_canvas').data('global-state');
     ctx.font      = "bold 22px Verdana";
     ctx.fillStyle = "#555";
     ctx.fillText(hname, 150, 50);
@@ -17,12 +18,11 @@ $(function(){
     // Blue   : '#DEF3F5', '#89C3C6'
     // Red    : '#dc4950', '#e05e65'
     // Orange : '#F1B16E', '#EC9054'
-    var main_colors = {'unknown' : '#c1bad9', 'ok' : '#DEF3F5', 'warning' : '#F1B16E' , 'critical' : '#dc4950'};
-    var huge_colors = {'unknown' : '#a79fcb', 'ok' : '#89C3C6', 'warning' : '#EC9054' , 'critical' : '#e05e65'};
+    var main_colors = {'UNKNOWN' : '#c1bad9', 'OK' : '#DEF3F5', 'WARNING' : '#F1B16E' , 'CRITICAL' : '#dc4950'};
+    var huge_colors = {'UNKNOWN' : '#a79fcb', 'OK' : '#89C3C6', 'WARNING' : '#EC9054' , 'CRITICAL' : '#e05e65'};
     
-
-    var main_color = main_colors[all_states['global']];//'#F1B16E';//'#c1bad9';
-    var huge_color = huge_colors[all_states['global']];//'#EC9054'; //'#a79fcb';
+    var main_color = main_colors[global_state];
+    var huge_color = huge_colors[global_state];
     var line_color = huge_color;
 
     var line_s = 2;
@@ -62,7 +62,7 @@ $(function(){
 	var o = 80 - (img_size/2);
         ctx.drawImage(img_status, o, o, img_size, img_size);
     };
-    img_status.src = '/static/img/icons/state_up.png';
+    img_status.src = $('#host_canvas').data('icon-uri');
     
     
     //////////////// Lines part

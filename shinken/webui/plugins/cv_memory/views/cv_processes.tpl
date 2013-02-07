@@ -1,7 +1,8 @@
 
 <link href="/static/cv_memory/css/memory.css" rel="stylesheet">
 
-<div id='cv_processes_cont'>
+<div class='span12'>
+<div id='cv_processes_cont' class='span9'>
   <table class='table-bordered table-striped table-hover table-condensed' id='host_processes'>
   <thead>
     <th data-sort="string">User</th>
@@ -29,7 +30,8 @@
     </tbody>
   </table>
 </div>
-
+<div class='span3'> <a  href="javascript:reload_custom_view('processes');"><i class="icon-repeat"></i> Reload</a>
+</div>
 
 <script>
 $(function(){

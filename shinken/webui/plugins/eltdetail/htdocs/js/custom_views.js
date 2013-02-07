@@ -36,7 +36,9 @@ function show_custom_view(p){
 
     var _t = new Date().getTime();
     console.log('GOGOGO'+hname);
+    var spinner = get_spinner('cv'+cvname);
     $('#cv'+cvname).load('/cv/'+cvname+'/'+hname+"?_="+_t);
+
     _already_load[cvname] = true;
     console.log("Already load?");
     console.log(_already_load);
@@ -55,3 +57,11 @@ $(window).ready(function(){
     });
 
 });
+
+
+function reload_custom_view(name){
+    // Be sure to remove the panel from already view, becaue if not
+    // won't load
+    delete _already_load[name];
+    show_custom_view($('#tab-cv-'+name));
+}

@@ -427,7 +427,7 @@ $(document).ready(function(){
 			<ul class="nav nav-tabs"  style="margin-bottom: 12px;">
 			  %_go_active = 'active'
 			  %for cvname in elt.custom_views:
-			     <li class="{{_go_active}} cv_pane" data-cv-name="{{cvname}}" data-elt-name='{{elt.get_full_name()}}'  ><a href="#cv{{cvname}}" data-toggle="tab">{{cvname.capitalize()}}</a></li>
+			     <li class="{{_go_active}} cv_pane" data-cv-name="{{cvname}}" data-elt-name='{{elt.get_full_name()}}' id='tab-cv-{{cvname}}'><a href="#cv{{cvname}}" data-toggle="tab">{{cvname.capitalize()}}</a></li>
 			     %_go_active = ''
 			  %end
 

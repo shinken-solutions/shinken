@@ -86,6 +86,7 @@
     <script src="/static/js/jquery.hotkeys.js"></script>
     <!-- From http://joequery.github.com/Stupid-Table-Plugin/ -->
     <script src="/static/js/jquery-stupidtable.min.js"></script>
+    <script src="/static/js/spin.min.js"></script>
 
     <!--Shinken ones-->
     <script src="/static/js/shinken-refresh.js"></script>
@@ -98,6 +99,7 @@
     <script src="/static/js/shinken-canvas.js"></script>
     <script src="/static/js/shinken-gauge.js"></script>
     <script src="/static/js/shinken-treemap.js"></script>
+    
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

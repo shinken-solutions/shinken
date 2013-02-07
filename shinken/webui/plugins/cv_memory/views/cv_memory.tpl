@@ -1,7 +1,9 @@
 %import json
 
-<div id='cv_memory_cont'>
-  <div id="treemap"></div>
+<div id='cv_memory_cont' class='span12'>
+  <div id="treemap" class='span11'></div>
+  <div  class='span1'> <a  href="javascript:reload_custom_view('memory');"><i class="icon-repeat"></i> Reload</a></div>
+  
 </div>
 
 
