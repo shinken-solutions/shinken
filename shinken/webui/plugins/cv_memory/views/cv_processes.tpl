@@ -20,8 +20,8 @@
 	<td>{{p['pid']}}</td>
 	<td>{{p['cpu_percent']}}</td>
 	<td>{{'%.1f' % p['memory_percent']}}</td>
-	<td>{{p['memory_info'][1]}}</td>
-	<td>{{p['memory_info'][0]}}</td>
+	<td data-sort-value="{{p['memory_info'][1]}}">{{fancy_units(p['memory_info'][1])}}</td>
+	<td data-sort-value="{{p['memory_info'][0]}}">{{fancy_units(p['memory_info'][0])}}</td>
 	<td>{{p['status']}}</td>
 	<td>{{p['name']}}</td>
       </tr>
@@ -33,6 +33,12 @@
 
 <script>
 $(function(){
+
+
+
+
+
+
 var table = $("#host_processes").stupidtable();
 
 /* Add a callback to add remove arrow */

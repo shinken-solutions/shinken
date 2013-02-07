@@ -33,6 +33,14 @@ import json
 ### Will be populated by the UI with it's own value
 app = None
 
+def fancy_units(num):
+    for x in ['','KB','MB','GB']:
+        if num < 1024.0 and num > -1024.0:
+            return "%3.1f%s" % (num, x)
+        num /= 1024.0
+    return "%3.1f%s" % (num, 'TB')
+
+
 def get_processes(h):
 
     addr = h.address
@@ -61,7 +69,7 @@ def get_page(hname):
 
     ps = get_processes(h)
     
-    return {'app': app, 'elt': h, 'ps':ps}
+    return {'app': app, 'elt': h, 'ps':ps, 'fancy_units':fancy_units}
 
 
 def get_page_proc(hname):
