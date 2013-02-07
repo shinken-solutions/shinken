@@ -731,7 +731,7 @@ class Helper(object):
         s += '<li class="no_list_style">'
         if path == '/' and len(services) > 0:
             s += """<span class="alert-small"> Others </span>"""
-        s += "<ul>"
+        s += '<ul style="margin-left: 5px;">'
         # Sort our services before print them
         services.sort(hst_srv_sort)
         for svc in services:
