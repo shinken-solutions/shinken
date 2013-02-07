@@ -396,3 +396,9 @@ a.disabled-link:hover {
 th[data-sort]{
   cursor:pointer;
 }
+
+
+/* For list where we do not want a style */
+.no_list_style{
+    list-style-type: none;
+}

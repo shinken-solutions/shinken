@@ -137,7 +137,9 @@ class Service(SchedulingItem):
 
         # Custom views
         'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
-        
+
+        # UI aggregation
+        'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
 
     })
 

@@ -479,36 +479,13 @@ $(document).ready(function(){
 						<p class="font-blue">No services available</p>
 					</div>
 		      		%end
-		      		<div class="host-services">
-		      			%nb = 0
-		      			%for s in helper.get_host_services_sorted(elt):
-		      			%nb += 1
+		      		<div class="host-services span11">
 
-		      			%# " We put a max imapct to print, bacuse too high is just useless"
-		      			%if nb > max_impacts:
-		      			%   break
-		      			%end
-
-		      			%if nb == 8:
-		      			<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
-		      			%end
-
-		      			%if nb < 8:
-		      			<div class="service">
-		      				%else:
-		      				<div class="service hidden_impacts_services">
-		      					%end
-		      					<div>
-		      						<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
-		      						<span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
-		      						%for i in range(0, s.business_impact-2):
-		      						<img alt="icon state" src="/static/images/star.png">
-		      						%end
-
-		      					</div>
-		      				</div>
-		      				%# End of this service
-		      				%end
+				  <div class='pull-left'>
+				    %_html_id = helper.get_html_id(elt)
+				    {{!helper.print_aggregation_tree(helper.get_host_service_aggregation_tree(elt), _html_id)}}
+				  </div>
+				  <div>&nbsp;</div>
 		      			</div>
 		      			%end #of the only host part
 

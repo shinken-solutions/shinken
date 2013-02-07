@@ -99,6 +99,8 @@
     <script src="/static/js/shinken-canvas.js"></script>
     <script src="/static/js/shinken-gauge.js"></script>
     <script src="/static/js/shinken-treemap.js"></script>
+    <script src="/static/js/shinken-aggregation.js"></script>
+
     
 
     %# End of classic js import. Now call for specific ones

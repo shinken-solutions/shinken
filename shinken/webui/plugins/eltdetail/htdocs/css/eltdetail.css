@@ -181,7 +181,7 @@ div.content {
     position: relative;
 }
 
-.info, .success, .warning, .error, .validation {
+.info, .success, .warn, .error, .validation {
   border: 1px solid;
   margin: 10px 0px;
   padding:5px 10px 5px 60px;
@@ -199,7 +199,7 @@ div.content {
   background-color: #DFF2BF;
   background-image:url('success.png');
 }
-.warning {
+.warn {
   color: #9F6000;
   background-color: #FEEFB3;
   background-image: url('warning.png');
