@@ -546,6 +546,8 @@ class Service(SchedulingItem):
                         if hasattr(self, 'check_command'):
                             # here we can replace VALUE, VALUE1, VALUE2,...
                             new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
+                        if hasattr(self, 'aggregation'):
+                            new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:
