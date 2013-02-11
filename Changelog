@@ -1,7 +1,12 @@
 ########################
 Shinken ChangeLog
 #######################
+1.2.4 - 11/02/2013
+------------------
+	MODULES FIXES
+	* Fix : LS module crash when bad socket close on the client side.
 
+	
 1.2.3 - 30/01/2013
 ------------------
         CORE FIXES
