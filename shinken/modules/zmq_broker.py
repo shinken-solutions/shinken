@@ -51,7 +51,6 @@ properties = {
     'external': False,
     }
 
-
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
     logger.info("[Zmq Broker] Get a Zmq broker module for plugin %s" % mod_conf.get_name())
@@ -60,6 +59,20 @@ def get_instance(mod_conf):
     instance = Zmq_broker(mod_conf, pub_endpoint, serialize_to)
     return instance
 
+
+# Json custom encoder, encodes sets to lists
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+	if isinstance(obj, set):
+	    return list(obj)
+	return json.JSONEncoder.default(self, obj)
+
+# Msgpack custom encoder, encodes set to lists
+def encode_monitoring_data(obj):
+    if isinstance(obj, set):
+        return list(set)
+    return obj
+
 # Class for the ZeroMQ broker
 class Zmq_broker(BaseModule):
     context = None
@@ -67,13 +80,6 @@ class Zmq_broker(BaseModule):
     pub_endpoint = None
     serialize_to = None
     serialize = None
-
-    # Json encoder, encodes sets to lists
-    class SetEncoder(json.JSONEncoder):
-        def default(self, obj):
-	    if isinstance(obj, set):
-	        return list(obj)
-	    return json.JSONEncoder.default(self, obj)
 
     def __init__(self, mod_conf, pub_endpoint, serialize_to):
         BaseModule.__init__(self, mod_conf)
@@ -92,10 +98,11 @@ class Zmq_broker(BaseModule):
         # depending on the serialization method
         # chosen in the configuration.
         if self.serialize_to == "msgpack":
-            from msgpack import packb
-            self.serialize = lambda msg: packb(msg, default=str)
+            import msgpack
+            packer = msgpack.Packer(default = encode_monitoring_data)
+            self.serialize = lambda msg: packer.pack(msg)
         elif self.serialize_to == "json":
-            self.serialize = lambda msg: json.dumps(msg, cls=self.SetEncoder)
+            self.serialize = lambda msg: json.dumps(msg, cls=SetEncoder)
         else:
             raise Exception("[Zmq Broker] No valid serialization method defined (Got "+str(self.serializ_to)+")!")
 		
