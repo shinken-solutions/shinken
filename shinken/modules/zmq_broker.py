@@ -70,7 +70,7 @@ class SetEncoder(json.JSONEncoder):
 # Msgpack custom encoder, encodes set to lists
 def encode_monitoring_data(obj):
     if isinstance(obj, set):
-        return list(set)
+        return list(obj)
     return obj
 
 # Class for the ZeroMQ broker
