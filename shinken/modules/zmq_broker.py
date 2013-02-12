@@ -34,11 +34,15 @@
 # tcp://127.0.0.1:22777
 # ipc:///tmp/shinken_pub
 # inproc://shinken_pub
+#
+# The monitoring data itself is serialized
+# using either json or msgpack depending on
+# the module configuration.
+#
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 import zmq
-import json
 
 properties = {
     'daemons': ['broker'],
@@ -88,7 +92,7 @@ class Zmq_broker(BaseModule):
             self.serialize = dumps
         else:
             raise Exception("[Zmq Broker] No valid serialization method defined (Got "+str(self.serializ_to)+")!")
-  	
+		
 	
     # Called by Broker to say 'let's prepare yourself guy'
     def init(self):
