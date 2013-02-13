@@ -37,6 +37,7 @@ import select
 import threading
 import base64
 import cPickle
+import imp
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
@@ -46,6 +47,7 @@ from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
+from shinken.webui import plugins
 
 # Local import
 from shinken.misc.datamanager import datamgr
@@ -90,11 +92,18 @@ class Webui_broker(BaseModule, Daemon):
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui: using the backend", self.http_backend
+
+        # Look for an additonnal pages dir
+        self.additional_plugins_dir = getattr(modconf, 'additional_plugins_dir', '')
+        if self.additional_plugins_dir:
+            self.additional_plugins_dir = os.path.abspath(self.additional_plugins_dir)
+        
         # We will save all widgets
         self.widgets = {}
         # We need our regenerator now (before main) so if we are in a scheduler,
         # rg will be able to skip some broks
         self.rg = Regenerator()
+
 
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
@@ -105,6 +114,7 @@ class Webui_broker(BaseModule, Daemon):
                 os.mkdir(self.photo_dir)
             except Exception, exp:
                 print "Photo dir creation failed", exp
+
 
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
@@ -195,7 +205,14 @@ class Webui_broker(BaseModule, Daemon):
             logger.error("The view path do not exist at %s" % bottle.TEMPLATE_PATH)
             sys.exit(2)
 
-        self.load_plugins()
+        # First load the additonal plugins so they will have the lead on
+        # URI routes
+        if self.additional_plugins_dir:
+            self.load_plugins(self.additional_plugins_dir)
+
+        # Then look at the plugins in toe core and load all we can there
+        core_plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
+        self.load_plugins(core_plugin_dir)
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
@@ -287,27 +304,14 @@ class Webui_broker(BaseModule, Daemon):
             # DBG: print "WEBUI\nWEBUI\n"
 
 
-    # Here we will load all plugins (pages) under the webui/plugins
-    # directory. Each one can have a page, views and htdocs dir that we must
-    # route correctly
-    def load_plugins(self):
-        from shinken.webui import plugins
-        plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
-        print "Loading plugin directory: %s" % plugin_dir
-
-        # Load plugin directories
-        plugin_dirs = [fname for fname in os.listdir(plugin_dir)
-                        if os.path.isdir(os.path.join(plugin_dir, fname))]
-
-        print "Plugin dirs", plugin_dirs
-        sys.path.append(plugin_dir)
-        # We try to import them, but we keep only the one of
-        # our type
-        for fdir in plugin_dirs:
-            print "Try to load", fdir
-            mod_path = 'shinken.webui.plugins.%s.%s' % (fdir, fdir)
+    def load_plugin(self, fdir, plugin_dir):
+            print "Try to load", fdir, "from", plugin_dir
             try:
-                m = __import__(mod_path, fromlist=[mod_path])
+                # Put the full qualified path of the module we want to load
+                # for example we will give  webui/plugins/eltdetail/
+                mod_path = os.path.join(plugin_dir, fdir)
+                # Then we load the eltdetail.py inside this directory
+                m = imp.load_module('%s' % (fdir), *imp.find_module(fdir, [mod_path]))
                 m_dir = os.path.abspath(os.path.dirname(m.__file__))
                 sys.path.append(m_dir)
 
@@ -370,6 +374,28 @@ class Webui_broker(BaseModule, Daemon):
 
             except Exception, exp:
                 logger.warning("Loading plugins: %s" % exp)
+        
+
+
+
+    # Here we will load all plugins (pages) under the webui/plugins
+    # directory. Each one can have a page, views and htdocs dir that we must
+    # route correctly
+    def load_plugins(self, plugin_dir):
+        print "Loading plugin directory: %s" % plugin_dir
+
+        # Load plugin directories
+        plugin_dirs = [fname for fname in os.listdir(plugin_dir)
+                        if os.path.isdir(os.path.join(plugin_dir, fname))]
+
+        print "Plugin dirs", plugin_dirs
+        sys.path.append(plugin_dir)
+        # We try to import them, but we keep only the one of
+        # our type
+        for fdir in plugin_dirs:
+            self.load_plugin(fdir, plugin_dir)
+            
+    
 
     def add_static(self, fdir, m_dir):
         static_route = '/static/' + fdir + '/:path#.+#'
@@ -379,6 +405,7 @@ class Webui_broker(BaseModule, Daemon):
             print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
+
 
     # It will say if we can launch a page rendering or not.
     # We can only if there is no writer running from now
