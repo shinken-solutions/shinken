@@ -610,7 +610,10 @@ class Satellite(BaseSatellite):
                 continue
 
             try:
-                con = sched['con']
+                try:
+                    con = sched['con']
+                except KeyError:
+                    con = None
                 if con is not None:  # None = not initialized
                     pyro.set_timeout(con, 120)
                     # OK, go for it :)
