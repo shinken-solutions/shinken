@@ -210,6 +210,14 @@ class Webui_broker(BaseModule, Daemon):
         if self.additional_plugins_dir:
             self.load_plugins(self.additional_plugins_dir)
 
+        # Modules can also override some views if need
+        for inst in self.modules_manager.instances:
+            f = getattr(inst, 'get_webui_plugins_path', None)
+            if f and callable(f):
+                mod_plugins_path = os.path.abspath(f(self))
+                self.load_plugins(mod_plugins_path)
+                
+
         # Then look at the plugins in toe core and load all we can there
         core_plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
         self.load_plugins(core_plugin_dir)
@@ -385,8 +393,11 @@ class Webui_broker(BaseModule, Daemon):
         print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
+        if not os.path.exists(plugin_dir):
+            return
+        
         plugin_dirs = [fname for fname in os.listdir(plugin_dir)
-                        if os.path.isdir(os.path.join(plugin_dir, fname))]
+                       if os.path.isdir(os.path.join(plugin_dir, fname))]
 
         print "Plugin dirs", plugin_dirs
         sys.path.append(plugin_dir)
