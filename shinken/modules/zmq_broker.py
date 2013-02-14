@@ -89,7 +89,6 @@ def encode_monitoring_data(obj):
 
 # Class for the ZeroMQ broker
 class Zmq_broker(BaseModule):
-
     context = None
     s_pub = None
     pub_endpoint = None
@@ -97,7 +96,7 @@ class Zmq_broker(BaseModule):
     serialize = None
 
     def __init__(self, mod_conf, pub_endpoint, serialize_to):
-	from zmq import Context, PUB
+        from zmq import Context, PUB
         BaseModule.__init__(self, mod_conf)
         self.pub_endpoint = pub_endpoint
         self.serialize_to = serialize_to
