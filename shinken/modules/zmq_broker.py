@@ -113,8 +113,9 @@ class Zmq_broker(BaseModule):
 
     # Publish to the ZeroMQ socket
     # using the chosen serialization method
-    def publish(self, msg):
+    def publish(self, msg, topic=""):
         data = self.serialize(msg)
+        self.s_pub.send(topic, zmq.SNDMORE)
         self.s_pub.send(data)
 		
     # An host check have just arrived, we UPDATE data info with this
@@ -123,7 +124,7 @@ class Zmq_broker(BaseModule):
 
         #Publish update data to the ZeroMQ endpoint.
         msg = b.data
-        self.publish(msg)
+        self.publish(msg, b.type)
 
     # Properly close down this thing.
     def do_stop(self):
