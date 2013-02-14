@@ -166,7 +166,7 @@ function recheck_now(name) {
     var elts = get_elements(name);
     //alert('Try to fix' + hname);
     var now = '$NOW$';
-    var url = '/action/SCHEDULE_'+elts.type+'_CHECK/'+elts.nameslash+'/'+now;
+    var url = '/action/SCHEDULE_FORCED_'+elts.type+'_CHECK/'+elts.nameslash+'/'+now;
     // We can launch it :)
     launch(url);
 }
