@@ -42,8 +42,13 @@
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
-import zmq
-import json
+
+# Check for JSON library
+try:
+    import json
+except ImportError:
+    # python 2.5
+    import simplejson as json
 
 properties = {
     'daemons': ['broker'],
@@ -54,6 +59,15 @@ properties = {
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
     logger.info("[Zmq Broker] Get a Zmq broker module for plugin %s" % mod_conf.get_name())
+
+    # Check for ZeroMQ library
+    try:
+        import zmq
+    except ImportError:
+        logger.info("[Zmq Broker] Could not find python zmq library")
+        return None
+
+    # Get module configuration
     pub_endpoint = getattr(mod_conf, 'pub_endpoint', "tcp://127.0.0.1:22777")
     serialize_to = getattr(mod_conf, 'serialize_to', "json")
     instance = Zmq_broker(mod_conf, pub_endpoint, serialize_to)
@@ -75,6 +89,7 @@ def encode_monitoring_data(obj):
 
 # Class for the ZeroMQ broker
 class Zmq_broker(BaseModule):
+
     context = None
     s_pub = None
     pub_endpoint = None
@@ -82,6 +97,7 @@ class Zmq_broker(BaseModule):
     serialize = None
 
     def __init__(self, mod_conf, pub_endpoint, serialize_to):
+	from zmq import Context, PUB
         BaseModule.__init__(self, mod_conf)
         self.pub_endpoint = pub_endpoint
         self.serialize_to = serialize_to
@@ -90,16 +106,16 @@ class Zmq_broker(BaseModule):
         # This doesn't work properly in init()
         # sometimes it ends up beings called several
         # times and the address becomes already in use.
-        self.context = zmq.Context()
-        self.s_pub = self.context.socket(zmq.PUB)
+        self.context = Context()
+        self.s_pub = self.context.socket(PUB)
         self.s_pub.bind(self.pub_endpoint)
 
         # Load the correct serialization function
         # depending on the serialization method
         # chosen in the configuration.
         if self.serialize_to == "msgpack":
-            import msgpack
-            packer = msgpack.Packer(default = encode_monitoring_data)
+            from msgpack import Packer
+            packer = Packer(default = encode_monitoring_data)
             self.serialize = lambda msg: packer.pack(msg)
         elif self.serialize_to == "json":
             self.serialize = lambda msg: json.dumps(msg, cls=SetEncoder)
@@ -114,8 +130,9 @@ class Zmq_broker(BaseModule):
     # Publish to the ZeroMQ socket
     # using the chosen serialization method
     def publish(self, msg, topic=""):
+        from zmq import SNDMORE
         data = self.serialize(msg)
-        self.s_pub.send(topic, zmq.SNDMORE)
+        self.s_pub.send(topic, SNDMORE)
         self.s_pub.send(data)
 		
     # An host check have just arrived, we UPDATE data info with this
