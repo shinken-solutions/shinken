@@ -39,7 +39,7 @@ import sys
 # Usage
 if len(sys.argv) > 1:
     if sys.argv[1] == "--help" or sys.argv[1] == "-h":
-        print("Usage: python zmq_mon_client.py [json|msgpack] [<zmq endpoint>] [<zmq topic>]")
+        print("Usage: python zmq_broker_client.py [json|msgpack] [<zmq endpoint>] [<zmq topic>]")
         sys.exit(-1)
 
 # Serialization method
