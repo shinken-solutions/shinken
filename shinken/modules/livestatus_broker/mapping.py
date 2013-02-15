@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 
 from shinken.bin import VERSION
 from shinken.macroresolver import MacroResolver
@@ -124,7 +125,6 @@ def find_pnp_perfdata_xml(name, request):
             # It is a service
 
 	    # replace space, colon, slash and backslash to be PNP compliant
-	    import re
 	    name = name.split('/', 1)
 	    name[1] = re.sub(r'[ :\/\\]', '_', name[1])
 
