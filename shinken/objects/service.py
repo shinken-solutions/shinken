@@ -307,7 +307,8 @@ class Service(SchedulingItem):
         'SERVICEACKCOMMENT':      'get_ack_comment',
         'SERVICEACTIONURL':       'action_url',
         'SERVICENOTESURL':        'notes_url',
-        'SERVICENOTES':           'notes'
+        'SERVICENOTES':           'notes',
+        'SERVICEBUSINESSIMPACT':  'business_impact'
     }
 
     # This tab is used to transform old parameters name into new ones
