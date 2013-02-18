@@ -65,7 +65,6 @@ class Notification(Action):
         'notif_nb':            IntegerProp(default=0),
         'status':              StringProp(default='scheduled'),
         't_to_go':             IntegerProp(default=0),
-        'is_a':                StringProp(default=''),
         'command':             StringProp(default=''),
         'sched_id':            IntegerProp(default=0),
         'timeout':             IntegerProp(default=10),
