@@ -67,8 +67,8 @@ class Worker:
         self._mortal = mortal
         self._idletime = 0
         self._timeout = timeout
+        self.s = None
         self.processes_by_worker = processes_by_worker
-        self.input_queue = s
         self._c = Queue()  # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
@@ -99,9 +99,9 @@ class Worker:
         if hasattr(self._c, 'close'):
             self._c.close()
             self._c.join_thread()
-        if hasattr(self.input_queue, 'close'):
-            self.input_queue.close()
-            self.input_queue.join_thread()
+        if hasattr(self.s, 'close'):
+            self.s.close()
+            self.s.join_thread()
 
     def join(self, timeout=None):
         self._process.join(timeout)
