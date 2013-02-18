@@ -181,7 +181,8 @@ class ShinkenTest(unittest.TestCase):
         ref.schedule(force=True)
         # now checks are schedule and we get them in
         # the action queue
-        check = ref.actions.pop()
+        #check = ref.actions.pop()
+        check = ref.checks_in_progress[0]
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
