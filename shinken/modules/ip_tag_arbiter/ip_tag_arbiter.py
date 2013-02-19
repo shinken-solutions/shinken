@@ -36,12 +36,17 @@ from shinken.log import logger
 
 # Just print some stuff
 class Ip_Tag_Arbiter(BaseModule):
-    def __init__(self, mod_conf, ip_range, prop, value, method):
+    def __init__(self, mod_conf, ip_range, prop, value, method, ignore_hosts=None):
         BaseModule.__init__(self, mod_conf)
         self.ip_range = IP(ip_range)
         self.property = prop
         self.value = value
         self.method = method
+        if ignore_hosts:
+            self.ignore_hosts = ignore_hosts.split(', ')
+            logger.debug("[IP Tag] Ignoring hosts : %s" % self.ignore_hosts)
+        else:
+            self.ignore_hosts = []
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -52,6 +57,11 @@ class Ip_Tag_Arbiter(BaseModule):
         for h in arb.conf.hosts:
             if not hasattr(h, 'address') and not hasattr(h, 'host_name'):
                 continue
+
+            if h.get_name() in self.ignore_hosts:
+                logger.debug("[IP Tag] Ignoring host %s" % h.get_name())
+                continue
+
             # The address to resolve
             addr = None
 
@@ -61,8 +71,8 @@ class Ip_Tag_Arbiter(BaseModule):
             else:
                 addr = h.address
 
-            logger.info("[IP Tag] Looking for %s" % h.get_name())
-            logger.info("[IP Tag] Address is %s" % str(addr))
+            logger.debug("[IP Tag] Looking for %s" % h.get_name())
+            logger.debug("[IP Tag] Address is %s" % str(addr))
             h_ip = None
             try:
                 IP(addr)
@@ -79,22 +89,26 @@ class Ip_Tag_Arbiter(BaseModule):
                     pass
 
             # Ok, maybe we succeed :)
-            logger.info("[IP Tag] Host ip is: %s" % str(h_ip))
+            logger.debug("[IP Tag] Host ip is: %s" % str(h_ip))
             # If we got an ip that match and the object do not already got
             # the property, tag it!
             if h_ip and h_ip in self.ip_range:
-                logger.info("[IP Tag] Is in the range")
-                # 2 cases: append or replace.
+                logger.debug("[IP Tag] Is in the range")
+                # 3 cases: append , replace and set
                 # append will join with the value if exist
                 # replace will replace it if NOT existing
+                # set put the value even if the property exists
                 if self.method == 'append':
                     orig_v = getattr(h, self.property, '')
-                    logger.info("[IP Tag] Orig_v: %s" % str(orig_v))
+                    logger.debug("[IP Tag] Orig_v: %s" % str(orig_v))
                     new_v = ','.join([orig_v, self.value])
-                    logger.info("[IP Tag] Newv %s" % new_v)
+                    logger.debug("[IP Tag] Newv %s" % new_v)
                     setattr(h, self.property, new_v)
 
                 if self.method == 'replace':
                     if not hasattr(h, self.property):
                         # Ok, set the value!
                         setattr(h, self.property, self.value)
+
+                if self.method == 'set':
+                    setattr(h, self.property, self.value)

@@ -31,9 +31,9 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
+# called by the plugin manager to get a module
 def get_instance(plugin):
-    logger.info("[IP Tag] Get a Service Perfdata broker for plugin %s" % plugin.get_name())
+    logger.info("[IP Tag] Get a IPTag module for plugin %s" % plugin.get_name())
 
     # First try to import
     try:
@@ -47,6 +47,7 @@ def get_instance(plugin):
     prop = plugin.property
     value = plugin.value
     method = getattr(plugin, 'method', 'replace')
+    ignore_hosts = getattr(plugin, 'ignore_hosts', None)
 
-    instance = Ip_Tag_Arbiter(plugin, ip_range, prop, value, method)
+    instance = Ip_Tag_Arbiter(plugin, ip_range, prop, value, method, ignore_hosts)
     return instance
