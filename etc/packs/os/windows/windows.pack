@@ -25,5 +25,8 @@
          "_SHARE_CRIT": {"type":"percent",
                                 "description": "Critical level for the share disk space"
                              }
+         "_SERVICESEXCLUDED": {"type":"string",
+                                "description": "Regex for services to be excluded from check auto services"
+                             }
           }
 }
