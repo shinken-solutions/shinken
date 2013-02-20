@@ -119,7 +119,7 @@ def get_cpu(h):
 
 
 def compute_worst_state(d):
-    _ref = {'OK':0, 'UP':0, 'DOWN':3, 'UNREACHABLE':1, 'UNKNOWN':1, 'CRITICAL':3, 'WARNING':2}
+    _ref = {'OK':0, 'UP':0, 'DOWN':3, 'UNREACHABLE':1, 'UNKNOWN':1, 'CRITICAL':3, 'WARNING':2, 'PENDING' :1}
     cur_level = _ref[d['global']]
     for (k,v) in d.iteritems():
         level = _ref[v]

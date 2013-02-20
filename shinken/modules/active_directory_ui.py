@@ -214,7 +214,7 @@ class AD_Webui(BaseModule):
         c = self.app.datamgr.get_contact(user)
 
         if not c:
-            logger.warning("[Active Directory UI] AD/Ldap: invalid user %s (not founded)" % user)
+            logger.warning("[Active Directory UI] AD/Ldap: invalid user %s (not found)" % user)
             return False
 
         # first we need to find the principalname of this entry
