@@ -1443,7 +1443,7 @@ function install_mongodb(){
                 cecho " > repository configuration not found. Adding 10 gen repository" yellow
                 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> ${LOGFILE} 2>&1
                 echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
-                cecho " > Updating repositories " > yellow
+                cecho " > Updating repositories " yellow
                 apt-get --allow-unauthenticated update >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
                 apt-get --allow-unauthenticated --force-yes install -y $MONGOPKGS >> ${LOGFILE} 2>&1
