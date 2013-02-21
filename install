@@ -795,7 +795,7 @@ function fix(){
     cecho " > Add Shinken entry for skonf in sudoers" green
     cp /etc/sudoers /tmp/sudoers.shinken
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /tmp/sudoers.shinken
-    visudo -c -f /tmp/sudoers.shinken
+    visudo -c -f /tmp/sudoers.shinken >> ${LOGFILE} 2>&1
     if [ $? -eq 0 ]
     then
         mv /tmp/sudoers.shinken /etc/sudoers
