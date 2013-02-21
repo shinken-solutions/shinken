@@ -483,6 +483,10 @@ function prerequisites(){
         PYLIBS=$PYLIBSDEB
     fi
 
+    # this is a fix for MySQL-python complainig about outdated version of distribute
+    cecho " > Installing distribute" green
+    easy_install -U distribute >> ${LOGFILE} 2>&1
+
     for p in $PYLIBS
     do
         module=$(echo $p | awk -F: '{print $1'})
