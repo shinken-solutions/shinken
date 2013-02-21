@@ -148,7 +148,7 @@ $(document).ready(function(){
 			<tr>
 				<td>Parents:</td>
 				%if len(elt.parents) > 0:
-				<td>{{elt.alias}}</td>
+				<td>{{','.join([h.get_name() for h in elt.parents])}}</td>
 				%else:
 				<td>No parents</td>
 				%end

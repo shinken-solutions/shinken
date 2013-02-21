@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 
 from shinken.bin import VERSION
 from shinken.macroresolver import MacroResolver
@@ -122,7 +123,12 @@ def find_pnp_perfdata_xml(name, request):
     if request.pnp_path_readable:
         if '/' in name:
             # It is a service
-            if os.access(request.pnp_path + '/' + name + '.xml', os.R_OK):
+
+	    # replace space, colon, slash and backslash to be PNP compliant
+	    name = name.split('/', 1)
+	    name[1] = re.sub(r'[ :\/\\]', '_', name[1])
+
+            if os.access(request.pnp_path + '/' + '/'.join(name) + '.xml', os.R_OK):
                 return 1
         else:
             # It is a host

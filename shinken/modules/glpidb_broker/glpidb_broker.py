@@ -237,6 +237,6 @@ class Glpidb_broker(BaseModule):
             table = 'glpi_plugin_monitoring_services'
 
         where_clause = {'id': new_data['id']}
-        logger.debug("[GLPIdb Broker] Update service: " % str(new_data))
+        logger.debug("[GLPIdb Broker] Update service: %s" % str(new_data))
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]

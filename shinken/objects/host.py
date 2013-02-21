@@ -346,7 +346,8 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
         'TOTALHOSTSERVICESUNKNOWN': 'get_total_services_unknown',
-        'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical'
+        'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical',
+        'HOSTBUSINESSIMPACT':  'business_impact'
     }
 
     # Manage ADDRESSX macros by adding them dynamically

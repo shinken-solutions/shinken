@@ -1297,9 +1297,14 @@ class ExternalCommandManager:
                 return
 
             i = host.launch_check(now, force=True)
-            for chk in host.actions:
+            c = None
+            for chk in host.checks_in_progress:
                 if chk.id == i:
                     c = chk
+            # Should not be possible to not find the check, but if so, don't crash
+            if not c:
+                console_logger.error('Passive host check failed. Cannot find the check id %s' % i)
+                return
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
             c.exit_status = status_code
@@ -1330,10 +1335,15 @@ class ExternalCommandManager:
             if self.current_timestamp < service.last_chk:
                 return
 
+            c = None
             i = service.launch_check(now, force=True)
-            for chk in service.actions:
+            for chk in service.checks_in_progress:
                 if chk.id == i:
                     c = chk
+            # Should not be possible to not find the check, but if so, don't crash
+            if not c:
+                console_logger.error('Passive service check failed. Cannot find the check id %s' % i)
+                return                
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the service
             c.exit_status = return_code

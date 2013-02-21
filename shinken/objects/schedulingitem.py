@@ -565,7 +565,7 @@ class SchedulingItem(Item):
             return None
 
         # Get the command to launch, and put it in queue
-        self.launch_check(self.next_chk)
+        self.launch_check(self.next_chk,force=force)
 
 
     # If we've got a system time change, we need to compensate it
@@ -1257,14 +1257,20 @@ class SchedulingItem(Item):
         # Look if we are in check or not
         self.update_in_checking()
 
+        # the check is being forced, so we just replace next_chk time by now
+        if force and self.in_checking:
+            now = time.time()
+            c_in_progress = self.checks_in_progress[0]
+            c_in_progress.t_to_go = now
+            return c_in_progress.id
+
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
             now = time.time()
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
-            if c_in_progress.t_to_go > now:  # Very far?
-                c_in_progress.t_to_go = now  # No, I want a check right NOW
+            c_in_progress.t_to_go = now  # No, I want a check right NOW
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
