@@ -118,6 +118,6 @@ class CheckWays(Items):
         if name is None:
             name = CheckWay.id
         params['checkway_name'] = name
-        print "Asking a new inner checkway from name %s with params %s" % (name, params)
+        #print "Asking a new inner checkway from name %s with params %s" % (name, params)
         cw = CheckWay(params)
         self.items[cw.id] = cw

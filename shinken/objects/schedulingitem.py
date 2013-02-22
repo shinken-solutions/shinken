@@ -1283,7 +1283,6 @@ class SchedulingItem(Item):
             for cw in self.checkways:
                 c_cw = cw.get_check_command(t)
                 if c_cw:
-                    print "WE FOUND A VALID CHECK WAY TO USE", cw, c_cw
                     check_command = c_cw
                     break
             
