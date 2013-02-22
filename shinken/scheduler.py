@@ -157,6 +157,7 @@ class Scheduler:
         self.hosts.create_reversed_list()
 
         self.notificationways = conf.notificationways
+        self.checkways = conf.checkways
         self.contacts = conf.contacts
         self.contacts.create_reversed_list()
         self.contactgroups = conf.contactgroups

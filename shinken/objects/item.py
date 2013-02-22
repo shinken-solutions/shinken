@@ -571,6 +571,8 @@ Like temporary attributes such as "imported_from", etc.. """
             else:
                 setattr(self, prop, None)
 
+
+
     # We look at the 'trigger' prop and we create a trigger for it
     def explode_trigger_string_into_triggers(self, triggers):
         src = getattr(self, 'trigger', '')
@@ -1000,6 +1002,24 @@ class Items(object):
     def linkify_with_triggers(self, triggers):
         for i in self:
             i.linkify_with_triggers(triggers)
+
+
+    # We've got a notificationways property with , separated contacts names
+    # and we want have a list of NotificationWay
+    def linkify_with_checkways(self, checkways):
+        for i in self:
+            if not hasattr(i, 'checkways'):
+                continue
+            new_checkways = []
+            for cw_name in i.checkways:
+                cw = checkways.find_by_name(cw_name)
+                if cw is not None:
+                    new_checkways.append(cw)
+                else:
+                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), cw_name)
+                    i.configuration_errors.append(err)
+            # Get the list, but first make elements uniq
+            i.checkways = new_checkways
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
