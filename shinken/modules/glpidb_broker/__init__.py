@@ -27,8 +27,6 @@
 # This text is print at the import
 from shinken.log import logger
 
-logger.info("[GLPIdbBroker] Loading the Glpi broker module")
-
 properties = {
     'daemons': ['broker'],
     'type': 'glpidb',

@@ -33,8 +33,6 @@ import os
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
-logger.info("[CfgPasswordUI] Loaded Apache/Passwd module")
-
 properties = {
     'daemons': ['webui', 'skonf'],
     'type': 'cfg_password_webui'

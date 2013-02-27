@@ -132,6 +132,12 @@ class MacroResolver(Borg):
         except AttributeError, exp:
             # Return no value
             return ''
+        except UnicodeError, exp:
+            if isinstance(value, str):
+                return unicode(value, 'utf8', errors='ignore')
+            else:
+                return ''
+
 
     # For some macros, we need to delete unwanted characters
     def _delete_unwanted_caracters(self, s):

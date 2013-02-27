@@ -832,7 +832,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            logger.warning("[items] %s.%s is already defined" % (type, i.get_name()))
+            logger.warning("[items] %s.%s is already defined '%s'" % (type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
             del self[id]  # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []

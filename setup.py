@@ -495,7 +495,7 @@ config_objects_file = (
                         'contacts.cfg',
                         'discovery_rules.cfg',
                         'hosts/localhost.cfg',
-                        'services/linux_local.cfg',
+                        'services/services.cfg',
                         'contactgroups.cfg',
                         'escalations.cfg',
                         'commands.cfg',
@@ -555,9 +555,6 @@ data_files = [
          'bin/init.d/shinken-scheduler',
          'bin/init.d/shinken-skonf',
          ]
-        ),
-    (
-        default_paths['libexec'], ['libexec/check.sh']
         )
     ]
 
@@ -583,7 +580,7 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="1.2.2",
+        version="1.2.4",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",

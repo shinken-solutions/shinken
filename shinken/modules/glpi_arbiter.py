@@ -31,6 +31,7 @@
 import xmlrpclib
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter'],
@@ -85,7 +86,7 @@ class Glpi_arbiter(BaseModule):
         all_commands = self.con.monitoring.shinkenCommands(arg)
         logger.info("[GLPI Arbiter] Get all commands: %s" % str(all_commands))
         for command_info in all_commands:
-            logger.info("[GLPI Arbiter] Command info in GLPI: " % str(command_info))
+            logger.info("[GLPI Arbiter] Command info in GLPI: %s" % str(command_info))
             h = {'command_name': command_info['command_name'],
                  'command_line': command_info['command_line'],
                  }
@@ -109,7 +110,7 @@ class Glpi_arbiter(BaseModule):
 
         # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
-        logger.info("[GLPI Arbiter] Get all hosts" % str(all_hosts))
+        logger.info("[GLPI Arbiter] Get all hosts %s" % str(all_hosts))
         attributs = ['display_name', 'hostgroups', 'initial_state',
                      'active_checks_enabled', 'passive_checks_enabled', 'obsess_over_host',
                      'check_freshness', 'freshness_threshold', 'event_handler',
@@ -155,7 +156,7 @@ class Glpi_arbiter(BaseModule):
                      'retain_status_information', 'retain_nonstatus_information', 'is_volatile',
                      '_httpstink']
         for template_info in all_templates:
-            logger("[GLPI Arbiter] Template info in GLPI: %s" % template_info)
+            logger.info("[GLPI Arbiter] Template info in GLPI: %s" % template_info)
             h = {'register': '0'}
             for attribut in attributs:
                 if attribut in template_info:
@@ -196,7 +197,7 @@ class Glpi_arbiter(BaseModule):
         all_contacts = self.con.monitoring.shinkenContacts(arg)
         logger.info("[GLPI Arbiter] Get all contacts: %s" % str(all_contacts))
         for contact_info in all_contacts:
-            logger.info("[GLPI Arbiter] Contact info in GLPI:" % contact_info)
+            logger.info("[GLPI Arbiter] Contact info in GLPI: %s" % contact_info)
             h = {'contact_name': contact_info['contact_name'],
                  'alias': contact_info['alias'],
                  'host_notifications_enabled': contact_info['host_notifications_enabled'],
