@@ -741,6 +741,7 @@ function fix(){
     sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
     cecho " > Add Shinken entry for skonf in sudoers" green
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
+    chmod u=r,g=r,o= /etc/sudoers.d/shinken
     [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
 }
 
