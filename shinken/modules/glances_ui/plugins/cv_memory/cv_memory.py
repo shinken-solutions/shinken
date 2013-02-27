@@ -23,10 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
+from shinken.webui.bottle import redirect, abort
 from pprint import pprint
 
 import xmlrpclib
+import socket
 import json
 
 
@@ -49,6 +50,7 @@ def get_processes(h):
     # 10s max to aswer
     gs.sock.timeout = 10
     ps = json.loads(gs.getProcessList())
+    
 
     return ps
 
@@ -66,10 +68,15 @@ def get_page(hname):
 
     # Ok, we can lookup it
     h = app.datamgr.get_host(hname)
-
-    ps = get_processes(h)
-    
-    return {'app': app, 'elt': h, 'ps':ps, 'fancy_units':fancy_units}
+    error = ''
+    ps = []
+    try:
+        ps = get_processes(h)
+    except (xmlrpclib.Error, socket.error), exp:
+        error = str(exp)
+        return {'app': app, 'elt': h, 'ps':ps, 'fancy_units':fancy_units, 'error' : error}
+        
+    return {'app': app, 'elt': h, 'ps':ps, 'fancy_units':fancy_units, 'error' : error}
 
 
 def get_page_proc(hname):
