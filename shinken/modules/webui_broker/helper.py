@@ -25,6 +25,7 @@
 import time
 import copy
 import math
+from pprint import pprint
 try:
     import json
 except ImportError:
@@ -155,20 +156,24 @@ class Helper(object):
         else:  # past :)
             return ' '.join(duration) + ' ago'
 
+
     # Need to create a X level higher and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
         # First we need ALL elements
         all_elts = self.get_all_linked_elts(elt, levels=levels)
-        print "We got all our elements"
+
+        #print "We got all our elements"
         dicts = []
         for i in all_elts:
-            safe_print("Elt", i.get_dbg_name())
-            d = self.get_dep_graph_struct(i)
-            dicts.append(d)
+            #safe_print("Elt", i.get_dbg_name())
+            ds = self.get_dep_graph_struct(i)
+            for d in ds:
+                dicts.append(d)
         j = json.dumps(dicts)
-        safe_print("Create json", j)
-        print "create_json_dep_graph::Json creation time", time.time() - t0
+        #safe_print("Create json", j)
+        #pprint(dicts)
+        #print "create_json_dep_graph::Json creation time", time.time() - t0
         return j
 
     # Return something like:
@@ -189,8 +194,74 @@ class Helper(object):
     #              }
     # But as a python dict
 
-    def get_dep_graph_struct(self, elt, levels=3):
+    def get_all_nodes_from_aggregation_node(self, tree):
+        res = [{'path' : tree['path'], 'services': tree['services'], 'state': tree['state'], 'full_path': tree['full_path']}]
+        for s in tree['sons']:
+            r = self.get_all_nodes_from_aggregation_node(s)
+            for n in r:
+                res.append(n)
+        return res
+            
+        
+
+    def create_dep_graph_aggregation_node(self, elt):
+        # {'path' : '/', 'sons' : [], 'services':[], 'state':'unknown', 'full_path':'/'}
+        hname = elt.get_name()
+        tree = self.get_host_service_aggregation_tree(elt)
+        all_nodes = self.get_all_nodes_from_aggregation_node(tree)
+        #print "aLL NODES"
+        #pprint(all_nodes)
+
+        res = []
+        for n in all_nodes:
+            d = {'id': self.strip_html_id(hname+n['full_path']), 'name': n['full_path'],
+                 'data': {'$type': 'custom',
+                          'business_impact': 2,#elt.business_impact,
+                          'img_src': '/static/img/icons/state_%s.png' % n['state'],
+                          },
+                 'adjacencies': []
+                 }
+            # Set the right info panel
+            d['data']['infos'] = ''#r''' %s ''' % self.strip_html_id(n['full_path'])
+            d['data']['elt_type'] = 'service'
+            d['data']['is_problem'] = False
+            d['data']['state_id'] = 1
+            d['data']['circle'] = 'none'
+
+            # by default the father linkis the host
+            father =  elt.get_dbg_name()
+            # But if the aggregation is a level1+ it must be the level-1 one
+            #print "FULL PATH"*20, n['full_path'], n['full_path'].count('/'), self.get_aggregation_paths(n['full_path'])
+            agg_parts = [s for s in self.get_aggregation_paths(n['full_path']) if s]
+
+            # Root, no block for it
+            if len(agg_parts) == 0:
+                continue
+            # For 1, it'smeans first agg level, so our father is the host
+            # but it's already set. For >1, the father is the agg level before
+            if len(agg_parts) > 1:
+                pre_path = '/'+'/'.join(agg_parts[:-1])
+                father = self.strip_html_id(elt.get_dbg_name()+pre_path)
+                
+
+            pd = {'nodeTo': father,
+                  'data': {"$type": "line", "$direction": [self.strip_html_id(d['id']), elt.get_dbg_name()]
+                           }
+                  }
+            if n['state'].lower() in ['warning', 'critical']:
+                pd['data']["$color"] = 'Tomato'
+            else:
+                pd['data']["$color"] = 'PaleGreen'
+            d['adjacencies'].append(pd)
+            
+            res.append(d)
+
+        return res
+    
+
+    def get_dep_graph_struct(self, elt):
         t = elt.__class__.my_type
+
         # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
         # so a node with important data for rendering
         # type = custom, business_impact and img_src.
@@ -201,7 +272,15 @@ class Helper(object):
                        },
              'adjacencies': []
              }
+        res = [d]
 
+        # if we got an host, compute the aggregation part
+        if t == 'host':
+            nodes = self.create_dep_graph_aggregation_node(elt)
+            for n in nodes:
+                res.append(n)
+
+        
         # Set the right info panel
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
                    <p>since %s</p>
@@ -215,7 +294,7 @@ class Helper(object):
         d['data']['is_problem'] = elt.is_problem
         d['data']['state_id'] = elt.state_id
 
-        safe_print("ELT:%s is %s" % (elt.get_full_name(), elt.state))
+        #safe_print("ELT:%s is %s" % (elt.get_full_name(), elt.state))
         if elt.state in ['OK', 'UP', 'PENDING']:
             d['data']['circle'] = 'none'
         elif elt.state in ['DOWN', 'CRITICAL']:
@@ -224,12 +303,23 @@ class Helper(object):
             d['data']['circle'] = 'orange'
         else:
             d['data']['circle'] = 'none'
-
-
+        
+        
         # Now put in adj our parents
         for p in elt.parent_dependencies:
-            pd = {'nodeTo': p.get_dbg_name(),
-                  'data': {"$type": "line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+            # The link service-> host can be squize by aggregations if set
+            if t == 'service' and elt.aggregation and p == elt.host:
+                agg_name = '/'.join(self.get_aggregation_paths(elt.aggregation))
+                agg_id = self.strip_html_id(p.get_dbg_name()+agg_name)
+                pd = {'nodeTo': agg_id,
+                      'data': {"$type": "line", "$direction": [elt.get_dbg_name(), agg_id]
+                               }
+                      }
+            else: # Ok a basic link with the element and elt so
+                pd = {'nodeTo': p.get_dbg_name(),
+                      'data': {"$type": "line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]
+                               }
+                      }
 
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
@@ -241,7 +331,8 @@ class Helper(object):
 
         # The sons case is now useful, it will be done by our sons
         # that will link us
-        return d
+        return res
+
 
     # Return all linked elements of this elt, and 2 level
     # higher and lower :)
@@ -261,8 +352,9 @@ class Helper(object):
             for c in par_elts:
                 my.add(c)
 
-        safe_print("get_all_linked_elts::Give elements", my)
+        #safe_print("get_all_linked_elts::Give elements", my)
         return my
+
 
     # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
@@ -302,8 +394,8 @@ class Helper(object):
 
 
     def print_business_rules_mobile(self, tree, level=0, source_problems=[]):
-        safe_print("Should print tree", tree)
-        safe_print('with source_problems', source_problems)
+        #safe_print("Should print tree", tree)
+        #safe_print('with source_problems', source_problems)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
@@ -311,7 +403,7 @@ class Helper(object):
         # Maybe we are the root problem of this, and so we are printing it
         root_str = ''
         if node in source_problems:
-            print "I am a root problem"
+            #print "I am a root problem"
             root_str = ' <span class="alert-small alert-critical"> Root problem</span>'
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
@@ -343,8 +435,8 @@ class Helper(object):
 
 
     def print_business_rules(self, tree, level=0, source_problems=[]):
-        safe_print("Should print tree", tree)
-        safe_print('with source_problems', source_problems)
+        #safe_print("Should print tree", tree)
+        #safe_print('with source_problems', source_problems)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
@@ -353,7 +445,7 @@ class Helper(object):
         # Maybe we are the root problem of this, and so we are printing it
         root_str = ''
         if node in source_problems:
-            print "I am a root problem"
+            #print "I am a root problem"
             root_str = ' <span class="alert-small alert-critical"> Root problem</span>'
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
@@ -391,7 +483,7 @@ class Helper(object):
     # User: Frescha
     # Date: 08.01.2012
     def print_business_tree(self, tree, level=0):
-        safe_print("Should print tree", tree)
+        #safe_print("Should print tree", tree)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
@@ -547,11 +639,11 @@ class Helper(object):
             res.append((u'« First', 0, step, False))
             res.append(('...', None, None, False))
 
-        print "Range,", current_page - 1, current_page + 1
+        #print "Range,", current_page - 1, current_page + 1
         for i in xrange(current_page - 1, current_page + 2):
             if i < 0:
                 continue
-            print "Doing PAGE", i
+            #print "Doing PAGE", i
             is_current = (i == current_page)
             start = int(i * step)
             # Maybe we are generating a page too high, bail out
@@ -567,10 +659,10 @@ class Helper(object):
             res.append(('...', None, None, False))
             res.append((u'Last »', start, end, False))
 
-        print "Total:", total, "pos", pos, "step", step
-        print "nb pages", nb_pages, "current_page", current_page
+        #print "Total:", total, "pos", pos, "step", step
+        #print "nb pages", nb_pages, "current_page", current_page
 
-        print "Res", res
+        #print "Res", res
 
         return res
 
@@ -656,7 +748,7 @@ class Helper(object):
         
 
     def assume_and_get_path_in_tree(self, tree, paths):
-        print "Tree on start of", paths, tree
+        #print "Tree on start of", paths, tree
         current_full_path = ''
         for p in paths:
             # Don't care about void path, like for root
@@ -686,15 +778,10 @@ class Helper(object):
         for s in h.services:
             p = s.aggregation
             paths = self.get_aggregation_paths(p)
-            print "Service", s.get_name(), "with path", paths
+            #print "Service", s.get_name(), "with path", paths
             leaf = self.assume_and_get_path_in_tree(tree, paths)
             leaf['services'].append(s)
-        print "Whole tree"
-        from pprint import pprint
-        pprint(tree)
         self.compute_aggregation_tree_worse_state(tree)
-        print "After worse state"
-        pprint(tree)
         
         return tree
 
