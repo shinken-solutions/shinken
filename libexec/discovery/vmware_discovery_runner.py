@@ -188,7 +188,6 @@ if __name__ == "__main__":
     parser = optparse.OptionParser(
         version="Shinken VMware links dumping script version %s" % VERSION)
     parser.add_option("-x", "--esx3-path", dest='check_esx_path',
-                      default='/usr/local/nagios/libexec/check_esx3.pl',
                       help="Full path of the check_esx3.pl script (default: %default)")
     parser.add_option("-V", "--vcenter", '--Vcenter',
                       help="The IP/DNS address of your Vcenter host.")
@@ -213,15 +212,16 @@ if __name__ == "__main__":
     if opts.password is None:
         error = True
         parser.error("missing -p or --password option for the vcenter password")
-    if not os.path.exists(opts.check_esx_path):
-        parser.error("the path %s for the check_esx3.pl script is wrong, missing file" % opts.check_esx_path)
-    else:
-        # Not given, try to find one
+    if opts.check_esx_path is None:
         p = search_for_check_esx3()
+        # Not given, try to find one
         if p is None:
             parser.error("Sorry, I cannot find check_esx3.pl, please specify "
                          "it with -x")
         #else set it :)
         opts.check_esx_path = p
+    else:
+	if not os.path.exists(opts.check_esx_path):
+            parser.error("the path %s for the check_esx3.pl script is wrong, missing file" % opts.check_esx_path)
 
     main(**opts.__dict__)
