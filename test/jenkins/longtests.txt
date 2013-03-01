@@ -117,6 +117,7 @@ test_multiple_not_hostgroups.py
 
 # takes long
 test_livestatus.py
+test_livestatus_mongodb.py
 # takes very, very long
 test_maintenance_period.py
 test_downtimes.py

@@ -496,6 +496,7 @@ OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         tac = time.time()
         pyresponse = eval(response)
+        print response
         print "number of records with test_ok_01", len(pyresponse)
         self.assert_(len(pyresponse) == should_be)
 
@@ -538,6 +539,18 @@ Filter: type = HOST DOWNTIME ALERT
 Filter: type ~ starting...
 Filter: type ~ shutting down...
 Or: 8
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        allpyresponse = eval(response)
+        print "all records", len(allpyresponse)
+        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+
+
+        # Now a pure class check query
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: class = 1
 OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         allpyresponse = eval(response)

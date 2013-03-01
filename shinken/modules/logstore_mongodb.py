@@ -186,6 +186,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
             logger.info("[LogStoreMongoDB] Next log rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate)))
 
+
     def manage_log_brok(self, b):
         data = b.data
         line = data['log']
@@ -231,19 +232,24 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         else:
             logger.info("[LogStoreMongoDB] This line is invalid: %s" % line)
 
+
     def add_filter(self, operator, attribute, reference):
         if attribute == 'time':
             self.mongo_time_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
         self.mongo_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
 
+
     def add_filter_and(self, andnum):
         self.mongo_filter_stack.and_elements(andnum)
+
 
     def add_filter_or(self, ornum):
         self.mongo_filter_stack.or_elements(ornum)
 
+
     def add_filter_not(self):
         self.mongo_filter_stack.not_elements()
+
 
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
@@ -267,6 +273,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
+
         filter_element = eval('{ ' + mongo_filter + ' }')
         logger.debug("[LogstoreMongoDB] Mongo filter is %s" % str(filter_element))
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
@@ -276,16 +283,21 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             dbresult = [Logline([(c,) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
         return dbresult
 
+
     def make_mongo_filter(self, operator, attribute, reference):
         # The filters are text fragments which are put together to form a sql where-condition finally.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         # which attributes are suitable for a sql statement
-        good_attributes = ['time', 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state', 'state_type', 'type']
+        good_attributes = ['time', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state', 'state_type', 'type']
         good_operators = ['=', '!=']
         #  put strings in '' for the query
         string_attributes = ['command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state_type', 'type']
         if attribute in string_attributes:
             reference = "'%s'" % reference
+
+        # We should change the "class" query into the internal "logclass" attribute
+        if attribute == 'class':
+            attribute = 'logclass'
 
         def eq_filter():
             if reference == '':
