@@ -6,22 +6,21 @@
 "path":"network/services/",
 
 "macros":{
-	 "_LDAPBASE": {"type":"string",
-	                     "description":"The read snmp community allowed on the linux server"
-			     },
-         "_DOMAIN": {"type":"string",
-                      "description": "Windows Domain of the server"
+         "_LDAPBASE": {"type":"string",
+                       "description":"The read snmp community allowed on the linux server"
                       },
-
+         "_DOMAIN": {"type":"string",
+                     "description": "Windows Domain of the server"
+                      },
          "_DOMAINUSERSHORT": {"type":"string",
-                                "description": "Short name (without the domain) of the user to query the server. Should have rights on the WMI tables for reading."
+                              "description": "Short name (without the domain) of the user to query the server. Should have rights on the WMI tables for reading."
                              },
          "_DOMAINUSER": {"type":"string",
-                              "description": "Full name of the user to query. Is by default DOMAIN\\USERSHORT"
-                             },
+                         "description": "Full name of the user to query. Is by default DOMAIN\\USERSHORT"
+                        },
          "_DOMAINPASSWORD": {"type":"string",
-                                  "description": "Password for the user that will launch the query"
-                             }
+                             "description": "Password for the user that will launch the query"
+                            }
 	}
 
 }
