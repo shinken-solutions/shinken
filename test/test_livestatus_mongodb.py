@@ -42,6 +42,7 @@ from shinken.objects.module import Module
 from shinken.objects.service import Service
 from shinken.modules.livestatus_broker.mapping import Logline
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
+from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
 from shinken.comment import Comment
 
 try:
@@ -596,7 +597,10 @@ OutputFormat: json"""
             'mongodb_uri': "mongodb://127.0.0.1:27017",
             'max_logs_age': '7y',
         })
-        self.assert_(dbmodconf.max_logs_age == 7*365)
+        
+        print dbmodconf.max_logs_age
+        livestatus_broker = LiveStatusLogStoreMongoDB(dbmodconf)
+        self.assert_(livestatus_broker.max_logs_age == 7*365)
 
 
 if __name__ == '__main__':
