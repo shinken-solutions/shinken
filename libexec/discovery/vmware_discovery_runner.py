@@ -221,7 +221,7 @@ if __name__ == "__main__":
         #else set it :)
         opts.check_esx_path = p
     else:
-	if not os.path.exists(opts.check_esx_path):
+        if not os.path.exists(opts.check_esx_path):
             parser.error("the path %s for the check_esx3.pl script is wrong, missing file" % opts.check_esx_path)
 
     main(**opts.__dict__)
