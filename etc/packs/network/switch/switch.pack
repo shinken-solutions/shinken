@@ -1,7 +1,7 @@
 {
 "name":"switch",
 
-"description":"Standard siwtch checks. Checks are done by check_nwc_health.",
+"description":"Standard switch checks. Checks are done by check_nwc_health.",
 
 "path":"network/",
 
