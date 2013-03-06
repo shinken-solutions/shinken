@@ -127,10 +127,13 @@
                              "description":"Dirty pages flushed to disk per second. usually by a checkpoint"
                              },
          "_MSSQL_DATABASE_BACKUP_AGE_CRIT": {"type":"string",
-                             "description":"Check if a database is online and accepting connections"
+                             "description":"Elapsed time (in hours) since a database was last backed up"
                              },
          " _MSSQL_DATABASE_BACKUP_AGE_WARN": {"type":"string",
-                             "description":"Check if a database is online and accepting connections"
+                             "description":"Elapsed time (in hours) since a database was last backed up"
+                             },
+         " _MSSQL_DATABASE_BACKUP_AGE_EXCLUDED": {"type":"string",
+                             "description":"Database to be excluded from backup age check"
                              }
          }
 
