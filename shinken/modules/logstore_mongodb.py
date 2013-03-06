@@ -51,6 +51,7 @@ from pymongo.errors import AutoReconnect
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 from shinken.log import logger
+from shinken.util import to_bool
 
 properties = {
     'daemons': ['livestatus'],
@@ -97,6 +98,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.database = getattr(modconf, 'database', 'logs')
         self.collection = getattr(modconf, 'collection', 'logs')
         self.use_aggressive_sql = True
+        self.mongodb_fsync = to_bool(getattr(modconf, 'mongodb_fsync', "True"))
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
@@ -137,7 +139,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=True)
             else:
                 # Old versions of pymongo do not known about fsync
-                if ReplicaSetConnection:
+                if ReplicaSetConnection and self.mongodb_fsync:
                     self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
                 else:
                     self.conn = pymongo.Connection(self.mongodb_uri)
