@@ -43,7 +43,7 @@ __all__ = ('Action')
 valid_exit_status = (0, 1, 2, 3)
 
 only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout',
-                  'env', 'module_type', 'execution_time')
+                  'env', 'module_type', 'execution_time', 'u_time', 's_time')
 
 shellchars = ('!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
                    '|', '{', '}', ';', '<', '>', '?', '`')
@@ -155,6 +155,7 @@ class __Action(object):
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
 
+
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
         # so we do not wait the same for an little check
@@ -162,6 +163,7 @@ class __Action(object):
         # but do not wait more than 0.1s.
         self.last_poll = time.time()
 
+        _, _, child_utime, child_stime, _ = os.times()
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time * 2, 0.1)
             #time.sleep(wait_time)
@@ -184,6 +186,10 @@ class __Action(object):
                 self.exit_status = 3
                 # Do not keep a pointer to the process
                 del self.process
+                # Get the user and system time
+                _, _, n_child_utime, n_child_stime, _ = os.times()
+                self.u_time = n_child_utime - child_utime
+                self.s_time = n_child_stime - child_stime
                 return
             return
 
@@ -227,6 +233,11 @@ class __Action(object):
 
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
+        # Also get the system and user times
+        _, _, n_child_utime, n_child_stime, _ = os.times()
+        self.u_time = n_child_utime - child_utime
+        self.s_time = n_child_stime - child_stime
+
 
     def copy_shell__(self, new_i):
         """
@@ -236,6 +247,7 @@ class __Action(object):
         for prop in only_copy_prop:
             setattr(new_i, prop, getattr(self, prop))
         return new_i
+
 
     def got_shell_characters(self):
         for c in self.command:

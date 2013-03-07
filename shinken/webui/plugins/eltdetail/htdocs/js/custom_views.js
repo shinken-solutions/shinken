@@ -37,7 +37,12 @@ function show_custom_view(p){
     var _t = new Date().getTime();
     console.log('GOGOGO'+hname);
     var spinner = get_spinner('cv'+cvname);
-    $('#cv'+cvname).load('/cv/'+cvname+'/'+hname+"?_="+_t);
+    $('#cv'+cvname).load('/cv/'+cvname+'/'+hname+"?_="+_t, function(response, status, xhr) {
+	if (status == "error") {
+	    var msg = "Sorry but there was an error: ";
+	    $('#cv'+cvname).html(msg + xhr.status + " " + xhr.statusText);
+	}
+    });
 
     _already_load[cvname] = true;
     console.log("Already load?");

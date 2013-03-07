@@ -1,6 +1,11 @@
 
 <link href="/static/cv_memory/css/memory.css" rel="stylesheet">
 
+%if error:
+<span class='span10 error'> Error during host connection to Glances agent : {{error}}</span>
+<div  class='span1'> <a  href="javascript:reload_custom_view('processes');"><i class="icon-repeat"></i> Reload</a></div>
+%else:
+
 <div class='span12'>
 <div id='cv_processes_cont' class='span9'>
   <table class='table-bordered table-striped table-hover table-condensed' id='host_processes'>
@@ -32,6 +37,8 @@
 </div>
 <div class='span3'> <a  href="javascript:reload_custom_view('processes');"><i class="icon-repeat"></i> Reload</a>
 </div>
+
+%end
 
 <script>
 $(function(){

@@ -1,13 +1,21 @@
 %import json
 
+
+%if error:
+<span class='span10 error'> Error during host connection to Glances agent : {{error}}</span>
+<div  class='span1'> <a  href="javascript:reload_custom_view('memory');"><i class="icon-repeat"></i> Reload</a></div>
+%else:
+
 <div id='cv_memory_cont' class='span12'>
   <div id="treemap" class='span11'></div>
   <div  class='span1'> <a  href="javascript:reload_custom_view('memory');"><i class="icon-repeat"></i> Reload</a></div>
   
 </div>
+%end
 
 
 <link href="/static/cv_memory/css/memory.css" rel="stylesheet">
+
 
 
 <script>
