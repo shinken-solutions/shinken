@@ -53,13 +53,13 @@ else
     SCRIPTNAME=$SHINKEN_MODULE_FILE
 fi
 
-curpath=$(cd $(dirname "$0") && pwd)
-#echo curpath is $curpath filename is $(basename "$0")
+curdir=$(dirname $(readlink -f "$0"))
+#echo curdir is $curdir filename is $(basename "$0")
 
 ## Default paths:
-test "$BIN" || BIN=$(cd $curpath/.. && pwd)
-test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
-test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
+test "$BIN" || BIN=$(cd $curdir/.. && pwd)
+test "$VAR" || VAR=$(cd $curdir/../../var && pwd)
+test "$ETC" || ETC=$(cd $curdir/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
@@ -176,12 +176,6 @@ fi
 # Now place us in our var directory so even our arbiter will be
 # happy for opening its pid and cmd files
 cd $VAR
-
-#echo BIN=$BIN
-#echo VAR=$VAR
-#echo ETC=$ETC
-
-#set -xv
 
 
 echo_success() {

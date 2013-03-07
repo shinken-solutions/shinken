@@ -48,7 +48,7 @@
 
 NAME="shinken-poller"
 
-curdir=$(dirname "$0")
+curdir=$(dirname $(readlink -f "$0"))
 
 export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
