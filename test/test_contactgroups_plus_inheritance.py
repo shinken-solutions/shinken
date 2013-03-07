@@ -43,6 +43,24 @@ class TestPlusInInheritance(ShinkenTest):
         self.assert_("test_contact_1" in [c .get_name() for c in host1.contacts])
         self.assert_("test_contact_2" in [c .get_name() for c in host1.contacts])
 
+        host2 = self.sched.hosts.find_by_name("test_host_2")
+        self.assert_("test_contact_1" in [c .get_name() for c in host2.contacts])
+
+        host3 = self.sched.hosts.find_by_name("test_host_3")
+        self.assert_("test_contact_1" in [c .get_name() for c in host3.contacts])
+        self.assert_("test_contact_2" in [c .get_name() for c in host3.contacts])
+
+        host4 = self.sched.hosts.find_by_name("test_host_4")
+        self.assert_("test_contact_1" in [c .get_name() for c in host4.contacts])
+
+        host5 = self.sched.hosts.find_by_name("test_host_5")
+        self.assert_("test_contact_1" in [c .get_name() for c in host5.contacts])
+        self.assert_("test_contact_2" in [c .get_name() for c in host5.contacts])
+
+        host6 = self.sched.hosts.find_by_name("test_host_6")
+        self.assert_("test_contact_1" in [c .get_name() for c in host6.contacts])
+        self.assert_("test_contact_2" in [c .get_name() for c in host6.contacts])
+
 
 if __name__ == '__main__':
     unittest.main()
