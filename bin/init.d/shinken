@@ -56,10 +56,6 @@ fi
 curdir=$(dirname $(readlink -f "$0"))
 #echo curdir is $curdir filename is $(basename "$0")
 
-## Default paths:
-test "$BIN" || BIN=$(cd $curdir/.. && pwd)
-test "$VAR" || VAR=$(cd $curdir/../../var && pwd)
-test "$ETC" || ETC=$(cd $curdir/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
@@ -114,8 +110,6 @@ SUBMODULES=""
 ## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
 ## to easily use your own config
 
-#echo "Using $SHINKEN_DEFAULT_FILE .."
-
 
 
 usage() {
@@ -157,6 +151,11 @@ fi
 
 # Reads configuration variable file if it is present
 [ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+
+# Use default paths:
+test -z "$BIN" && BIN=$(cd $curdir/.. && pwd)
+test -z "$VAR" && VAR=$(cd $curdir/../../var && pwd)
+test -z "$ETC" && ETC=$(cd $curdir/../../etc && pwd)
 
 
 # Now look if some required variables are pre defined:
