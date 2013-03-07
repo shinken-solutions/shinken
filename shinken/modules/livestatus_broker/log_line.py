@@ -215,14 +215,18 @@ class Logline(dict):
                 setattr(self, 'time', int(time))
                 setattr(self, 'type', type)
 
+
     def as_tuple(self):
         return tuple([str(getattr(self, col)) for col in Logline.columns])
+
 
     def as_dict(self):
         return dict(zip(Logline.columns, [getattr(self, col) for col in Logline.columns]))
 
+
     def __str__(self):
         return "line: %s" % self.message
+
 
     def fill(self, datamgr):
         """Attach host and/or service objects to a Logline object

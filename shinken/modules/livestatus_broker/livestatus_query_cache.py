@@ -137,9 +137,9 @@ class LiveStatusQueryCache(object):
             return (False, False, [])
         logger.debug("[Livestatus Broker Query Cache] I search the cache for categories %s with key %s and data %s" % (str(query.cache_category), str(query.key), str(query.data)))
         try:
-            return (query.cache_category != cache_IMPOSSIBLE, True, self.categories[query.cache_category].get(query.key))
+            return (query.cache_category != CACHE_IMPOSSIBLE, True, self.categories[query.cache_category].get(query.key))
         except LFUCacheMiss:
-            return (query.cache_category != cache_IMPOSSIBLE, False, [])
+            return (query.cache_category != CACHE_IMPOSSIBLE, False, [])
 
     def cache_query(self, query, result):
         """Puts the result of a livestatus query (metainfo) into the cache."""
@@ -159,12 +159,12 @@ class LiveStatusQueryCache(object):
         try:
             if brok.data['state_id'] != obj.state_id:
                 logger.info("[Livestatus Broker Query Cache] Detected statechange: %s" % str(obj))
-                self.invalidate_category(cache_GLOBAL_STATS)
-                self.invalidate_category(cache_SERVICE_STATS)
+                self.invalidate_category(CACHE_GLOBAL_STATS)
+                self.invalidate_category(CACHE_SERVICE_STATS)
             if brok.data['state_type_id'] != obj.state_type_id:
                 logger.info("[Livestatus Broker Query Cache] Detected statetypechange: %s" % str(obj))
-                self.invalidate_category(cache_GLOBAL_STATS_WITH_STATEtype)
-                self.invalidate_category(cache_SERVICE_STATS)
+                self.invalidate_category(CACHE_GLOBAL_STATS_WITH_STATETYPE)
+                self.invalidate_category(CACHE_SERVICE_STATS)
             logger.debug("[Livestatus Broker Query Cache] Obj State id: %d and State type id: %d, Data state id: %d abd state type id: %d" % (obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']))
         except Exception:
             pass
