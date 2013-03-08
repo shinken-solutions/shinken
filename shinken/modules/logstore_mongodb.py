@@ -136,11 +136,11 @@ class LiveStatusLogStoreMongoDB(BaseModule):
     def open(self):
         try:
             if self.replica_set:
-                self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=True)
+                self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=self.mongodb_fsync)
             else:
                 # Old versions of pymongo do not known about fsync
-                if ReplicaSetConnection and self.mongodb_fsync:
-                    self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
+                if ReplicaSetConnection:
+                    self.conn = pymongo.Connection(self.mongodb_uri, fsync=self.mongodb_fsync)
                 else:
                     self.conn = pymongo.Connection(self.mongodb_uri)
             self.db = self.conn[self.database]
