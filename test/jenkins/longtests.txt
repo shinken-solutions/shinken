@@ -114,6 +114,7 @@ test_missing_timeperiod.py
 test_livestatus_allowedhosts.py
 test_module_trending.py
 test_multiple_not_hostgroups.py
+test_contactgroups_plus_inheritance.py
 
 # takes long
 test_livestatus.py
