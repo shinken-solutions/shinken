@@ -214,21 +214,21 @@ function loadjscssfile(filename, filetype){
  * Example: header_element.tpl
  */
 
-function skonf() {
-    var Port = 7766;
-    var Host = document.domain;
-    var Url = 'http://' + Host + ':' + Port;
-    return Url;
-}
+// function skonf() {
+//     var Port = 7766;
+//     var Host = document.domain;
+//     var Url = 'http://' + Host + ':' + Port;
+//     return Url;
+// }
 
-function webui() {
-    var Port = 7767;
-    var Host = document.domain;
-    var Url = 'http://' + Host + ':' + Port;
-    return Url;
-}
+// function webui() {
+//     var Port = 7767;
+//     var Host = document.domain;
+//     var Url = 'http://' + Host + ':' + Port;
+//     return Url;
+// }
 
-$(function(){
-    $("a[href=':7766']").attr('href', skonf());
-    $("a[href=':7767']").attr('href', webui());
-});
+// $(function(){
+//     $("a[href=':7766']").attr('href', skonf());
+//     $("a[href=':7767']").attr('href', webui());
+// });

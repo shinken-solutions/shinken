@@ -641,3 +641,12 @@ class Webui_broker(BaseModule, Daemon):
 
         safe_print("Will return external_ui_link::", lst)
         return lst
+
+    # 
+    def get_webui_port(self):
+        port = 666
+        return port
+    # 
+    def get_skonf_port(self):
+        port = 777
+        return port

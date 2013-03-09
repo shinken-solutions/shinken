@@ -1,5 +1,26 @@
 %if 'app' not in locals(): app = None
 
+<script type="text/javascript">
+  function skonf() {
+      var Port = {{app.get_skonf_port()}};
+      var Host = document.domain;
+      var Url = 'http://' + Host + ':' + Port;
+      return Url;
+  }
+
+  function webui() {
+      var Port = {{app.get_webui_port()}}
+      var Host = document.domain;
+      var Url = 'http://' + Host + ':' + Port;
+      return Url;
+  }
+
+  $(function(){
+      $("a[href=':7766']").attr('href', skonf());
+      $("a[href=':7767']").attr('href', webui());
+  });
+</script>
+
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
