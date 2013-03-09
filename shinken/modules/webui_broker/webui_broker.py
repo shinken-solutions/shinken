@@ -650,3 +650,7 @@ class Webui_broker(BaseModule, Daemon):
     def get_skonf_port(self):
         port = 777
         return port
+
+    def get_skonf_active_state(self):
+        state = 0
+        return state

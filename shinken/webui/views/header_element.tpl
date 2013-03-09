@@ -36,7 +36,9 @@
            <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
            <ul class="dropdown-menu">
             <li><a href=":7767">Shinken UI </a></li>
+            %if app.get_skonf_active_state() == 1:
             <li><a href=":7766">Skonf UI</a><span class="badger-beta badger-critical">Beta</span></li>
+            %end
             <!-- We will add also others UIs on the global menu -->
             %if app:
             %other_uis = app.get_external_ui_link()
