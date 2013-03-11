@@ -200,7 +200,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         values = logline.as_dict()
         if logline.logclass != LOGCLASS_INVALID:
             try:
-                self.db[self.collection].insert(values, safe=True)
+                self.db[self.collection].insert(values)
                 self.is_connected = CONNECTED
                 # If we have a backlog from an outage, we flush these lines
                 # First we make a copy, so we can delete elements from
