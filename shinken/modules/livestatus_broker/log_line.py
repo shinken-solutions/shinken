@@ -188,11 +188,12 @@ class Logline(dict):
                      type.startswith('Bailing out') or \
                      type.startswith('active mode...') or \
                      type.startswith('standby mode...') or \
-                     type.startswith('Debug') or \
                      type.startswith('Warning') or \
                      type.startswith('Info'):
                     logobject = LOGOBJECT_INFO
                     logclass = LOGCLASS_PROGRAM
+                elif type.startswith('Debug'):
+                    pass
                 else:
                     logger.debug("[Livestatus Log Lines] Does not match")
                     pass
