@@ -682,7 +682,7 @@ class Host(SchedulingItem):
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT HOST STATE: %s;%s;%s;%d;%s'
+            console_logger.debug('CURRENT HOST STATE: %s;%s;%s;%d;%s'
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))

@@ -692,7 +692,7 @@ class Service(SchedulingItem):
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
+            console_logger.debug('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
