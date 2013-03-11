@@ -88,7 +88,6 @@ class Graphite_broker(BaseModule):
                 logger.error("[Graphite broker] Graphite Carbon instance network socket! IOError:%s" % str(err))
                 raise
         logger.info("[Graphite broker] Connection successful to  %s:%d" % (str(self.host), self.port))
-        self.ticks = 0
 
     # Sending data to Carbon. In case of failure, try to reconnect and send again. If carbon instance is down
     # Data are buffered.
