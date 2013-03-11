@@ -208,7 +208,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 backloglines = [bl for bl in self.backlog]
                 for backlogline in backloglines:
                     try:
-                        self.db[self.collection].insert(backlogline, safe=True)
+                        self.db[self.collection].insert(backlogline)
                         self.backlog.remove(backlogline)
                     except AutoReconnect, exp:
                         self.is_connected = SWITCHING
