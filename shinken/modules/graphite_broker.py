@@ -281,7 +281,8 @@ class Graphite_broker(BaseModule):
             try:
 	        self.send_packet(packet)
                 # Flush the buffer after a successful send to Graphite
-                self.buffer = []   
+                self.buffer = []
+                self.ticks = 0
             except IOError, err:
                 self.ticks += 1
                 logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s" % ( self.ticks , self.tick_limit ))
