@@ -89,16 +89,23 @@ class Memcache_retention_scheduler(BaseModule):
 
         # Now the flat file method
         for h_name in hosts:
-            h = hosts[h_name]
-            key = self.normalize_key("HOST-%s" % h_name)
-            val = cPickle.dumps(h)
-            self.mc.set(key, val)
+            try:
+                h = hosts[h_name]
+                key = self.normalize_key("HOST-%s" % h_name)
+                val = cPickle.dumps(h)
+                self.mc.set(key, val)
+            except:
+                logger.error("[MemcacheRetention] error while saving host %s" % key)
 
         for (h_name, s_desc) in services:
-            key = self.normalize_key("SERVICE-%s,%s" % (h_name, s_desc))
-            s = services[(h_name, s_desc)]
-            val = cPickle.dumps(s)
-            self.mc.set(key, val)
+            try:
+                key = self.normalize_key("SERVICE-%s,%s" % (h_name, s_desc))
+                s = services[(h_name, s_desc)]
+                val = cPickle.dumps(s)
+                self.mc.set(key, val)
+            except:
+                logger.error("[MemcacheRetention] error while saving service %s" % key)
+
         self.mc.disconnect_all()
         logger.info("Retention information updated in Memcache")
 
@@ -112,18 +119,27 @@ class Memcache_retention_scheduler(BaseModule):
 
         # Now the flat file method
         for h in daemon.hosts:
-            key = self.normalize_key("HOST-%s" % h.host_name)
-            val = self.mc.get(key)
-            if val is not None:
-                val = cPickle.loads(val)
-                ret_hosts[h.host_name] = val
+            key = ""
+            try:
+                key = self.normalize_key("HOST-%s" % h.host_name)
+                val = self.mc.get(key)
+                if val is not None:
+                    val = cPickle.loads(val)
+                    ret_hosts[h.host_name] = val
+            except:
+                logger.error("[MemcacheRetention] error while loading host %s" % key)
 
         for s in daemon.services:
-            key = self.normalize_key("SERVICE-%s,%s" % (s.host.host_name, s.service_description))
-            val = self.mc.get(key)
-            if val is not None:
-                val = cPickle.loads(val)
-                ret_services[(s.host.host_name, s.service_description)] = val
+            key = ""
+            try:
+                key = self.normalize_key("SERVICE-%s,%s" % (s.host.host_name, s.service_description))
+                val = self.mc.get(key)
+                if val is not None:
+                    val = cPickle.loads(val)
+                    ret_services[(s.host.host_name, s.service_description)] = val
+            except:
+                logger.error("[MemcacheRetention] error while loading service %s" % key)
+
         self.mc.disconnect_all()
 
         all_data = {'hosts': ret_hosts, 'services': ret_services}
