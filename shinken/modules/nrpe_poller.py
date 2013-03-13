@@ -254,7 +254,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 buf = ''
 
             except SSLError:
-                bug = ''
+                buf = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
             # or refuse arguments...)
