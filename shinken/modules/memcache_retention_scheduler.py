@@ -68,6 +68,13 @@ class Memcache_retention_scheduler(BaseModule):
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 
+    def normalize_key(self, key):
+        """
+        Prepare key to be correct for memcache
+        """
+        # space are not allowed in memcache key.. so change it by SPACE token
+        return key.replace(' ', 'SPACE').encode('utf8', 'ignore')
+
     def hook_save_retention(self, daemon):
         """
         main function that is called in the retention creation pass
@@ -83,18 +90,13 @@ class Memcache_retention_scheduler(BaseModule):
         # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
-            key = "HOST-%s" % h_name
-            key = key.encode('utf8', 'ignore')
+            key = self.normalize_key("HOST-%s" % h_name)
             val = cPickle.dumps(h)
             self.mc.set(key, val)
 
         for (h_name, s_desc) in services:
-            key = "SERVICE-%s,%s" % (h_name, s_desc)
+            key = self.normalize_key("SERVICE-%s,%s" % (h_name, s_desc))
             s = services[(h_name, s_desc)]
-            # space are not allowed in memcache key.. so change it by SPACE token
-            key = key.replace(' ', 'SPACE')
-            key = key.encode('utf8', 'ignore')
-            #print "Using key", key
             val = cPickle.dumps(s)
             self.mc.set(key, val)
         self.mc.disconnect_all()
@@ -110,18 +112,14 @@ class Memcache_retention_scheduler(BaseModule):
 
         # Now the flat file method
         for h in daemon.hosts:
-            key = "HOST-%s" % h.host_name
-            key = key.encode('utf8', 'ignore')
+            key = self.normalize_key("HOST-%s" % h.host_name)
             val = self.mc.get(key)
             if val is not None:
                 val = cPickle.loads(val)
                 ret_hosts[h.host_name] = val
 
         for s in daemon.services:
-            key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
-            # space are not allowed in memcache key.. so change it by SPACE token
-            key = key.replace(' ', 'SPACE')
-            key = key.encode('utf8', 'ignore')
+            key = self.normalize_key("SERVICE-%s,%s" % (s.host.host_name, s.service_description))
             val = self.mc.get(key)
             if val is not None:
                 val = cPickle.loads(val)
