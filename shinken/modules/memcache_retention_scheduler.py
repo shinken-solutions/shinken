@@ -97,6 +97,7 @@ class Memcache_retention_scheduler(BaseModule):
             #print "Using key", key
             val = cPickle.dumps(s)
             self.mc.set(key, val)
+        self.mc.disconnect_all()
         logger.info("Retention information updated in Memcache")
 
     # Should return if it succeed in the retention load or not
@@ -125,6 +126,7 @@ class Memcache_retention_scheduler(BaseModule):
             if val is not None:
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
+        self.mc.disconnect_all()
 
         all_data = {'hosts': ret_hosts, 'services': ret_services}
 
