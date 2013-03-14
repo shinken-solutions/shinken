@@ -39,8 +39,11 @@ try:
 except ImportError:
     is_android = False
 
+is_jython = sys.platform.startswith('java')
 
-if not is_android:
+if is_jython:
+    pass
+elif not is_android:
     from multiprocessing import Queue, Manager, active_children, cpu_count
 else:
     from multiprocessing import active_children
@@ -499,7 +502,7 @@ class Daemon(object):
 
         # Now we can start our Manager
         # interprocess things. It's important!
-        if is_android:
+        if is_android or is_jython:
             self.manager = None
         else:
             self.manager = Manager()
@@ -543,6 +546,7 @@ class Daemon(object):
         self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl)
 
     def get_socks_activity(self, socks, timeout):
+        socks[0].setblocking(0)
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error, e:
@@ -560,12 +564,19 @@ class Daemon(object):
         # Now get the module path. It's in fact the directory modules
         # inside the shinken directory. So let's find it.
 
+        # It's look like jython behavior is different
+        # when using this function in livestatus broker, workdir is added
+        # to the module path. we set workdir to the current directory as a temporary fix
+
         self.debug_output.append("modulemanager file %s" % shinken.modulesmanager.__file__)
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+        print "****** "+modulespath
         self.debug_output.append("modulemanager absolute file %s" % modulespath)
         # We got one of the files
-        parent_path = os.path.dirname(os.path.dirname(modulespath))
+        parent_path = os.path.dirname(os.path.dirname(modulespath)).rpartition("/")[0]
+        print "$$$$$$ "+parent_path
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
+        print "###### "+modulespath
         self.debug_output.append("Using modules path: %s" % (modulespath))
 
         return modulespath
@@ -573,7 +584,8 @@ class Daemon(object):
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
-        act = active_children()
+        if not is_jython:
+            act = active_children()
         self.modules_manager.check_alive_instances()
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
@@ -632,13 +644,14 @@ class Daemon(object):
                 os.initgroups(self.user, gid)
             except OSError, e:
                 logger.warning('Cannot call the additional groups setting with initgroups (%s)' % e.strerror)
-        try:
-            # First group, then user :)
-            os.setregid(gid, gid)
-            os.setreuid(uid, uid)
-        except OSError, e:
-            logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting" % (self.user, self.group, e.strerror, e.errno))
-            sys.exit(2)
+        if not is_jython:
+            try:
+                # First group, then user :)
+                os.setregid(gid, gid)
+                os.setreuid(uid, uid)
+            except OSError, e:
+                logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting" % (self.user, self.group, e.strerror, e.errno))
+                sys.exit(2)
 
     # Parse self.config_file and get all properties in it.
     # If some properties need a pythonization, we do it.
@@ -702,6 +715,9 @@ class Daemon(object):
             except ImportError:
                 version = ".".join(map(str, sys.version_info[:2]))
                 raise Exception("pywin32 not installed for Python " + version)
+        elif is_jython:
+            for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR2):
+                signal.signal(sig, func)
         else:
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)

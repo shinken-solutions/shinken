@@ -68,6 +68,7 @@ class ModulesManager(object):
     # The previous imported modules, if any, are cleaned before.
     def load(self):
         now = int(time.time())
+        print self.modules_path
         # We get all modules file with .py
         modules_files = [fname[:-3] for fname in os.listdir(self.modules_path)
                          if fname.endswith(".py")]
@@ -85,7 +86,7 @@ class ModulesManager(object):
         # our type
         del self.imported_modules[:]
         for fname in modules_files:
-            #print "Try to load", fname
+            print "Try to load", fname
             try:
                 m = __import__(fname)
                 if not hasattr(m, 'properties'):

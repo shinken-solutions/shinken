@@ -186,8 +186,11 @@ def get_livestatus_full_name(item, req):
 #       this is needed for filters. lsl query attributes are converted to this datatype
 #       later, the repr datatype needs to be converted to a string
 
-livestatus_attribute_map = {
-    'Host': {
+
+# JVM limits method code size to 64k
+# We have to split livestatus_attribute_map creating in severals methods
+def generate_livestatus_attribute_map(livestatus_attribute_map):
+    livestatus_attribute_map['Host'] = {
         'accept_passive_checks': {
             'description': 'Whether passive host checks are accepted (0/1)',
             'function': lambda item, req: item.passive_checks_enabled,
@@ -738,8 +741,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: "",  # REPAIRME
             'datatype': float,
         },
-    },
-    'Service': {
+    }
+    livestatus_attribute_map['Service'] = {
         'accept_passive_checks': {
             'description': 'Whether the service accepts passive checks (0/1)',
             'function': lambda item, req: item.passive_checks_enabled,
@@ -1474,8 +1477,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.state_type_id,
             'datatype': int,
         },
-    },
-    'Hostgroup': {
+    }
+    livestatus_attribute_map['Hostgroup'] = {
         'action_url': {
             'description': 'An optional URL to custom actions or information about the hostgroup',
             'function': lambda item, req: item.action_url,
@@ -1581,8 +1584,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: reduce(worst_service_state, (y.state_id for x in item.members for y in x.services), 0),
             'datatype': int,
         },
-    },
-    'Servicegroup': {
+    }
+    livestatus_attribute_map['Servicegroup'] = {
         'action_url': {
             'description': 'An optional URL to custom notes or actions on the service group',
             'function': lambda item, req: item.action_url,
@@ -1668,8 +1671,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: reduce(worst_service_state, (x.state_id for x in item.members), 0),
             'datatype': int,
         },
-    },
-    'Contact': {
+    }
+    livestatus_attribute_map['Contact'] = {
         'address1': {
             'description': 'The additional field address1',
             'function': lambda item, req: item.address1,
@@ -1769,8 +1772,8 @@ livestatus_attribute_map = {
             'datatype': bool,
         },
 
-    },
-    'Contactgroup': {
+    }
+    livestatus_attribute_map['Contactgroup'] = {
         'alias': {
             'description': 'The alias of the contactgroup',
             'function': lambda item, req: item.alias,
@@ -1784,8 +1787,8 @@ livestatus_attribute_map = {
             'description': 'The name of the contactgroup',
             'function': lambda item, req: item.contactgroup_name,
         },
-    },
-    'Timeperiod': {
+    }
+    livestatus_attribute_map['Timeperiod'] = {
         'alias': {
             'description': 'The alias of the timeperiod',
             'function': lambda item, req: item.alias,
@@ -1799,8 +1802,8 @@ livestatus_attribute_map = {
             'description': 'The name of the timeperiod',
             'function': lambda item, req: item.timeperiod_name,
         },
-    },
-    'Command': {
+    }
+    livestatus_attribute_map['Command'] = {
         'line': {
             'description': 'The shell command line',
             'function': lambda item, req: item.command_line,
@@ -1809,8 +1812,8 @@ livestatus_attribute_map = {
             'description': 'The name of the command',
             'function': lambda item, req: item.command_name,
         },
-    },
-    'SchedulerLink': {
+    }
+    livestatus_attribute_map['SchedulerLink'] = {
         'address': {
             'description': 'The ip or dns address of the scheduler',
             'function': lambda item, req: item.address,  # REPAIRME
@@ -1839,8 +1842,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.weight,  # REPAIRME
             'datatype': int,
         },
-    },
-    'PollerLink': {
+    }
+    livestatus_attribute_map['PollerLink'] = {
         'address': {
             'description': 'The ip or dns address of the poller',
             'function': lambda item, req: item.address,  # REPAIRME
@@ -1864,8 +1867,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.spare,
             'datatype': bool,
         },
-    },
-    'ReactionnerLink': {
+    }
+    livestatus_attribute_map['ReactionnerLink'] = {
         'address': {
             'description': 'The ip or dns address of the reactionner',
             'function': lambda item, req: item.address,  # REPAIRME
@@ -1889,8 +1892,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.spare,
             'datatype': bool,
         },
-    },
-    'BrokerLink': {
+    }
+    livestatus_attribute_map['BrokerLink'] = {
         'address': {
             'description': 'The ip or dns address of the broker',
             'function': lambda item, req: item.address,  # REPAIRME
@@ -1914,8 +1917,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.spare,
             'datatype': bool,
         },
-    },
-    'Problem': {
+    }
+    livestatus_attribute_map['Problem'] = {
         'impacts': {
             'description': 'List of what the source impact (list of hosts and services)',
             'function': lambda item, req: from_svc_hst_distinct_lists(item.impacts),
@@ -1924,8 +1927,8 @@ livestatus_attribute_map = {
             'description': 'The source name of the problem (host or service)',
             'function': lambda item, req: get_livestatus_full_name(item.source, req),
         },
-    },
-    'Downtime': {
+    }
+    livestatus_attribute_map['Downtime'] = {
         'author': {
             'description': 'The contact that scheduled the downtime',
             'function': lambda item, req: item.author,
@@ -2522,8 +2525,10 @@ livestatus_attribute_map = {
             'function': lambda item, req: {True: 0, False: 1}[item.is_in_effect],
             'datatype': int,
         },
-    },
-    'Comment': {
+    }
+
+def generate_livestatus_attribute_map_2(livestatus_attribute_map):
+    livestatus_attribute_map['Comment'] = {
         'author': {
             'description': 'The contact that entered the comment',
             'function': lambda item, req: item.author,
@@ -3120,8 +3125,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.comment_type,  # CONTROLME INSORTME
             'datatype': int,
         },
-    },
-    'Hostsbygroup': {
+    }
+    livestatus_attribute_map['Hostbygroup'] = {
         'hostgroup_action_url': {
             'description': 'An optional URL to custom actions or information about the hostgroup',
             'function': lambda item, req: item.hostgroup,  # REPAIRME
@@ -3242,8 +3247,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.hostgroup,  # REPAIRME
             'datatype': int,
         },
-    },
-    'Servicesbygroup': {
+    }
+    livestatus_attribute_map['Servicesbygroup'] = {
         'servicegroup_action_url': {
             'description': 'An optional URL to custom notes or actions on the service group',
             'function': lambda item, req: "",  # REPAIRME
@@ -3329,8 +3334,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: "",  # REPAIRME
             'datatype': int,
         },
-    },
-    'Servicesbyhostgroup': {
+    }
+    livestatus_attribute_map['Servicesbyhostgroup'] = {
         'hostgroup_action_url': {
             'description': 'An optional URL to custom actions or information about the hostgroup',
             'function': lambda item, req: "",  # REPAIRME
@@ -3451,8 +3456,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: "",  # REPAIRME
             'datatype': int,
         },
-    },
-    'Config': {
+    }
+    livestatus_attribute_map['Config'] = {
         'accept_passive_host_checks': {
             'description': 'Whether passive host checks are accepted in general (0/1)',
             'function': lambda item, req: item.passive_host_checks_enabled,
@@ -3651,8 +3656,8 @@ livestatus_attribute_map = {
             'function': lambda item, req: 0,  # REPAIRME
             'datatype': float,
         },
-    },
-    'Logline': {
+    }
+    livestatus_attribute_map['Logline'] = {
         'attempt': {
             'description': 'The number of the check attempt',
             'function': lambda item, req: item.attempt,
@@ -4336,8 +4341,11 @@ livestatus_attribute_map = {
             'description': 'The type of the message (text before the colon), the message itself for info messages',
             'function': lambda item, req: item.type,  # REPAIRME
         },
-    },
-}
+    }
+
+livestatus_attribute_map = dict()
+generate_livestatus_attribute_map(livestatus_attribute_map)
+generate_livestatus_attribute_map_2(livestatus_attribute_map)
 
 table_class_map = {
     'hosts': ('Host', Host),

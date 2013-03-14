@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from Queue import Empty
+import sys
 
 # In android, we should use threads, not process
 is_android = True
@@ -32,14 +33,18 @@ try:
 except ImportError:
     is_android = False
 
-if not is_android:
+is_jython = sys.platform.startswith('java')
+
+if is_jython:
+    from Queue import Queue
+    from threading import Thread as Process
+elif not is_android:
     from multiprocessing import Process, Queue
 else:
     from Queue import Queue
     from threading import Thread as Process
 
 import time
-import sys
 import signal
 from log import logger
 

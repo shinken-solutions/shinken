@@ -183,7 +183,8 @@ except AttributeError, exp:
                 logger.error("Your pyro version (%s) is not supported. Please install version (%s) " % (PYRO_VERSION, last_known_working_version))
                 exit(1)
             else:
-                Pyro.config.SERVERTYPE = "multiplex"
+                #NRD Pyro.config.SERVERTYPE = "multiplex"
+                Pyro.config.SERVERTYPE = "thread"
                 # For Pyro >4.X hash
                 if hasattr(Pyro.config, 'SOCK_REUSE'):
                     Pyro.config.SOCK_REUSE = True

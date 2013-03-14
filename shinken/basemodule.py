@@ -31,7 +31,8 @@ import os
 import signal
 import time
 from re import compile
-from multiprocessing import Queue, Process
+from Queue import Queue
+from threading import Thread
 
 from shinken.log import logger
 
@@ -163,7 +164,7 @@ class BaseModule(object):
             return
         self.stop_process()
         logger.info("Starting external process for instance %s" % (self.name))
-        p = Process(target=self.main, args=())
+        p = Thread(target=self.main, args=())
 
         # Under windows we should not call start() on an object that got
         # its process as object, so we remove it and we set it in a earlier
@@ -177,7 +178,7 @@ class BaseModule(object):
         # We save the process data AFTER the fork()
         self.process = p
         self.properties['process'] = p  # TODO: temporary
-        logger.info("%s is now started ; pid=%d" % (self.name, p.pid))
+        logger.info("%s is now started ; name=%s" % (self.name, p.name))
 
 
     def __kill(self):

@@ -120,8 +120,6 @@ class Command(Item):
                 #elif 'default' in entry[prop]:
                 #    data[prop] = entry.default
 
-
-
     # Call by pickle to dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):

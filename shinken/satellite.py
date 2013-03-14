@@ -45,7 +45,8 @@ except ImportError:
 from Queue import Empty
 
 if not is_android:
-    from multiprocessing import Queue, Manager, active_children, cpu_count
+    #NRD from multiprocessing import Queue, Manager, active_children, cpu_count
+    pass
 else:
     from Queue import Queue
 

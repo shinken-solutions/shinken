@@ -30,7 +30,8 @@ import traceback
 import socket
 import cPickle
 
-from multiprocessing import active_children
+#NRD from multiprocessing import active_children
+from threading import enumerate
 from Queue import Empty
 
 from shinken.satellite import BaseSatellite
@@ -333,9 +334,9 @@ class Broker(BaseSatellite):
         self.broks.extend(data)
 
     def do_stop(self):
-        act = active_children()
+        act = enumerate()
         for a in act:
-            a.terminate()
+            #a.terminate()
             a.join(1)
         super(Broker, self).do_stop()
 
