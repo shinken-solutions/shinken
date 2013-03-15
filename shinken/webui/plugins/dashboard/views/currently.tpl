@@ -23,14 +23,21 @@ $(function($) {
     });
 </script>
 
+<div class="row-fluid">
+  <ul class="pull-right nav nav-pills font-grey">
+    <li> <a href="/dashboard"><i class="icon-home"></i></a></li>
+    <li><a href=""><i class="icon-cogs"></i></a></li>
+  </ul>
+</div>
+
 <!-- Jet Pack Area START -->
-<div>
+<div class="row-fluid">
   <p><span id="clock"></span></p>
   <p><span id="date"></span></p>
 </div>
 <!-- Jet Pack Area END -->
 
-<div> 
+<div class="row-fluid"> 
   <ul id="Navigation" class="span8 wtf">
     <li class="span3">
       <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="85px" viewBox="0 0 100 83.419" enable-background="new 0 0 100 83.419" fill ="#FFFFFF" xml:space="preserve">
@@ -129,7 +136,7 @@ $(function($) {
       %end
 </li>
 </ul>
-
 </div>
+
 
 <!-- Shinken Info End -->
