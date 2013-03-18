@@ -72,7 +72,9 @@ class Webui_broker(BaseModule, Daemon):
         self.plugins = []
 
         self.port = int(getattr(modconf, 'port', '7767'))
+        self.http_port = int(getattr(modconf, 'http_port', '7766'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
+        self.show_skonf = int(getattr(modconf, 'show_skonf', '1'))
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.play_sound = to_bool(getattr(modconf, 'play_sound', '0'))
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
@@ -641,3 +643,16 @@ class Webui_broker(BaseModule, Daemon):
 
         safe_print("Will return external_ui_link::", lst)
         return lst
+
+    # 
+    def get_webui_port(self):
+        port = self.port
+        return port
+    # 
+    def get_skonf_port(self):
+        port = self.http_port
+        return port
+
+    def get_skonf_active_state(self):
+        state = self.show_skonf
+        return state

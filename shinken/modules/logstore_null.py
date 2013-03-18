@@ -28,16 +28,8 @@ This class store log broks in a black hole
 It is one possibility (!) for an exchangeable storage for log broks
 """
 
-import os
-import sys
-import time
-import datetime
-import re
-from shinken.objects.service import Service
-
 from shinken.log import logger
 from shinken.basemodule import BaseModule
-from shinken.objects.module import Module
 
 properties = {
     'daemons': ['livestatus'],
