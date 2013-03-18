@@ -1168,8 +1168,9 @@ class Snmp_poller(BaseModule):
 
             # if directory
             elif os.path.isdir(self.datasource_file):
+                if not self.datasource_file.endswith("/") : self.datasource_file.join(self.datasource_file, "/") 
                 files = glob.glob(os.path.join(self.datasource_file,
-                                               '/Default*.ini')
+                                               'Default*.ini')
                                  )
                 for f in files:
                     if self.datasource is None:
@@ -1179,7 +1180,7 @@ class Snmp_poller(BaseModule):
                         ctemp = ConfigObj(f, interpolation='template')
                         self.datasource.merge(ctemp)
             else:
-                raise IOError, "File or folder not found"
+                raise IOError, "File or folder not found: %s" % self.datasource_file
             # Store config in memcache
             self.memcached.set('datasource', self.datasource, time=604800)
         # TODO
