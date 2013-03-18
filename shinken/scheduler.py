@@ -1337,6 +1337,7 @@ class Scheduler:
     def get_new_actions(self):
         self.hook_point('get_new_actions')
         # ask for service and hosts their next check
+        self.hook_point('add_actions')
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 for a in i.actions:
