@@ -27,7 +27,7 @@
                              },
          "_EXCLUDED_SERVICES": {"type":"string",
                                 "description": "Regex for services to be excluded from check auto services"
-                             }
+                             },
          "_WINDOWS_DISK_WARN": {"type":"percent",
                              "description":"Level for disk space"
                              },
