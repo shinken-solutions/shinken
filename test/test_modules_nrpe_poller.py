@@ -32,6 +32,7 @@ from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import nrpe_poller
 from shinken.modules.nrpe_poller import get_instance
+from shinken.message import Message
 
 modconf = Module()
 modconf.module_name = "NrpePoller"
