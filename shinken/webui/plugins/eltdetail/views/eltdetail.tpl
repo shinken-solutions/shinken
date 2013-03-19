@@ -442,7 +442,7 @@ $(document).ready(function(){
 		      		<!-- Show our father dependencies if we got some -->
 		      		%#    Now print the dependencies if we got somes
 		      		%if len(elt.parent_dependencies) > 0:
-		      		<h4 class="span10">Root cause:</h4>
+		      		<h4 class="span10" style="width : 100%">Root cause:</h4>
 		      		<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 		      		<div class="clear"></div>
 		      		{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems)}}
