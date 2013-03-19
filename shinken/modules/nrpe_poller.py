@@ -422,7 +422,9 @@ class Nrpe_poller(BaseModule):
                 c.con.look_for_timeout()
 
         # We check if all new things in connections
-        asyncore.poll(timeout=1)
+        # WARNING : using poll2 instead of poll (poll1 is with select
+        # call that is limited to 1024 connexions, poll2 is ... poll).
+        asyncore.poll2(timeout=1)
 
         # Now we look for finished checks
         for c in self.checks:
