@@ -36,6 +36,9 @@ import binascii
 import asyncore
 import getopt
 import shlex
+import traceback
+import cStringIO
+
 
 try:
     import OpenSSL
@@ -457,12 +460,30 @@ class Nrpe_poller(BaseModule):
         for chk in to_del:
             self.checks.remove(chk)
 
+
+
+
+    # Wrapper function for work in order to catch the exception
+    # to see the real work, look at do_work
+    def work(self, s, returns_queue, c):
+        try:
+            self.do_work(s, returns_queue, c)
+        # Catch any exception, try to print it and exit anyway
+        except Exception, exp:
+            output = cStringIO.StringIO()
+            traceback.print_exc(file=output)
+            logger.error("Worker '%d' exit with an unmanaged exception : %s" % (self.id, output.getvalue()))
+            output.close()
+            # Ok I die now
+            raise
+
+
     # id = id of the worker
     # s = Global Queue Master->Slave
     # m = Queue Slave->Master
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
-    def work(self, s, returns_queue, c):
+    def do_work(self, s, returns_queue, c):
         logger.info("[NRPEPoller] Module started!")
         ## restore default signal handler for the workers:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
