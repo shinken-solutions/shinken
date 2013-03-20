@@ -47,6 +47,9 @@ class TestNrpePoller(ShinkenTest):
     #    self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 
     def test_nrpe_poller(self):
+        if os.name == 'nt':
+            return
+        
 
         mod = nrpe_poller.Nrpe_poller(modconf)
 
