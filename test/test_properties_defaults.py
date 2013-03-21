@@ -520,6 +520,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('trigger_name', ''),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
+        ('custom_views', ''),
         ])
 
     def setUp(self):
@@ -779,6 +780,9 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('trigger_name', ''),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
+        ('aggregation', ''),
+        ('service_dependencies', ''),
+        ('custom_views', ''),
         ])
 
     def setUp(self):

@@ -142,7 +142,6 @@ launch_and_assert test_freshness.py
 launch_and_assert test_star_in_hostgroups.py
 launch_and_assert test_protect_esclamation_point.py
 launch_and_assert test_module_passwd_ui.py
-launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_css_in_command.py
 launch_and_assert test_servicedependency_implicit_hostgroup.py
 launch_and_assert test_pack_hash_memory.py
@@ -158,6 +157,7 @@ launch_and_assert test_python_crash_with_recursive_bp_rules.py
 launch_and_assert test_missing_timeperiod.py
 launch_and_assert test_module_trending.py
 launch_and_assert test_multiple_not_hostgroups.py
+launch_and_assert test_contactgroups_plus_inheritance.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.

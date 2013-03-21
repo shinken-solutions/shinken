@@ -121,6 +121,9 @@ class Service(SchedulingItem):
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
 
+        # Easy Service dep definition
+        'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
+
         # service generator
         'duplicate_foreach':       StringProp(default=''),
         'default_value':           StringProp(default=''),
@@ -239,9 +242,6 @@ class Service(SchedulingItem):
         'state_id_before_impact': IntegerProp(default=0),
         # if the state change, we know so we do not revert it
         'state_changed_since_impact': BoolProp(default=False),
-
-        # Easy Service dep definition
-        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
 
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
@@ -544,9 +544,12 @@ class Service(SchedulingItem):
                                 # because in the "explode" phase, we do not have access to this data! :(
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
-                        if hasattr(self, 'check_command'):
-                            # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
+                        # Here is a list of property where we will expand the $KEY$ by the value
+                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies']
+                        for prop in _the_expandables:
+                            if hasattr(self, prop):
+                                # here we can replace VALUE, VALUE1, VALUE2,...
+                                setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
                         if hasattr(self, 'aggregation'):
                             new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
