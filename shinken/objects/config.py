@@ -56,6 +56,7 @@ from realm import Realm, Realms
 from contact import Contact, Contacts
 from contactgroup import Contactgroup, Contactgroups
 from notificationway import NotificationWay, NotificationWays
+from checkmodulation import CheckModulation, CheckModulations
 from servicegroup import Servicegroup, Servicegroups
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
@@ -312,6 +313,7 @@ class Config(Item):
         'contact':          (Contact, Contacts, 'contacts'),
         'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups'),
         'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
+        'checkmodulation':         (CheckModulation, CheckModulations, 'checkmodulations'),
         'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
         'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
         'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters'),
@@ -502,7 +504,7 @@ class Config(Item):
     def read_config_buf(self, buf):
         params = []
         types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
-                 'contact', 'notificationway', 'host', 'service', 'servicegroup',
+                 'contact', 'notificationway', 'checkmodulation', 'host', 'service', 'servicegroup',
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
@@ -700,7 +702,7 @@ class Config(Item):
         self.hosts.linkify(self.timeperiods, self.commands, \
                                self.contacts, self.realms, \
                                self.resultmodulations, self.businessimpactmodulations, \
-                               self.escalations, self.hostgroups, self.triggers)
+                               self.escalations, self.hostgroups, self.triggers, self.checkmodulations)
 
         self.hostsextinfo.merge(self.hosts)
 
@@ -714,7 +716,7 @@ class Config(Item):
         self.services.linkify(self.hosts, self.commands, \
                                   self.timeperiods, self.contacts,\
                                   self.resultmodulations, self.businessimpactmodulations, \
-                                  self.escalations, self.servicegroups, self.triggers)
+                                  self.escalations, self.servicegroups, self.triggers, self.checkmodulations)
 
         self.servicesextinfo.merge(self.services)
 
@@ -724,6 +726,9 @@ class Config(Item):
 
         # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)
+
+        # link notificationways with timeperiods and commands
+        self.checkmodulations.linkify(self.timeperiods, self.commands)
 
         #print "Contactgroups"
         # link contacgroups with contacts
@@ -773,6 +778,7 @@ class Config(Item):
         # satellites
         self.realms.prepare_for_satellites_conf()
 
+
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify(self):
@@ -786,6 +792,7 @@ class Config(Item):
         self.hosts.late_linkify_h_by_commands(self.commands)
         self.services.late_linkify_s_by_commands(self.commands)
         self.contacts.late_linkify_c_by_commands(self.commands)
+
 
     # Some properties are dangerous to be send like that
     # like realms linked in hosts. Realms are too big to send (too linked)
@@ -957,6 +964,7 @@ class Config(Item):
         self.contacts.fill_default()
         self.contactgroups.fill_default()
         self.notificationways.fill_default()
+        self.checkmodulations.fill_default()
         self.services.fill_default()
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
@@ -1269,6 +1277,7 @@ class Config(Item):
         self.contacts.create_reversed_list()
         self.contactgroups.create_reversed_list()
         self.notificationways.create_reversed_list()
+        self.checkmodulations.create_reversed_list()
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
@@ -1321,7 +1330,7 @@ class Config(Item):
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
-                  'hostsextinfo', 'servicesextinfo'):
+                  'hostsextinfo', 'servicesextinfo', 'checkmodulations'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x))
             cur = getattr(self, x)
@@ -1400,6 +1409,7 @@ class Config(Item):
         self.contactgroups.pythonize()
         self.contacts.pythonize()
         self.notificationways.pythonize()
+        self.checkmodulations.pythonize()
         self.servicegroups.pythonize()
         self.services.pythonize()
         self.servicedependencies.pythonize()
@@ -1444,6 +1454,7 @@ class Config(Item):
         self.hosts.compute_hash()
         self.contacts.pythonize()
         self.notificationways.pythonize()
+        self.checkmodulations.pythonize()
         self.services.pythonize()
         self.resultmodulations.pythonize()
         self.businessimpactmodulations.pythonize()
@@ -1733,6 +1744,7 @@ class Config(Item):
                 new_hostgroups.append(hg.copy_shell())
             cur_conf.hostgroups = Hostgroups(new_hostgroups)
             cur_conf.notificationways = self.notificationways
+            cur_conf.checkmodulations = self.checkmodulations
             cur_conf.contactgroups = self.contactgroups
             cur_conf.contacts = self.contacts
             cur_conf.triggers = self.triggers
