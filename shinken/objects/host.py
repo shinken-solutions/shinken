@@ -137,7 +137,7 @@ class Host(SchedulingItem):
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
         # Our check ways. By defualt void, but will filled by an inner if need
-        'checkways':       ListProp(default='', fill_brok=['full_status']),
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
 
 
     })
@@ -968,7 +968,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkways=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkmodulations=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -986,7 +986,7 @@ class Hosts(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
-        self.linkify_with_checkways(checkways)
+        self.linkify_with_checkmodulations(checkmodulations)
         
 
     # Fill address by host_name if not set
@@ -1084,8 +1084,8 @@ class Hosts(Items):
                 if cc:
                     cc.late_linkify_with_command(commands)
             
-            # Ok also link check_ways
-            for cw in h.checkways:
+            # Ok also link checkmodulations
+            for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
                 print cw
 

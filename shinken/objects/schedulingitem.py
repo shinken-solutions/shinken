@@ -1280,7 +1280,7 @@ class SchedulingItem(Item):
             check_command = self.check_command
             # But if a checkway is available, use this one instead.
             # Take the first available
-            for cw in self.checkways:
+            for cw in self.checkmodulations:
                 c_cw = cw.get_check_command(t)
                 if c_cw:
                     check_command = c_cw

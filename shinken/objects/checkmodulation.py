@@ -31,13 +31,13 @@ from shinken.util import to_name_if_possible
 from shinken.log import logger
 
 
-class CheckWay(Item):
+class CheckModulation(Item):
     id = 1  # zero is always special in database, so we do not take risk here
-    my_type = 'checkway'
+    my_type = 'checkmodulation'
 
     properties = Item.properties.copy()
     properties.update({
-        'checkway_name':          StringProp(fill_brok=['full_status']),
+        'checkmodulation_name':          StringProp(fill_brok=['full_status']),
         'check_command':          StringProp(fill_brok=['full_status']),
         'check_period' :          StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
     })
@@ -50,7 +50,7 @@ class CheckWay(Item):
 
     # For debugging purpose only (nice name)
     def get_name(self):
-        return self.checkway_name
+        return self.checkmodulation_name
 
 
     # Will look at if our check_period is ok, and give our check_command if we got it
@@ -74,20 +74,20 @@ class CheckWay(Item):
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[notificationway::%s] %s property not set" % (self.get_name(), prop))
+                    logger.warning("[checkmodulation::%s] %s property not set" % (self.get_name(), prop))
                     state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'check_command'):
-            logger.warning("[checkway::%s] do not have any check_command defined" % self.get_name())
+            logger.warning("[checkmodulation::%s] do not have any check_command defined" % self.get_name())
             state = False
         else:
             if self.check_command is None:
-                logger.warning("[checkway::%s] a check_command is missing" % self.get_name())
+                logger.warning("[checkmodulation::%s] a check_command is missing" % self.get_name())
                 state = False
             if not self.check_command.is_valid():
-                logger.warning("[checkway::%s] a check_command is invalid" % self.get_name())
+                logger.warning("[checkmodulation::%s] a check_command is invalid" % self.get_name())
                 state = False
 
         # Ok just put None as check_period, means 24x7
@@ -104,9 +104,9 @@ class CheckWay(Item):
             self.check_command.late_linkify_with_command(commands)
 
 
-class CheckWays(Items):
-    name_property = "checkway_name"
-    inner_class = CheckWay
+class CheckModulations(Items):
+    name_property = "checkmodulation_name"
+    inner_class = CheckModulation
 
 
     def linkify(self, timeperiods, commands):
@@ -116,8 +116,8 @@ class CheckWays(Items):
 
     def new_inner_member(self, name=None, params={}):
         if name is None:
-            name = CheckWay.id
-        params['checkway_name'] = name
-        #print "Asking a new inner checkway from name %s with params %s" % (name, params)
-        cw = CheckWay(params)
+            name = CheckModulation.id
+        params['checkmodulation_name'] = name
+        #print "Asking a new inner checkmodulation from name %s with params %s" % (name, params)
+        cw = CheckModulation(params)
         self.items[cw.id] = cw

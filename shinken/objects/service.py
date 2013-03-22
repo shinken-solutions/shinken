@@ -136,7 +136,7 @@ class Service(SchedulingItem):
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
         # Our check ways. By defualt void, but will filled by an inner if need
-        'checkways':       ListProp(default='', fill_brok=['full_status']),
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
 
     })
 
@@ -996,7 +996,7 @@ class Services(Items):
     # service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts,
                 resultmodulations, businessimpactmodulations, escalations,
-                servicegroups, triggers, checkways):
+                servicegroups, triggers, checkmodulations):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -1012,7 +1012,7 @@ class Services(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
-        self.linkify_with_checkways(checkways)
+        self.linkify_with_checkmodulations(checkmodulations)
         
 
     # We can link services with hosts so
