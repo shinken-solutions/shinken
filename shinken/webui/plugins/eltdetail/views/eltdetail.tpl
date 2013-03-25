@@ -602,14 +602,14 @@ $(document).ready(function(){
 						  </tbody>
 						</table>
 
-		      			%else:
+					%else:
 						<div class="alert alert-info">
-							<p class="font-blue">No comments available</p>
+							<p class="font-blue">No downtimes available</p>
 						</div>
-		      			%end
-		      		</div>
-		      	</div>
-		      	<!-- Tab Comments and Downtimes End -->
+					%end
+				</div>
+			</div>
+			<!-- Tab Comments and Downtimes End -->
 
 		      	<!-- Tab Graph Start -->
 		      	<div class="tab-pane" id="graphs">
