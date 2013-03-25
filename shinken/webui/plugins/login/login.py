@@ -65,11 +65,15 @@ def user_auth():
     print "Got forms"
     login = app.request.forms.get('login', '')
     password = app.request.forms.get('password', '')
+    rememberme = app.request.forms.get('remember_me', '')
     is_mobile = app.request.forms.get('is_mobile', '0')
     is_auth = app.check_auth(login, password)
 
     if is_auth:
-        app.response.set_cookie('user', login, secret=app.auth_secret, path='/')
+        expire=''
+        if rememberme:
+            expire='Fri, 01 Jan 2100 00:00:00 GMT'
+        app.response.set_cookie('user', login, secret=app.auth_secret, path='/', expires=expire)
         if is_mobile == '1':
             redirect("/mobile/main")
         else:
