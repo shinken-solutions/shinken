@@ -26,8 +26,18 @@ import time
 import subprocess
 import unittest
 from tempfile import NamedTemporaryFile
-import json
 
+try:
+    import json
+except ImportError:
+    # For old Python version, load
+    # simple json (it can be hard json?! It's 2 functions guy!)
+    try:
+        import simplejson as json
+    except ImportError:
+        print "Error: you need the json or simplejson module"
+        raise
+                                                
 external_mapping = os.path.join(os.path.dirname(__file__),
                                 '..', 'libexec', 'external_mapping.py')
 

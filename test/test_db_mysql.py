@@ -23,7 +23,11 @@
 #
 
 from shinken_test import *
-from shinken.db_mysql import DBMysql
+try:
+    from shinken.db_mysql import DBMysql
+except ImportError:
+    # Oups this server do not have mysql installed, skip this test
+    DBMysql = None
 
 
 class TestConfig(ShinkenTest):
@@ -33,6 +37,8 @@ class TestConfig(ShinkenTest):
         self.db = DBMysql(host='localhost', user='root', password='root', database='merlin', character_set='utf8')
 
     def test_connect_database(self):
+        if not DBMysql:
+            return
         self.create_db()
         try:
             self.db.connect_database()
@@ -40,6 +46,8 @@ class TestConfig(ShinkenTest):
             pass
 
     def test_execute_query(self):
+        if not DBMysql:
+            return
         self.create_db()
         try:
             self.db.connect_database()
