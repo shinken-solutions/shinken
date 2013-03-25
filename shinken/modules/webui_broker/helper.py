@@ -306,6 +306,7 @@ class Helper(object):
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
+        fathers = sorted(fathers, key=lambda dict: dict['node'].get_full_name())
         s = ''
         # Maybe we are the root problem of this, and so we are printing it
         root_str = ''
@@ -346,6 +347,7 @@ class Helper(object):
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
+        fathers = sorted(fathers, key=lambda dict: dict['node'].get_full_name())
         s = ''
 
         # Maybe we are the root problem of this, and so we are printing it
@@ -393,6 +395,7 @@ class Helper(object):
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
+        fathers = sorted(fathers, key=lambda dict: dict['node'].get_full_name())
         s = ''
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
