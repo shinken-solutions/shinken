@@ -124,4 +124,4 @@ test_multiple_not_hostgroups.py
 test_contactgroups_plus_inheritance.py
 test_modules_nrpe_poller.py
 test_checkmodulations.py
-
+test_macromodulations.py

@@ -158,6 +158,7 @@ class Scheduler:
 
         self.notificationways = conf.notificationways
         self.checkmodulations = conf.checkmodulations
+        self.macromodulations = conf.macromodulations
         self.contacts = conf.contacts
         self.contacts.create_reversed_list()
         self.contactgroups = conf.contactgroups

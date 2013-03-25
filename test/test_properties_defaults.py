@@ -521,6 +521,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
+        ('macromodulations', ''),
         ])
 
     def setUp(self):
@@ -781,6 +782,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
+        ('macromodulations', ''),        
         ])
 
     def setUp(self):

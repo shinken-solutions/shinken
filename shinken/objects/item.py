@@ -1033,10 +1033,29 @@ class Items(object):
                 if cw is not None:
                     new_checkmodulations.append(cw)
                 else:
-                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), cw_name)
+                    err = "The checkmodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.checkmodulations = new_checkmodulations
+
+
+    # We've got list of macro modulations as list of names, and
+    # we want real objects
+    def linkify_with_macromodulations(self, macromodulations):
+        for i in self:
+            if not hasattr(i, 'macromodulations'):
+                continue
+            new_macromodulations = []
+            for cw_name in i.macromodulations:
+                cw = macromodulations.find_by_name(cw_name)
+                if cw is not None:
+                    new_macromodulations.append(cw)
+                else:
+                    err = "The macromodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    i.configuration_errors.append(err)
+            # Get the list, but first make elements uniq
+            i.macromodulations = new_macromodulations
+
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
