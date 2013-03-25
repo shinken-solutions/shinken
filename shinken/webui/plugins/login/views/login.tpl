@@ -39,8 +39,6 @@ $(document).ready(function(){
         <label>Password</label>
         <input class="span6" id="password" name="password" type="password" onkeypress="capsCheck(event,this);">
         <br>
-        Don't forget me <input class="span6" id="remember_me" name="remember_me" type="checkbox" >
-        <br>
         <button class="btn" type="submit" href="javascript: submitform()"><i class="icon-signin"></i> Login</button>
       </form>
     </div>
