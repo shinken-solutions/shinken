@@ -1,4 +1,4 @@
-%rebase layout globals(), css=['system/css/log.css'], title='Architecture state', menu_part='/system'
+%rebase layout globals(), css=['system/css/log.css'], title='System Log', menu_part='/system'
 
 %from shinken.bin import VERSION
 %helper = app.helper
@@ -22,9 +22,9 @@
         <li class="active"><a data-toggle="tab" href="#lA">Today</a></li>
         <li><a data-toggle="tab" href="#lB">Yesterday</a></li>
         <li><a data-toggle="tab" href="#lC">This Week</a></li>
-        <li><a data-toggle="tab" href="#lD">Last Week</a></li>
-        <li><a data-toggle="tab" href="#lE">This Month</a></li>
-        <li><a data-toggle="tab" href="#lF">Last Month</a></li>
+        <li><a data-toggle="tab" href="#lD">Week I</a></li>
+        <li><a data-toggle="tab" href="#lE">Week II</a></li>
+        <li><a data-toggle="tab" href="#lF">Week III</a></li>
         <li><a data-toggle="tab" href="#lG">Custom</a></li>
     </ul>
     <div class="tab-content">
