@@ -39,8 +39,7 @@
 		%end
 
 		<div class="impact pblink" id="{{imp_id}}">
-			<div class="show-problem" id="show-problem-{{imp_id}}">
-			</div>
+			<div class="show-problem" id="show-problem-{{imp_id}}"> </div>
 
 			%for i in range(2, impact.business_impact):
 			<div class="criticity-icon-{{i-1}}">
