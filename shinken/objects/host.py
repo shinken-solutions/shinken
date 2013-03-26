@@ -136,8 +136,9 @@ class Host(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
-        # Our check ways. By defualt void, but will filled by an inner if need
+        # Our modulations. By defualt void, but will filled by an inner if need
         'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
 
 
     })
@@ -968,7 +969,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkmodulations=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkmodulations=None, macromodulations=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -987,6 +988,7 @@ class Hosts(Items):
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
         self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
         
 
     # Fill address by host_name if not set

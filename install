@@ -762,6 +762,7 @@ function relocate(){
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+    rm $TARGET/bin/default/shinken.in 
     # relocate init file
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
