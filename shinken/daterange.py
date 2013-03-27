@@ -79,19 +79,14 @@ class Timerange:
 
     # entry is like 00:00-24:00
     def __init__(self, entry):
-        self.is_valid=True
-        pattern=r'(\d\d:\d\d-\d\d:\d\d)'
-        is_valid = re.match(pattern, entry)
-        if is_valid:
-            entries = entry.split('-')
-            start = entries[0]
-            end = entries[1]
-            sentries = start.split(':')
-            self.hstart = int(sentries[0])
-            self.mstart = int(sentries[1])
-            eentries = end.split(':')
-            self.hend = int(eentries[0])
-            self.mend = int(eentries[1])
+        pattern=r'((\d\d):(\d\d)-(\d\d):(\d\d))'
+        matches = re.match(pattern, entry)
+        if matches:
+            self.is_valid=True
+            self.hstart = int(matches.group(1))
+            self.mstart = int(matches.group(2))
+            self.hend = int(matches.group(3))
+            self.mend = int(matches.group(4))
         else:
             self.is_valid=False
 
