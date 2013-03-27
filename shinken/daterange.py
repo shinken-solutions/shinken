@@ -24,7 +24,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time, calendar
+import time, calendar, re
 
 from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
 from shinken.log import logger
@@ -79,15 +79,21 @@ class Timerange:
 
     # entry is like 00:00-24:00
     def __init__(self, entry):
-        entries = entry.split('-')
-        start = entries[0]
-        end = entries[1]
-        sentries = start.split(':')
-        self.hstart = int(sentries[0])
-        self.mstart = int(sentries[1])
-        eentries = end.split(':')
-        self.hend = int(eentries[0])
-        self.mend = int(eentries[1])
+        self.is_valid=True
+        pattern=r'(\d\d:\d\d-\d\d:\d\d)'
+        is_valid = re.match(pattern, entry)
+        if is_valid:
+            entries = entry.split('-')
+            start = entries[0]
+            end = entries[1]
+            sentries = start.split(':')
+            self.hstart = int(sentries[0])
+            self.mstart = int(sentries[1])
+            eentries = end.split(':')
+            self.hend = int(eentries[0])
+            self.mend = int(eentries[1])
+        else:
+            self.is_valid=False
 
     def __str__(self):
         return str(self.__dict__)
@@ -103,7 +109,7 @@ class Timerange:
 
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
-        return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
+        return (self.is_valid and self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60)
 
 
 """ TODO: Add some comment about this class for the doc"""
