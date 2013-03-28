@@ -80,15 +80,13 @@ class Timerange:
     # entry is like 00:00-24:00
     def __init__(self, entry):
         pattern=r'((\d\d):(\d\d)-(\d\d):(\d\d))'
-        matches = re.match(pattern, entry)
-        if matches:
-            self.is_valid=True
-            self.hstart = int(matches.group(1))
-            self.mstart = int(matches.group(2))
-            self.hend = int(matches.group(3))
-            self.mend = int(matches.group(4))
-        else:
-            self.is_valid=False
+        m = re.match(pattern, entry)
+        self.is_valid=m is not None
+        if self.is_valid:
+            self.hstart = int(m.group(1))
+            self.mstart = int(m.group(2))
+            self.hend = int(m.group(3))
+            self.mend = int(m.group(4))
 
     def __str__(self):
         return str(self.__dict__)
@@ -139,7 +137,10 @@ class Daterange:
 
     # By default, daterange are correct
     def is_correct(self):
-        return True
+        for tr in self.timeranges:
+            if tr.is_time_valid(t):
+                return True
+        return False
 
     def get_month_id(cls, month):
         try:

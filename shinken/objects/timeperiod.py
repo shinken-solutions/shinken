@@ -427,7 +427,10 @@ class Timeperiod(Item):
     def is_correct(self):
         b = True
         for dr in self.dateranges:
-            b &= dr.is_correct()
+            d = dr.is_correct()
+            if not d:
+                logger.error("[timeperiod::%s] invalid daterange " % (self.get_name()))
+            b &= d
 
         # Even one invalid is non correct
         for e in self.invalid_entries:
