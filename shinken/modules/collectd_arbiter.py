@@ -162,13 +162,13 @@ class Data(list, object):
     def get_srv_desc(self):
         r = self.plugin
         if self.plugininstance:
-            r += '_' + self.plugininstance
+            r += '-' + self.plugininstance
         return r
 
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
-            r += '_' + self.typeinstance
+            r += '-' + self.typeinstance
         return r
 
     def get_metric_value(self):
