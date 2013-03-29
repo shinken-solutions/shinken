@@ -54,16 +54,21 @@ BUFFER_SIZE = 1024
 # Collectd message types
 TYPE_HOST            = 0x0000
 TYPE_TIME            = 0x0001
+TYPE_TIME_HR         = 0x0008
 TYPE_PLUGIN          = 0x0002
 TYPE_PLUGIN_INSTANCE = 0x0003
 TYPE_TYPE            = 0x0004
 TYPE_TYPE_INSTANCE   = 0x0005
 TYPE_VALUES          = 0x0006
 TYPE_INTERVAL        = 0x0007
+TYPE_INTERVAL_HR     = 0x0009
+TYPE_MESSAGE         = 0x0100
 
 # DS kinds
 DS_TYPE_COUNTER = 0
 DS_TYPE_GAUGE = 1
+DS_TYPE_DERIVE = 2
+DS_TYPE_ABSOLUTE = 3
 
 header = struct.Struct("!2H")
 number = struct.Struct("!Q")
@@ -86,7 +91,7 @@ def decode_values(pktype, plen, buf):
 
     result = []
     for dstype in map(ord, buf[header.size + short.size:off]):
-        if dstype == DS_TYPE_COUNTER:
+        if (dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE):
             v = (dstype, number.unpack_from(buf, off)[0])
             result.append(v)
             off += valskip
@@ -113,7 +118,9 @@ def decode_string(msgtype, pklen, buf):
 decoder_mapping = {
     TYPE_VALUES: decode_values,
     TYPE_TIME: decode_number,
+    TYPE_TIME_HR: decode_number,
     TYPE_INTERVAL: decode_number,
+    TYPE_INTERVAL_HR: decode_number,
     TYPE_HOST: decode_string,
     TYPE_PLUGIN: decode_string,
     TYPE_PLUGIN_INSTANCE: decode_string,
@@ -155,13 +162,13 @@ class Data(list, object):
     def get_srv_desc(self):
         r = self.plugin
         if self.plugininstance:
-            r += '_' + self.plugininstance
+            r += '-' + self.plugininstance
         return r
 
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
-            r += '_' + self.typeinstance
+            r += '-' + self.typeinstance
         return r
 
     def get_metric_value(self):
@@ -229,8 +236,12 @@ class CollectdServer(object):
         for kind, data in iterable:
             if kind == TYPE_TIME:
                 d.time = data
+            elif kind == TYPE_TIME_HR:
+        d.time = data >> 30
             elif kind == TYPE_INTERVAL:
                 d.interval = data
+            elif kind == TYPE_INTERVAL_HR:
+                d.interval = data >> 30
             elif kind == TYPE_HOST:
                 d.host = data
             elif kind == TYPE_PLUGIN:
