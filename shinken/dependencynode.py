@@ -25,7 +25,6 @@
 
 import re
 
-
 """
 Here is a node class for dependency_node(s) and a factory to create them
 """
@@ -150,6 +149,7 @@ class DependencyNode(object):
             #print "not mul, return worst", worse_state
             return worst_state
 
+
     # return a list of all host/service in our node and below
     def list_all_elements(self):
         r = []
@@ -163,6 +163,7 @@ class DependencyNode(object):
 
         # and uniq the result
         return list(set(r))
+
 
     # If we are a of: rule, we can get some 0 in of_values,
     # if so, change them with NB sons instead
@@ -199,7 +200,7 @@ class DependencyNodeFactory(object):
     # the () will be eval in a recursiv way, only one level of ()
     def eval_cor_pattern(self, pattern, hosts, services):
         pattern = pattern.strip()
-        #print "*****Loop", pattern
+        #print "***** EVAL ", pattern
         complex_node = False
 
         # Look if it's a complex pattern (with rule) or
@@ -252,63 +253,97 @@ class DependencyNodeFactory(object):
 
         in_par = False
         tmp = ''
+        stacked_par = 0
         for c in pattern:
-            if c == '(':
-                in_par = True
-                tmp = tmp.strip()
-                if tmp != '':
-                    o = self.eval_cor_pattern(tmp, hosts, services)
-                    #print "1( I've %s got new sons" % pattern , o
-                    node.sons.append(o)
-                continue
-            if c == ')':
-                in_par = False
-                tmp = tmp.strip()
-                if tmp != '':
-                    #print "Evaluating sub pat", tmp
-                    o = self.eval_cor_pattern(tmp, hosts, services)
-                    #print "2) I've %s got new sons" % pattern , o
-                    node.sons.append(o)
-                ## else:
-                ##     print "Fuck a node son!"
-                tmp = ''
-                continue
-
-            if not in_par:
-                if c in ('&', '|'):
+            #print "MATCHING", c
+            if c == '&' or c == '|':
+                # Maybe we are in a par, if so, just stack it
+                if in_par:
+                    #print " & in a par, just staking it"
+                    tmp += c
+                else:
+                    # Oh we got a real cut in an expression, if so, cut it
+                    #print "REAL & for cutting"
+                    tmp = tmp.strip()
+                    # Look at the rule viability
                     current_rule = node.operand
-                    #print "Current rule", current_rule
                     if current_rule is not None and current_rule != 'of:' and c != current_rule:
                         # Should be logged as a warning / info? :)
-                        #print "Fuck, you mix all dumbass!"
                         return None
+
                     if current_rule != 'of:':
                         node.operand = c
-                    tmp = tmp.strip()
                     if tmp != '':
+                        #print "Will analyse the current str", tmp
                         o = self.eval_cor_pattern(tmp, hosts, services)
-                        #print "3&| I've %s got new sons" % pattern , o
                         node.sons.append(o)
                     tmp = ''
                     continue
-                else:
+            
+            elif c == '(':
+                stacked_par += 1
+                #print "INCREASING STACK TO", stacked_par
+                
+                in_par = True
+                tmp = tmp.strip()
+                # Maybe we just start a par, but we got some things in tmp
+                # that should not be good in fact !
+                if stacked_par == 1 and tmp != '':
+                    #TODO : real error
+                    print "ERROR : bad expression near", tmp
+                    continue
+
+                # If we are already in a par, add this (
+                # but not if it's the first one so
+                if stacked_par > 1:
                     tmp += c
+                    #o = self.eval_cor_pattern(tmp)
+                    #print "1( I've %s got new sons" % pattern , o
+                    #node.sons.append(o)
+                    
+            elif c == ')':
+                #print "Need closeing a sub expression?", tmp
+                stacked_par -= 1
+
+                if stacked_par < 0:
+                    # TODO : real error
+                    print "Error : bad expression near", tmp, "too much ')'"
+                    continue
+                
+                if stacked_par == 0:
+                    #print "THIS is closing a sub compress expression", tmp
+                    tmp = tmp.strip()
+                    o = self.eval_cor_pattern(tmp, hosts, services)
+                    node.sons.append(o)
+                    in_par = False
+                    # OK now clean the tmp so we start clean
+                    tmp = ''
+                    continue
+
+                # ok here we are still in a huge par, we just close one sub one
+                tmp += c
+            # Maybe it's a classic character, if so, continue
             else:
                 tmp += c
 
+        # Be sure to manage the trainling part when the line is done
         tmp = tmp.strip()
         if tmp != '':
+            #print "Managing trainling part", tmp
             o = self.eval_cor_pattern(tmp, hosts, services)
             #print "4end I've %s got new sons" % pattern , o
             node.sons.append(o)
+
 
         # We got our nodes, so we can update 0 values of of_values
         # with the number of sons
         node.switch_zeros_of_values()
 
         #print "End, tmp", tmp
-        #print "R %s:" % pattern, node
+        #print "R %s:" % pattern
+        #print "Node:", node
         return node
+
 
 
     # We've got an object, like h1,db1 that mean the
