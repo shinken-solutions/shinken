@@ -237,7 +237,7 @@ class CollectdServer(object):
             if kind == TYPE_TIME:
                 d.time = data
             elif kind == TYPE_TIME_HR:
-        d.time = data >> 30
+                d.time = data >> 30
             elif kind == TYPE_INTERVAL:
                 d.interval = data
             elif kind == TYPE_INTERVAL_HR:

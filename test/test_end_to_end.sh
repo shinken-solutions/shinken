@@ -291,8 +291,8 @@ NB_REACTIONNERS=5
 NB_BROKERS=5
 # Still 1 receiver
 NB_RECEIVERS=2
-# still 1
-NB_ARBITERS=3
+# Two arbiters, each got 3 process
+NB_ARBITERS=6
 
 # Now check if the run looks good with var in the direct directory
 check_good_run var var var
@@ -371,6 +371,19 @@ string_in_file "\[broker-Slave\] Connection problem to the poller poller-Master"
 # And should have load the modules
 string_in_file "\[broker-Slave\] I correctly loaded the modules: \[Simple-log,Livestatus\]" $VAR/nagios.log
 
+
+echo "Now we stop... the Arbiter!"
+# We clean the log first
+> $VAR/nagios.log
+
+bin/stop_arbiter.sh
+sleep 30
+
+echo "OK AND NOW?"
+string_in_file "Arbiter Master is dead. The arbiter Arbiter-spare take the lead"  $VAR/nagios.log
+
+# Look at satellite states
+string_in_file "Setting the satellite broker-Master to a dead state" $VAR/nagios.log
 
 echo "Now we clean it"
 ./clean.sh
