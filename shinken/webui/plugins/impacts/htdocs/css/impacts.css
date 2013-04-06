@@ -67,6 +67,8 @@
     display: inline-block;
     border-radius: 6px;
 /*    box-shadow: 0 2px 2px rgba(0, 0, 0, .3);*/
+    border-left: solid 1px #EBEBEB;
+    border-right: solid 1px #EBEBEB;
     position: relative;
     background: white;
     height: 100%;
@@ -106,8 +108,6 @@
 }
 
 .impact-active, .impact:hover {
-    background-color: #FAFAFA;
-/*    border: 1px solid #E3E3E3;*/
     color: #333333!important;
 }
 
@@ -467,17 +467,24 @@
 /* 
 ----------------------------------------------- */
 
+#result-stats {
+    border-top: 1px solid #EBEBEB;
+}
+
+#result-stats p{
+    margin-bottom: 3px;
+    margin-left: 5px;
+}
 
 .impact-arrow {
     font-size: 35px;
-    height: 100%;
-    position: absolute;
+    height: 60px;
 }
 
-.impact-arrow:hover {
-    background: #FF9900;
+.impact-arrow i{
+    line-height: 60px;
+    position: relative;
+    padding-top: 10px;
 }
 
-.hover-test {
-    font-weight: bold;
-}
+.desc {display: none;}
