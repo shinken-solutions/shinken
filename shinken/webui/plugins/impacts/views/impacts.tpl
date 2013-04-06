@@ -1,7 +1,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%rebase layout globals(), js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
+%rebase layout globals(), js=['impacts/js/impacts.js', 'impacts/js/hoverit.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
 
 
 %# Look for actions if we must show them or not
@@ -10,9 +10,11 @@
 %global_disabled = 'disabled-link'
 %end
 
-
 <div id="impact-container">
 	<div class="impacts-panel">
+		<div>
+			<p>Impacts: <span class="label label-important">{{app.datamgr.get_len_overall_state()}}</span> IT Problems: <span class="label label-important"> {{app.datamgr.get_nb_all_problems()}}</span></p>
+		</div>
 		%# " We look for separate bad and good elements, so we remember last state"
 		%last_was_bad = False
 		%# " By default we won't expand an impact."
@@ -39,32 +41,33 @@
 		%end
 
 		<div class="impact pblink" id="{{imp_id}}">
-			<div class="show-problem" id="show-problem-{{imp_id}}">
-			</div>
+			<div class="span11">
+				<div class="show-problem" id="show-problem-{{imp_id}}"> </div>
 
-			%for i in range(2, impact.business_impact):
-			<div class="criticity-icon-{{i-1}}">
-				<img src="static/images/star.png">
-			</div>
-			%end
+				%for i in range(2, impact.business_impact):
+				<div class="criticity-icon-{{i-1}}">
+					<img src="static/images/star.png">
+				</div>
+				%end
 
-			<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
-			<div class="impact-rows">
-				<div class="impact-row">
-					<span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
-				</div>
-				<div class="impact-row">
-					<span class="impact-duration">since {{helper.print_duration(impact.last_state_change, just_duration=True, x_elts=2)}}</span>
+				<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"> </div>
+				<div class="impact-rows">
+					<div class="impact-row">
+						<span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
+					</div>
+					<div class="impact-row">
+						<span class="impact-duration">since {{helper.print_duration(impact.last_state_change, just_duration=True, x_elts=2)}}</span>
+					</div>
 				</div>
 			</div>
+			<div class="span1"> <i class="icon-double-angle-right impact-arrow font-lightgrey"></i> </div>
 		</div>
 		%# end of the for imp_id in impacts:
 		%end
 
 	</div>
 
-	<div class="right-panel">
-	</div>
+	<div class="right-panel"> </div>
 
 	%# "#######    Now we will output righ panel with all root problems"
 	<div class="problems-panels">
@@ -135,7 +138,7 @@
 				%if not pb.event_handler:
 				%disabled_s = 'disabled-link'
 				%end
-				<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}'' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-pencil"></i>Try to fix it</a></div>
+				<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-pencil"></i>Try to fix it</a></div>
 				%if not pb.problem_has_been_acknowledged:
 				<div class="action-ack">
 					<a class='{{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(pb)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>
