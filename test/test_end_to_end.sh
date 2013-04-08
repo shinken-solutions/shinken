@@ -618,7 +618,7 @@ string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
 
 # And the string so the spare is taking the control
-string_in_file "I (Arbiter-spare) take the lead" $VAR/nagios.log
+string_in_file "Arbiter Master is dead. The arbiter Arbiter-spare take the lead" $VAR/nagios.log
 
 echo "Now we clean it"
 ./clean.sh
