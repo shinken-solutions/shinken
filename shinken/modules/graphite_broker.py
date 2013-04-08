@@ -70,6 +70,7 @@ class Graphite_broker(BaseModule):
         self.ticks = 0
         self.host_dict = {}
         self.svc_dict = {}
+        self.multival = re.compile(r'_(\d+)$')
 
         # optional "sub-folder" in graphite to hold the data of a specific host
         self.graphite_data_source = self.illegal_char.sub('_',
@@ -116,7 +117,9 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
+
             name = self.illegal_char.sub('_', elts[0])
+            name = self.multival.sub(r'.\1', name)
 
             raw = elts[1]
             # get metric value and its thresholds values if they exist
@@ -287,3 +290,4 @@ class Graphite_broker(BaseModule):
                 self.ticks += 1
                 logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s" % ( self.ticks , self.tick_limit ))
             
+

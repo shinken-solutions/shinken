@@ -26,6 +26,7 @@
 import os
 import time
 
+from itertools import izip
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 from shinken.log import logger
@@ -36,10 +37,32 @@ properties = {
     'external': True,
     }
 
+DEFAULT_PORT = 25826
+DEFAULT_MULTICAST_IP = "239.192.74.66"
+BUFFER_SIZE = 4096
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    instance = Collectd_arbiter(plugin)
+    if hasattr(plugin, "multicast"):
+        multicast = plugin.multicast.lower() in ("yes", "true", "1")
+    else:
+        multicast = False
+
+    if hasattr(plugin, 'host'):
+        host = plugin.host      
+    else:
+        host = DEFAULT_MULTICAST_IP
+        multicast = True
+    
+    if hasattr(plugin, 'port'):
+        port = int(plugin.port)
+    else:
+        port = DEFAULT_PORT
+
+
+    logger.info("[Collectd] Using host=%s port=%d multicast=%d" % (host, port, multicast))
+
+    instance = Collectd_arbiter(plugin, host, port, multicast)
     return instance
 
 import socket
@@ -47,9 +70,6 @@ import struct
 import time
 from StringIO import StringIO
 
-DEFAULT_PORT = 25826
-DEFAULT_MULTICAST_IP = "239.192.74.66"
-BUFFER_SIZE = 1024
 
 # Collectd message types
 TYPE_HOST            = 0x0000
@@ -63,6 +83,7 @@ TYPE_VALUES          = 0x0006
 TYPE_INTERVAL        = 0x0007
 TYPE_INTERVAL_HR     = 0x0009
 TYPE_MESSAGE         = 0x0100
+TYPE_SEVERITY        = 0x0101
 
 # DS kinds
 DS_TYPE_COUNTER = 0
@@ -91,6 +112,7 @@ def decode_values(pktype, plen, buf):
 
     result = []
     for dstype in map(ord, buf[header.size + short.size:off]):
+        logger.error("[Collectd] nvalues=%d dstype=%d" % (nvalues, dstype))
         if (dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE):
             v = (dstype, number.unpack_from(buf, off)[0])
             result.append(v)
@@ -126,7 +148,10 @@ decoder_mapping = {
     TYPE_PLUGIN_INSTANCE: decode_string,
     TYPE_TYPE: decode_string,
     TYPE_TYPE_INSTANCE: decode_string,
+    TYPE_MESSAGE: decode_string,
+    TYPE_SEVERITY: decode_number,
 }
+
 
 
 def decode_packet(buf):
@@ -148,12 +173,16 @@ def decode_packet(buf):
 
 class Data(list, object):
     def __init__(self, **kw):
+        self.kind = 0
         self.time = 0
+        self.interval = 0
         self.host = None
         self.plugin = ''
         self.plugininstance = ''
         self.type = ''
         self.typeinstance = ''
+        self.message = ''
+        self.severity = 0
         self.values = []
 
     def __str__(self):
@@ -165,30 +194,22 @@ class Data(list, object):
             r += '-' + self.plugininstance
         return r
 
+    def get_message(self):
+        return self.message
+
+    def get_kind(self):
+        return self.kind
+
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
             r += '-' + self.typeinstance
         return r
 
-    def get_metric_value(self):
+    def get_metric_values(self):
         if len(self.values) == 0:
             return None
-        # Take the last element of the last
-        return self.values[-1][-1]
-
-    def get_service_output(self):
-        if not self.host:
-            return None
-
-        mname = self.get_metric_name()
-        srv_desc = self.get_srv_desc()
-        mvalue = self.get_metric_value()
-        if mvalue is None:
-            return None
-
-        r = '%s;%s;CollectD value | %s=%s' % (self.host, srv_desc, mname, mvalue)
-        return r
+        return self.values
 
     def get_name(self):
         if not self.host:
@@ -197,17 +218,21 @@ class Data(list, object):
         r = '%s;%s' % (self.host, srv_desc)
         return r
 
+    def get_message_command(self):
+        now = int(time.time())
+        if self.severity == 4: # OK
+            returncode = 0
+        elif self.severity == 1:
+            returncode = 2
+        elif self.severity == 2:
+            returncode = 1
+        else:
+            returncode = 3
+        return  '[%d] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s' % (now, self.host, self.get_srv_desc(), returncode, self.message)
+
 
 class CollectdServer(object):
-    addr = None
-    host = None
-    port = DEFAULT_PORT
-
-    def __init__(self, host=None, port=DEFAULT_PORT, multicast=False):
-        if host is None:
-            multicast = True
-            host = DEFAULT_MULTICAST_IP
-
+    def __init__(self, host, port, multicast):
         self.host = host
         self.port = port
 
@@ -230,14 +255,17 @@ class CollectdServer(object):
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, val)
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
+        logger.info("[Collectd] Socket is opened")
+
     def interpret_opcodes(self, iterable):
         d = Data()
 
         for kind, data in iterable:
+            d.kind = kind
             if kind == TYPE_TIME:
                 d.time = data
             elif kind == TYPE_TIME_HR:
-        d.time = data >> 30
+                d.time = data >> 30
             elif kind == TYPE_INTERVAL:
                 d.interval = data
             elif kind == TYPE_INTERVAL_HR:
@@ -254,7 +282,11 @@ class CollectdServer(object):
                 d.typeinstance = data
             elif kind == TYPE_VALUES:
                 d.values = data
-                yield d
+            elif kind == TYPE_MESSAGE:
+                d.message = data
+            elif kind == TYPE_SEVERITY:
+                d.severity = data
+            yield d
 
     def receive(self):
         return self._sock.recv(BUFFER_SIZE)
@@ -281,8 +313,25 @@ class Element(object):
         self.interval = interval
         self.got_new_data = False
 
-    def add_perf_data(self, mname, mvalue):
-        self.perf_datas[mname] = mvalue
+    def add_perf_data(self, mname, mvalues):
+        if not mvalues:
+            return
+
+        if mname not in self.perf_datas:
+            oldvalues = [(dstype, val, val) for dstype, val in mvalues]
+        else:
+            oldvalues = self.perf_datas[mname]
+
+        r = []
+        for (olddstype,oldrawval,oldval),(dstype,newrawval) in izip(oldvalues, mvalues):
+            if dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE:
+              logger.error("[Collectd] newval=%s oldval=%s diff=%s" % (str(newrawval), str(oldrawval), str(newrawval-oldrawval)))
+              r.append((dstype,newrawval,newrawval-oldrawval))
+            elif dstype == DS_TYPE_GAUGE:
+              r.append((dstype,newrawval,newrawval))
+
+
+        self.perf_datas[mname] = r
         self.got_new_data = True
 
     def get_command(self):
@@ -296,35 +345,39 @@ class Element(object):
         if now > self.last_update + self.interval:
             r = '[%d] PROCESS_SERVICE_OUTPUT;%s;%s;CollectD| ' % (now, self.host_name, self.sdesc)
             for (k, v) in self.perf_datas.iteritems():
-                r += '%s=%s ' % (k, v)
+                for i, w in enumerate(v):
+                  if len(v) > 1:
+                      r += '%s_%d=%s ' % (k, i, str(w[2]))
+                  else:
+                      r += '%s=%s ' % (k, str(w[2]))
             print 'Updating', (self.host_name, self.sdesc)
-            self.perf_datas.clear()
+#            self.perf_datas.clear()
             self.last_update = now
+            self.got_new_data = False
             return r
 
 
 class Collectd_arbiter(BaseModule):
-    def __init__(self, modconf):
+    def __init__(self, modconf, host, port, multicast):
         BaseModule.__init__(self, modconf)
+        self.host = host
+        self.port = port
+        self.multicast = multicast
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_proctitle(self.name)
         self.set_exit_handler()
-
-        last_check = 0.0
-
-        cs = CollectdServer()
-        while True:
-            # Each second we are looking at sending old elements
-            if time.time() > last_check + 1:
+	
+        try:
+            cs = CollectdServer(self.host, self.port, self.multicast)
+            while True:
+                # Each second we are looking at sending old elements
                 for e in elements.values():
                     c = e.get_command()
                     if c is not None:
                         print 'Got ', c
-                        ext_cmd = ExternalCommand(c)
-                        self.from_q.put(ext_cmd)
-            try:
+                        self.from_q.put(ExternalCommand(c))
                 for item in cs.read():
                     print item, item.__dict__
                     n = item.get_name()
@@ -332,7 +385,14 @@ class Collectd_arbiter(BaseModule):
                         e = Element(item.host, item.get_srv_desc(), item.interval)
                         elements[n] = e
                     e = elements[n]
-                    e.add_perf_data(item.get_metric_name(), item.get_metric_value())
+                    if item.get_kind() == TYPE_VALUES:
+                        e.add_perf_data(item.get_metric_name(), item.get_metric_values())
+                    elif item.get_kind() == TYPE_MESSAGE:
+                        c = item.get_message_command()
+                        if c is not None:
+                            self.from_q.put(ExternalCommand(c))
+        except Exception, e:
+            logger.error("[Collectd] exception: %s" % str(e))
+        except ValueError, exp:
+            logger.error("[Collectd] Read error: %s" % exp)
 
-            except ValueError, exp:
-                logger.error("[Collectd] Read error: %s" % exp)
