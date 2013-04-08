@@ -1107,7 +1107,8 @@ class Items(object):
                             pass
                     # Else it's an host to add, but maybe it's ALL
                     elif h == '*':
-                        for newhost in get_all_host_names_set(hosts):
+                        for newhost in  set(h.host_name for h in hosts.items.values() \
+                                            if getattr(h, 'host_name', '') != '' and not h.is_tpl()):
                             hnames_list.append(newhost)
                             #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
                     else:

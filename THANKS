@@ -92,3 +92,4 @@ To jbeltran for his bug report about GLPIDB
 To Joachim Schiele for his bug report about PNP version
 To flaf and Imrane.Dessai for their bug report about additive inheritance.
 To Johan Svensson for his bug report about poller worker crash not in logs, and for his patch about NRPE booster crash with bad SSL
+To Finn Christiansen for his bug report about function get_all_host_names_set missing since 1.2.4
