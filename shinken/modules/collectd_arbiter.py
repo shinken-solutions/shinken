@@ -112,7 +112,6 @@ def decode_values(pktype, plen, buf):
 
     result = []
     for dstype in map(ord, buf[header.size + short.size:off]):
-        logger.error("[Collectd] nvalues=%d dstype=%d" % (nvalues, dstype))
         if (dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE):
             v = (dstype, number.unpack_from(buf, off)[0])
             result.append(v)
@@ -218,6 +217,9 @@ class Data(list, object):
         r = '%s;%s' % (self.host, srv_desc)
         return r
 
+    def get_time(self):
+        return self.time
+
     def get_message_command(self):
         now = int(time.time())
         if self.severity == 4: # OK
@@ -313,23 +315,25 @@ class Element(object):
         self.interval = interval
         self.got_new_data = False
 
-    def add_perf_data(self, mname, mvalues):
+    def add_perf_data(self, mname, mvalues, mtime):
         if not mvalues:
             return
 
+        r = []
         if mname not in self.perf_datas:
-            oldvalues = [(dstype, val, val) for dstype, val in mvalues]
+            for (dstype, newrawval) in mvalues:
+                r.append((dstype, newrawval, newrawval, mtime))
         else:
             oldvalues = self.perf_datas[mname]
 
-        r = []
-        for (olddstype,oldrawval,oldval),(dstype,newrawval) in izip(oldvalues, mvalues):
-            if dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE:
-              logger.error("[Collectd] newval=%s oldval=%s diff=%s" % (str(newrawval), str(oldrawval), str(newrawval-oldrawval)))
-              r.append((dstype,newrawval,newrawval-oldrawval))
-            elif dstype == DS_TYPE_GAUGE:
-              r.append((dstype,newrawval,newrawval))
-
+            for (olddstype,oldrawval,oldval,oldtime),(dstype,newrawval) in izip(oldvalues, mvalues):
+                difftime = mtime - oldtime
+                if difftime < 1:
+                    continue
+                if dstype == DS_TYPE_COUNTER or dstype == DS_TYPE_DERIVE or dstype == DS_TYPE_ABSOLUTE:
+                    r.append((dstype,newrawval,(newrawval-oldrawval)/float(difftime),mtime))
+                elif dstype == DS_TYPE_GAUGE:
+                    r.append((dstype,newrawval,newrawval,mtime))
 
         self.perf_datas[mname] = r
         self.got_new_data = True
@@ -386,7 +390,7 @@ class Collectd_arbiter(BaseModule):
                         elements[n] = e
                     e = elements[n]
                     if item.get_kind() == TYPE_VALUES:
-                        e.add_perf_data(item.get_metric_name(), item.get_metric_values())
+                        e.add_perf_data(item.get_metric_name(), item.get_metric_values(), item.get_time())
                     elif item.get_kind() == TYPE_MESSAGE:
                         c = item.get_message_command()
                         if c is not None:
@@ -395,4 +399,5 @@ class Collectd_arbiter(BaseModule):
             logger.error("[Collectd] exception: %s" % str(e))
         except ValueError, exp:
             logger.error("[Collectd] Read error: %s" % exp)
+
 
