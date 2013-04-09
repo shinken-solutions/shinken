@@ -86,8 +86,12 @@ def get_root():
     user = app.request.get_cookie("user", secret=app.auth_secret)
     if user:
         redirect("/problems")
-    elif app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
-        user_name = app.request.headers[app.remote_user_variable]
+    elif app.remote_user_enable > 0:
+        user_name=None
+        if app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
+            user_name = app.request.headers[app.remote_user_variable]
+        elif app.remote_user_variable in app.request.environ and app.remote_user_enable == '2':
+            user_name = app.request.environ[app.remote_user_variable]
         c = app.datamgr.get_contact(user_name)
         print "Got", c
         if not c:
