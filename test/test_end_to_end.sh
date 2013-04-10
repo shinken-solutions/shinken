@@ -105,7 +105,7 @@ function check_good_run {
     ls var
     is_file_present $LOG/nagios.log
     string_in_file "Waiting for initial configuration" $LOG/nagios.log
-    string_in_file "First scheduling" $LOG/nagios.log
+#    string_in_file "First scheduling" $LOG/nagios.log
     string_in_file "OK, all schedulers configurations are dispatched :)" $LOG/nagios.log
     string_in_file "OK, no more reactionner sent need" $LOG/nagios.log
     string_in_file "OK, no more poller sent need" $LOG/nagios.log
@@ -450,6 +450,66 @@ string_in_file "Skipping configuration 0 send to the poller poller-Master-2: it 
 
 echo "Now we clean it"
 ./clean.sh
+
+
+
+
+
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                          Broker complete links                                   #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+test/bin/launch_all_debug7.sh
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+
+
+echo "Now checking for existing apps"
+
+echo "we can sleep 5sec for conf dispatching and so good number of process"
+sleep 10
+
+# The number of process changed, we mush look for it
+
+# Standard launch process packets
+NB_SCHEDULERS=4
+# 1 + nb cpus for stack 1, and same for stack 2
+NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
+# 2 for stack1, same for stack 2
+NB_REACTIONNERS=6
+# 6 : 3 for each brokers, because they are both active, that't the goal of this part of the test!
+NB_BROKERS=6
+# STill one receivers
+NB_RECEIVERS=2
+# still 1
+NB_ARBITERS=3
+
+# Now check if the run looks good with var in the direct directory
+check_good_run var var var
+
+echo "All launch of LB daemons is OK"
+
+
+# Now look if it's also good in the log file too
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "\[broker-Master-1\] Connection OK to the scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "\[broker-Master-2\] Connection OK to the scheduler scheduler-Master-1" $VAR/nagios2.log
+string_in_file "initial Broks for broker broker-Master-1" $VAR/nagios.log
+string_in_file "initial Broks for broker broker-Master-2" $VAR/nagios2.log
+string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
+string_in_file "OK, no more poller sent need" $VAR/nagios.log
+string_in_file "OK, no more broker sent need" $VAR/nagios.log
+
+echo "Now we clean it"
+./clean.sh
+
+
+
 
 
 
