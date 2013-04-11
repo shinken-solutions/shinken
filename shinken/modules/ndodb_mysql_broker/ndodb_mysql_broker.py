@@ -341,12 +341,13 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         tables = [
+            # Configuration tables
             'commands', 'contacts', 'contactgroups', 'hosts',
-            'hostescalations', 'hostgroups', 'notifications',
-            'services', 'serviceescalations', 'programstatus',
+            'hostescalations', 'hostgroups', 'services', 'serviceescalations',
             'servicegroups', 'timeperiods', 'hostgroup_members',
-            'contactgroup_members', 'objects', 'hoststatus',
-            'servicestatus', 'instances', 'servicegroup_members'
+            'contactgroup_members', 'servicegroup_members',
+            # Status tables
+            'programstatus', 'hoststatus', 'servicestatus',
             ]
 
         res = []
