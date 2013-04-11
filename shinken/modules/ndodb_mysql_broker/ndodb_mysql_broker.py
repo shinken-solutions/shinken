@@ -123,7 +123,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.mapping_service_id = {}
 
         # Todo list to manage brok
-        self.todo = []
+        self.todo = {}
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -135,29 +135,36 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.synchronize_database_id != 0 and 'instance_id' in new_b.data:
             # If we use database sync, we have to synchronize database id
             # so we wait for the instance name
-            if 'instance_name' not in new_b.data:
-                self.todo.append(new_b)
-                return
+            brok_id = new_b.data['instance_id']
+            converted_instance_id = self.convert_id(brok_id)
+            if converted_instance_id is not None:
+                new_b.data['instance_id'] = converted_instance_id
+                queries = BaseModule.manage_brok(self, new_b)
+                if queries is not None:
+                    for q in queries:
+                        self.db.execute_query(q)
 
-            # We convert the id to write properly in the base using the
-            # instance_name to reuse the instance_id in the base.
-            else:
-                new_b.data['instance_id'] = self.convert_id(
-                    new_b.data['instance_id'], new_b.data['instance_name']
-                    )
+            if converted_instance_id is None:
+                if brok_id in self.todo:
+                    self.todo[brok_id].append(new_b)
+                else:
+                    self.todo[brok_id] = [new_b]
 
-                self.todo.append(new_b)
-                for brok in self.todo:
-                    # We have to put the good instance ID to all brok waiting
-                    # in the list then execute the query
-                    brok.data['instance_id'] = new_b.data['instance_id']
+            if converted_instance_id is None and 'instance_name' in new_b.data:
+                converted_brok_id = self.get_instance_id(new_b.data['instance_name'])
+                self.database_id_cache[brok_id] = converted_brok_id
+                # We have to put the good instance ID to all brok waiting
+                # in the list then execute the query
+                for brok in self.todo[brok_id]:
+                    brok.data['instance_id'] = converted_brok_id
                     queries = BaseModule.manage_brok(self, brok)
                     if queries is not None:
                         for q in queries:
                             self.db.execute_query(q)
                 # We've finished to manage the todo, so we empty it
-                self.todo = []
-                return
+                self.todo[brok_id] = []
+
+            return
 
         # Executed if we don't synchronize or there is no instance_id
         queries = BaseModule.manage_brok(self, new_b)
@@ -203,22 +210,13 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row2[0]
 
-    def convert_id(self, brok_id, name):
-        # Look if we have already encountered this id
+    def convert_id(self, brok_id):
+        """ Look if we have already encountered this id """
         if brok_id in self.database_id_cache:
             return self.database_id_cache[brok_id]
         else:
-            data_id = 1
-            # If we disable the database sync,
-            # we are using the in-brok instance_id
-            if self.synchronize_database_id == 0:
-                data_id = brok_id
-            # Else: we are querying the database and get a new one
-            else:
-                data_id = self.get_instance_id(name)
-            # cache this!
-            self.database_id_cache[brok_id] = data_id
-            return data_id
+            return None
+
 
     def get_host_object_id_by_name_sync(self, host_name, instance_id):
         # First look in cache.
