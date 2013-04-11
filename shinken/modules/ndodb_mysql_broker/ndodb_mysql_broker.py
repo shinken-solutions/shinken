@@ -263,7 +263,7 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
     def get_max_hostgroup_id_sync(self):
-        query = u"SELECT max(hostgroup_id) + 1 from %shostgroups" % self.prefix
+        query = u"SELECT COALESCE(max(hostgroup_id) + 1, 1) from %shostgroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -304,7 +304,7 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
     def get_max_servicegroup_id_sync(self):
-        query = u"SELECT max(servicegroup_id) + 1 from %sservicegroups" % self.prefix
+        query = u"SELECT COALESCE(max(servicegroup_id) + 1, 1) from %sservicegroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -324,7 +324,7 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
     def get_max_contactgroup_id_sync(self):
-        query = u"SELECT max(contactgroup_id) + 1 from %scontactgroups" % self.prefix
+        query = u"SELECT COALESCE(max(contactgroup_id) + 1,1) from %scontactgroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -436,18 +436,21 @@ class Ndodb_Mysql_broker(BaseModule):
 
         data = b.data
 
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'], 'objecttype_id': 1,
-            'name1': data['host_name'],
-            'is_active': data['active_checks_enabled']
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
+        if host_id == 0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 1,
+                'name1': data['host_name'],
+                'is_active': data['active_checks_enabled']
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
 
-        host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'], data['instance_id']
-            )
+            host_id = self.get_host_object_id_by_name_sync(
+                data['host_name'], data['instance_id']
+                )
 
         #print "DATA:", data
         hosts_data = {
@@ -472,7 +475,8 @@ class Ndodb_Mysql_broker(BaseModule):
             'active_checks_enabled': data['active_checks_enabled'],
             'notifications_enabled': data['notifications_enabled'],
             'obsess_over_host': data['obsess_over_host'],
-            'notes': data['notes'], 'notes_url': data['notes_url'],
+            'notes': data['notes'],
+            'notes_url': data['notes_url'],
         }
 
         #print "HOST DATA", hosts_data
@@ -526,23 +530,30 @@ class Ndodb_Mysql_broker(BaseModule):
         #new_b = copy.deepcopy(b)
 
         data = b.data
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'], 'objecttype_id': 2,
-            'name1': data['host_name'],
-            'name2': data['service_description'],
-            'is_active': data['active_checks_enabled']
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
-
-        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
-
         service_id = self.get_service_object_id_by_name_sync(
             data['host_name'],
             data['service_description'],
             data['instance_id']
             )
+        if service_id==0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 2,
+                'name1': data['host_name'],
+                'name2': data['service_description'],
+                'is_active': data['active_checks_enabled']
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
+
+            service_id = self.get_service_object_id_by_name_sync(
+                data['host_name'],
+                data['service_description'],
+                data['instance_id']
+                )
+
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
         # TODO: Include with the service cache.
         self.mapping_service_id[data['id']] = service_id
@@ -629,20 +640,25 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
 
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'],
-            'objecttype_id': 3,
-            'name1': data['hostgroup_name'],
-            'is_active': 1
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
-
         hostgroup_id = self.get_hostgroup_object_id_by_name_sync(
             data['hostgroup_name'], \
             data['instance_id']
             )
+        if hostgroup_id == 0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 3,
+                'name1': data['hostgroup_name'],
+                'is_active': 1
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
+
+            hostgroup_id = self.get_hostgroup_object_id_by_name_sync(
+                data['hostgroup_name'], \
+                data['instance_id']
+                )
 
         # We can't get the id of the hostgroup in the base because
         # we don't have inserted it yet!
@@ -682,19 +698,23 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'],
-            'objecttype_id': 4,
-            'name1': data['servicegroup_name'],
-            'is_active': 1
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
-
         servicegroup_id = self.get_servicegroup_object_id_by_name_sync(
             data['servicegroup_name'], data['instance_id']
             )
+        if servicegroup_id == 0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 4,
+                'name1': data['servicegroup_name'],
+                'is_active': 1
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
+
+            servicegroup_id = self.get_servicegroup_object_id_by_name_sync(
+                data['servicegroup_name'], data['instance_id']
+                )
         svcgp_id = self.get_max_servicegroup_id_sync()
 
         servicegroups_data = {
@@ -1040,15 +1060,20 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_initial_contact_status_brok(self, b):
         data = b.data
 
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'],
-            'objecttype_id': 10,
-            'name1': data['contact_name'],
-            'is_active': 1
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
+        contact_obj_id = self.get_contact_object_id_by_name_sync(
+            data['contact_name'],
+            data['instance_id']
+            )
+        if contact_obj_id==0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 10,
+                'name1': data['contact_name'],
+                'is_active': 1
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
 
         contact_obj_id = self.get_contact_object_id_by_name_sync(
             data['contact_name'],
@@ -1073,20 +1098,25 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        # First add to nagios_objects
-        objects_data = {
-            'instance_id': data['instance_id'],
-            'objecttype_id': 11,
-            'name1': data['contactgroup_name'],
-            'is_active': 1
-        }
-        object_query = self.db.create_insert_query('objects', objects_data)
-        self.db.execute_query(object_query)
-
         contactgroup_id = self.get_contactgroup_object_id_by_name_sync(
             data['contactgroup_name'],
             data['instance_id']
             )
+        if contactgroup_id == 0:
+            # First add to nagios_objects
+            objects_data = {
+                'instance_id': data['instance_id'],
+                'objecttype_id': 11,
+                'name1': data['contactgroup_name'],
+                'is_active': 1
+            }
+            object_query = self.db.create_insert_query('objects', objects_data)
+            self.db.execute_query(object_query)
+
+            contactgroup_id = self.get_contactgroup_object_id_by_name_sync(
+                data['contactgroup_name'],
+                data['instance_id']
+                )
         ctcgp_id = self.get_max_contactgroup_id_sync()
 
         contactgroups_data = {
