@@ -133,7 +133,7 @@ class Ndodb_Mysql_broker(BaseModule):
         new_b = copy.deepcopy(b)
 
         # If we synchronize, must look for id change
-        if self.synchronize_database_id != '0' and 'instance_id' in new_b.data:
+        if self.synchronize_database_id != 0 and 'instance_id' in new_b.data:
             # If we use database sync, we have to synchronize database id
             # so we wait for the instance name
             if 'instance_name' not in new_b.data:
@@ -212,7 +212,7 @@ class Ndodb_Mysql_broker(BaseModule):
             data_id = 1
             # If we disable the database sync,
             # we are using the in-brok instance_id
-            if self.synchronize_database_id == '0':
+            if self.synchronize_database_id == 0:
                 data_id = brok_id
             # Else: we are querying the database and get a new one
             else:
