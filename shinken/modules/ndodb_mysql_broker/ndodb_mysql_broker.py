@@ -742,10 +742,36 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
         return res
 
+    def update_statehistory(self, object_id, data):
+        statehistory_data = {
+            'instance_id': data['instance_id'],
+            'state_time': de_unixify(data['last_chk']),
+            'state_time_usec': 0,
+            'object_id': object_id,
+            'state_change': 1,
+            'state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'current_check_attempt': data['attempt'],
+            # FIXME max_check_attempts isn't available
+            'max_check_attempts': data['attempt'],
+            'output': data['output'],
+        }
+        # last_state and last_hard_state are only available on 1.4b9 version
+        if self.centreon_version:
+            statehistory_data['last_state'] = data['last_state_id']
+            statehistory_data['last_hard_state'] = -1
+
+        query = self.db.create_insert_query('statehistory', statehistory_data)
+
+        return query
+
+
     # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         data = b.data
-        #print "DATA", data
+        #logger.debug("DATA %s" % data)
+        queries = []
+
         host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
         # Only the host is impacted
@@ -756,21 +782,27 @@ class Ndodb_Mysql_broker(BaseModule):
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
             'state_type': data['state_type_id'],
-            'start_time': data['start_time'],
+            # FIXME: ATM, we put the received time of the brok
+            'start_time': time.strftime("%Y-%m-%d %H:%M:%S"),
             'start_time_usec': 0,
             'execution_time': data['execution_time'],
             'latency': data['latency'],
             'return_code': data['return_code'],
             'output': data['output'],
-            'perfdata': data['perf_data']
+            'perfdata': data['perf_data'],
+            'host_object_id': host_id,
         }
         # Centreon add some fields
         if self.centreon_version:
             host_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
+        queries.append(self.db.create_insert_query('hostchecks', host_check_data))
 
-        # Now servicestatus
+        statehistory_query = ''
+        if data['state'] != data['last_state']:
+            queries.append(self.update_statehistory(host_id, data))
+
+        # Now hoststatus
         hoststatus_data = {
             'instance_id': data['instance_id'],
             'check_type': 0,
@@ -788,9 +820,11 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
 
-        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
+        queries.append(self.db.create_update_query('hoststatus', hoststatus_data, where_clause))
 
-        return [query, hoststatus_query]
+        print queries
+
+        return queries
 
     # The next schedule got it's own brok. got it and just update the
     # next_check with it
@@ -812,6 +846,8 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_service_check_result_brok(self, b):
         data = b.data
         #logger.debug("DATA %s" % data)
+        queries = []
+
         service_id = self.get_service_object_id_by_name_sync(
             data['host_name'], \
             data['service_description'], \
@@ -826,20 +862,27 @@ class Ndodb_Mysql_broker(BaseModule):
             'current_check_attempt': data['attempt'],
             'state': data['state_id'],
             'state_type': data['state_type_id'],
-            'start_time': data['start_time'],
+            # FIXME: ATM, we put the received time of the brok
+            'start_time': time.strftime("%Y-%m-%d %H:%M:%S"),
             'start_time_usec': 0,
             'execution_time': data['execution_time'],
             'latency': data['latency'],
             'return_code': data['return_code'],
             'output': data['output'],
-            'perfdata': data['perf_data']
+            'perfdata': data['perf_data'],
+            'service_object_id': service_id,
         }
 
         # Centreon add some fields
         if self.centreon_version:
             service_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
+        queries.append(self.db.create_insert_query('servicechecks', service_check_data))
+
+        # update statehistory if necessary
+        statehistory_query = ''
+        if data['state'] != data['last_state']:
+            queries.append(self.update_statehistory(service_id, data))
 
         # Now servicestatus
         servicestatus_data = {
@@ -860,13 +903,13 @@ class Ndodb_Mysql_broker(BaseModule):
         if self.centreon_version:
             servicestatus_data['long_output'] = data['long_output']
 
-        servicestatus_query = self.db.create_update_query(
+        queries.append(self.db.create_update_query(
             'servicestatus', \
             servicestatus_data, \
             where_clause
-            )
+            ))
 
-        return [query, servicestatus_query]
+        return queries
 
     # The next schedule got it's own brok. got it and just update the
     # next_check with it
