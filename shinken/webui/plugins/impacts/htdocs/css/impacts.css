@@ -108,6 +108,7 @@
 }
 
 .impact-active, .impact:hover {
+    background: #FAFAFA;
     color: #333333!important;
 }
 
@@ -159,9 +160,8 @@
 /* The impact icon (so the service one or the host one) */
 .impact-icon {
     float: left;
-    height: 64px;
     overflow: hidden;
-    width: 64px;
+
     margin-top: 3px;
 }
 
@@ -471,7 +471,8 @@
     border-top: 1px solid #EBEBEB;
 }
 
-#result-stats p{
+#result-stats p {
+    border-bottom: 1px solid #EBEBEB;
     margin-bottom: 3px;
     margin-left: 5px;
 }
