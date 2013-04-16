@@ -13,13 +13,13 @@
 <div id="impact-container">
 	<div class="impacts-panel">
 
-		<script type="text/javascript">
+		<!--<script type="text/javascript">
 			$(document).ready(function() {
 			    $(".impact").hover(function () {
 			        $(".desc").toggle();
 			    })
 			})
-		</script>
+		</script> -->
 
 <!--		<div id="result-stats">
     			<p>Impacts: <span class="label label-important">{{app.datamgr.get_len_overall_state()}}</span> IT Problems: <span class="label label-important"> {{app.datamgr.get_nb_all_problems()}}</span></p>
@@ -59,7 +59,7 @@
 				</div>
 				%end
 
-				<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"> </div>
+				<div class="impact-icon"><img style="width: 54px;height: 54px;" src="{{helper.get_icon_state(impact)}}"> </div>
 				<div class="impact-rows">
 					<div class="impact-row">
 						<span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
@@ -69,7 +69,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="span1 impact-arrow"> <i class="icon-double-angle-right font-lightgrey desc"></i> </div>
+			<div class="span1 impact-arrow"> <i class="icon-double-angle-right font-white"></i> </div>
 		</div>
 		%# end of the for imp_id in impacts:
 		%end

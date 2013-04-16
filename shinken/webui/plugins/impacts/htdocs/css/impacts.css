@@ -86,7 +86,7 @@
     clear: both;
     display: block;
     outline: none;
-    padding-left: 20px;
+    padding-left: 5px;
     font-size: 15px;
     position: relative;
     zoom: 1;
@@ -108,8 +108,12 @@
 }
 
 .impact-active, .impact:hover {
-    background: #FAFAFA;
-    color: #333333!important;
+    background-color: #0088CC;
+    color: #FFFFFF !important;
+}
+
+.impact:hover span {
+    color: #FFFFFF !important;
 }
 
 /*p.impact-active {
@@ -118,16 +122,16 @@
         }
 */
 
-.impact-active .impact-state-text {
-    color: #333333;
+.impact-active, .impact-active span, .impact-state-text {
+    color: #FFFFFF;
 }
 
 .impact-active .impact-duration{
-    color: #333333;
+    color: #FFFFFF;
 }
 
 .impact-active .impact-name{
-    color: #333333;
+    color: #FFFFFF;
 }
 
 /* One problem block*/
@@ -193,7 +197,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 50px;
+    margin-left: 45px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -205,7 +209,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 62px;
+    margin-left: 59px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -215,7 +219,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 74px;
+    margin-left: 71px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -489,3 +493,5 @@
 }
 
 .desc {display: none;}
+
+.hover {display: inline !important;}
