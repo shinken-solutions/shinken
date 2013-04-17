@@ -2666,7 +2666,7 @@ function install_check_wmi_plus(){
     install -b -g $SKGROUP -o $SKUSER -m 0664 check_wmi_plus.conf.sample $LIBEXEC/check_wmi_plus.conf
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_wmi_plus.pl $LIBEXEC/check_wmi_plus.pl
     install -g $SKGROUP -o $SKUSER -m 0775 -d $LIBEXEC/check_wmi_plus.d
-    install -b -g $SKGROUP -o $SKUSER -m 0664 $TMP/check_wmi_plus.d/* $LIBEXEC
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TMP/check_wmi_plus.d/* $LIBEXEC/check_wmi_plus.d
 
     cecho " > configuring plugin" green
     sed -i "s#/usr/lib/nagios/plugins#"$LIBEXEC"#g" $LIBEXEC/check_wmi_plus.conf
