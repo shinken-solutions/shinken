@@ -37,6 +37,7 @@ from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
 from shinken.log import logger
+from shinken.misc.perfdata import PerfDatas
 
 
 properties = {
@@ -92,47 +93,24 @@ class Graphite_Webui(BaseModule):
     # return ('/', '30'), ('/var', '50')
     def get_metric_and_value(self, perf_data):
         res = []
-        s = perf_data.strip()
-        # Get all metrics non void
-        elts = s.split(' ')
-        metrics = [e for e in elts if e != '']
+        metrics = PerfDatas(perf_data)
 
         for e in metrics:
-            logger.debug("[Graphite UI] groking: %s" % e)
-            elts = e.split('=', 1)
-            if len(elts) != 2:
-                continue
+            logger.debug("[Graphite UI] groking: %s" % str(e))
 
-            
-            name = self.illegal_char.sub('_', elts[0])
+            name = self.illegal_char.sub('_', e.name)
             name = self.multival.sub(r'.*', name)
-            if name in [x[0] for x in res]:
-                continue
 
-            raw = elts[1]
-            # get the first value of ;
-            if ';' in raw:
-                elts = raw.split(';')
-                if len(elts) >= 3:
-                    name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
-                else:
-                    name_value = {name: elts[0]}
-            else:
-                value = raw
-                name_value = {name: raw}
+            # get metric value and its thresholds values if they exist
+            name_value = {name: (e.value, e.uom)}
+            if e.warning and e.critical:
+                name_value[name + '_warn'] = e.warning
+                name_value[name + '_crit'] = e.critical
             # bailout if need
             if name_value[name] == '':
                 continue
-            
 
-            # Try to get the int/float in it :)
-            for key, value in name_value.items():
-                m = re.search("(\d*\.*\d*)(.*)", value)
-                if m:
-                    name_value[key] = m.groups(0)
-                else:
-                    continue
-            logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, value))
+            logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, e.value))
             for key, value in name_value.items():
                 res.append((key, value))
         return res
