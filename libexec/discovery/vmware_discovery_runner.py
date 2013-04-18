@@ -145,11 +145,13 @@ def print_all_links(res, rules):
     r = []
     for host in res:
         host_name = _apply_rules(host, rules)
+        print "%s::esxhostname=%s" % (host_name, host_name)
         print "%s::isesxhost=1" % host_name
         for vm in res[host]:
             # First we apply rules on the names
             vm_name = _apply_rules(vm, rules)
             #v = (('host', host_name),('host', vm_name))
+            print "%s::vmname=%s" % (vm_name, vm_name)
             print "%s::isesxvm=1" % vm_name
             print "%s::esxhost=%s" % (vm_name, host_name)
             #r.append(v)
