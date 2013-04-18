@@ -88,19 +88,20 @@
 		%impact = impacts[imp_id]
 
 		<div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
-			<div class="right-panel-top">
-				<a href="#a" class="pblink close" id="{{imp_id}}"> &times;</a>
+			<div class="panel-header row-fluid">
+				<div class="span11">
+					%for i in range(2, impact.business_impact):
+					<div class="criticity-inpb-icon-{{i-1}}">
+						<img src="static/images/star.png">
+					</div>
+					%end
+					<h2 class="state_{{impact.state.lower()}}">  <img style="width: 64px; height:64px" src="{{helper.get_icon_state(impact)}}" />{{impact.state}}: {{impact.get_full_name()}}</h2>
+				</div>
+				<button id="{{imp_id}}" aria-hidden="true" data-dismiss="modal" class="pblink close" type="button">×</button>
 			</div>
+			
+			<hr class="no-topmargin">
 
-			<br style="clear: both">
-
-			<!--<div class="impact-icon-big"><img style="width: 80px;height: 80px;" src="{{helper.get_icon_state(impact)}}"> </div>-->
-			%for i in range(2, impact.business_impact):
-			<div class="criticity-inpb-icon-{{i-1}}">
-				<img src="static/images/star.png">
-			</div>
-			%end
-			<h2 class="state_{{impact.state.lower()}}"><img style="width: 64px; height:64px" src="{{helper.get_icon_state(impact)}}" />{{impact.state}}: {{impact.get_full_name()}}</h2>
 		<!--<center>
 			<div class="impact-row"><span class="impact-inpb-name">{{impact.get_full_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span></div>
 		</center>-->
