@@ -12,11 +12,11 @@
   var new_properties = [];
 </script>
 
-<div class='offset1 span10'>
-  <span id='saving_log' class='hide alert'></span>
+<div class="row-fluid">
+  <span id="saving_log" class="hide alert"></span>
 </div>
 
-<a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
+<!-- <a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a> -->
 
 <div class="row-fluid">
   <div data-table='contacts' name='form-element'>
@@ -25,6 +25,7 @@
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>
       <li><a href="#direct" data-toggle="tab">Direct configuration</a></li>
       <li><a href="#macros" data-toggle="tab">Macros</a></li>
+      <a href="javascript:submit_form()" class="btn btn-small btn-info pull-right"><i class="icon-ok"></i> Submit</a>
     </ul>
 
     <div class="tab-content">
@@ -32,9 +33,9 @@
 <!-- Tab Generic Stop-->
 <div class="tab-pane active" id="generic">
   <div class="span6">
-    {{!helper.get_string_input(elt, 'contact_name', 'Contact name', span='', popover='Name of the contact. Should be unique.', editable=editable)}}
+    {{!helper.get_string_input(elt, 'contact_name', 'Contact name', span='', editable=editable)}}
 
-    {{!helper.get_string_input(elt, 'display_name', 'Display name', span='', innerspan='span3', placeholder=elt.get('contact_name', ''), editable=editable)}}
+    {{!helper.get_string_input(elt, 'display_name', 'Display name', span='', innerspan='', placeholder=elt.get('contact_name', ''), editable=editable)}}
   </div>
 	
   <div class="span6">
@@ -46,7 +47,7 @@
   <div class="span12 no-leftmargin">
     <form class="form-horizontal">
       <div class="control-group">
-        <label class="control-label">Tags: </label>
+        <label class="control-label">Tags </label>
           <div class="controls"> 
             <input id='use' class="to_use_complete" data-use='{{elt.get('use', '')}}' data-cls='contact' name="use" type="text" tabindex="2"/>
           </div>
@@ -68,7 +69,6 @@
 	{{!helper.get_select_input(elt, 'host_notification_period', 'Host notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 
 	{{!helper.get_select_input(elt, 'service_notification_period', 'Service notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
-
 
 	{{!helper.get_bool_input(elt, 'host_notifications_enabled', 'Enable host notifications', editable=editable)}}
 

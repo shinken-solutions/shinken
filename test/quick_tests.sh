@@ -52,7 +52,6 @@ launch_and_assert test_config.py
 launch_and_assert test_dependencies.py
 launch_and_assert test_npcdmod.py
 launch_and_assert test_problem_impact.py
-launch_and_assert test_timeperiods.py
 launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
 launch_and_assert test_module_service_perfdata.py
@@ -141,7 +140,6 @@ launch_and_assert test_freshness.py
 launch_and_assert test_star_in_hostgroups.py
 launch_and_assert test_protect_esclamation_point.py
 launch_and_assert test_module_passwd_ui.py
-launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_css_in_command.py
 launch_and_assert test_servicedependency_implicit_hostgroup.py
 launch_and_assert test_pack_hash_memory.py
@@ -161,6 +159,7 @@ launch_and_assert test_checkmodulations.py
 launch_and_assert test_macromodulations.py
 launch_and_assert test_module_file_tag.py
 launch_and_assert test_livestatus_db.py
+launch_and_assert test_contactgroups_plus_inheritance.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.
@@ -168,6 +167,10 @@ launch_and_assert test_livestatus.py
 
 # Can failed on non prepared box
 launch_and_assert test_bad_start.py
+
+
+# Temporary move to the end, because it fail
+launch_and_assert test_timeperiods.py
 
 # And create the coverage file
 coverage xml --omit=/usr/lib

@@ -65,7 +65,8 @@ class TestConfig(ShinkenTest):
         sl.properties = {}
         sl.properties['to_queue'] = None
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         print self.sched.broks
         sl.init()
         for b in self.sched.broks.values():

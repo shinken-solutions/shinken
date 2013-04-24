@@ -66,8 +66,21 @@ html, body {height: 95.5%;}
 .font-grey {
   color: #505050;
 }
+
+.font-lightgrey {
+  color: #EBEBEB;
+}
+
 .font-blue {
   color: #3A87AD;
+}
+
+/*  Special Shinken Buttons
+    ------------------------------------------------------- */
+
+.btn-spezial {
+  min-height: 15px !important;
+  line-height: 17px;
 }
 
 /*  Special Shinken styles
@@ -193,10 +206,18 @@ html, body {height: 95.5%;}
   word-wrap: break-word;
 }
 
+.hero-unit p {
+  color: #FFF;
+}
+
+.hero-unit-small {
+  padding: 30px;
+}
+
 /*  Alert styles => BTN Color
     ------------------------------------------------------- */
 .alert {
-  color: #FFFFFF;
+  /*color: #FFFFFF;*/
   text-align: center;
 }
 
@@ -339,7 +360,7 @@ html, body {height: 95.5%;}
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 24px;
 }
 
 h1, h2, h3, h4 {
@@ -372,4 +393,17 @@ a.disabled-link:hover {
 
 .row-fluid .offset1 {
   margin-left: 3%;
+}
+
+
+
+/* With the SORTER javascript plugin */
+th[data-sort]{
+  cursor:pointer;
+}
+
+
+/* For list where we do not want a style */
+.no_list_style{
+    list-style-type: none;
 }

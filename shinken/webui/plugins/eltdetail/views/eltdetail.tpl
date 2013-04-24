@@ -26,7 +26,7 @@ Invalid element name
 %end
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js'], css=['eltdetail/css/iphonebuttons.css_', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js', 'eltdetail/js/custom_views.js', 'eltdetail/js/tabs.js' ], css=['eltdetail/css/iphonebuttons.css_', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
@@ -70,7 +70,9 @@ $(document).ready(function(){
 </script>
 
   %#  "Content Container Start"
-  
+
+  %#app.insert_template('cv_linux', globals())
+
   <div id="content_container" class="row-fluid">
   	<div class="row-fluid">
   		<h1 class="span7 state_{{elt.state.lower()}} icon_down no-margin"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
@@ -189,14 +191,14 @@ $(document).ready(function(){
 		</table>	    
 
 		<div class="span4">
-			%#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
-			%if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="alert alert-critical no-bottommargin pulsate row-fluid">
-				<div class="span2" style="font-size: 50px; padding-top: 10px;"> <i class="icon-bolt"></i> </div>
-				<p class="span10">This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
-				%# "end of the 'SOLVE THIS' highlight box"
-				%end
-			</div>
+		      	%#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
+		      	%if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
+		      	<div class="alert alert-critical no-bottommargin pulsate row-fluid">
+		      		<div class="span2 font-white" style="font-size: 50px; padding-top: 10px;"> <i class="icon-bolt"></i> </div>
+		      		<p class="span10 font-white">This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+		      		%# "end of the 'SOLVE THIS' highlight box"
+		      		%end
+		      	</div>
 		</div>				
 	</div>
 
@@ -423,16 +425,32 @@ $(document).ready(function(){
 		<!-- Detail info box start -->
 		<div class="span9 tabbable">
 			<ul class="nav nav-tabs"  style="margin-bottom: 12px;">
-				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
-				<li><a href="#comments" data-toggle="tab">Comments</a></li>
-				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
-				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
-				<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
+			  %_go_active = 'active'
+			  %for cvname in elt.custom_views:
+			     <li class="{{_go_active}} cv_pane" data-cv-name="{{cvname}}" data-elt-name='{{elt.get_full_name()}}' id='tab-cv-{{cvname}}'><a class='link_to_tab' href="#cv{{cvname}}" data-toggle="tab">{{cvname.capitalize()}}</a></li>
+			     %_go_active = ''
+			  %end
+
+				<li class="{{_go_active}}"><a class='link_to_tab' href="#impacts" data-toggle="tab">Services</a></li>
+			        <li><a class='link_to_tab' href="#comments" data-toggle="tab">Comments</a></li>
+				<li><a class='link_to_tab' href="#downtimes" data-toggle="tab">Downtimes</a></li>
+				<li><a class='link_to_tab' href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
+				<li><a class='link_to_tab' href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
 				<!--<li><a href="/depgraph/{{elt.get_full_name()}}" title="Impact map of {{elt.get_full_name()}}">Impact map</a></li> -->
 			</ul>
 			<div class="tab-content">
+
+			  <!-- First custom views -->
+			  %_go_active = 'active'
+			  %for cvname in elt.custom_views:
+			     <div class="tab-pane {{_go_active}}" data-cv-name="{{cvname}}" data-elt-name='{{elt.get_full_name()}}' id="cv{{cvname}}">
+			       Cannot load the pane {{cvname}}.
+			     </div>
+			     %_go_active = ''
+			  %end
+
 				<!-- Tab Summary Start-->
-				<div class="tab-pane active" id="impacts">
+				<div class="tab-pane {{_go_active}}" id="impacts">
 		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
 		      left is information, right is related elements -->
 		      <div class="row-fluid">
@@ -460,36 +478,13 @@ $(document).ready(function(){
 						<p class="font-blue">No services available</p>
 					</div>
 		      		%end
-		      		<div class="host-services">
-		      			%nb = 0
-		      			%for s in helper.get_host_services_sorted(elt):
-		      			%nb += 1
+		      		<div class="host-services span11">
 
-		      			%# " We put a max imapct to print, bacuse too high is just useless"
-		      			%if nb > max_impacts:
-		      			%   break
-		      			%end
-
-		      			%if nb == 8:
-		      			<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
-		      			%end
-
-		      			%if nb < 8:
-		      			<div class="service">
-		      				%else:
-		      				<div class="service hidden_impacts_services">
-		      					%end
-		      					<div>
-		      						<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
-		      						<span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
-		      						%for i in range(0, s.business_impact-2):
-		      						<img alt="icon state" src="/static/images/star.png">
-		      						%end
-
-		      					</div>
-		      				</div>
-		      				%# End of this service
-		      				%end
+				  <div class='pull-left'>
+				    %_html_id = helper.get_html_id(elt)
+				    {{!helper.print_aggregation_tree(helper.get_host_service_aggregation_tree(elt), _html_id)}}
+				  </div>
+				  <div>&nbsp;</div>
 		      			</div>
 		      			%end #of the only host part
 
@@ -606,21 +601,21 @@ $(document).ready(function(){
 						  </tbody>
 						</table>
 
-		      			%else:
+					%else:
 						<div class="alert alert-info">
-							<p class="font-blue">No comments available</p>
+							<p class="font-blue">No downtimes available</p>
 						</div>
-		      			%end
-		      		</div>
-		      	</div>
-		      	<!-- Tab Comments and Downtimes End -->
+					%end
+				</div>
+			</div>
+			<!-- Tab Comments and Downtimes End -->
 
 		      	<!-- Tab Graph Start -->
 		      	<div class="tab-pane" id="graphs">
 		      		%uris = app.get_graph_uris(elt, graphstart, graphend)
 		      		%if len(uris) == 0:
-					<div class="row alert">
-					    <div class="font-red"><strong>Oh snap!</strong> No graphs available!</div>
+					<div class="alert alert-info">
+					    <div class="font-blue"><strong>Oh snap!</strong> No graphs available!</div>
 					</div>
 		      		%else:
 		      		<h4>Graphs</h4>

@@ -42,10 +42,10 @@
 		</table>
 
 		<div class="progress span5 no-bottommargin" style="height: 45px;">
-			<div class="bar bar-success" style="width: 35%;"></div>
-			<div class="bar bar-info" style="width: 20%;"></div>
-			<div class="bar bar-danger" style="width: 10%;"></div>
-			<div class="bar bar-warning" style="width: 35%;"></div>
+			<div class="bar bar-success quickinfo" data-original-title='35% Up' style="width: 35%;"></div>
+			<div class="bar bar-info quickinfo" data-original-title='20% Unreachable' style="width: 20%;"></div>
+			<div class="bar bar-danger quickinfo" data-original-title='10% Down' style="width: 10%;"></div>
+			<div class="bar bar-warning quickinfo" data-original-title='35% Warning' style="width: 35%;"></div>
 		</div>
 	</div>
 

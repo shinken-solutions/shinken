@@ -56,10 +56,10 @@ class TestConfig(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
@@ -67,7 +67,7 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             brok.prepare()
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
     def tearDown(self):
         self.livestatus_broker.db.commit()
@@ -97,7 +97,8 @@ class TestConfigSmall(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
@@ -106,6 +107,7 @@ class TestConfigSmall(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
+
 
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
@@ -189,6 +191,7 @@ Columns: time type options state host_name"""
             print "archive is", day[2]
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now + 3600)
+
 
     def test_num_logs(self):
         self.print_header()
@@ -544,7 +547,9 @@ class TestConfigBig(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -774,7 +779,8 @@ class TestConfigNoLogstore(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2

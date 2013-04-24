@@ -39,18 +39,10 @@
   });
 </script>
 
-<script type="text/javascript">
-  setInterval("jetpack();",5000);
-  function jetpack(){
-    $('#jetpack').load(location.href + ' #jetpack');
-  }
-</script>
-
 <div class="row-fluid">
   <ul class="pull-right nav nav-pills font-grey">
     <li> <a href="/dashboard"><i class="icon-home"></i></a></li>
     <li><a href=""><i class="icon-cogs"></i></a></li>
-    <li><a href="#" id="request2"><i class="icon-fullscreen"></i></a></li>
   </ul>
 </div>
 
@@ -60,9 +52,7 @@
   <p><span id="date"></span></p>
 </div>
 
-<!-- jetpack Area END -->
-
-<div id="jetpack" class="row-fluid"> 
+<div class="row-fluid"> 
   <ul id="Navigation" class="span8 wtf">
     <li class="span3">
       <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="85px" viewBox="0 0 100 83.419" enable-background="new 0 0 100 83.419" fill ="#FFFFFF" xml:space="preserve">
@@ -153,8 +143,8 @@
       <span class="badger-big badger-ok">{{app.datamgr.get_per_hosts_state()}}%</span>
       %end
       %end
-    </li>
-  </ul>
+</li>
+</ul>
 </div>
 
 
