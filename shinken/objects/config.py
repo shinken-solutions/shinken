@@ -1000,6 +1000,7 @@ class Config(Item):
         # realm if need and it will be tagged to sat that do
         # not have an realm
         self.fill_default_realm()
+        self.realms.fill_default() # also put default inside the realms themselves
         self.reactionners.fill_default()
         self.pollers.fill_default()
         self.brokers.fill_default()

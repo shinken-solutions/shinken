@@ -142,7 +142,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
         'use_local_log': BoolProp(default='1'),
-        'log_level':     LogLevelProp(default='WARNING'),
+        'log_level':     LogLevelProp(default='INFO'), # TODO : fix the scheduler so we can put back WARNiING here
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled':BoolProp(default='1'),
