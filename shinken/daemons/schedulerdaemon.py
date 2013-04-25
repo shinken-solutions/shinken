@@ -91,8 +91,6 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
         
-        print "BROKER %s ask us broks, give it %d" % (bname, len(res))
-        
         return res
 
 
