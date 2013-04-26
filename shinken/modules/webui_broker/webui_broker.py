@@ -693,13 +693,13 @@ class Webui_broker(BaseModule, Daemon):
 
     def get_webui_port(self):
         port = self.port
-	return port
+        return port
 
     def get_skonf_port(self):
         port = self.http_port
-	return port
+        return port
 
     def get_skonf_active_state(self):
         state = self.show_skonf
-	return state
+        return state
 
