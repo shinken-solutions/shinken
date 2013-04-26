@@ -39,7 +39,20 @@ class DependencyNode(object):
         self.not_value = False
 
     def __str__(self):
-        return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
+        return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]), self.not_value)
+
+
+    def get_reverse_state(self, state):
+        # Warning is still warning
+        if state == 1:
+            return 1
+        if state == 0:
+            return 2
+        if state == 2:
+            return 0
+        # should not go here...
+        return state
+
 
     # We will get the state of this node, by looking at the state of
     # our sons, and apply our operand
@@ -92,15 +105,21 @@ class DependencyNode(object):
         # Now look at the rule. For a or
         if self.operand == '|':
             if 0 in states:
+                if self.not_value:
+                    return self.get_reverse_state(0)
                 #print "We find a OK/UP match in an OR", states
                 return 0
             # no ok/UP-> return worst state
             else:
+                if self.not_value:
+                    return self.get_reverse_state(best_not_good)
                 #print "I send the best not good state...in an OR", best_not_good, states
                 return best_not_good
 
         # With an AND, we just send the worst state
         if self.operand == '&':
+            if self.not_value:
+                return self.get_reverse_state(worst_state)
             #print "We raise worst state for a AND", worst_state,states
             return worst_state
 
@@ -131,12 +150,18 @@ class DependencyNode(object):
 
         # return the worst state that apply
         if crit_apply:
+            if self.not_value:
+                return self.get_reverse_state(2)
             return 2
 
         if warn_apply:
+            if self.not_value:
+                return self.get_reverse_state(1)
             return 1
 
         if ok_apply:
+            if self.not_value:
+                return self.get_reverse_state(0)
             return 0
 
         # Maybe even OK is not possible, if so, it depends if the admin
@@ -144,9 +169,13 @@ class DependencyNode(object):
         # the simple should give OK, the mult should give the worst state
         if self.is_of_mul:
             #print "Is mul, send 0"
+            if self.not_value:
+                return self.get_reverse_state(0)
             return 0
         else:
             #print "not mul, return worst", worse_state
+            if self.not_value:
+                return self.get_reverse_state(worst_state)
             return worst_state
 
 
@@ -253,9 +282,10 @@ class DependencyNodeFactory(object):
 
         in_par = False
         tmp = ''
+        son_is_not = False # We keep is the next son will ne not or not
         stacked_par = 0
         for c in pattern:
-            #print "MATCHING", c
+            #print "MATCHING", c, pattern
             if c == '&' or c == '|':
                 # Maybe we are in a par, if so, just stack it
                 if in_par:
@@ -276,6 +306,10 @@ class DependencyNodeFactory(object):
                     if tmp != '':
                         #print "Will analyse the current str", tmp
                         o = self.eval_cor_pattern(tmp, hosts, services)
+                        # Maybe our son was notted
+                        if son_is_not:
+                            o.not_value = True
+                            son_is_not = False
                         node.sons.append(o)
                     tmp = ''
                     continue
@@ -314,6 +348,10 @@ class DependencyNodeFactory(object):
                     #print "THIS is closing a sub compress expression", tmp
                     tmp = tmp.strip()
                     o = self.eval_cor_pattern(tmp, hosts, services)
+                    # Maybe our son was notted
+                    if son_is_not:
+                        o.not_value = True
+                        son_is_not = False
                     node.sons.append(o)
                     in_par = False
                     # OK now clean the tmp so we start clean
@@ -322,6 +360,14 @@ class DependencyNodeFactory(object):
 
                 # ok here we are still in a huge par, we just close one sub one
                 tmp += c
+            # Manage the NOT for an expression. If we are in a starting bloc, put as 
+            # a NOT node, but if inside a bloc, don't
+            elif c == '!':
+                if stacked_par == 0:
+                    son_is_not = True
+                    # DO NOT keep the c in tmp, we consumed it
+                else:
+                    tmp += c
             # Maybe it's a classic character, if so, continue
             else:
                 tmp += c
@@ -331,6 +377,10 @@ class DependencyNodeFactory(object):
         if tmp != '':
             #print "Managing trainling part", tmp
             o = self.eval_cor_pattern(tmp, hosts, services)
+            # Maybe our son was notted
+            if son_is_not:
+                o.not_value = True
+                son_is_not = False
             #print "4end I've %s got new sons" % pattern , o
             node.sons.append(o)
 

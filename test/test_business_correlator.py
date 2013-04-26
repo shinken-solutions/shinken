@@ -1320,6 +1320,80 @@ class TestBusinesscorrel(ShinkenTest):
                                                         
 
 
+
+
+
+
+
+
+
+
+
+    # We will try a strange rule that ask UP&UP -> DOWN&DONW-> OK
+    def test_darthelmet_rule(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_darthelmet")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        A = self.sched.hosts.find_by_name("test_darthelmet_A")
+        B = self.sched.hosts.find_by_name("test_darthelmet_B")
+        
+        self.assert_(host.got_business_rule == True)
+        self.assert_(host.business_rule is not None)
+        bp_rule = host.business_rule
+        self.assert_(bp_rule.operand == '|')
+
+        # Now state working on the states
+        self.scheduler_loop(3, [[host, 0, 'UP'], [A, 0, 'UP'], [B, 0, 'UP'] ] )
+        self.assert_(host.state == 'UP')
+        self.assert_(host.state_type == 'HARD')
+        self.assert_(A.state == 'UP')
+        self.assert_(A.state_type == 'HARD')
+
+        state = bp_rule.get_state()
+        print "WTF0", state
+        self.assert_(state == 0)
+
+        # Now we set the A as soft/DOWN
+        self.scheduler_loop(1, [[A, 2, 'DOWN']])
+        self.assert_(A.state == 'DOWN')
+        self.assert_(A.state_type == 'SOFT')
+        self.assert_(A.last_hard_state_id == 0)
+
+        # The business rule must still be 0
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we get A DOWN/HARD
+        self.scheduler_loop(3, [[A, 2, 'DOWN']])
+        self.assert_(A.state == 'DOWN')
+        self.assert_(A.state_type == 'HARD')
+        self.assert_(A.last_hard_state_id == 1)
+
+        # The rule must still be a 2 (or inside)
+        state = bp_rule.get_state()
+        print "WFT", state
+        self.assert_(state == 2)
+
+        # Now we also set B as DOWN/HARD, should get back to 0!
+        self.scheduler_loop(3, [[B, 2, 'DOWN']])
+        self.assert_(B.state == 'DOWN')
+        self.assert_(B.state_type == 'HARD')
+        self.assert_(B.last_hard_state_id == 1)
+
+        # And now the state of the rule must be 0 again! (strange rule isn't it?)
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+
+
+
+
 class TestConfigBroken(ShinkenTest):
     """A class with a broken configuration, where business rules reference unknown hosts/services"""
 
