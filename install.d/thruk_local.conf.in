@@ -1,0 +1,15 @@
+############################################
+# put your own settings into this file
+# settings from this file will override
+# those from the thruk.conf
+############################################
+
+<Component Thruk::Backend>
+    <peer>
+        name   = External Shinken
+        type   = livestatus
+        <options>
+            peer    = 127.0.0.1:50000
+       </options>
+    </peer>
+</Component>
