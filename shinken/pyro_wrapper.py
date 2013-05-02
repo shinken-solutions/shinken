@@ -37,12 +37,15 @@ except ImportError:  # ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
 
-
 """ This class is a wrapper for managing Pyro 3 and 4 version """
-class InvalidWorkDir(Exception): pass
 
 
-class PortNotFree(Exception): pass
+class InvalidWorkDir(Exception):
+    pass
+
+
+class PortNotFree(Exception):
+    pass
 
 PYRO_VERSION = 'UNKNOWN'
 
@@ -78,7 +81,8 @@ try:
             else:
                 prtcol = 'PYRO'
 
-            logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
+            logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" %
+                        (host, port, str(use_ssl)))
             # Now the real start
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
@@ -114,7 +118,7 @@ try:
             # tying to talk with us, bypass this
             except ProtocolError:
                 pass
-                
+                logger.warning("Someone is talking to me in a strange language!")
 
 
     def create_uri(address, port, obj_name, use_ssl):
@@ -152,13 +156,13 @@ except AttributeError, exp:
     Pyro.config.HMAC_KEY = "NOTSET"
 
     old_versions = ["4.1", "4.2", "4.3", "4.4"]
-    
+
     # Version not supported for now, we have to work on it
     bad_versions = []
     last_known_working_version = "4.14"
     msg_waitall_issue_versions = ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", '4.8',
                                   '4.9', '4.10', '4.11', '4.12', '4.13']
-    
+
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
         protocol = 'PYRO'
@@ -174,7 +178,7 @@ except AttributeError, exp:
             if PYRO_VERSION in msg_waitall_issue_versions:
                 if hasattr(socket, 'MSG_WAITALL'):
                     del socket.MSG_WAITALL
-                                        
+
             # Pyro 4 is by default a thread, should do select
             # (I hate threads!)
             # And of course the name changed since 4.5...
@@ -185,7 +189,8 @@ except AttributeError, exp:
             if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
             elif PYRO_VERSION in bad_versions:
-                logger.error("Your pyro version (%s) is not supported. Please install version (%s) " % (PYRO_VERSION, last_known_working_version))
+                logger.error("Your pyro version (%s) is not supported. Please install version (%s) "
+                             % (PYRO_VERSION, last_known_working_version))
                 exit(1)
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
@@ -194,14 +199,15 @@ except AttributeError, exp:
                     Pyro.config.SOCK_REUSE = True
                     max_try = 1
             nb_try = 0
-            is_good = False
+            #is_good = False # not used
             # Ok, Pyro4 do not close sockets like it should,
             # so we got TIME_WAIT socket :(
             # so we allow to retry during 35 sec (30 sec is the default
             # timewait for close sockets)
             while nb_try < max_try:
                 nb_try += 1
-                logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
+                logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" %
+                            (host, port, str(use_ssl)))
                 # And port already use now raise an exception
                 try:
                     Pyro.core.Daemon.__init__(self, host=host, port=port)
@@ -236,6 +242,7 @@ except AttributeError, exp:
             # Catch bad protocol attemps, like a telnet connexion
             except ProtocolError:
                 pass
+                logger.warning("Someone is talking to me in a strange language!")
 
 
     def create_uri(address, port, obj_name, use_ssl=False):
@@ -275,7 +282,7 @@ class ShinkenPyroDaemon(PyroClass):
         return ins
 
 # Common exceptions to be catch
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
-                    Pyro.errors.TimeoutError, Pyro.errors.NamingError)
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError,
+                 Pyro.errors.CommunicationError,
+                 Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError,
+                 Pyro.errors.TimeoutError, Pyro.errors.NamingError)
