@@ -49,11 +49,11 @@ function launch_and_assert {
       ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT --xunit-file=TEST-$SCRIPT.xml
     fi
     if [ $? != 0 ]
-	then
-	echo "Error: the test $SCRIPT failed"
-	exit 2
+        then
+        echo "Error: the test $SCRIPT failed"
+        exit 2
     else
-	echo "test $SCRIPT succeeded, next one"
+        echo "test $SCRIPT succeeded, next one"
     fi
 }
 
