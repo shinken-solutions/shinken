@@ -44,9 +44,9 @@ test $COVERAGE == "COVERAGE" && rm -f .coverage
 function launch_and_assert {
     SCRIPT=$1
     if test $COVERAGE == "NOCOVERAGE"; then
-      ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT
+      ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT --xunit-file=TEST-$SCRIPT.xml
     else
-      ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
+      ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT --xunit-file=TEST-$SCRIPT.xml
     fi
     if [ $? != 0 ]
 	then
