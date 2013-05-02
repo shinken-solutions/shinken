@@ -110,6 +110,11 @@ try:
             # and I don't know why... :(
             except NotImplementedError:
                 pass
+            # Maybe it's just a protocol error, like someone with a telnet
+            # tying to talk with us, bypass this
+            except ProtocolError:
+                pass
+                
 
 
     def create_uri(address, port, obj_name, use_ssl):
@@ -223,10 +228,14 @@ except AttributeError, exp:
                 return self.sockets
 
         def handleRequests(self, s):
-            if PYRO_VERSION in old_versions:
-                Pyro.core.Daemon.handleRequests(self, [s])
-            else:
-                Pyro.core.Daemon.events(self, [s])
+            try:
+                if PYRO_VERSION in old_versions:
+                    Pyro.core.Daemon.handleRequests(self, [s])
+                else:
+                    Pyro.core.Daemon.events(self, [s])
+            # Catch bad protocol attemps, like a telnet connexion
+            except ProtocolError:
+                pass
 
 
     def create_uri(address, port, obj_name, use_ssl=False):
