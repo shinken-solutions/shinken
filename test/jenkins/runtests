@@ -57,15 +57,14 @@ function launch_and_assert {
     fi
 }
 
-while read tfile
-do
-  case ${tfile:0:1} in
-  "#")
-       ;;
-  *)   launch_and_assert $tfile
-       ;;
-  esac
-done < $TESTLIST
+# We this we drop commented line and empty lines.
+# We could have used "only" grep -v "#" because the $() return only one line and
+# multiple space are skipped by the for loop
+# Safer to drop at the very beginning
+for line in $(grep -vE "#|^ *$" $TESTLIST);do
+    launch_and_assert $line
+done
+
 
 # Create the coverage file
 if test $COVERAGE == "COVERAGE"; then
