@@ -2502,6 +2502,10 @@ function install_check_esx3(){
     cecho " > Getting check_esx3 plugin from op5" green
     wget $WGETPROXY $CHECK_ESX3_SCRIPT -O check_esx3.pl >> ${LOGFILE} 2>&1
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_esx3.pl $LIBEXEC/check_esx3.pl
+
+    cecho " > Getting check_disk_vcenter plugin" green
+    wget $WGETPROXY $CHECK_DISK_VCENTER_SCRIPT -O check_disk_vcenter.pl >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_disk_vcenter.pl $LIBEXEC/check_disk_vcenter.pl
 }
 
 # NAGIOS-PLUGINS
