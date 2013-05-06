@@ -5,6 +5,11 @@
 
 "path":"/cluster",
 
-"macros":{ }	 
+"macros":{
+    "_SNMPCOMMUNITY": {"type":"string",
+                       "description":"The read snmp community allowed"
+    }
+
+        }
 
 }
