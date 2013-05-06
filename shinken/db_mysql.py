@@ -66,11 +66,12 @@ class DBMysql(DB):
         # http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8
         # for utf8 code :)
 
-    def execute_query(self, query):
+    def execute_query(self, query, do_debug=False):
         """Just run the query
         TODO: finish catch
         """
-        logger.debug("[MysqlDB]I run query %s" % query)
+        if do_debug:
+            logger.debug("[MysqlDB]I run query %s" % query)
         try:
             self.db_cursor.execute(query)
             self.db.commit()
