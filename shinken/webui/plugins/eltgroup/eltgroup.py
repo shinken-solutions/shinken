@@ -55,4 +55,4 @@ def get_page(arg1='nothing'):
 #    the dummy/htdocs/ directory. Beware: it will take the plugin name to match.
 #  * optional: you can add 'method': 'POST' so this address will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_page: {'routes': ['/eltgroup/:arg1', '/eltgroup/'], 'view': 'eltgroup', 'static': True}}
+pages = {get_page: {'routes': ['/eltgroup/:arg1', '/eltgroup/'], 'view': 'eltgroupoverview', 'static': True}}

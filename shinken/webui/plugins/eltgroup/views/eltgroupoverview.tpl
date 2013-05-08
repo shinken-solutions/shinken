@@ -1,47 +1,148 @@
-%rebase layout globals(), css=['eltgroup/css/group-overview.css'], title='', menu_part=''
+%rebase layout globals(), css=['eltgroup/css/group-overview.css', 'eltgroup/css/styles.css'], js=['eltgroup/js/script.js'], title='', menu_part=''
+
 
 <div class="row-fluid">
-	<div>
-		<div class="well well-small">
-			<div class="span6">
-				<p></p>
-			</div>
-		</div>
-
-		<div class="row-fluid">
-			<table class="table table-bordered">
-				<thead>
-					<tr>
-						<th>Host Group</th>
-						<th>Host Status Summary</th>
-						<th>Service Status Summary</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>AspenTech Group</td>
-						<td>8 Up</td>
-						<td> 
-							<ul class="unstyled">
-								<li>12 OK</li>
-								<li>34 Warning</li>
-								<li>9 Critical</li>
-							</ul>
-						</td>
-					</tr>
-					<tr>
-						<td>OsiSoft Pims Group</td>
-						<td>12 Up</td>
-						<td> 
-							<ul class="unstyled">
-								<li>112 OK</li>
-								<li>42 Warning</li>
-								<li>3 Critical</li>
-							</ul>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
+  <h3 class="span11 no-topmargin">Group overview</h3>
+  <span class="span1 btn-group pull-right">
+    <a href="#" id="gridview" class="btn btn-small switcher"><i class="icon-th"></i></a>
+    <a href="#" id="listview" class="btn btn-small switcher active"> <i class="icon-list"></i></a>
+  </span>
 </div>
+		
+		<ul id="products" class="list no-leftmargin">
+			<!-- row 1 -->
+			<li class="clearfix">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 45</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 2 -->
+			<li class="clearfix alt">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 55</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 3 -->
+			<li class="clearfix third">
+				<section class="left">	
+				    <h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 32</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 4 -->
+			<li class="clearfix alt">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 70</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 5 -->
+			<li class="clearfix">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 99</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 6 -->
+			<li class="clearfix alt third">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 45</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 7 -->
+			<li class="clearfix">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 25</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 8 -->
+			<li class="clearfix alt">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 60</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+			
+			<!-- row 9 -->
+			<li class="clearfix third">
+				<section class="left">
+					<h3>Group Name</h3>
+					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+				</section>
+				
+				<section class="right">
+					<span class="hostsum">Hosts 102</span>
+					<span class="darkview">
+					<a href="#" class="firstbtn">Details</a>
+					</span>
+				</section>
+			</li>
+		</ul>
+		
