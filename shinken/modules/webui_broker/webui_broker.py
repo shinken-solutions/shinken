@@ -77,7 +77,7 @@ class Webui_broker(BaseModule, Daemon):
         umask = getattr(modconf, 'umask')
         if umask != None: self.serveropts['umask'] = int(umask)
         bindAddress = getattr(modconf, 'bindAddress')
-        if bindAddress: self.serveropts['bindAddress'] = bindAddress
+        if bindAddress: self.serveropts['bindAddress'] = str(bindAddress)
 
         self.port = int(getattr(modconf, 'port', '7767'))
         self.http_port = int(getattr(modconf, 'http_port', '7766'))
