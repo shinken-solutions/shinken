@@ -133,12 +133,18 @@ class Scheduler:
         # And a dummy push flavor
         self.push_flavor = 0
 
+        # Now fake initialize for our satellites
+        self.brokers = {}
+        self.pollers = {}
+        self.reactionners = {}
+
 
     def reset(self):
         self.must_run = True
         del self.waiting_results[:]
-        for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks:
+        for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks, self.brokers:
             o.clear()
+        
 
     # Load conf for future use
     # we are in_test if the data are from an arbiter object like,
@@ -157,6 +163,8 @@ class Scheduler:
         self.hosts.create_reversed_list()
 
         self.notificationways = conf.notificationways
+        self.checkmodulations = conf.checkmodulations
+        self.macromodulations = conf.macromodulations
         self.contacts = conf.contacts
         self.contacts.create_reversed_list()
         self.contactgroups = conf.contactgroups
@@ -199,6 +207,7 @@ class Scheduler:
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval * 60)
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
 
+
     # Update the 'tick' for a function call in our
     # recurrent work
     def update_recurrent_works_tick(self, f_name, new_tick):
@@ -208,16 +217,19 @@ class Scheduler:
                 logger.debug("Changing the tick to %d for the function %s" % (new_tick, name))
                 self.recurrent_works[i] = (name, f, new_tick)
 
+
     # Load the pollers from our app master
     def load_satellites(self, pollers, reactionners):
         self.pollers = pollers
         self.reactionners = reactionners
+
 
     # Oh... Arbiter want us to die... To launch a new Scheduler
     # "Mais qu'a-t-il de plus que je n'ais pas?"
     # "But.. On which point it is better than me?"
     def die(self):
         self.must_run = False
+
 
     def dump_objects(self):
         d = tempfile.gettempdir()
@@ -239,24 +251,48 @@ class Scheduler:
         except Exception, exp:
             logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
 
+
     # Load the external command
     def load_external_command(self, e):
         self.external_command = e
+
 
     # We've got activity in the fifo, we get and run commands
     def run_external_commands(self, cmds):
         for command in cmds:
             self.run_external_command(command)
 
+
     def run_external_command(self, command):
         logger.debug("scheduler resolves command '%s'" % command)
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
-    def add_Brok(self, brok):
+
+    # Add_Brok is a bit more complex than the others, because
+    # on starting, the broks are put in a global queue : self.broks
+    # then when the first broker connect, it will generate initial_broks
+    # in it's own queue (so bname != None).
+    # and when in "normal" run, we just need to put the brok to all queues
+    def add_Brok(self, brok, bname=None):
         # For brok, we TAG brok with our instance_id
         brok.instance_id = self.instance_id
-        self.broks[brok.id] = brok
+        # Maybe it's just for one broker
+        if bname:
+            broks = self.brokers[bname]['broks']
+            broks[brok.id] = brok
+        else:
+            # If there are known brokers, give it to them
+            if len(self.brokers) > 0:
+                # Or maybe it's for all
+                for bname in self.brokers:
+                    broks = self.brokers[bname]['broks']
+                    broks[brok.id] = brok
+            else: # no brokers? maybe at startup for logs
+                # we will put in global queue, that the first broker
+                # connexion will get all
+                self.broks[brok.id] = brok
+
 
     def add_Notification(self, notif):
         self.actions[notif.id] = notif
@@ -265,6 +301,7 @@ class Scheduler:
             b = notif.get_initial_status_brok()
             self.add(b)
 
+
     def add_Check(self, c):
         self.checks[c.id] = c
         # A new check means the host/service changes its next_check
@@ -272,26 +309,32 @@ class Scheduler:
         b = c.ref.get_next_schedule_brok()
         self.add(b)
 
+
     def add_EventHandler(self, action):
         # print "Add an event Handler", elt.id
         self.actions[action.id] = action
+
 
     def add_Downtime(self, dt):
         self.downtimes[dt.id] = dt
         if dt.extra_comment:
             self.add_Comment(dt.extra_comment)
 
+
     def add_ContactDowntime(self, contact_dt):
         self.contact_downtimes[contact_dt.id] = contact_dt
+
 
     def add_Comment(self, comment):
         self.comments[comment.id] = comment
         b = comment.ref.get_update_status_brok()
         self.add(b)
 
+
     # Ok one of our modules send us a command? just run it!
     def add_ExternalCommand(self, ext_cmd):
         self.external_command.resolve_command(ext_cmd)
+
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -376,14 +419,19 @@ class Scheduler:
             nb_checks_drops = 0
 
         # For broks and actions, it's more simple
-        if len(self.broks) > max_broks:
-            id_max = self.broks.keys()[-1]
-            id_to_del_broks = [i for i in self.broks if i < id_max - max_broks]
-            nb_broks_drops = len(id_to_del_broks)
-            for i in id_to_del_broks:
-                del self.broks[i]
-        else:
-            nb_broks_drops = 0
+        # or brosk, manage global but also all brokers queue
+        b_lists = [self.broks]
+        for (bname, e) in self.brokers.iteritems():
+            b_lists.append(e['broks'])
+        for broks in b_lists:
+            if len(broks) > max_broks:
+                id_max = broks.keys()[-1]
+                id_to_del_broks = [i for i in broks if i < id_max - max_broks]
+                nb_broks_drops = len(id_to_del_broks)
+                for i in id_to_del_broks:
+                    del broks[i]
+            else:
+                nb_broks_drops = 0
 
         if len(self.actions) > max_actions:
             id_max = self.actions.keys()[-1]
@@ -880,11 +928,19 @@ class Scheduler:
 
     # Call by brokers to have broks
     # We give them, and clean them!
-    def get_broks(self):
-        res = self.broks
+    def get_broks(self, bname):
+        # If we are here, we are sure the broker entry exists
+        res = self.brokers[bname]['broks']
         # They are gone, we keep none!
-        self.broks = {}
+        self.brokers[bname]['broks'] = {}
+
+        # Also put in the result the possible first log broks if so
+        res.update(self.broks)
+        # and clean the global broks too now
+        self.broks.clear()
+        
         return res
+
 
     # An element can have its topology changed by an external command
     # if so a brok will be generated with this flag. No need to reset all of
@@ -1107,14 +1163,14 @@ class Scheduler:
 
     # Fill the self.broks with broks of self (process id, and co)
     # broks of service and hosts (initial status)
-    def fill_initial_broks(self, with_logs=False):
+    def fill_initial_broks(self, bname, with_logs=False):
         # First a Brok for delete all from my instance_id
         b = Brok('clean_all_my_instance_id', {'instance_id': self.instance_id})
-        self.add(b)
+        self.add_Brok(b, bname)
 
         # first the program status
         b = self.get_program_status_brok()
-        self.add(b)
+        self.add_Brok(b, bname)
 
         #  We can't call initial_status from all this types
         #  The order is important, service need host...
@@ -1129,7 +1185,7 @@ class Scheduler:
             for tab in initial_status_types:
                 for i in tab:
                     b = i.get_initial_status_brok()
-                    self.add(b)
+                    self.add_Brok(b, bname)
 
         # Only raises the all logs at the scheduler startup
         if with_logs:
@@ -1141,23 +1197,26 @@ class Scheduler:
 
         # Add a brok to say that we finished all initial_pass
         b = Brok('initial_broks_done', {'instance_id': self.instance_id})
-        self.add(b)
+        self.add_Brok(b, bname)
 
         # We now have all full broks
         self.has_full_broks = True
 
-        logger.info("[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
+        logger.info("[%s] Created %d initial Broks for broker %s" % (self.instance_name, len(self.brokers[bname]['broks']), bname))
+
 
     # Crate a brok with program status info
     def get_and_register_program_status_brok(self):
         b = self.get_program_status_brok()
         self.add(b)
 
+
     # Crate a brok with program status info
     def get_and_register_update_program_status_brok(self):
         b = self.get_program_status_brok()
         b.type = 'update_program_status'
         self.add(b)
+
 
     # Get a brok with program status
     # TODO: GET REAL VALUES
@@ -1435,10 +1494,6 @@ class Scheduler:
         self.sched_daemon.modules_manager.start_external_instances(late_start=True)
 
         # Ok, now all is initialized, we can make the initial broks
-        logger.debug("Starting initial broks")
-        t0 = time.time()
-        self.fill_initial_broks(with_logs=True)
-        logger.debug("Finishing initial broks at %d in %d secs" % (time.time(), time.time() - t0))
         logger.info("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
         logger.info("[%s] First scheduling done" % self.instance_name)

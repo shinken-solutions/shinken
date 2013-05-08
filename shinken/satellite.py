@@ -104,6 +104,7 @@ class IForArbiter(Interface):
         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
         return self.app.what_i_managed() # self.app.schedulers.keys()
 
+
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
@@ -169,7 +170,7 @@ class IBroks(Interface):
     """
 
     # poller or reactionner ask us actions
-    def get_broks(self):
+    def get_broks(self, bname):
         res = self.app.get_broks()
         return res
 

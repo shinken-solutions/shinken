@@ -55,6 +55,7 @@ class Itemgroup(Item):
         for key in params:
             setattr(self, key, params[key])
 
+
     # Copy the groups properties EXCEPT the members
     # members need to be fill after manually
     def copy_shell(self):
@@ -128,8 +129,10 @@ class Itemgroup(Item):
 
         return res
 
+
     def has(self, prop):
         return hasattr(self, prop)
+
 
     # Get a brok with hostgroup info (like id, name)
     # members is special: list of (id, host_name) for database info
@@ -157,8 +160,10 @@ class Itemgroups(Items):
         for i in self:
             i.fill_default()
 
+
     def add(self, ig):
         self.items[ig.id] = ig
+
 
     def get_members_by_name(self, gname):
         g = self.find_by_name(gname)

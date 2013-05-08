@@ -138,12 +138,15 @@ class Service(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Our check ways. By defualt void, but will filled by an inner if need
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
+
         # Custom views
         'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
-
     })
 
     # properties used in the running state
@@ -1004,7 +1007,7 @@ class Services(Items):
     # service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts,
                 resultmodulations, businessimpactmodulations, escalations,
-                servicegroups, triggers):
+                servicegroups, triggers, checkmodulations, macromodulations):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -1020,6 +1023,9 @@ class Services(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
+        self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
+        
 
     # We can link services with hosts so
     # We can search in O(hosts) instead

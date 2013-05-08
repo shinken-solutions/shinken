@@ -188,9 +188,7 @@ class Logline(dict):
                      type.startswith('Bailing out') or \
                      type.startswith('active mode...') or \
                      type.startswith('standby mode...') or \
-                     type.startswith('Debug') or \
-                     type.startswith('Warning') or \
-                     type.startswith('Info'):
+                     type.startswith('Warning'):
                     logobject = LOGOBJECT_INFO
                     logclass = LOGCLASS_PROGRAM
                 else:

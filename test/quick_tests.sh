@@ -52,7 +52,6 @@ launch_and_assert test_config.py
 launch_and_assert test_dependencies.py
 launch_and_assert test_npcdmod.py
 launch_and_assert test_problem_impact.py
-launch_and_assert test_timeperiods.py
 launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
 launch_and_assert test_module_service_perfdata.py
@@ -126,7 +125,6 @@ launch_and_assert test_module_on_module.py
 launch_and_assert test_disable_active_checks.py
 launch_and_assert test_no_event_handler_during_downtime.py
 launch_and_assert test_inheritance_and_plus.py
-launch_and_assert test_livestatus_db.py
 launch_and_assert test_parse_perfdata.py
 launch_and_assert test_service_template_inheritance.py
 launch_and_assert test_module_ip_tag.py
@@ -157,6 +155,10 @@ launch_and_assert test_python_crash_with_recursive_bp_rules.py
 launch_and_assert test_missing_timeperiod.py
 launch_and_assert test_module_trending.py
 launch_and_assert test_multiple_not_hostgroups.py
+launch_and_assert test_checkmodulations.py
+launch_and_assert test_macromodulations.py
+launch_and_assert test_module_file_tag.py
+launch_and_assert test_livestatus_db.py
 launch_and_assert test_contactgroups_plus_inheritance.py
 
 launch_and_assert test_maintenance_period.py
@@ -165,6 +167,10 @@ launch_and_assert test_livestatus.py
 
 # Can failed on non prepared box
 launch_and_assert test_bad_start.py
+
+
+# Temporary move to the end, because it fail
+launch_and_assert test_timeperiods.py
 
 # And create the coverage file
 coverage xml --omit=/usr/lib

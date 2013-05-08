@@ -64,13 +64,20 @@ class ArbiterLink(SatelliteLink):
                 state = False  # Bad boy...
         return state
 
-    # Look for ourself as an arbiter. Should be our fqdn name, or if not, our hostname
-    def is_me(self):
+
+    # Look for ourself as an arbiter. If we search for a specific arbiter name, go forit
+    # If not look be our fqdn name, or if not, our hostname
+    def is_me(self, lookup_name):
         logger.info("And arbiter is launched with the hostname:%s from an arbiter point of view of addr:%s" % (self.host_name, socket.getfqdn()))
-        return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
+        if lookup_name:
+            return lookup_name == self.get_name()
+        else:
+            return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
+
 
     def give_satellite_cfg(self):
         return {'port': self.port, 'address': self.address, 'name': self.arbiter_name}
+
 
     def do_not_run(self):
         if self.con is None:
@@ -85,6 +92,7 @@ class ArbiterLink(SatelliteLink):
             self.con = None
             return False
 
+
     def get_satellite_list(self, daemon_type):
         if self.con is None:
             self.create_connection()
@@ -97,6 +105,7 @@ class ArbiterLink(SatelliteLink):
         except Pyro.errors.ProtocolError, exp:
             self.con = None
             return []
+
 
     def get_satellite_status(self, daemon_type, name):
         if self.con is None:
@@ -111,6 +120,7 @@ class ArbiterLink(SatelliteLink):
             self.con = None
             return {}
 
+
     def get_all_states(self):
         if self.con is None:
             self.create_connection()
@@ -123,6 +133,7 @@ class ArbiterLink(SatelliteLink):
         except Pyro.errors.ProtocolError, exp:
             self.con = None
             return None
+
 
     def get_objects_properties(self, table, *properties):
         if self.con is None:
@@ -141,6 +152,7 @@ class ArbiterLink(SatelliteLink):
 class ArbiterLinks(SatelliteLinks):
     name_property = "name"
     inner_class = ArbiterLink
+
 
     # We must have a realm property, so we find our realm
     def linkify(self, modules):

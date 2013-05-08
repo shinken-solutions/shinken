@@ -56,6 +56,7 @@ def get_instance(plugin):
 class Graphite_Webui(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
+        self.multival = re.compile(r'_(\d+)$')
         self.uri = getattr(modconf, 'uri', None)
         self.templates_path = getattr(modconf, 'templates_path', '/tmp')
 
@@ -101,7 +102,13 @@ class Graphite_Webui(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
+
+            
             name = self.illegal_char.sub('_', elts[0])
+            name = self.multival.sub(r'.*', name)
+            if name in [x[0] for x in res]:
+                continue
+
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
@@ -113,6 +120,7 @@ class Graphite_Webui(BaseModule):
             # bailout if need
             if name_value[name] == '':
                 continue
+            
 
             # Try to get the int/float in it :)
             for key, value in name_value.items():
@@ -271,3 +279,4 @@ class Graphite_Webui(BaseModule):
 
         # Oups, bad type?
         return []
+

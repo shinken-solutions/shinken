@@ -54,7 +54,7 @@ if ($HOSTSTATE =~ /UNREACHABLE/) {
 
 $texthtml = $texthtml  . "<strong>Impacted host</strong> : $HOSTNAME\n"
 	. "<strong>Address</strong> : <i>$HOSTADDRESS</i> \n"
-	. "<strong>Host State : <span style='color:$color> $HOSTSTATE </span></strong>\n"
+	. "<strong>Host State : <span style='color:$color'> $HOSTSTATE </span></strong>\n"
 	. "<strong>Date/Time</strong> : <i>$SHORTDATETIME</i> \n\n"
 	. "<strong>Host Output</strong> : $HOSTOUTPUT \n\n\n\n";
 

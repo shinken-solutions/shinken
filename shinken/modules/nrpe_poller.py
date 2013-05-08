@@ -36,6 +36,9 @@ import binascii
 import asyncore
 import getopt
 import shlex
+import traceback
+import cStringIO
+
 
 try:
     import OpenSSL
@@ -52,6 +55,7 @@ except ImportError:
 
 from Queue import Empty
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['poller'],
@@ -64,7 +68,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    print "Get a nrpe poller module for plugin %s" % mod_conf.get_name()
+    logger.info("[NRPEPoller] Get a nrpe poller module for plugin %s" % mod_conf.get_name())
     instance = Nrpe_poller(mod_conf)
     return instance
 
@@ -231,7 +235,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
             try:
                 buf = self.recv(1034)
             except socket.error, exp:
-                print exp
+                logger.debug("[NRPEPoller] Exiting %s" % exp)
                 self.set_exit(2, str(exp))
                 return
 
@@ -254,7 +258,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 buf = ''
 
             except SSLError:
-                bug = ''
+                buf = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
             # or refuse arguments...)
@@ -348,7 +352,7 @@ class Nrpe_poller(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        print "Initialization of the nrpe poller module"
+        logger.info("[NRPEPoller] Initialization of the nrpe poller module")
         self.i_am_dying = False
 
     # Get new checks if less than nb_checks_max
@@ -418,7 +422,9 @@ class Nrpe_poller(BaseModule):
                 c.con.look_for_timeout()
 
         # We check if all new things in connections
-        asyncore.poll(timeout=1)
+        # WARNING : using poll2 instead of poll (poll1 is with select
+        # call that is limited to 1024 connexions, poll2 is ... poll).
+        asyncore.poll2(timeout=1)
 
         # Now we look for finished checks
         for c in self.checks:
@@ -428,7 +434,7 @@ class Nrpe_poller(BaseModule):
                 try:
                     self.returns_queue.put(c)
                 except IOError, exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
+                    logger.error("[NRPEPoller] Exiting: %s" %  exp)
                     sys.exit(2)
                 continue
             # Then we check for good checks
@@ -449,20 +455,38 @@ class Nrpe_poller(BaseModule):
                 try:
                     self.returns_queue.put(c)
                 except IOError, exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
+                    logger.error("[NRPEPoller]Exiting: %s" %  exp)
                     sys.exit(2)
 
         # And delete finished checks
         for chk in to_del:
             self.checks.remove(chk)
 
+
+
+
+    # Wrapper function for work in order to catch the exception
+    # to see the real work, look at do_work
+    def work(self, s, returns_queue, c):
+        try:
+            self.do_work(s, returns_queue, c)
+        # Catch any exception, try to print it and exit anyway
+        except Exception, exp:
+            output = cStringIO.StringIO()
+            traceback.print_exc(file=output)
+            logger.error("Worker '%d' exit with an unmanaged exception : %s" % (self.id, output.getvalue()))
+            output.close()
+            # Ok I die now
+            raise
+
+
     # id = id of the worker
     # s = Global Queue Master->Slave
     # m = Queue Slave->Master
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
-    def work(self, s, returns_queue, c):
-        print "[Nrpe] Module NRPE started!"
+    def do_work(self, s, returns_queue, c):
+        logger.info("[NRPEPoller] Module started!")
         ## restore default signal handler for the workers:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         self.set_proctitle(self.name)
@@ -492,7 +516,7 @@ class Nrpe_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are dying..." % self.id
+                    logger.info("[NRPEPoller] Dad say we are dying...")
                     break
             except:
                 pass

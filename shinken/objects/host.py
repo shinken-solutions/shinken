@@ -136,6 +136,10 @@ class Host(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Our modulations. By defualt void, but will filled by an inner if need
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
+
         # Custom views
         'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
 
@@ -293,9 +297,7 @@ class Host(SchedulingItem):
         'pack_id': IntegerProp(default=-1),
 
         # Trigger list
-        'triggers':  StringProp(default=[])
-
-        
+        'triggers':  StringProp(default=[]),
     })
 
     # Hosts macros and prop that give the information
@@ -968,7 +970,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkmodulations=None, macromodulations=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -986,6 +988,9 @@ class Hosts(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
+        self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
+        
 
     # Fill address by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1010,6 +1015,7 @@ class Hosts(Items):
             # We find the id, we replace the names
             h.parents = new_parents
 
+
     # Link with realms and set a default realm if none
     def linkify_h_by_realms(self, realms):
         default_realm = None
@@ -1030,6 +1036,7 @@ class Hosts(Items):
                 h.realm = default_realm
                 h.got_default_realm = True
 
+
     # We look for hostgroups property in hosts and
     # link them
     def linkify_h_by_hg(self, hostgroups):
@@ -1048,6 +1055,7 @@ class Hosts(Items):
                             err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
                             h.configuration_errors.append(err)
                 h.hostgroups = new_hostgroups
+
 
     # We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups, triggers):
@@ -1068,6 +1076,7 @@ class Hosts(Items):
         # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
 
+
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_h_by_commands(self, commands):
@@ -1077,12 +1086,19 @@ class Hosts(Items):
                 cc = getattr(h, prop, None)
                 if cc:
                     cc.late_linkify_with_command(commands)
+            
+            # Ok also link checkmodulations
+            for cw in h.checkmodulations:
+                cw.late_linkify_cw_by_commands(commands)
+                print cw
+
 
     # Create dependencies:
     # Dependencies at the host level: host parent
     def apply_dependencies(self):
         for h in self:
             h.fill_parents_dependency()
+
 
     # Parent graph: use to find quickly relations between all host, and loop
     # return True if there is a loop

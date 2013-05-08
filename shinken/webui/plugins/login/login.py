@@ -69,7 +69,7 @@ def user_auth():
     is_auth = app.check_auth(login, password)
 
     if is_auth:
-        app.response.set_cookie('user', login, secret=app.auth_secret, path='/')
+        app.response.set_cookie('user', login, secret=app.auth_secret, path='/', expires='Fri, 01 Jan 2100 00:00:00 GMT')
         if is_mobile == '1':
             redirect("/mobile/main")
         else:
@@ -86,8 +86,15 @@ def get_root():
     user = app.request.get_cookie("user", secret=app.auth_secret)
     if user:
         redirect("/problems")
-    elif app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
-        user_name = app.request.headers[app.remote_user_variable]
+    elif app.remote_user_enable in ['1', '2']:
+        user_name=None
+        if app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
+            user_name = app.request.headers[app.remote_user_variable]
+        elif app.remote_user_variable in app.request.environ and app.remote_user_enable == '2':
+            user_name = app.request.environ[app.remote_user_variable]
+        if not user_name:
+            print "Warning: You need to have a contact having the same name as your user %s"
+            redirect("/user/login")
         c = app.datamgr.get_contact(user_name)
         print "Got", c
         if not c:

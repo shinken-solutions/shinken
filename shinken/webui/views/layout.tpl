@@ -89,7 +89,9 @@
     <script src="/static/js/spin.min.js"></script>
 
     <!--Shinken ones-->
+    %if refresh:
     <script src="/static/js/shinken-refresh.js"></script>
+    %end
     <script src="/static/js/shinken-actions.js"></script>
     <script src="/static/js/shinken-deptree.js"></script>
     <script src="/static/js/shinken-greeting.js"></script>

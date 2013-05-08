@@ -94,8 +94,9 @@ class Ip_Tag_Arbiter(BaseModule):
             # the property, tag it!
             if h_ip and h_ip in self.ip_range:
                 logger.debug("[IP Tag] Is in the range")
-                # 3 cases: append , replace and set
-                # append will join with the value if exist
+                # 4 cases: append , replace and set
+                # append will join with the value if exist (on the END)
+                # prepend will join with the value if exist (on the BEGINING)
                 # replace will replace it if NOT existing
                 # set put the value even if the property exists
                 if self.method == 'append':
@@ -103,6 +104,14 @@ class Ip_Tag_Arbiter(BaseModule):
                     logger.debug("[IP Tag] Orig_v: %s" % str(orig_v))
                     new_v = ','.join([orig_v, self.value])
                     logger.debug("[IP Tag] Newv %s" % new_v)
+                    setattr(h, self.property, new_v)
+
+                # Same but we put before
+                if self.method == 'prepend':
+                    orig_v = getattr(h, self.property, '')
+                    logger.debug("[File Tag] Orig_v: %s" % str(orig_v))
+                    new_v = ','.join([self.value, orig_v])
+                    logger.debug("[File Tag] Newv %s" % new_v)
                     setattr(h, self.property, new_v)
 
                 if self.method == 'replace':

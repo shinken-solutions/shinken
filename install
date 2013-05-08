@@ -762,6 +762,7 @@ function relocate(){
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+    rm $TARGET/bin/default/shinken.in 
     # relocate init file
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
@@ -988,6 +989,25 @@ function sinstall(){
     cecho "| " green
     cecho "| You can now learn how to configure shinken at: http://www.shinken-monitoring.org/wiki" green
     cecho "+------------------------------------------------------------------------------" green
+    echo ""
+    cecho "Do not forget to allow localhost to browse the entire snmp tree. Sample configuration" yellow
+    cecho "use snmp checks and the plugins should be able to access local snmp tree." yellow
+    cecho "For testing purpose you could modify your snmpd configuration this way :" yellow
+    echo ""
+    cecho "Debian :" yellow
+    cecho " edit /etc/snmp/snmpd.conf and replace the following lines :" yellow
+    cecho " view   systemonly  included   .1.3.6.1.2.1.1" yellow
+    cecho " view   systemonly  included   .1.3.6.1.2.1.25.1" yellow
+    cecho " by this one : " yellow
+    cecho " view   systemonly  included   .1" yellow
+    echo ""
+    cecho "RedHat/CentOS :" yellow
+    cecho " edit /etc/snmp/snmpd.conf and replace the following lines :" yellow
+    cecho " view   systemview  included   .1.3.6.1.2.1.1" yellow
+    cecho " view   systemview  included   .1.3.6.1.2.1.25.1" yellow
+    cecho " by this one : " yellow
+    cecho " view   systemview  included   .1" yellow
+
 }
 
 

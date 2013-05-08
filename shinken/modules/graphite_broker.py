@@ -70,6 +70,7 @@ class Graphite_broker(BaseModule):
         self.ticks = 0
         self.host_dict = {}
         self.svc_dict = {}
+        self.multival = re.compile(r'_(\d+)$')
 
         # optional "sub-folder" in graphite to hold the data of a specific host
         self.graphite_data_source = self.illegal_char.sub('_',
@@ -88,7 +89,6 @@ class Graphite_broker(BaseModule):
                 logger.error("[Graphite broker] Graphite Carbon instance network socket! IOError:%s" % str(err))
                 raise
         logger.info("[Graphite broker] Connection successful to  %s:%d" % (str(self.host), self.port))
-        self.ticks = 0
 
     # Sending data to Carbon. In case of failure, try to reconnect and send again. If carbon instance is down
     # Data are buffered.
@@ -117,7 +117,9 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
+
             name = self.illegal_char.sub('_', elts[0])
+            name = self.multival.sub(r'.\1', name)
 
             raw = elts[1]
             # get metric value and its thresholds values if they exist
@@ -282,8 +284,10 @@ class Graphite_broker(BaseModule):
             try:
 	        self.send_packet(packet)
                 # Flush the buffer after a successful send to Graphite
-                self.buffer = []   
+                self.buffer = []
+                self.ticks = 0
             except IOError, err:
                 self.ticks += 1
                 logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s" % ( self.ticks , self.tick_limit ))
             
+

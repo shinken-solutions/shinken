@@ -520,6 +520,8 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('trigger_name', ''),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
+        ('checkmodulations', ''),
+        ('macromodulations', ''),
         ('custom_views', ''),
         ])
 
@@ -602,6 +604,7 @@ class TestRealm(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('realm_members', ''),
         ('higher_realms', ''),
         ('default', '0'),
+        ('broker_complete_links', '0'),
         ])
 
     def setUp(self):
@@ -780,6 +783,8 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('trigger_name', ''),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
+        ('checkmodulations', ''),
+        ('macromodulations', ''),        
         ('aggregation', ''),
         ('service_dependencies', ''),
         ('custom_views', ''),
