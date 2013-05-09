@@ -41,7 +41,7 @@ def get_instance(mod_conf):
     if not hasattr(mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
     if not hasattr(mod_conf, 'synchronize_database_id'):
-        mod_conf.synchronize_database_id = '0'
+        mod_conf.synchronize_database_id = '1'
     instance = Ndodb_Mysql_broker(mod_conf)
 
     return instance

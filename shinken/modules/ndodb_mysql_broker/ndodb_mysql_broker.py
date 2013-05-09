@@ -820,8 +820,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         queries.append(self.db.create_update_query('hoststatus', hoststatus_data, where_clause))
 
-        print queries
-
         return queries
 
     # The next schedule got it's own brok. got it and just update the
