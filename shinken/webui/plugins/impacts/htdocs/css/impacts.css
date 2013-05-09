@@ -37,7 +37,7 @@
 
 /* problem impact panel */
 .problems-panel {
-    height: 600px;
+    min-height: 600px;
     width: 550px;
     background: #FAFAFA;
     position: relative;
