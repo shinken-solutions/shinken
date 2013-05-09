@@ -30,6 +30,7 @@
 				<section class="left">
 					<h3>Group Name</h3>
 					<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+					<span class="meta"> <span class="label label-important pulsate">Business impact</span> </span>
 				</section>
 				
 				<section class="right">
