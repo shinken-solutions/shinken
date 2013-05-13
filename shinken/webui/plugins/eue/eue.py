@@ -418,7 +418,3 @@ pages = {
     eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
 }
 
-
-
-# TODO : I comment the EUE page before the 1.2.1 release
-pages = {}
