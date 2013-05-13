@@ -61,7 +61,6 @@ time picker is from : https://github.com/jdewit/bootstrap-timepicker/tree/master
 <table class="table table-condensed"> 
     <thead>
         <tr>
-            <th>Timestamp</th>
             <th>Date</th>
             <th>Duration</th>
             <th>State</th>
@@ -78,7 +77,6 @@ time picker is from : https://github.com/jdewit/bootstrap-timepicker/tree/master
         %   badge = "badge-important"
         %end
         <tr>
-            <td>{{element["timestamp"]}}</td>
             <td><a href="/eue_report/{{element["key"]}}">{{element["date"]}}</a></td>
             <td>{{element["duration"]}}</td>
             <td><span class="badge {{badge}}"></span></td>
