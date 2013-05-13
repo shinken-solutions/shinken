@@ -42,18 +42,25 @@ time picker is from : https://github.com/jdewit/bootstrap-timepicker/tree/master
     </div>
 </div>
 
-<button class="btn btn-danger" data-toggle="collapse" data-target="#graph">
-  Graph
-</button>
-<div id="graph" class="collapse in"></div>
 
-<div class="pagination">
-    <ul>
-        <li><a href="/eue_feature_history/{{eueid}}?lastts={{lastts}}&direction=prev">Prev</a></li>
-        <li><a href="/eue_feature_history/{{eueid}}?lastts={{lastts}}&direction=next">Next</a></li>
-    </ul>
+<div class="row">
+    <div class="span2">
+        <button class="btn btn-danger" data-toggle="collapse" data-target="#graph">Graph</button>
+    </div>
+    <div class="span2">
+        <div class="pagination">
+            <ul>
+                <li><a href="/eue_feature_history/{{eueid}}?page={{str(int(page)-1)}}">Previous</a></li>
+                <li><a href="/eue_feature_history/{{eueid}}?page={{str(int(page)+1)}}">Next</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="span2">
+        Page {{page}}/{{pages}}
+    </div>
 </div>
 
+<div id="graph" class="row collapse in"></div>
 
 <table class="table table-condensed"> 
     <thead>
@@ -86,14 +93,6 @@ time picker is from : https://github.com/jdewit/bootstrap-timepicker/tree/master
         %end
     </tbody>
 </table>
-
-<div class="pagination">
-    <ul>
-        <li><a href="/eue_feature_history/{{eueid}}?lastts={{lastts}}&direction=prev">Prev</a></li>
-        <li><a href="/eue_feature_history/{{eueid}}?lastts={{lastts}}&direction=next">Next</a></li>
-    </ul>
-</div>
-
 
 <div class="modal hide" id="filter">
   <div class="modal-header">

@@ -192,32 +192,21 @@ def feature_history(eueid):
     morris = []
 
     # for pagination
-    itempsperpage = app.request.GET.get('itempsperpage', 20)
-    
-    # sort = app.request.GET.get("sort", "desc")
-    # if sort == "desc":
-    #     sortdirection = pymongo.DESCENDING
-    # else:
-    #     sortdirection = pymongo.ASCENDING
-
-    lastts = app.request.GET.get('lastts', None)
+    itemsperpage = int(app.request.GET.get('itempsperpage', 20))
+    pages = int(math.ceil(float(db.eue.find(filters).count()) / itemsperpage))
     direction = app.request.GET.get('direction', "next")
-    # if app.request.GET.get('direction', None) == "prev":
-    #     diroperator = "$gt"
-    # else:
-    #     diroperator = "$lt"
+   
+    try:
+        page = int(app.request.GET.get('page',0))
+        if int(page) < 0:
+            page = 0
+    
+        if int(page) > pages:
+            page = pages
+    except:
+        page = 0
 
-    # if lastts:
-    #     if sortdirection == pymongo.DESCENDING:
-    #         filters["start_time"] = {diroperator:int(lastts)}
-    #     elif sortdirection == pymongo.ASCENDING:
-    #         filters["start_time"] = {diroperator:int(lastts)}
-
-    if direction == "next":
-        result = db.eue.find(filters).sort("start_time",-1).limit(itempsperpage)
-    else:
-        result = db.eue.find(filters).sort("start_time",1).limit(itempsperpage).sort("start_time",-1)
-
+    result = db.eue.find(filters).sort("start_time",-1).limit(itemsperpage).skip(int(page) * int(itemsperpage))
     date = None
 
     for feature in result:
@@ -262,8 +251,9 @@ def feature_history(eueid):
         "history":history,
         "message":"",
         "filters" : filters,
-        "lastts" : int(lastts),
-        "itempsperpage":itempsperpage,
+        "page" : int(page),
+        "itempsperpage":itemsperpage,
+        "pages" : pages,
         "eueid":eueid,
         "morris" : json.dumps(morris,indent=4),
         'app': app,
