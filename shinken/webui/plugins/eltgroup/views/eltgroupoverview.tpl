@@ -4,8 +4,8 @@
 <div class="row-fluid">
   <h3 class="span11 no-topmargin">Group overview</h3>
   <span class="span1 btn-group pull-right">
-    <a href="#" id="gridview" class="btn btn-small switcher"><i class="icon-th"></i></a>
     <a href="#" id="listview" class="btn btn-small switcher active"> <i class="icon-list"></i></a>
+    <a href="#" id="gridview" class="btn btn-small switcher"><i class="icon-th"></i></a>
   </span>
 </div>
 		
