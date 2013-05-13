@@ -23,6 +23,7 @@ profile=auto
 use_proxy=0
 proxy_host=
 proxy_port=
+no_proxy=localhost,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
 proxy_autourl=
 [execution]
 mode=headless
