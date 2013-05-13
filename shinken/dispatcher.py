@@ -545,7 +545,11 @@ class Dispatcher:
                 for rec in r.receivers:
                     if rec.need_conf:
                         logger.info('[%s] Trying to send configuration to receiver %s' % (r.get_name(), rec.get_name()))
-                        is_sent = rec.put_conf(rec.cfg)
+                        is_sent = False
+                        if rec.reachable:
+                            is_sent = rec.put_conf(rec.cfg)
+                        else:
+                            logger.info('[%s] Skyping configuration sent to offline receiver %s' % (r.get_name(), rec.get_name()))
                         if is_sent:
                             rec.active = True
                             rec.need_conf = False
