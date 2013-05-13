@@ -265,7 +265,8 @@ def feature_history(eueid):
         "lastts" : int(lastts),
         "itempsperpage":itempsperpage,
         "eueid":eueid,
-        "morris" : json.dumps(morris,indent=4)
+        "morris" : json.dumps(morris,indent=4),
+        'app': app,
     }
 
 
@@ -414,7 +415,7 @@ pages = {
     reporting: {'routes': ['/eue_report/:eueid'], 'view': 'eue_report', 'static': True},
     feature_history: {'routes': ['/eue_feature_history/:eueid'], 'view': 'eue_feature_history','static': True},
     eue_media: {'routes': ['/eue_media/:media'], 'view': None,'static': True},
-    eue_widget: {'routes': ['/widget/eue'], 'view': 'eue_widget', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'eue', 'widget_picture': '/static/eue/img/widget_eue.png'}
-    eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
+    #eue_widget: {'routes': ['/widget/eue'], 'view': 'eue_widget', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'eue', 'widget_picture': '/static/eue/img/widget_eue.png'},
+    #eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
 }
 
