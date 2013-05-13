@@ -209,12 +209,18 @@ class AD_Webui(BaseModule):
         if not self.ldap_uri:
             return False
 
-        logger.debug("[Active Directory UI] Trying to auth by ldap with user %s and password %s" % (user, password))
+        logger.debug("[Active Directory UI] Trying to auth by ldap with user %s" % user)
 
         c = self.app.datamgr.get_contact(user)
 
         if not c:
             logger.warning("[Active Directory UI] AD/Ldap: invalid user %s (not found)" % user)
+            return False
+
+        # I don't know why, but ldap automagically auth void password. That's just stupid I think
+        # so we don't allow them.
+        if not password:
+            logger.warning("[Active Directory UI] AD/Ldap: void password are not allowed (user:%s)" % user)
             return False
 
         # first we need to find the principalname of this entry

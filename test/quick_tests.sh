@@ -44,6 +44,7 @@ launch_and_assert test_properties_defaults.py
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
+launch_and_assert test_timeperiods.py
 launch_and_assert test_host_missing_adress.py
 launch_and_assert test_not_hostname.py
 launch_and_assert test_bad_contact_call.py
@@ -169,8 +170,7 @@ launch_and_assert test_livestatus.py
 launch_and_assert test_bad_start.py
 
 
-# Temporary move to the end, because it fail
-launch_and_assert test_timeperiods.py
+
 
 # And create the coverage file
 coverage xml --omit=/usr/lib

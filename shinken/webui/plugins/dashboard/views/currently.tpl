@@ -41,8 +41,8 @@
 
 <div class="row-fluid">
   <ul class="pull-right nav nav-pills font-grey">
-    <li> <a href="/dashboard"><i class="icon-home"></i></a></li>
-    <li><a href=""><i class="icon-cogs"></i></a></li>
+    <li> <a href="/dashboard" class="font-darkgrey"><i class="icon-home"></i></a></li>
+    <li><a href="" class="font-darkgrey"><i class="icon-cogs"></i></a></li>
   </ul>
 </div>
 
