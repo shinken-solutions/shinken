@@ -43,20 +43,16 @@ time picker is from : https://github.com/jdewit/bootstrap-timepicker/tree/master
 </div>
 
 
-<div class="row">
+<div class="row-fluid">
     <div class="span2">
         <button class="btn btn-danger" data-toggle="collapse" data-target="#graph">Graph</button>
     </div>
     <div class="span2">
-        <div class="pagination">
-            <ul>
-                <li><a href="/eue_feature_history/{{eueid}}?page={{str(int(page)-1)}}">Previous</a></li>
-                <li><a href="/eue_feature_history/{{eueid}}?page={{str(int(page)+1)}}">Next</a></li>
-            </ul>
+        <div class="btn-group">
+            <a class="btn" href="/eue_feature_history/{{eueid}}?page={{str(int(page)-1)}}"><i class="icon-chevron-left"></i></a>
+            <a class="btn" href="#">Page {{page+1}}/{{pages}}</a>
+            <a class="btn" href="/eue_feature_history/{{eueid}}?page={{str(int(page)+1)}}"><i class="icon-chevron-right"></i></a>
         </div>
-    </div>
-    <div class="span2">
-        Page {{page}}/{{pages}}
     </div>
 </div>
 
