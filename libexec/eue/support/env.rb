@@ -48,6 +48,7 @@ use_proxy=				params["browser"]["use_proxy"]
 proxy_host=				params["browser"]["proxy_host"]
 proxy_port=				params["browser"]["proxy_port"]
 proxy_autourl=			params["browser"]["proxy_autourl"]
+no_proxy=			    params["browser"]["no_proxy"]
 
 # media
 capture_path=			params["media"]["path"]
@@ -110,11 +111,13 @@ if browser_name == "firefox"
 		if proxy_autourl != ""
 			proxy.setProxyAutoconfigUrl(proxy_autourl)
 		else
-			profile.addAdditionalPreference("network.proxy.http", proxy_host);
-			profile.addAdditionalPreference("network.proxy.http_port", proxy_port)
+			profile["network.proxy.type"] = 1 
+			profile["network.proxy.http"] = proxy_host
+			profile["network.proxy.http_port"] = proxy_port.to_i
+			profile["network.proxy.no_proxies_on"] = no_proxy
 		end
 	end
-	
+
 	Browser = Watir::Browser.new(:firefox, :profile => profile)	
 	Browser.driver.manage.timeouts.implicit_wait=3
 elsif browser_name == "chrome"
