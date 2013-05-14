@@ -2157,19 +2157,42 @@ function install_cucumber(){
     install -b -g $SKGROUP -o $SKUSER -m 0664 $LIBEXEC/eue/glpi.ini.in $LIBEXEC/eue/glpi.ini
     sed -i "s/@@IPWEBUI@@/"$IP"/g" $LIBEXEC/eue/glpi.ini
 
-    cecho " --> Crontab for removing firefox webdriver profile older than one hour" green
+    cecho " > Crontab for removing firefox webdriver profile older than one hour" green
     rm -f /tmp/crontab
-    crontab -l > /tmp/crontab 2 > /dev/null
+    crontab -l > /tmp/crontab 
     echo "# Purge webdriver profile every hour for profiles older than  1 hour" >> /tmp/crontab
-    echo "* */1 * * * find /tmp -maxdepth 1 -mmin +59 -type f -name "webdriver*" -exec rm -f  {} \;" >> /tmp/crontab
-    crontab /tmp/crontab
-    cecho " --> restart shinken" green
+    echo "* */1 * * * find /tmp -maxdepth 1 -mmin +60 -type d -name webdriver\\* -exec rm -Rf  {} \\;" >> /tmp/crontab
+    crontab /tmp/crontab > /dev/null 2>&1
+    cecho " > Restarting shinken" green
+
+    install_phantomjs
+
     skill
     sstart
 }
 
 
+install_phantomjs(){
+    cecho " > Installing phantomjs headless browser stack" green
+    cd /tmp
+    wget $WGETPROXY $PHANTOM >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho "There was an error while donwloading $PHANTOM" red
+    else
+        archive=$(echo $PHANTOM | awk -F/ '{print $NF}')
+        folder=$(echo $archive | sed -e "s/\.tar.bz2//g")
+        tar jxvf $archive >> ${LOGFILE} 2>&1
+        cp -a $folder $PHANTOMTARGET
+        echo "export PATH=i\$PATH:$PHANTOMTARGET/bin" > /etc/profile.d/phantomjs.sh
+        chmod +x /etc/profile.d/phantomjs.sh
+        source /etc/profile.d/phantomjs.sh
+    fi
 
+
+     
+
+}
 
 # CAPTURE_PLUGIN
 function install_capture_plugin(){
