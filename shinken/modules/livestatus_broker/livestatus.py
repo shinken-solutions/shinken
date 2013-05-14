@@ -24,6 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import traceback
+import cStringIO
+
 from livestatus_counters import LiveStatusCounters
 from livestatus_request import LiveStatusRequest
 from livestatus_response import LiveStatusResponse
@@ -59,6 +62,12 @@ class LiveStatus(object):
             return response.respond()
         except Exception, exp:
             logger.error("[Livestatus] Exception! %s" % exp)
+            # Also show the exception
+            output = cStringIO.StringIO()
+            traceback.print_exc(file=output)
+            logger.error("[Livestatus] Back trace of this exception: %s" % (output.getvalue()))
+            output.close()
+            # Ok now we can return something
             response = LiveStatusResponse()
             response.output = LiveStatusQueryError.messages[452] % data
             response.statuscode = 452

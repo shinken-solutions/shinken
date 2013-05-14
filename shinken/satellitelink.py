@@ -139,6 +139,7 @@ class SatelliteLink(Item):
             logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
             logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
+            
 
     # Get and clean all of our broks
     def get_all_broks(self):
@@ -222,7 +223,6 @@ class SatelliteLink(Item):
             if self.con is None:
                 self.add_failed_check_attempt()
                 return
-
             r = self.con.ping()
             # Should return us pong string
             if r == 'pong':
@@ -231,6 +231,7 @@ class SatelliteLink(Item):
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
             self.add_failed_check_attempt(reason=str(exp))
+
 
     def wait_new_conf(self):
         if self.con is None:
@@ -328,6 +329,7 @@ class SatelliteLink(Item):
             #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
+
     # Return True if the satellite said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
         # If not even the cfg_id in the managed_conf, bail out
@@ -351,6 +353,7 @@ class SatelliteLink(Item):
         except Pyro_exp_pack, exp:
             self.con = None
             return False
+            
 
     def get_external_commands(self):
         if self.con is None:
@@ -375,12 +378,14 @@ class SatelliteLink(Item):
             self.con = None
             return []
 
+
     def prepare_for_conf(self):
         self.cfg = {'global': {}, 'schedulers': {}, 'arbiters': {}}
         properties = self.__class__.properties
         for prop, entry in properties.items():
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
+
 
     # Some parameters for satellites are not defined in the satellites conf
     # but in the global configuration. We can pass them in the global
@@ -389,8 +394,10 @@ class SatelliteLink(Item):
         for prop in params:
             self.cfg['global'][prop] = params[prop]
 
+
     def get_my_type(self):
         return self.__class__.my_type
+
 
     # Here for poller and reactionner. Scheduler have its own function
     def give_satellite_cfg(self):
@@ -402,6 +409,7 @@ class SatelliteLink(Item):
                 'passive': self.passive,
                 'poller_tags': getattr(self, 'poller_tags', []),
                 'reactionner_tags': getattr(self, 'reactionner_tags', [])}
+
 
     # Call by pickle for dataify the downtime
     # because we DO NOT WANT REF in this pickleisation!
