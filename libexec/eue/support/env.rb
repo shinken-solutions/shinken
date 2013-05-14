@@ -48,7 +48,6 @@ use_proxy=				params["browser"]["use_proxy"]
 proxy_host=				params["browser"]["proxy_host"]
 proxy_port=				params["browser"]["proxy_port"]
 proxy_autourl=			params["browser"]["proxy_autourl"]
-no_proxy=			    params["browser"]["no_proxy"]
 
 # media
 capture_path=			params["media"]["path"]
@@ -56,11 +55,6 @@ capture_screenshots=	params["media"]["capture"].to_i
 capture_video=			params["media"]["capturevideo"].to_i
 media_server_url=		params["media"]["url"]
 capture_level=			params["media"]["capture_level"]
-
-if browser_name == "phantomjs"
-    # we do not need Xvfb for phantomjs
-    mode = "visible"
-end
 
 if mode == "headless"
 	display = headless_display
@@ -116,13 +110,11 @@ if browser_name == "firefox"
 		if proxy_autourl != ""
 			proxy.setProxyAutoconfigUrl(proxy_autourl)
 		else
-			profile["network.proxy.type"] = 1 
-			profile["network.proxy.http"] = proxy_host
-			profile["network.proxy.http_port"] = proxy_port.to_i
-			profile["network.proxy.no_proxies_on"] = no_proxy
+			profile.addAdditionalPreference("network.proxy.http", proxy_host);
+			profile.addAdditionalPreference("network.proxy.http_port", proxy_port)
 		end
 	end
-
+	
 	Browser = Watir::Browser.new(:firefox, :profile => profile)	
 	Browser.driver.manage.timeouts.implicit_wait=3
 elsif browser_name == "chrome"
@@ -137,11 +129,16 @@ elsif browser_name == "chrome"
 	Browser = Watir::Browser.new(:chrome, :switches => switches_array)
 	Browser.driver.manage.timeouts.implicit_wait=3
 elsif browser_name == "phantomjs"
-	switches_array = ["--disk-cache=false", "--ignore-ssl-errors=true","--load-images=true"]
+	switches_array = ["--disk-cache=false","--ignore-ssl-errors=true"]
 	if use_proxy == "1"
-        switches_array << "--proxy=#{proxy_host}:#{proxy_port}"
+	 	switches_array << "--proxy=#{proxy_host}:#{proxy_port}"
 	end
-	Browser = Watir::Browser.new(:phantomjs, :switches => switches_array)
+
+	if browser_path != "default"
+		Browser = Watir::Browser.new(:phantomjs, :switches => switches_array)
+	else
+		Browser = Watir::Browser.new(:phantomjs, :path => browser_path, :switches => switches_array)
+	end
 else
 	puts "Unsuported browser %s ! " % browser_name
 	Process.exit(2)
