@@ -57,6 +57,11 @@ capture_video=			params["media"]["capturevideo"].to_i
 media_server_url=		params["media"]["url"]
 capture_level=			params["media"]["capture_level"]
 
+if browser_name == "phantomjs"
+    # we do not need Xvfb for phantomjs
+    mode = "visible"
+end
+
 if mode == "headless"
 	display = headless_display
 	if capture_video == 1
@@ -131,6 +136,12 @@ elsif browser_name == "chrome"
 	end
 	Browser = Watir::Browser.new(:chrome, :switches => switches_array)
 	Browser.driver.manage.timeouts.implicit_wait=3
+elsif browser_name == "phantomjs"
+	switches_array = ["--disk-cache=false", "--ignore-ssl-errors=true","--load-images=true"]
+	if use_proxy == "1"
+        switches_array << "--proxy=#{proxy_host}:#{proxy_port}"
+	end
+	Browser = Watir::Browser.new(:phantomjs, :switches => switches_array)
 else
 	puts "Unsuported browser %s ! " % browser_name
 	Process.exit(2)
