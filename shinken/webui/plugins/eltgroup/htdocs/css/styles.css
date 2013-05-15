@@ -62,9 +62,12 @@ transition: opacity 0.2s linear 0s;
 -moz-transition: opacity 0.25s linear 0s;
 -o-transition: opacity 0.25s linear 0s;  
 }
-ul.grid li:hover section.right span.darkview { opacity: 1; }
 
-ul.grid li section.right span.darkview a.firstbtn { display: block; margin-bottom: 10px; }
+ul.grid li:hover section.right span.darkview { opacity: 1;}
+ul.grid li:hover section.right span.darkview a { opacity: 1; color: #FFF; font-size: 25px; text-decoration:none; }
+
+ul.grid li section.right span.darkview a.firstbtn { display: block; margin-bottom: 10px; text-decoration:none !important;}
+ul.grid li section.right span.darkview a.firstbtn:hover { display: block; margin-bottom: 10px; text-decoration:none !important;}
 
 /** clearfix **/
 .clearfix:after { content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0; }

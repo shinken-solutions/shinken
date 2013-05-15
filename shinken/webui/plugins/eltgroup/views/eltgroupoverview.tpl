@@ -19,7 +19,8 @@
 		<section class="right">
 			<span class="hostsum">Hosts 45</span>
 			<span class="darkview">
-			<a href="#" class="firstbtn">Details</a>
+			<a href="#" class="firstbtn"><i class="icon-zoom-in"></i> Details</a>
+			<a href="#" class="firstbtn"><i class="icon-cogs"></i> Settings</a>
 			</span>
 		</section>
 	</li>
