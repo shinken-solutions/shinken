@@ -3,8 +3,8 @@
 <div class="row-fluid">
   <h3 class="span11 no-topmargin">Group overview</h3>
   <span class="span1 btn-group pull-right">
-    <a href="#" id="listview" class="btn btn-small switcher active"> <i class="icon-list"></i></a>
-    <a href="#" id="gridview" class="btn btn-small switcher"><i class="icon-th"></i></a>
+    <a href="#" id="listview" class="btn btn-small switcher active quickinfo" data-original-title='List'> <i class="icon-align-justify"></i></a>
+    <a href="#" id="gridview" class="btn btn-small switcher quickinfo"data-original-title='Grid'><i class="icon-th"></i></a>
   </span>
 </div>
 		
@@ -14,6 +14,7 @@
 		<section class="left">
 			<h3>Group Name</h3>
 			<span class="meta">Services: <span class="quickinfo" data-original-title='Down'>29</span>/<span class="quickinfo" data-original-title='Up'>78</span>/<span class="quickinfo" data-original-title='Unreachable'>12</span>/<span class="quickinfo" data-original-title='Pending'>2</span></span>
+			<span class="meta"> <span class="label label-important pulsate">Business impact</span> </span>
 		</section>
 		
 		<section class="right">
