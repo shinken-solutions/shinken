@@ -79,7 +79,7 @@ class Timerange:
 
     # entry is like 00:00-24:00
     def __init__(self, entry):
-        pattern=r'((\d\d):(\d\d)-(\d\d):(\d\d))'
+        pattern=r'(\d\d):(\d\d)-(\d\d):(\d\d)'
         m = re.match(pattern, entry)
         self.is_valid=m is not None
         if self.is_valid:
