@@ -95,3 +95,6 @@ To Johan Svensson for his bug report about poller worker crash not in logs, and 
 To Finn Christiansen for his bug report about function get_all_host_names_set missing since 1.2.4
 To Michael Lübben for his bug report about telnet crashing daemons
 To GILLARDEAU Thibaut for his bug report about the windows pack
+To Georges Racinet for his bugs reports about SSL
+To pepejey for his bug report about void password in ldap auth module. And NO THANKS to the Ldap protocol RFC guys :( 
+To Benoit Dunand-Laisin for his bug report about livestatus command management regression
