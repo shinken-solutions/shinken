@@ -138,7 +138,7 @@ class Daterange:
     # By default, daterange are correct
     def is_correct(self):
         for tr in self.timeranges:
-            if tr.is_time_valid(t):
+            if tr.is_time_valid(tr):
                 return True
         return False
 
