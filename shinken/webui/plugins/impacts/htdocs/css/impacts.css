@@ -37,23 +37,26 @@
 
 /* problem impact panel */
 .problems-panel {
-    height: 600px;
+    min-height: 600px;
     width: 550px;
-    background: white;
+    background: #FAFAFA;
     position: relative;
     left: -450px; /* by default it's hidden*/
-    top: 5px;
+    /*top: 5px;*/
     z-index: 3;
     /*max-width: 575px;
     min-width: 600px;*/
-    border-top-right-radius: 6px;
+/*    border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
-    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4);*/
+    border-top: 1px solid #EBEBEB;
+    border-right: 1px solid #EBEBEB;
+    border-left: 1px solid #EBEBEB;
     display: none;
     overflow: hidden;
     opacity : 0;
     padding: 10px 20px;
-    width: 85%;
+    width: 94%;
 }
 
 
@@ -63,7 +66,9 @@
     float: left;
     display: inline-block;
     border-radius: 6px;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, .3);
+/*    box-shadow: 0 2px 2px rgba(0, 0, 0, .3);*/
+    border-left: solid 1px #EBEBEB;
+    border-right: solid 1px #EBEBEB;
     position: relative;
     background: white;
     height: 100%;
@@ -81,7 +86,7 @@
     clear: both;
     display: block;
     outline: none;
-    padding: 10px 20px;
+    padding-left: 5px;
     font-size: 15px;
     position: relative;
     zoom: 1;
@@ -102,9 +107,13 @@
     background-image: url("images/alpha_black.png");
 }
 
-.impact-active{
-    background-image: url("/static/images/right-black-arrow.png");
-    color: #FFF!important;
+.impact-active, .impact:hover {
+    background-color: #0088CC;
+    color: #FFFFFF !important;
+}
+
+.impact:hover span {
+    color: #FFFFFF !important;
 }
 
 /*p.impact-active {
@@ -113,16 +122,16 @@
         }
 */
 
-.impact-active .impact-state-text {
-    color: #FFF;
+.impact-active, .impact-active span, .impact-state-text {
+    color: #FFFFFF;
 }
 
 .impact-active .impact-duration{
-    color: #FFF;
+    color: #FFFFFF;
 }
 
 .impact-active .impact-name{
-    color: #FFF;
+    color: #FFFFFF;
 }
 
 /* One problem block*/
@@ -155,9 +164,8 @@
 /* The impact icon (so the service one or the host one) */
 .impact-icon {
     float: left;
-    height: 64px;
     overflow: hidden;
-    width: 64px;
+
     margin-top: 3px;
 }
 
@@ -189,7 +197,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 50px;
+    margin-left: 45px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -201,7 +209,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 62px;
+    margin-left: 59px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -211,7 +219,7 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-left: 74px;
+    margin-left: 71px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -315,7 +323,7 @@
     border-radius: 5px;
     overflow: hidden;
     text-align: left;
-    background: #F5F5F5;
+/*    background: #F5F5F5;*/
 }
 
 
@@ -460,27 +468,30 @@
 }
 
 
-
-
-
-
-/* From Meatball css */
-/* branding
+/* 
 ----------------------------------------------- */
-/*h1#branding {
-    font-weight:normal;
-    font-size:3em;
-    text-align:left;
-    background:#005577;
-    padding:.7em 1em;
-    margin-bottom:0;
+
+#result-stats {
+    border-top: 1px solid #EBEBEB;
 }
 
-h4#page-heading {
-font-weight: normal;
-padding: .5em;
-margin: 0 0 10px 0;
-border-bottom: 1px solid #CCC;
-background: #EDF4F5;
-font-size: 19px;
-}*/
+#result-stats p {
+    border-bottom: 1px solid #EBEBEB;
+    margin-bottom: 3px;
+    margin-left: 5px;
+}
+
+.impact-arrow {
+    font-size: 35px;
+    height: 60px;
+}
+
+.impact-arrow i{
+    line-height: 60px;
+    position: relative;
+    padding-top: 10px;
+}
+
+.desc {display: none;}
+
+.hover {display: inline !important;}

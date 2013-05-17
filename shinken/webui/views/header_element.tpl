@@ -1,13 +1,6 @@
 %if 'app' not in locals(): app = None
 
 <script type="text/javascript">
-  function skonf() {
-      var Port = {{app.get_skonf_port()}};
-      var Host = document.domain;
-      var Url = 'http://' + Host + ':' + Port;
-      return Url;
-  }
-
   function webui() {
       var Port = {{app.get_webui_port()}}
       var Host = document.domain;
@@ -16,7 +9,6 @@
   }
 
   $(function(){
-      $("a[href=':7766']").attr('href', skonf());
       $("a[href=':7767']").attr('href', webui());
   });
 </script>
@@ -36,9 +28,6 @@
            <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
            <ul class="dropdown-menu">
             <li><a href=":7767">Shinken UI </a></li>
-            %if app.get_skonf_active_state() == 1:
-            <li><a href=":7766">Skonf UI</a><span class="badger-beta badger-critical">Beta</span></li>
-            %end
             <!-- We will add also others UIs on the global menu -->
             %if app:
             %other_uis = app.get_external_ui_link()
@@ -113,7 +102,7 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li> <a class="disabled-link" href="#"><i class="icon-pencil"></i> Edit profile</a> </li>
-              <li> <a class="" href="http://http://www.shinken-monitoring.org/wiki/"><i class="icon-external-link"></i> Help</a></li>
+	      <li> <a class="" href="http://www.shinken-monitoring.org/wiki/"><i class="icon-external-link"></i> Help</a></li>
               <li class="divider"></li>
               <li> <a href="/user/logout" data-original-title='Logout'><i class="icon-off"></i> Logout</a></li>
             </ul>

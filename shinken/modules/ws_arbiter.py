@@ -26,6 +26,23 @@
 # This Class is an Arbiter module for having a webservice
 # where you can push external commands
 
+"""This is a new version of the ws_arbiter. This ws_arbiter supports
+multiple external commands.
+
+It can support the following incoming data:
+host1, service1, value1, host2, service2, value2
+
+Here is a short command line example:
+2 hosts (host1 and host2), one service each (Service1 and Service2)
+
+curl --data "host_name=host1&service_description=Service1
+&return_code=0&output=OK+%7C+Service1%3D53%25&time_stamp=1365446900
+&host_name=host2&service_description=Service2
+&return_code=0&output=OK+%7C+Service2%3D60%25&time_stamp=1365446900" http://shinken_server:7760/push_check_result
+
+It is now possible to do bulk data on the webservice.
+"""
+
 import os
 import sys
 import select
@@ -54,13 +71,63 @@ def get_instance(plugin):
 app = None
 
 
+def get_commands(time_stamps, hosts, services, return_codes, outputs):
+    """Composing a command list based on the information received in
+    POST request"""
+
+    commands = []
+
+    current_time_stamp = int(time.time())
+
+    def _compose_command(t, h, s, r, o):
+        """Simple function to create a command from the inputs"""
+        cmd = ""
+        if not s or s == "":
+            cmd = '[%s] PROCESS_HOST_CHECK_RESULT;%s;%s;%s' % (t if t is not None else current_time_stamp, h, r, o)
+        else:
+            cmd = '[%s] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%s;%s' % (t if t is not None else current_time_stamp, h, s, r, o)
+        logger.debug("[Ws_arbiter] CMD: %s" % (cmd))
+        commands.append(cmd)
+
+    # Trivial case: empty commmand list
+    if (return_codes is None or len(return_codes) == 0):
+        return commands
+
+    # Sanity check: if we get N return codes, we must have N hosts.
+    # The other values could be None
+    if (len(return_codes) != len(hosts)):
+        logger.error("[Ws_arbiter] number of return codes (%d) does not match number of hosts (%d)" % (len(return_codes), len(hosts)))
+        abort(400, "number of return codes does not match number of hosts")
+
+    map(_compose_command, time_stamps, hosts, services, return_codes, outputs)
+    logger.debug("[Ws_arbiter] commands = %s" % (str(commands)))
+    return commands
+
+
 def get_page():
-    # We get all value we want
-    time_stamp = request.forms.get('time_stamp', int(time.time()))
-    host_name = request.forms.get('host_name', None)
-    service_description = request.forms.get('service_description', None)
-    return_code = request.forms.get('return_code', -1)
-    output = request.forms.get('output', None)
+    commands_list = []
+
+    try:
+        # Getting lists of informations for the commands
+        time_stamp_list = []
+        host_name_list = []
+        service_description_list = []
+        return_code_list = []
+        output_list = []
+        time_stamp_list = request.forms.getall(key='time_stamp')
+        logger.debug("[Ws_arbiter] time_stamp_list: %s" % (time_stamp_list))
+        host_name_list = request.forms.getall(key='host_name')
+        logger.debug("[Ws_arbiter] host_name_list: %s" % (host_name_list))
+        service_description_list = request.forms.getall(key='service_description')
+        logger.debug("[Ws_arbiter] service_description_list: %s" % (service_description_list))
+        return_code_list = request.forms.getall(key='return_code')
+        logger.debug("[Ws_arbiter] return_code_list: %s" % (return_code_list))
+        output_list = request.forms.getall(key='output')
+        logger.debug("[Ws_arbiter] output_list: %s" % (output_list))
+        commands_list = get_commands(time_stamp_list, host_name_list, service_description_list, return_code_list, output_list)
+    except Exception, e:
+        logger.error("[Ws_arbiter] failed to get the lists: %s" % str(e))
+        commands_list = []
 
     # We check for auth if it's not anonymously allowed
     if app.username != 'anonymous':
@@ -72,23 +139,13 @@ def get_page():
         if basic[0] != app.username or basic[1] != app.password:
             abort(403, 'Authentication denied')
 
-    # Ok, here it's an anonymouscall, or a registered one, but maybe the query is false
-    if time_stamp == 0 or not host_name or not output or return_code == -1:
-        abort(400, "Incorrect syntax")
-
-    # Maybe we got an host, maybe a service :)
-    if not service_description:
-        cmd = '[%s] PROCESS_HOST_CHECK_RESULT;%s;%s;%s' % (time_stamp, host_name, return_code, output)
-    else:
-        cmd = '[%s] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%s;%s' % (time_stamp, host_name, service_description, return_code, output)
-
-    # Now create the external command and put it in our main queue()
-    # so the arbiter will read it :)
-    ext = ExternalCommand(cmd)
-    app.from_q.put(ext)
+    # Adding commands to the main queue()
+    logger.debug("[Ws_arbiter] commands =  %s" % str(sorted(commands_list)))
+    for c in sorted(commands_list):
+        ext = ExternalCommand(c)
+        app.from_q.put(ext)
 
     # OK here it's ok, it will return a 200 code
-
 
 
 # This module will open an HTTP service, where a user can send a command, like a check

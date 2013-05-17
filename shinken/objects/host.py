@@ -140,6 +140,8 @@ class Host(SchedulingItem):
         'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
         'macromodulations':       ListProp(default=''),
 
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
 
     })
 
@@ -296,7 +298,6 @@ class Host(SchedulingItem):
 
         # Trigger list
         'triggers':  StringProp(default=[]),
-
     })
 
     # Hosts macros and prop that give the information

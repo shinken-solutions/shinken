@@ -22,14 +22,13 @@
 
     <div class="row-fluid">
       <div class="span8">
-        <h3><i class="icon-cogs"> Shinken Daemons</i></h3>
+        <h3>Shinken Daemons</h3>
         %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
         %for (sat_type, sats) in types:
         <h4><i class="icon-wrench"></i> {{sat_type.capitalize()}}</h4>
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>#</th>
               <th>State</th>
               <th>Alive</th>
               <th>Attemts</th>
@@ -40,7 +39,6 @@
           <tbody>
           %for s in sats:
             <tr>
-              <td>1</td>
               <td><img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" /></td>
               <td>{{s.alive}}</td>
               <td>{{s.attempt}}/{{s.max_check_attempts}}</td>

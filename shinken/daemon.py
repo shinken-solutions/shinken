@@ -142,7 +142,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
         'use_local_log': BoolProp(default='1'),
-        'log_level':     LogLevelProp(default='WARNING'),
+        'log_level':     LogLevelProp(default='INFO'), # TODO : fix the scheduler so we can put back WARNiING here
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled':BoolProp(default='1'),
@@ -519,14 +519,20 @@ class Daemon(object):
             if not hasattr(Pyro.config, 'PYROSSL_CERTDIR'):
                 logger.error('Sorry, this Pyro version do not manage SSL.')
                 sys.exit(2)
-            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
+            # Protect against name->IP substritution in Pyro3
+            Pyro.config.PYRO_DNS_URI = 1
+            # Beware #839 Pyro lib need str path, not unicode
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(str(ssl_conf.certs_dir))
+            if not os.path.exists(Pyro.config.PYROSSL_CERTDIR):
+                logger.error('Error : the directory %s is missing for SSL certificates (certs_dir). Please fix it in your configuration' % Pyro.config.PYROSSL_CERTDIR)
+                sys.exit(2)
             logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
-            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(str(ssl_conf.ca_cert))
             logger.debug("Using ssl ca cert file: %s" % Pyro.config.PYROSSL_CA_CERT)
-            Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
+            Pyro.config.PYROSSL_CERT = os.path.abspath(str(ssl_conf.server_cert))
             logger.debug("Using ssl server cert file: %s" % Pyro.config.PYROSSL_CERT)
 
-            if self.hard_ssl_name_check:
+            if ssl_conf.hard_ssl_name_check:
                 Pyro.config.PYROSSL_POSTCONNCHECK = 1
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK = 0

@@ -391,7 +391,27 @@ class TestTimeperiods(ShinkenTest):
 
         self.assert_(t_next == 'Tue Aug 17 16:30:00 2010')
 
+    def test_dayweek_exclusion_timeperiod(self):
+        self.print_header()
+        t = Timeperiod()
+        now = time.time()
+        # Get the 13 of july 2010 at 15:00, tuesday
+        july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
+        print july_the_13
 
+        # Now we add this timeperiod an exception
+        t2 = Timeperiod()
+        t2.timeperiod_name = ''
+        t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-24:00')
+        t.exclude = [t2]
+	
+        t.resolve_daterange(t.dateranges, 'monday 00:00-24:00')
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-24:00')
+        t.resolve_daterange(t.dateranges, 'wednesday 00:00-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_13)
+        t_next = time.asctime(time.localtime(t_next))
+        print "T next", t_next
+        self.assert_(t_next == "Wed Jul 14 00:00:00 2010")
 
 if __name__ == '__main__':
     unittest.main()

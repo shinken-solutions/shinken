@@ -81,7 +81,8 @@ class TestRegenerator(ShinkenTest):
         # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.rg = Regenerator()
 
         # Got the initial creation ones
@@ -183,7 +184,8 @@ class TestRegenerator(ShinkenTest):
         self.rg.load_from_scheduler(self.sched)
 
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         # Got the initial creation ones
         ids = self.sched.broks.keys()
         ids.sort()

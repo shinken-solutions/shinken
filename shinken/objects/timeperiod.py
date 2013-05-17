@@ -91,8 +91,10 @@ import string
 
 from item import Item, Items
 
-from shinken.daterange import Daterange, CalendarDaterange, StandardDaterange, MonthWeekDayDaterange
-from shinken.daterange import MonthDateDaterange, WeekDayDaterange, MonthDayDaterange
+from shinken.daterange import Daterange, CalendarDaterange
+from shinken.daterange import StandardDaterange, MonthWeekDayDaterange
+from shinken.daterange import MonthDateDaterange, WeekDayDaterange
+from shinken.daterange import MonthDayDaterange
 from shinken.brok import Brok
 from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
 from shinken.log import logger, console_logger
@@ -251,7 +253,8 @@ class Timeperiod(Item):
         # first find from cache
         t = int(t)
         original_t = t
-        #print self.get_name(), "Check valid time for", time.asctime(time.localtime(t))
+
+        #logger.debug("[%s] Check valid time for %s" % ( self.get_name(), time.asctime(time.localtime(t)))
 
         res_from_cache = self.find_next_valid_time_from_cache(t)
         if res_from_cache is not None:
@@ -259,51 +262,43 @@ class Timeperiod(Item):
 
         still_loop = True
 
-        local_min = None
         # Loop for all minutes...
         while still_loop:
-            #print self.get_name(), '\nLoop'
+            local_min = None
+
             # Ok, not in cache...
             dr_mins = []
+            s_dr_mins = []
+
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
 
-            #print "TOTO", self.get_name(), 'Mins:', dr_mins
-            #for o in dr_mins:
-            #    print "FUCK",time.asctime(time.localtime(o)), "\n"
+            s_dr_mins = sorted([d for d in dr_mins if d is not None])
 
-            # Min but not the None values...
-            try:
-                local_min = min([d for d in dr_mins if d is not None])
-            except ValueError:  # dr_mins if full of None, not good
-                local_min = None
+            for t1 in s_dr_mins:
+                if not self.exclude and still_loop is True:
+                    # No Exclude so we are good
+                    local_min = t1
+                    still_loop = False
+                else:               
+                    for tp in self.exclude:
+                        if not tp.is_time_valid(t1) and still_loop is True:
+                            # OK we found a date that is not valid in any exclude timeperiod 
+                            local_min = t1
+                            still_loop = False
+               
+            if local_min is None:
+                # print "Looking for next valid date"
+                exc_mins = []
+                if s_dr_mins != []:
+                    for tp in self.exclude:
+                        exc_mins.append(tp.get_next_invalid_time_from_t(s_dr_mins[0]))
 
-            #if local_min != None:
-            #    print "Proposed?", local_min
-            #    print "Proposed local min", time.asctime(time.localtime(local_min))
+                s_exc_mins = sorted([d for d in exc_mins if d is not None])
 
-
-            # We do not loop unless the local_min is not valid
-            still_loop = False
-
-            # if we've got a real value, we check it with the exclude
-            if local_min is not None:
-                # Now check if local_min is not valid
-                for tp in self.exclude:
-                    #print self.get_name(), "Check in TP"
-                    if tp.is_time_valid(local_min):
-                        still_loop = True
-                        #t = local_min + 60
-                        #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
-                        local_min = tp.get_next_invalid_time_from_t(local_min+60)
-                        ## if local_min != None:
-                        ##     print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
-                        ##     print local_min
-                        ## print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
-                        ## print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
-                    ## else:
-                    ##     print self.get_name(), "Tp ca lui va", tp.get_name()
-
+                if s_exc_mins != []:
+                    local_min = s_exc_mins[0] 
+            
             if local_min is None:
                 still_loop = False
             else:
@@ -318,7 +313,7 @@ class Timeperiod(Item):
         return local_min
 
     def get_next_invalid_time_from_t(self, t):
-        #print '\n\n', self.get_name(), 'search for next invalid from', time.asctime(time.localtime(t))
+        #print '\n\n', self.get_name(), 'Search for next invalid from', time.asctime(time.localtime(t)), t
         t = int(t)
         original_t = t
         still_loop = True
@@ -342,7 +337,7 @@ class Timeperiod(Item):
             #val_valids = []
             #val_inval = []
             # But maybe we can find a better solution with next invalid of standard dateranges
-            # print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
+            #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
                 #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
                 #print dr.__dict__
@@ -351,8 +346,8 @@ class Timeperiod(Item):
                 #print self.get_name(), "Dr", dr.__dict__,  "give me next invalid", time.asctime(time.localtime(m))
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
-                    ## if not self.is_time_valid(m):
-                    ##     print "Final: Got a next invalid at", time.asctime(time.localtime(m))
+                    #if not self.is_time_valid(m):
+                    #     print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)

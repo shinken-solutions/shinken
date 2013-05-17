@@ -31,7 +31,7 @@ def print_cat_tree(tree):
     if name.startswith('/'):
         name = name[1:]
     nb = tree['nb']
-    s = '<a href="/getpacks/%s"> %s (%d)</a> <ul id="cat-%s">' % (name, name, nb, _id)
+    s = '<a href="/getpacks/%s"> %s (%d)</a> <ul id="cat-%s" class="nav nav-list">' % (name, name, nb, _id)
 
     print "My sons", tree['sons']
     for (_, node) in tree['sons'].iteritems():

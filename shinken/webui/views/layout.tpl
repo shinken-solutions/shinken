@@ -49,6 +49,9 @@
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <link href="/static/css/custom/datepicker.css" rel="stylesheet">
 
+    <!-- Canvas and gauge ones -->
+    <link href="/static/css/shinken-gauge.css" rel="stylesheet">
+
     %# And now for css files
       %for p in css:
     <link rel="stylesheet" type="text/css" href="/static/{{p}}">
@@ -81,16 +84,26 @@
     <script src="/static/js/jquery.meow.js"></script>
     <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
     <script src="/static/js/jquery.hotkeys.js"></script>
-    
+    <!-- From http://joequery.github.com/Stupid-Table-Plugin/ -->
+    <script src="/static/js/jquery-stupidtable.min.js"></script>
+    <script src="/static/js/spin.min.js"></script>
 
     <!--Shinken ones-->
+    %if refresh:
     <script src="/static/js/shinken-refresh.js"></script>
+    %end
     <script src="/static/js/shinken-actions.js"></script>
     <script src="/static/js/shinken-deptree.js"></script>
     <script src="/static/js/shinken-greeting.js"></script>
     <script src="/static/js/shinken-opacity.js"></script>
     <script src="/static/js/shinken-modals.js"></script>
     <script src="/static/js/shinken-widgets.js"></script>
+    <script src="/static/js/shinken-canvas.js"></script>
+    <script src="/static/js/shinken-gauge.js"></script>
+    <script src="/static/js/shinken-treemap.js"></script>
+    <script src="/static/js/shinken-aggregation.js"></script>
+
+    
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

@@ -259,7 +259,7 @@ class Config(Item):
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
         'certs_dir':             StringProp(default='etc/certs'),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
-        'server_cert':          StringProp(default='etc/certs/server.pem'),
+        'server_cert':           StringProp(default='etc/certs/server.pem'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format
@@ -1000,6 +1000,7 @@ class Config(Item):
         # realm if need and it will be tagged to sat that do
         # not have an realm
         self.fill_default_realm()
+        self.realms.fill_default() # also put default inside the realms themselves
         self.reactionners.fill_default()
         self.pollers.fill_default()
         self.brokers.fill_default()
@@ -1384,9 +1385,12 @@ class Config(Item):
         # Check that for each poller_tag of a host, a poller exists with this tag
         # TODO: need to check that poller are in the good realm too
         hosts_tag = set()
+        services_tag = set()
         pollers_tag = set()
         for h in self.hosts:
             hosts_tag.add(h.poller_tag)
+        for s in self.services:
+            services_tag.add(s.poller_tag)
         for p in self.pollers:
             for t in p.poller_tags:
                 pollers_tag.add(t)
@@ -1395,6 +1399,12 @@ class Config(Item):
                 logger.error("Hosts exist with poller_tag %s but no poller got this tag" % tag)
                 self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
+        if not services_tag.issubset(pollers_tag):
+            for tag in services_tag.difference(pollers_tag):        
+                logger.error("Services exist with poller_tag %s but no poller got this tag" % tag)
+                self.add_error("Error: services exist with poller_tag %s but no poller got this tag" % tag)
+                r = False
+    
 
         # Check that all hosts involved in business_rules are from the same realm
         for l in [self.services, self.hosts]:
