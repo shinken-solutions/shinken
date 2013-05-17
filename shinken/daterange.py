@@ -103,6 +103,10 @@ class Timerange:
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
         return (self.is_valid and self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60)
+    
+    def is_correct(self):
+        return self.is_valid 
+
 
 
 """ TODO: Add some comment about this class for the doc"""
@@ -135,12 +139,11 @@ class Daterange:
     def __str__(self):
         return '' # str(self.__dict__)
 
-    # By default, daterange are correct
     def is_correct(self):
         for tr in self.timeranges:
-            if tr.is_time_valid(tr):
-                return True
-        return False
+            if not tr.is_correct():
+                return False
+        return True
 
     def get_month_id(cls, month):
         try:
