@@ -349,7 +349,7 @@ class Daemon(object):
         try:
             pid = int(self.fpid.read())
         except:
-            logger.warning("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
+            logger.info("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
             return
 
         try:
