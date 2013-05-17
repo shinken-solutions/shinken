@@ -360,7 +360,7 @@ class Daemon(object):
             return
         except os.error, e:
             if e.errno == errno.ESRCH:
-                logger.warning("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
+                logger.info("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
                 return
             raise
 
