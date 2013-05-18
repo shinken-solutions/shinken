@@ -74,10 +74,12 @@ class Webui_broker(BaseModule, Daemon):
         self.plugins = []
 
         self.serveropts = {}
-        umask = getattr(modconf, 'umask')
-        if umask != None: self.serveropts['umask'] = int(umask)
-        bindAddress = getattr(modconf, 'bindAddress')
-        if bindAddress: self.serveropts['bindAddress'] = str(bindAddress)
+        umask = getattr(modconf, 'umask', None)
+        if umask != None: 
+            self.serveropts['umask'] = int(umask)
+        bindAddress = getattr(modconf, 'bindAddress', None)
+        if bindAddress:
+            self.serveropts['bindAddress'] = str(bindAddress)
 
         self.port = int(getattr(modconf, 'port', '7767'))
         self.http_port = int(getattr(modconf, 'http_port', '7766'))
@@ -243,7 +245,7 @@ class Webui_broker(BaseModule, Daemon):
         # handle of the Queue()? That's just because under Windows, select
         # only manage winsock (so network) file descriptor! What a shame!
         print "Starting WebUI application"
-        srv = run(host=self.host, port=self.port, server=self.http_backend,**self.serveropts)
+        srv = run(host=self.host, port=self.port, server=self.http_backend, **self.serveropts)
 
         # ^ IMPORTANT ^
         # We are not managing the lock at this
