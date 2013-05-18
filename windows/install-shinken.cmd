@@ -54,28 +54,28 @@ if "%errorlevel%"=="0" goto thirdpart
 echo #################################################################################
 echo #################################################################################
 echo WARNING !
-echo Internet seems to be not connected....
+echo Internet seems to be not connected, or the veosoft website is not reachable....
 echo Please check your connection. You may also download the thirdpart by your own way.
 echo Ending the installation script with services installation.
 echo .
 echo #################################################################################
 echo #################################################################################
+pause
 goto installservices
 :thirdpart
 
 rem V1.3 - New Check_wmi_plus to change name collumn on check_pages
 rem v1.3 - 3rdPart libexec only check_nt and DLL in the libexec
-echo Downloading the check_wmi_plus by Matthew Jurgens - Copyright (C) 2011
-echo Modification of configuration files by Veosoft for Shinken team - October 2012
+echo Downloading the check_wmi_plus by Matthew Jurgens - Copyright (C) 2011-2013
+echo Modification of configuration files by Veosoft for Shinken team - May 2013
 wget.exe http://www.veosoft.net/downloads/WindowsFiles/1.4-3rdPart/check_wmi_plus_1.56.zip check_wmi_plus.zip
-echo Downloading the nagios plugins
-echo Modification and compilation with cygwin by Veosoft for Shinken team - October 2012
+echo Downloading the nagios check_nt program
+echo Modification and compilation with cygwin by Veosoft for Shinken team - May 2013
 wget.exe http://www.veosoft.net/downloads/WindowsFiles/1.4-3rdPart/libexec-windows_1.4.zip libexec-windows.zip
 
-pause
-cscript dounzip.vbs check_wmi_plus
-cscript dounzip.vbs libexec-windows
-pause
+rem Stange thing, on some systems, the WGET will do the extraction - an windows explorer feature i think !
+if not exist check_wmi_plus\check_wmi_plus.pltpl cscript dounzip.vbs check_wmi_plus
+if not exist libexec-windows\check_apache.pl cscript dounzip.vbs libexec-windows
 
 echo merging the thirdpart into shinken libexec folder...
 xcopy check_wmi_plus\*.* libexec-windows /S /E /Y
@@ -119,4 +119,24 @@ start install-reactionner.cmd
 start install-scheduler.cmd
 
 echo Installation finished.
+rem Now, we are going in the parent folder to delete the windows folder and only let the deletion scripts
+rd /s /q windows\bin
+rd /s /q windows\etc
+rd /s /q windows\libexec-windows
+rd /s /q windows\logconfig
+rd /s /q windows\tools
+rd /s /q windows\svclogs
+rd /s /q windows\windowshost_pack
+rd /s /q windows\check_wmi_plus
+del /f /q windows\check_wmi_plus.zip
+del /f /q windows\libexec-windows.zip
+del /f /q windows\createeventsource.exe
+del /f /q windows\dounzip.vbs
+del /f /q windows\log4net*.*
+del /f /q windows\licence.rtf
+del /f /q windows\replace_*.vbs
+del /f /q windows\Shinken_*.*
+del /f /q windows\veo*.*
+del /f /q windows\wget*.*
+
 pause
