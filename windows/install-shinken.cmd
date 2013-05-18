@@ -1,6 +1,6 @@
 @echo off
 rem installation of shinken services
-rem (c) 2012 October, By VEOSOFT, Jean-françois BUTKIEWICZ
+rem (c) 2013 May, By VEOSOFT, Jean-françois BUTKIEWICZ
 rem This script is for IT admins only. If you do not have experience or
 rem knowledge fundation to install manually shinken on a windows host, please use the 
 rem integrated installation of Shinken using the setup.exe program delivered by
@@ -11,7 +11,7 @@ rem
 
 echo Shinken Windows Installation
 echo Provided by VEOSOFT for Shinken Team
-echo V 1.2 - October 2012
+echo V 1.3 - May 2013
 echo ====================================
 echo Checkin for InstallUtil tool ....
 
@@ -63,15 +63,20 @@ echo ###########################################################################
 goto installservices
 :thirdpart
 
+rem V1.3 - New Check_wmi_plus to change name collumn on check_pages
+rem v1.3 - 3rdPart libexec only check_nt and DLL in the libexec
 echo Downloading the check_wmi_plus by Matthew Jurgens - Copyright (C) 2011
 echo Modification of configuration files by Veosoft for Shinken team - October 2012
-wget.exe http://www.veosoft.net/downloads/WindowsFiles/3rdPart/check_wmi_plus.zip check_wmi_plus.zip
+wget.exe http://www.veosoft.net/downloads/WindowsFiles/1.4-3rdPart/check_wmi_plus_1.56.zip check_wmi_plus.zip
 echo Downloading the nagios plugins
 echo Modification and compilation with cygwin by Veosoft for Shinken team - October 2012
-wget.exe http://www.veosoft.net/downloads/WindowsFiles/3rdPart/libexec-windows.zip libexec-windows.zip
+wget.exe http://www.veosoft.net/downloads/WindowsFiles/1.4-3rdPart/libexec-windows_1.4.zip libexec-windows.zip
 
+pause
 cscript dounzip.vbs check_wmi_plus
 cscript dounzip.vbs libexec-windows
+pause
+
 echo merging the thirdpart into shinken libexec folder...
 xcopy check_wmi_plus\*.* libexec-windows /S /E /Y
 
@@ -88,6 +93,13 @@ echo libexec for windows copied.
 echo Updating the install root for windows folder...
 xcopy *.* ..\ /Y
 echo install root for windows updated.
+
+:modifpack
+rem copying the windows pack modified....
+echo Copying the windows pack modified...
+xcopy windowshost_pack\*.* ..\etc\packs\os\windows /S /E /Y
+echo windows pack modified.
+
 echo Starting installation of arbiter in the main process
 cd ..
 if exist .\libexec\check_wmi_plus.pl cscript replace_perl_installdir.vbs .\libexec\check_wmi_plus.pl @@installdir@@ "%cd%"

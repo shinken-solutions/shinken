@@ -1,2 +1,2 @@
 cd ..
-c:\python27\python.exe @@installdir@@\bin\shinken-reactionner.py -c @@installdir@@\etc\reactionnerd-windows.ini
+%python-exe% @@INSTALLDIR@@\bin\shinken-reactionner.py -c @@INSTALLDIR@@\etc\reactionnerd-windows.ini

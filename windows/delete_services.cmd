@@ -1,0 +1,6 @@
+sc delete "ShinkenArbiter_service"
+sc delete "ShinkenBroker_service"
+sc delete "ShinkenPoller_service"
+sc delete "ShinkenReactionner_service"
+sc delete "ShinkenReceiver_service"
+sc delete "ShinkenScheduler_service"
