@@ -26,7 +26,7 @@
 from shinken_test import unittest, ShinkenTest
 
 from shinken.brok import Brok
-from shinken.modules.merlindb_broker import get_instance
+from shinken.modules.merlindb_broker.module import get_instance
 
 
 class TestConfig(ShinkenTest):
@@ -49,6 +49,7 @@ class TestConfig(ShinkenTest):
 
         md.init()
         b = Brok('clean_all_my_instance_id', {'instance_id': 0})
+        b.prepare()
         md.manage_brok(b)
         r = md.db_backend.db_cursor.execute("SELECT count(*) from timeperiod WHERE instance_id = '0'")
         self.assert_(r.fetchall() == [(0,)])

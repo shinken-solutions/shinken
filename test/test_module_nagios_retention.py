@@ -26,8 +26,8 @@ Test Nagios retention
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules import nagios_retention_file_scheduler
-from shinken.modules.nagios_retention_file_scheduler import get_instance
+from shinken.modules.nagios_retention_file_scheduler import module as nagios_retention_file_scheduler
+from shinken.modules.nagios_retention_file_scheduler.module import get_instance
 
 modconf = Module()
 modconf.module_name = "NagiosRetention"
