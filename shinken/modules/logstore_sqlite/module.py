@@ -39,7 +39,7 @@ from shinken.objects.service import Service
 from shinken.log import logger
 
 # Import a class from the livestatus module, should be already loaded!
-import livestatus_broker
+from shinken.modules.livestatus_broker import module as livestatus_broker
 LiveStatusStack = livestatus_broker.LiveStatusStack
 LOGCLASS_INVALID = livestatus_broker.LOGCLASS_INVALID
 Logline = livestatus_broker.Logline
