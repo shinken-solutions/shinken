@@ -23,28 +23,3 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-properties = {
-    'daemons': ['broker'],
-    'type': 'couchdb',
-    'phases': ['running'],
-    }
-
-
-# called by the plugin manager to get a broker
-def get_instance(plugin):
-
-    print "Get a Couchdb broker for plugin %s" % plugin.get_name()
-
-    # first try the import
-    try:
-        from couchdb_broker import Couchdb_broker
-    except ImportError, exp:
-        print "Warning: the plugin type couchdb is unavailable: %s" % exp
-        return None
-
-    # TODO: catch errors
-    host = plugin.host
-    user = plugin.user
-    password = plugin.password
-    instance = Couchdb_broker(plugin, host, user, password)
-    return instance

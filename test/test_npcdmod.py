@@ -30,8 +30,8 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
 
-from shinken.modules import npcdmod_broker
-from shinken.modules.npcdmod_broker import Npcd_broker
+from shinken.modules.npcdmod_broker import module as npcdmod_broker
+from shinken.modules.npcdmod_broker.module import Npcd_broker
 
 sys.setcheckinterval(10000)
 

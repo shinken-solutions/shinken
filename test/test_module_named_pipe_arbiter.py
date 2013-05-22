@@ -29,8 +29,8 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
 
-from shinken.modules import named_pipe
-from shinken.modules.named_pipe import Named_Pipe_arbiter, get_instance
+from shinken.modules.named_pipe import module as named_pipe
+from shinken.modules.named_pipe.module import Named_Pipe_arbiter, get_instance
 
 modconf = Module()
 modconf.module_name = "NamedPipe"

@@ -26,19 +26,27 @@ Test memcache retention.
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules import memcache_retention_scheduler
-from shinken.modules.memcache_retention_scheduler import get_instance
+from shinken.modules.memcache_retention_scheduler import module as memcache_retention_scheduler
+from shinken.modules.memcache_retention_scheduler.module import get_instance
 
 modconf = Module()
 modconf.module_name = "MemcacheRetention"
 modconf.module_type = memcache_retention_scheduler.properties['type']
 modconf.properties = memcache_retention_scheduler.properties.copy()
 
+try:
+    import memcache
+except ImportError:
+    memcache = None
 
 class TestMemcacheRetention(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_memcache_retention(self):
+        if not memcache:
+            print "WARNING: cannot test the memcache module. Please install the python-memcache module first"
+            return
+
         # get our modules
         modconf.server = 'localhost'
         modconf.port = '11211'

@@ -26,24 +26,3 @@
 # This Class implement the Thrift Service Check Acceptor, an NSCA inspired
 # interface to submit checks results
 
-
-import os
-
-from shinken.basemodule import BaseModule
-from shinken.log import logger
-
-properties = {
-    'daemons': ['webui'],
-    'type': 'glances_ui',
-    'external': False,
-    }
-
-
-from glances_ui import Glances_UI
-
-# called by the plugin manager to get a broker
-def get_instance(mod_conf):
-    logger.info("[Glances WebUI] Get a Glances WebUI module for plugin %s" % mod_conf.get_name())
-    instance = Glances_UI(mod_conf)
-    return instance
-
