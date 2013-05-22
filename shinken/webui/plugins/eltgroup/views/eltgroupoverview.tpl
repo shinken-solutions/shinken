@@ -1,4 +1,4 @@
-%rebase layout globals(), css=['eltgroup/css/group-overview.css', 'eltgroup/css/styles.css'], js=['eltgroup/js/script.js'], title='Group overview', menu_part=''
+%rebase layout globals(), css=['eltgroup/css/group-overview.css'], js=['eltgroup/js/group-overview.js'], title='Group overview', menu_part=''
 
 <div class="row-fluid">
   <h3 class="span11 no-topmargin">Group overview</h3>
