@@ -149,6 +149,7 @@ class LiveStatusQueryMetainfo(object):
         self.query_hints = {
             'target': HINT_NONE,
         }
+        self.table = 'TABLE_IS_NOT_SET'
         self.keyword_counter = Counter()
         self.metainfo_filter_stack = LiveStatusQueryMetainfoFilterStack()
         self.structure(data)

@@ -259,7 +259,7 @@ class Config(Item):
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
         'certs_dir':             StringProp(default='etc/certs'),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
-        'server_cert':          StringProp(default='etc/certs/server.pem'),
+        'server_cert':           StringProp(default='etc/certs/server.pem'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format

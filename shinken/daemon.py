@@ -349,7 +349,7 @@ class Daemon(object):
         try:
             pid = int(self.fpid.read())
         except:
-            logger.warning("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
+            logger.info("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
             return
 
         try:
@@ -360,7 +360,7 @@ class Daemon(object):
             return
         except os.error, e:
             if e.errno == errno.ESRCH:
-                logger.warning("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
+                logger.info("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
                 return
             raise
 
@@ -519,14 +519,20 @@ class Daemon(object):
             if not hasattr(Pyro.config, 'PYROSSL_CERTDIR'):
                 logger.error('Sorry, this Pyro version do not manage SSL.')
                 sys.exit(2)
-            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
+            # Protect against name->IP substritution in Pyro3
+            Pyro.config.PYRO_DNS_URI = 1
+            # Beware #839 Pyro lib need str path, not unicode
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(str(ssl_conf.certs_dir))
+            if not os.path.exists(Pyro.config.PYROSSL_CERTDIR):
+                logger.error('Error : the directory %s is missing for SSL certificates (certs_dir). Please fix it in your configuration' % Pyro.config.PYROSSL_CERTDIR)
+                sys.exit(2)
             logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
-            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(str(ssl_conf.ca_cert))
             logger.debug("Using ssl ca cert file: %s" % Pyro.config.PYROSSL_CA_CERT)
-            Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
+            Pyro.config.PYROSSL_CERT = os.path.abspath(str(ssl_conf.server_cert))
             logger.debug("Using ssl server cert file: %s" % Pyro.config.PYROSSL_CERT)
 
-            if self.hard_ssl_name_check:
+            if ssl_conf.hard_ssl_name_check:
                 Pyro.config.PYROSSL_POSTCONNCHECK = 1
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK = 0
