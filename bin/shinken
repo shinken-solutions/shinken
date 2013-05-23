@@ -99,7 +99,7 @@ def create_archive(to_pack):
     tmp_file = os.path.join(tmp_dir, name+'.tar.gz')
     tar = tarfile.open(tmp_file, "w:gz")
     os.chdir(to_pack)
-    tar.add(".",arcname=name)
+    tar.add(".",arcname='.')
     tar.close()
     logger.debug("Saved file %s" % tmp_file)
     return tmp_file
