@@ -38,8 +38,9 @@ headless_display=		params["execution"]["display"]
 # firefox | ie | chrome
 browser_name=			params["browser"]["name"]
 # firefox only
-if browser_name == "firefox"
+if browser_name == "firefox" || browser_name == "phantomjs"
 	browser_path=		params["browser"]["path"]
+
 else
 	browser_path=		"default"
 end
@@ -48,6 +49,7 @@ use_proxy=				params["browser"]["use_proxy"]
 proxy_host=				params["browser"]["proxy_host"]
 proxy_port=				params["browser"]["proxy_port"]
 proxy_autourl=			params["browser"]["proxy_autourl"]
+no_proxy=			    params["browser"]["no_proxy"]
 
 # media
 capture_path=			params["media"]["path"]
@@ -56,7 +58,12 @@ capture_video=			params["media"]["capturevideo"].to_i
 media_server_url=		params["media"]["url"]
 capture_level=			params["media"]["capture_level"]
 
-if mode == "headless"
+if browser_name == "phantomjs"
+    # we do not need Xvfb for phantomjs
+    mode = "visible"
+end
+
+if mode == "headless" 
 	display = headless_display
 	if capture_video == 1
 		$headless = Headless.new(
@@ -110,11 +117,13 @@ if browser_name == "firefox"
 		if proxy_autourl != ""
 			proxy.setProxyAutoconfigUrl(proxy_autourl)
 		else
-			profile.addAdditionalPreference("network.proxy.http", proxy_host);
-			profile.addAdditionalPreference("network.proxy.http_port", proxy_port)
+			profile["network.proxy.type"] = 1 
+			profile["network.proxy.http"] = proxy_host
+			profile["network.proxy.http_port"] = proxy_port.to_i
+			profile["network.proxy.no_proxies_on"] = no_proxy
 		end
 	end
-	
+
 	Browser = Watir::Browser.new(:firefox, :profile => profile)	
 	Browser.driver.manage.timeouts.implicit_wait=3
 elsif browser_name == "chrome"
@@ -129,16 +138,15 @@ elsif browser_name == "chrome"
 	Browser = Watir::Browser.new(:chrome, :switches => switches_array)
 	Browser.driver.manage.timeouts.implicit_wait=3
 elsif browser_name == "phantomjs"
-	switches_array = ["--disk-cache=false","--ignore-ssl-errors=true"]
-	if use_proxy == "1"
-	 	switches_array << "--proxy=#{proxy_host}:#{proxy_port}"
-	end
-
-	if browser_path != "default"
-		Browser = Watir::Browser.new(:phantomjs, :switches => switches_array)
-	else
-		Browser = Watir::Browser.new(:phantomjs, :path => browser_path, :switches => switches_array)
-	end
+    # PHANTOMJS HEADLESS WEBKIT BROWSER
+    args = []
+    args << "--ignore-ssl-errors=true"
+    args << "--web-security=true"
+     
+    if use_proxy == "1"
+        args << "--proxy=#{proxy_host}:#{proxy_port}"
+    end
+    Browser=Watir::Browser.new(:phantomjs, :args => args) 
 else
 	puts "Unsuported browser %s ! " % browser_name
 	Process.exit(2)
