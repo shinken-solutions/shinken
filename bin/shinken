@@ -37,6 +37,7 @@ import shutil
 import zipfile
 import tarfile
 import pycurl
+import ConfigParser
 from StringIO import StringIO
 
 try:
@@ -54,7 +55,9 @@ from shinken.log import logger
 from shinken.objects.config import Config
 
 logger.set_level(logger.DEBUG)
+logger.set_display_time(False)
 
+CONFIG = {}
 
 class Dummy():
     def __init__(self): pass
@@ -64,390 +67,88 @@ logger.load_obj(Dummy())
 
 
 if os.name != 'nt':
-    DEFAULT_CFG = os.path.expanduser('~/shinken.io.ini')
+    DEFAULT_CFG = os.path.expanduser('~/.shinken.ini')
 else:
-    DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.io.ini'
+    DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.ini'
 
+
+URI = 'shinken.io'
+DEBUG = True
 
 
 def create_archive(to_pack):
     # First try to look if the directory we are trying to pack is valid
     to_pack = os.path.abspath(to_pack)
     if not os.path.exists(to_pack):
-        print "Error : the directory to pack is missing", to_pack
+        logger.error("Error : the directory to pack is missing %s" % to_pack)
         sys.exit(2)
-    print "Preparing to pack the directory", to_pack
+    logger.debug("Preparing to pack the directory %s" % to_pack)
     package_json_p = os.path.join(to_pack, 'package.json')
     if not os.path.exists(package_json_p):
         print "Error : Missing file", package_json_p
         sys.exit(2)
     package_json = read_package_json(open(package_json_p))
-    print package_json
+
+    name = package_json.get('name', None)
+    if not name:
+        logger.error('Missing name entry in the package.json file. Cannot pack')
+        sys.exit(2)
 
     # Now prepare a destination file
-    tmp_file = tempfile.mktemp()
+    tmp_dir  = tempfile.gettempdir()
+    tmp_file = os.path.join(tmp_dir, name+'.tar.gz')
     tar = tarfile.open(tmp_file, "w:gz")
-    root_dir, dir_name = os.path.split(to_pack)
-    os.chdir(root_dir)
-    tar.add(dir_name)
+    os.chdir(to_pack)
+    tar.add(".",arcname=name)
     tar.close()
-    print "Saved file", tmp_file
+    logger.debug("Saved file %s" % tmp_file)
+    return tmp_file
     
+
+def publish_archive(archive):
+    # Now really publish it
+    proxy = CONFIG['shinken.io']['proxy']
+    api_key = CONFIG['shinken.io']['api_key']
     
-    
-
-
-def create_pack(pack_file, p_dest_dir, share_dir):
-    _tmp = tempfile.mktemp()
-
-    print "Using the destination directory: %s" % p_dest_dir
-    src_dir = os.path.abspath(os.path.dirname(pack_file))
-    print "Source dir that will be load", src_dir
-
-    print "Will use the source temp file %s" % _tmp
-    f = open(_tmp, 'w')
-    f.write('cfg_dir=%s\n' % src_dir)
-    f.flush()
-    print "Saved tmp file"
-
-    cfg = Config()
-    buf = cfg.read_config([_tmp])
-    raw_objects = cfg.read_config_buf(buf)
-    cfg.create_objects(raw_objects)
-
-    # Now we can close the cfg temp file
-    f.close()
-
-    print "Loading pack files"
-    cfg.load_packs()
-
-    print "Packs", cfg.packs
-
-    packs = [p for p in cfg.packs]
-    if len(packs) > 1:
-        logger.log("Sorry, there is too much .pack file in the directory %s, please get only one .pack for this directory and it's subdirectories")
-        sys.exit(2)
-
-    o = {}
-    pack = packs.pop()
-    o['name'] = pack.get_name()
-    o['description'] = pack.description
-    o['templates'] = pack.templates
-    o['services'] = {}
-    o['commands'] = []
-    print "We are creating the pack '%s'" % o['name']
-    print "Description: %s" % o['description']
-    print "Host templates: %s" % ','.join(o['templates'])
-    # We will dump the services linked to theses templates
-    for h in cfg.hosts:
-        if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
-            print "WARNING: you miss the host template '%s' in the pack file. I'm adding it" % h.name
-            o['templates'].append(h.name)
-
-    for s in cfg.services:
-        if s.is_tpl() and hasattr(s, 'service_description') and hasattr(s, 'host_name'):
-            desc = s.service_description
-            if not desc in o['services']:
-                o['services'][desc] = {'templates': []}
-            tpls = s.host_name.split(',')
-            tpls = [t.strip() for t in tpls]
-            for t in tpls:
-                o['services'][desc]['templates'].append(t)
-            # Make elements uniq
-            o['services'][desc]['templates'] = list(set(o['services'][desc]['templates']))
-
-    for c in cfg.commands:
-        cname = getattr(c, 'command_name', '')
-        if cname in ['bp_rule', '_internal_host_up']:
-            continue
-        if cname:
-            o['commands'].append(cname)
-    # Make comands uniq
-    o['commands'] = list(set(o['commands']))
-
-    o['path'] = pack.path
-    print "Path: %s" % o['path']
-    o['doc_link'] = pack.doc_link
-    print "Doc link: %s" % o['doc_link']
-    o['macros'] = {}
-    print "Macros:"
-    for (k, v) in pack.macros.iteritems():
-        t = v.get('type', 'string')
-        d = v.get('description', '')
-        o['macros'][k] = {'type': t, 'description': ''}
-        print "\t%s: Type=%s Description='%s'" % (k, t, d)
-
-    j = json.dumps(o, sort_keys=True, indent=3)
-    print "Pack file generated:", j
-
-    create_dir = os.path.join(p_dest_dir, o['name'])
-    print "We will create the pack directory in %s" % create_dir
-    # Now get all the .cfg files from the src_dir and put them into a pack directory
-    if os.path.exists(create_dir) and os.path.isdir(create_dir):
-        print "Warning: the destination directory already exists. I clean it!"
-        #TODO: do the clean
-        shutil.rmtree(create_dir)
-
-    os.mkdir(create_dir)
-    pack_file_dest = os.path.join(create_dir, o['name'] + '.pack')
-    print "Saving the .pack file into %s" % pack_file_dest
-    f = open(pack_file_dest, 'w')
-    f.write(j)
-    f.close()
-
-    for root, dirs, files in os.walk(src_dir):
-        for file in files:
-            if re.search("\.cfg$", file):
-                base = root[len(src_dir):].strip()
-                if base.startswith('/'):
-                    base = base[1:]
-                to_save = os.path.join(root, file)
-                print "We will save the file", base, to_save
-                dest_dir = os.path.join(create_dir, base)
-                print "Save in the directory", dest_dir
-                dest_file = os.path.join(dest_dir, file)
-                print "Into the file", dest_file
-                if not os.path.exists(dest_dir):
-                    os.mkdir(dest_dir)
-                shutil.copy(to_save, dest_file)
-
-    # Create the shares dir
-    #os.mkdir(os.path.join(create_dir, 'share'))
-    os.mkdir(os.path.join(create_dir, 'images'))
-    os.mkdir(os.path.join(create_dir, 'images', 'sets'))
-    os.mkdir(os.path.join(create_dir, 'templates'))
-    os.mkdir(os.path.join(create_dir, 'templates', 'graphite'))
-    os.mkdir(os.path.join(create_dir, 'templates', 'pnp'))
-
-    # Now look for the share dir and for push icon sets or
-    if share_dir:
-        print "We will parse the share tree to find related files"
-        sets_dir = os.path.join(share_dir, 'images', 'sets')
-        if os.path.exists(sets_dir):
-            print "Looking the share/images/sets"
-            # We are looking for the hosttags and the template
-            # name too
-            _img_names = pack.templates
-            _img_names.append(o['name'])
-            # Ok but uniq please :)
-            _img_names = list(set(_img_names))
-            for t in _img_names:
-                print "Lookng for the template", t
-                _p = os.path.join(sets_dir, t)
-                if os.path.exists(_p) and os.path.isdir(_p):
-                    _d = os.path.join(create_dir, 'images', 'sets', t)
-                    #if not os.path.exists(_d):
-                    #    os.mkdir(_d)
-                    print "COPY %s into %s" % (_p, _d)
-                    shutil.copytree(_p, _d)
-
-        graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
-        if os.path.exists(graphite_templates_dir):
-            print "Looking the share/templates/graphite dir"
-            for c in cfg.commands:
-                cname = c.get_name()
-                if cname in ['bp_rule', '_internal_host_up']:
-                    continue
-                print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname + '.graph')
-                _d = os.path.join(create_dir, 'templates', 'graphite', cname + '.graph')
-                print "So search for graphite template", _p
-                if os.path.exists(_p):
-                    print "COPYING %s into %s" % (_p, _d)
-                    shutil.copy(_p, _d)
-
-        pnp_templates_dir = os.path.join(share_dir, 'templates', 'pnp')
-        if os.path.exists(pnp_templates_dir):
-            print "Looking the share/templates/pnp dir"
-            for c in cfg.commands:
-                cname = c.get_name()
-                if cname in ['bp_rule', '_internal_host_up']:
-                    continue
-                print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname + '.php')
-                _d = os.path.join(create_dir, 'templates', 'pnp', cname + '.php')
-                print "So search for graphite template", _p
-                if os.path.exists(_p):
-                    print "COPYING %s into %s" % (_p, _d)
-                    shutil.copy(_p, _d)
-
-    zip_file_p = os.path.join(p_dest_dir, o['name'] + '.zip')
-    print "Want to save the zip file", zip_file_p
-
-    fd = zipfile.ZipFile(zip_file_p, "w")
-
-    for root, dirs, files in os.walk(create_dir):
-        for file in files:
-            name = os.path.join(root, file)
-            dst_name = name[len(create_dir):]
-            if dst_name.startswith('/'):
-                dst_name = dst_name[1:]
-            print "Saving in zip", name, 'as', dst_name
-            fd.write(name, dst_name, zipfile.ZIP_DEFLATED)
-    fd.close()
-
-    print "The pakc file is saved as", zip_file_p
-
-
-def push_pack(zip_file_p, api_key, uri, proxy):
-    # open the file again, to see what's in it
-    #file = zipfile.ZipFile(zip_file_p, "r")
-    #for info in file.infolist():
-    #    print info.filename
-
-    print "GO PUSH"
-    print "LAUNCH THE FILE", zip_file_p
-
-    import pycurl
-
+    # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 5)
-    c.setopt(c.TIMEOUT, 8)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri + "/pushpack")
-
-    c.setopt(c.HTTPPOST, [("key", api_key),
-                          ("data",
-                           (c.FORM_FILE, str(zip_file_p),
-                            c.FORM_CONTENTTYPE, "application/x-gzip"))
-                          ])
-
-    #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    #c.setopt(c.VERBOSE, 1)
-    c.perform()
-    print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    print "Thanks :) "
-
-
-def register(login, password, email, uri, proxy):
-    print "GO register"
-    #import os, urllib
-    #os.environ["http_proxy"] = "http://proxy:3128"
-    #data = urllib.urlopen("http://www.google.fr").read()
-    #print "DATA?", data
-
-    print "Trying to register the user", login, "with the email", email
-
-    c = pycurl.Curl()
-    c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 5)
-    c.setopt(c.TIMEOUT, 8)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri + "/register")
-
-    c.setopt(c.HTTPPOST, [("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
-
-    error = ''
-    obj = ''
-    #c.setopt(c.VERBOSE, 1)
-    response = StringIO()
-    c.setopt(c.WRITEFUNCTION, response.write)
-    c.perform()
-    response.seek(0)
-    status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got
-    if status_code == 200:
-        obj = json.loads(response.read().replace('\\/', '/'))
-    else:
-        error = response.read().replace('\\/', '/')
-
-    c.close()
-    print "status code: %s" % status_code
-    if error:
-        print "Sorry there was an error with the query:", error
-        sys.exit(2)
-    state = obj['state']
-    text = obj['text']
-    if state == 200:
-        print "OK:", text
-        sys.exit(0)
-    else:
-        print "Error:", text
-        sys.exit(2)
-
-
-def getkey(login, password, uri, proxy):
-    print "GO get your key"
-    #import os, urllib
-    #os.environ["http_proxy"] = "http://proxy:3128"
-    #data = urllib.urlopen("http://www.google.fr").read()
-    #print "DATA?", data
-
-    print "Trying to get your API KEY for", login
-
-    c = pycurl.Curl()
-    c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.CONNECTTIMEOUT, 10)
     c.setopt(c.TIMEOUT, 10)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri + "/apikey")
-
-    c.setopt(c.HTTPPOST, [("login", login), ("password", password), ('cli_mode', '1')])
-
-    #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    error = ''
-    #c.setopt(c.VERBOSE, 1)
-    response = StringIO()
-    c.setopt(c.WRITEFUNCTION, response.write)
-    c.perform()
-    response.seek(0)
-    status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got
-    if status_code == 200:
-        obj = json.loads(response.read().replace('\\/', '/'))
-    else:
-        error = response.read().replace('\\/', '/')
-
-    c.close()
-    print "status code: %s" % status_code
-    if error:
-        print "Sorry there was an error with the query:", error
-        sys.exit(2)
-
-    print "You api key is", obj['api_key']
-
-
-def analyse(api_key, stats_file, uri, proxy):
-    if not api_key:
-        print "Error: Sorry, analysing the configuration need an API key"
-        sys.exit(2)
-    if not stats_file:
-        print "Error: missing statitics files for analysing"
-        sys.exit(2)
-
-    import pycurl
-
-    c = pycurl.Curl()
-    c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 5)
-    c.setopt(c.TIMEOUT, 8)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri + "/pushstats")
-
-    c.setopt(c.HTTPPOST, [("key", api_key),
+    c.setopt(c.URL, URI + "/push")
+    c.setopt(c.HTTPPOST, [("api_key", api_key),
                           ("data",
-                           (c.FORM_FILE, str(stats_file),
+                           (c.FORM_FILE, str(archive),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
-
-    #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    c.setopt(c.VERBOSE, 1)
+    response = StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, response.write)
+    if DEBUG:
+        c.setopt(c.VERBOSE, 1)
     c.perform()
-    print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
+    r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
-    print "that's it ;)"
+    if r != 200:
+        logger.error("There was a critical error : %s" % response.getvalue())
+        sys.exit(2)
+    else:    
+        ret  = json.loads(response.getvalue().replace('\\/', '/'))
+        status = ret.get('status')
+        text   = ret.get('text')
+        if status == 200:
+            logger.log(text)
+        else:
+            logger.error(text)
+    
+
 
 
 def read_package_json(fd):
     package_json = json.load(fd)
     if not package_json:
-        print "Bad package.json file"
+        logger.error("Bad package.json file")
         sys.exit(2)
     return package_json
 
@@ -516,6 +217,18 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
     uri = opts.uri or 'shinken.io'
     proxy = opts.proxy or None
 
+    if not os.path.exists(DEFAULT_CFG):
+        logger.debug('Missing configuration file!')
+    else:
+        cfg = ConfigParser.ConfigParser()
+        cfg.read(DEFAULT_CFG)
+        for section in cfg.sections():
+            if not section in CONFIG:
+                CONFIG[section] = {}
+            for (key, value) in cfg.items(section):
+                CONFIG[section][key] = value
+
+
     if opts.create_pack:
         mode = 'create_pack'
 
@@ -538,7 +251,9 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
             to_pack = '.'
             if len(args) == 2:
                 to_pack = args[1]
-            create_archive(to_pack)
+            archive = create_archive(to_pack)
+            publish_archive(archive)
+            
 
 
     if opts.upload:

@@ -68,6 +68,7 @@ class Log:
 
     def __init__(self):
         self._level = logging.NOTSET
+        self.display_time = True
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -102,6 +103,11 @@ class Log:
 
         self._level = level
         logging.getLogger().setLevel(level)
+
+
+    def set_display_time(self, b):
+        self.display_time = b
+
 
     def debug(self, msg, *args, **kwargs):
         self._log(logging.DEBUG, msg, *args, **kwargs)
@@ -142,9 +148,15 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
+                if self.display_time:
+                    fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
+                else:
+                    fmt = u'%(level)-9s %(name)s%(msg)s\n'
             else:
-                fmt = u'[%(date)s] %(name)s%(msg)s\n'
+                if self.display_time:
+                    fmt = u'[%(date)s] %(name)s%(msg)s\n'
+                else:
+                    fmt = u'%(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
