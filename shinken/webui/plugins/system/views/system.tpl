@@ -29,6 +29,7 @@
         <table class="table table-hover">
           <thead>
             <tr>
+              <th>Name</th>
               <th>State</th>
               <th>Alive</th>
               <th>Attemts</th>
@@ -39,6 +40,7 @@
           <tbody>
           %for s in sats:
             <tr>
+              <td>{{s.get_name()}}</td>
               <td><img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" /></td>
               <td>{{s.alive}}</td>
               <td>{{s.attempt}}/{{s.max_check_attempts}}</td>
