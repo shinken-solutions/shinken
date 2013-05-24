@@ -31,30 +31,30 @@ if not defined?($Index)
 end
 
 # linux only
-mode = params["execution"]["mode"]
-headless_resolution= params["execution"]["resolution"]
-headless_display= params["execution"]["display"]
+mode =params["execution"]["mode"]
+headless_resolution=params["execution"]["resolution"]
+headless_display=params["execution"]["display"]
 # firefox | ie | chrome
-browser_name= params["browser"]["name"]
+browser_name=params["browser"]["name"]
 # firefox only
 if browser_name == "firefox" || browser_name == "phantomjs"
-    browser_path= params["browser"]["path"]
+    browser_path=params["browser"]["path"]
 else
     browser_path= "default"
 end
 
-use_proxy= params["browser"]["use_proxy"]
-proxy_host= params["browser"]["proxy_host"]
-proxy_port= params["browser"]["proxy_port"]
-proxy_autourl= params["browser"]["proxy_autourl"]
-no_proxy= params["browser"]["no_proxy"]
+use_proxy=params["browser"]["use_proxy"]
+proxy_host=params["browser"]["proxy_host"]
+proxy_port=params["browser"]["proxy_port"]
+proxy_autourl=params["browser"]["proxy_autourl"]
+no_proxy=params["browser"]["no_proxy"]
 
 # media
-capture_path= params["media"]["path"]
-capture_screenshots= params["media"]["capture"].to_i
-capture_video= params["media"]["capturevideo"].to_i
-media_server_url= params["media"]["url"]
-capture_level= params["media"]["capture_level"]
+capture_path=params["media"]["path"]
+capture_screenshots=params["media"]["capture"].to_i
+capture_video=params["media"]["capturevideo"].to_i
+media_server_url=params["media"]["url"]
+capture_level=params["media"]["capture_level"]
 
 if browser_name == "phantomjs"
     # we do not need Xvfb for phantomjs
@@ -137,11 +137,11 @@ elsif browser_name == "chrome"
 elsif browser_name == "phantomjs"
     # PHANTOMJS HEADLESS WEBKIT BROWSER
     args = []
-    args << "--ignore-ssl-errors= true"
-    args << "--web-security= true"
+    args << "--ignore-ssl-errors=true"
+    args << "--web-security=true"
      
     if use_proxy == "1"
-        args << "--proxy= #{proxy_host}:#{proxy_port}"
+        args << "--proxy=#{proxy_host}:#{proxy_port}"
     end
     if browser_path != ""
         Browser= Watir::Browser.new(:phantomjs, :args => args, :path => browser_path)
