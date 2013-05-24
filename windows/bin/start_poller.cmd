@@ -1,2 +1,2 @@
 cd ..
-c:\python27\python.exe @@installdir@@\bin\shinken-poller.py -c @@installdir@@\etc\pollerd-windows.ini
+%python-exe% @@INSTALLDIR@@\bin\shinken-poller.py -c @@INSTALLDIR@@\etc\pollerd-windows.ini
