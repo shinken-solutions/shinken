@@ -2187,6 +2187,7 @@ install_phantomjs(){
         echo "export PATH=i\$PATH:$PHANTOMTARGET/bin" > /etc/profile.d/phantomjs.sh
         chmod +x /etc/profile.d/phantomjs.sh
         source /etc/profile.d/phantomjs.sh
+	sed -i "s#path=default#path="$PHANTOMTARGET"/bin/phantomjs#g" $TARGET/libexec/eue/glpi.ini
     fi
 
 
