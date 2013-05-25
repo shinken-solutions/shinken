@@ -2553,6 +2553,11 @@ function install_nagios-plugins(){
     make >> ${LOGFILE} >> ${LOGFILE}  2>&1
     cecho " > Installing" green
     make install >> ${LOGFILE} >> ${LOGFILE}  2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing nagios-plugins" red
+        exit 2
+    fi
     install -b -g $SKGROUP -o $SKUSER -m 0775 contrib/check_mem.pl $LIBEXEC >> ${LOGFILE} 2>&1
 }
 
