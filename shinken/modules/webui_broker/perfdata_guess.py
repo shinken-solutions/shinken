@@ -36,7 +36,7 @@ from shinken.misc.perfdata import PerfDatas
 def get_perfometer_table_values(elt):
     # first try to get the command name called
     cmd = elt.check_command.call.split('!')[0]
-    print "Looking for perfometer value for command", cmd
+    safe_print("Looking for perfometer value for command", cmd)
 
     tab = {'check_http': manage_check_http_command,
            'check_ping': manage_check_ping_command,
@@ -48,7 +48,10 @@ def get_perfometer_table_values(elt):
     if f:
         return f(elt)
 
-    r = manage_unknown_command(elt)
+    try:
+        r = manage_unknown_command(elt)
+    except:
+        return None
     return r
 
 
@@ -78,7 +81,7 @@ def manage_check_http_command(elt):
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
-    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    #print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
@@ -110,7 +113,7 @@ def manage_check_ping_command(elt):
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%sms' % v
-    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    #print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
@@ -148,7 +151,7 @@ def manage_check_tcp_command(elt):
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
-    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    #print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
@@ -164,13 +167,13 @@ def manage_unknown_command(elt):
         m = p['time']
     else:
         for v in p:
-            print "Look for", v
+            #print "Look for", v
             if v.name is not None and v.value is not None:
                 m = v
                 break
 
     prop = m.name
-    print "Got a property", prop, "and a value", m
+    safe_print("Got a property", prop, "and a value", m)
     v = m.value
     if not v:
         print "No value, I bailout"
@@ -197,7 +200,7 @@ def manage_unknown_command(elt):
     metrics = [(s_color, pct), ('white', 100-pct)]
     uom = '' or m.uom
     title = '%s%s' % (v, uom)
-    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    #print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
@@ -216,7 +219,7 @@ def get_linear_color(elt, name):
 
     # Get a "hash" of the metric name
     h = hash(name) % 25
-    print "H", h
+    #print "H", h
     # Most value are high in red, so to do not overlap, go down
     red = (c[0] - h) % 256
     green = (c[1] - h) % 256

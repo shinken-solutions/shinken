@@ -38,6 +38,7 @@ import struct
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
+from shinken.misc.perfdata import PerfDatas
 
 properties = {
     'daemons': ['broker'],
@@ -107,41 +108,30 @@ class Graphite_broker(BaseModule):
     # return ('/', '30'), ('/var', '50')
     def get_metric_and_value(self, perf_data):
         res = []
-        s = perf_data.strip()
-        # Get all metrics non void
-        elts = s.split(' ')
-        metrics = [e for e in elts if e != '']
+        metrics = PerfDatas(perf_data)
 
         for e in metrics:
-            logger.debug("[Graphite broker] Groking: %s" % str(e))
-            elts = e.split('=', 1)
-            if len(elts) != 2:
-                continue
+            try:
+                logger.debug("[Graphite broker] Groking: %s" % str(e))
+            except UnicodeEncodeError:
+                pass
 
-            name = self.illegal_char.sub('_', elts[0])
+            name = self.illegal_char.sub('_', e.name)
             name = self.multival.sub(r'.\1', name)
 
-            raw = elts[1]
             # get metric value and its thresholds values if they exist
-            if ';' in raw and len(filter(None, raw.split(';'))) >= 3:
-                elts = raw.split(';')
-                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
-            # get the first value of ;
-            else:
-                value = raw
-                name_value = {name: raw}
+            name_value = {name: e.value}
+            if e.warning and e.critical:
+                name_value[name + '_warn'] = e.warning
+                name_value[name + '_crit'] = e.critical
             # bailout if need
             if name_value[name] == '':
                 continue
 
-            # Try to get the int/float in it :)
-            for key, value in name_value.items():
-                m = re.search("(-?\d*\.?\d*)(.*)", value)
-                if m:
-                    name_value[key] = m.groups(0)[0]
-                else:
-                    continue
-            logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(value)))
+            try:
+                logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(e.value)))
+            except UnicodeEncodeError:
+                pass
             for key, value in name_value.items():
                 res.append((key, value))
         return res
@@ -184,7 +174,10 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+        try:
+            logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+        except UnicodeEncodeError:
+            pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source, desc))
@@ -197,7 +190,7 @@ class Graphite_broker(BaseModule):
                 if value:
                     self.buffer.append(("%s.%s" % (path, metric),
                                        ("%d" % check_time,
-                                        "%s" % value)))
+                                        "%s" % str(value))))
 
         else:
             lines = []
@@ -205,9 +198,12 @@ class Graphite_broker(BaseModule):
             for (metric, value) in couples:
                 if value:
                     lines.append("%s.%s %s %d" % (path, metric,
-                                                  value, check_time))
+                                                  str(value), check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s" % packet)
+            try:
+                logger.debug("[Graphite broker] Launching: %s" % packet)
+            except UnicodeEncodeError:
+                pass
             try:
                 self.send_packet(packet)
             except IOError, err:
@@ -233,7 +229,10 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+        try:
+            logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+        except UnicodeEncodeError:
+            pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source))
@@ -255,7 +254,10 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.__HOST__.%s %s %d" % (path, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s" % packet)
+            try:
+                logger.debug("[Graphite broker] Launching: %s" % packet)
+            except UnicodeEncodeError:
+                pass
             try:
                 self.send_packet(packet)
             except IOError, err:
