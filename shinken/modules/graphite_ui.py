@@ -96,7 +96,10 @@ class Graphite_Webui(BaseModule):
         metrics = PerfDatas(perf_data)
 
         for e in metrics:
-            logger.debug("[Graphite UI] groking: %s" % str(e))
+            try:
+                logger.debug("[Graphite UI] groking: %s" % str(e))
+            except UnicodeEncodeError:
+                pass
 
             name = self.illegal_char.sub('_', e.name)
             name = self.multival.sub(r'.*', name)
@@ -109,8 +112,10 @@ class Graphite_Webui(BaseModule):
             # bailout if need
             if name_value[name] == '':
                 continue
-
-            logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, e.value))
+            try:
+                logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, e.value))
+            except UnicodeEncodeError:
+                pass
             for key, value in name_value.items():
                 res.append((key, value))
         return res

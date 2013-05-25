@@ -44,7 +44,7 @@ class Metric:
     def __init__(self, s):
         self.name = self.value = self.uom = self.warning = self.critical = self.min = self.max = None
         s = s.strip()
-        print "Analysis string", s
+        #print "Analysis string", s
         r = metric_pattern.match(s)
         if r:
             # Get the name but remove all ' in it
@@ -58,7 +58,7 @@ class Metric:
             #print 'Name', self.name
             #print "Value", self.value
             #print "Res", r
-            print r.groups()
+            #print r.groups()
             if self.uom == '%':
                 self.min = 0
                 self.max = 100

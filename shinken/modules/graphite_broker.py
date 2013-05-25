@@ -111,7 +111,10 @@ class Graphite_broker(BaseModule):
         metrics = PerfDatas(perf_data)
 
         for e in metrics:
-            logger.debug("[Graphite broker] Groking: %s" % str(e))
+            try:
+                logger.debug("[Graphite broker] Groking: %s" % str(e))
+            except UnicodeEncodeError:
+                pass
 
             name = self.illegal_char.sub('_', e.name)
             name = self.multival.sub(r'.\1', name)
@@ -125,7 +128,10 @@ class Graphite_broker(BaseModule):
             if name_value[name] == '':
                 continue
 
-            logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(e.value)))
+            try:
+                logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(e.value)))
+            except UnicodeEncodeError:
+                pass
             for key, value in name_value.items():
                 res.append((key, value))
         return res
@@ -168,7 +174,10 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+        try:
+            logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+        except UnicodeEncodeError:
+            pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source, desc))
@@ -191,7 +200,10 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.%s %s %d" % (path, metric,
                                                   str(value), check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s" % packet)
+            try:
+                logger.debug("[Graphite broker] Launching: %s" % packet)
+            except UnicodeEncodeError:
+                pass
             try:
                 self.send_packet(packet)
             except IOError, err:
@@ -217,7 +229,10 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+        try:
+            logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+        except UnicodeEncodeError:
+            pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source))
@@ -239,7 +254,10 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.__HOST__.%s %s %d" % (path, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s" % packet)
+            try:
+                logger.debug("[Graphite broker] Launching: %s" % packet)
+            except UnicodeEncodeError:
+                pass
             try:
                 self.send_packet(packet)
             except IOError, err:
