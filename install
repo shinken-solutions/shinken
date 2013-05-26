@@ -2547,17 +2547,19 @@ function install_nagios-plugins(){
     rm -Rf nagios-plugins-$NAGPLUGVERS
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> ${LOGFILE} 2>&1
     cd nagios-plugins-$NAGPLUGVERS
+    cecho " > Patching nagios-plugins" green
+    patch -p0 < $myscripts/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green
     make >> ${LOGFILE} >> ${LOGFILE}  2>&1
     cecho " > Installing" green
     make install >> ${LOGFILE} >> ${LOGFILE}  2>&1
-    if [ $? -ne 0 ]
-    then
-        cecho " > Error while installing nagios-plugins" red
-        exit 2
-    fi
+    #if [ $? -ne 0 ]
+    #then
+    #    cecho " > Error while installing nagios-plugins" red
+    #    exit 2
+    #fi
     install -b -g $SKGROUP -o $SKUSER -m 0775 contrib/check_mem.pl $LIBEXEC >> ${LOGFILE} 2>&1
 }
 
