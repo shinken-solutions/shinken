@@ -101,7 +101,7 @@ def check_deamons_numbers(result, target):
 # OptionParser one
 parser = OptionParser()
 parser.add_option('-a', '--hostname', dest='hostname', default='127.0.0.1')
-parser.add_option('-p', '--portnumber', dest='portnum', default=7770)
+parser.add_option('-p', '--portnumber', dest='portnum', default=7770, type=int)
 parser.add_option('-s', '--ssl', dest='ssl', default=False)
 # TODO: Add a list of correct values for target and don't authorize
 # anything else
