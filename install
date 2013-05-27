@@ -2106,6 +2106,87 @@ function install_notify_by_xmpp(){
     sed -i "s/^#password=.*$/password=$XMPP_PASSWORD_1/g" $XMPP_CONFIG_FILE
 }
 
+# thruk
+function install_thruk(){
+    cadre "Install thruk" green
+    cd $myscripts
+    case $CODE in
+        REDHAT)
+            if [ ! -f "/etc/yum.repos.d/consol-labs.repo" ]
+            then
+                case $VERS in
+                    5)
+                        cp install.d/consol-labs.rhel5.repo.in /etc/yum.repos.d/consol-labs.repo
+                        ;;
+                    6)
+                        cp install.d/consol-labs.rhel6.repo.in /etc/yum.repos.d/consol-labs.repo
+                        ;;
+                    *)
+                        cecho " > Unsupported RedHat/CentOs version" red
+                        exit 2
+                        ;;
+                esac
+                yum clean all >> ${LOGFILE} 2>&1
+                cecho " > Installing thruk" green
+                installpkg pkg $THRUKPKGS
+                cp install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                cecho " > Enable and start thruk" green
+                enable_service thruk
+                manage_service thruk start
+                manage_service ${WEBSERVER} restart
+            else
+                # check if thruk is installed
+                exist=$(rpm -qa | grep thruk)
+                if [[ -z "$exist" ]]
+                then
+                    cecho " > Installing thruk" green
+                    installpkg pkg $THRUKPKGS
+                    install -b install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                    cecho " > Enable and start thruk" green
+                    enable_service thruk
+                    manage_service thruk start
+                    manage_service ${WEBSERVER} restart
+                else
+                    cecho "Already installed" yellow
+                fi
+            fi
+            ;;
+        DEBIAN)
+            if [[ "$VERS" = "6" ]]; then
+                if [ ! -f "/etc/apt/sources.list.d/consol-labs.list" ]
+                then
+                    cecho " > repository configuration not found. Adding consol-labs repository" yellow
+                    apt-key adv --keyserver keys.gnupg.net --recv F8C1CA08A57B9ED7 >> ${LOGFILE} 2>&1
+                    echo "deb http://labs.consol.de/repo/stable/debian squeeze main" > /etc/apt/sources.list.d/consol-labs.list
+                    cecho " > Updating repositories " yellow
+                    apt-get --allow-unauthenticated update >> ${LOGFILE} 2>&1
+                    cecho " > Installing thruk" green
+                    apt-get --allow-unauthenticated --force-yes install -y $THRUKPKGS >> ${LOGFILE} 2>&1
+                else
+                    cecho " > console-labs repository found." green
+                    thrukexist=$(dpkg -l | grep "^ii" | grep "thruk")
+                    if [ -z "$thrukexist" ]
+                    then
+                        cecho " > Installing thruk" green
+                        installpkg pkg $THRUKPKGS
+                        install -b install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                        manage_service ${WEBSERVER} restart
+                    else
+                        cecho " > Thruk already installed" green
+                    fi
+                fi
+            else
+                cecho " > Unsupported Debian version" red
+                exit 2
+            fi
+            ;;
+        *)
+            cecho " > Unknown distribution: $DIST" red
+            exit 2
+            ;;
+    esac
+}
+
 #################################
 ### PLUGINS INSTALLATION PART ###
 #################################
@@ -3081,6 +3162,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                mongodb
                                nconf (experimental)
                                notify_by_xmpp
+                               thruk
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
     --enableeue             Enable application performance monitoring stack (experimental)
@@ -3248,6 +3330,10 @@ do
             elif [ "$OPTARG" == "notify_by_xmpp" ]
             then
                 install_notify_by_xmpp
+                exit 0
+            elif [ "$OPTARG" == "thruk" ]
+            then
+                install_thruk
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
