@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2009-2012:
+* Copyright (C) 2009-2013:
 *    Gabes Jean, naparuba@gmail.com
 *    Gerhard Lausser, Gerhard.Lausser@consol.de
 *    Gregory Starck, g.starck@gmail.com
@@ -25,6 +25,10 @@
 
 #content_container {
 	padding-bottom: 15px;
+}
+
+#inner_depgraph {
+  background: #FFFFFF;
 }
 
 #event_command {
