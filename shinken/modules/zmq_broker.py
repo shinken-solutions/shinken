@@ -119,7 +119,7 @@ class Zmq_broker(BaseModule):
         elif self.serialize_to == "json":
             self.serialize = lambda msg: json.dumps(msg, cls=SetEncoder)
         else:
-            raise Exception("[Zmq Broker] No valid serialization method defined (Got "+str(self.serializ_to)+")!")
+            raise Exception("[Zmq Broker] No valid serialization method defined (Got "+str(self.serialize_to)+")!")
 		
 	
     # Called by Broker to say 'let's prepare yourself guy'

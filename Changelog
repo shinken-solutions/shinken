@@ -3,7 +3,7 @@ Shinken ChangeLog
 #######################
 
 
-1.4   - XX/05/2013
+1.4   - 27/05/2013
 ------------------
 	CORE ENHANCEMENT
 	Add : Change Vsphere SDK Version
@@ -36,7 +36,7 @@ Shinken ChangeLog
 	Fix : (reported by: Johan Svensson) now poller worker crashs are now put in the log.
 	Fix : (reported by: flaf and Imrane.Dessai) bad additive inheritance with multiples templates.
 	FIX : MySQL-python complainig about outdated version of distribute
-
+	FIX : (by :Alexandre Veyrenc) graphite module now manage perfdata with space in names
 	
 	
 	MODULES ENHANCEMENT
