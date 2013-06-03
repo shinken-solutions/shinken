@@ -33,8 +33,13 @@ try:
 except ImportError:
     sys.exit("This script needs the Python ElementTree module. Please install it")
 
-VERSION = '0.1'
-
+VERSION = '0.1.1'
+# Fred : command launched depending on os detection
+if os.name != 'nt': 
+    DEFAULT_CMD = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s"
+else:
+    DEFAULT_CMD = "nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s"
+    
 parser = optparse.OptionParser(
     "%prog [options] -t nmap scanning targets",
     version="%prog " + VERSION)
@@ -255,13 +260,15 @@ if not simulate:
 
     print "propose a tmppath", tmppath
 
-    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
+    # Fred : command launched depending on os detection
+    # cmd = "nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
+    cmd = DEFAULT_CMD % (' '.join(targets), min_rate, max_retries, tmppath)
     print "Launching command,", cmd
     try:
         nmap_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            close_fds=True, shell=True)
+            close_fds=False, shell=True)
     except OSError, exp:
         print "Debug: Error in launching command:", cmd, exp
         sys.exit(2)
@@ -273,7 +280,9 @@ if not simulate:
         print "Error: the nmap return an error: '%s'" % stderrdata
         sys.exit(2)
 
-    print "Got it", (stdoutdata, stderrdata)
+    # Fred : no need to print nmap result catched ...
+    # print "Got it", (stdoutdata, stderrdata)
+    print "Got it !"
 
     xml_input = tmppath
 else:  # simulate mode
@@ -343,19 +352,31 @@ for h in hosts:
 
     # Now the OS detection
     ios = h.find('os')
-    #print os.__dict__
-    cls = ios.findall('osclass')
-    for c in cls:
-        #print "Class", c.__dict__
-        family = c.attrib['osfamily']
-        accuracy = c.attrib['accuracy']
-        osgen = c.attrib.get('osgen', '')
-        os_type = c.attrib.get('type', '')
-        vendor = c.attrib.get('vendor', '')
+    # Fred : if no OS detected by nmap (localhost on Windows does not detect OS !)
+    if ios:
+        #print os.__dict__
+        cls = ios.findall('osclass')
+        for c in cls:
+            #print "Class", c.__dict__
+            family = c.attrib['osfamily']
+            accuracy = c.attrib['accuracy']
+            osgen = c.attrib.get('osgen', '')
+            os_type = c.attrib.get('type', '')
+            vendor = c.attrib.get('vendor', '')
+            #print "Type:", family, osgen, accuracy
+            dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
+        # Ok we can compute our OS now :)
+        dh.compute_os()
+    else:
+        debug(" No OS detected !")
+        family = 'Unknown'
+        accuracy = 'Unknown'
+        osgen = 'Unknown'
+        os_type = 'Unknown'
+        vendor = 'Unknown'
         #print "Type:", family, osgen, accuracy
         dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
-    # Ok we can compute our OS now :)
-    dh.compute_os()
+        dh.compute_os()
 
     # Now the ports :)
     allports = h.findall('ports')
