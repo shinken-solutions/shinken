@@ -26,8 +26,8 @@ Test Mongodb retention.
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules import mongodb_retention
-from shinken.modules.mongodb_retention import get_instance
+from shinken.modules.mongodb_retention import module as mongodb_retention
+from shinken.modules.mongodb_retention.module import get_instance
 
 modconf = Module()
 modconf.module_name = "MongodbRetention"
@@ -42,8 +42,7 @@ class TestMongodbRetention(ShinkenTest):
 
     def test_mongodb_retention(self):
         # get our modules
-        sl = mongodb_retention.Mongodb_retention_scheduler(
-            modconf, 'localhost', 'test')
+        sl = mongodb_retention.Mongodb_retention_scheduler(modconf, 'localhost', 'test', '')
 
         # sl = get_instance(mod)
         # Hack here :(

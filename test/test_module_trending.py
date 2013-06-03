@@ -25,10 +25,10 @@
 
 import os
 from shinken_test import *
-sys.path.append("../shinken/modules")
-import trending_broker
 from shinken.brok import Brok
 
+from shinken.modules.trending_broker import module as trending_broker
+from shinken.modules.trending_broker.module import get_instance
 
 modconf = Module()
 modconf.module_name = "Trending"

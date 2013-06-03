@@ -35,12 +35,20 @@ import time
 import random
 import copy
 
+sys.path.append('../shinken/modules')
+
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
+from shinken.modules.logstore_sqlite.module import LiveStatusLogStoreSqlite
+from shinken.modules.livestatus_broker import module as livestatus_broker
+from shinken.modules.livestatus_broker.module import LiveStatus_broker
+from shinken.modules.livestatus_broker.livestatus import LiveStatus
+from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
+from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
 from shinken.modules.livestatus_broker.mapping import Logline
-from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
+
 from shinken.comment import Comment
 
 sys.setcheckinterval(10000)

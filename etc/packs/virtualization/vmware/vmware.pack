@@ -5,7 +5,7 @@
 
 "path":"virtualization/",
 
-"templates": ["esx", "vmware-vm"],
+"templates": ["esx", "vmware-vm", "vcenter"],
 
 "macros":{
          "_ESX_CPU_WARN": {"type":"percent",

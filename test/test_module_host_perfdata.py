@@ -26,7 +26,8 @@
 import os
 from shinken_test import *
 sys.path.append("../shinken/modules")
-from host_perfdata_broker import *
+from shinken.modules.host_perfdata_broker import module as host_perfdata_broker
+from shinken.modules.host_perfdata_broker.module import get_instance
 from shinken.brok import Brok
 
 

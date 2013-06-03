@@ -44,8 +44,9 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
-from shinken.modules import livestatus_broker
-from shinken.modules.livestatus_broker import LiveStatus_broker
+# Special Livestatus module opening since the module rename
+from shinken.modules.livestatus_broker import module as livestatus_broker
+from shinken.modules.livestatus_broker.module import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
 from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
 from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache

@@ -28,6 +28,7 @@ import time
 import sys
 import traceback
 import cStringIO
+import imp
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -69,8 +70,8 @@ class ModulesManager(object):
     def load(self):
         now = int(time.time())
         # We get all modules file with .py
-        modules_files = [fname[:-3] for fname in os.listdir(self.modules_path)
-                         if fname.endswith(".py")]
+        modules_files = []#fname[:-3] for fname in os.listdir(self.modules_path)
+                         #if fname.endswith(".py")]
 
         # And directories
         modules_files.extend([fname for fname in os.listdir(self.modules_path)
@@ -85,18 +86,29 @@ class ModulesManager(object):
         # our type
         del self.imported_modules[:]
         for fname in modules_files:
-            #print "Try to load", fname
             try:
-                m = __import__(fname)
+                # Then we load the module.py inside this directory
+                mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.py'))
+                mod_dir  =  os.path.dirname(mod_file)
+                # We add this dir to sys.path so the module can load local files too
+                sys.path.append(mod_dir)
+                # important, equivalent to import fname from module.py
+                m = imp.load_source(fname, mod_file)
+                m_dir = os.path.abspath(os.path.dirname(m.__file__))
+                
+                # Look if it's a valid module
                 if not hasattr(m, 'properties'):
+                    logger.warning('Bad module file for %s : missing properties dict' % mod_file)
                     continue
-
+                
                 # We want to keep only the modules of our type
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception, exp:
+                # Oups, somethign went wrong here...
                 logger.warning("Importing module %s: %s" % (fname, exp))
 
+        # Now we want to find in theses modules the ones we are looking for
         del self.modules_assoc[:]
         for mod_conf in self.modules:
             module_type = mod_conf.module_type
