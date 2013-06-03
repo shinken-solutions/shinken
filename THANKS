@@ -98,3 +98,4 @@ To GILLARDEAU Thibaut for his bug report about the windows pack
 To Georges Racinet for his bugs reports about SSL
 To pepejey for his bug report about void password in ldap auth module. And NO THANKS to the Ldap protocol RFC guys :( 
 To Benoit Dunand-Laisin for his bug report about livestatus command management regression
+To Frederic Mohier for his fix about nmap discovery and windows
