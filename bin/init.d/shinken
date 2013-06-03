@@ -165,10 +165,6 @@ if ! test "$SHINKENCFG"
 then
     SHINKENCFG="$ETC/nagios.cfg"
 fi
-if ! test "$SHINKENSPECIFICCFG"
-then
-    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
-fi
 
 # If var or run dir is missing, create them and chown them
 [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
@@ -290,10 +286,16 @@ do_start() {
 	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
         rc=$?
     elif [ "$mod" != "arbiter" ]; then
-        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+        MODCFG=`echo ${mod}CFG | tr '[:lower:]' '[:upper:]'`
+        output=$("$modfilepath" -d -c "${MODCFG}" $DEBUGCMD 2>&1)
         rc=$?
     else
-        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+        if ! test "$SHINKENSPECIFICCFG"
+        then
+            output=$("$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+        else
+            output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+        fi
         rc=$?
     fi
     # debug:
