@@ -24,7 +24,9 @@
 #
 
 from shinken_test import *
-from shinken.modules.webui.helper import helper
+from shinken.modulesctx import modulesctx
+webui = modulesctx.get_module('webui')
+helper = webui.helper
 
 
 class TestUIHelper(ShinkenTest):
