@@ -30,8 +30,10 @@ from multiprocessing import Queue, Manager, active_children
 from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules.booster_nrpe import module as nrpe_poller
-from shinken.modules.booster_nrpe.module import get_instance
+from shinken.modulesctx import modulesctx
+nrpe_poller = modulesctx.get_module('booster_nrpe')
+get_instance = nrpe_poller.get_instance
+
 from shinken.message import Message
 
 modconf = Module()

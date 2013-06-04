@@ -29,8 +29,9 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules.hack_commands_poller_tag_arbiter import module as hack_commands_poller_tag_arbiter
-from shinken.modules.hack_commands_poller_tag_arbiter.module import get_instance
+from shinken.modulesctx import modulesctx
+hack_commands_poller_tag_arbiter = modulesctx.get_module('hack_commands_poller_tag_arbiter')
+get_instance = hack_commands_poller_tag_arbiter.get_instance
 
 
 class TestHackCmdPollerTag(ShinkenTest):

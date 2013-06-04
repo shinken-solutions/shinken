@@ -173,6 +173,8 @@ class ShinkenTest(unittest.TestCase):
         scheddaemon.sched = self.sched
         scheddaemon.modulesdir = modulesdir
         scheddaemon.load_modules_manager()
+        # Remember to clean the logs we just created before launching tests
+        self.clear_logs()
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
