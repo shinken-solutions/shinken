@@ -26,8 +26,8 @@ Test memcache retention.
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules.memcache_retention_scheduler import module as memcache_retention_scheduler
-from shinken.modules.memcache_retention_scheduler.module import get_instance
+from shinken.modules.retention_memcache import module as memcache_retention_scheduler
+from shinken.modules.retention_memcache.module import get_instance
 
 modconf = Module()
 modconf.module_name = "MemcacheRetention"

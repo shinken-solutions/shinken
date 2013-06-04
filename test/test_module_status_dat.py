@@ -27,7 +27,7 @@ import os
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.modules.status_dat_broker.module import get_instance
+from shinken.modules.status_dat.module import get_instance
 
 
 class TestConfig(ShinkenTest):

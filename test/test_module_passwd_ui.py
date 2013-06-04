@@ -38,8 +38,8 @@ if not sys.version_info > (2, 5):
         raise SystemExit(0)
 
 from shinken.objects.module import Module
-from shinken.modules.passwd_ui import module as passwd_ui
-from shinken.modules.passwd_ui.module import get_instance
+from shinken.modules.auth_htpasswd import module as passwd_ui
+from shinken.modules.auth_htpasswd.module import get_instance
 from shinken.log import logger
 
 

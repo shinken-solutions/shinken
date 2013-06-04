@@ -45,13 +45,6 @@ properties = {
 def get_instance(plugin):
     logger.info("[Livestatus Broker] Get a Livestatus instance for plugin %s" % plugin.get_name())
 
-    # First try to import
-    try:
-        from livestatus_broker import LiveStatus_broker
-    except ImportError, exp:
-        logger.warning("[Livestatus Broker] Warning: the plugin type %s is unavailable: %s" % ('livestatus', exp))
-        return None
-
     instance = LiveStatus_broker(plugin)
     return instance
 
@@ -80,7 +73,7 @@ from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
 # Local import
-from livestatus import LiveStatus
+from livestatus_obj import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
 from livestatus_query_cache import LiveStatusQueryCache
 from livestatus_stack import LiveStatusStack

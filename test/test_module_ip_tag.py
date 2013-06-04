@@ -29,8 +29,8 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules.ip_tag_arbiter import module as ip_tag_arbiter
-from shinken.modules.ip_tag_arbiter.module import get_instance
+from shinken.modules.ip_tag import module as ip_tag_arbiter
+from shinken.modules.ip_tag.module import get_instance
 
 
 class TestIpTag(ShinkenTest):

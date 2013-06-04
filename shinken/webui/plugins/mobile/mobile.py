@@ -29,7 +29,7 @@
 import time
 from shinken.util import safe_print
 from shinken.webui.bottle import redirect
-from shinken.modules.webui_broker.helper import hst_srv_sort
+from shinken.modules.webui.helper import hst_srv_sort
 from shinken.misc.sorter import worse_first
 
 try:

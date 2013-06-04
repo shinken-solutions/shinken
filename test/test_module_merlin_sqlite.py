@@ -26,7 +26,7 @@
 from shinken_test import unittest, ShinkenTest
 
 from shinken.brok import Brok
-from shinken.modules.merlindb_broker.module import get_instance
+from shinken.modules.merlindb.module import get_instance
 
 
 class TestConfig(ShinkenTest):

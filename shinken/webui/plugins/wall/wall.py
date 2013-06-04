@@ -29,7 +29,7 @@ app = None
 import time
 
 from shinken.webui.bottle import redirect
-from shinken.modules.webui_broker.helper import hst_srv_sort
+from shinken.modules.webui.helper import hst_srv_sort
 from shinken.util import safe_print
 try:
     import json

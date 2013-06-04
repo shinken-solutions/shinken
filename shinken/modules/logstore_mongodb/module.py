@@ -39,10 +39,10 @@ import pymongo
 from shinken.objects.service import Service
 
 # Import a class from the livestatus module, should be already loaded!
-import livestatus_broker
-LiveStatusStack = livestatus_broker.LiveStatusStack
-LOGCLASS_INVALID = livestatus_broker.LOGCLASS_INVALID
-Logline = livestatus_broker.Logline
+from shinken.modules.livestatus import module as livestatus
+LiveStatusStack = livestatus.LiveStatusStack
+LOGCLASS_INVALID = livestatus.LOGCLASS_INVALID
+Logline = livestatus.Logline
 
 
 from pymongo import Connection

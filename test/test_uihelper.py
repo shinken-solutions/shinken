@@ -24,7 +24,7 @@
 #
 
 from shinken_test import *
-from shinken.modules.webui_broker.helper import helper
+from shinken.modules.webui.helper import helper
 
 
 class TestUIHelper(ShinkenTest):

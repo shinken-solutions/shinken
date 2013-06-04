@@ -45,11 +45,11 @@ from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
 # Special Livestatus module opening since the module rename
-from shinken.modules.livestatus_broker import module as livestatus_broker
-from shinken.modules.livestatus_broker.module import LiveStatus_broker
-from shinken.modules.livestatus_broker.livestatus import LiveStatus
-from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
+from shinken.modules.livestatus import module as livestatus_broker
+from shinken.modules.livestatus.module import LiveStatus_broker
+from shinken.modules.livestatus.livestatus import LiveStatus
+from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
+from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
 from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()

@@ -40,7 +40,7 @@ from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
-from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.livestatus.mapping import Logline
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
 from shinken.comment import Comment

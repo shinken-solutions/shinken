@@ -42,12 +42,12 @@ from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
 from shinken.modules.logstore_sqlite.module import LiveStatusLogStoreSqlite
-from shinken.modules.livestatus_broker import module as livestatus_broker
-from shinken.modules.livestatus_broker.module import LiveStatus_broker
-from shinken.modules.livestatus_broker.livestatus import LiveStatus
-from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
-from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.livestatus import module as livestatus_broker
+from shinken.modules.livestatus.module import LiveStatus_broker
+from shinken.modules.livestatus.livestatus import LiveStatus
+from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
+from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
+from shinken.modules.livestatus.mapping import Logline
 
 from shinken.comment import Comment
 
