@@ -30,8 +30,10 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.daemons.arbiterdaemon import Arbiter
 from shinken.objects.module import Module
-from shinken.modules.pickle_retention_file_generic import module as pickle_retention_file_generic
-from shinken.modules.pickle_retention_file_generic.module import get_instance
+
+from shinken.modulesctx import modulesctx
+pickle_retention_file_generic = modulesctx.get_module('pickle_retention_file_generic')
+get_instance = pickle_retention_file_generic.get_instance
 
 modconf = Module()
 modconf.module_name = "PickleRetentionGeneric"
