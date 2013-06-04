@@ -29,8 +29,10 @@ import time
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules.pickle_retention_file_scheduler import module as pickle_retention_file_scheduler
-from shinken.modules.pickle_retention_file_scheduler.module import get_instance
+
+from shinken.modulesctx import modulesctx
+pickle_retention_file_scheduler = modulesctx.get_module('pickle_retention_file_scheduler')
+get_instance = pickle_retention_file_scheduler.get_instance
 
 modconf = Module()
 modconf.module_name = "PickleRetention"

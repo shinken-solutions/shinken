@@ -30,8 +30,10 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules.ip_tag import module as ip_tag_arbiter
-from shinken.modules.file_tag.module import get_instance
+
+from shinken.modulesctx import modulesctx
+get_instance = modulesctx.get_module('file_tag').get_instance
+
 
 
 class TestFileTag(ShinkenTest):

@@ -34,8 +34,10 @@ time.sleep = original_time_sleep
 
 from shinken.objects.module import Module
 
-from shinken.modules.hot_dependencies import module as hot_dependencies_arbiter
-from shinken.modules.hot_dependencies.module import Hot_dependencies_arbiter, get_instance
+from shinken.modulesctx import modulesctx
+hot_dependencies_arbiter = modulesctx.get_module('hot_dependencies')
+Hot_dependencies_arbiter = hot_dependencies_arbiter.Hot_dependencies_arbiter
+get_instance             = hot_dependencies_arbiter.get_instance
 
 modconf = Module()
 modconf.module_name = "PickleRetention"

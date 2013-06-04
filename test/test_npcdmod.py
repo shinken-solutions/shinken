@@ -29,9 +29,10 @@ from multiprocessing import Queue
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
+from shinken.modulesctx import modulesctx
+npcdmod_broker = modulesctx.get_module('npcdmod')
+Npcd_broker = npcdmod_broker.Npcd_broker
 
-from shinken.modules.npcdmod import module as npcdmod_broker
-from shinken.modules.npcdmod.module import Npcd_broker
 
 sys.setcheckinterval(10000)
 

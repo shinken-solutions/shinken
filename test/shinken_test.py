@@ -171,7 +171,8 @@ class ShinkenTest(unittest.TestCase):
         self.sched = Scheduler(scheddaemon)
 
         scheddaemon.sched = self.sched
-
+        scheddaemon.modulesdir = modulesdir
+        scheddaemon.load_modules_manager()
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
