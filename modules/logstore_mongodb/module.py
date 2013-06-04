@@ -36,10 +36,13 @@ import datetime
 import re
 import sys
 import pymongo
+
 from shinken.objects.service import Service
+from shinken.modulesctx import modulesctx
 
 # Import a class from the livestatus module, should be already loaded!
-from shinken.modules.livestatus import module as livestatus
+livestatus = modulesctx.get_module('livestatus')
+
 LiveStatusStack = livestatus.LiveStatusStack
 LOGCLASS_INVALID = livestatus.LOGCLASS_INVALID
 Logline = livestatus.Logline

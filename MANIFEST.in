@@ -4,6 +4,7 @@ recursive-include etc *.cfg *.ini *.pem
 recursive-include windows .bat .reg
 recursive-include bin *.* *-* shinken
 recursive-include libexec *.*
+recursive-include modules *.*
 include test *.py *.txt
 recursive-include doc *.html *.png *.txt *.css *.jpg *.xml *.tpl *.gif *.js
 global-exclude .git *.pyc *.pyo

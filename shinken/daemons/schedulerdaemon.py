@@ -400,6 +400,7 @@ class Shinken(BaseSatellite):
             self.load_config_file()
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
+            self.load_modules_manager()
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.info("[scheduler] General interface is at: %s" % self.uri2)
             self.do_mainloop()

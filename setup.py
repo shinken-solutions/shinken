@@ -482,6 +482,7 @@ if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
 etc_root = os.path.dirname(default_paths['etc'])
+var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
 main_config_files = ('nagios.cfg',
@@ -491,6 +492,7 @@ additionnal_config_files = ('shinken-specific.cfg',
                             'shinken-specific-high-availability.cfg',
                             'shinken-specific-load-balanced-only.cfg',
                             'skonf.cfg',
+                            'paths.cfg',
                             )
 
 config_objects_file = (
@@ -573,7 +575,11 @@ if not is_update:
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken']
          ))
-#print "DATA", data_files
+    
+    # Also add modules to the var directory
+    for p in gen_data_files('modules'):
+        _path, _file = os.path.split(p)
+        data_files.append( (os.path.join(var_root, _path), [p]))
 
 print "All package _data"
 if __name__ == "__main__":

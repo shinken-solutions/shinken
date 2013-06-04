@@ -49,6 +49,7 @@ import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
 
@@ -134,6 +135,7 @@ class Daemon(object):
         #
         # as returned once the daemon is started.
         'workdir':       PathProp(default=DEFAULT_WORK_DIR),
+        'modulesdir':    PathProp(default='modules'),
         'host':          StringProp(default='0.0.0.0'),
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
@@ -195,8 +197,6 @@ class Daemon(object):
         # and be really forked()
         self.manager = None
 
-        self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
-
         os.umask(UMASK)
         self.set_exit_handler()
 
@@ -254,18 +254,19 @@ class Daemon(object):
                 break
         self.request_stop()
 
+
     def do_load_modules(self):
         self.modules_manager.load_and_init()
         logger.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+
 
     # Dummy method for adding broker to this daemon
     def add(self, elt):
         pass
 
+
     def dump_memory(self):
         logger.info("I dump my memory, it can take a minute")
-
-
         try:
             from guppy import hpy
             hp = hpy()
@@ -273,15 +274,24 @@ class Daemon(object):
         except ImportError:
             logger.warning('I do not have the module guppy for memory dump, please install it')
 
+
     def load_config_file(self):
         self.parse_config_file()
         if self.config_file is not None:
             # Some paths can be relatives. We must have a full path by taking
             # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
-            pass
+
+
+    def load_modules_manager(self):
+        self.modules_manager = ModulesManager(self.name, self.find_modules_path(), [])
         # Set the modules watchdogs
-        self.modules_manager.set_max_queue_size(self.max_queue_size)
+        # TOFIX: Beware, the arbiter do not have the max_queue_size property
+        self.modules_manager.set_max_queue_size(getattr(self, 'max_queue_size', 0))
+        # And make the module manager load the sub-process Queue() manager
+        self.modules_manager.load_manager(self.manager)
+        
+
 
     def change_to_workdir(self):
         try:
@@ -290,12 +300,14 @@ class Daemon(object):
             raise InvalidWorkDir(e)
         self.debug_output.append("Successfully changed to workdir: %s" % (self.workdir))
 
+
     def unlink(self):
         logger.debug("Unlinking %s" % self.pidfile)
         try:
             os.unlink(self.pidfile)
         except Exception, e:
             logger.error("Got an error unlinking our pidfile: %s" % (e))
+
 
     # Look if we need a local log or not
     def register_local_log(self):
@@ -309,6 +321,7 @@ class Daemon(object):
                 sys.exit(2)
             logger.info("Using the local log file '%s'" % self.local_log)
 
+
     # Only on linux: Check for /dev/shm write access
     def check_shm(self):
         import stat
@@ -319,6 +332,7 @@ class Daemon(object):
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
                 logger.critical("The directory %s is not writable or readable. Please make it read writable: %s" % (shm_path, shm_path))
                 sys.exit(2)
+
 
     def __open_pidfile(self, write=False):
         ## if problem on opening or creating file it'll be raised to the caller:
@@ -333,11 +347,10 @@ class Daemon(object):
         except Exception, e:
             raise InvalidPidFile(e)
 
+
     # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
     # Keep in self.fpid the File object to the pidfile. Will be used by writepid.
     def check_parallel_run(self):
-
-
         # TODO: other daemon run on nt
         if os.name == 'nt':
             logger.warning("The parallel daemon check is not available on nt")
@@ -381,6 +394,7 @@ class Daemon(object):
         # because the previous instance should have deleted it!!
         self.__open_pidfile(write=True)
 
+
     def write_pid(self, pid=None):
         if pid is None:
             pid = os.getpid()
@@ -389,6 +403,7 @@ class Daemon(object):
         self.fpid.write("%d" % (pid))
         self.fpid.close()
         del self.fpid  ## no longer needed
+
 
     # Close all the process file descriptors. Skip the descriptors
     # present in the skip_close_fds list
@@ -409,10 +424,10 @@ class Daemon(object):
             except OSError:  # ERROR, fd wasn't open to begin with (ignored)
                 pass
 
+
     # Go in "daemon" mode: close unused fds, redirect stdout/err,
     # chdir, umask, fork-setsid-fork-writepid
     def daemonize(self, skip_close_fds=None):
-
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
@@ -471,6 +486,7 @@ class Daemon(object):
             logger.debug(s)
         del self.debug_output
 
+
     def do_daemon_init_and_start(self, use_pyro=True):
         self.change_to_user_group()
         self.change_to_workdir()
@@ -503,8 +519,7 @@ class Daemon(object):
             self.manager = None
         else:
             self.manager = Manager()
-        # And make the module manager know it
-        self.modules_manager.load_manager(self.manager)
+        # Will be add to the modules manager later
 
     def setup_pyro_daemon(self):
 
@@ -548,6 +563,7 @@ class Daemon(object):
 
         self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl)
 
+
     def get_socks_activity(self, socks, timeout):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
@@ -558,23 +574,24 @@ class Daemon(object):
             raise
         return ins
 
+
     # Find the absolute path of the shinken module directory and returns it.
+    # If the directory do not exist, we must exit!
     def find_modules_path(self):
-        import shinken
-        # BEWARE: this way of finding path is good if we still
-        # DO NOT HAVE CHANGED PWD!!!
-        # Now get the module path. It's in fact the directory modules
-        # inside the shinken directory. So let's find it.
+        if not hasattr(self, 'modulesdir') or not self.modulesdir:
+            logger.error("Your configuration is missing the path to the modules (modulesdir). Please configure it")
+            sys.exit(2)
+        self.modulesdir = os.path.abspath(self.modulesdir)
+        logger.info("Modules directory: %s" % (self.modulesdir))
+        if not os.path.exists(self.modulesdir):
+            logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modulesdir)
+            sys.exit(2)
 
-        self.debug_output.append("modulemanager file %s" % shinken.modulesmanager.__file__)
-        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        self.debug_output.append("modulemanager absolute file %s" % modulespath)
-        # We got one of the files
-        parent_path = os.path.dirname(os.path.dirname(modulespath))
-        modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        self.debug_output.append("Using modules path: %s" % (modulespath))
+        # Ok remember to populate the modulesctx object
+        modulesctx.set_modulesdir(self.modulesdir)
 
-        return modulespath
+        return self.modulesdir
+
 
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
@@ -583,6 +600,7 @@ class Daemon(object):
         self.modules_manager.check_alive_instances()
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
+
 
     # Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
@@ -675,6 +693,7 @@ class Daemon(object):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
 
+
     # Some paths can be relatives. We must have a full path by taking
     # the config file by reference
     def relative_paths_to_full(self, reference_path):
@@ -689,6 +708,7 @@ class Daemon(object):
                     path = new_path
                 setattr(self, prop, path)
                 #print "Setting %s for %s" % (path, prop)
+
 
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))

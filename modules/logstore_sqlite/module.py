@@ -37,9 +37,13 @@ import datetime
 import re
 from shinken.objects.service import Service
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
+
+
+livestatus_broker = modulesctx.get_module('livestatus')
 
 # Import a class from the livestatus module, should be already loaded!
-from shinken.modules.livestatus import module as livestatus_broker
+#from shinken.modules.livestatus import module as livestatus_broker
 LiveStatusStack = livestatus_broker.LiveStatusStack
 LOGCLASS_INVALID = livestatus_broker.LOGCLASS_INVALID
 Logline = livestatus_broker.Logline

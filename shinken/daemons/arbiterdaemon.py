@@ -268,6 +268,10 @@ class Arbiter(Daemon):
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.me.modules]))
 
+        self.modulesdir = getattr(self.conf, 'modulesdir', '')
+
+        # Ok it's time to load the module manager now!
+        self.load_modules_manager()
         # we request the instances without them being *started*
         # (for those that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)

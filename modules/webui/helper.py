@@ -40,8 +40,7 @@ except ImportError:
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
 from shinken.misc.sorter import hst_srv_sort
-# TODO: manage it in a clean way.
-from shinken.modules.webui.perfdata_guess import get_perfometer_table_values
+from perfdata_guess import get_perfometer_table_values
 
 
 class Helper(object):

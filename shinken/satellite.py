@@ -937,6 +937,8 @@ class Satellite(BaseSatellite):
 
             self.do_post_daemon_init()
 
+            self.load_modules_manager()
+
             # We wait for initial conf
             self.wait_for_initial_conf()
             if not self.new_conf:  # we must have either big problem or was requested to shutdown

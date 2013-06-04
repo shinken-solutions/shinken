@@ -68,6 +68,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.objects.module import Module
 from shinken.daemon import Daemon
@@ -196,8 +197,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.log.load_obj(self)
         # Daemon like init
         self.debug_output = []
-
-        self.modules_manager = ModulesManager('livestatus', self.find_modules_path(), [])
+        self.modulesdir = modulesctx.get_modulesdir()
+        self.modules_manager = ModulesManager('livestatus', self.modulesdir, [])
         self.modules_manager.set_modules(self.modules)
         # We can now output some previously silenced debug output
         self.do_load_modules()

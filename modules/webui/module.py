@@ -44,6 +44,7 @@ from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, template
 from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
@@ -155,6 +156,7 @@ class Webui_broker(BaseModule, Daemon):
         print "Init of the Webui '%s'" % self.name
         self.rg.load_external_queue(self.from_q)
 
+
     # This is called only when we are in a scheduler
     # and just before we are started. So we can gain time, and
     # just load all scheduler objects without fear :) (we
@@ -164,9 +166,11 @@ class Webui_broker(BaseModule, Daemon):
         print "pre_scheduler_mod_start::", sched.__dict__
         self.rg.load_from_scheduler(sched)
 
+
     # In a scheduler we will have a filter of what we really want as a brok
     def want_brok(self, b):
         return self.rg.want_brok(b)
+
 
     def main(self):
         self.set_proctitle(self.name)
@@ -176,7 +180,7 @@ class Webui_broker(BaseModule, Daemon):
 
         # Daemon like init
         self.debug_output = []
-
+        self.modulesdir = modulesctx.get_modulesdir()
         self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
         # We can now output some previously silenced debug output
@@ -211,11 +215,13 @@ class Webui_broker(BaseModule, Daemon):
             time.sleep(2)
             raise
 
+
     # A plugin send us en external command. We just put it
     # in the good queue
     def push_external_command(self, e):
         print "WebUI: got an external command", e.__dict__
         self.from_q.put(e)
+
 
     # Real main function
     def do_main(self):
@@ -468,6 +474,7 @@ class Webui_broker(BaseModule, Daemon):
             # like 1ms
             time.sleep(0.001)
 
+
     # It will say if we can launch a brok management or not
     # We can only if there is no readers running from now
     def wait_for_no_readers(self):
@@ -491,6 +498,7 @@ class Webui_broker(BaseModule, Daemon):
                 print "WARNING: we are in lock/read since more than 30s!"
                 start = time.time()
 
+
     # We want a lock manager version of the plugin functions
     def lockable_function(self, f):
         print "We create a lock version of", f
@@ -510,6 +518,7 @@ class Webui_broker(BaseModule, Daemon):
                 self.global_lock.release()
         print "The lock version is", lock_version
         return lock_version
+
 
     def declare_common_static(self):
         @route('/static/photos/:path#.+#')
@@ -535,6 +544,7 @@ class Webui_broker(BaseModule, Daemon):
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
+
 
     def check_auth(self, user, password):
         print "Checking auth of", user  # , password
@@ -566,6 +576,7 @@ class Webui_broker(BaseModule, Daemon):
         # Ok if we got a real contact, and if a module auth it
         return (is_ok and c is not None)
 
+
     def get_user_auth(self):
         # First we look for the user sid
         # so we bail out if it's a false one
@@ -577,6 +588,7 @@ class Webui_broker(BaseModule, Daemon):
 
         c = self.datamgr.get_contact(user_name)
         return c
+
 
     # Try to got for an element the graphs uris from modules
     # The source variable describes the source of the calling. Are we displaying 
@@ -602,6 +614,7 @@ class Webui_broker(BaseModule, Daemon):
         #safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris
+
         
     def get_common_preference(self, key, default=None):
         safe_print("Checking common preference for", key)
@@ -653,6 +666,7 @@ class Webui_broker(BaseModule, Daemon):
         print 'get_user_preference :: Nothing return, I send non'
         return default
 
+
     # Try to got for an element the graphs uris from modules
     def set_user_preference(self, user, key, value):
         safe_print("Saving user preference for", user.get_name(), key, value)
@@ -669,6 +683,7 @@ class Webui_broker(BaseModule, Daemon):
                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
+
                 
     def set_common_preference(self, key, value):
         safe_print("Saving common preference", key, value)
@@ -694,6 +709,7 @@ class Webui_broker(BaseModule, Daemon):
     # For a specific place like dashboard we return widget lists
     def get_widgets_for(self, place):
         return self.widgets.get(place, [])
+
 
     # Will get all label/uri for external UI like PNP or NagVis
     def get_external_ui_link(self):
@@ -721,13 +737,16 @@ class Webui_broker(BaseModule, Daemon):
         except Exception, exp:
             pass#print "Exception?", exp
 
+
     def get_webui_port(self):
         port = self.port
         return port
 
+
     def get_skonf_port(self):
         port = self.http_port
         return port
+
 
     def get_skonf_active_state(self):
         state = self.show_skonf

@@ -103,6 +103,7 @@ class Config(Item):
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default=''),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
+        'modulesdir':               StringProp(default='modules'),
         'use_local_log':            BoolProp(default='1'),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
