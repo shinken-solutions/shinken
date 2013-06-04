@@ -286,7 +286,9 @@ do_start() {
 	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
         rc=$?
     elif [ "$mod" != "arbiter" ]; then
-        MODCFG=`echo ${mod}CFG | tr '[:lower:]' '[:upper:]'`
+        # MAYBE THERE IS SOMETHING MORE CLEAN ???...
+        MODCFG=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
+        MODCFG=$(eval echo ${MODCFG})
         output=$("$modfilepath" -d -c "${MODCFG}" $DEBUGCMD 2>&1)
         rc=$?
     else
