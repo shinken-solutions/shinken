@@ -26,6 +26,7 @@
 
 import imp
 import os
+import sys
 
 from shinken.log import logger
 
@@ -42,6 +43,9 @@ class ModulesContext(object):
 
     # Useful for a module to load another one, and get a handler to it
     def get_module(self, name):
+        mod_dir  = os.path.abspath(os.path.join(self.modulesdir, name))
+        if not mod_dir in sys.path:
+            sys.path.append(mod_dir)
         mod_path = os.path.join(self.modulesdir, name, 'module.py')
         try:
             r = imp.load_source(name, mod_path)

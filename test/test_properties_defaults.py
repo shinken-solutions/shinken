@@ -98,6 +98,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('prefix', '/usr/local/shinken/'),
         ('workdir', ''),
         ('config_base_dir', ''),
+        ('modulesdir', 'modules'),
         ('use_local_log', '1'),
         ('log_level', 'WARNING'),
         ('local_log', 'arbiterd.log'),

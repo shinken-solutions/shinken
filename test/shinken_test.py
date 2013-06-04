@@ -23,6 +23,7 @@ from shinken.objects.module import Module
 
 from shinken.dispatcher import Dispatcher
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
@@ -44,12 +45,26 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
+# Modules are by default on the ../modules
+myself = os.path.abspath(__file__)
+modulesdir = os.path.join(os.path.dirname(os.path.dirname(myself)), 'modules')
+
+class __DUMMY:
+    def add(self, obj):
+        pass
+
+logger.load_obj(__DUMMY())
+
+
+modulesctx.set_modulesdir(modulesdir)
+
 # Special Livestatus module opening since the module rename
-from shinken.modules.livestatus import module as livestatus_broker
-from shinken.modules.livestatus.module import LiveStatus_broker
-from shinken.modules.livestatus.livestatus import LiveStatus
-from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
+#from shinken.modules.livestatus import module as livestatus_broker
+livestatus_broker = modulesctx.get_module('livestatus')
+LiveStatus_broker = livestatus_broker.LiveStatus_broker
+LiveStatus = livestatus_broker.LiveStatus
+LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
+LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
 from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
