@@ -173,7 +173,12 @@ class Graphite_Webui(BaseModule):
 
         # If not try to use the one for the parent folder
         if not os.path.isfile(thefile):
-            thefile = os.path.join(self.templates_path, filename)
+            # In case of CHECK_NRPE, the check_name is in second place
+            if len(elt.check_command.get_name().split('!')) > 1:
+                filename = elt.check_command.get_name().split('!')[0] + '_' + elt.check_command.get_name().split('!')[1] + '.graph'
+                thefile = os.path.join(self.templates_path, source, filename)
+            if not os.path.isfile(thefile):
+                thefile = os.path.join(self.templates_path, filename)
 
         if os.path.isfile(thefile):
             template_html = ''
