@@ -29,8 +29,11 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules import hack_poller_tag_by_macros
-from shinken.modules.hack_poller_tag_by_macros import get_instance
+
+from shinken.modulesctx import modulesctx
+hack_poller_tag_by_macros = modulesctx.get_module('hack_poller_tag_by_macros')
+get_instance = hack_poller_tag_by_macros.get_instance
+
 
 
 class TestHackPollerTagByMacors(ShinkenTest):

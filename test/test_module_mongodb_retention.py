@@ -26,8 +26,10 @@ Test Mongodb retention.
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules.retention_mongodb import module as mongodb_retention
-from shinken.modules.retention_mongodb.module import get_instance
+
+from shinken.modulesctx import modulesctx
+mongodb_retention = modulesctx.get_module('retention_mongodb')
+get_instance = mongodb_retention.get_instance
 
 modconf = Module()
 modconf.module_name = "MongodbRetention"

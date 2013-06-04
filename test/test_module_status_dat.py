@@ -27,7 +27,10 @@ import os
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.modules.status_dat.module import get_instance
+from shinken.modulesctx import modulesctx
+get_instance = modulesctx.get_module('status_dat').get_instance
+
+
 
 
 class TestConfig(ShinkenTest):

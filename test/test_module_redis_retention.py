@@ -27,8 +27,9 @@ from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
 from shinken.log import logger
-from shinken.modules.retention_redis import module as redis_retention_scheduler
-from shinken.modules.retention_redis.module import get_instance
+from shinken.modulesctx import modulesctx
+redis_retention_scheduler = modulesctx.get_module('retention_redis')
+get_instance = redis_retention_scheduler.get_instance
 
 modconf = Module()
 modconf.module_name = "RedisRetention"

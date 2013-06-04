@@ -27,8 +27,9 @@ import os
 from shinken_test import *
 from shinken.brok import Brok
 
-from shinken.modules.trending import module as trending_broker
-from shinken.modules.trending.module import get_instance
+from shinken.modulesctx import modulesctx
+trending_broker = modulesctx.get_module('trending')
+get_instance = trending_broker.get_instance
 
 modconf = Module()
 modconf.module_name = "Trending"

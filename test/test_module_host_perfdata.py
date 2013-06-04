@@ -26,9 +26,13 @@
 import os
 from shinken_test import *
 sys.path.append("../shinken/modules")
-from shinken.modules.perfdata_host import module as host_perfdata_broker
-from shinken.modules.perfdata_host.module import get_instance
+
 from shinken.brok import Brok
+
+
+from shinken.modulesctx import modulesctx
+host_perfdata_broker = modulesctx.get_module('perfdata_host')
+get_instance = host_perfdata_broker.get_instance
 
 
 class TestConfig(ShinkenTest):

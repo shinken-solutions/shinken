@@ -28,7 +28,8 @@ import time
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.modules.perfdata_service.module import get_instance
+from shinken.modulesctx import modulesctx
+get_instance = modulesctx.get_module('perfdata_service').get_instance
 
 
 class TestModSRVPErfdata(ShinkenTest):
