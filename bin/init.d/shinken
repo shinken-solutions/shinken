@@ -286,10 +286,9 @@ do_start() {
 	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
         rc=$?
     elif [ "$mod" != "arbiter" ]; then
-        # MAYBE THERE IS SOMETHING MORE CLEAN ???...
-        MODCFG=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
-        MODCFG=$(eval echo ${MODCFG})
-        output=$("$modfilepath" -d -c "${MODCFG}" $DEBUGCMD 2>&1)
+        modINI=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
+        modinifile=$(eval echo ${modINI})
+        output=$("$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
         rc=$?
     else
         if ! test "$SHINKENSPECIFICCFG"
