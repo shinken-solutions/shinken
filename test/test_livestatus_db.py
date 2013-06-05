@@ -41,13 +41,20 @@ from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
-from shinken.modules.logstore_sqlite.module import LiveStatusLogStoreSqlite
-from shinken.modules.livestatus import module as livestatus_broker
-from shinken.modules.livestatus.module import LiveStatus_broker
-from shinken.modules.livestatus.livestatus import LiveStatus
-from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
-from shinken.modules.livestatus.mapping import Logline
+livestatus_broker = modulesctx.get_module('livestatus')
+LiveStatus_broker = livestatus_broker.LiveStatus_broker
+LiveStatus = livestatus_broker.LiveStatus
+LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
+LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
+Logline = livestatus_broker.Logline
+LiveStatusLogStoreSqlite = modulesctx.get_module('logstore_sqlite').LiveStatusLogStoreSqlite
+#from shinken.modules.logstore_sqlite.module import LiveStatusLogStoreSqlite
+#from shinken.modules.livestatus import module as livestatus_broker
+#from shinken.modules.livestatus.module import LiveStatus_broker
+#from shinken.modules.livestatus.livestatus import LiveStatus
+#from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
+#from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
+#from shinken.modules.livestatus.mapping import Logline
 
 from shinken.comment import Comment
 
@@ -844,7 +851,7 @@ class TestConfigNoLogstore(TestConfig):
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
         self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modulesctx.get_modulesdir(), [])
         self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
         # We can now output some previouly silented debug ouput
         self.livestatus_broker.do_load_modules()

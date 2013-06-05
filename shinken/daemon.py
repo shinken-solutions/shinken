@@ -203,7 +203,8 @@ class Daemon(object):
 
     # At least, lose the local log file if needed
     def do_stop(self):
-        if self.modules_manager:
+        # Maybe the modules manager is not even created!
+        if getattr(self, 'modules_manager', None):
             # We save what we can but NOT for the scheduler
             # because the current sched object is a dummy one
             # and the old one has already done it!

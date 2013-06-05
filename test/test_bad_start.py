@@ -25,7 +25,7 @@
 import os
 import tempfile
 
-from shinken_test import unittest
+from shinken_test import *
 
 import shinken.log as shinken_log
 
@@ -85,12 +85,15 @@ class template_Test_Daemon_Bad_Start():
         cls = self.daemon_cls
         return cls(daemons_config[cls], False, True, False, None)
 
+
     def get_daemon(self):
         global run
         os.chdir(curdir)
         shinken_log.local_log = None  # otherwise get some "trashs" logs..
         d = self.create_daemon()
+
         d.load_config_file()
+        
         d.port = HIGH_PORT + run  # random high port, I hope no one is using it :)
         run += 1
         self.get_login_and_group(d)
