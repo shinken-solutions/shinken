@@ -67,6 +67,7 @@ class Graphite_broker(BaseModule):
         else:
             self.port = int(getattr(modconf, 'port', '2003'))
         self.tick_limit = int(getattr(modconf, 'tick_limit', '300'))
+        self.ignore_services = getattr(modconf, 'ignore_services', '').split(',')
         self.buffer = []
         self.ticks = 0
         self.host_dict = {}
@@ -156,8 +157,8 @@ class Graphite_broker(BaseModule):
         perf_data = data['perf_data']
         couples = self.get_metric_and_value(perf_data)
 
-        # If no values, we can exit now
-        if len(couples) == 0:
+        # If no values or ignore check, we can exit now
+        if len(couples) == 0 or data['service_description'] in self.ignore_services:
             return
 
         hname = self.illegal_char.sub('_', data['host_name'])
