@@ -157,8 +157,10 @@ class __Action(object):
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
         
-        logger.debug("Output : %s" % self.output)
-        logger.debug("- perf_data : %s" % self.perf_data)
+        if len(self.output) > 0:
+            logger.debug("Output : %s" % self.output)
+        if len(self.perf_data) > 0:
+            logger.debug("- perf_data : %s" % self.perf_data)
         # safe_print("Output : ", self.output)
         # safe_print("- perf_data : ", self.perf_data)
         # safe_print("- long_output : ", self.long_output)
