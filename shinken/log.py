@@ -30,6 +30,19 @@ from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
 
+# If we run on Windows OS ...
+import os
+if os.name == 'nt': 
+    # To display colored text on a Windows console
+    from ctypes import windll
+    # needed for Python2/Python3 diff
+    try:
+        input = raw_input
+    except:
+        pass
+    STD_OUTPUT_HANDLE = -11
+    stdout_handle = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+
 def is_tty():
     # Look if we are in a tty or not
     if hasattr(sys.stdout, 'isatty'):
@@ -172,7 +185,11 @@ class Log:
         if print_it and len(s) > 1:            
             # Take a color so we can print if it's a TTY
             if is_tty():
-                color = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}.get(level, None)
+                # Coloured text in Windows console
+                if os.name == 'nt': 
+                    color = {Log.NOTSET:7, Log.DEBUG:8, Log.INFO:7, Log.WARNING:6, Log.ERROR:4, Log.CRITICAL:5}.get(level, None)
+                else:
+                    color = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}.get(level, None)
             else:
                 color = None
             
@@ -180,7 +197,12 @@ class Log:
             # If the daemon is launched with a non UTF8 shell
             # we can have problems in printing, work around it.
             try:
-                cprint(s[:-1], color)
+                # Coloured text in Windows console
+                if os.name == 'nt': 
+                    windll.kernel32.SetConsoleTextAttribute(stdout_handle, color)
+                    print(s[:-1])
+                else:
+                    cprint(s[:-1], color)
             except UnicodeEncodeError:
                 print s.encode('ascii', 'ignore')
 
