@@ -166,4 +166,3 @@ if __name__ == '__main__':
     cprint('Underline red on grey color', 'red', 'on_grey',
             ['underline'])
     cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
-
