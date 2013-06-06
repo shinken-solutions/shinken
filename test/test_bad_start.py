@@ -71,7 +71,7 @@ HIGH_PORT = 65488
 run = 0   # We will open some ports but not close them (yes it's not good) and
 # so we will open a range from a high port
 
-class template_Test_Daemon_Bad_Start():
+class template_Daemon_Bad_Start():
 
     def get_login_and_group(self, p):
         try:
@@ -143,23 +143,23 @@ class template_Test_Daemon_Bad_Start():
         os.rmdir(d1.workdir)
 
 
-class Test_Broker_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+class Test_Broker_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Broker
 
 
-class Test_Scheduler_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+class Test_Scheduler_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Shinken
 
 
-class Test_Poller_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+class Test_Poller_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Poller
 
 
-class Test_Reactionner_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+class Test_Reactionner_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Reactionner
 
 
-class Test_Arbiter_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+class Test_Arbiter_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Arbiter
 
     def create_daemon(self):
