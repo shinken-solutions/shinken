@@ -425,7 +425,7 @@ class Host(SchedulingItem):
             state = False
 
         if getattr(self, 'check_command', None) is None:
-            logger.error("%s: I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
@@ -434,13 +434,13 @@ class Host(SchedulingItem):
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
                         logger.error("[host::%s] %s" % (self.get_name(), bperror))
                     state = False
 
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.error("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period

@@ -167,11 +167,3 @@ if __name__ == '__main__':
             ['underline'])
     cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
 
-    # look at the output and select the color you want
-    # for instance hex E is yellow on black
-    # hex 1E is yellow on blue
-    # hex 2E is yellow on green and so on
-    for color in range(0, 75):
-         windll.kernel32.SetConsoleTextAttribute(stdout_handle, color)
-         print("%X --> %s" % (color, "Have a fine day!"))
-         
