@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import types
-import time
+#import time
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
 from shinken.misc.regenerator import Regenerator
@@ -36,8 +36,9 @@ from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SER
 def itersorted(self, hints=None):
     preselected_ids = []
     preselection = False
-    logger.debug("[Livestatus Regenerator] Hint is %s" % hints["target"])
-    if hints == None:
+    if hints is not None:
+        logger.debug("[Livestatus Regenerator] Hint is %s" % hints["target"])
+    if hints is None:
         # return all items
         hints = {}
     elif hints['target'] == HINT_HOST:
