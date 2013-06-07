@@ -158,8 +158,8 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         # Make one big filter where the single filters are anded
         self.filter_stack.and_elements(self.filter_stack.qsize())
 
-        if self.table == 'log':
-            self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
+        #if self.table == 'log':
+        #    self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
 
         self.metainfo = LiveStatusQueryMetainfo(metafilter)
 
