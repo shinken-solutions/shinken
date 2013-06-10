@@ -28,7 +28,11 @@ import os
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        os.popen("test_db_sqlite/create_db_sqlite.sh")
+        if os.name != 'nt':
+            os.popen("test_db_sqlite/create_db_sqlite.sh")
+        else :
+            print "Cannot generate sqlite test dabatase for Windows"
+            return
 
     def create_db(self):
         self.db = DBSqlite("test_db_sqlite/test_db_sqlite.sqlite", table_prefix='')
