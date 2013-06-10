@@ -17,6 +17,7 @@ dist
 
 # OS generated files #
 ######################
+*.pyc
 *.DS_Store*
 ehthumbs.db
 Icon?
