@@ -28,6 +28,8 @@
 # to brok log into the syslog
 
 import syslog
+import types
+from logging.handlers import SysLogHandler
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -37,26 +39,54 @@ properties = {
     'type': 'syslog',
     'external': False,
     'phases': ['running'],
-    }
+}
 
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    logger.info("Get a Syslog broker for plugin %s" % plugin.get_name())
+    name = plugin.get_name()
+    logger.info("Get a Syslog broker for plugin %s" % (name))
 
-    #Catch errors
-    #path = plugin.path
-    instance = Syslog_broker(plugin)
+    # syslog.syslog priority defaults to (LOG_INFO | LOG_USER)
+    facility = syslog.LOG_USER
+    priority = syslog.LOG_INFO
+
+    # Get configuration values, if any
+    if hasattr(plugin, 'facility'):
+        facility = plugin.facility
+    if hasattr(plugin, 'priority'):
+        priority = plugin.priority
+
+    # Ensure config values have a string type compatible with
+    # SysLogHandler.encodePriority
+    if type(facility) in types.StringTypes:
+        facility = types.StringType(facility)
+    if type(priority) in types.StringTypes:
+        priority = types.StringType(priority)
+
+    # Convert facility / priority (integers or strings) to aggregated
+    # priority value
+    sh = SysLogHandler()
+    try:
+        priority = sh.encodePriority(facility, priority)
+    except TypeError, e:
+        logger.error("[%s] Couldn't get syslog priority, "
+                     "reverting to defaults" % (name))
+
+    logger.debug("[%s] Syslog priority: %d" % (name, priority))
+
+    instance = Syslog_broker(plugin, priority)
     return instance
 
 
-# Class for the Merlindb Broker
-# Get broks and puts them in merlin database
+# Class for the Syslog Broker
+# Get log broks and send them to syslog
 class Syslog_broker(BaseModule):
-    def __init__(self, modconf):
+    def __init__(self, modconf, priority):
         BaseModule.__init__(self, modconf)
+        self.priority = priority
 
-    # A service check have just arrived, we UPDATE data info with this
+    # A log has just arrived, we send it to syslog
     def manage_log_brok(self, b):
         data = b.data
-        syslog.syslog(data['log'].encode('UTF-8'))
+        syslog.syslog(self.priority, data['log'].encode('UTF-8'))
