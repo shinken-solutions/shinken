@@ -8,7 +8,7 @@ Rem (c) 2013 - IPM France
 Rem ----------------------------------------------------------------------------
 
 Rem Parameters
-SET python_exe=c:\python27\python.exe
+SET python_exe=@@pythonDir@@\python.exe
 
 Rem Commande line parameters
 SET module=%1
@@ -23,14 +23,14 @@ Rem Check if Python is installed
 if not exist %python_exe% goto pythonNotInstalled
 
 Rem Set Shinken command line parameters
-SET parameters=-c C:\Shinken\etc\%module%d-windows.ini
-if "%module%" == "arbiter" SET parameters=-c C:\Shinken\etc\nagios-windows.cfg -c C:\Shinken\etc\shinken-specific-windows.cfg
+SET parameters=-c @@installDir@@\etc\%module%d-windows.ini
+if "%module%" == "arbiter" SET parameters=-c @@installDir@@\etc\nagios-windows.cfg -c @@installDir@@\etc\shinken-specific-windows.cfg
 
 if "%test%" == "-v" Goto checkShinken
 
 Echo ***************************************************************************
 Echo Starting Shinken module '%module%' ...
-start /SEPARATE "Shinken %module%" %python_exe% C:\Shinken\bin\shinken-%module%.py %test% %parameters%
+start "Shinken %module%" %python_exe% @@installDir@@\bin\shinken-%module%.py %parameters%
 If ERRORLEVEL 1 Goto startError
 Echo Shinken module '%module%' started.
 Echo ***************************************************************************
@@ -38,10 +38,10 @@ Goto End
 
 :checkShinken
 SET module=arbiter
-SET parameters=-c C:\Shinken\etc\nagios-windows.cfg -c C:\Shinken\etc\shinken-specific-windows.cfg
+SET parameters=-v -c @@installDir@@\etc\nagios-windows.cfg -c @@installDir@@\etc\shinken-specific-windows.cfg
 Echo ***************************************************************************
 Echo Starting Shinken configuration check ...
-%python_exe% C:\Shinken\bin\shinken-%module%.py %test% %parameters%
+%python_exe% @@installDir@@\bin\shinken-%module%.py %parameters%
 If ERRORLEVEL 1 Goto startError
 Echo Shinken module '%module%' started.
 Echo ***************************************************************************
@@ -50,13 +50,13 @@ Goto End
 :startError
 Echo Shinken module '%module%' not started, return code : %ERRORLEVEL%
 Echo ***************************************************************************
-Goto End
+Exit /B 1
 
 :pythonNotInstalled
 echo ***************************************************************************
 echo Python is not installed. Shinken can not be started !
 echo ***************************************************************************
-goto End
+Exit /B 2
 
 :Syntax
 Echo ***************************************************************************
@@ -71,6 +71,7 @@ Echo  Current parameters :
 Echo   module : %module%
 Echo   test : %test%
 Echo ***************************************************************************
-goto End
+Exit /B 2
 
 :End
+Exit /B 0

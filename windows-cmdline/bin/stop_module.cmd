@@ -8,7 +8,7 @@ Rem (c) 2013 - IPM France
 Rem ----------------------------------------------------------------------------
 
 Rem Parameters
-SET python_exe=c:\python27\python.exe
+SET python_exe=@@pythonDir@@\python.exe
 
 Rem Commande line parameters
 SET module=%1
@@ -16,13 +16,6 @@ SET test=
 
 if "%1" == "" SET /P module=Identifiant du module ?
 if "%module%" == "" goto syntax
-
-Rem Check if Python is installed
-if not exist %python_exe% goto pythonNotInstalled
-
-Rem Set Shinken command line parameters
-SET parameters=-c C:\Shinken\etc\%module%d-windows.ini
-if "%module%" == "arbiter" SET parameters=-c C:\Shinken\etc\nagios-windows.cfg -c C:\Shinken\etc\shinken-specific-windows.cfg
 
 Echo ***************************************************************************
 Echo Stopping Shinken module : %module%

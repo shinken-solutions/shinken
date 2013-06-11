@@ -1,0 +1,173 @@
+# This is not a std html or any other kind of file
+# It is used to define some command examples
+# Run check wmi plus with --iexamples=1 to see the output
+# The output is HTML format suitable for use with Drupal
+# You must provide -H, -u and -p on the command line
+# The base command then becomes
+# check_wmi_plus.pl -H HOST -u USER -p PASSWORD
+#
+# The file is read one line at a time
+# Lines starting with:
+# !A are arguments to the check wmi plus base command
+# !T are a title and are made bold
+#
+# other lines are assumed to be HTML that we just display as is
+# lines starting with # are ignored
+#
+# define some colours - we need them for display, perf and trigger
+!Define:display:blue
+!Define:perf:green
+!Define:trigger:red
+#
+The checks shown on this page are generated using the --iexample=1 parameter.
+A valid -H HOSTNAME -u USER and -p PASSWORD must also be passed on the command line.
+The examples are run against a machine (which is not very busy) running Windows Server 2008 R2, IIS v7, SQL Express 2008 and Exchange 2010.
+
+<h2>Lets Start Easy</h2>
+!TShow the version and basic command line help
+!A--version
+
+Some of the following commands need at least 2 WMI data samples. If the command output shows <code>Collecting first WMI sample because the previous state data file (/tmp/cwpss_somefilename.state) contained no data. Results will be shown the next time the plugin runs.</code> then you need to run the command a second time to see the output.
+
+The plugin output is colour coded as follows:
+<font color=blue>Plugin display output</font>
+<font color=red>Warning/Critical trigger information</font>
+<font color=green>Performance Data</font>
+
+!TCheck CPU utilisation
+!A-m checkcpu
+
+If you take a look at the --help output for checkcpu you can see that the only valid Warning/Critical Field is _AvgCPU, so you do not  even  need to specify it. So the command for going warning above 1% and critical above 90% is:
+!A-m checkcpu -w 1 -c 90
+
+<h2>The Built-in Checks</h2>
+!TCheck the CPU Queue
+!A-m checkcpuq
+
+!TCheck the CPU Queue 5 times as fast as possible (0 seconds apart)
+!A-m checkcpuq -a 5 -y 0
+
+!TCheck the drive size of C:
+!A-m checkdrivesize -a c:
+
+!TCheck the drive size of all drives, use volume names and include an overall total
+!A-m checkdrivesize -o 1 -3 1
+
+!TCheck the system event log for the last 1 hour for warnings and errors
+!A-m checkeventlog
+
+!TCheck the Application event log for errors only (hence the -o 2) for the past 4 hours
+!A-m checkeventlog -a application -o 2 -3 4
+
+!TCheck the file age of c:/pagefile.sys and warn if it is older 10 minutes, go critical if less than 30 minutes
+!A-m checkfileage -a c:/pagefile.sys -w 10min -c 30min:
+
+!TCheck the size of c:/pagefile.sys, warn if it is more than 1500MB and go critical if larger than 2GB
+!A-m checkfilesize -a c:/pagefile.sys -w 1500m -c 2g
+
+!T show the size of the files in c:/ (do not include sub directories)
+!A-m checkfoldersize -a c:/
+
+!TCheck the RAM utilisation
+!A-m checkmem
+
+!TCheck the RAM utilisation, warn if more than 40% utilised, go critical if more than 90%
+!A-m checkmem -w 40 -c 90
+
+!TCheck the RAM utilisation, warn if less than 70% is free
+!A-m checkmem -w _MemFree%=70:
+
+!TList valid network adapters for checknetwork
+!A-m checknetwork
+
+!TCheck the network stats for the 'LAN0' interface (might not be valid for your system).
+!A-m checknetwork -a LAN0
+
+!TCheck the size of all page files using automatic warning and critical settings
+!A-m checkpage -a auto -o .
+
+!TCheck for all the processes whose Name matches svchost
+!A-m checkprocess -a svchost
+
+!TCheck for all the processes whose Name matches svchost, display the full Commandline and warn if there are more than 4 of them
+!A-m checkprocess -a svchost -o comm -w 4
+
+!TCheck for all the processes whose Commandline matches C:/Windows/system32/svchost.exe, display the full Commandline and exclude any of them that contain the string 'serv'
+!A-m checkprocess -s comm -a C:/Windows/system32/svchost.exe -o comm -3 serv
+
+!TCheck the all automatially started services are running OK. Warn if there is more than zero not OK, go critical if there is more than 1 not OK
+!A-m checkservice -a auto -w 0 -c 1
+
+!TCheck all services with the string 'windows' in the short or long name
+!A-m checkservice -a windows
+
+!TCheck SMART status of all drives on the system.
+!A-m checksmart -H gold
+
+!TCheck all services with the string 'windows' in the short or long name, exclude any that have 'audio' in them
+!A-m checkservice -a windows -o audio
+
+!TCheck the uptime and warn if it is less than 20 minutes, go critical if it is less than 10 minutes (and just so it will always show a warning for this example add -w 1min)
+!A-m checkuptime -w 10min: -c 20min: -w 1min
+
+
+
+<h2>Some Example Ini File Checks</h2>
+Only some of the checks from the ini files have been included. There are lots more.
+
+!TCheck DHCP stats. Warn if the active queue length exceeds 2
+!A-m checkdhcp -s stats -w ActiveQueueLength=2
+
+!TCheck the number of DNS A records defined 
+!A-m checkdns -s arecords
+
+!TCheck utilisation of each CPU, rather than just the overall total, warn if any of them goes above 5% utilisation
+!A-m checkeachcpu -w 5
+
+!TList Exchange DB Instances (needs at least Information Store and Transport services running)
+!A-m checkexchange -s listDBInstances
+
+!TCheck Exchange stats for any database name ending in _Total
+!A-m checkexchange -s DBInstances -a %_total
+
+!TCheck Exchange SMTP Receive states for all transports (_Total)
+!A-m checkexchange -s SmtpReceive -a _total
+
+!TCheck IIS Connection stats for all web sites
+!A-m checkiis -s connections -a _total
+
+!TCheck IIS Request stats and warn if the POST Requests per second exceeds 10 for the testsite
+!A-m checkiis -s requests -a TestSite -w _PostRequestsPersec=10
+
+!TCheck the IO of the logical drive C:, warn if the current disk queue length is more than 10
+!A-m checkio -s logical -a c: -w CurrentDiskQueueLength=10
+
+!TCheck the IO of the physical drive C: (may be different to the logical C:)
+!A-m checkio -s physical -a c:
+
+!TCheck the printer spooler, warn if OutofPaperErrors>0 (There are no printer servers running on this test machine!)
+!A-m checkprint -s spooler -w OutofPaperErrors=0
+
+!TCheck CPU utilisation for some SQL server processes, warn if utilisation is more than 10% or if there are more than 2 processes
+!A-m checkproc -s cpu -a %sql% -w 10 -w _ItemCount=2
+
+!TCheck for processes using more than 50% of the CPU. Include all processes with the string 'serv'. Also warn if there are more than 2 of them found using more than 50%
+!A-m checkproc -s cpuabove -a %serv% -w 50 -w _ItemCount=2
+
+!TList the SQL Express DB Instances
+!A-m checksql -s listdb -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS
+
+!TCheck SQL Express cache stats totals (use a different value for -a for SQL Server)
+!A-m checksql -s cache -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS
+
+!TCheck SQL Express latch stats (use a different value for -a for SQL Server)
+!A-m checksql -s latches -a MSSQLSQLEXPRESS_MSSQLSQLEXPRESS
+
+!TCheck the numbers of Terminal Services sessions
+!A-m checkts -s sessions
+
+!TCheck for users that do not require a password and warn if you find some, go OK of none found (--nodatamode)
+!A-m checkusers -s count -a "PasswordRequired!='True'" --nodatamode -w 0
+
+!TShow the Operating System and Service Pack version, and the installation data. Warn if the installation is older than 2 years
+!A-m info -s os -w 2yr
