@@ -65,8 +65,8 @@ sys.path.insert(0, bottle_dir)
 webuimod_dir = os.path.abspath(os.path.dirname(__file__))
 htdocs_dir = os.path.join(webuimod_dir, 'htdocs')
 
-bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
-bottle.TEMPLATE_PATH.append(bottle_dir)
+bottle.TEMPLATE_PATH.append(os.path.join(webuimod_dir, 'views'))
+bottle.TEMPLATE_PATH.append(webuimod_dir)
 
 
 
