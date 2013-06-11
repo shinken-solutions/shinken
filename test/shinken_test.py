@@ -114,7 +114,43 @@ class Pluginconf(object):
     pass
 
 
-class ShinkenTest(unittest.TestCase):
+class _Unittest2CompatMixIn:
+    """
+    Mixin for simulating methods new in unittest2 resp. Python 2.7.
+
+    Every test-case should inherit this *after* unittest.TestCase to
+    make the compatiblity-methods available if they are not defined in
+    unittest.TestCase already. Example::
+
+       class MyTestCase(unittest.TestCase, Unittest2CompatMixIn):
+           ...
+
+    """
+    def assertNotIn(self, member, container, msg=None):
+       self.assertTrue(member not in container, msg)
+
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container, msg)
+
+    def assertIsInstance(self, obj, cls, msg=None):
+        self.assertTrue(isinstance(obj, cls), msg)
+
+    def assertRegexpMatches(self, line, pattern, msg):
+        r = re.search(pattern, line)
+        self.assertTrue(r is not None, msg)
+
+    def assertIs(self, obj, cmp, msg=None):
+        self.assertTrue(obj is cmp, msg)
+
+
+class TestCase(unittest.TestCase, _Unittest2CompatMixIn):
+    """
+    `unittest.TestCase` with mix-in for simulating methods new in
+    unittest2 resp. Python 2.7 already mixed-in.
+    """
+
+
+class ShinkenTest(TestCase):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
@@ -410,37 +446,6 @@ class ShinkenTest(unittest.TestCase):
         self.livestatus_broker.db.open()
         #--- livestatus_broker.do_main
 
-
-# Hook for old python some test
-if not hasattr(ShinkenTest, 'assertNotIn'):
-    def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
-    ShinkenTest.assertNotIn = assertNotIn
-        
-
-if not hasattr(ShinkenTest, 'assertIn'):
-    def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
-    ShinkenTest.assertIn = assertIn
-
-if not hasattr(ShinkenTest, 'assertIsInstance'):
-    def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
-    ShinkenTest.assertIsInstance = assertIsInstance
-                    
-
-if not hasattr(ShinkenTest, 'assertRegexpMatches'):
-    def assertRegexpMatches(self, line, patern):
-        r = re.search(patern, line)
-        self.assertTrue(r is not None)
-    ShinkenTest.assertRegexpMatches = assertRegexpMatches
-                    
-
-if not hasattr(ShinkenTest, 'assertIs'):
-    def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
-    ShinkenTest.assertIs = assertIs
-                            
 
 if __name__ == '__main__':
     unittest.main()
