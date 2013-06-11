@@ -61,6 +61,10 @@ bottle.debug(True)
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
+# Look at the webui module root dir too
+webuimod_dir = os.path.abspath(os.path.dirname(__file__))
+htdocs_dir = os.path.join(webuimod_dir, 'htdocs')
+
 bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
 
@@ -526,14 +530,14 @@ class Webui_broker(BaseModule, Daemon):
             if os.path.exists(os.path.join(self.photo_dir, path+'.jpg')):
                 return static_file(path+'.jpg', root=self.photo_dir)
             else:
-                return static_file('images/user.png', root=os.path.join(bottle_dir, 'htdocs'))
+                return static_file('images/user.png', root=htdocs_dir)
 
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
             # By default give from the root in bottle_dir/htdocs. If the file is missing,
             # search in the share dir
-            root = os.path.join(bottle_dir, 'htdocs')
+            root = htdocs_dir
             p = os.path.join(root, path)
             if not os.path.exists(p):
                 root = self.share_dir
@@ -542,7 +546,7 @@ class Webui_broker(BaseModule, Daemon):
         # And add the favicon ico too
         @route('/favicon.ico')
         def give_favicon():
-            return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
+            return static_file('favicon.ico', root=os.path.join(htdocs_dir, 'images'))
 
 
     def check_auth(self, user, password):
