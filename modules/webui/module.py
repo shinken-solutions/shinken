@@ -48,7 +48,6 @@ from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
-from shinken.webui import plugins
 
 # Local import
 from shinken.misc.datamanager import datamgr
@@ -257,7 +256,7 @@ class Webui_broker(BaseModule, Daemon):
                 
 
         # Then look at the plugins in toe core and load all we can there
-        core_plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
+        core_plugin_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'plugins')
         self.load_plugins(core_plugin_dir)
 
         # Declare the whole app static files AFTER the plugin ones
