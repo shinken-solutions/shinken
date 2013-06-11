@@ -49,6 +49,7 @@ function check_gotfirstdata_result(response){
     if(response.status == 200 && response.text == '1'){
 	// Go Refresh
         location.assign(location.href);
+	reinit_refresh();
     }else{
 	postpone_refresh();
     }
