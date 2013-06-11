@@ -161,6 +161,8 @@ class __Action(object):
             logger.debug("Output : %s" % self.output)
         if len(self.perf_data) > 0:
             logger.debug("- perf_data : %s" % self.perf_data)
+        # if len(self.long_output) > 0:
+            # logger.debug("Long output : %s" % self.long_output)
         # safe_print("Output : ", self.output)
         # safe_print("- perf_data : ", self.perf_data)
         # safe_print("- long_output : ", self.long_output)
