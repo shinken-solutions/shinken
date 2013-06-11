@@ -3,6 +3,7 @@
 *.egg-info
 build
 dist
+INSTALLED_FILES
 .project
 .pydevproject
 .settings
