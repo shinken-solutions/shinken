@@ -232,8 +232,9 @@ class Satellite(BaseSatellite):
 
         self.returns_queue = None
         self.q_by_mod = {}
-        # Todo, choose this value wisely
-        self.max_q_size = 42
+
+        # Not used for now
+        #self.max_q_size = 42
 
         # Can have a queue of external_commands given by modules
         # will be taken by arbiter to process
@@ -541,7 +542,8 @@ class Satellite(BaseSatellite):
 
         return max_size
 
-    # Here we create new workers if the queue load (len of verifs) is too long
+    # Here we do not create new workers yet  if the queue load (len of verifs) is too long
+    # We only ensure we have min_workers per modules.
     def adjust_worker_number_by_load(self):
         to_del = []
         logger.debug("[%s] Trying to adjust worker number."
@@ -550,7 +552,7 @@ class Satellite(BaseSatellite):
 
         # I want at least min_workers by module then if I can, I add worker for load balancing
         for mod in self.q_by_mod:
-            #At leat min_workers
+            #At least min_workers
             while len(self.q_by_mod[mod]) < self.min_workers:
                 try:
                     self.create_and_launch_worker(module_name=mod)
@@ -558,7 +560,7 @@ class Satellite(BaseSatellite):
                 # if so, just delete if from q_by_mod
                 except NotWorkerMod:
                     to_del.append(mod)
-
+            """
             # Try to really adjust load if necessary
             if self.get_max_q_len(mod) > self.max_q_size:
                 if len(self.q_by_mod[mod]) >= self.max_workers:
@@ -571,6 +573,7 @@ class Satellite(BaseSatellite):
                     # if so, just delete if from q_by_mod
                     except NotWorkerMod:
                         to_del.append(mod)
+            """
 
         for mod in to_del:
             logger.debug("[%s] The module %s is not a worker one, "
