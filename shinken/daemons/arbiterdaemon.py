@@ -63,7 +63,7 @@ class IForArbiter(Interface):
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
-
+    
 
     def get_config(self):
         return self.app.conf

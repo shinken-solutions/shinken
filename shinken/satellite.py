@@ -792,9 +792,9 @@ class Satellite(BaseSatellite):
     def do_post_daemon_init(self):
 
         # And we register them
-        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-        self.uri3 = self.pyro_daemon.register(self.brok_interface, "Broks")
-        self.uri4 = self.pyro_daemon.register(self.scheduler_interface, "Schedulers")
+        self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
+        self.uri3 = self.pyro_daemon.register(self.brok_interface)#, "Broks")
+        self.uri4 = self.pyro_daemon.register(self.scheduler_interface)#, "Schedulers")
 
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queue for fork AFTER

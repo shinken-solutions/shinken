@@ -109,6 +109,7 @@ class Interface(object):#Pyro.core.ObjBase, object):
 
     def put_conf(self, conf):
         self.app.new_conf = conf
+    put_conf.method = 'post'
 
     def wait_new_conf(self):
         self.app.cur_conf = None

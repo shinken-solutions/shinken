@@ -28,6 +28,7 @@ import errno
 import time
 import socket
 import copy
+import cPickle
 import inspect
 from log import logger
 
@@ -240,6 +241,9 @@ except AttributeError, exp:
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
+                                # Post args are cPickled
+                                if v is not None:
+                                    v = cPickle.loads(v)
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:

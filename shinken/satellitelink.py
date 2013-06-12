@@ -25,6 +25,9 @@
 
 import time
 import socket
+import requests
+import json
+import cPickle
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
@@ -101,20 +104,10 @@ class SatelliteLink(Item):
 
     def create_connection(self):
         try:
-            self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
-            # By default Pyro got problem in connect() function that can take
-            # long seconds to raise a timeout. And even with the _setTimeout()
-            # call. So we change the whole default connect() timeout
-            socket.setdefaulttimeout(self.timeout)
-            self.con = pyro.getProxy(self.uri)
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
-            pyro.set_timeout(self.con, self.timeout)
+            #self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
+            self.con = requests.Session()
+            self.uri = "http://%s:%s/" % (self.arb_satmap['address'], self.arb_satmap['port'])
         except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
             self.con = None
             logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
 
@@ -131,7 +124,8 @@ class SatelliteLink(Item):
 
         try:
             pyro.set_timeout(self.con, self.data_timeout)
-            self.con.put_conf(conf)
+            #self.con.put_conf(conf)
+            self._post('put_conf', {'conf':conf})
             pyro.set_timeout(self.con, self.timeout)
             return True
         except Pyro_exp_pack, exp:
@@ -212,6 +206,51 @@ class SatelliteLink(Item):
     def known_conf_managed_push(self, cfg_id, push_flavor):
         self.managed_confs[cfg_id] = push_flavor
 
+
+    # Try to get an URI path
+    def _get(self, path):
+        if self.con is None:
+            self.create_connection()
+        
+        # If the connection failed to initialize, bail out
+        if self.con is None:
+            self.add_failed_check_attempt()
+            return
+        print "REACHING", self.uri+path
+        r = self.con.get(self.uri+path)
+        
+        # If need it will raise an error here
+        r.raise_for_status()
+        # Should return us pong string
+        return r.content
+        
+
+    # Try to get an URI path
+    def _post(self, path, args):
+        if self.con is None:
+            self.create_connection()
+        
+        # If the connection failed to initialize, bail out
+        if self.con is None:
+            self.add_failed_check_attempt()
+            return
+        print "REACHING", self.uri+path
+        for (k,v) in args.iteritems():
+            print "TYPE?", type(v)
+            args[k] = cPickle.dumps(v)
+        t0 = time.time()
+        #data = cPickle.dumps(args)
+        print "Compress in", time.time() - t0
+        r = self.con.post(self.uri+path, data=args)
+        
+        # If need it will raise an error here
+        r.raise_for_status()
+        # Should return us pong string
+        return r.content
+
+    
+
+
     def ping(self):
         logger.info("Pinging %s" % self.get_name())
         try:
@@ -223,13 +262,15 @@ class SatelliteLink(Item):
             if self.con is None:
                 self.add_failed_check_attempt()
                 return
-            r = self.con.ping()
+            
+            r = self._get('ping')
+
             # Should return us pong string
             if r == 'pong':
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -277,16 +318,16 @@ class SatelliteLink(Item):
         if self.con is None:
             return False
 
-
         try:
-            r = self.con.got_conf()
+            r = self._get('got_conf')
             # Protect against bad Pyro return
             if not isinstance(r, bool):
                 return False
             return r
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:            
             self.con = None
             return False
+
 
     def remove_from_conf(self, sched_id):
         if self.con is None:
@@ -313,17 +354,19 @@ class SatelliteLink(Item):
             return
 
         try:
-            tab = self.con.what_i_managed()
-            #print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
+            tab = self._get('what_i_managed')
+            print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
+            tab = json.loads(tab)
             # Protect against bad Pyro return
             if not isinstance(tab, dict):
                 self.con = None
                 self.managed_confs = {}
+                return
             # We can update our list now
             self.managed_confs = tab
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             # A timeout is not a crime, put this case aside
-            if type(exp) == Pyro.errors.TimeoutError:
+            if type(exp) == requests.exceptions.Timeout:
                 return
             self.con = None
             #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
