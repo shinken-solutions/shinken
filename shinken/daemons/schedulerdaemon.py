@@ -122,7 +122,6 @@ class IForArbiter(IArb):
 
 
     def put_conf(self, conf):
-        print "WE RECEIVE", conf
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
     put_conf.method = 'POST'

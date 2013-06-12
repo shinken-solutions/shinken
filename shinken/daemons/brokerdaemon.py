@@ -29,6 +29,7 @@ import time
 import traceback
 import socket
 import cPickle
+import requests
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -182,7 +183,7 @@ class Broker(BaseSatellite):
 
         try:
             socket.setdefaulttimeout(3)
-            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            links[id]['con'] = requests.Session()#Pyro.core.getProxyForURI(uri)
             socket.setdefaulttimeout(None)
         except Pyro_exp_pack, exp:
             # But the multiprocessing module is not compatible with it!
@@ -196,8 +197,9 @@ class Broker(BaseSatellite):
         try:
             # initial ping must be quick
             pyro.set_timeout(links[id]['con'], 5)
-            links[id]['con'].ping()
-            new_run_id = links[id]['con'].get_running_id()
+            self._get(links[id], 'ping')
+            new_run_id = self._get(links[id], 'get_running_id')
+            new_run_id = float(new_run_id)
             # data transfer can be longer
             pyro.set_timeout(links[id]['con'], 120)
 
@@ -210,7 +212,8 @@ class Broker(BaseSatellite):
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
-                    links[id]['con'].fill_initial_broks(self.name)
+                    #links[id]['con'].fill_initial_broks(self.name)
+                    self._get(links[id], 'fill_initial_broks', {'bname':self.name})
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except Pyro_exp_pack, exp:
@@ -290,7 +293,10 @@ class Broker(BaseSatellite):
                 con = links[sched_id]['con']
                 if con is not None:  # None = not initialized
                     t0 = time.time()
-                    tmp_broks = con.get_broks(self.name)
+                    #tmp_broks = con.get_broks(self.name)
+                    tmp_broks = self._get(links[sched_id], 'get_broks', {'bname':self.name})
+                    tmp_broks = cPickle.loads(str(tmp_broks))
+
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
@@ -324,7 +330,7 @@ class Broker(BaseSatellite):
             # so.. bye bye :)
             except Exception, x:
                 logger.error(str(x))
-                logger.error(''.join(Pyro.util.getPyroTraceback(x)))
+                logger.error(traceback.format_exc())
                 sys.exit(1)
 
 
@@ -390,7 +396,8 @@ class Broker(BaseSatellite):
             if s['name'] in g_conf['satellitemap']:
                 s = dict(s)  # make a copy
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
+            #uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.schedulers[sched_id]['uri'] = uri
 
             self.schedulers[sched_id]['broks'] = broks
@@ -416,7 +423,8 @@ class Broker(BaseSatellite):
             if a['name'] in g_conf['satellitemap']:
                 a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
-            uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
+            #uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.arbiters[arb_id]['uri'] = uri
 
             self.arbiters[arb_id]['broks'] = broks
@@ -445,7 +453,8 @@ class Broker(BaseSatellite):
             if p['name'] in g_conf['satellitemap']:
                 p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
-            uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+            #uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.pollers[pol_id]['uri'] = uri
 
             self.pollers[pol_id]['broks'] = broks
@@ -476,7 +485,8 @@ class Broker(BaseSatellite):
             if r['name'] in g_conf['satellitemap']:
                 r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
-            uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
+            #uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.reactionners[rea_id]['uri'] = uri
 
             self.reactionners[rea_id]['broks'] = broks

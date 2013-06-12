@@ -214,39 +214,6 @@ class BaseSatellite(Daemon):
         return r
 
 
-class Satellite(BaseSatellite):
-    """Our main APP class"""
-
-    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
-
-        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, \
-                                            debug, debug_file)
-
-        # Keep broks so they can be eaten by a broker
-        self.broks = {}
-
-        self.workers = {}   # dict of active workers
-
-        # Init stats like Load for workers
-        self.wait_ratio = Load(initial_value=1)
-
-        self.brok_interface = IBroks(self)
-        self.scheduler_interface = ISchedulers(self)
-
-        # Just for having these attributes defined here. explicit > implicit ;)
-        self.uri2 = None
-        self.uri3 = None
-        self.s = None
-
-        self.returns_queue = None
-        self.q_by_mod = {}
-
-        # Can have a queue of external_commands given by modules
-        # will be taken by arbiter to process
-        self.external_commands = []
-
-
-    
     def _get(self, sched, path, args={}):
         uri = sched['uri']
         con = sched['con']
@@ -292,6 +259,42 @@ class Satellite(BaseSatellite):
         return r.content
 
 
+
+
+
+class Satellite(BaseSatellite):
+    """Our main APP class"""
+
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+
+        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, \
+                                            debug, debug_file)
+
+        # Keep broks so they can be eaten by a broker
+        self.broks = {}
+
+        self.workers = {}   # dict of active workers
+
+        # Init stats like Load for workers
+        self.wait_ratio = Load(initial_value=1)
+
+        self.brok_interface = IBroks(self)
+        self.scheduler_interface = ISchedulers(self)
+
+        # Just for having these attributes defined here. explicit > implicit ;)
+        self.uri2 = None
+        self.uri3 = None
+        self.s = None
+
+        self.returns_queue = None
+        self.q_by_mod = {}
+
+        # Can have a queue of external_commands given by modules
+        # will be taken by arbiter to process
+        self.external_commands = []
+
+
+    
     # Initialize or re-initialize connection with scheduler """
     def pynag_con_init(self, id):
         sched = self.schedulers[id]

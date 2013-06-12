@@ -32,7 +32,7 @@ import cPickle
 import inspect
 from log import logger
 
-from shinken.webui import bottle
+from shinken.webui import bottlecore as bottle
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
@@ -183,7 +183,7 @@ except AttributeError, exp:
 
             # And port already use now raise an exception
             try:
-                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect')
+                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect', quiet=True)
             except socket.error, exp:
                 msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
                 raise PortNotFree(msg)
@@ -231,13 +231,13 @@ except AttributeError, exp:
                 # and again
                 def register_callback(fname, args, f, obj):
                     def f_wrapper():
-                        print "Trying to catch the args need by the function", f, fname, args
-                        print 'And the object', obj
+                        #print "Trying to catch the args need by the function", f, fname, args
+                        #print 'And the object', obj
                         d = {}
                         method = getattr(f, 'method', 'get').lower()
-                        print "GOT FUNCITON METHOD", method
+                        #print "GOT FUNCITON METHOD", method
                         for aname in args:
-                            print "LOOKING FOR", aname, "in", method
+                            #print "LOOKING FOR", aname, "in", method
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
@@ -250,15 +250,15 @@ except AttributeError, exp:
                                     raise Exception('Missing argument %s' % aname)
                             d[aname] = v
                         ret = f(**d)
-                        print "THE FUNCTION RETURN", ret
+                        #print "THE FUNCTION RETURN", ret
                         return ret
                     print "REGISTERING", '/'+fname, "with", f_wrapper
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
                 register_callback(fname, args, f, obj)
                     
-            def bla():
-                return "FUCK"
-            bottle.route('/', callback=bla)
+            def slash():
+                return "OK"
+            bottle.route('/', callback=slash)
 
 
         def handleRequests(self, s):
