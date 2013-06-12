@@ -89,18 +89,20 @@ class InvalidPidFile(Exception): pass
 
 
 """ Interface for pyro communications """
-class Interface(Pyro.core.ObjBase, object):
+class Interface(object):#Pyro.core.ObjBase, object):
+    exports = []
 
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
 
-        Pyro.core.ObjBase.__init__(self)
+        #Pyro.core.ObjBase.__init__(self)
 
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
 
     def ping(self):
         return "pong"
+    exports.append({'route':'/ping', 'args':[], 'f':ping})
 
     def get_running_id(self):
         return self.running_id

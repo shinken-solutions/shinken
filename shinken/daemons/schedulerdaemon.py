@@ -337,7 +337,7 @@ class Shinken(BaseSatellite):
             self.pyro_daemon.unregister(self.ichecks)
         # Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
+        self.uri = self.pyro_daemon.register(self.ichecks)#, "Checks")
         logger.debug("The Checks Interface uri is: %s" % self.uri)
 
         # Same for Broks
@@ -346,7 +346,7 @@ class Shinken(BaseSatellite):
             self.pyro_daemon.unregister(self.ibroks)
         # Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
+        self.uri2 = self.pyro_daemon.register(self.ibroks)#, "Broks")
         logger.debug("The Broks Interface uri is: %s" % self.uri2)
 
         logger.info("Loading configuration.")
@@ -401,7 +401,7 @@ class Shinken(BaseSatellite):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
-            self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+            self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
             logger.info("[scheduler] General interface is at: %s" % self.uri2)
             self.do_mainloop()
         except Exception, exp:

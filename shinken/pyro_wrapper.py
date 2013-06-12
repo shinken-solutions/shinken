@@ -27,7 +27,11 @@ import select
 import errno
 import time
 import socket
+import copy
+import inspect
 from log import logger
+
+from shinken.webui import bottle
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
@@ -169,80 +173,92 @@ except AttributeError, exp:
 
         def __init__(self, host, port, use_ssl=False):
             self.port = port
+            self.host = host
             # Port = 0 means "I don't want pyro"
             if self.port == 0:
                 return
 
-            # Some version with Pyro got problems with the socket.MSG_WAITALL
-            # It was "solved" in 4.14. But before this, just delete it
-            if PYRO_VERSION in msg_waitall_issue_versions:
-                if hasattr(socket, 'MSG_WAITALL'):
-                    del socket.MSG_WAITALL
+            logger.info("Initializing HTTP connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
 
-            # Pyro 4 is by default a thread, should do select
-            # (I hate threads!)
-            # And of course the name changed since 4.5...
-            # Since then, we got a better sock reuse, so
-            # before 4.5 we must wait 35 s for the port to stop
-            # and in >=4.5 we can use REUSE socket :)
-            max_try = 35
-            if PYRO_VERSION in old_versions:
-                Pyro.config.SERVERTYPE = "select"
-            elif PYRO_VERSION in bad_versions:
-                logger.error("Your pyro version (%s) is not supported. Please install version (%s) "
-                             % (PYRO_VERSION, last_known_working_version))
-                exit(1)
-            else:
-                Pyro.config.SERVERTYPE = "multiplex"
-                # For Pyro >4.X hash
-                if hasattr(Pyro.config, 'SOCK_REUSE'):
-                    Pyro.config.SOCK_REUSE = True
-                    max_try = 1
-            nb_try = 0
-            #is_good = False # not used
-            # Ok, Pyro4 do not close sockets like it should,
-            # so we got TIME_WAIT socket :(
-            # so we allow to retry during 35 sec (30 sec is the default
-            # timewait for close sockets)
-            while nb_try < max_try:
-                nb_try += 1
-                logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" %
-                            (host, port, str(use_ssl)))
-                # And port already use now raise an exception
-                try:
-                    Pyro.core.Daemon.__init__(self, host=host, port=port)
-                    # Ok, we got our daemon, we can exit
-                    break
-                except socket.error, exp:
-                    msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
-                    # At 35 (or over), we are very not happy
-                    if nb_try >= max_try:
-                        raise PortNotFree(msg)
-                    logger.error(msg + "but we try another time in 1 sec")
-                    time.sleep(1)
-                except Exception, e:
-                    # must be a problem with pyro workdir:
-                    raise InvalidWorkDir(e)
+            # And port already use now raise an exception
+            try:
+                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect')
+            except socket.error, exp:
+                msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
+                raise PortNotFree(msg)
+            except Exception, e:
+                # must be a problem with pyro workdir:
+                raise InvalidWorkDir(e)
+
+            #@bottle.error(code=500)
+            #def error500(err):
+            #    print err.__dict__
+            #    return 'FUCKING ERROR 500', str(err)
+
 
         # Get the server socket but not if disabled
         def get_sockets(self):
             if self.port == 0:
                 return []
-            if PYRO_VERSION in old_versions:
-                return self.sockets()
-            else:
-                return self.sockets
+            return [self.srv.socket]
+
+        def register(self, obj):
+            print "TRYING TO REGISTER THE OBJECT", obj, "of the class", obj.__class__
+            print obj.__dict__
+            print obj.__class__.__dict__
+            methods = inspect.getmembers(obj, predicate=inspect.ismethod)
+            print methods
+            for (fname, f) in methods:
+                if fname.startswith('_'):
+                    print "SKIPPING PRIVATE function", fname
+                    continue
+                print fname, f
+                #print f.__dict__
+                print "ARGS", inspect.getargspec(f)
+                argspec = inspect.getargspec(f)
+                args = argspec.args
+                varargs = argspec.varargs
+                keywords = argspec.keywords
+                defaults = argspec.defaults
+                print args, varargs, keywords, defaults
+                # remove useless self in args, because we alredy got a bonded method f
+                if 'self' in args:
+                    args.remove('self')
+                print "NEW ARGS", fname, args
+                # WARNING : we MUST do a 2 levels function here, or the f_wrapper
+                # will be uniq and so will link to the last function again
+                # and again
+                def register_callback(fname, args, f, obj):
+                    def f_wrapper():
+                        print "Trying to catch the args need by the function", f, fname, args
+                        print 'And the object', obj
+                        d = {}
+                        method = getattr(f, 'method', 'get').lower()
+                        print "GOT FUNCITON METHOD", method
+                        for aname in args:
+                            print "LOOKING FOR", aname, "in", method
+                            v = None
+                            if method == 'post':
+                                v = bottle.request.forms.get(aname, None)
+                            elif method == 'get':
+                                v = bottle.request.GET.get(aname, None)
+                            if v is None:
+                                    raise Exception('Missing argument %s' % aname)
+                            d[aname] = v
+                        ret = f(**d)
+                        print "THE FUNCTION RETURN", ret
+                        return ret
+                    print "REGISTERING", '/'+fname, "with", f_wrapper
+                    bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
+                register_callback(fname, args, f, obj)
+                    
+            def bla():
+                return "FUCK"
+            bottle.route('/', callback=bla)
+
 
         def handleRequests(self, s):
-            try:
-                if PYRO_VERSION in old_versions:
-                    Pyro.core.Daemon.handleRequests(self, [s])
-                else:
-                    Pyro.core.Daemon.events(self, [s])
-            # Catch bad protocol attemps, like a telnet connexion
-            except ProtocolError:
-                pass
-                logger.warning("Someone is talking to me in a strange language!")
+            self.srv.handle_request()
 
 
     def create_uri(address, port, obj_name, use_ssl=False):

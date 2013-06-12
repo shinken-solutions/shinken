@@ -32,6 +32,7 @@ import socket
 import traceback
 import cStringIO
 import cPickle
+import copy
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -46,6 +47,7 @@ from shinken.external_command import ExternalCommand
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
+    exports = copy.copy(Interface.exports)
 
     def have_conf(self, magic_hash):
         # I've got a conf and a good one
@@ -54,14 +56,18 @@ class IForArbiter(Interface):
         else:  # I've no conf or a bad one
             return False
 
+
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf_raw):
         conf = cPickle.loads(conf_raw)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
+    put_conf.method = 'POST'
+
 
     def get_config(self):
         return self.app.conf
+
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
@@ -548,7 +554,7 @@ class Arbiter(Daemon):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             
-            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            self.uri_arb = self.pyro_daemon.register(self.interface)#, "ForArbiter")
 
             # ok we are now fully daemonized (if requested)
             # now we can start our "external" modules (if any):
