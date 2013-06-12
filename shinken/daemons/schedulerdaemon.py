@@ -56,7 +56,9 @@ They connect here and see if they are still OK with our running_id, if not, they
         res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags, reactionner_tags, worker_name, module_types)
         #print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
-        return res
+
+        return cPickle.dumps(res)
+    
 
     # poller or reactionner are putting us results
     def put_results(self, results):
@@ -70,7 +72,8 @@ They connect here and see if they are still OK with our running_id, if not, they
 
         #for c in results:
         #self.sched.put_results(c)
-        return True
+        return cPickle.dumps(True)
+    put_results.method = 'post'
 
 
 class IBroks(Interface):
@@ -91,7 +94,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
         
-        return res
+        return cPickle.dumps(res)
 
 
     # A broker is a new one, if we do not have

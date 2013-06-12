@@ -35,6 +35,8 @@ If Arbiter wants it to have a new conf, the satellite forgets the previous
  Schedulers (and actions into) and takes the new ones.
 """
 
+
+
 # Try to see if we are in an android device or not
 is_android = True
 try:
@@ -56,6 +58,7 @@ import sys
 import cPickle
 import traceback
 import socket
+import requests
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -242,6 +245,53 @@ class Satellite(BaseSatellite):
         # will be taken by arbiter to process
         self.external_commands = []
 
+
+    
+    def _get(self, sched, path, args={}):
+        uri = sched['uri']
+        con = sched['con']
+        if con is None:
+            sched['con'] = requests.Session()
+        if con is None:
+            return None
+
+        r = con.get(uri+path, params=args)
+
+        if r.status_code != requests.codes.ok:
+            print "FUCK", r.content
+        
+        # If need it will raise an error here
+        r.raise_for_status()
+        
+        # Ok get back the content if so
+        return r.content
+
+
+
+    def _post(self, sched, path, args={}):
+        uri = sched['uri']
+        con = sched['con']
+        if con is None:
+            sched['con'] = requests.Session()
+        if con is None:
+            return None
+
+        for (k,v) in args.iteritems():
+            print "TYPE?", type(v)
+            args[k] = cPickle.dumps(v)
+
+        r = con.post(uri+path, data=args)
+
+        if r.status_code != requests.codes.ok:
+            print "FUCK", r.content
+        
+        # If need it will raise an error here
+        r.raise_for_status()
+        
+        # Ok get back the content if so
+        return r.content
+
+
     # Initialize or re-initialize connection with scheduler """
     def pynag_con_init(self, id):
         sched = self.schedulers[id]
@@ -257,13 +307,13 @@ class Satellite(BaseSatellite):
         logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
 
         try:
-            socket.setdefaulttimeout(3)
-            sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
-            socket.setdefaulttimeout(None)
+            #socket.setdefaulttimeout(3)
+            sch_con = sched['con'] = requests.Session()#Pyro.core.getProxyForURI(uri)
+            #socket.setdefaulttimeout(None)
         except Pyro_exp_pack, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
+            #socket.setdefaulttimeout(None)
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -272,8 +322,10 @@ class Satellite(BaseSatellite):
         # timeout of 120 s
         # and get the running id
         try:
-            pyro.set_timeout(sch_con, 5)
-            new_run_id = sch_con.get_running_id()
+            #pyro.set_timeout(sch_con, 5)
+            new_run_id = self._get(sched, 'get_running_id')
+            new_run_id = float(new_run_id)
+            print "GET BACK RUNNING ID", new_run_id, type(new_run_id)
         except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError), exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
@@ -286,6 +338,7 @@ class Satellite(BaseSatellite):
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
         logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
+
 
     # Manage action returned from Workers
     # We just put them into the corresponding sched
@@ -343,7 +396,8 @@ class Satellite(BaseSatellite):
                 try:
                     con = sched['con']
                     if con is not None:  # None = not initialized
-                        send_ok = con.put_results(ret)
+                        send_ok = self._post(sched, 'put_results', {'results':ret})
+                        send_ok = bool(cPickle.loads(str(send_ok)))
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
@@ -455,11 +509,13 @@ class Satellite(BaseSatellite):
         # And then call our master stop from satellite code
         super(Satellite, self).do_stop()
 
+
     # Call by arbiter to get our external commands
     def get_external_commands(self):
         res = self.external_commands
         self.external_commands = []
         return res
+
 
     # A simple function to add objects in self
     # like broks in self.broks, etc
@@ -475,11 +531,13 @@ class Satellite(BaseSatellite):
             logger.debug("Enqueuing an external command '%s'" % str(elt.__dict__))
             self.external_commands.append(elt)
 
+
     # Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
         res = copy.copy(self.broks)
         self.broks.clear()
         return res
+
 
     # workers are processes, they can die in a numerous of ways
     # like:
@@ -524,6 +582,7 @@ class Satellite(BaseSatellite):
 
             # So now we can really forgot it
             del self.workers[id]
+
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
@@ -570,6 +629,7 @@ class Satellite(BaseSatellite):
         # return the id of the worker (i), and its queue
         return (i, q)
 
+
     # Add a list of actions to our queues
     def add_actions(self, lst, sched_id):
         for a in lst:
@@ -581,6 +641,7 @@ class Satellite(BaseSatellite):
             a.status = 'queue'
             self.assign_to_a_queue(a)
 
+
     # Take an action and put it into one queue
     def assign_to_a_queue(self, a):
         msg = Message(id=0, type='Do', data=a)
@@ -589,6 +650,7 @@ class Satellite(BaseSatellite):
         a.worker_id = i
         if q is not None:
             q.put(msg)
+
 
     # We get new actions from schedulers, we create a Message and we
     # put it in the s queue (from master to slave)
@@ -618,11 +680,13 @@ class Satellite(BaseSatellite):
                 if con is not None:  # None = not initialized
                     pyro.set_timeout(con, 120)
                     # OK, go for it :)
-                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
-                                             poller_tags=self.poller_tags, \
-                                             reactionner_tags=self.reactionner_tags, \
-                                             worker_name=self.name, \
-                                             module_types=self.q_by_mod.keys())
+                    tmp = self._get(sched, 'get_checks', {'do_checks':do_checks, 'do_actions':do_actions,
+                                                          'poller_tags':self.poller_tags,
+                                                          'reactionner_tags':self.reactionner_tags,
+                                                          'worker_name':self.name,
+                                                          'module_types':self.q_by_mod.keys()})
+                    # Explicit pickle load
+                    tmp = cPickle.loads(str(tmp))
                     logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
@@ -860,7 +924,8 @@ class Satellite(BaseSatellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            #uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
