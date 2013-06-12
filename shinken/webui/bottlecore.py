@@ -1917,7 +1917,6 @@ class WSGIRefServer(ServerAdapter):
 ## Shinken: add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler):  # pragma: no cover
-        print "Call the Select version"
         from wsgiref.simple_server import make_server, WSGIRequestHandler
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):

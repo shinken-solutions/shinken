@@ -179,6 +179,7 @@ except AttributeError, exp:
             if self.port == 0:
                 return
 
+            self.uri = 'http://%s:%s' % (self.host, self.port)
             logger.info("Initializing HTTP connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
 
             # And port already use now raise an exception
@@ -204,28 +205,21 @@ except AttributeError, exp:
             return [self.srv.socket]
 
         def register(self, obj):
-            print "TRYING TO REGISTER THE OBJECT", obj, "of the class", obj.__class__
-            print obj.__dict__
-            print obj.__class__.__dict__
             methods = inspect.getmembers(obj, predicate=inspect.ismethod)
-            print methods
             for (fname, f) in methods:
+                # Slip private functions
                 if fname.startswith('_'):
-                    print "SKIPPING PRIVATE function", fname
                     continue
-                print fname, f
-                #print f.__dict__
-                print "ARGS", inspect.getargspec(f)
+                # Get the args of the function to catch them in the queries
                 argspec = inspect.getargspec(f)
                 args = argspec.args
                 varargs = argspec.varargs
                 keywords = argspec.keywords
                 defaults = argspec.defaults
-                print args, varargs, keywords, defaults
                 # remove useless self in args, because we alredy got a bonded method f
                 if 'self' in args:
                     args.remove('self')
-                print "NEW ARGS", fname, args
+                print "Registering", fname, args
                 # WARNING : we MUST do a 2 levels function here, or the f_wrapper
                 # will be uniq and so will link to the last function again
                 # and again
@@ -250,15 +244,18 @@ except AttributeError, exp:
                                     raise Exception('Missing argument %s' % aname)
                             d[aname] = v
                         ret = f(**d)
-                        #print "THE FUNCTION RETURN", ret
                         return ret
-                    print "REGISTERING", '/'+fname, "with", f_wrapper
+                    # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
                 register_callback(fname, args, f, obj)
                     
             def slash():
                 return "OK"
             bottle.route('/', callback=slash)
+
+
+        def unregister(self, obj):
+            return
 
 
         def handleRequests(self, s):
@@ -279,8 +276,7 @@ except AttributeError, exp:
 
     # Shutdown in 4 do not take arg
     def shutdown(con):
-        con.shutdown()
-        con.close()
+        con.srv = None
 
     PyroClass = Pyro4Daemon
 

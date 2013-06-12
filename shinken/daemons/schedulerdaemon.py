@@ -341,8 +341,8 @@ class Shinken(BaseSatellite):
             self.pyro_daemon.unregister(self.ichecks)
         # Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = self.pyro_daemon.register(self.ichecks)#, "Checks")
-        logger.debug("The Checks Interface uri is: %s" % self.uri)
+        self.pyro_daemon.register(self.ichecks)
+        logger.debug("The Scheduler Interface uri is: %s" % self.uri)
 
         # Same for Broks
         if self.ibroks is not None:
@@ -350,8 +350,7 @@ class Shinken(BaseSatellite):
             self.pyro_daemon.unregister(self.ibroks)
         # Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.pyro_daemon.register(self.ibroks)#, "Broks")
-        logger.debug("The Broks Interface uri is: %s" % self.uri2)
+        self.pyro_daemon.register(self.ibroks)#, "Broks")
 
         logger.info("Loading configuration.")
         self.conf.explode_global_conf()
@@ -405,8 +404,10 @@ class Shinken(BaseSatellite):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
-            self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
-            logger.info("[scheduler] General interface is at: %s" % self.uri2)
+            self.pyro_daemon.register(self.interface)#, "ForArbiter")
+            self.pyro_daemon.unregister(self.interface)
+            self.uri = self.pyro_daemon.uri
+            logger.info("[scheduler] General interface is at: %s" % self.uri)
             self.do_mainloop()
         except Exception, exp:
             logger.critical("I got an unrecoverable error. I have to exit")
