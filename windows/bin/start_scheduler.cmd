@@ -1,2 +1,2 @@
 cd ..
-c:\python27\python.exe @@installdir@@\bin\shinken-scheduler.py -c @@installdir@@\etc\schedulerd-windows.ini
+%python-exe% @@INSTALLDIR@@\bin\shinken-scheduler.py -c @@INSTALLDIR@@\etc\schedulerd-windows.ini

@@ -143,11 +143,6 @@ class install(_install):
         if self.group is None:
             self.group = DEFAULT_GROUP
 
-        if self.root:
-            for attr in ('etc_path', 'var_path', 'plugins_path', 'run_path', 'log_path'):
-                setattr(self, attr, change_root(self.root, getattr(self, attr)))
-
-
 class build_config(Command):
     description = "build the shinken config files"
 
@@ -158,6 +153,7 @@ class build_config(Command):
     def initialize_options (self):
         self.build_dir = None
         self.build_base = None
+        self.root = None
         self.etc_path = None
         self.var_path = None
         self.run_path = None
@@ -178,6 +174,7 @@ class build_config(Command):
                                    ('install_scripts', '_install_scripts'),
         )
         self.set_undefined_options('install_config',
+                                   ('root', 'root'),
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
                                    ('run_path', 'run_path'),
@@ -207,6 +204,11 @@ class build_config(Command):
         log.info('generating %s from %s', outfile, templatefile)
         if not self.dry_run:
             self.mkpath(os.path.dirname(outfile))
+
+            bin_path = self._install_scripts
+            if self.root:
+                bin_path = bin_path.replace(self.root.rstrip(os.path.sep), '')
+
             # Read the template file
             f = open(templatefile)
             buf = f.read()
@@ -216,7 +218,7 @@ class build_config(Command):
             buf = buf.replace("$VAR$", self.var_path)
             buf = buf.replace("$RUN$", self.run_path)
             buf = buf.replace("$LOG$", self.log_path)
-            buf = buf.replace("$SCRIPTS_BIN$", self._install_scripts)
+            buf = buf.replace("$SCRIPTS_BIN$", bin_path)
             # write out the new file
             f = open(outfile, "w")
             f.write(buf)
@@ -232,12 +234,14 @@ class build_config(Command):
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
         if not os.path.exists(discovery_dir):
             os.makedirs(discovery_dir)
-        for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
+        for dirname in [self.var_path, self.run_path, self.log_path]:
             if self.build_base:
                 if not is_install:
                     dirname = os.path.join(self.build_base, os.path.relpath(dirname, '/')) #dirname)
                 else:
                     dirname = os.path.join(self.build_base, dirname)
+                    if self.root:
+                        dirname = change_root(self.root, dirname)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
@@ -352,7 +356,10 @@ class install_config(Command):
         log.warn('>>> %s', self.etc_path)
         if not self.skip_build:
             self.run_command('build_config')
-        self.outfiles = self.copy_tree(self.build_dir, self.etc_path)
+        etc_path = self.etc_path
+        if self.root:
+            etc_path = change_root(self.root, self.etc_path)
+        self.outfiles = self.copy_tree(self.build_dir, etc_path)
 
         # if root is set, it's for pacakge, so NO chown
         if pwd and not self.root:
@@ -475,6 +482,7 @@ if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
 etc_root = os.path.dirname(default_paths['etc'])
+var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
 main_config_files = ('nagios.cfg',
@@ -484,6 +492,7 @@ additionnal_config_files = ('shinken-specific.cfg',
                             'shinken-specific-high-availability.cfg',
                             'shinken-specific-load-balanced-only.cfg',
                             'skonf.cfg',
+                            'paths.cfg',
                             )
 
 config_objects_file = (
@@ -495,7 +504,7 @@ config_objects_file = (
                         'contacts.cfg',
                         'discovery_rules.cfg',
                         'hosts/localhost.cfg',
-                        'services/linux_local.cfg',
+                        'services/services.cfg',
                         'contactgroups.cfg',
                         'escalations.cfg',
                         'commands.cfg',
@@ -555,9 +564,6 @@ data_files = [
          'bin/init.d/shinken-scheduler',
          'bin/init.d/shinken-skonf',
          ]
-        ),
-    (
-        default_paths['libexec'], ['libexec/check.sh']
         )
     ]
 
@@ -569,7 +575,11 @@ if not is_update:
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken']
          ))
-#print "DATA", data_files
+    
+    # Also add modules to the var directory
+    for p in gen_data_files('modules'):
+        _path, _file = os.path.split(p)
+        data_files.append( (os.path.join(var_root, _path), [p]))
 
 print "All package _data"
 if __name__ == "__main__":
@@ -583,7 +593,7 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="1.2.2",
+        version="1.4",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",

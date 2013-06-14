@@ -24,5 +24,7 @@ $DIR/../../bin/launch_receiver_debug.sh
 
 # From now only one arbtier
 $DIR/launch_arbiter2_debug.sh
+$DIR/launch_arbiter2_spare_debug.sh
+
 
 

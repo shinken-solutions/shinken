@@ -121,6 +121,9 @@ class Service(SchedulingItem):
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
 
+        # Easy Service dep definition
+        'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
+
         # service generator
         'duplicate_foreach':       StringProp(default=''),
         'default_value':           StringProp(default=''),
@@ -135,7 +138,15 @@ class Service(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Our check ways. By defualt void, but will filled by an inner if need
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
 
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+
+        # UI aggregation
+        'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -235,9 +246,6 @@ class Service(SchedulingItem):
         # if the state change, we know so we do not revert it
         'state_changed_since_impact': BoolProp(default=False),
 
-        # Easy Service dep definition
-        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
-
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
@@ -307,7 +315,8 @@ class Service(SchedulingItem):
         'SERVICEACKCOMMENT':      'get_ack_comment',
         'SERVICEACTIONURL':       'action_url',
         'SERVICENOTESURL':        'notes_url',
-        'SERVICENOTES':           'notes'
+        'SERVICENOTES':           'notes',
+        'SERVICEBUSINESSIMPACT':  'business_impact'
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -538,9 +547,14 @@ class Service(SchedulingItem):
                                 # because in the "explode" phase, we do not have access to this data! :(
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
-                        if hasattr(self, 'check_command'):
-                            # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
+                        # Here is a list of property where we will expand the $KEY$ by the value
+                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies']
+                        for prop in _the_expandables:
+                            if hasattr(self, prop):
+                                # here we can replace VALUE, VALUE1, VALUE2,...
+                                setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
+                        if hasattr(self, 'aggregation'):
+                            new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:
@@ -993,7 +1007,7 @@ class Services(Items):
     # service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts,
                 resultmodulations, businessimpactmodulations, escalations,
-                servicegroups, triggers):
+                servicegroups, triggers, checkmodulations, macromodulations):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -1009,6 +1023,9 @@ class Services(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
+        self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
+        
 
     # We can link services with hosts so
     # We can search in O(hosts) instead

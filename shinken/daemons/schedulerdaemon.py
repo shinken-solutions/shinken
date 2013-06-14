@@ -77,23 +77,34 @@ class IBroks(Interface):
     """ Interface for Brokers:
 They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE update...) """
 
-    # poller or reactionner ask us actions
-    def get_broks(self):
-        #print "We ask us broks"
-        res = self.app.get_broks()
-        #print "Sending %d broks" % len(res) #, res
+    # A broker ask us broks
+    def get_broks(self, bname):
+        # Maybe it was not registered as it should, if so,
+        # do it for it
+        if not bname in self.app.brokers:
+            self.fill_initial_broks(bname)
+
+        # Now get the broks for this specific broker
+        res = self.app.get_broks(bname)
+        # got only one global counter for broks
         self.app.nb_broks_send += len(res)
-        #we do not more have a full broks in queue
-        self.app.has_full_broks = False
+        # we do not more have a full broks in queue
+        self.app.brokers[bname]['has_full_broks'] = False
+        
         return res
+
 
     # A broker is a new one, if we do not have
     # a full broks, we clean our broks, and
     # fill it with all new values
-    def fill_initial_broks(self):
-        if not self.app.has_full_broks:
-            self.app.broks.clear()
-            self.app.fill_initial_broks()
+    def fill_initial_broks(self, bname):
+        if bname not in self.app.brokers:
+            logger.info("A new broker just connected : %s" % bname)
+            self.app.brokers[bname] = {'broks' : {}, 'has_full_broks' : False}
+        e = self.app.brokers[bname]
+        if not e['has_full_broks']:
+            e['broks'].clear()
+            self.app.fill_initial_broks(bname, with_logs=True)
 
 
 class IForArbiter(IArb):
@@ -106,9 +117,11 @@ class IForArbiter(IArb):
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
 
+
     def put_conf(self, conf):
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
+
 
     # Call by arbiter if it thinks we are running but we must not (like
     # if I was a spare that take a conf but the master returns, I must die
@@ -120,6 +133,7 @@ class IForArbiter(IArb):
         logger.debug("Arbiter wants me to wait for a new configuration")
         self.app.sched.die()
         super(IForArbiter, self).wait_new_conf()
+
 
 
 # The main app class
@@ -155,6 +169,8 @@ class Shinken(BaseSatellite):
         # from now only pollers
         self.pollers = {}
         self.reactionners = {}
+        self.brokers = {}
+        
 
     def do_stop(self):
         if self.pyro_daemon:
@@ -369,6 +385,7 @@ class Shinken(BaseSatellite):
         # and set ourself in it
         self.schedulers = {self.conf.instance_id: self.sched}
 
+
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
     def what_i_managed(self):
@@ -383,6 +400,7 @@ class Shinken(BaseSatellite):
             self.load_config_file()
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
+            self.load_modules_manager()
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.info("[scheduler] General interface is at: %s" % self.uri2)
             self.do_mainloop()

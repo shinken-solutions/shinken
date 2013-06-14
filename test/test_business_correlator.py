@@ -1151,6 +1151,249 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(state == 2)
 
 
+
+
+
+
+    # We will try a simple bd1 OR db2
+    def test_multi_layers(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = []  # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
+
+        # THE RULE IS (test_host_0,db1| (test_host_0,db2 & (test_host_0,lvs1|test_host_0,lvs2) ) ) & test_router_0
+        svc_lvs1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "lvs1")
+        self.assert_(svc_lvs1 is not None)
+        svc_lvs2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "lvs2")
+        self.assert_(svc_lvs2 is not None)
+
+        svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
+        self.assert_(svc_bd1.got_business_rule == False)
+        self.assert_(svc_bd1.business_rule is None)
+        svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
+        self.assert_(svc_bd2.got_business_rule == False)
+        self.assert_(svc_bd2.business_rule is None)
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Multi_levels")
+        self.assert_(svc_cor.got_business_rule == True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == '&')
+
+        # We check for good parent/childs links
+        # So svc_cor should be a son of svc_bd1 and svc_bd2
+        # and bd1 and bd2 should be parents of svc_cor
+        self.assert_(svc_cor in svc_bd1.child_dependencies)
+        self.assert_(svc_cor in svc_bd2.child_dependencies)
+        self.assert_(svc_cor in router.child_dependencies)
+        self.assert_(svc_bd1 in svc_cor.parent_dependencies)
+        self.assert_(svc_bd2 in svc_cor.parent_dependencies)
+        self.assert_(router in svc_cor.parent_dependencies)
+        
+
+        sons = bp_rule.sons
+        print "Sons,", sons
+        # We've got 2 sons, 2 services nodes
+        self.assert_(len(sons) == 2)
+        # Son0 is (test_host_0,db1| (test_host_0,db2 & (test_host_0,lvs1|test_host_0,lvs2) ) )
+        son0 = sons[0]
+        self.assert_(son0.operand == '|')
+        # Son1 is test_router_0
+        self.assert_(sons[1].operand == 'host')
+        self.assert_(sons[1].sons[0] == router)
+
+        # Son0_0 is test_host_0,db1
+        # Son0_1 is test_host_0,db2 & (test_host_0,lvs1|test_host_0,lvs2)
+        son0_0 = son0.sons[0]
+        son0_1 = son0.sons[1]
+        self.assert_(son0_0.operand == 'service')
+        self.assert_(son0_0.sons[0] == svc_bd1)
+        self.assert_(son0_1.operand == '&')
+
+        # Son0_1_0 is test_host_0,db2
+        # Son0_1_1 is test_host_0,lvs1|test_host_0,lvs2
+        son0_1_0 = son0_1.sons[0]
+        son0_1_1 = son0_1.sons[1]
+        self.assert_(son0_1_0.operand == 'service')
+        self.assert_(son0_1_0.sons[0] == svc_bd2)
+        self.assert_(son0_1_1.operand == '|')
+
+        # Son0_1_1_0 is test_host_0,lvs1
+        # Son0_1_1_1 is test_host_0,lvs2
+        son0_1_1_0 = son0_1_1.sons[0]
+        son0_1_1_1 = son0_1_1.sons[1]
+
+
+        self.assert_(son0_1_1_0.operand == 'service')
+        self.assert_(son0_1_1_0.sons[0] == svc_lvs1)
+        self.assert_(son0_1_1_1.operand == 'service')
+        self.assert_(son0_1_1_1.sons[0] == svc_lvs2)
+                
+        
+        # Now state working on the states
+        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10'],
+                                [svc_lvs1, 0, 'OK'], [svc_lvs2, 0, 'OK'], [router, 0, 'UP'] ])
+        self.assert_(svc_bd1.state == 'OK')
+        self.assert_(svc_bd1.state_type == 'HARD')
+        self.assert_(svc_bd2.state == 'OK')
+        self.assert_(svc_bd2.state_type == 'HARD')
+
+        # All is green, the rule should be green too
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we set the bd1 as soft/CRITICAL
+        self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd1.state == 'CRITICAL')
+        self.assert_(svc_bd1.state_type == 'SOFT')
+        self.assert_(svc_bd1.last_hard_state_id == 0)
+
+        # The business rule must still be 0
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we get bd1 CRITICAL/HARD
+        self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd1.state == 'CRITICAL')
+        self.assert_(svc_bd1.state_type == 'HARD')
+        self.assert_(svc_bd1.last_hard_state_id == 2)
+
+        # The rule must still be a 0 (or inside)
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we also set bd2 as CRITICAL/HARD... byebye 0 :)
+        self.scheduler_loop(2, [[svc_bd2, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd2.state == 'CRITICAL')
+        self.assert_(svc_bd2.state_type == 'HARD')
+        self.assert_(svc_bd2.last_hard_state_id == 2)
+
+        # And now the state of the rule must be 2
+        state = bp_rule.get_state()
+        self.assert_(state == 2)
+
+        # And If we set one WARNING?
+        self.scheduler_loop(2, [[svc_bd2, 1, 'WARNING | value1=1 value2=2']])
+        self.assert_(svc_bd2.state == 'WARNING')
+        self.assert_(svc_bd2.state_type == 'HARD')
+        self.assert_(svc_bd2.last_hard_state_id == 1)
+
+        # Must be WARNING (better no 0 value)
+        state = bp_rule.get_state()
+        self.assert_(state == 1)
+
+        # We should got now svc_bd2 and svc_bd1 as root problems
+        print "Root problems"
+        for p in svc_cor.source_problems:
+            print p.get_full_name()
+        self.assert_(svc_bd1 in svc_cor.source_problems)
+        self.assert_(svc_bd2 in svc_cor.source_problems)
+
+
+
+        # What about now with the router in DOWN?
+        self.scheduler_loop(5, [[router, 2, 'DOWN']])
+        self.assert_(router.state == 'DOWN')
+        self.assert_(router.state_type == 'HARD')
+        self.assert_(router.last_hard_state_id == 1)
+        
+        # Must be CRITICAL (CRITICAL VERSUS DOWN -> DOWN)
+        state = bp_rule.get_state()
+        self.assert_(state == 2)
+
+        # Now our root problem is router
+        print "Root problems"
+        for p in svc_cor.source_problems:
+            print p.get_full_name()
+        self.assert_(router in svc_cor.source_problems)
+                                                        
+
+
+
+
+
+
+
+
+
+
+
+    # We will try a strange rule that ask UP&UP -> DOWN&DONW-> OK
+    def test_darthelmet_rule(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_darthelmet")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        A = self.sched.hosts.find_by_name("test_darthelmet_A")
+        B = self.sched.hosts.find_by_name("test_darthelmet_B")
+        
+        self.assert_(host.got_business_rule == True)
+        self.assert_(host.business_rule is not None)
+        bp_rule = host.business_rule
+        self.assert_(bp_rule.operand == '|')
+
+        # Now state working on the states
+        self.scheduler_loop(3, [[host, 0, 'UP'], [A, 0, 'UP'], [B, 0, 'UP'] ] )
+        self.assert_(host.state == 'UP')
+        self.assert_(host.state_type == 'HARD')
+        self.assert_(A.state == 'UP')
+        self.assert_(A.state_type == 'HARD')
+
+        state = bp_rule.get_state()
+        print "WTF0", state
+        self.assert_(state == 0)
+
+        # Now we set the A as soft/DOWN
+        self.scheduler_loop(1, [[A, 2, 'DOWN']])
+        self.assert_(A.state == 'DOWN')
+        self.assert_(A.state_type == 'SOFT')
+        self.assert_(A.last_hard_state_id == 0)
+
+        # The business rule must still be 0
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we get A DOWN/HARD
+        self.scheduler_loop(3, [[A, 2, 'DOWN']])
+        self.assert_(A.state == 'DOWN')
+        self.assert_(A.state_type == 'HARD')
+        self.assert_(A.last_hard_state_id == 1)
+
+        # The rule must still be a 2 (or inside)
+        state = bp_rule.get_state()
+        print "WFT", state
+        self.assert_(state == 2)
+
+        # Now we also set B as DOWN/HARD, should get back to 0!
+        self.scheduler_loop(3, [[B, 2, 'DOWN']])
+        self.assert_(B.state == 'DOWN')
+        self.assert_(B.state_type == 'HARD')
+        self.assert_(B.last_hard_state_id == 1)
+
+        # And now the state of the rule must be 0 again! (strange rule isn't it?)
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+
+
+
+
 class TestConfigBroken(ShinkenTest):
     """A class with a broken configuration, where business rules reference unknown hosts/services"""
 

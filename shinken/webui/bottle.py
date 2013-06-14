@@ -1894,6 +1894,13 @@ class FlupFCGIServer(ServerAdapter):
         kwargs.update(self.options)  # allow to override bindAddress and others
         flup.server.fcgi.WSGIServer(handler, **kwargs).run()
 
+class FlupSCGIServer(ServerAdapter):
+    def run(self, handler):  # pragma: no cover
+        import flup.server.scgi
+        kwargs = {'bindAddress': (self.host, self.port)}
+        kwargs.update(self.options)  # allow to override bindAddress and others
+        flup.server.scgi.WSGIServer(handler, **kwargs).run()
+
 
 class WSGIRefServer(ServerAdapter):
     def run(self, handler):  # pragma: no cover
@@ -2093,6 +2100,7 @@ class AutoServer(ServerAdapter):
 server_names = {
     'cgi': CGIServer,
     'flup': FlupFCGIServer,
+    'flupscgi': FlupSCGIServer,
     'wsgiref': WSGIRefServer,
     'wsgirefselect': WSGIRefServerSelect,
     'cherrypy': CherryPyServer,

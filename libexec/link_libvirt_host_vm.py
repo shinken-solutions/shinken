@@ -99,9 +99,9 @@ if __name__ == "__main__":
     parser = optparse.OptionParser(
         version="Shinken libvirt mapping to json mapping %s" % VERSION)
     parser.add_option("-o", "--output", dest='output_file',
-                      default='/tmp/external_mapping_file.json',
+                      default='/tmp/libvirt_mapping_file.json',
                       help="Path of the generated json mapping file.\n"
-                           "Default: /tmp/external_mapping_file.json")
+                      "Default: /tmp/libvirt_mapping_file.json")
     parser.add_option("-u", "--uris", dest='uris',
                       help="Libvirt URIS separated by comma")
     parser.add_option("-i", "--ignore", dest='ignore',

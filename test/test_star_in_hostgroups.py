@@ -48,6 +48,9 @@ class TestStarInGroups(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
         self.assert_(svc is not None)
 
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST_HNAME_STAR")
+        self.assert_(svc is not None)
+
 
 if __name__ == '__main__':
     unittest.main()

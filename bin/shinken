@@ -1,0 +1,312 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2009-2012:
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
+Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
+
+"""
+
+import optparse
+import sys
+import os
+import re
+import tempfile
+import json
+import shutil
+import zipfile
+import tarfile
+import pycurl
+import ConfigParser
+from StringIO import StringIO
+
+try:
+    import shinken
+    from shinken.bin import VERSION
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    from shinken.bin import VERSION
+
+from shinken.log import logger
+from shinken.objects.config import Config
+
+logger.set_level(logger.DEBUG)
+logger.set_display_time(False)
+
+CONFIG = {}
+
+class Dummy():
+    def __init__(self): pass
+
+    def add(self, obj): pass
+logger.load_obj(Dummy())
+
+
+if os.name != 'nt':
+    DEFAULT_CFG = os.path.expanduser('~/.shinken.ini')
+else:
+    DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.ini'
+
+
+URI = 'shinken.io'
+DEBUG = True
+
+
+def create_archive(to_pack):
+    # First try to look if the directory we are trying to pack is valid
+    to_pack = os.path.abspath(to_pack)
+    if not os.path.exists(to_pack):
+        logger.error("Error : the directory to pack is missing %s" % to_pack)
+        sys.exit(2)
+    logger.debug("Preparing to pack the directory %s" % to_pack)
+    package_json_p = os.path.join(to_pack, 'package.json')
+    if not os.path.exists(package_json_p):
+        print "Error : Missing file", package_json_p
+        sys.exit(2)
+    package_json = read_package_json(open(package_json_p))
+
+    name = package_json.get('name', None)
+    if not name:
+        logger.error('Missing name entry in the package.json file. Cannot pack')
+        sys.exit(2)
+
+    # Now prepare a destination file
+    tmp_dir  = tempfile.gettempdir()
+    tmp_file = os.path.join(tmp_dir, name+'.tar.gz')
+    tar = tarfile.open(tmp_file, "w:gz")
+    os.chdir(to_pack)
+    tar.add(".",arcname='.')
+    tar.close()
+    logger.debug("Saved file %s" % tmp_file)
+    return tmp_file
+    
+
+def publish_archive(archive):
+    # Now really publish it
+    proxy = CONFIG['shinken.io']['proxy']
+    api_key = CONFIG['shinken.io']['api_key']
+    
+    # Ok we will push the file with a 10s timeout
+    c = pycurl.Curl()
+    c.setopt(c.POST, 1)
+    c.setopt(c.CONNECTTIMEOUT, 10)
+    c.setopt(c.TIMEOUT, 10)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    c.setopt(c.URL, URI + "/push")
+    c.setopt(c.HTTPPOST, [("api_key", api_key),
+                          ("data",
+                           (c.FORM_FILE, str(archive),
+                            c.FORM_CONTENTTYPE, "application/x-gzip"))
+                          ])
+    response = StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, response.write)
+    if DEBUG:
+        c.setopt(c.VERBOSE, 1)
+    c.perform()
+    r = c.getinfo(pycurl.HTTP_CODE)
+    c.close()
+    if r != 200:
+        logger.error("There was a critical error : %s" % response.getvalue())
+        sys.exit(2)
+    else:    
+        ret  = json.loads(response.getvalue().replace('\\/', '/'))
+        status = ret.get('status')
+        text   = ret.get('text')
+        if status == 200:
+            logger.log(text)
+        else:
+            logger.error(text)
+    
+
+
+
+def read_package_json(fd):
+    package_json = json.load(fd)
+    if not package_json:
+        logger.error("Bad package.json file")
+        sys.exit(2)
+    return package_json
+
+
+
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(
+        """
+Create   : %prog [options] -c -p pack_file [-s share_dir] [-d dest]
+Upload   : %prog [options] -u -z pack.zip -k API_KEY
+Register : %prog [options] -r -l login -P password -e email
+Retrieve : %prog [options] -g -l login -P password
+Analyse  : %prog [options] -a -k API_KEY /path/stats.json
+
+For more information, look at http://www.shinken-monitoring.org/wiki/packs/create_and_push_packs
+""",
+        version="%prog " + VERSION)
+    parser.add_option('-c', '--create', action='store_true',
+                      dest="create_pack", help=('Mode to create a zip file from a pack'))
+    parser.add_option('-p', '--pack-file', dest="pack_file",
+                      help="""Pack .pack file that you want to generate from.""")
+    parser.add_option('-s', '--share-dir', dest="share_dir",
+                       help=('Your share directory with templates and icon sets'))
+    parser.add_option('-d', '--dest', dest="p_dest_dir",
+                      help="""Directory where to """)
+    parser.add_option('-U', '--uri', dest="uri",
+                      help="""Uri to push the pack. Default is community.shinken-monitoring.org""")
+    parser.add_option('--proxy', dest="proxy",
+                      help="""Proxy URI. Like http://user:password@proxy-server:3128""")
+
+    parser.add_option('-u', '--upload', action='store_true',
+                      dest="upload", help=('Mode to upload a pack zip file to the Shinken Pack website. It need an API key for it.'))
+    parser.add_option('-z', '--zip-file',
+                      dest="zip_file", help=("Your Pack zip file to send in the Shinken Pack website"))
+    # TODO: where is the PACK WEBSITE??? :)
+    parser.add_option('-k', '--api-key',
+                      dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
+
+    parser.add_option('-r', '--register', action='store_true',
+                      dest="register", help=("Mode to register to the Shinken pack website"))
+    parser.add_option('-l', '--login',
+                      dest="login", help=("Login name to the Shinken Pack website, to register or get the API key"))
+    parser.add_option('-P', '--password',
+                      dest="password", help=("Password for the Shinken pack website registration"))
+    parser.add_option('-e', '--email',
+                      dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
+
+    parser.add_option('-g', '--get-key', action='store_true',
+                      dest="getkey", help=("Mode to retrieve your API key"))
+
+    parser.add_option('-a', '--analyse', action='store_true',
+                      dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
+
+    opts, args = parser.parse_args()
+
+    mode = ''
+
+    # For the create pack part
+    pack_file = ''
+    p_dest_dir = tempfile.gettempdir()
+    src_dir = ''
+    _tmp = tempfile.mktemp()
+    share_dir = opts.share_dir or ''
+
+    uri = opts.uri or 'shinken.io'
+    proxy = opts.proxy or None
+
+    if not os.path.exists(DEFAULT_CFG):
+        logger.debug('Missing configuration file!')
+    else:
+        cfg = ConfigParser.ConfigParser()
+        cfg.read(DEFAULT_CFG)
+        for section in cfg.sections():
+            if not section in CONFIG:
+                CONFIG[section] = {}
+            for (key, value) in cfg.items(section):
+                CONFIG[section][key] = value
+
+
+    if opts.create_pack:
+        mode = 'create_pack'
+
+        if not opts.pack_file:
+            parser.error("Requires a pack file (option -p/--pack-file)")
+        pack_file = opts.pack_file
+
+        if not pack_file.endswith('.pack'):
+            print "Sorry, the pack-file is not a .pack file. exiting"
+            sys.exit(2)
+
+        if opts.p_dest_dir:
+            p_dest_dir = opts.p_dest_dir
+
+        create_pack(pack_file, p_dest_dir, share_dir)
+
+
+    if len(args) >= 1:
+        if args[0] == 'publish':
+            to_pack = '.'
+            if len(args) == 2:
+                to_pack = args[1]
+            archive = create_archive(to_pack)
+            publish_archive(archive)
+            
+
+
+    if opts.upload:
+        mode = 'upload'
+        if not opts.zip_file:
+            parser.error("Requires a pack zip file (option -z/--zip-file)")
+        zip_file = opts.zip_file
+
+        if not opts.api_key:
+            parser.error("Requires an API key (option -k/--api-key)")
+        api_key = opts.api_key
+
+        push_pack(zip_file, api_key, uri, proxy)
+
+
+    if opts.register:
+        mode = 'register'
+        if not opts.login:
+            parser.error("Requires a login name (option -l/--login)")
+        login = opts.login
+        if not opts.password:
+            parser.error("Requires a password (option -P/--password)")
+        password = opts.password
+        if not opts.email:
+            parser.error("Requires a valid email (option -e/--email)")
+        email = opts.email
+
+        register(login, password, email, uri, proxy)
+
+
+    if opts.getkey:
+        mode = 'getkey'
+        if not opts.login:
+            parser.error("Requires a login name (option -l/--login)")
+        login = opts.login
+        if not opts.password:
+            parser.error("Requires a password (option -P/--password)")
+        password = opts.password
+
+        getkey(login, password, uri, proxy)
+
+
+
+    if opts.analyse:
+        mode = 'analyse'
+        if not opts.api_key:
+            parser.error("Requires an API key (option -k/--api-key)")
+        api_key = opts.api_key
+        files = args
+        if not files:
+            parser.error("Requires a statistic file to send")
+        if len(files) != 1:
+            parser.error("Too much statistics files to send")
+        p = files[0]
+        print "Sending statistics in file ", p
+        analyse(api_key, p, uri, proxy)

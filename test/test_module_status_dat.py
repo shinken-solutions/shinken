@@ -27,7 +27,10 @@ import os
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.modules.status_dat_broker import get_instance
+from shinken.modulesctx import modulesctx
+get_instance = modulesctx.get_module('status_dat').get_instance
+
+
 
 
 class TestConfig(ShinkenTest):
@@ -65,7 +68,8 @@ class TestConfig(ShinkenTest):
         sl.properties = {}
         sl.properties['to_queue'] = None
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         print self.sched.broks
         sl.init()
         for b in self.sched.broks.values():

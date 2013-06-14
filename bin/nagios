@@ -23,102 +23,98 @@
 
 
 # Wrapper script to call Arbiter instead of Nagios bin
-
 DIR=$(dirname "$0")
 
-# search for an argument -v so i konw if we want to do a config check
 
-function pythonver(){
-	versions="2.4 2.5 2.6 2.7"
-	LASTFOUND=""
-	# is there any python here?
-	for v in $versions
-	do
-		which python$v > /dev/null 2>&1
-		if [ $? -eq 0 ]
-		then
-			LASTFOUND="python$v"
-		fi
-	done
-	if [ -z "$LASTFOUND" ]
-	then
-		# finaly try to find a default python
-		which python > /dev/null 2>&1
-		if [ $? -ne 0 ]
-		then
-			echo "No python interpreter found!"
-			exit 2
-		else
-			echo "python found"
-			LASTFOUND=$(which python)
-		fi
-	fi
-	PY=$LASTFOUND
-}
+### find last python version
+versions="2.4 2.5 2.6 2.7"
+LASTFOUND=""
+# is there any python here?
+for v in $versions
+do
+    which python$v > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+        LASTFOUND="python$v"
+    fi
+done
 
-
-function usage(){
-	echo "Shinken"
-	echo "License: GNU AFFERO GENERAL PUBLIC LICENSE version 3"
-	echo ""
-	echo "Website: http://www.shinken-monitoring.org"
-	echo "Usage: nagios [options] <main_config_file>"
-	echo ""
-	echo "Options:"
-	echo ""
-	echo "  -v, --verify-config          Verify all configuration data"
-	echo "  -s, --test-scheduling        Not used "
-	echo "  -x, --dont-verify-paths      Not used"
-	echo "  -p, --precache-objects       Not used"
-	echo "  -u, --use-precached-objects  Not used"
-	echo "  -d, --daemon                 Not used"
-}
-
-if [ -z "$1" ]
+if [ -z "$LASTFOUND" ]
 then
-	usage
-	exit 0
+    # finaly try to find a default python
+    which python > /dev/null 2>&1
+    if [ $? -ne 0 ]
+    then
+        echo "No python interpreter found!"
+        exit 2
+    else
+        echo "python found"
+        LASTFOUND=$(which python)
+    fi
+fi
+PY=$LASTFOUND
+
+
+### usage
+function usage(){
+    echo "Shinken"
+    echo "License: GNU AFFERO GENERAL PUBLIC LICENSE version 3"
+    echo ""
+    echo "Website: http://www.shinken-monitoring.org"
+    echo "Usage: nagios [options] <main_config_file>"
+    echo ""
+    echo "Options:"
+    echo ""
+    echo "  -v, --verify-config          Verify all configuration data"
+    echo "  -s, --test-scheduling        Not used "
+    echo "  -x, --dont-verify-paths      Not used"
+    echo "  -p, --precache-objects       Not used"
+    echo "  -u, --use-precached-objects  Not used"
+    echo "  -d, --daemon                 Not used"
+}
+
+if [ -z "$1" ]; then
+    usage
+    exit 0
 fi
 
+
+### parse args
+COMMAND=""
 while getopts "v:sxpud" opt; do
-	echo "$opt $OPTARG"
-		case $opt in
-		v)
-			# so we are in config check mode
-			echo $OPTARG
-			if [ -z "$OPTARG" ]
-			then
-				echo "You must provide a nagios configuration file"
-				exit 2
-			else
-				# well shinken arbiter does not act really as nagios so we need to provide at least a -c argument for configfile
-				$PY $DIR/shinken-arbiter.py -v -c $OPTARG
-				exit $?
-			fi
-			;;
-		s)
-			echo "Hey! you are on shinken here!"
-			exit 2
-			;;
-		x)
-			echo "Hey! you are on shinken here!"
-			exit 2
-			;;
-		p)
-			echo "Hey! you are on shinken here!"
-			exit 2
-			;;
-		u)
-			echo "Hey! you are on shinken here!"
-			exit 2
-			;;
-		d)
-			echo "Hey! you are on shinken here!"
-			exit 2
-			;;
-		*)
-			usage
-			exit 0
-			;;
-	esac
+    case $opt in
+        v)
+            COMMAND="$opt"
+            ;;
+
+        s|x|p|u|d)
+            # ignore unused options
+            ;;
+
+        *)
+            usage
+            exit 0
+            ;;
+    esac
 done
+shift $(( OPTIND - 1 ))
+
+
+### run commands
+case "$COMMAND" in
+    v)
+        if [ -z "$1" ]; then
+            echo "You must provide a nagios configuration file"
+            exit 2
+        else
+	    # well shinken arbiter does not act really as nagios so we need to provide at least a -c argument for configfile
+	    $PY $DIR/shinken-arbiter.py -v -c $1
+	    exit $?
+        fi
+        ;;
+
+    *)
+        usage
+        exit 0
+        ;;
+esac

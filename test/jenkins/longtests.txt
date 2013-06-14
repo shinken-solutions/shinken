@@ -114,9 +114,16 @@ test_missing_timeperiod.py
 test_livestatus_allowedhosts.py
 test_module_trending.py
 test_multiple_not_hostgroups.py
+test_contactgroups_plus_inheritance.py
+test_modules_nrpe_poller.py
+test_checkmodulations.py
+test_macromodulations.py
+test_module_file_tag.py
+
 
 # takes long
 test_livestatus.py
+test_livestatus_mongodb.py
 # takes very, very long
 test_maintenance_period.py
 test_downtimes.py

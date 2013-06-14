@@ -43,7 +43,8 @@
 
 NAME="shinken"
 
-AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter skonf"
+## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
+AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 
 ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
 if [ -z "$SHINKEN_MODULE_FILE" ]; then
@@ -163,10 +164,6 @@ fi
 if ! test "$SHINKENCFG"
 then
     SHINKENCFG="$ETC/nagios.cfg"
-fi
-if ! test "$SHINKENSPECIFICCFG"
-then
-    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 fi
 
 # If var or run dir is missing, create them and chown them
@@ -289,10 +286,17 @@ do_start() {
 	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
         rc=$?
     elif [ "$mod" != "arbiter" ]; then
-        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+        modINI=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
+        modinifile=$(eval echo ${modINI})
+        output=$("$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
         rc=$?
     else
-        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+        if ! test "$SHINKENSPECIFICCFG"
+        then
+            output=$("$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+        else
+            output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+        fi
         rc=$?
     fi
     # debug:

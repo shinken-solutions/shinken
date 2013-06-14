@@ -65,8 +65,18 @@ class TestConfig(ShinkenTest):
         # and the tricky last one (with no value :) )
         self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
 
-    def test_service_generators_not(self):
 
+        # Now check that the dependencies are also created as Generated Service C Dependant -> Generated Service C
+        svc_c_dep = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C Dependant")
+        self.assert_(svc_c_dep is not None)
+        # Dep version should a child of svc
+        self.assert_(svc_c_dep in svc_c.child_dependencies)
+        # But not on other of course
+        self.assert_(svc_c_dep not in svc_d.child_dependencies)
+
+        
+
+    def test_service_generators_not(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router

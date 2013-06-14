@@ -26,7 +26,7 @@ new_macro_id = 0;
 function add_macro(){
     var s = $('#new_macros');
 
-    var n = $('<form id="new_macro'+new_macro_id+'" class="form-inline"> <input id="new_macro_name_'+new_macro_id+'" class="new_macro_name" name="" type="text" placeholder="new macro"> <input class="new_macro_value offset1" id="new_macro_value_'+new_macro_id+'" name="" type="text" value="" placeholder="value"> <a class="btn btn-danger offset1" href="javascript:del_macro('+new_macro_id+');"><i class="icon-remove"></i> DEL</a> </form> </span>');
+    var n = $('<form id="new_macro'+new_macro_id+'" class="form-inline"> <input id="new_macro_name_'+new_macro_id+'" class="new_macro_name" name="" type="text" placeholder="new macro"> <input class="new_macro_value offset1" id="new_macro_value_'+new_macro_id+'" name="" type="text" value="" placeholder="value"> <a class="btn btn-danger offset1" href="javascript:del_macro('+new_macro_id+');"><i class="icon-remove"></i> Delete</a> </form> </span>');
     s.append(n);
     new_properties.push(new_macro_id);
     new_macro_id += 1;

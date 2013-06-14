@@ -23,6 +23,7 @@ from shinken.objects.module import Module
 
 from shinken.dispatcher import Dispatcher
 from shinken.log import logger
+from shinken.modulesctx import modulesctx
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
@@ -44,11 +45,26 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
-from shinken.modules import livestatus_broker
-from shinken.modules.livestatus_broker import LiveStatus_broker
-from shinken.modules.livestatus_broker.livestatus import LiveStatus
-from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
+# Modules are by default on the ../modules
+myself = os.path.abspath(__file__)
+modulesdir = os.path.join(os.path.dirname(os.path.dirname(myself)), 'modules')
+
+class __DUMMY:
+    def add(self, obj):
+        pass
+
+logger.load_obj(__DUMMY())
+
+
+modulesctx.set_modulesdir(modulesdir)
+
+# Special Livestatus module opening since the module rename
+#from shinken.modules.livestatus import module as livestatus_broker
+livestatus_broker = modulesctx.get_module('livestatus')
+LiveStatus_broker = livestatus_broker.LiveStatus_broker
+LiveStatus = livestatus_broker.LiveStatus
+LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
+LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
 from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
@@ -155,7 +171,10 @@ class ShinkenTest(unittest.TestCase):
         self.sched = Scheduler(scheddaemon)
 
         scheddaemon.sched = self.sched
-
+        scheddaemon.modulesdir = modulesdir
+        scheddaemon.load_modules_manager()
+        # Remember to clean the logs we just created before launching tests
+        self.clear_logs()
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
@@ -181,7 +200,8 @@ class ShinkenTest(unittest.TestCase):
         ref.schedule(force=True)
         # now checks are schedule and we get them in
         # the action queue
-        check = ref.actions.pop()
+        #check = ref.actions.pop()
+        check = ref.checks_in_progress[0]
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
@@ -328,24 +348,6 @@ class ShinkenTest(unittest.TestCase):
         self.print_header()
         self.assert_(self.conf.conf_is_correct)
 
-    def find_modules_path(self):
-        """ Find the absolute path of the shinken module directory and returns it.  """
-        import shinken
-
-        # BEWARE: this way of finding path is good if we still
-        # DO NOT HAVE CHANGE PWD!!!
-        # Now get the module path. It's in fact the directory modules
-        # inside the shinken directory. So let's find it.
-
-        print "modulemanager file", shinken.modulesmanager.__file__
-        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        print "modulemanager absolute file", modulespath
-        # We got one of the files of
-        parent_path = os.path.dirname(os.path.dirname(modulespath))
-        modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path: %s" % (modulespath))
-
-        return modulespath
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
@@ -379,7 +381,7 @@ class ShinkenTest(unittest.TestCase):
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
         self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modulesdir, [])
         self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
         # We can now output some previouly silented debug ouput
         self.livestatus_broker.do_load_modules()

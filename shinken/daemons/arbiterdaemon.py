@@ -133,7 +133,7 @@ class IForArbiter(Interface):
 # Main Arbiter Class
 class Arbiter(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None, analyse=None, migrate=None):
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None, analyse=None, migrate=None, arb_name=''):
 
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
 
@@ -141,6 +141,7 @@ class Arbiter(Daemon):
         self.verify_only = verify_only
         self.analyse = analyse
         self.migrate = migrate
+        self.arb_name = arb_name
 
         self.broks = {}
         self.is_master = False
@@ -244,11 +245,14 @@ class Arbiter(Daemon):
 
         # Search which Arbiterlink I am
         for arb in self.conf.arbiters:
-            if arb.is_me():
+            if arb.is_me(self.arb_name):
                 arb.need_conf = False
                 self.me = arb
                 self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter: %s" % (('master', 'spare')[self.is_master], arb.get_name()))
+                if self.is_master:
+                    logger.info("I am the master Arbiter: %s" % arb.get_name())
+                else:
+                    logger.info("I am a spare Arbiter: %s" % arb.get_name())
 
                 # Set myself as alive ;)
                 self.me.alive = True
@@ -264,6 +268,10 @@ class Arbiter(Daemon):
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.me.modules]))
 
+        self.modulesdir = getattr(self.conf, 'modulesdir', '')
+
+        # Ok it's time to load the module manager now!
+        self.load_modules_manager()
         # we request the instances without them being *started*
         # (for those that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
@@ -570,9 +578,9 @@ class Arbiter(Daemon):
         for arb in self.conf.arbiters:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
-                arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
+                arb.is_me = lambda x: True  # we now definitively know who we are, just keep it.
             else:
-                arb.is_me = lambda: False  # and we know who we are not, just keep it.
+                arb.is_me = lambda x: False  # and we know who we are not, just keep it.
 
 
     def do_loop_turn(self):
@@ -639,7 +647,7 @@ class Arbiter(Daemon):
             # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > master_timeout:
-                logger.info("Master is dead!!! I (%s) take the lead" % self.me.get_name())
+                logger.info("Arbiter Master is dead. The arbiter %s take the lead" % self.me.get_name())
                 self.must_run = True
                 break
 
@@ -674,7 +682,7 @@ class Arbiter(Daemon):
         # Before running, I must be sure who am I
         # The arbiters change, so we must re-discover the new self.me
         for arb in self.conf.arbiters:
-            if arb.is_me():
+            if arb.is_me(self.arb_name):
                 self.me = arb
 
         if self.conf.human_timestamp_log:

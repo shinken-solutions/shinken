@@ -408,6 +408,8 @@ class Receiver(Satellite):
 
             self.do_daemon_init_and_start()
 
+            self.load_modules_manager()
+
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 

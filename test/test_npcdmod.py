@@ -29,9 +29,10 @@ from multiprocessing import Queue
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
+from shinken.modulesctx import modulesctx
+npcdmod_broker = modulesctx.get_module('npcdmod')
+Npcd_broker = npcdmod_broker.Npcd_broker
 
-from shinken.modules import npcdmod_broker
-from shinken.modules.npcdmod_broker import Npcd_broker
 
 sys.setcheckinterval(10000)
 
@@ -100,13 +101,14 @@ class TestNpcd(ShinkenTest):
 
     def update_broker(self):
         self.sched.get_new_broks()
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for i in ids:
-            brok = self.sched.broks[i]
+            brok = self.sched.brokers['Default-Broker']['broks'][i]
             brok.prepare()
             self.npcdmod_broker.manage_brok(brok)
         self.sched.broks = {}
+
 
     def print_header(self):
         print "#" * 80 + "\n" + "#" + " " * 78 + "#"
@@ -136,7 +138,8 @@ class TestNpcd(ShinkenTest):
 
         self.npcdmod_broker.init()
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
 
         print "got initial broks"
         now = time.time()
@@ -166,8 +169,10 @@ class TestNpcd(ShinkenTest):
         self.npcdmod_broker.from_q = Queue()
 
         self.npcdmod_broker.init()
+        
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
 
         print "got initial broks"
         now = time.time()
@@ -194,6 +199,7 @@ class TestNpcd(ShinkenTest):
             os.unlink("./perfdata")
         print "Len" * 20, self.npcdmod_broker.from_q.qsize()
         self.assert_(self.npcdmod_broker.from_q.qsize() == 1)
+        self.npcdmod_broker.from_q.get()
         self.npcdmod_broker.from_q.close()
 
 

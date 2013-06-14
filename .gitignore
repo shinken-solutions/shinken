@@ -3,6 +3,7 @@
 *.egg-info
 build
 dist
+INSTALLED_FILES
 .project
 .pydevproject
 .settings
@@ -17,9 +18,12 @@ dist
 
 # OS generated files #
 ######################
+*.pyc
 *.DS_Store*
 ehthumbs.db
 Icon?
 Thumbs.db
 *.pid
 ._.*
+
+*pack_distribution.dat
