@@ -107,7 +107,7 @@ class SatelliteLink(Item):
             #self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
             self.con = requests.Session()
             self.uri = "http://%s:%s/" % (self.arb_satmap['address'], self.arb_satmap['port'])
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
 
@@ -127,11 +127,12 @@ class SatelliteLink(Item):
             #self.con.put_conf(conf)
             self._post('put_conf', {'conf':conf})
             pyro.set_timeout(self.con, self.timeout)
+            print "PUT CONF SUCESS", self.get_name()
             return True
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
-            logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+            #logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
             
 
@@ -208,7 +209,7 @@ class SatelliteLink(Item):
 
 
     # Try to get an URI path
-    def _get(self, path):
+    def _get(self, path, args={}):
         if self.con is None:
             self.create_connection()
         
@@ -217,12 +218,13 @@ class SatelliteLink(Item):
             self.add_failed_check_attempt()
             return
         print "REACHING", self.uri+path
-        r = self.con.get(self.uri+path)
+        r = self.con.get(self.uri+path, params=args)
         
         # If need it will raise an error here
         r.raise_for_status()
         # Should return us pong string
-        return r.content
+        
+        return json.loads(r.content)
         
 
     # Try to get an URI path
@@ -236,11 +238,8 @@ class SatelliteLink(Item):
             return
         print "REACHING", self.uri+path
         for (k,v) in args.iteritems():
-            print "TYPE?", type(v)
             args[k] = cPickle.dumps(v)
-        t0 = time.time()
-        #data = cPickle.dumps(args)
-        print "Compress in", time.time() - t0
+        # Ok go for it!
         r = self.con.post(self.uri+path, data=args)
         
         # If need it will raise an error here
@@ -280,7 +279,7 @@ class SatelliteLink(Item):
         try:
             self.con.wait_new_conf()
             return True
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return False
 
@@ -298,14 +297,16 @@ class SatelliteLink(Item):
 
         try:
             if magic_hash is None:
-                r = self.con.have_conf()
+                r = self._get('have_conf')
             else:
-                r = self.con.have_conf(magic_hash)
+                r = self._get('have_conf', {'magic_hash':magic_hash})
+            print "have_conf RAW CALL", r, type(r)
+            #r = json.loads(r)
             # Protect against bad Pyro return
             if not isinstance(r, bool):
                 return False
             return r
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return False
 
@@ -340,7 +341,7 @@ class SatelliteLink(Item):
         try:
             self.con.remove_from_conf(sched_id)
             return True
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return False
 
@@ -356,31 +357,45 @@ class SatelliteLink(Item):
         try:
             tab = self._get('what_i_managed')
             print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
-            tab = json.loads(tab)
+
             # Protect against bad Pyro return
             if not isinstance(tab, dict):
+                print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
                 self.con = None
                 self.managed_confs = {}
                 return
+
+            # Ok protect against json that is chaning keys as string instead of int
+            tab_cleaned = {}
+            for (k,v) in tab.iteritems():
+                try:
+                    tab_cleaned[int(k)] = v
+                except ValueError:
+                    print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
             # We can update our list now
-            self.managed_confs = tab
+            self.managed_confs = tab_cleaned
         except requests.exceptions.RequestException, exp:
+            print "EXCEPTION INwhat_i_managed", str(exp)
             # A timeout is not a crime, put this case aside
             if type(exp) == requests.exceptions.Timeout:
                 return
             self.con = None
-            #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
 
     # Return True if the satellite said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
         # If not even the cfg_id in the managed_conf, bail out
+        from pprint import pprint
+        print "DO I MANAGE?", self.get_name(), self.managed_confs, cfg_id
+        pprint(self.managed_confs)
         if not cfg_id in self.managed_confs:
             return False
 
         # maybe it's in but with a false push_flavor. check it :)
         return self.managed_confs[cfg_id] == push_flavor
+
 
     def push_broks(self, broks):
         if self.con is None:
@@ -392,8 +407,9 @@ class SatelliteLink(Item):
 
 
         try:
-            return self.con.push_broks(broks)
-        except Pyro_exp_pack, exp:
+            self._post('push_broks', {'broks':broks})
+            return True
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return False
             
@@ -414,7 +430,7 @@ class SatelliteLink(Item):
                 self.con = None
                 return []
             return tab
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return []
         except AttributeError:

@@ -30,6 +30,7 @@ import socket
 import copy
 import cPickle
 import inspect
+import json
 from log import logger
 
 from shinken.webui import bottlecore as bottle
@@ -184,7 +185,7 @@ except AttributeError, exp:
 
             # And port already use now raise an exception
             try:
-                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect', quiet=True)
+                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect', quiet=False)
             except socket.error, exp:
                 msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
                 raise PortNotFree(msg)
@@ -231,7 +232,7 @@ except AttributeError, exp:
                         method = getattr(f, 'method', 'get').lower()
                         #print "GOT FUNCITON METHOD", method
                         for aname in args:
-                            #print "LOOKING FOR", aname, "in", method
+                            print "LOOKING FOR", aname, "in", fname
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
@@ -241,10 +242,12 @@ except AttributeError, exp:
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:
-                                    raise Exception('Missing argument %s' % aname)
+                                print "FUCK MISSING ARG"*100, aname
+                                raise Exception('Missing argument %s' % aname)
                             d[aname] = v
                         ret = f(**d)
-                        return ret
+                        bottle.response.content_type = 'application/json'
+                        return json.dumps(ret)
                     # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
                 register_callback(fname, args, f, obj)

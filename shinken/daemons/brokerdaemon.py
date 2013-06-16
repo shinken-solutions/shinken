@@ -185,7 +185,7 @@ class Broker(BaseSatellite):
             socket.setdefaulttimeout(3)
             links[id]['con'] = requests.Session()#Pyro.core.getProxyForURI(uri)
             socket.setdefaulttimeout(None)
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             socket.setdefaulttimeout(None)
@@ -216,7 +216,7 @@ class Broker(BaseSatellite):
                     self._get(links[id], 'fill_initial_broks', {'bname':self.name})
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except Pyro_exp_pack, exp:
+        except requests.exceptions.RequestException, exp:
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -289,12 +289,14 @@ class Broker(BaseSatellite):
         # We check for new check in each schedulers and put
         # the result in new_checks
         for sched_id in links:
+            print "GET BROKS FROM"*20, links[sched_id]
             try:
                 con = links[sched_id]['con']
                 if con is not None:  # None = not initialized
                     t0 = time.time()
                     #tmp_broks = con.get_broks(self.name)
                     tmp_broks = self._get(links[sched_id], 'get_broks', {'bname':self.name})
+                    print "RAW BROKS", tmp_broks
                     tmp_broks = cPickle.loads(str(tmp_broks))
 
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
@@ -314,7 +316,7 @@ class Broker(BaseSatellite):
                 except:
                     pass
                 self.pynag_con_init(sched_id, type=type)
-            except Pyro.errors.ProtocolError, exp:
+            except requests.exceptions.RequestException, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
@@ -323,9 +325,6 @@ class Broker(BaseSatellite):
             # scheduler must not have checks
             except Pyro.errors.NamingError, exp:
                 logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
-            except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
-                logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
-                links[sched_id]['con'] = None
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
             except Exception, x:
@@ -424,7 +423,7 @@ class Broker(BaseSatellite):
                 a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
             #uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
-            uri = 'http://%s:%s/' % (s['address'], s['port'])
+            uri = 'http://%s:%s/' % (a['address'], a['port'])
             self.arbiters[arb_id]['uri'] = uri
 
             self.arbiters[arb_id]['broks'] = broks
@@ -454,7 +453,7 @@ class Broker(BaseSatellite):
                 p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
             #uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
-            uri = 'http://%s:%s/' % (s['address'], s['port'])
+            uri = 'http://%s:%s/' % (p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
 
             self.pollers[pol_id]['broks'] = broks
@@ -486,7 +485,7 @@ class Broker(BaseSatellite):
                 r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
             #uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
-            uri = 'http://%s:%s/' % (s['address'], s['port'])
+            uri = 'http://%s:%s/' % (r['address'], r['port'])
             self.reactionners[rea_id]['uri'] = uri
 
             self.reactionners[rea_id]['broks'] = broks

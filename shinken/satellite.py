@@ -59,6 +59,7 @@ import cPickle
 import traceback
 import socket
 import requests
+import json
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -105,7 +106,7 @@ class IForArbiter(Interface):
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
-        return self.app.what_i_managed() # self.app.schedulers.keys()
+        return self.app.what_i_managed()
 
 
     # Call by arbiter if it thinks we are running but we must do not (like
@@ -128,7 +129,8 @@ class IForArbiter(Interface):
     # </WTF??>
     def push_broks(self, broks):
         self.app.add_broks_to_queue(broks.values())
-        return True
+    push_broks.method = 'post'
+    
 
 
     # The arbiter ask us our external commands in queue
@@ -144,6 +146,7 @@ class IForArbiter(Interface):
     # Use by the receivers to got the host names managed by the schedulers
     def push_host_names(self, sched_id, hnames):
         self.app.push_host_names(sched_id, hnames)
+    push_host_names.method = 'post'
 
 
 class ISchedulers(Interface):
@@ -175,7 +178,7 @@ class IBroks(Interface):
     # poller or reactionner ask us actions
     def get_broks(self, bname):
         res = self.app.get_broks()
-        return res
+        return cPickle.dumps(res)
 
 
 class BaseSatellite(Daemon):
@@ -231,7 +234,7 @@ class BaseSatellite(Daemon):
         r.raise_for_status()
         
         # Ok get back the content if so
-        return r.content
+        return json.loads(r.content)
 
 
 
@@ -329,7 +332,7 @@ class Satellite(BaseSatellite):
             new_run_id = self._get(sched, 'get_running_id')
             new_run_id = float(new_run_id)
             print "GET BACK RUNNING ID", new_run_id, type(new_run_id)
-        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError), exp:
+        except (requests.exceptions.RequestException, cPickle.PicklingError, KeyError), exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -400,24 +403,25 @@ class Satellite(BaseSatellite):
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = self._post(sched, 'put_results', {'results':ret})
-                        send_ok = bool(cPickle.loads(str(send_ok)))
+                        print "SEND OK"*20, send_ok
+
                 # Not connected or sched is gone
-                except (Pyro_exp_pack, KeyError), exp:
+                except (requests.exceptions.RequestException, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
-                    try:
-                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
+                    #try:
+                    #    logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    #except:
+                    #    pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
-                    try:
-                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
+                    #try:
+                    #    logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    #except:
+                    #    pass
                     raise
 
 
@@ -698,12 +702,12 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (Pyro_exp_pack, KeyError), exp:
+            except (requests.exceptions.RequestException, KeyError), exp:
                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
-                try:
-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                except:
-                    pass
+                #try:
+                #    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                #except:
+                #    pass
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks

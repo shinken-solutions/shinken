@@ -27,7 +27,7 @@ import os
 import time
 import traceback
 import cPickle
-
+import requests
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -72,7 +72,7 @@ They connect here and see if they are still OK with our running_id, if not, they
 
         #for c in results:
         #self.sched.put_results(c)
-        return cPickle.dumps(True)
+        return True
     put_results.method = 'post'
 
 
@@ -93,7 +93,6 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        
         return cPickle.dumps(res)
 
 
@@ -260,6 +259,7 @@ class Shinken(BaseSatellite):
             self.must_run = False
             Daemon.manage_signal(self, sig, frame)
 
+
     def do_loop_turn(self):
         # Ok, now the conf
         self.wait_for_initial_conf()
@@ -269,6 +269,7 @@ class Shinken(BaseSatellite):
         self.setup_new_conf()
         logger.info("New configuration loaded")
         self.sched.run()
+
 
     def setup_new_conf(self):
         pk = self.new_conf
@@ -312,7 +313,8 @@ class Shinken(BaseSatellite):
                 p = dict(p)  # make a copy
                 p.update(override_conf['satellitemap'][p['name']])
 
-            uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
+            #uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
+            uri = 'http://%s:%s/' % (p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
 
@@ -404,7 +406,7 @@ class Shinken(BaseSatellite):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
-            self.pyro_daemon.register(self.interface)#, "ForArbiter")
+            self.pyro_daemon.register(self.interface)
             self.pyro_daemon.unregister(self.interface)
             self.uri = self.pyro_daemon.uri
             logger.info("[scheduler] General interface is at: %s" % self.uri)

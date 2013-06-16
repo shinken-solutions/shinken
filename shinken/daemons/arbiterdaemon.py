@@ -33,6 +33,7 @@ import traceback
 import cStringIO
 import cPickle
 import copy
+import json
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -52,14 +53,14 @@ class IForArbiter(Interface):
     def have_conf(self, magic_hash):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
-            return True
+            return json.dumps(True)
         else:  # I've no conf or a bad one
-            return False
+            return json.dumps(False)
 
 
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
-    def put_conf(self, conf_raw):
-        conf = cPickle.loads(conf_raw)
+    def put_conf(self, conf):
+        conf = cPickle.loads(conf)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'

@@ -73,7 +73,8 @@ class ReceiverLink(SatelliteLink):
                 self.add_failed_check_attempt()
                 return
 
-            r = self.con.push_host_names(sched_id, hnames)
+            #r = self.con.push_host_names(sched_id, hnames)
+            self._post('push_host_names', {'sched_id':sched_id, 'hnames':hnames})
         except Pyro_exp_pack, exp:
             self.add_failed_check_attempt(reason=str(exp))
 
