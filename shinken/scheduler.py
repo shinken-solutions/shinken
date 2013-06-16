@@ -32,6 +32,7 @@ import tempfile
 import traceback
 import json
 import requests
+import cPickle
 from Queue import Empty
 
 try:
@@ -185,7 +186,7 @@ class Scheduler:
         r = con.post(uri+path, data=args)
 
         if r.status_code != requests.codes.ok:
-            print "FUCK", r.content
+            print "FUCK", r.content, r.__dict__, r.raw._original_response.msg.__dict__
         
         # If need it will raise an error here
         r.raise_for_status()
@@ -835,6 +836,7 @@ class Scheduler:
                     self.nb_checks_send += len(lst)
                 except requests.exceptions.RequestException, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
+                    print exp.__dict__
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -904,7 +906,7 @@ class Scheduler:
                     # initial ping must be quick
                     pyro.set_timeout(con, 120)
                     #results = con.get_returns(self.instance_id)
-                    results = self._get(sched, 'get_returns', {'sched_id':self.instance_id})
+                    results = self._get(p, 'get_returns', {'sched_id':self.instance_id})
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
@@ -943,7 +945,7 @@ class Scheduler:
                     # initial ping must be quick
                     #pyro.set_timeout(con, 120)
                     #results = con.get_returns(self.instance_id)
-                    results = self._get(sched, 'get_returns', {'sched_id':self.instance_id})
+                    results = self._get(p, 'get_returns', {'sched_id':self.instance_id})
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received

@@ -35,6 +35,8 @@ from log import logger
 
 from shinken.webui import bottlecore as bottle
 
+bottle.debug(True)
+
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
     import Pyro
@@ -226,13 +228,16 @@ except AttributeError, exp:
                 # and again
                 def register_callback(fname, args, f, obj):
                     def f_wrapper():
+                        # Warning : put the bottle.response set inside the wrapper
+                        # because outside it will break bottle
+                        #bottle.response.content_type = 'application/json'
                         #print "Trying to catch the args need by the function", f, fname, args
                         #print 'And the object', obj
                         d = {}
                         method = getattr(f, 'method', 'get').lower()
                         #print "GOT FUNCITON METHOD", method
                         for aname in args:
-                            print "LOOKING FOR", aname, "in", fname
+                            print "LOOKING FOR", aname, "in", fname, method
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
@@ -246,7 +251,7 @@ except AttributeError, exp:
                                 raise Exception('Missing argument %s' % aname)
                             d[aname] = v
                         ret = f(**d)
-                        bottle.response.content_type = 'application/json'
+
                         return json.dumps(ret)
                     # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())

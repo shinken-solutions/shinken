@@ -159,13 +159,14 @@ class ISchedulers(Interface):
     def push_actions(self, actions, sched_id):
         # logger.debug("[%s] A scheduler sent me action : %s") % (self.name, actions)
         self.app.add_actions(actions, sched_id)
+    push_actions.method = 'post'
 
     # A scheduler ask us the action return value
     def get_returns(self, sched_id):
         #print "A scheduler ask me the returns", sched_id
         ret = self.app.get_return_for_passive(sched_id)
         #print "Send mack", len(ret), "returns"
-        return ret
+        return cPickle.dumps(ret)
 
 
 class IBroks(Interface):
@@ -195,6 +196,7 @@ class BaseSatellite(Daemon):
         # Now we create the interfaces
         self.interface = IForArbiter(self)
 
+
     # The arbiter can resent us new conf in the pyro_daemon port.
     # We do not want to loose time about it, so it's not a blocking
     # wait, timeout = 0s
@@ -202,11 +204,13 @@ class BaseSatellite(Daemon):
     def watch_for_new_conf(self, timeout):
         self.handleRequests(timeout)
 
+
     def do_stop(self):
         if self.pyro_daemon and self.interface:
             logger.info("[%s] Stopping all network connections" % self.name)
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
+
 
     # Give the arbiter the data about what I manage
     # for me it's the ids of my schedulers
