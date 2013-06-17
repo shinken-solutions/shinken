@@ -1,6 +1,8 @@
 shinken (1.4-1) stable; urgency=low
 
   * Upgrade to 1.4
+  * Split modules in separate packages
+  * Shinken package is now a package which configures Shinken elements to have a ready-to-go solution
 
  -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Mon, 03 Dec 2012 17:06:21 -0500
 
