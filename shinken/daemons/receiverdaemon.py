@@ -27,6 +27,7 @@ import os
 import time
 import traceback
 import sys
+import requests
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -207,7 +208,8 @@ class Receiver(Satellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'ForArbiter', self.use_ssl)
+            #uri = pyro.create_uri(s['address'], s['port'], 'ForArbiter', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
@@ -288,15 +290,12 @@ class Receiver(Satellite):
             if len(cmds) > 0 and con:
                 logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))
                 try:
-                    con.run_external_commands(cmds)
+                    #con.run_external_commands(cmds)
+                    self._post(sched, 'run_external_commands', {'cmds':cmds})
                     sent = True
                 # Not connected or sched is gone
-                except (Pyro_exp_pack, KeyError), exp:
+                except (requests.exceptions.RequestException, KeyError), exp:
                     logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
-                    try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized

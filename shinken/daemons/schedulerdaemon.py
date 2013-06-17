@@ -118,6 +118,7 @@ class IForArbiter(IArb):
     # it can send us global command, or specific ones
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
+    run_external_commands.method = 'POST'
 
 
     def put_conf(self, conf):
