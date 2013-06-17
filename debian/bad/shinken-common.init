@@ -1,0 +1,542 @@
+#!/bin/sh
+
+# Copyright (C) 2009-2011:
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+### BEGIN INIT INFO
+# Provides:          shinken
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      S 0 1 6
+# Short-Description: Shinken monitoring daemon
+# Description:       Shinken is a monitoring tool composed of many separated modules:
+#     - arbiter     : the main one : control everything else.
+#     - scheduler   : receives checks/actions from arbiter. Schedules & forwards them to pollers.
+#     - poller      : receives the checks from a scheduler. Launch them and returns results
+#     - broker      : manage results by looking at scheduler. Like export to flat file or db.
+#     - reactionner : manage the failed checks by looking at scheduler.
+#     - receiver    : manage all passive data
+### END INIT INFO
+
+# Deadlink :(
+# http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+
+
+NAME="shinken"
+
+## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
+AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
+
+## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
+if [ -z "$SHINKEN_MODULE_FILE" ]; then
+    SCRIPTNAME=$0
+    _usage_mods_="[ <$AVAIL_MODULES> ]"
+else
+    SCRIPTNAME=$SHINKEN_MODULE_FILE
+fi
+
+curpath=$(cd $(dirname "$0") && pwd)
+#echo curpath is $curpath filename is $(basename "$0")
+
+## Default paths:
+test "$BIN" || BIN=$(cd $curpath/.. && pwd)
+test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
+test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
+export LANG=en_US.UTF8
+export PYTHONIOENCODING=utf8
+
+# We try to find the LAST possible Python VERSION
+pythonver() {
+    versions="2.4 2.5 2.6 2.7"
+    LASTFOUND=""
+    # Is there any python here?
+    for v in $versions
+    do
+        which python$v > /dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+            LASTFOUND="python$v"
+        fi
+    done
+    if [ -z "$LASTFOUND" ]
+    then
+        # Finaly try to find a default python
+        which python > /dev/null 2>&1
+        if [ $? -ne 0 ]
+        then
+            echo "No python interpreter found!"
+            exit 2
+        else
+            echo "python found"
+            LASTFOUND=$(which python)
+        fi
+    fi
+    PYTHON=$LASTFOUND
+}
+
+# Ok, go search this Python version
+pythonver
+
+# Uncomment the line below if you got the **lib** shinken installed
+# on a non standard place (not in /usr/lib/python*)
+#export PYTHONPATH="${PATH:+$PATH:}/opt/shinken"
+# Or uncommentif you want to force the Python version
+#export PYTHON=python2.7
+
+# default
+DEBUG=false
+CMD=""
+SUBMODULES=""
+
+## This permits to overhidde the default "default shinken cfg file":
+[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
+## so you can now do:
+## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
+## to easily use your own config
+
+#echo "Using $SHINKEN_DEFAULT_FILE .."
+
+
+
+usage() {
+    cat << END
+Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+
+ -d  start requested module(s) in debug mode, only useful with start|restart
+
+END
+}
+
+if [ "$1" = "-d" ]; then
+    DEBUG="1"
+    shift
+fi
+
+if [ $# -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
+
+CMD=$1
+shift
+SUBMODULES=$*
+
+if [ -z "$SUBMODULES" ]; then
+    SUBMODULES=$AVAIL_MODULES
+else
+    # check given modules
+    for mod1 in $SUBMODULES; do
+        found=0
+        for mod2 in $AVAIL_MODULES; do
+            [ $mod1 = $mod2 ] && found=1;
+        done
+        [ $found = 0 ] && { usage >&2 ; exit 2 ; }
+    done
+fi
+
+
+# Reads configuration variable file if it is present
+[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+
+
+# Now look if some required variables are pre defined:
+if ! test "$SHINKENCFG"
+then
+    SHINKENCFG="$ETC/nagios.cfg"
+fi
+if ! test "$SHINKENSPECIFICCFG"
+then
+    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+fi
+
+# If var or run dir is missing, create them and chown them
+[ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
+[ ! -d $RUN ] && mkdir -p $RUN && chown $SHINKENUSER:$SHINKENGROUP $RUN
+
+# Now place us in our var directory so even our arbiter will be
+# happy for opening its pid and cmd files
+cd $VAR
+
+#echo BIN=$BIN
+#echo VAR=$VAR
+#echo ETC=$ETC
+
+#set -xv
+
+
+echo_success() {
+   log_end_msg 0 $*
+}
+
+echo_failure() {
+    log_end_msg 1 $*
+}
+
+#log_end_msg
+
+
+# Load the VERBOSE setting and other rcS variables
+[ -f /etc/default/rcS ] && . /etc/default/rcS
+
+# Source function library.
+[ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
+
+[ -f /lib/lsb/init-functions ] && . /lib/lsb/init-functions
+
+
+
+################################################
+
+#
+# returns the pid for a submodule
+#
+
+getpidfile() {
+    mod="$1"
+    modPIDVAR=$(echo $mod | tr 'a-z' 'A-Z')"PID"
+    pidfile=$(echo $(eval echo \${$modPIDVAR}))
+    if test "$pidfile"
+    then
+        echo "$pidfile"
+    else
+        echo "$RUN/${mod}d.pid"
+    fi
+}
+
+getmodpid() {
+    mod=$1
+    pidfile=$(getpidfile "$mod")
+    if [ -s $pidfile ]; then
+        cat $pidfile
+    fi
+}
+
+
+getdebugfile() {
+    mod="$1"
+    modDEBUG=$(echo $mod | tr 'a-z' 'A-Z')"DEBUGFILE"
+    debugfile=$(echo $(eval echo \${$modDEBUG}))
+    if test "$debugfile"
+    then
+        echo "$debugfile"
+    else
+        echo "${VAR}/${mod}-debug.log"
+    fi
+}
+
+#
+# Display status
+#
+do_status() {
+    mod=$1
+    pidfile=$(getpidfile "$mod")
+    [ -e "$pidfile" ] || {
+        echo "$mod NOT RUNNING (pidfile ($pidfile) not exist)"
+        return 3
+    }
+    [ -r "$pidfile" ] || {
+        echo "$mod NOT RUNNING (pidfile ($pidfile) unreadable)"
+        return 3
+    }
+    pid=$(cat "$pidfile")
+    if [ -z "$pid" ]; then
+        echo "$mod NOT RUNNING (pid file empty)"
+        return 4
+    fi
+    ps -p "$pid" >/dev/null 2>&1
+    rc=$?
+    if [ $rc != 0 ]; then
+        log_failure_msg  "$mod NOT RUNNING (process $pid doesn't exist?)"
+        return 1
+    fi
+    echo "$mod RUNNING (pid $pid)"
+    return 0
+}
+
+#
+# starts our modules
+#
+do_start() {
+    mod=$1
+    modfilepath="$BIN/shinken-${mod}"
+    [ -e "$modfilepath" ] || {
+        log_failure_msg "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
+        return 5
+    }
+    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
+    # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
+    if [ "$mod" = 'skonf' ]; then
+	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+        rc=$?
+    elif [ "$mod" != "arbiter" ]; then
+        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+        rc=$?
+    else
+        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+        rc=$?
+    fi
+    # debug:
+    #resfile="/tmp/bad_start_for_$mod"
+    #echo "$output" > "$resfile" || true
+    if [ $rc != 0 ]; then
+        resfile="/tmp/bad_start_for_$mod"
+        echo "$output" > "$resfile" || true
+        output=$(echo "$output" | tail -1)
+        echo "FAILED: $output (full output is in $resfile)"
+        return 1
+    fi
+    echo "OK"
+    return 0
+}
+
+#
+# stops modules
+#
+do_stop() {
+    mod=$1
+    pid=$(getmodpid "$mod")
+    statusoutput=$(do_status "$mod")
+    [ $? -ne 0 ] && {
+        echo "$statusoutput"
+        return 0
+    }
+    if [ ! -z "$pid" ]; then
+        kill "$pid"
+        sleep 0.5
+        ## TODO: instead of 'sleep 1': wait up to when pid file is removed (with timeout)?
+        for i in 1 2 3
+        do
+            # TODO: use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill them (SIGTERM).."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
+            kill $cpid > /dev/null 2>&1
+        done
+        for i in 1 2 3
+        do
+            # TODO: eventually use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill -9 them.."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
+            kill -9 $cpid > /dev/null 2>&1
+        done
+        sleep 1
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        if [ ! -z "$allpids" ]; then
+            echo "FAILED: one or more process for $mod are still running after kill -9!"
+            echo "Remaining processes are (pids="$allpids"):"
+            ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
+            echo "You should check this."
+            return 1
+        fi
+        echo "OK"
+    else
+        echo "NOT RUNNING"
+    fi
+    return 0
+}
+
+#
+# does the config check
+#
+do_check() {
+    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+    return $?
+}
+
+
+############################
+
+do_start_() {
+    echo  "Starting $1: "
+    status=$(do_status "$1")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        log_warning_msg "Already running"
+        return
+    fi
+    if test "$1" = "arbiter"
+    then
+        # arbiter is special:
+        # it doesn't actually declare a "workdir" properties in its config
+        # so we have explicitely to cd to the "VAR" directory.
+        # so that the default pidfile ( == nagios lock_file) which is now "arbiterd.pid"
+        # will be created at the correct place.
+        cd "$VAR"
+        # TODO: check if other possibility wouldn't be better:
+        # declare a "workdir" properties for the arbiter module definition.. in shinken-specific.cfg.
+        # but if the lock_file path is absolute then this 'cd' isn't required.
+    fi
+    startoutput=$(do_start "$1")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        echo "$startoutput"
+        echo_failure
+    fi
+    return $rc
+}
+
+do_stop_() {
+    echo  "Stopping $1"
+    statusoutput=$(do_status "$1")
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        failuremsg="Couldn't get status of $1: $statusoutput"
+    else
+        stopoutput=$(do_stop "$1" 2>&1)
+        rc=$?
+        [ $rc -ne 0 ] && failuremsg="Couldn't stop $1: $stopoutput"
+    fi
+    if [ $rc -ne 0 ]; then
+        log_failure_msg "$failuremsg"
+        echo_failure
+    else
+        echo_success
+    fi
+    return $rc
+}
+
+do_restart_() {
+    mod="$1"
+    echo "Restarting $mod"
+    if [ "$mod" = "arbiter" ]; then
+        do_check_ "$mod"
+        checkrc=$?
+        if [ $checkrc -ne 0 ]; then
+           return 1
+        fi
+    fi
+    stopoutput=$(do_stop "$mod")
+    startoutput=$(do_start "$mod")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        log_failure_msg "$startoutput"
+        echo_failure
+    fi
+    return $rc
+}
+
+do_reload_() {
+    mod="$1"
+    echo "Reloading $mod"
+    if [ "$mod" = "arbiter" ]; then
+        do_check_ "$mod"
+        checkrc=$?
+        if [ $checkrc -ne 0 ]; then
+           return 1
+        fi
+    fi
+    stopoutput=$(do_stop "$mod")
+    startoutput=$(do_start "$mod")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        log_failure_msg "$startoutput"
+        echo_failure
+    fi
+    return $rc
+}
+
+do_status_() {
+    mod=$1
+    echo  "Checking status of $mod"
+    do_status "$1"
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        echo_failure
+    fi
+
+}
+
+do_check_() {
+    echo "Doing config check"
+    output=$(do_check "$1" 2>&1)
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        check_res_file=$(mktemp /tmp/shinken_checkconfig_resultXXXXXXXX)
+        echo "$output" > "$check_res_file"
+        mv $check_res_file /tmp/shinken_checkconfig_result
+        check_res_file="/tmp/shinken_checkconfig_result"
+        output=$(echo "$output" | tail -1)
+        log_warning_msg "full result is in ${check_res_file}"
+        log_failure_msg "ConfigCheck failed: $output"
+        echo_failure
+    fi
+    return $rc
+}
+do_checkconfig_() { do_check_ "$1" ; }
+
+
+############################
+
+do_cmd_on() {
+    action=$1
+    mods=$2
+    for mod in $mods
+    do
+        do_${action}_ "$mod"
+    done
+}
+
+
+############################
+## Main:
+
+case "$CMD" in
+    start|stop|restart|status)
+        do_cmd_on "$CMD" "$SUBMODULES"
+        ;;
+    check|checkconfig|reload)
+        do_cmd_on "$CMD" "arbiter"
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac
+

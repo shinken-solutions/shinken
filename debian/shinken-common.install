@@ -1,0 +1,9 @@
+shinken/*.py /usr/lib/python2.7/dist-packages/shinken
+shinken/clients /usr/lib/python2.7/dist-packages/shinken
+shinken/core /usr/lib/python2.7/dist-packages/shinken
+shinken/misc /usr/lib/python2.7/dist-packages/shinken
+shinken/objects /usr/lib/python2.7/dist-packages/shinken
+shinken/plugins/__init__.py /usr/lib/python2.7/dist-packages/shinken/plugins/
+shinken/modules/__init__.py /usr/lib/python2.7/dist-packages/shinken/modules/
+shinken/trending /usr/lib/python2.7/dist-packages/shinken
+shinken/daemons/__init__.py /usr/lib/python2.7/dist-packages/shinken/daemons

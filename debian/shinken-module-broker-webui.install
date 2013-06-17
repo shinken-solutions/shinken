@@ -1,0 +1,8 @@
+shinken/modules/webui_broker /usr/lib/python2.7/dist-packages/shinken/modules
+##shinken/webui/htdocs /usr/share/shinken
+shinken/webui/bottle.py /usr/lib/python2.7/dist-packages/shinken/webui/
+shinken/webui/__init__.py /usr/lib/python2.7/dist-packages/shinken/webui/
+shinken/webui/plugins /usr/lib/python2.7/dist-packages/shinken/webui/
+shinken/webui/plugins_hostd /usr/lib/python2.7/dist-packages/shinken/webui/
+shinken/webui/plugins_skonf /usr/lib/python2.7/dist-packages/shinken/webui/
+shinken/webui/views /usr/lib/python2.7/dist-packages/shinken/webui/

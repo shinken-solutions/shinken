@@ -1,0 +1,373 @@
+diff --git a/shinken/satellite.py b/shinken/satellite.py
+index 57f107e..11d4dce 100644
+--- a/shinken/satellite.py
++++ b/shinken/satellite.py
+@@ -45,7 +45,7 @@ except ImportError:
+ from Queue import Empty
+ 
+ if not is_android:
+-    from multiprocessing import Queue, Manager, active_children, cpu_count
++    from multiprocessing import Queue, active_children, cpu_count
+ else:
+     from Queue import Queue
+ 
+@@ -70,11 +70,11 @@ from shinken.worker import Worker
+ from shinken.load import Load
+ from shinken.daemon import Daemon, Interface
+ from shinken.log import logger
+-from shinken.brok import Brok
+-from shinken.check import Check
+-from shinken.notification import Notification
+-from shinken.eventhandler import EventHandler
+-from shinken.external_command import ExternalCommand
++#from shinken.brok import Brok  # Unused
++#from shinken.check import Check  # Unused
++#from shinken.notification import Notification  # Unused
++#from shinken.eventhandler import EventHandler  # Unused
++#from shinken.external_command import ExternalCommand  # Unused
+ 
+ # Pack of common Pyro exceptions
+ from shinken.pyro_wrapper import Pyro_exp_pack
+@@ -102,8 +102,7 @@ class IForArbiter(Interface):
+     # It will ask me to remove one or more sched_id
+     def what_i_managed(self):
+         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
+-        return self.app.what_i_managed() # self.app.schedulers.keys()
+-
++        return self.app.what_i_managed()  # self.app.schedulers.keys()
+ 
+     # Call by arbiter if it thinks we are running but we must do not (like
+     # if I was a spare that take a conf but the master returns, I must die
+@@ -117,7 +116,6 @@ class IForArbiter(Interface):
+         self.app.schedulers.clear()
+         self.app.cur_conf = None
+ 
+-
+     # <WTF??> Inconsistent comments!
+     # methods are only used by the arbiter or the broker?
+     # NB: following methods are only used by broker
+@@ -127,16 +125,13 @@ class IForArbiter(Interface):
+         self.app.add_broks_to_queue(broks.values())
+         return True
+ 
+-
+     # The arbiter ask us our external commands in queue
+     def get_external_commands(self):
+         return self.app.get_external_commands()
+ 
+-
+     ### NB: only useful for receiver
+     def got_conf(self):
+-        return self.app.cur_conf != None
+-
++        return self.app.cur_conf is not None
+ 
+     # Use by the receivers to got the host names managed by the schedulers
+     def push_host_names(self, sched_id, hnames):
+@@ -180,8 +175,8 @@ class BaseSatellite(Daemon):
+ 
+     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+ 
+-        super(BaseSatellite, self).__init__(name, config_file, is_daemon, \
+-                                                do_replace, debug, debug_file)
++        super(BaseSatellite, self).__init__(name, config_file, is_daemon,
++                                            do_replace, debug, debug_file)
+ 
+         # Ours schedulers
+         self.schedulers = {}
+@@ -216,8 +211,8 @@ class Satellite(BaseSatellite):
+ 
+     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+ 
+-        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, \
+-                                            debug, debug_file)
++        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace,
++                                        debug, debug_file)
+ 
+         # Keep broks so they can be eaten by a broker
+         self.broks = {}
+@@ -238,6 +233,9 @@ class Satellite(BaseSatellite):
+         self.returns_queue = None
+         self.q_by_mod = {}
+ 
++        # Not used for now
++        #self.max_q_size = 42
++
+         # Can have a queue of external_commands given by modules
+         # will be taken by arbiter to process
+         self.external_commands = []
+@@ -264,25 +262,29 @@ class Satellite(BaseSatellite):
+             # But the multiprocessing module is not compatible with it!
+             # so we must disable it immediately after
+             socket.setdefaulttimeout(None)
+-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
++            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" %
++                           (self.name, sname, str(exp)))
+             sched['con'] = None
+             return
+ 
+-
+         # timeout of 120 s
+         # and get the running id
+         try:
+             pyro.set_timeout(sch_con, 5)
+             new_run_id = sch_con.get_running_id()
+-        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError), exp:
+-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
++        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError,
++                cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError,
++                Pyro.errors.DaemonError), exp:
++            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s"
++                           % (self.name, sname, str(exp)))
+             sched['con'] = None
+             return
+ 
+         # The schedulers have been restarted: it has a new run_id.
+         # So we clear all verifs, they are obsolete now.
+         if sched['running_id'] != 0 and new_run_id != running_id:
+-            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions" % (self.name, sname))
++            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions"
++                        % (self.name, sname))
+             sched['wait_homerun'].clear()
+         sched['running_id'] = new_run_id
+         logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
+@@ -324,7 +326,6 @@ class Satellite(BaseSatellite):
+         except KeyError:
+             pass
+ 
+-
+     # Return the chk to scheduler and clean them
+     # REF: doc/shinken-action-queues.png (6)
+     def manage_returns(self):
+@@ -348,7 +349,9 @@ class Satellite(BaseSatellite):
+                 except (Pyro_exp_pack, KeyError), exp:
+                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                     try:
+-                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
++                        logger.error(''.join(PYRO_VERSION < "4.0"
++                                     and Pyro.util.getPyroTraceback(exp)
++                                     or Pyro.util.getPyroTraceback()))
+                     except:
+                         pass
+                     self.pynag_con_init(sched_id)
+@@ -356,14 +359,16 @@ class Satellite(BaseSatellite):
+                 except AttributeError, exp:  # the scheduler must  not be initialized
+                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                 except Exception, exp:
+-                    logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
++                    logger.error("A satellite raised an unknown exception: %s (%s)"
++                                 % (exp, type(exp)))
+                     try:
+-                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
++                        logger.error(''.join(PYRO_VERSION < "4.0"
++                                     and Pyro.util.getPyroTraceback(exp)
++                                     or Pyro.util.getPyroTraceback()))
+                     except:
+                         pass
+                     raise
+ 
+-
+             # We clean ONLY if the send is OK
+             if send_ok:
+                 sched['wait_homerun'].clear()
+@@ -404,7 +409,9 @@ class Satellite(BaseSatellite):
+         except OSError, exp:
+             # We look for the "Function not implemented" under Linux
+             if exp.errno == 38 and os.name == 'posix':
+-                logger.critical("Got an exception (%s). If you are under Linux, please check that your /dev/shm directory exists and is read-write." % (str(exp)))
++                logger.critical("Got an exception (%s). If you are under Linux, "
++                                "please check that your /dev/shm directory exists and"
++                                " is read-write." % (str(exp)))
+             raise
+ 
+         # If we are in the fork module, we do not specify a target
+@@ -422,8 +429,9 @@ class Satellite(BaseSatellite):
+                 return
+         # We want to give to the Worker the name of the daemon (poller or reactionner)
+         cls_name = self.__class__.__name__.lower()
+-        w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
+-                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target, loaded_into=cls_name)
++        w = Worker(1, q, self.returns_queue, self.processes_by_worker,
++                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length,
++                   target=target, loaded_into=cls_name)
+         w.module_name = module_name
+         # save this worker
+         self.workers[w.id] = w
+@@ -525,31 +533,54 @@ class Satellite(BaseSatellite):
+             # So now we can really forgot it
+             del self.workers[id]
+ 
+-    # Here we create new workers if the queue load (len of verifs) is too long
++    # Returns the max queue size for a mod
++    def get_max_q_len(self, mod):
++        max_size = 0
++
++        for _, q in self.q_by_mod[mod].items():
++            max_size = max(max_size, q.qsize())
++
++        return max_size
++
++    # Here we do not create new workers yet  if the queue load (len of verifs) is too long
++    # We only ensure we have min_workers per modules.
+     def adjust_worker_number_by_load(self):
+-        # TODO: get a real value for a load
+-        wish_worker = 1
+-        # I want at least min_workers or wish_workers (the biggest)
+-        # but not more than max_workers
+-        while len(self.workers) < self.min_workers \
+-                  or (wish_worker > len(self.workers) \
+-                      and len(self.workers) < self.max_workers):
+-            to_del = []
+-            for mod in self.q_by_mod:
++        to_del = []
++        logger.debug("[%s] Trying to adjust worker number."
++                     " Actual number : %d, min per module : %d, max per module : %d"
++                     % (self.name, len(self.workers), self.min_workers, self.max_workers))
++
++        # I want at least min_workers by module then if I can, I add worker for load balancing
++        for mod in self.q_by_mod:
++            #At least min_workers
++            while len(self.q_by_mod[mod]) < self.min_workers:
+                 try:
+                     self.create_and_launch_worker(module_name=mod)
+                 # Maybe this modules is not a true worker one.
+                 # if so, just delete if from q_by_mod
+                 except NotWorkerMod:
+                     to_del.append(mod)
++            """
++            # Try to really adjust load if necessary
++            if self.get_max_q_len(mod) > self.max_q_size:
++                if len(self.q_by_mod[mod]) >= self.max_workers:
++                    logger.info("Cannot add a new %s worker, even if load is high. "
++                                "Consider changing your max_worker parameter") % mod
++                else:
++                    try:
++                        self.create_and_launch_worker(module_name=mod)
++                    # Maybe this modules is not a true worker one.
++                    # if so, just delete if from q_by_mod
++                    except NotWorkerMod:
++                        to_del.append(mod)
++            """
+ 
+-            for mod in to_del:
+-                logger.debug("[%s] The module %s is not a worker one, I remove it from the worker list" % (self.name,mod))
+-                del self.q_by_mod[mod]
+-
++        for mod in to_del:
++            logger.debug("[%s] The module %s is not a worker one, "
++                         "I remove it from the worker list" % (self.name, mod))
++            del self.q_by_mod[mod]
+         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
+ 
+-
+     # Get the Queue() from an action by looking at which module
+     # it wants with a round robin way to scale the load between
+     # workers
+@@ -594,7 +625,7 @@ class Satellite(BaseSatellite):
+     # put it in the s queue (from master to slave)
+     # REF: doc/shinken-action-queues.png (1)
+     def get_new_actions(self):
+-        now = time.time()
++        #now = time.time()  #Unused
+ 
+         # Here are the differences between a
+         # poller and a reactionner:
+@@ -618,11 +649,11 @@ class Satellite(BaseSatellite):
+                 if con is not None:  # None = not initialized
+                     pyro.set_timeout(con, 120)
+                     # OK, go for it :)
+-                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
+-                                             poller_tags=self.poller_tags, \
+-                                             reactionner_tags=self.reactionner_tags, \
+-                                             worker_name=self.name, \
+-                                             module_types=self.q_by_mod.keys())
++                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions,
++                                         poller_tags=self.poller_tags,
++                                         reactionner_tags=self.reactionner_tags,
++                                         worker_name=self.name,
++                                         module_types=self.q_by_mod.keys())
+                     logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
+                     # We 'tag' them with sched_id and put into queue for workers
+                     # REF: doc/shinken-action-queues.png (2)
+@@ -634,7 +665,9 @@ class Satellite(BaseSatellite):
+             except (Pyro_exp_pack, KeyError), exp:
+                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                 try:
+-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
++                    logger.debug(''.join(PYRO_VERSION < "4.0"
++                                 and Pyro.util.getPyroTraceback(exp)
++                                 or Pyro.util.getPyroTraceback()))
+                 except:
+                     pass
+                 self.pynag_con_init(sched_id)
+@@ -643,7 +676,9 @@ class Satellite(BaseSatellite):
+             except (AttributeError, Pyro.errors.NamingError), exp:
+                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                 try:
+-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
++                    logger.debug(''.join(PYRO_VERSION < "4.0"
++                                 and Pyro.util.getPyroTraceback(exp)
++                                 or Pyro.util.getPyroTraceback()))
+                 except:
+                     pass
+             # What the F**k? We do not know what happened,
+@@ -651,7 +686,9 @@ class Satellite(BaseSatellite):
+             except Exception, exp:
+                 logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
+                 try:
+-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
++                    logger.debug(''.join(PYRO_VERSION < "4.0"
++                                 and Pyro.util.getPyroTraceback(exp)
++                                 or Pyro.util.getPyroTraceback()))
+                 except:
+                     pass
+                 raise
+@@ -732,8 +769,9 @@ class Satellite(BaseSatellite):
+             for mod in self.q_by_mod:
+                 # In workers we've got actions send to queue - queue size
+                 for (i, q) in self.q_by_mod[mod].items():
+-                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" % \
+-                        (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len()))
++                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" %
++                                (sched_id, sched['name'], mod,
++                                 i, q.qsize(), self.get_returns_queue_len()))
+ 
+         # Before return or get new actions, see how we manage
+         # old ones: are they still in queue (s)? If True, we
+@@ -851,7 +889,8 @@ class Satellite(BaseSatellite):
+                     already_got = True
+ 
+             if already_got:
+-                logger.info("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
++                logger.info("[%s] We already got the conf %d (%s)"
++                            % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
+                 actions = self.schedulers[sched_id]['actions']
+ 
+@@ -951,7 +990,6 @@ class Satellite(BaseSatellite):
+             # And even start external ones
+             self.modules_manager.start_external_instances()
+ 
+-
+             # Allocate Mortal Threads
+             for _ in xrange(1, self.min_workers):
+                 to_del = []
+@@ -964,13 +1002,15 @@ class Satellite(BaseSatellite):
+                         to_del.append(mod)
+ 
+                 for mod in to_del:
+-                    logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
++                    logger.debug("The module %s is not a worker one, "
++                                 "I remove it from the worker list" % mod)
+                     del self.q_by_mod[mod]
+ 
+             # Now main loop
+             self.do_mainloop()
+-        except Exception, exp:
++        except Exception:
+             logger.critical("I got an unrecoverable error. I have to exit")
+-            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
++            logger.critical("You can log a bug ticket at "
++                            "https://github.com/naparuba/shinken/issues/new to get help")
+             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
+             raise

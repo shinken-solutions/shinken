@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+# Delete manually this file ...
+rm /usr/lib/python2.7/dist-packages/shinken/modules/webui_broker/__init__.pyc || true
+
+rm /usr/lib/python2.7/dist-packages/shinken/webui/htdocs || true
+rm /usr/share/shinken/htdocs/js/jquery.js || true

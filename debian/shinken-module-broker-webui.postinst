@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+cookies=`tr -dc "[:alpha:]" < /dev/urandom | head -c 30`
+sed -i -r "s/CHANGE_ME/$cookies/g" /etc/shinken/shinken-specific/broker-webui.cfg
+sed -i -r "s/; CHANGE THIS or someone could forge//g" /etc/shinken/shinken-specific/broker-webui.cfg
+
+
+
+ln -s /usr/share/shinken/htdocs /usr/lib/python2.7/dist-packages/shinken/webui/ || true
+ln -s /usr/share/javascript/jquery/jquery.js /usr/share/shinken/htdocs/js/ || true

@@ -1,0 +1,56 @@
+#! /bin/sh
+
+# Copyright (C) 2009-2011:
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+### BEGIN INIT INFO
+# Provides:          shinken-receiver
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Shinken receiver daemon
+# Description:       Shinken is a monitoring tool and the Receiver
+#                    is one of its daemon. This one gets the configuration from the arbiter
+#                    His purpose is to get the broks from the schedulers specified in the
+#                    configuration
+### END INIT INFO
+
+### BEGIN INIT INFO Redhat
+# Shinken        Starts Shinken Receiver
+#
+# chkconfig: 345 99 01
+# description: Start Shinken receiver daemon
+### END INIT INFO
+
+# Author: Gabes Jean <naparuba@gmail.com>
+#         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+
+
+NAME="shinken-receiver"
+
+curdir=$(dirname "$0")
+
+export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+
+"$curdir/shinken" $@ receiver
+
+exit $?

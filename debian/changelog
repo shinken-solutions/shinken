@@ -1,0 +1,5 @@
+shinken (1.4) stable; urgency=low
+
+  * Initial release.
+
+ -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Mon, 03 Dec 2012 17:06:21 -0500

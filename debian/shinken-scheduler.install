@@ -1,0 +1,2 @@
+bin/shinken-scheduler /usr/lib/python2.7/dist-packages/shinken/bin/
+shinken/daemons/schedulerdaemon.py /usr/lib/python2.7/dist-packages/shinken/daemons

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+mkdir -p /var/log/shinken/
+chown -R shinken:shinken /var/log/shinken/
+
+update-rc.d shinken-scheduler defaults

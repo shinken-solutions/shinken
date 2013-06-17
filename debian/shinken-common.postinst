@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+sed  -i 's|$ETC$|/etc/shinken/|g' /etc/default/shinken
+sed  -i 's|$VAR$|/var/lib/shinken/|g' /etc/default/shinken
+sed  -i 's|$SCRIPTS_BIN$|/usr/share/pyshared/shinken/bin/|g' /etc/default/shinken
+sed  -i 's|$RUN$|/var/run/shinken/|g' /etc/default/shinken
+sed  -i 's|$LOG$|/var/log/shinken/|g' /etc/default/shinken
+
+mkdir -p /var/lib/shinken/
+chown -R shinken:shinken /var/lib/shinken/
+
+update-rc.d shinken stop 20 0 1 6 .
+#update-rc.d shinken defaults
+

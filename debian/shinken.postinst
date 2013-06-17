@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+# Add WebUI broker module
+sed -i -r ':a;N;$!ba;s/(define broker.*)(^ *modules[a-zA-Z, \-]*)(.*})/\1\2 ,WebUI\3/g' /etc/shinken/shinken-specific/broker.cfg
+
+# Add WebUI submodules
+sed -i -r ':a;N;$!ba;s/(define module.*)(^ *modules[a-zA-Z_, \-]*)(.*})/\1\2 ,SQLitedb\3/g' /etc/shinken/shinken-specific/broker-webui.cfg
+sed -i -r ':a;N;$!ba;s/(define module.*)(^ *modules[a-zA-Z_, \-]*)(.*})/\1\2 ,Cfg_password\3/g' /etc/shinken/shinken-specific/broker-webui.cfg
+
+# Add retention modules
+sed -i -r ':a;N;$!ba;s/(define *broker.*)(^ *modules[a-zA-Z_, \-]*)(.*})/\1\2 ,PickleRetentionBroker\3/g' /etc/shinken/shinken-specific/broker.cfg
+sed -i -r ':a;N;$!ba;s/(define *arbiter.*)(^ *modules[a-zA-Z_, \-]*)(.*})/\1\2 ,PickleRetentionArbiter\3/g' /etc/shinken/shinken-specific/arbiter.cfg
+sed -i -r ':a;N;$!ba;s/(define *scheduler.*)(^ *modules[a-zA-Z_, \-]*)(.*})/\1\2 ,PickleRetention\3/g' /etc/shinken/shinken-specific/scheduler.cfg
+
+# Start daemons
+service shinken-broker start
+service shinken-scheduler start
+service shinken-poller start
+service shinken-reactionner start
+service shinken-arbiter start
+
+# Echo instructions
+echo ""
+echo "========================================================="
+echo "=====                                               ====="
+echo "=====                Shinken is ready               ====="
+echo "=====                                               ====="
+echo "========================================================="
+echo "=        You can now go to http://127.0.0.1:7767        ="
+echo "=                   Username: admin                     ="
+echo "=                   Password: admin                     ="
+echo "========================================================="
+echo ""
