@@ -1,5 +1,40 @@
-shinken (1.4) stable; urgency=low
+shinken (1.4-1) stable; urgency=low
 
-  * Initial release.
+  * Upgrade to 1.4
 
  -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Mon, 03 Dec 2012 17:06:21 -0500
+
+shinken (1.0-1) unstable; urgency=low
+
+  * Upgrade to 1.0
+
+ -- Arthur Gautier <superbaloo+debian@superbaloo.net>  Tue, 28 Feb 2012 18:37:34 +0100
+
+shinken (0.8.5-1) unstable; urgency=low
+
+  * Update to 0.8.5
+
+ -- Arthur Gautier <superbaloo+debian@superbaloo.net>  Mon, 06 Feb 2012 18:19:46 +0100
+
+shinken (0.8.1-1) unstable; urgency=low
+
+  * 0.8 version of shinken
+  * Major feature:
+    * WebUI
+  * For other things please see
+    https://github.com/naparuba/shinken/blob/master/Changelog
+
+ -- Arthur Gautier <superbaloo+debian@superbaloo.net>  Sat, 12 Nov 2011 15:10:17 +0100
+
+shinken (0.6.5-2) unstable; urgency=low
+
+  * Fixing long description (Closes: #642254)
+  * Fix init scripts (Closes: #642297)
+
+ -- Arthur Gautier <superbaloo+debian@superbaloo.net>  Thu, 22 Sep 2011 22:42:39 +0200
+
+shinken (0.6.5-1) unstable; urgency=low
+
+  * Initial release (Closes: #599073) 
+
+ -- Arthur Gautier <superbaloo+debian@superbaloo.net>  Thu, 15 Sep 2011 14:00:09 +0200
