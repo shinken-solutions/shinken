@@ -56,6 +56,8 @@ from realm import Realm, Realms
 from contact import Contact, Contacts
 from contactgroup import Contactgroup, Contactgroups
 from notificationway import NotificationWay, NotificationWays
+from checkmodulation import CheckModulation, CheckModulations
+from macromodulation import MacroModulation, MacroModulations
 from servicegroup import Servicegroup, Servicegroups
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
@@ -101,6 +103,7 @@ class Config(Item):
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default=''),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
+        'modulesdir':               StringProp(default='modules'),
         'use_local_log':            BoolProp(default='1'),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
@@ -257,7 +260,7 @@ class Config(Item):
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
         'certs_dir':             StringProp(default='etc/certs'),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
-        'server_cert':          StringProp(default='etc/certs/server.pem'),
+        'server_cert':           StringProp(default='etc/certs/server.pem'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format
@@ -312,6 +315,8 @@ class Config(Item):
         'contact':          (Contact, Contacts, 'contacts'),
         'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups'),
         'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
+        'checkmodulation':  (CheckModulation, CheckModulations, 'checkmodulations'),
+        'macromodulation':  (MacroModulation, MacroModulations, 'macromodulations'),
         'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
         'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
         'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters'),
@@ -502,7 +507,7 @@ class Config(Item):
     def read_config_buf(self, buf):
         params = []
         types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
-                 'contact', 'notificationway', 'host', 'service', 'servicegroup',
+                 'contact', 'notificationway', 'checkmodulation', 'macromodulation', 'host', 'service', 'servicegroup',
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
@@ -698,9 +703,11 @@ class Config(Item):
         #print "Hosts"
         # link hosts with timeperiods and commands
         self.hosts.linkify(self.timeperiods, self.commands, \
-                               self.contacts, self.realms, \
-                               self.resultmodulations, self.businessimpactmodulations, \
-                               self.escalations, self.hostgroups, self.triggers)
+                           self.contacts, self.realms, \
+                           self.resultmodulations, self.businessimpactmodulations, \
+                           self.escalations, self.hostgroups, self.triggers, self.checkmodulations,
+                           self.macromodulations
+                           )
 
         self.hostsextinfo.merge(self.hosts)
 
@@ -712,9 +719,11 @@ class Config(Item):
         #print "Services"
         # link services with other objects
         self.services.linkify(self.hosts, self.commands, \
-                                  self.timeperiods, self.contacts,\
-                                  self.resultmodulations, self.businessimpactmodulations, \
-                                  self.escalations, self.servicegroups, self.triggers)
+                              self.timeperiods, self.contacts,\
+                              self.resultmodulations, self.businessimpactmodulations, \
+                              self.escalations, self.servicegroups, self.triggers, self.checkmodulations,
+                              self.macromodulations
+                              )
 
         self.servicesextinfo.merge(self.services)
 
@@ -724,6 +733,12 @@ class Config(Item):
 
         # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)
+
+        # link notificationways with timeperiods and commands
+        self.checkmodulations.linkify(self.timeperiods, self.commands)
+
+        # Link with timeperiods
+        self.macromodulations.linkify(self.timeperiods)
 
         #print "Contactgroups"
         # link contacgroups with contacts
@@ -773,6 +788,7 @@ class Config(Item):
         # satellites
         self.realms.prepare_for_satellites_conf()
 
+
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify(self):
@@ -786,6 +802,7 @@ class Config(Item):
         self.hosts.late_linkify_h_by_commands(self.commands)
         self.services.late_linkify_s_by_commands(self.commands)
         self.contacts.late_linkify_c_by_commands(self.commands)
+
 
     # Some properties are dangerous to be send like that
     # like realms linked in hosts. Realms are too big to send (too linked)
@@ -957,6 +974,8 @@ class Config(Item):
         self.contacts.fill_default()
         self.contactgroups.fill_default()
         self.notificationways.fill_default()
+        self.checkmodulations.fill_default()
+        self.macromodulations.fill_default()
         self.services.fill_default()
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
@@ -982,6 +1001,7 @@ class Config(Item):
         # realm if need and it will be tagged to sat that do
         # not have an realm
         self.fill_default_realm()
+        self.realms.fill_default() # also put default inside the realms themselves
         self.reactionners.fill_default()
         self.pollers.fill_default()
         self.brokers.fill_default()
@@ -1269,6 +1289,8 @@ class Config(Item):
         self.contacts.create_reversed_list()
         self.contactgroups.create_reversed_list()
         self.notificationways.create_reversed_list()
+        self.checkmodulations.create_reversed_list()
+        self.macromodulations.create_reversed_list()
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
@@ -1321,7 +1343,7 @@ class Config(Item):
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
-                  'hostsextinfo', 'servicesextinfo'):
+                  'hostsextinfo', 'servicesextinfo', 'checkmodulations', 'macromodulations'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x))
             cur = getattr(self, x)
@@ -1364,9 +1386,12 @@ class Config(Item):
         # Check that for each poller_tag of a host, a poller exists with this tag
         # TODO: need to check that poller are in the good realm too
         hosts_tag = set()
+        services_tag = set()
         pollers_tag = set()
         for h in self.hosts:
             hosts_tag.add(h.poller_tag)
+        for s in self.services:
+            services_tag.add(s.poller_tag)
         for p in self.pollers:
             for t in p.poller_tags:
                 pollers_tag.add(t)
@@ -1375,6 +1400,12 @@ class Config(Item):
                 logger.error("Hosts exist with poller_tag %s but no poller got this tag" % tag)
                 self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
+        if not services_tag.issubset(pollers_tag):
+            for tag in services_tag.difference(pollers_tag):        
+                logger.error("Services exist with poller_tag %s but no poller got this tag" % tag)
+                self.add_error("Error: services exist with poller_tag %s but no poller got this tag" % tag)
+                r = False
+    
 
         # Check that all hosts involved in business_rules are from the same realm
         for l in [self.services, self.hosts]:
@@ -1400,6 +1431,8 @@ class Config(Item):
         self.contactgroups.pythonize()
         self.contacts.pythonize()
         self.notificationways.pythonize()
+        self.checkmodulations.pythonize()
+        self.macromodulations.pythonize()
         self.servicegroups.pythonize()
         self.services.pythonize()
         self.servicedependencies.pythonize()
@@ -1444,6 +1477,7 @@ class Config(Item):
         self.hosts.compute_hash()
         self.contacts.pythonize()
         self.notificationways.pythonize()
+        self.checkmodulations.pythonize()
         self.services.pythonize()
         self.resultmodulations.pythonize()
         self.businessimpactmodulations.pythonize()
@@ -1733,6 +1767,8 @@ class Config(Item):
                 new_hostgroups.append(hg.copy_shell())
             cur_conf.hostgroups = Hostgroups(new_hostgroups)
             cur_conf.notificationways = self.notificationways
+            cur_conf.checkmodulations = self.checkmodulations
+            cur_conf.macromodulations = self.macromodulations
             cur_conf.contactgroups = self.contactgroups
             cur_conf.contacts = self.contacts
             cur_conf.triggers = self.triggers

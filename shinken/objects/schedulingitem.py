@@ -565,7 +565,7 @@ class SchedulingItem(Item):
             return None
 
         # Get the command to launch, and put it in queue
-        self.launch_check(self.next_chk)
+        self.launch_check(self.next_chk, force=force)
 
 
     # If we've got a system time change, we need to compensate it
@@ -1257,22 +1257,39 @@ class SchedulingItem(Item):
         # Look if we are in check or not
         self.update_in_checking()
 
+        # the check is being forced, so we just replace next_chk time by now
+        if force and self.in_checking:
+            now = time.time()
+            c_in_progress = self.checks_in_progress[0]
+            c_in_progress.t_to_go = now
+            return c_in_progress.id
+
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
             now = time.time()
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
-            if c_in_progress.t_to_go > now:  # Very far?
-                c_in_progress.t_to_go = now  # No, I want a check right NOW
+            c_in_progress.t_to_go = now  # No, I want a check right NOW
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
         if force or (not self.is_no_check_dependent()):
+
+            # By default we will use our default check_command
+            check_command = self.check_command
+            # But if a checkway is available, use this one instead.
+            # Take the first available
+            for cw in self.checkmodulations:
+                c_cw = cw.get_check_command(t)
+                if c_cw:
+                    check_command = c_cw
+                    break
+            
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
-            command_line = m.resolve_command(self.check_command, data)
+            command_line = m.resolve_command(check_command, data)
 
             # By default env is void
             env = {}
@@ -1284,17 +1301,17 @@ class SchedulingItem(Item):
             # By default we take the global timeout, but we use the command one if it
             # define it (by default it's -1)
             timeout = cls.check_timeout
-            if self.check_command.timeout != -1:
-                timeout = self.check_command.timeout
+            if check_command.timeout != -1:
+                timeout = check_command.timeout
 
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
             # And reactionner_tag too
             c = Check('scheduled', command_line, self, t, ref_check, \
                       timeout=timeout, \
-                      poller_tag=self.check_command.poller_tag, \
+                      poller_tag=check_command.poller_tag, \
                       env=env, \
-                      module_type=self.check_command.module_type)
+                      module_type=check_command.module_type)
 
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not

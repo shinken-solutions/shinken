@@ -26,8 +26,10 @@ Test Redis retention.
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
-from shinken.modules import redis_retention_scheduler
-from shinken.modules.redis_retention_scheduler import get_instance
+from shinken.log import logger
+from shinken.modulesctx import modulesctx
+redis_retention_scheduler = modulesctx.get_module('retention_redis')
+get_instance = redis_retention_scheduler.get_instance
 
 modconf = Module()
 modconf.module_name = "RedisRetention"
@@ -35,10 +37,19 @@ modconf.module_type = redis_retention_scheduler.properties['type']
 modconf.properties = redis_retention_scheduler.properties.copy()
 
 
+try:
+    import redis
+except ImportError:
+    redis = None
+
 class TestRedis(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_redis_retention(self):
+        if not redis:
+            logger.warning('Cannot import python-redis lib!')
+            return
+
         # get our modules
         mod = redis_retention_scheduler.Redis_retention_scheduler(
             modconf, 'localhost')

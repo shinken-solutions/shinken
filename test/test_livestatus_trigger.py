@@ -279,8 +279,11 @@ class TestConfigSmall(TestConfig):
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
         print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.conf.skip_initial_broks = False        
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
+        
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None

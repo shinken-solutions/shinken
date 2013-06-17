@@ -40,8 +40,9 @@ from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
-from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.livestatus.mapping import Logline
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
+from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
 from shinken.comment import Comment
 
 try:
@@ -170,7 +171,9 @@ class TestConfigSmall(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
@@ -269,7 +272,9 @@ class TestConfigBig(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -495,6 +500,7 @@ OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         tac = time.time()
         pyresponse = eval(response)
+        print response
         print "number of records with test_ok_01", len(pyresponse)
         self.assert_(len(pyresponse) == should_be)
 
@@ -537,6 +543,18 @@ Filter: type = HOST DOWNTIME ALERT
 Filter: type ~ starting...
 Filter: type ~ shutting down...
 Or: 8
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        allpyresponse = eval(response)
+        print "all records", len(allpyresponse)
+        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+
+
+        # Now a pure class check query
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: class = 1
 OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         allpyresponse = eval(response)
@@ -596,7 +614,10 @@ OutputFormat: json"""
             'mongodb_uri': "mongodb://127.0.0.1:27017",
             'max_logs_age': '7y',
         })
-        self.assert_(dbmodconf.max_logs_age == 7*365)
+        
+        print dbmodconf.max_logs_age
+        livestatus_broker = LiveStatusLogStoreMongoDB(dbmodconf)
+        self.assert_(livestatus_broker.max_logs_age == 7*365)
 
 
 if __name__ == '__main__':

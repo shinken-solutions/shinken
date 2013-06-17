@@ -51,7 +51,9 @@ class Check(Action):
         'depend_on':    StringProp(default=[]),
         'dep_check':    StringProp(default=[]),
         'check_time':   IntegerProp(default=0),
-        'execution_time': IntegerProp(default=0),
+        'execution_time': FloatProp(default=0.0),
+        'u_time':       FloatProp(default=0.0),
+        's_time':       FloatProp(default=0.0),
         'perf_data':    StringProp(default=''),
         'check_type':   IntegerProp(default=0),
         'poller_tag':   StringProp(default='None'),
@@ -89,6 +91,8 @@ class Check(Action):
             self.depend_on_me = [dep_check]
         self.check_time = 0
         self.execution_time = 0
+        self.u_time = 0  # user executon time
+        self.s_time = 0  # system execution time
         self.perf_data = ''
         self.check_type = 0  # which kind of check result? 0=active 1=passive
         self.poller_tag = poller_tag

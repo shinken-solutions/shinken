@@ -26,7 +26,7 @@
 import time
 
 from action import Action
-from shinken.property import IntegerProp, StringProp
+from shinken.property import IntegerProp, StringProp, FloatProp
 from shinken.autoslots import AutoSlots
 
 """ TODO: Add some comment about this class for the doc"""
@@ -47,7 +47,9 @@ class EventHandler(Action):
         'long_output':    StringProp(default=''),
         't_to_go':        StringProp(default=0),
         'check_time':     StringProp(default=0),
-        'execution_time': StringProp(default=0),
+        'execution_time': FloatProp(default=0),
+        'u_time':         FloatProp(default=0.0),
+        's_time':         FloatProp(default=0.0),
         'env':            StringProp(default={}),
         'perf_data':      StringProp(default=''),
         'sched_id':       IntegerProp(default=0),
@@ -78,11 +80,14 @@ class EventHandler(Action):
         self.t_to_go = time.time()
         self.check_time = 0
         self.execution_time = 0
+        self.u_time = 0
+        self.s_time = 0
         self.perf_data = ''
         self.env = {}
         self.module_type = module_type
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
+
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
@@ -145,3 +150,7 @@ class EventHandler(Action):
             self.worker = 'none'
         if not getattr(self, 'module_type', None):
             self.module_type = 'fork'
+        # s_time and u_time are added between 1.2 and 1.4
+        if not hasattr(self, 'u_time'):
+            self.u_time = 0
+            self.s_time = 0

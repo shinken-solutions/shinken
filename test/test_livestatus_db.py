@@ -35,12 +35,27 @@ import time
 import random
 import copy
 
+sys.path.append('../shinken/modules')
+
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
-from shinken.modules.livestatus_broker.mapping import Logline
-from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
+livestatus_broker = modulesctx.get_module('livestatus')
+LiveStatus_broker = livestatus_broker.LiveStatus_broker
+LiveStatus = livestatus_broker.LiveStatus
+LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
+LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
+Logline = livestatus_broker.Logline
+LiveStatusLogStoreSqlite = modulesctx.get_module('logstore_sqlite').LiveStatusLogStoreSqlite
+#from shinken.modules.logstore_sqlite.module import LiveStatusLogStoreSqlite
+#from shinken.modules.livestatus import module as livestatus_broker
+#from shinken.modules.livestatus.module import LiveStatus_broker
+#from shinken.modules.livestatus.livestatus import LiveStatus
+#from shinken.modules.livestatus.livestatus_regenerator import LiveStatusRegenerator
+#from shinken.modules.livestatus.livestatus_query_cache import LiveStatusQueryCache
+#from shinken.modules.livestatus.mapping import Logline
+
 from shinken.comment import Comment
 
 sys.setcheckinterval(10000)
@@ -56,10 +71,10 @@ class TestConfig(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
@@ -67,7 +82,7 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             brok.prepare()
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
     def tearDown(self):
         self.livestatus_broker.db.commit()
@@ -97,7 +112,8 @@ class TestConfigSmall(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
@@ -106,6 +122,7 @@ class TestConfigSmall(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
+
 
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
@@ -189,6 +206,7 @@ Columns: time type options state host_name"""
             print "archive is", day[2]
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now + 3600)
+
 
     def test_num_logs(self):
         self.print_header()
@@ -544,7 +562,9 @@ class TestConfigBig(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -774,7 +794,8 @@ class TestConfigNoLogstore(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -830,7 +851,7 @@ class TestConfigNoLogstore(TestConfig):
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
         self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modulesctx.get_modulesdir(), [])
         self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
         # We can now output some previouly silented debug ouput
         self.livestatus_broker.do_load_modules()

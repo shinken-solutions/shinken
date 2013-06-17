@@ -1,2 +1,2 @@
 cd ..
-c:\python27\python.exe @@installdir@@\bin\shinken-broker.py -c @@installdir@@\etc\brokerd-windows.ini
+%python-exe% @@INSTALLDIR@@\bin\shinken-broker.py -c @@INSTALLDIR@@\etc\brokerd-windows.ini

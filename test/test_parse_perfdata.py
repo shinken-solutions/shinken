@@ -77,8 +77,47 @@ class TestParsePerfdata(ShinkenTest):
 
         self.assert_(len(p) == 3)
 
+        s = "'Physical Memory Used'=12085620736Bytes; 'Physical Memory Utilisation'=94%;80;90;"
+        p = PerfDatas(s)
+        p.metrics
+        m = p['Physical Memory Used']
+        self.assert_(m.name == 'Physical Memory Used')
+        self.assert_(m.value == 12085620736)
+        self.assert_(m.uom == 'Bytes')
+        self.assert_(m.warning is None)
+        self.assert_(m.critical is None)
+        self.assert_(m.min is None)
+        self.assert_(m.max is None)
 
+        m = p['Physical Memory Utilisation']
+        self.assert_(m.name == 'Physical Memory Utilisation')
+        self.assert_(m.value == 94)
+        self.assert_(m.uom == '%')
+        self.assert_(m.warning == 80)
+        self.assert_(m.critical == 90)
+        self.assert_(m.min == 0)
+        self.assert_(m.max == 100)
 
+        s = "'C: Space'=35.07GB; 'C: Utilisation'=87.7%;90;95;"
+        p = PerfDatas(s)
+        p.metrics
+        m = p['C: Space']
+        self.assert_(m.name == 'C: Space')
+        self.assert_(m.value == 35.07)
+        self.assert_(m.uom == 'GB')
+        self.assert_(m.warning is None)
+        self.assert_(m.critical is None)
+        self.assert_(m.min is None)
+        self.assert_(m.max is None)
+
+        m = p['C: Utilisation']
+        self.assert_(m.name == 'C: Utilisation')
+        self.assert_(m.value == 87.7)
+        self.assert_(m.uom == '%')
+        self.assert_(m.warning == 90)
+        self.assert_(m.critical == 95)
+        self.assert_(m.min == 0)
+        self.assert_(m.max == 100)
 
 if __name__ == '__main__':
     unittest.main()

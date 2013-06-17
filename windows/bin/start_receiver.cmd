@@ -1,2 +1,2 @@
 cd ..
-c:\python27\python.exe @@installdir@@\bin\shinken-receiver.py -c @@installdir@@\etc\receiverd-windows.ini
+%python-exe% @@INSTALLDIR@@\bin\shinken-receiver.py -c @@INSTALLDIR@@\etc\receiverd-windows.ini

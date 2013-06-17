@@ -2,6 +2,122 @@
 Shinken ChangeLog
 #######################
 
+
+1.4   - 27/05/2013
+------------------
+	CORE ENHANCEMENT
+	Add : Change Vsphere SDK Version
+	Add : new option for realm : broker complete links, so now a scheduler can give broks to several brokers instead of only one.
+	Add : now the arbiter can take its arbiter lookup name from parameter. Use to allow same host to run arbiter in HA for tests.
+	Add : macro_modulations objects, to dynamically change the macro based on the timeperiod. Can be useful as check_modulations, but easier to use, so maybe they will simply replace them	Use persistent cookies by defaut
+	Add : (nerocide) now KEY are expand on the service_dependencies	property.
+	Add : first version of user/system time catch for checks.
+	Add : check_modulations objects.	
+	
+	CORE FIXES
+	Fix : (reported by:Georges Racinet) lot of SSL errors with Pyro3. Fix #839
+	Fix : bad offline receiver was too much verbose. Fix #559	
+	Fix : (reported by: Beuc) : bad discovery script name. Fix #843	
+	FIX : #613 macros was overinding modules list instead of just adding a module. No bug at all just a misleading configuration in macro
+	Fix : the mysql python module installation on redhat/centos
+	FIX : Jenkins tests + autogeneration of all_tests based on py file in the tests directory
+	FIX : Jenkis test scripts : The loop skip empty lines
+	Fix : (reported by: miluebbe) catch bad protocol exception in daemons, like a telnet connexion. Fix #829
+	Fix : Timeperiod calculation
+	Fix : (reported by:darthelmet) bad NOT management for bp_rule and complex expression. Fix #827
+	Fix : remove useless print.
+	Fix : (reported by:sebguilbaud) bad URL for check_hpasm.
+	Fix : try to fix the no log error for scheduler and log	level. Need a beter solution.
+	Fix : Check if a poller exists to handle services tag.Raise error if not
+	Fix : (reported by:boardstretcher) fix #814 about regression since last SSO related patch.
+	Fix : get_all_host_names_set functions since 1.2.4.
+	Fix : fix #509  now bp_rules can manage multi-levels rules with ()
+	Fix : Missing quote in host state notification e-mails
+	Fix : (reported by: Johan Svensson) now poller worker crashs are now put in the log.
+	Fix : (reported by: flaf and Imrane.Dessai) bad additive inheritance with multiples templates.
+	FIX : MySQL-python complainig about outdated version of distribute
+	FIX : (by :Alexandre Veyrenc) graphite module now manage perfdata with space in names
+	
+	
+	MODULES ENHANCEMENT
+	Add : Sqlite to Mongodb logstore converter
+	Add : ws_arbiter now supports multiple input values. The ws_arbiter module can now accept a list of metrics to process. See:http://www.shinken-monitoring.org/forum/index.php/topic,846.0.html
+	Add : remote_user_variable from wsgi environment, to use set 'remote_user_enable 2'
+	Add : collectd header in shinken-specific.cfg
+	Add : proper support for counter/derive/absolute datatypes, by taking the derivative. Removed debug logging.
+	Add : support for collectd messages. Added support for more than one value in VALUES collectd part. Fixed graphite broker to nicely deal with multiple values. Fixed graphite graphs to support	multiple values by sh
+	Add : new arbiter module, FileTag, taht will tag an host if it is present in a flat file.	
+	Add : support for high resolution time/interval (collectd 5.0),	and also added support for derive and absolute types
+	Add : AWS arbiter module, to import your hosts from AWS/EC2.
+	Add : (reported by: joachim schiele) update the PNP version to the lastest one.
+	Ehn : add an optionnal list of hostnames to ignore for iptag module	
+	Add : example client for zmq_broker.py	
+	Add : A ZeroMQ pub socket broker for shinken
+	
+	MODULES FIXES
+	Fix : (reported by:Benoit Dunand-Laisin) livestatus command management with json option.
+	Fix : (reported by:pepejey) void password in ldap auth module. Fix #822	
+	Fix : make the NDO synchronize_database_id option 1 by default to avoid single scheduler mode bug. Make the module far less verbose too.
+	Fix : (reported by:Johan Svensson) nrpe booster module now manage more than 1024 simultaneous connexions by switchting from select based poll to a real poll call.
+	Fix : mongodb fsync as a parameter
+	Fix : invalid variable name causes nrpe_poller crash when recieving SSLError exception
+	Fix : (reported by : igup) logstore_mongodb did nt manage the	class filter.
+	Fix : Livestatus and pnpgraph_present
+	
+	
+	
+	UI ENHANCEMENT
+	Add : New impact panel design
+	Add : jquery triggerd hover effect
+	Enh : layout aligned
+	Add : font color class
+	Add : Update Font Awesome 3.0.2
+	Add : auto refresh function to view
+	Add : Screenfull lib	
+	Add : WebUI start of a geomap, imported from	https://github.com/darkweaver87/alertsmap with Remi Buisson	auth. Still work to do, for centring the map (wtf....) and give	real data.
+	Add : [mq]: flupscgi.patch
+	Add : fullscreen dashboard menu
+	Add : WebUI now manage aggregation in the dep trees, reducing the number of visible elements.
+	Add : WebUI Glances view now raise a real error message when fail to connect.
+	Add : WebUI /detail view now save the tab on the location hash, so a refresh will put the user in the good tab.
+	Add : WebUI can now load an additonnal path for plugins taht can override the default ones.
+	
+	
+	UI FIXES
+	Fix : Font color / dashboard
+	Fix : get back refresh on dashboard, so widget edit work again.
+	Fix : WebUI /impacts now display root problems even if there are lot of them.
+	Add : Tooltip to overview bar / eltgroup
+	Enh : Enabled refresh disable function / fullscreen
+	Enh : Change tab names / system log
+	Fix : #776  use "expires" of simplecookie (of bottle.py) Be carefull, "expires" uses String and not Datetime nor TimeStamp see	: http://stackoverflow.com/questions/7913169/python-bottle-persistent-cookie-not-work
+	Fix : #779 : sorting fathers before printing
+	Fix : wrong btn alignment for Host Detail Impact
+	Fix : Parents werent displayed in webui	
+	Fix : Forced check are now handled
+	
+
+	DEFAULT PACKS
+	Fix : disable the PickleRetentionArbiter and PickleRetentionBrokerby default. Very advanced modules taht should not be used without
+	Fix : currently removing skonf from standard install. If people want to TEST it, they will have to go to the init.d script. This will remove all script-kiddies from testing it and cry because it dont work. Dev are
+	Add : properties to ESX Host and ESX VM in discovery_runner
+	Add : collectd_disk.trig example
+	Fix : remove _fs_custom stuff
+	Fix : Modified collectd pack in accordance to proper naming aswell
+	Fix : typo in service Disks of linux pack Add new check_disk_custom for linux pack as sample for multi-value duplicate_foreach statement
+	Fix : MsSQL packk Typo Add Host Macros for Windows Pack
+	Fix : type in _MSSQL_CONNECTION_CRIT
+	Fix : type in WARN macros Added Macro definitions in mssql.pack
+	
+
+
+
+1.2.4 - 11/02/2013
+------------------
+	MODULES FIXES
+	* Fix : LS module crash when bad socket close on the client side.
+
+	
 1.2.3 - 30/01/2013
 ------------------
         CORE FIXES
@@ -28,7 +144,7 @@ Shinken ChangeLog
 	CORE ENHANCEMENTS
 	* Add : (Jean-francois BUTKIEWICZ) Windows installation for shinken, using .net services instead of instsrv.
 	* Add : (Romain Forlot) distro support to install notify_by_xmpp
-	* Add : (Romain Forlot) Added pnp4nagios, multisite and nagvis add-on's config folders into restore function (prior version didn't restore them)
+	* Add : (Denetariko) Added pnp4nagios, multisite and nagvis add-on's config folders into restore function (prior version didn't restore them)
 	* Add : (from : Joel Ramat) include the -property feature in discovery.
 	* Add : making orphanage time configurable
 	* Add : first version of a Trending broker module, and libexec scripts.

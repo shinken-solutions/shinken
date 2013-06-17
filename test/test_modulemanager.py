@@ -34,29 +34,10 @@ class TestModuleManager(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    def find_modules_path(self):
-        """ Find the absolute path of the shinken module directory and returns it.  """
-        import shinken
-
-        # BEWARE: this way of finding path is good if we still
-        # DO NOT HAVE CHANGE PWD!!!
-        # Now get the module path. It's in fact the directory modules
-        # inside the shinken directory. So let's find it.
-
-        print "modulemanager file", shinken.modulesmanager.__file__
-        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        print "modulemanager absolute file", modulespath
-        # We got one of the files of
-        parent_path = os.path.dirname(os.path.dirname(modulespath))
-        modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path: %s" % (modulespath))
-
-        return modulespath
-
     # Try to see if the module manager can manage modules
     def test_modulemanager(self):
         mod = Module({'module_name': 'LiveStatus', 'module_type': 'livestatus'})
-        self.modulemanager = ModulesManager('broker', self.find_modules_path(), [])
+        self.modulemanager = ModulesManager('broker', modulesdir, [])
         self.modulemanager.set_modules([mod])
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus

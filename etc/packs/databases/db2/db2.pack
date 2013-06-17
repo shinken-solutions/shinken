@@ -1,0 +1,11 @@
+{
+"name": "db2",
+
+"description": "Db2 database checks, like connected users, locks or tablespace usage",
+
+"path":"databases/",
+
+"macros":{}
+
+
+}

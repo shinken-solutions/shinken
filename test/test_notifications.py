@@ -465,7 +465,6 @@ class TestNotif(ShinkenTest):
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
 
-        print "prout"
         # I do not want a notification of a recovery because
         # the user did not have the notif first!
         self.assert_(not self.any_log_match('notify-service'))

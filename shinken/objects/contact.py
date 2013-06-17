@@ -234,15 +234,18 @@ class Contacts(Items):
                 nw = notificationways.find_by_name(nw_name)
                 if nw is not None:
                     new_notificationways.append(nw)
-                else:  # TODO: What?
-                    pass
+                else:
+                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), nw_name)
+                    i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
+
 
     def late_linkify_c_by_commands(self, commands):
         for i in self:
             for nw in i.notificationways:
                 nw.late_linkify_nw_by_commands(commands)
+
 
     # We look for contacts property in contacts and
     def explode(self, contactgroups, notificationways):

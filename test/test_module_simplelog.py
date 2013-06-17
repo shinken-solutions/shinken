@@ -27,7 +27,9 @@ import os
 from shinken_test import unittest, ShinkenTest
 
 from shinken.brok import Brok
-from shinken.modules.simplelog_broker import get_instance
+from shinken.modulesctx import modulesctx
+get_instance = modulesctx.get_module('simplelog').get_instance
+
 
 
 class TestConfig(ShinkenTest):

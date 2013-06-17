@@ -55,7 +55,7 @@ def critical(obj, output):
     now = time.time()
     cls = obj.__class__
     i = obj.launch_check(now, force=True)
-    for chk in obj.actions:
+    for chk in obj.checks_in_progress:
         if chk.id == i:
             logger.debug("[trigger] I found the check I want to change")
             c = chk
@@ -75,8 +75,9 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     if not obj:
         return
     output = output or obj.output
-    perfdata = perfdata or obj.perfdata
-    return_code = return_code or obj.state_id
+    perfdata = perfdata or obj.perf_data
+    if return_code is None:
+      return_code = obj.state_id
 
     logger.debug("[trigger] Setting %s %s %s for object %s" % (output, perfdata, return_code, obj.get_full_name()))
 
@@ -86,7 +87,7 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     now = time.time()
     cls = obj.__class__
     i = obj.launch_check(now, force=True)
-    for chk in obj.actions:
+    for chk in obj.checks_in_progress:
         if chk.id == i:
             logger.debug("[trigger] I found the check I want to change")
             c = chk

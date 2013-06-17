@@ -58,17 +58,18 @@ class TestConfig(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data
+            #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
+            brok.prepare()
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
     def lines_equal(self, text1, text2):
         # gets two multiline strings and compares the contents
@@ -280,7 +281,8 @@ class TestConfigSmall(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
@@ -2538,7 +2540,9 @@ class TestConfigBig(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -3717,7 +3721,9 @@ class TestConfigComplex(TestConfig):
         self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None

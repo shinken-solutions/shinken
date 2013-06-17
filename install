@@ -483,6 +483,10 @@ function prerequisites(){
         PYLIBS=$PYLIBSDEB
     fi
 
+    # this is a fix for MySQL-python complainig about outdated version of distribute
+    cecho " > Installing distribute" green
+    easy_install -U distribute >> ${LOGFILE} 2>&1
+
     for p in $PYLIBS
     do
         module=$(echo $p | awk -F: '{print $1'})
@@ -758,6 +762,7 @@ function relocate(){
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+    rm $TARGET/bin/default/shinken.in 
     # relocate init file
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
@@ -791,7 +796,7 @@ function fix(){
     cecho " > Add Shinken entry for skonf in sudoers" green
     cp /etc/sudoers /tmp/sudoers.shinken
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /tmp/sudoers.shinken
-    visudo -c -f /tmp/sudoers.shinken
+    visudo -c -f /tmp/sudoers.shinken >> ${LOGFILE} 2>&1
     if [ $? -eq 0 ]
     then
         mv /tmp/sudoers.shinken /etc/sudoers
@@ -984,6 +989,25 @@ function sinstall(){
     cecho "| " green
     cecho "| You can now learn how to configure shinken at: http://www.shinken-monitoring.org/wiki" green
     cecho "+------------------------------------------------------------------------------" green
+    echo ""
+    cecho "Do not forget to allow localhost to browse the entire snmp tree. Sample configuration" yellow
+    cecho "use snmp checks and the plugins should be able to access local snmp tree." yellow
+    cecho "For testing purpose you could modify your snmpd configuration this way :" yellow
+    echo ""
+    cecho "Debian :" yellow
+    cecho " edit /etc/snmp/snmpd.conf and replace the following lines :" yellow
+    cecho " view   systemonly  included   .1.3.6.1.2.1.1" yellow
+    cecho " view   systemonly  included   .1.3.6.1.2.1.25.1" yellow
+    cecho " by this one : " yellow
+    cecho " view   systemonly  included   .1" yellow
+    echo ""
+    cecho "RedHat/CentOS :" yellow
+    cecho " edit /etc/snmp/snmpd.conf and replace the following lines :" yellow
+    cecho " view   systemview  included   .1.3.6.1.2.1.1" yellow
+    cecho " view   systemview  included   .1.3.6.1.2.1.25.1" yellow
+    cecho " by this one : " yellow
+    cecho " view   systemview  included   .1" yellow
+
 }
 
 
@@ -1439,7 +1463,7 @@ function install_mongodb(){
                 cecho " > repository configuration not found. Adding 10 gen repository" yellow
                 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> ${LOGFILE} 2>&1
                 echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
-                cecho " > Updating repositories " > yellow
+                cecho " > Updating repositories " yellow
                 apt-get --allow-unauthenticated update >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
                 apt-get --allow-unauthenticated --force-yes install -y $MONGOPKGS >> ${LOGFILE} 2>&1
@@ -2082,6 +2106,87 @@ function install_notify_by_xmpp(){
     sed -i "s/^#password=.*$/password=$XMPP_PASSWORD_1/g" $XMPP_CONFIG_FILE
 }
 
+# thruk
+function install_thruk(){
+    cadre "Install thruk" green
+    cd $myscripts
+    case $CODE in
+        REDHAT)
+            if [ ! -f "/etc/yum.repos.d/consol-labs.repo" ]
+            then
+                case $VERS in
+                    5)
+                        cp install.d/consol-labs.rhel5.repo.in /etc/yum.repos.d/consol-labs.repo
+                        ;;
+                    6)
+                        cp install.d/consol-labs.rhel6.repo.in /etc/yum.repos.d/consol-labs.repo
+                        ;;
+                    *)
+                        cecho " > Unsupported RedHat/CentOs version" red
+                        exit 2
+                        ;;
+                esac
+                yum clean all >> ${LOGFILE} 2>&1
+                cecho " > Installing thruk" green
+                installpkg pkg $THRUKPKGS
+                cp install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                cecho " > Enable and start thruk" green
+                enable_service thruk
+                manage_service thruk start
+                manage_service ${WEBSERVER} restart
+            else
+                # check if thruk is installed
+                exist=$(rpm -qa | grep thruk)
+                if [[ -z "$exist" ]]
+                then
+                    cecho " > Installing thruk" green
+                    installpkg pkg $THRUKPKGS
+                    install -b install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                    cecho " > Enable and start thruk" green
+                    enable_service thruk
+                    manage_service thruk start
+                    manage_service ${WEBSERVER} restart
+                else
+                    cecho "Already installed" yellow
+                fi
+            fi
+            ;;
+        DEBIAN)
+            if [[ "$VERS" = "6" ]]; then
+                if [ ! -f "/etc/apt/sources.list.d/consol-labs.list" ]
+                then
+                    cecho " > repository configuration not found. Adding consol-labs repository" yellow
+                    apt-key adv --keyserver keys.gnupg.net --recv F8C1CA08A57B9ED7 >> ${LOGFILE} 2>&1
+                    echo "deb http://labs.consol.de/repo/stable/debian squeeze main" > /etc/apt/sources.list.d/consol-labs.list
+                    cecho " > Updating repositories " yellow
+                    apt-get --allow-unauthenticated update >> ${LOGFILE} 2>&1
+                    cecho " > Installing thruk" green
+                    apt-get --allow-unauthenticated --force-yes install -y $THRUKPKGS >> ${LOGFILE} 2>&1
+                else
+                    cecho " > console-labs repository found." green
+                    thrukexist=$(dpkg -l | grep "^ii" | grep "thruk")
+                    if [ -z "$thrukexist" ]
+                    then
+                        cecho " > Installing thruk" green
+                        installpkg pkg $THRUKPKGS
+                        install -b install.d/thruk_local.conf.in /etc/thruk/thruk_local.conf
+                        manage_service ${WEBSERVER} restart
+                    else
+                        cecho " > Thruk already installed" green
+                    fi
+                fi
+            else
+                cecho " > Unsupported Debian version" red
+                exit 2
+            fi
+            ;;
+        *)
+            cecho " > Unknown distribution: $DIST" red
+            exit 2
+            ;;
+    esac
+}
+
 #################################
 ### PLUGINS INSTALLATION PART ###
 #################################
@@ -2507,6 +2612,10 @@ function install_check_esx3(){
     cecho " > Getting check_esx3 plugin from op5" green
     wget $WGETPROXY $CHECK_ESX3_SCRIPT -O check_esx3.pl >> ${LOGFILE} 2>&1
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_esx3.pl $LIBEXEC/check_esx3.pl
+
+    cecho " > Getting check_disk_vcenter plugin" green
+    wget $WGETPROXY $CHECK_DISK_VCENTER_SCRIPT -O check_disk_vcenter.pl >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 check_disk_vcenter.pl $LIBEXEC/check_disk_vcenter.pl
 }
 
 # NAGIOS-PLUGINS
@@ -2533,12 +2642,19 @@ function install_nagios-plugins(){
     rm -Rf nagios-plugins-$NAGPLUGVERS
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> ${LOGFILE} 2>&1
     cd nagios-plugins-$NAGPLUGVERS
+    cecho " > Patching nagios-plugins" green
+    patch -p0 < $myscripts/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green
     make >> ${LOGFILE} >> ${LOGFILE}  2>&1
     cecho " > Installing" green
     make install >> ${LOGFILE} >> ${LOGFILE}  2>&1
+    #if [ $? -ne 0 ]
+    #then
+    #    cecho " > Error while installing nagios-plugins" red
+    #    exit 2
+    #fi
     install -b -g $SKGROUP -o $SKUSER -m 0775 contrib/check_mem.pl $LIBEXEC >> ${LOGFILE} 2>&1
 }
 
@@ -2645,7 +2761,7 @@ function install_check_wmi_plus(){
     install -b -g $SKGROUP -o $SKUSER -m 0664 check_wmi_plus.conf.sample $LIBEXEC/check_wmi_plus.conf
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_wmi_plus.pl $LIBEXEC/check_wmi_plus.pl
     install -g $SKGROUP -o $SKUSER -m 0775 -d $LIBEXEC/check_wmi_plus.d
-    install -b -g $SKGROUP -o $SKUSER -m 0664 $TMP/check_wmi_plus.d/* $LIBEXEC
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TMP/check_wmi_plus.d/* $LIBEXEC/check_wmi_plus.d
 
     cecho " > configuring plugin" green
     sed -i "s#/usr/lib/nagios/plugins#"$LIBEXEC"#g" $LIBEXEC/check_wmi_plus.conf
@@ -2734,6 +2850,86 @@ function install_check_oracle_health(){
     make install >> ${LOGFILE} 2>&1
     mkdir -p ${VAR}${TMP} >> ${LOGFILE} 2>&1
 }
+
+# CHECK_DB2_HEALTH
+function install_check_db2_health(){
+    cadre "Install nagios plugins" green
+
+    if [ -z "$DB2_HOME" ]
+    then
+        cadre "WARNING YOU SHOULD INSTALL DB2 DEV APP CLIENT!!!!" yellow
+        cecho " > Download the db2 client see http://www.ibm.com/software/data/db2/udb/support: " yellow
+        cecho " > Set the DB2_HOME environment variable (better to set it in the bashrc )" yellow
+        cecho " > Follow any DB2 initialization prerequiresites" yellow
+        cecho " > press ENTER to continue or CTRL+C to abort" yellow
+        exit 2
+    fi
+
+    cecho " > Installing prerequisites" green
+    case $CODE in
+        REDHAT|Fedora)
+            installpkg pkg $CHECKDB2HEALTHYUMPKG
+            ;;
+        DEBIAN)
+            installpkg pkg $CHECKDB2HEALTHAPTPKG
+            ;;
+    esac
+    cecho " > Installing cpan prerequisites" green
+    cd $TMP
+    for m in $CHECKDB2HEALTHCPAN
+    do
+        filename=$(echo $m | awk -F"/" '{print $NF}')
+        if [ ! -f "$filename" ]
+        then
+            wget $WGETPROXY $m >> ${LOGFILE} 2>&1
+            if [ $? -ne 0 ]
+            then
+                cecho " > Error while downloading $m" red
+                exit 2
+            fi
+        fi
+        tar zxvf $filename  >> ${LOGFILE} 2>&1
+        cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+        perl Makefile.PL >> ${LOGFILE} 2>&1
+        make >> ${LOGFILE} 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > There was an error building module" red
+            exit 2
+        fi
+        make install  >> ${LOGFILE} 2>&1
+    done
+    cd $TMP
+    cecho " > Downloading check_db2_health" green
+    wget $WGETPROXY $CHECKDB2HEALTH >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading $filename" red
+        exit 2
+    fi
+    cecho " > Extracting archive " green
+    filename=$(echo $CHECKDB2HEALTH | awk -F"/" '{print $NF}')
+    tar zxvf $filename >> ${LOGFILE} 2>&1
+    cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+    ./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$LIBEXEC --with-mymodules-dyn-dir=$LIBEXEC --with-statefiles-dir=$TARGET/var$TMP >> ${LOGFILE} 2>&1
+    cecho " > Building plugin" green
+    make >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while building check_db2_health module" red
+        exit 2
+    fi
+    make check >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while building check_db2_health module" red
+        exit 2
+    fi
+    cecho " > Installing plugin" green
+    make install >> ${LOGFILE} 2>&1
+    mkdir -p ${VAR}${TMP} >> ${LOGFILE} 2>&1
+}
+
 # CHECK_NETAPP2
 
 function install_check_netapp2(){
@@ -3041,6 +3237,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                nagios-plugins
                                check_oracle_health
                                check_mysql_health
+							   check_db2_health
                                capture_plugin
                                check_wmi_plus
                                check_mongodb
@@ -3063,6 +3260,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                mongodb
                                nconf (experimental)
                                notify_by_xmpp
+                               thruk
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
     --enableeue             Enable application performance monitoring stack (experimental)
@@ -3137,6 +3335,10 @@ do
             then
                 install_check_mysql_health
                 exit 0
+            elif [ "$OPTARG" == "check_db2_health" ]
+            then
+                install_check_db2_health
+                exit 0				
             elif [ "$OPTARG" == "capture_plugin" ]
             then
                 install_capture_plugin
@@ -3230,6 +3432,10 @@ do
             elif [ "$OPTARG" == "notify_by_xmpp" ]
             then
                 install_notify_by_xmpp
+                exit 0
+            elif [ "$OPTARG" == "thruk" ]
+            then
+                install_thruk
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
