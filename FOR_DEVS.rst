@@ -1,3 +1,6 @@
+For Developers
+==================
+
 Here is a way to setup a shinken in "raw mode" without installing it really:
 
 Install
