@@ -60,14 +60,10 @@ import traceback
 import socket
 import requests
 import json
+import zlib
+import base64
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
-
-Pyro = pyro.Pyro
-PYRO_VERSION = pyro.PYRO_VERSION
+from shinken.http_daemon import HTTPDaemon
 
 from shinken.message import Message
 from shinken.worker import Worker
@@ -80,8 +76,6 @@ from shinken.notification import Notification
 from shinken.eventhandler import EventHandler
 from shinken.external_command import ExternalCommand
 
-# Pack of common Pyro exceptions
-from shinken.pyro_wrapper import Pyro_exp_pack
 
 
 # Class to tell that we are facing a non worker module
@@ -135,7 +129,8 @@ class IForArbiter(Interface):
 
     # The arbiter ask us our external commands in queue
     def get_external_commands(self):
-        return self.app.get_external_commands()
+        cmds = self.app.get_external_commands()
+        return cPickle.dumps(cmds)
 
 
     ### NB: only useful for receiver
@@ -179,7 +174,7 @@ class IBroks(Interface):
     # poller or reactionner ask us actions
     def get_broks(self, bname):
         res = self.app.get_broks()
-        return cPickle.dumps(res)
+        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
 
 
 class BaseSatellite(Daemon):
@@ -189,7 +184,6 @@ class BaseSatellite(Daemon):
 
         super(BaseSatellite, self).__init__(name, config_file, is_daemon, \
                                                 do_replace, debug, debug_file)
-
         # Ours schedulers
         self.schedulers = {}
 
@@ -206,9 +200,9 @@ class BaseSatellite(Daemon):
 
 
     def do_stop(self):
-        if self.pyro_daemon and self.interface:
+        if self.http_daemon and self.interface:
             logger.info("[%s] Stopping all network connections" % self.name)
-            self.pyro_daemon.unregister(self.interface)
+            self.http_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
 
@@ -253,6 +247,7 @@ class BaseSatellite(Daemon):
         for (k,v) in args.iteritems():
             print "TYPE?", type(v)
             args[k] = cPickle.dumps(v)
+            args[k] = zlib.compress(args[k], 2)
 
         r = con.post(uri+path, data=args)
 
@@ -317,13 +312,8 @@ class Satellite(BaseSatellite):
         logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
 
         try:
-            #socket.setdefaulttimeout(3)
-            sch_con = sched['con'] = requests.Session()#Pyro.core.getProxyForURI(uri)
-            #socket.setdefaulttimeout(None)
-        except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            #socket.setdefaulttimeout(None)
+            sch_con = sched['con'] = requests.Session()
+        except requests.exceptions.RequestException, exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -332,7 +322,6 @@ class Satellite(BaseSatellite):
         # timeout of 120 s
         # and get the running id
         try:
-            #pyro.set_timeout(sch_con, 5)
             new_run_id = self._get(sched, 'get_running_id')
             new_run_id = float(new_run_id)
             print "GET BACK RUNNING ID", new_run_id, type(new_run_id)
@@ -412,20 +401,12 @@ class Satellite(BaseSatellite):
                 # Not connected or sched is gone
                 except (requests.exceptions.RequestException, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
-                    #try:
-                    #    logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    #except:
-                    #    pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
-                    #try:
-                    #    logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    #except:
-                    #    pass
                     raise
 
 
@@ -512,11 +493,11 @@ class Satellite(BaseSatellite):
             except (AttributeError, AssertionError):
                 pass
         # Close the pyro server socket if it was opened
-        if self.pyro_daemon:
+        if self.http_daemon:
             if self.brok_interface:
-                self.pyro_daemon.unregister(self.brok_interface)
+                self.http_daemon.unregister(self.brok_interface)
             if self.scheduler_interface:
-                self.pyro_daemon.unregister(self.scheduler_interface)
+                self.http_daemon.unregister(self.scheduler_interface)
         # And then call our master stop from satellite code
         super(Satellite, self).do_stop()
 
@@ -689,7 +670,7 @@ class Satellite(BaseSatellite):
                 except KeyError:
                     con = None
                 if con is not None:  # None = not initialized
-                    pyro.set_timeout(con, 120)
+                    #pyro.set_timeout(con, 120)
                     # OK, go for it :)
                     tmp = self._get(sched, 'get_checks', {'do_checks':do_checks, 'do_actions':do_actions,
                                                           'poller_tags':self.poller_tags,
@@ -697,6 +678,8 @@ class Satellite(BaseSatellite):
                                                           'worker_name':self.name,
                                                           'module_types':self.q_by_mod.keys()})
                     # Explicit pickle load
+                    tmp = base64.b64decode(tmp)
+                    tmp = zlib.decompress(tmp)
                     tmp = cPickle.loads(str(tmp))
                     logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
                     # We 'tag' them with sched_id and put into queue for workers
@@ -708,27 +691,15 @@ class Satellite(BaseSatellite):
             # Or maybe is the connection lost, we recreate it
             except (requests.exceptions.RequestException, KeyError), exp:
                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
-                #try:
-                #    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                #except:
-                #    pass
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
-            except (AttributeError, Pyro.errors.NamingError), exp:
+            except AttributeError, exp:
                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
-                try:
-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                except:
-                    pass
             # What the F**k? We do not know what happened,
             # log the error message if possible.
             except Exception, exp:
                 logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
-                try:
-                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                except:
-                    pass
                 raise
 
     # In android we got a Queue, and a manager list for others
@@ -867,9 +838,9 @@ class Satellite(BaseSatellite):
     def do_post_daemon_init(self):
 
         # And we register them
-        self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
-        self.uri3 = self.pyro_daemon.register(self.brok_interface)#, "Broks")
-        self.uri4 = self.pyro_daemon.register(self.scheduler_interface)#, "Schedulers")
+        self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
+        self.uri3 = self.http_daemon.register(self.brok_interface)#, "Broks")
+        self.uri4 = self.http_daemon.register(self.scheduler_interface)#, "Schedulers")
 
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queue for fork AFTER
@@ -885,9 +856,10 @@ class Satellite(BaseSatellite):
             self.returns_queue = self.manager.Queue()
 
         # For multiprocess things, we should not have
-        # socket timeouts. will be set explicitly in Pyro calls
+        # socket timeouts.
         import socket
         socket.setdefaulttimeout(None)
+
 
     # Setup the new received conf from arbiter
     def setup_new_conf(self):
@@ -935,7 +907,6 @@ class Satellite(BaseSatellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            #uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
             uri = 'http://%s:%s/' % (s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri

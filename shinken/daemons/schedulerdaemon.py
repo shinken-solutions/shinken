@@ -27,14 +27,15 @@ import os
 import time
 import traceback
 import cPickle
+import zlib
 import requests
+import base64
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
-import shinken.pyro_wrapper as pyro
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 
@@ -57,7 +58,9 @@ They connect here and see if they are still OK with our running_id, if not, they
         #print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
 
-        return cPickle.dumps(res)
+        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        #return zlib.compress(cPickle.dumps(res), 2)
+    get_checks.encode = 'raw'
     
 
     # poller or reactionner are putting us results
@@ -93,8 +96,10 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        return cPickle.dumps(res)
-
+        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        #return zlib.compress(cPickle.dumps(res), 2)
+    get_broks.encode = 'raw'
+    
 
     # A broker is a new one, if we do not have
     # a full broks, we clean our broks, and
@@ -177,11 +182,11 @@ class Shinken(BaseSatellite):
         
 
     def do_stop(self):
-        if self.pyro_daemon:
+        if self.http_daemon:
             if self.ibroks:
-                self.pyro_daemon.unregister(self.ibroks)
+                self.http_daemon.unregister(self.ibroks)
             if self.ichecks:
-                self.pyro_daemon.unregister(self.ichecks)
+                self.http_daemon.unregister(self.ichecks)
         super(Shinken, self).do_stop()
 
 
@@ -314,7 +319,6 @@ class Shinken(BaseSatellite):
                 p = dict(p)  # make a copy
                 p.update(override_conf['satellitemap'][p['name']])
 
-            #uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
             uri = 'http://%s:%s/' % (p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
@@ -340,20 +344,20 @@ class Shinken(BaseSatellite):
         # give it an interface
         # But first remove previous interface if exists
         if self.ichecks is not None:
-            logger.debug("Deconnecting previous Check Interface from pyro_daemon")
-            self.pyro_daemon.unregister(self.ichecks)
+            logger.debug("Deconnecting previous Check Interface")
+            self.http_daemon.unregister(self.ichecks)
         # Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.pyro_daemon.register(self.ichecks)
+        self.http_daemon.register(self.ichecks)
         logger.debug("The Scheduler Interface uri is: %s" % self.uri)
 
         # Same for Broks
         if self.ibroks is not None:
-            logger.debug("Deconnecting previous Broks Interface from pyro_daemon")
-            self.pyro_daemon.unregister(self.ibroks)
+            logger.debug("Deconnecting previous Broks Interface")
+            self.http_daemon.unregister(self.ibroks)
         # Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.pyro_daemon.register(self.ibroks)#, "Broks")
+        self.http_daemon.register(self.ibroks)
 
         logger.info("Loading configuration.")
         self.conf.explode_global_conf()
@@ -407,9 +411,9 @@ class Shinken(BaseSatellite):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
-            self.pyro_daemon.register(self.interface)
-            self.pyro_daemon.unregister(self.interface)
-            self.uri = self.pyro_daemon.uri
+            self.http_daemon.register(self.interface)
+            self.http_daemon.unregister(self.interface)
+            self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s" % self.uri)
             self.do_mainloop()
         except Exception, exp:

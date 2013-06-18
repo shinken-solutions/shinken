@@ -30,6 +30,8 @@ import traceback
 import socket
 import cPickle
 import requests
+import base64
+import zlib
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -40,17 +42,7 @@ from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids
 from shinken.log import logger
 
-import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import Pyro
-
 from shinken.external_command import ExternalCommand
-
-# Pack of common Pyro exceptions
-#Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-#                    Pyro.errors.CommunicationError, \
-#                    Pyro.errors.DaemonError, Pyro.errors.TimeoutError)
-
-from shinken.pyro_wrapper import Pyro_exp_pack
 
 
 # Our main APP class
@@ -183,7 +175,7 @@ class Broker(BaseSatellite):
 
         try:
             socket.setdefaulttimeout(3)
-            links[id]['con'] = requests.Session()#Pyro.core.getProxyForURI(uri)
+            links[id]['con'] = requests.Session()
             socket.setdefaulttimeout(None)
         except requests.exceptions.RequestException, exp:
             # But the multiprocessing module is not compatible with it!
@@ -196,12 +188,12 @@ class Broker(BaseSatellite):
 
         try:
             # initial ping must be quick
-            pyro.set_timeout(links[id]['con'], 5)
+            #pyro.set_timeout(links[id]['con'], 5)
             self._get(links[id], 'ping')
             new_run_id = self._get(links[id], 'get_running_id')
             new_run_id = float(new_run_id)
             # data transfer can be longer
-            pyro.set_timeout(links[id]['con'], 120)
+            #pyro.set_timeout(links[id]['con'], 120)
 
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
@@ -220,10 +212,6 @@ class Broker(BaseSatellite):
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-#        except Pyro.errors.NamingError, exp:
-#            logger.info("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
-#            links[id]['con'] = None
-#            return
         except KeyError, exp:
             logger.info("the %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
@@ -296,8 +284,14 @@ class Broker(BaseSatellite):
                     t0 = time.time()
                     #tmp_broks = con.get_broks(self.name)
                     tmp_broks = self._get(links[sched_id], 'get_broks', {'bname':self.name})
-                    print "RAW BROKS", tmp_broks
-                    tmp_broks = cPickle.loads(str(tmp_broks))
+                    t0 = time.time()
+                    _t = base64.b64decode(tmp_broks)#str(tmp_broks))
+                    _t = zlib.decompress(_t)
+                    logger.debug("BROK STR %s" % (time.time() - t0))
+                    t0 = time.time()
+                    tmp_broks = cPickle.loads(_t)#str(tmp_broks))
+                    logger.debug("BROK LOADS %s" % (time.time() - t0))
+                    
 
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
@@ -311,10 +305,6 @@ class Broker(BaseSatellite):
             # Ok, con is not known, so we create it
             except KeyError, exp:
                 logger.debug("Key error for get_broks : %s" % str(exp))
-                try:
-                    logger.debug(''.join(Pyro.util.getPyroTraceback(exp)))
-                except:
-                    pass
                 self.pynag_con_init(sched_id, type=type)
             except requests.exceptions.RequestException, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
@@ -323,8 +313,6 @@ class Broker(BaseSatellite):
             except AttributeError, exp:
                 logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             # scheduler must not have checks
-            except Pyro.errors.NamingError, exp:
-                logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
             except Exception, x:
@@ -395,7 +383,6 @@ class Broker(BaseSatellite):
             if s['name'] in g_conf['satellitemap']:
                 s = dict(s)  # make a copy
                 s.update(g_conf['satellitemap'][s['name']])
-            #uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
             uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.schedulers[sched_id]['uri'] = uri
 
@@ -422,7 +409,6 @@ class Broker(BaseSatellite):
             if a['name'] in g_conf['satellitemap']:
                 a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
-            #uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
             uri = 'http://%s:%s/' % (a['address'], a['port'])
             self.arbiters[arb_id]['uri'] = uri
 
@@ -452,7 +438,6 @@ class Broker(BaseSatellite):
             if p['name'] in g_conf['satellitemap']:
                 p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
-            #uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
             uri = 'http://%s:%s/' % (p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
 
@@ -484,7 +469,6 @@ class Broker(BaseSatellite):
             if r['name'] in g_conf['satellitemap']:
                 r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
-            #uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
             uri = 'http://%s:%s/' % (r['address'], r['port'])
             self.reactionners[rea_id]['uri'] = uri
 
@@ -670,7 +654,7 @@ class Broker(BaseSatellite):
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             
-            self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf

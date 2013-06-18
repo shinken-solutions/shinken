@@ -27,22 +27,14 @@ import time
 import socket
 import requests
 import json
+import zlib
 import cPickle
-
-import shinken.pyro_wrapper as pyro
-Pyro = pyro.Pyro
-PYRO_VERSION = pyro.PYRO_VERSION
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
 
-# Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
-                    Pyro.errors.TimeoutError, Pyro.errors.NamingError)
 
 
 class SatelliteLink(Item):
@@ -123,16 +115,14 @@ class SatelliteLink(Item):
             return False
 
         try:
-            pyro.set_timeout(self.con, self.data_timeout)
-            #self.con.put_conf(conf)
+            #pyro.set_timeout(self.con, self.data_timeout)
             self._post('put_conf', {'conf':conf})
-            pyro.set_timeout(self.con, self.timeout)
+            #pyro.set_timeout(self.con, self.timeout)
             print "PUT CONF SUCESS", self.get_name()
             return True
         except requests.exceptions.RequestException, exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
-            #logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
             
 
@@ -217,8 +207,9 @@ class SatelliteLink(Item):
         if self.con is None:
             self.add_failed_check_attempt()
             return
-        print "REACHING", self.uri+path
+        print "REACHING GET", self.uri+path
         r = self.con.get(self.uri+path, params=args)
+        print "FN GET"
         
         # If need it will raise an error here
         r.raise_for_status()
@@ -236,16 +227,28 @@ class SatelliteLink(Item):
         if self.con is None:
             self.add_failed_check_attempt()
             return
-        print "REACHING", self.uri+path
+        print "REACHING POST", self.uri+path
+        t0 = time.time()
         for (k,v) in args.iteritems():
-            args[k] = cPickle.dumps(v)
+            print "ORIG SIZ OF V", len(args[k])
+            args[k] = zlib.compress(cPickle.dumps(v), 2)
+            print "SIZE OF V", len(args[k])
+            #args[k] = zlib.compress(args[k], 2)
+            #print "NEW SIZE OF V", len(args[k]), type(args[k])
+        print "_POST TIME TO CPIKCLE", time.time() - t0
         # Ok go for it!
+        t0 = time.time()
         r = self.con.post(self.uri+path, data=args)
+        print "_POST TIME TO POST", time.time() - t0
         
         # If need it will raise an error here
         r.raise_for_status()
+
+        ret = r.content
+        print "CONTENT READ"
+        
         # Should return us pong string
-        return r.content
+        return ret
 
     
 
@@ -277,11 +280,12 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
         try:
-            self.con.wait_new_conf()
+            r = self._get('wait_new_conf')
             return True
         except requests.exceptions.RequestException, exp:
             self.con = None
             return False
+        
 
     # To know if the satellite have a conf (magic_hash = None)
     # OR to know if the satellite have THIS conf (magic_hash != None)
@@ -301,8 +305,6 @@ class SatelliteLink(Item):
             else:
                 r = self._get('have_conf', {'magic_hash':magic_hash})
             print "have_conf RAW CALL", r, type(r)
-            #r = json.loads(r)
-            # Protect against bad Pyro return
             if not isinstance(r, bool):
                 return False
             return r
@@ -321,7 +323,7 @@ class SatelliteLink(Item):
 
         try:
             r = self._get('got_conf')
-            # Protect against bad Pyro return
+            # Protect against bad return
             if not isinstance(r, bool):
                 return False
             return r
@@ -339,11 +341,12 @@ class SatelliteLink(Item):
             return
 
         try:
-            self.con.remove_from_conf(sched_id)
+            self._get('remove_from_conf', {'sched_id':sched_id})
             return True
         except requests.exceptions.RequestException, exp:
             self.con = None
             return False
+
 
     def update_managed_list(self):
         if self.con is None:
@@ -358,7 +361,7 @@ class SatelliteLink(Item):
             tab = self._get('what_i_managed')
             print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
 
-            # Protect against bad Pyro return
+            # Protect against bad return
             if not isinstance(tab, dict):
                 print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
                 self.con = None
@@ -422,10 +425,10 @@ class SatelliteLink(Item):
         if self.con is None:
             return []
 
-
         try:
-            tab = self.con.get_external_commands()
-            # Protect against bad Pyro return
+            tab = self._get('get_external_commands')
+            tab = cPickle.loads(str(tab))
+            # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None
                 return []

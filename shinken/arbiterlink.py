@@ -23,11 +23,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
+import requests
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
-import shinken.pyro_wrapper as pyro
-Pyro = pyro.Pyro
 
 from shinken.log import logger
 
@@ -85,10 +84,7 @@ class ArbiterLink(SatelliteLink):
         try:
             self.con.do_not_run()
             return True
-        except Pyro.errors.URIError, exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return False
 
@@ -99,10 +95,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_list(daemon_type)
             return r
-        except Pyro.errors.URIError, exp:
-            self.con = None
-            return []
-        except Pyro.errors.ProtocolError, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return []
 
@@ -113,10 +106,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_status(daemon_type, name)
             return r
-        except Pyro.errors.URIError, exp:
-            self.con = None
-            return {}
-        except Pyro.errors.ProtocolError, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return {}
 
@@ -127,10 +117,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_all_states()
             return r
-        except Pyro.errors.URIError, exp:
-            self.con = None
-            return None
-        except Pyro.errors.ProtocolError, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return None
 
@@ -141,10 +128,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_objects_properties(table, *properties)
             return r
-        except Pyro.errors.URIError, exp:
-            self.con = None
-            return None
-        except Pyro.errors.ProtocolError, exp:
+        except requests.exceptions.RequestException, exp:
             self.con = None
             return None
 

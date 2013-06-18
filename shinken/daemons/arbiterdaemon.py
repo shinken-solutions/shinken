@@ -555,7 +555,7 @@ class Arbiter(Daemon):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             
-            self.uri_arb = self.pyro_daemon.register(self.interface)#, "ForArbiter")
+            self.uri_arb = self.http_daemon.register(self.interface)#, "ForArbiter")
 
             # ok we are now fully daemonized (if requested)
             # now we can start our "external" modules (if any):

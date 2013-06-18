@@ -33,18 +33,7 @@ from multiprocessing import active_children
 from Queue import Empty
 
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
-
-Pyro = pyro.Pyro
-PYRO_VERSION = pyro.PYRO_VERSION
-
-from shinken.pyro_wrapper import Pyro_exp_pack
-
 from shinken.satellite import Satellite
-
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 
@@ -208,7 +197,6 @@ class Receiver(Satellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            #uri = pyro.create_uri(s['address'], s['port'], 'ForArbiter', self.use_ssl)
             uri = 'http://%s:%s/' % (s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri
@@ -302,10 +290,6 @@ class Receiver(Satellite):
                     logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
-                    try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
                     raise
 
             # If we sent or not the commands, just clean the scheduler list.
@@ -409,7 +393,7 @@ class Receiver(Satellite):
 
             self.load_modules_manager()
 
-            self.uri2 = self.pyro_daemon.register(self.interface)#, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf

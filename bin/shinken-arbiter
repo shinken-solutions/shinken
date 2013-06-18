@@ -69,12 +69,11 @@ except ImportError:
 
 
 from shinken.bin import VERSION
-from shinken.pyro_wrapper import PYRO_VERSION
 from shinken.daemons.arbiterdaemon import Arbiter
 
 parser = optparse.OptionParser(
     "%prog [options] -c configfile [-c additional_config_file]",
-    version="%prog: " + VERSION + "     with pyro: " + PYRO_VERSION)
+    version="%prog: " + VERSION)
 parser.add_option('-c', '--config', action='append',
                   dest="config_files", metavar="CONFIG-FILE",
                   help=('Config file (your nagios.cfg). Multiple -c can be '

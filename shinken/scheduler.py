@@ -33,14 +33,9 @@ import traceback
 import json
 import requests
 import cPickle
+import zlib
 from Queue import Empty
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
-
-from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
 from shinken.notification import Notification
@@ -54,10 +49,6 @@ from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
 
-# Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
 
 
 class Scheduler:
@@ -182,6 +173,7 @@ class Scheduler:
         for (k,v) in args.iteritems():
             print "TYPE?", type(v)
             args[k] = cPickle.dumps(v)
+            args[k] = zlib.compress(args[k], 2)
 
         r = con.post(uri+path, data=args)
 
@@ -801,16 +793,8 @@ class Scheduler:
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-        except Pyro.errors.NamingError, exp:
-            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
         except KeyError, exp:
             logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
-        except Pyro.errors.CommunicationError, exp:
-            logger.warning("The %s '%s' got CommunicationError: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -836,23 +820,14 @@ class Scheduler:
                     self.nb_checks_send += len(lst)
                 except requests.exceptions.RequestException, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
-                    print exp.__dict__
-                    p['con'] = None
-                    return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -867,7 +842,7 @@ class Scheduler:
                 lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
+                    #pyro.set_timeout(con, 120)
                     logger.debug("Sending %d actions" % len(lst))
                     #con.push_actions(lst, self.instance_id)
                     self._post(p, 'push_actions', {'actions':lst, 'sched_id':self.instance_id})
@@ -876,20 +851,12 @@ class Scheduler:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
@@ -904,7 +871,7 @@ class Scheduler:
             if con is not None:
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
+                    #pyro.set_timeout(con, 120)
                     #results = con.get_returns(self.instance_id)
                     results = self._get(p, 'get_returns', {'sched_id':self.instance_id})
                     results = cPickle.loads(str(results))
@@ -918,20 +885,12 @@ class Scheduler:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -957,20 +916,12 @@ class Scheduler:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 

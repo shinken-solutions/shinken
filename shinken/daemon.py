@@ -46,9 +46,7 @@ if not is_android:
 else:
     from multiprocessing import active_children
 
-import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import InvalidWorkDir, Pyro
-
+from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
@@ -89,15 +87,12 @@ from shinken.bin import VERSION
 class InvalidPidFile(Exception): pass
 
 
-""" Interface for pyro communications """
-class Interface(object):#Pyro.core.ObjBase, object):
+""" Interface for Inter satellites communications """
+class Interface(object):
     exports = []
 
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
-
-        #Pyro.core.ObjBase.__init__(self)
-
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
 
@@ -174,7 +169,7 @@ class Daemon(object):
         self.t_each_loop = now  # used to track system time change
         self.sleep_time = 0.0  # used to track the time we wait
 
-        self.pyro_daemon = None
+        self.http_daemon = None
 
         # Log init
         #self.log = logger
@@ -217,9 +212,9 @@ class Daemon(object):
             # And we quit
             print('Stopping all modules')
             self.modules_manager.stop_all()
-            print('Stopping inter-process message (PYRO)')
-        if self.pyro_daemon:
-            pyro.shutdown(self.pyro_daemon)
+            print('Stopping inter-process message')
+        if self.http_daemon:
+            self.http_daemon.shutdown()
         logger.quit()
 
 
@@ -508,7 +503,7 @@ class Daemon(object):
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
-            socket_fds = [sock.fileno() for sock in self.pyro_daemon.get_sockets()]
+            socket_fds = [sock.fileno() for sock in self.http_daemon.get_sockets()]
             # Do not close the local_log file too if it's open
             if self.local_log_fd:
                 socket_fds.append(self.local_log_fd)
@@ -535,38 +530,23 @@ class Daemon(object):
 
         # The SSL part
         if ssl_conf.use_ssl:
-            # Maybe this Pyro version do not manage SSL, if so, bailout
-            if not hasattr(Pyro.config, 'PYROSSL_CERTDIR'):
-                logger.error('Sorry, this Pyro version do not manage SSL.')
+            # TODO: get back the ssl connexion!
+            PYROSSL_CERTDIR = os.path.abspath(str(ssl_conf.certs_dir))
+            if not os.path.exists(PYROSSL_CERTDIR):
+                logger.error('Error : the directory %s is missing for SSL certificates (certs_dir). Please fix it in your configuration' % PYROSSL_CERTDIR)
                 sys.exit(2)
-            # Protect against name->IP substritution in Pyro3
-            Pyro.config.PYRO_DNS_URI = 1
-            # Beware #839 Pyro lib need str path, not unicode
-            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(str(ssl_conf.certs_dir))
-            if not os.path.exists(Pyro.config.PYROSSL_CERTDIR):
-                logger.error('Error : the directory %s is missing for SSL certificates (certs_dir). Please fix it in your configuration' % Pyro.config.PYROSSL_CERTDIR)
-                sys.exit(2)
-            logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
-            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(str(ssl_conf.ca_cert))
-            logger.debug("Using ssl ca cert file: %s" % Pyro.config.PYROSSL_CA_CERT)
-            Pyro.config.PYROSSL_CERT = os.path.abspath(str(ssl_conf.server_cert))
-            logger.debug("Using ssl server cert file: %s" % Pyro.config.PYROSSL_CERT)
+            logger.debug("Using ssl certificate directory: %s" % PYROSSL_CERTDIR)
+            PYROSSL_CA_CERT = os.path.abspath(str(ssl_conf.ca_cert))
+            logger.debug("Using ssl ca cert file: %s" % PYROSSL_CA_CERT)
+            PYROSSL_CERT = os.path.abspath(str(ssl_conf.server_cert))
+            logger.debug("Using ssl server cert file: %s" % PYROSSL_CERT)
 
             if ssl_conf.hard_ssl_name_check:
-                Pyro.config.PYROSSL_POSTCONNCHECK = 1
+                PYROSSL_POSTCONNCHECK = 1
             else:
-                Pyro.config.PYROSSL_POSTCONNCHECK = 0
+                PYROSSL_POSTCONNCHECK = 0
 
-        # create the server, but Pyro > 4.8 version
-        # do not have such objects...
-        try:
-            Pyro.config.PYRO_STORAGE = "."
-            Pyro.config.PYRO_COMPRESSION = 1
-            Pyro.config.PYRO_MULTITHREADED = 0
-        except:
-            pass
-
-        self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl)
+        self.http_daemon = HTTPDaemon(self.host, self.port, ssl_conf.use_ssl)
 
 
     def get_socks_activity(self, socks, timeout):
@@ -724,6 +704,7 @@ class Daemon(object):
         else:  # Ok, really ask us to die :)
             self.interrupted = True
 
+
     def set_exit_handler(self):
         func = self.manage_signal
         if os.name == "nt":
@@ -737,6 +718,7 @@ class Daemon(object):
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)
 
+
     def get_header(self):
         return ["Shinken %s" % VERSION,
                 "Copyright (c) 2009-2011:",
@@ -746,9 +728,11 @@ class Daemon(object):
                 "Hartmut Goebel, h.goebel@goebel-consult.de",
                 "License: AGPL"]
 
+
     def print_header(self):
         for line in self.get_header():
             logger.info(line)
+
 
 # Wait up to timeout to handle the pyro daemon requests.
 # If suppl_socks is given it also looks for activity on that list of fd.
@@ -759,11 +743,10 @@ class Daemon(object):
 #  - second arg is sublist of suppl_socks that got activity.
 #  - third arg is possible system time change value, or 0 if no change.
     def handleRequests(self, timeout, suppl_socks=None):
-
         if suppl_socks is None:
             suppl_socks = []
         before = time.time()
-        socks = self.pyro_daemon.get_sockets()
+        socks = self.http_daemon.get_sockets()
         if suppl_socks:
             socks.extend(suppl_socks)
         ins = self.get_socks_activity(socks, timeout)
@@ -775,7 +758,7 @@ class Daemon(object):
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins and sock not in suppl_socks:
-                self.pyro_daemon.handleRequests(sock)
+                self.http_daemon.handleRequests(sock)
                 ins.remove(sock)
         # Tack in elapsed the WHOLE time, even with handling requests
         elapsed = time.time() - before
@@ -783,12 +766,12 @@ class Daemon(object):
             elapsed = 0.01  # but we absolutely need to return!= 0 to indicate that we got activity
         return elapsed, ins, tcdiff
 
+
     # Check for a possible system time change and act correspondingly.
     # If such a change is detected then we return the number of seconds that changed. 0 if no time change was detected.
     # Time change can be positive or negative:
     # positive when we have been sent in the future and negative if we have been sent in the past.
     def check_for_system_time_change(self):
-
         now = time.time()
         difference = now - self.t_each_loop
 
@@ -802,12 +785,14 @@ class Daemon(object):
 
         return difference
 
+
     # Default action for system time change. Actually a log is done
     def compensate_system_time_change(self, difference):
         logger.warning('A system time change of %s has been detected.  Compensating...' % difference)
 
+
     # Use to wait conf from arbiter.
-    # It send us conf in our pyro_daemon. It put the have_conf prop
+    # It send us conf in our http_daemon. It put the have_conf prop
     # if he send us something
     # (it can just do a ping)
     def wait_for_initial_conf(self, timeout=1.0):
@@ -824,6 +809,7 @@ class Daemon(object):
             sys.stdout.write(".")
             sys.stdout.flush()
 
+
     # We call the function of modules that got the this
     # hook function
     def hook_point(self, hook_name):
@@ -837,10 +823,12 @@ class Daemon(object):
                     logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
 
+
     # Dummy function for daemons. Get all retention data
     # So a module can save them
     def get_retention_data(self):
         return []
+
 
     # Save, to get back all data
     def restore_retention_data(self, data):
