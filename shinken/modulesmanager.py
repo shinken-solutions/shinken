@@ -138,6 +138,7 @@ class ModulesManager(object):
             return False
         return True
 
+
     # Request to "remove" the given instances list or all if not provided
     def clear_instances(self, insts=None):
         if insts is None:
@@ -145,9 +146,11 @@ class ModulesManager(object):
         for i in insts:
             self.remove_instance(i)
 
+
     # Put an instance to the restart queue
     def set_to_restart(self, inst):
         self.to_restart.append(inst)
+
 
     # actually only arbiter call this method with start_external=False..
     # Create, init and then returns the list of module instances that the caller needs.
@@ -185,6 +188,7 @@ class ModulesManager(object):
 
         return self.instances
 
+
     # Launch external instances that are load correctly
     def start_external_instances(self, late_start=False):
         for inst in [inst for inst in self.instances if inst.is_external]:
@@ -198,10 +202,10 @@ class ModulesManager(object):
             logger.info("Starting external module %s" % inst.get_name())
             inst.start()
 
+
     # Request to cleanly remove the given instance.
     # If instance is external also shutdown it cleanly
     def remove_instance(self, inst):
-
         # External instances need to be close before (process + queues)
         if inst.is_external:
             logger.debug("Ask stop process for %s" % inst.get_name())
@@ -212,6 +216,7 @@ class ModulesManager(object):
 
         # Then do not listen anymore about it
         self.instances.remove(inst)
+
 
     def check_alive_instances(self):
         # Only for external
@@ -244,6 +249,7 @@ class ModulesManager(object):
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
 
+
     def try_to_restart_deads(self):
         to_restart = self.to_restart[:]
         del self.to_restart[:]
@@ -258,18 +264,23 @@ class ModulesManager(object):
             else:
                 self.to_restart.append(inst)
 
+
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
         return [inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
+
     def get_external_instances(self, phase=None):
         return [inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
+
 
     def get_external_to_queues(self):
         return [inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
+
     def get_external_from_queues(self):
         return [inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
+
 
     def stop_all(self):
         # Ask internal to quit if they can

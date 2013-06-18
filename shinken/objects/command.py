@@ -89,7 +89,8 @@ class Command(Item):
                 self.module_type = 'fork'
 
     def get_name(self):
-        return self.command_name
+        return getattr(self, 'command_name', 'UNNAMED_COMMAND')
+
 
     def pythonize(self):
         self.command_name = self.command_name.strip()

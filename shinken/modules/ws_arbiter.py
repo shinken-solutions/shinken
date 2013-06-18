@@ -148,6 +148,89 @@ def get_page():
     # OK here it's ok, it will return a 200 code
 
 
+
+def do_restart():
+    commands_list = []
+
+    # Getting lists of informations for the commands
+    time_stamp = request.forms.get('time_stamp', int(time.time()))
+    command = '[%s] RESTART_PROGRAM\n' % time_stamp
+
+    # We check for auth if it's not anonymously allowed
+    if app.username != 'anonymous':
+        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION', ''))
+        # Maybe the user not even ask for user/pass. If so, bail out
+        if not basic:
+            abort(401, 'Authentication required')
+        # Maybe he do not give the good credential?
+        if basic[0] != app.username or basic[1] != app.password:
+            abort(403, 'Authentication denied')
+
+    # Adding commands to the main queue()
+    logger.debug("[Ws_arbiter] commands =  %s" % str(command))
+    ext = ExternalCommand(command)
+    app.from_q.put(ext)
+
+    # OK here it's ok, it will return a 200 code
+
+
+
+#service, sticky, notify, persistent, author, comment
+def do_acknowledge():
+    # Getting lists of informations for the commands
+    time_stamp = request.forms.get('time_stamp', int(time.time()))
+    host_name = request.forms.get('host_name', '')
+    service_description = request.forms.get('service_description', '')
+    sticky = request.forms.get('sticky', '1')
+    notify = request.forms.get('notify', '0')
+    persistent = request.forms.get('persistent', '1')
+    author     = request.forms.get('author', 'anonymous')
+    comment    = request.forms.get('comment', 'No comment').decode('utf8', 'ignore')
+ 
+    if not host_name:
+        abort(400, 'Missing parameter host_name')
+    if service_description:
+        command = '[%s] ACKNOWLEDGE_SVC_PROBLEM;%s;%s;%s;%s;%s;%s;%s\n' % (time_stamp,
+                                                                           host_name,
+                                                                         service_description,
+                                                                         sticky,
+                                                                         notify,
+                                                                         persistent,
+                                                                         author,
+                                                                         comment
+                                                                         )
+    else:
+        command = '[%s] ACKNOWLEDGE_HOST_PROBLEM;%s;%s;%s;%s;%s;%s\n' % (time_stamp,
+                                                                         host_name,
+                                                                         sticky,
+                                                                         notify,
+                                                                         persistent,
+                                                                         author,
+                                                                         comment
+                                                                         )
+        
+
+    # We check for auth if it's not anonymously allowed
+    if app.username != 'anonymous':
+        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION', ''))
+        # Maybe the user not even ask for user/pass. If so, bail out
+        if not basic:
+            abort(401, 'Authentication required')
+        # Maybe he do not give the good credential?
+        if basic[0] != app.username or basic[1] != app.password:
+            abort(403, 'Authentication denied')
+
+    # Adding commands to the main queue()
+    logger.debug("[Ws_arbiter] commands =  %s" % str(command))
+    ext = ExternalCommand(command)
+    app.from_q.put(ext)
+
+    # OK here it's ok, it will return a 200 code
+
+
+
+
+
 # This module will open an HTTP service, where a user can send a command, like a check
 # return.
 class Ws_arbiter(BaseModule):
@@ -169,6 +252,8 @@ class Ws_arbiter(BaseModule):
         self.srv = run(host=self.host, port=self.port, server='wsgirefselect')
         # And we link our page
         route('/push_check_result', callback=get_page, method='POST')
+        route('/restart', callback=do_restart, method='POST')
+        route('/acknowledge', callback=do_acknowledge, method='POST')
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):

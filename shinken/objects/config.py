@@ -822,7 +822,7 @@ class Config(Item):
                 logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
+                logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))                
         # Now pickle the whole conf, for easy and quick spare send
         t0 = time.time()
         whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)

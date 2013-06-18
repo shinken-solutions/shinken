@@ -92,9 +92,11 @@ try:
             except Pyro.errors.DaemonError, e:
                 msg = "Error: Sorry, the port %d is not free: %s" % (port, e)
                 raise PortNotFree(msg)
+            
 
         def register(self, obj, name):
             return self.connect(obj, name)
+
 
         def unregister(self, obj):
             try:
@@ -223,6 +225,8 @@ except AttributeError, exp:
                 except Exception, e:
                     # must be a problem with pyro workdir:
                     raise InvalidWorkDir(e)
+
+
 
         # Get the server socket but not if disabled
         def get_sockets(self):

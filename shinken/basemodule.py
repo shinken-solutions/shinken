@@ -158,7 +158,6 @@ class BaseModule(object):
 
     # Start this module process if it's external. if not -> donothing
     def start(self):
-
         if not self.is_external:
             return
         self.stop_process()
@@ -233,8 +232,10 @@ class BaseModule(object):
             brok.prepare()
             return manage(brok)
 
+
     def manage_signal(self, sig, frame):
         self.interrupted = True
+
 
     def set_signal_handler(self, sigs=None):
         if sigs is None:
@@ -244,6 +245,7 @@ class BaseModule(object):
             signal.signal(sig, self.manage_signal)
 
     set_exit_handler = set_signal_handler
+
 
     def do_stop(self):
         """Called just before the module will exit
@@ -265,6 +267,7 @@ class BaseModule(object):
         except:
             pass
 
+
     def main(self):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
@@ -275,6 +278,7 @@ class BaseModule(object):
             self.do_loop_turn()
         self.do_stop()
         logger.info("[%s]: exiting now.." % (self.name))
+
 
     # TODO: apparently some modules would uses "work" as the main method??
     work = main

@@ -254,6 +254,28 @@ check_process_nb poller 0
 check_process_nb reactionner 0
 
 
+echo "OK NOW SIMULATE A SHINKEN RESTART from external commands"
+sudo /etc/init.d/shinken start
+
+sleep 10
+ps -fu shinken
+
+
+check_good_run /var/lib/shinken /var/run/shinken /var/log/shinken
+
+echo "Let's void the log files"
+> $LOG/nagios.log
+
+echo "Now call a restart"
+
+now=$(date +%s)
+printf "[%lu] RESTART_PROGRAM\n" $now > /run/shinken/rw/nagios.cmd
+
+sleep 30
+
+echo "Should be a new restart now"
+string_in_file "Processing object config file" $LOG/nagios.log
+string_in_file "Things look okay - No serious problems were detected during the pre-flight check" $LOG/nagios.log
 
 echo "OK Great. Even the real launch test pass. Great. I can clean after me."
 ./clean.sh
@@ -463,9 +485,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-bcl.cfg
 test/bin/launch_all_debug7.sh
-globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-bcl.cfg
 
 
 echo "Now checking for existing apps"
