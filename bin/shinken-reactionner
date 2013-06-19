@@ -83,6 +83,10 @@ parser.add_option('-r', '--replace', action='store_true',
 parser.add_option('--debugfile', dest='debug_file',
                   help=("Debug file. Default: not used "
                         "(why debug a bug free program? :) )"))
+parser.add_option("-p", "--profile",
+                  dest="profile",
+                  help="Dump a profile file. Need the python cProfile librairy")
+
 opts, args = parser.parse_args()
 if args:
     parser.error("Does not accept any argument.")

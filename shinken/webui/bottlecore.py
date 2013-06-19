@@ -2720,7 +2720,7 @@ _HTTP_STATUS_LINES = dict((k, '%d %s' % (k, v)) for (k, v) in HTTP_CODES.iterite
 ### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
 ERROR_PAGE_TEMPLATE = """
 %try:
-    %from shinken.webui.bottle import DEBUG, HTTP_CODES, request, touni
+    %from shinken.webui.bottlecore import DEBUG, HTTP_CODES, request, touni
     %status_name = HTTP_CODES.get(e.status, 'Unknown').title()
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>

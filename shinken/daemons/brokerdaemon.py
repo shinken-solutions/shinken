@@ -55,7 +55,7 @@ class Broker(BaseSatellite):
         'local_log': PathProp(default='brokerd.log'),
     })
 
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile):
 
         super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
 

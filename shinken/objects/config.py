@@ -39,7 +39,7 @@ import itertools
 import time
 import random
 import cPickle
-from StringIO import StringIO
+from cStringIO import StringIO
 
 from item import Item
 from timeperiod import Timeperiod, Timeperiods
@@ -822,11 +822,7 @@ class Config(Item):
                 conf.hostgroups.prepare_for_sending()
                 logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
                 t0 = time.time()
-                fd = StringIO()
-                #r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                cPickle.dump(conf, fd, cPickle.HIGHEST_PROTOCOL)
-                r.serialized_confs[i] = fd.getvalue()
-                fd.close()
+                r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
                 logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
                 logger.debug("PICKLE LEN : %d" % len(r.serialized_confs[i]))
         # Now pickle the whole conf, for easy and quick spare send
@@ -834,7 +830,8 @@ class Config(Item):
         whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
         logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
         self.whole_conf_pack = whole_conf_pack
-        
+
+
 
     def dump(self):
         print "Slots", Service.__slots__
