@@ -167,7 +167,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.show_errors()
         self.dispatcher = Dispatcher(self.conf, self.me)
 
-        scheddaemon = Shinken(None, False, False, False, None)
+        scheddaemon = Shinken(None, False, False, False, None, None)
         self.sched = Scheduler(scheddaemon)
 
         scheddaemon.sched = self.sched

@@ -755,7 +755,7 @@ string_in_file "PASSIVE HOST CHECK: localhost;2;Oh yes"   $VAR/nagios.log
 echo "STOPPING MASTER SCHEDULER"
 bin/stop_scheduler.sh
 
-sleep 10
+sleep 30
 
 date +%s
 #Check if slave scheduler is ok

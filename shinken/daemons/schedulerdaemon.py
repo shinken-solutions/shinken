@@ -159,7 +159,7 @@ class Shinken(BaseSatellite):
     # Create a Pyro server (port = arvg 1)
     # then create the interface for arbiter
     # Then, it wait for a first configuration
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile):
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
 
         BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 

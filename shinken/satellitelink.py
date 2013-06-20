@@ -208,7 +208,7 @@ class SatelliteLink(Item):
             self.add_failed_check_attempt()
             return
         print "REACHING GET", self.uri+path
-        r = self.con.get(self.uri+path, params=args)
+        r = self.con.get(self.uri+path, params=args, timeout=10)
         print "FN GET"
         
         # If need it will raise an error here
@@ -230,7 +230,7 @@ class SatelliteLink(Item):
         print "REACHING POST", self.uri+path
         t0 = time.time()
         for (k,v) in args.iteritems():
-            print "ORIG SIZ OF V", len(args[k])
+            #print "ORIG SIZ OF V", len(args[k])
             args[k] = zlib.compress(cPickle.dumps(v), 2)
             print "SIZE OF V", len(args[k])
             #args[k] = zlib.compress(args[k], 2)
@@ -238,7 +238,7 @@ class SatelliteLink(Item):
         print "_POST TIME TO CPIKCLE", time.time() - t0
         # Ok go for it!
         t0 = time.time()
-        r = self.con.post(self.uri+path, data=args)
+        r = self.con.post(self.uri+path, data=args, timeout=10)
         print "_POST TIME TO POST", time.time() - t0
         
         # If need it will raise an error here

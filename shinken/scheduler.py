@@ -149,7 +149,7 @@ class Scheduler:
         if con is None:
             return None
 
-        r = con.get(uri+path, params=args)
+        r = con.get(uri+path, params=args, timeout=10)
 
         if r.status_code != requests.codes.ok:
             print "FUCK", r.content
@@ -175,7 +175,7 @@ class Scheduler:
             args[k] = cPickle.dumps(v)
             args[k] = zlib.compress(args[k], 2)
 
-        r = con.post(uri+path, data=args)
+        r = con.post(uri+path, data=args, timeout=10)
 
         if r.status_code != requests.codes.ok:
             print "FUCK", r.content, r.__dict__, r.raw._original_response.msg.__dict__

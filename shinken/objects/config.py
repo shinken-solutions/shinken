@@ -39,7 +39,8 @@ import itertools
 import time
 import random
 import cPickle
-from cStringIO import StringIO
+from StringIO import StringIO
+from multiprocessing import Process, Manager
 
 from item import Item
 from timeperiod import Timeperiod, Timeperiods
@@ -280,6 +281,9 @@ class Config(Item):
         'webui_port':    IntegerProp(default='8080'),
         'webui_host':    StringProp(default='0.0.0.0'),
 
+        # Large env tweacks
+        'use_multiprocesses_serializer':  BoolProp(default='0'),
+
     }
 
     macros = {
@@ -423,9 +427,6 @@ class Config(Item):
 
             for line in buf:
                 line = line.decode('utf8', 'replace')
-                # Should not be useful anymore with the Universal open
-                # if os.name != 'nt':
-                #  line = line.replace("\r\n", "\n")
                 res.write(line)
                 if line.endswith('\n'):
                     line = line[:-1]
@@ -442,6 +443,7 @@ class Config(Item):
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
+                        print "FILE", cfg_file_name
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
                         res.write('\n')
@@ -814,23 +816,109 @@ class Config(Item):
         # be changed into names
         self.hosts.prepare_for_sending()
         self.hostgroups.prepare_for_sending()
-        
+        t1 = time.time()
         logger.info('[Arbiter] Serializing the configurations...')
-        for r in self.realms:
-            for (i, conf) in r.confs.iteritems():
-                # Remember to protect the local conf hostgroups too!
-                conf.hostgroups.prepare_for_sending()
-                logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
-                t0 = time.time()
-                r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
-                logger.debug("PICKLE LEN : %d" % len(r.serialized_confs[i]))
-        # Now pickle the whole conf, for easy and quick spare send
-        t0 = time.time()
-        whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
-        logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
-        self.whole_conf_pack = whole_conf_pack
+        
+        
+        # There are two ways of configuration serializing
+        # One if to use the serial way, the other is with use_multiprocesses_serializer
+        # to call to sub-wrokers to do the job.
+        # TODO : enable on windows? I'm not sure it will work, must give a test
+        if os.name == 'nt' or not self.use_multiprocesses_serializer:
+            logger.info('Using the default serialization pass')
+            for r in self.realms:
+                for (i, conf) in r.confs.iteritems():
+                    # Remember to protect the local conf hostgroups too!
+                    conf.hostgroups.prepare_for_sending()
+                    logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
+                    t0 = time.time()
+                    r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
+                    logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
+                    logger.debug("PICKLE LEN : %d" % len(r.serialized_confs[i]))
+            # Now pickle the whole conf, for easy and quick spare send
+            t0 = time.time()
+            whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+            logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+            self.whole_conf_pack = whole_conf_pack
+            print "TOTAL serializing in", time.time() - t1
+    
+        else:
+            logger.info('Using the multiprocessing serialization pass')            
+            t1 = time.time()
 
+            # We ask a manager to manage the communication with our children
+            m = Manager()
+            # The list will got all the strings from the children
+            q = m.list()
+            for r in self.realms:
+                processes = []
+                for (i, conf) in r.confs.iteritems():
+                    # This function will be called by the children, and will give
+                    # us the pickle result
+                    def Serialize_config(q, rname, i, conf):
+                        # Remember to protect the local conf hostgroups too!
+                        conf.hostgroups.prepare_for_sending()
+                        logger.debug('[%s] Serializing the configuration %d' % (rname, i))
+                        t0 = time.time()
+                        res = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
+                        logger.debug("[config] time to serialize the conf %s:%s is %s" % (rname, i, time.time() - t0))
+                        q.append((i, res))
+
+                    # Prepare a sub-process that will manage the pickle computation
+                    p = Process(target=Serialize_config, name="serializer-%s-%d" %(r.get_name(), i) , args=(q, r.get_name(), i, conf))
+                    p.start()
+                    processes.append( (i, p) )
+
+                # Here all sub-processes are launched for this realm, now wait for them to finish
+                while len(processes) != 0:
+                    to_del = []
+                    for (i, p) in processes:
+                        if p.exitcode is not None:
+                            to_del.append((i, p))
+                            # remember to join() so the children can die
+                            p.join()
+                    for (i, p) in to_del:
+                        logger.debug("The sub process %s is done with the return code %d" % (p.name, p.exitcode))
+                        processes.remove( (i, p ) )
+                    # Don't be too quick to poll!
+                    time.sleep(0.1)
+                    
+                # Check if we got the good number of configuration, maybe one of the cildren got problems?
+                if len(q) != len(r.confs):
+                    logger.error("Something goes wrong in the configuration serializations, please restart Shinken Arbiter")
+                    sys.exit(2)
+                # Now get the serialized configuration and saved them into self
+                for (i, cfg) in q:
+                    r.serialized_confs[i] = cfg
+            print "TOTAL TIME", time.time() - t1
+
+            # Now pickle the whole configuration into one big pickle object, for the arbiter spares
+            whole_queue = m.list()
+            t0 = time.time()
+            # The function that just compute the whole conf pickle string, but n a children
+            def create_whole_conf_pack(whole_queue, self):
+                logger.debug("[config] sub processing the whole configuration pack creation")
+                whole_queue.append(cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL))
+                logger.debug("[config] sub processing the whole configuration pack creation finished")
+            # Go for it
+            p = Process(target=create_whole_conf_pack, args=(whole_queue, self), name='serializer-whole-configuration')
+            p.start()
+            # Wait for it to die
+            while p.exitcode is None:
+                time.sleep(0.1)
+            p.join()
+            # Maybe we don't have our result?
+            if len(whole_queue) != 1:
+                logger.error("Something goes wrong in the whole configuration pack creation, please restart Shinken Arbiter")
+                sys.exit(2)
+                
+            #Get it and save it
+            self.whole_conf_pack = whole_queue.pop()
+            logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+
+            print "TOTAL serializing iin", time.time() - t2
+            # Shutdown the manager, the sub-process should be gone now
+            m.shutdown()
 
 
     def dump(self):

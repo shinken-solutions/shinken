@@ -30,7 +30,7 @@ from shinken_test import *
 import shinken.log as shinken_log
 
 from shinken.daemon import InvalidPidFile, InvalidWorkDir
-from shinken.pyro_wrapper import PortNotFree
+from shinken.http_daemon import PortNotFree
 
 from shinken.daemons.pollerdaemon import Poller
 from shinken.daemons.brokerdaemon import Broker
@@ -83,7 +83,7 @@ class template_Daemon_Bad_Start():
 
     def create_daemon(self):
         cls = self.daemon_cls
-        return cls(daemons_config[cls], False, True, False, None)
+        return cls(daemons_config[cls], False, True, False, None, '')
 
 
     def get_daemon(self):
@@ -129,8 +129,8 @@ class template_Daemon_Bad_Start():
         d2 = self.get_daemon()
         d2.workdir = d1.workdir
         # TODO: find a way in Pyro4 to get the port
-        if hasattr(d1.pyro_daemon, 'port'):
-            d2.port = d1.pyro_daemon.port
+        if hasattr(d1.http_daemon, 'port'):
+            d2.port = d1.http_daemon.port
             self.assertRaises(PortNotFree, d2.do_daemon_init_and_start)
             d2.do_stop()
         d1.do_stop()
@@ -165,8 +165,8 @@ class Test_Arbiter_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
     def create_daemon(self):
         """ arbiter is always a bit special .. """
         cls = self.daemon_cls
-        #Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file)
-        return cls(daemons_config[cls], False, True, False, False, None)
+        #Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile)
+        return cls(daemons_config[cls], False, True, False, False, None, '')
 
 
 if __name__ == '__main__':

@@ -40,12 +40,13 @@ try:
 except ImportError:
     is_android = False
 
-
 if not is_android:
     from multiprocessing import Queue, Manager, active_children, cpu_count
+    from multiprocessing.managers import SyncManager
 else:
     from multiprocessing import active_children
 
+import http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
 from shinken.modulesctx import modulesctx
@@ -518,8 +519,14 @@ class Daemon(object):
         if is_android:
             self.manager = None
         else:
-            self.manager = Manager()
+            # The Manager is a sub-process, so we must be sure it won't have
+            # a socket of your http server alive
+            self.manager = SyncManager()
+            def close_http_daemon(daemon):
+                daemon.shutdown()
+            self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
         # Will be add to the modules manager later
+        
 
     def setup_pyro_daemon(self):
 
@@ -547,6 +554,7 @@ class Daemon(object):
                 PYROSSL_POSTCONNCHECK = 0
 
         self.http_daemon = HTTPDaemon(self.host, self.port, ssl_conf.use_ssl)
+        http_daemon.daemon_inst = self.http_daemon
 
 
     def get_socks_activity(self, socks, timeout):

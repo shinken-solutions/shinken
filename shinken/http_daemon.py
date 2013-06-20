@@ -162,9 +162,14 @@ class HTTPDaemon(object):
             con._pyroTimeout = timeout
 
 
-        # Just remove teh server, should do the work
+        # Close all sockets and delete the server object to be sure
+        # no one is still alive
         def shutdown(con):
+            print "STOP HTTP"
+            for s in con.get_sockets():
+                s.close()
             con.srv = None
+
 
 
         def get_socks_activity(self, timeout):
@@ -176,3 +181,6 @@ class HTTPDaemon(object):
                     return []
                 raise
             return ins
+
+
+daemon_inst = None

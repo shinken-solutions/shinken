@@ -220,6 +220,8 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('webui_lock_file', 'webui.pid'),
         ('webui_port', '8080'),
         ('webui_host', '0.0.0.0'),
+        
+        ('use_multiprocesses_serializer', '0'),
         ])
 
     def setUp(self):

@@ -40,7 +40,3 @@ if sys.version_info < (2, 4):
 elif sys.version_info >= (3,):
     sys.exit("Shinken is not yet compatible with Python 3.x, sorry")
 
-try:
-    import shinken.pyro_wrapper
-except ImportError:
-    sys.exit("Shinken requires the Python Pyro module. Please install it.")
