@@ -31,7 +31,7 @@
 
 export myscripts=$(readlink -f $(dirname $0))
 src=$myscripts
-. $myscripts/install.d/shinken.conf
+. "$myscripts"/install.d/shinken.conf
 
 
 function remove(){
@@ -409,7 +409,7 @@ function prerequisites(){
             ;;
         Fedora)
             case $VERS in
-                16|17)
+                16|17|18)
                     PACKAGES=$YUMPKGS
                     QUERY="rpm -q "
                     ;;
@@ -492,7 +492,7 @@ function prerequisites(){
         module=$(echo $p | awk -F: '{print $1'})
         import=$(echo $p | awk -F: '{print $2'})
 
-        $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
+        $PY "$myscripts"/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
         if [ $? -eq 2 ]
         then
             if [ $SKIPPREREQUISITES -eq 1 ]
@@ -816,7 +816,7 @@ function enable_initd(){
             enable_service shinken
             ;;
         systemd)
-            cp -f $src/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
+            cp -f  "$myscripts"/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
             # Fix path to daemon in service file for systemd
             sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' ${SYSTEMDPATH}lib/systemd/system/shinken*
             cecho " > Enabling $DIST startup script" green
@@ -936,7 +936,7 @@ function sinstall(){
         mkdir -p $TARGET
     fi
 
-    cp -Rf $src/* $TARGET/
+    cp -Rf  "$myscripts"/* $TARGET/
 
     if [ "$TARGET" == "/" ] || [ -z "$TARGET" ]
     then
@@ -947,14 +947,14 @@ function sinstall(){
     if [ "$TARGET/etc" != "$ETC" ]
     then
         rm -Rf $TARGET/etc
-        cp -Rf $src/etc/* $ETC/
+        cp -Rf  "$myscripts"/etc/* $ETC/
     fi
 
     # We want to copy the src/share into the var
     if [ ! -d $TARGET/var/share ]
     then
 	mkdir -p $TARGET/var/share
-	cp -Rf $src/share/* $TARGET/var/share
+	cp -Rf  "$myscripts"/share/* $TARGET/var/share
     fi
 
     cleanuptarget
@@ -1188,7 +1188,7 @@ function restore(){
 function supdate(){
 
     curpath=$(pwd)
-    if [ "$src" == "$TARGET" ]
+    if [ "$myscripts" == "$TARGET" ]
     then
         cecho "You should use the source tree to update and not use the target folder!!!!!" red
         exit 2
@@ -1200,7 +1200,7 @@ function supdate(){
     backup
     remove
     get_from_git
-    cp -Rf $src $TARGET
+    cp -Rf  "$myscripts" $TARGET
     relocate
     ln -sf $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
@@ -1246,7 +1246,7 @@ function cleanconf(){
         cecho " > Files/Folders list not found" yellow
         exit 2
     else
-        for f in $(cat $myscripts/install.d/config.files)
+        for f in $(cat "$myscripts"/install.d/config.files)
         do
             cecho " > Removing $ETC/$f" green
             rm -Rf $ETC/$f
@@ -1257,7 +1257,7 @@ function cleanconf(){
 function fixsudoers(){
     cecho " > Fix /etc/sudoers file for shinken integration" green
     cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
-    cat $myscripts/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
+    cat "$myscripts"/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
 }
 
 function fixcentreondb(){
@@ -1269,7 +1269,7 @@ function fixcentreondb(){
     pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
     db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 
-    cp $myscripts/install.d/centreon.sql $TMP/centreon.sql
+    cp "$myscripts"/install.d/centreon.sql $TMP/centreon.sql
     sed -i 's#TARGET#'$TARGET'#g' $TMP/centreon.sql
     sed -i 's#CENTREON#'$db'#g' $TMP/centreon.sql
 
@@ -1409,7 +1409,7 @@ function setdaemons(){
 # mongodb
 function install_mongodb(){
     cadre "Install mongodb server" green
-    cd $myscripts
+    cd "$myscripts"
     case $CODE in
         REDHAT)
             if [ ! -f "/etc/yum.repos.d/10gen.repo" ]
@@ -1541,7 +1541,7 @@ function install_nagvis(){
         then
             cecho " > Patching links for multisite use" green
             cd $NAGVISPREFIX/etc
-            patch < $myscripts/install.d/nagvis.multisite.uri.patch >> ${LOGFILE} 2>&1
+            patch < "$myscripts"/install.d/nagvis.multisite.uri.patch >> ${LOGFILE} 2>&1
         fi
     fi
     cecho " > Restart Apache " green
@@ -1662,7 +1662,7 @@ function install_multisite(){
 #    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
-        cp $src/install.d/multisite.mk $MKPREFIX/etc/
+        cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
@@ -2006,10 +2006,10 @@ function install_nconf(){
 
     cecho " > Patching nconf for shinken support" green
     cd $NCONFTARGET/include/ajax
-    patch < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
+    patch < "$myscripts"/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
 
     cecho " > Configure deployment.ini file" green
-    cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
+    cp -f "$myscripts"/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
     sed -i "s#__SHINKENTARGET__#"$TARGET"#g" $NCONFTARGET/config/deployment.ini
     sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini
     sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini
@@ -2109,7 +2109,7 @@ function install_notify_by_xmpp(){
 # thruk
 function install_thruk(){
     cadre "Install thruk" green
-    cd $myscripts
+    cd "$myscripts"
     case $CODE in
         REDHAT)
             if [ ! -f "/etc/yum.repos.d/consol-labs.repo" ]
@@ -2198,7 +2198,7 @@ function install_cucumber(){
         if [[ ! -f /etc/yum.repos.d/dag.repo ]]
         then
             cecho " > Enable dag repository for ffmpeg" green
-            cp $myscripts/install.d/dag.repo /etc/yum.repos.d
+            cp "$myscripts"/install.d/dag.repo /etc/yum.repos.d
             yum clean all >> ${LOGFILE} 2>&1
         fi
         cecho " > Installing eue dependencies" green
@@ -2643,7 +2643,7 @@ function install_nagios-plugins(){
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> ${LOGFILE} 2>&1
     cd nagios-plugins-$NAGPLUGVERS
     cecho " > Patching nagios-plugins" green
-    patch -p0 < $myscripts/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
+    patch -p0 < "$myscripts"/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green
