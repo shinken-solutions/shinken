@@ -250,6 +250,13 @@ function try_to_fix_all(){
     flush_selected_elements();
 }
 
+function submit_check_all(){
+	$.each(selected_elements, function(idx, name){
+		submit_check(unid_name(name), '0', 'Forced OK from WebUI');
+	});
+	flush_selected_elements();
+}
+
 
 function acknowledge_all(user){
     $.each(selected_elements, function(idx, name){
