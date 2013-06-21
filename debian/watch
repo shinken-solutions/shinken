@@ -1,0 +1,2 @@
+version=3
+http://www.shinken-monitoring.org/pub/ shinken-(\d[\d\.]+).tar.gz
