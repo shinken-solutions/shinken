@@ -1054,7 +1054,7 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
-        if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
+        if not cls.use_large_installation_tweaks and cls.enable_environment_macros or cls.use_large_installation_tweaks_notification_macros:
             n.env = m.get_env_macros(data)
 
 
