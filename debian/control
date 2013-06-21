@@ -4,7 +4,7 @@ Section: net
 Priority: extra
 Vcs-Git: git://anonscm.debian.org/collab-maint/shinken.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/shinken.git;a=summary
-Standards-Version: 3.9.2
+Standards-Version: 3.9.4
 XS-Python-Version: >= 2.5, << 3.0
 Build-Depends: debhelper (>= 7), quilt, python-setuptools
 Homepage: http://www.shinken-monitoring.org

@@ -1,12 +1,16 @@
 shinken (1.4-1~exp1) experimental; urgency=low
 
-  * New upstream release
+  * New upstream release (#672496)
   * Refactor of the build process
   * Split modules in separate packages
   * Shinken package is now a package which configures Shinken elements to have
     a ready-to-go solution
 
- -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Mon, 03 Dec 2012 17:06:21 -0500
+  [ Sylvestre Ledru ]
+  * Standards-Version updated to 3.9.4
+  * watch file added
+
+ -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Fri, 21 Jun 2013 15:07:56 +0200
 
 shinken (1.0-1) unstable; urgency=low
 
