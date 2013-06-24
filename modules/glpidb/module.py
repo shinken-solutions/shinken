@@ -262,6 +262,11 @@ class Glpidb_broker(BaseModule):
         del new_data['output']
         del new_data['latency']
         del new_data['execution_time']
+        if (new_data['state'] == 'OK') or (new_data['state'] == 'UP'):
+            new_data['is_acknowledged'] = 0
+            new_data['is_acknowledgeconfirmed'] = 0
+            new_data['acknowledge_comment'] = ''
+            new_data['acknowledge_users_id'] = 0
         try:
             new_data['id'] = b.data['plugin_monitoring_servicescatalogs_id']
             del new_data['plugin_monitoring_servicescatalogs_id']

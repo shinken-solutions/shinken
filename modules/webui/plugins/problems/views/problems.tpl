@@ -105,6 +105,9 @@
     <a href="javascript:recheck_now_all()"><i class="icon-repeat icon-white"></i> Recheck</a>
   </li>
   <li class="sliding-element">
+    <a href="javascript:submit_check_ok_all()"><i class="icon-share-alt icon-white"></i> Submit Result OK</a>
+  </li>
+  <li class="sliding-element">
     <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
   </li>
   <li class="sliding-element">
