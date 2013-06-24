@@ -819,6 +819,7 @@ function enable_initd(){
             cp -f  "$myscripts"/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
             # Fix path to daemon in service file for systemd
             sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' ${SYSTEMDPATH}lib/systemd/system/shinken*
+            sed -i -e 's/Type=forking/&\nWorkingDirectory=\/usr\/local\/shinken\/shinken/g' ${SYSTEMDPATH}lib/systemd/system/shinken-arbiter
             cecho " > Enabling $DIST startup script" green
             enable_service shinken-arbiter
             enable_service shinken-broker
