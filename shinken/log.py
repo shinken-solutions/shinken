@@ -265,7 +265,7 @@ class __ConsoleLogger:
     def critical(self, msg, *args, **kwargs):
         self._log(Log.CRITICAL, msg, *args, **kwargs)
 
-    def nagios(self, msg, *args, **kwargs):
+    def alert(self, msg, *args, **kwargs):
         kwargs.setdefault('display_level', False)
         self._log(Log.CRITICAL, msg, *args, **kwargs)
 
