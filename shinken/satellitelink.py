@@ -26,6 +26,7 @@
 import time
 import socket
 import requests
+
 import json
 import zlib
 import cPickle
@@ -34,7 +35,9 @@ from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
+from shinken.http_client import HTTPClient, HTTPExceptions
 
+        
 
 
 class SatelliteLink(Item):
@@ -94,21 +97,15 @@ class SatelliteLink(Item):
         self.arb_satmap = {'address': self.address, 'port': self.port}
         self.arb_satmap.update(satellitemap)
 
+
     def create_connection(self):
-        try:
-            #self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
-            self.con = requests.Session()
-            self.uri = "http://%s:%s/" % (self.arb_satmap['address'], self.arb_satmap['port'])
-        except requests.exceptions.RequestException, exp:
-            self.con = None
-            logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
+        self.con = HTTPClient(self.arb_satmap['address'], self.arb_satmap['port'], timeout=self.timeout, data_timeout=self.data_timeout)
+        self.uri = self.con.uri
+        
 
     def put_conf(self, conf):
-
         if self.con is None:
             self.create_connection()
-        #print "Connection is OK, now we put conf", conf
-        #print "Try to put conf:", conf
 
         # Maybe the connexion was not ok, bail out
         if not self.con:
@@ -116,11 +113,11 @@ class SatelliteLink(Item):
 
         try:
             #pyro.set_timeout(self.con, self.data_timeout)
-            self._post('put_conf', {'conf':conf})
+            self.con.post('put_conf', {'conf':conf})
             #pyro.set_timeout(self.con, self.timeout)
             print "PUT CONF SUCESS", self.get_name()
             return True
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
             return False
@@ -131,6 +128,7 @@ class SatelliteLink(Item):
         res = self.broks
         self.broks = []
         return res
+
 
     # Set alive, reachable, and reset attempts.
     # If we change state, raise a status brok update
@@ -198,6 +196,7 @@ class SatelliteLink(Item):
         self.managed_confs[cfg_id] = push_flavor
 
 
+    """
     # Try to get an URI path
     def _get(self, path, args={}):
         if self.con is None:
@@ -207,17 +206,41 @@ class SatelliteLink(Item):
         if self.con is None:
             self.add_failed_check_attempt()
             return
+        
         print "REACHING GET", self.uri+path
-        r = self.con.get(self.uri+path, params=args, timeout=10)
-        print "FN GET"
-        
-        # If need it will raise an error here
-        r.raise_for_status()
-        # Should return us pong string
-        
-        return json.loads(r.content)
-        
+        #r = self.con.get(self.uri+path, params=args, timeout=10)
+        c = self.con
+        c.setopt(c.POST, 0)
+        c.setopt(c.CONNECTTIMEOUT, 10)
+        c.setopt(c.TIMEOUT, 10)
+        #if proxy:
+        #    c.setopt(c.PROXY, proxy)
+        print "GO TO", self.uri+path+'?'+urllib.urlencode(args)
+        c.setopt(c.URL, str('fuck'+self.uri+path+'?'+urllib.urlencode(args)))
+        # Ok now manage the response
+        response = StringIO()
+        c.setopt(pycurl.WRITEFUNCTION, response.write)
+        #c.setopt(c.VERBOSE, 1)
+        try:
+            c.perform()
+        except pycurl.error, error:
+            errno, errstr = error
+            print 'An error occurred: ', errstr
+            raise HTTPException ('Connexion error to %s : %s' % (self.get_name(), errstr))
+        r = c.getinfo(pycurl.HTTP_CODE)
+        # Do NOT close the connexion
+        #c.close()
+        if r != 200:
+            logger.error("There was a critical error : %s" % response.getvalue())
+            raise Exception ('Connexion error to %s : %s' % (self.get_name(), r))
+        else:
+            # Manage special return of pycurl
+            ret  = json.loads(response.getvalue().replace('\\/', '/'))
+            print "GOT RAW RESULT", ret, type(ret)
+            return ret
+    """
 
+    """
     # Try to get an URI path
     def _post(self, path, args):
         if self.con is None:
@@ -238,18 +261,50 @@ class SatelliteLink(Item):
         print "_POST TIME TO CPIKCLE", time.time() - t0
         # Ok go for it!
         t0 = time.time()
-        r = self.con.post(self.uri+path, data=args, timeout=10)
+        
+        #r = self.con.post(self.uri+path, data=args, timeout=10)
         print "_POST TIME TO POST", time.time() - t0
         
         # If need it will raise an error here
-        r.raise_for_status()
+        #r.raise_for_status()
 
-        ret = r.content
+        #ret = r.content
         print "CONTENT READ"
+
+        c = self.con
+        c.setopt(c.POST, 1)
+        c.setopt(c.CONNECTTIMEOUT, 10)
+        c.setopt(c.TIMEOUT, 10)
+        #if proxy:
+        #    c.setopt(c.PROXY, proxy)
+        print "GO TO", self.uri+path
+        # Pycurl want a list of tuple as args
+        postargs = [(k,v) for (k,v) in args.iteritems()]
+        c.setopt(c.HTTPPOST, postargs)
+        c.setopt(c.URL, str(self.uri+path))
+        # Ok now manage the response
+        response = StringIO()
+        c.setopt(pycurl.WRITEFUNCTION, response.write)
+        #c.setopt(c.VERBOSE, 1)
+        c.perform()
+        r = c.getinfo(pycurl.HTTP_CODE)
+        # Do NOT close the connexion
+        #c.close()
+        if r != 200:
+            logger.error("There was a critical error : %s" % response.getvalue())
+            raise Exception ('Connexion error to %s : %s' % (self.get_name(), r))
+        else:
+            # Manage special return of pycurl
+            #ret  = json.loads(response.getvalue().replace('\\/', '/'))
+            ret = response.getvalue()
+            print "GOT RAW RESULT", ret, type(ret)
+            return ret
+
+        
         
         # Should return us pong string
         return ret
-
+    """
     
 
 
@@ -265,14 +320,14 @@ class SatelliteLink(Item):
                 self.add_failed_check_attempt()
                 return
             
-            r = self._get('ping')
+            r = self.con.get('ping')
 
             # Should return us pong string
             if r == 'pong':
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -280,9 +335,9 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
         try:
-            r = self._get('wait_new_conf')
+            r = self.con.get('wait_new_conf')
             return True
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return False
         
@@ -298,19 +353,19 @@ class SatelliteLink(Item):
         if self.con is None:
             return False
 
-
         try:
             if magic_hash is None:
-                r = self._get('have_conf')
+                r = self.con.get('have_conf')
             else:
-                r = self._get('have_conf', {'magic_hash':magic_hash})
+                r = self.con.get('have_conf', {'magic_hash':magic_hash})
             print "have_conf RAW CALL", r, type(r)
             if not isinstance(r, bool):
                 return False
             return r
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return False
+
 
     # To know if a receiver got a conf or not
     def got_conf(self):
@@ -322,12 +377,12 @@ class SatelliteLink(Item):
             return False
 
         try:
-            r = self._get('got_conf')
+            r = self.con.get('got_conf')
             # Protect against bad return
             if not isinstance(r, bool):
                 return False
             return r
-        except requests.exceptions.RequestException, exp:            
+        except HTTPExceptions, exp:
             self.con = None
             return False
 
@@ -341,9 +396,9 @@ class SatelliteLink(Item):
             return
 
         try:
-            self._get('remove_from_conf', {'sched_id':sched_id})
+            self.con.get('remove_from_conf', {'sched_id':sched_id})
             return True
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return False
 
@@ -358,7 +413,7 @@ class SatelliteLink(Item):
             return
 
         try:
-            tab = self._get('what_i_managed')
+            tab = self.con.get('what_i_managed')
             print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
 
             # Protect against bad return
@@ -377,9 +432,10 @@ class SatelliteLink(Item):
                     print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
             # We can update our list now
             self.managed_confs = tab_cleaned
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             print "EXCEPTION INwhat_i_managed", str(exp)
             # A timeout is not a crime, put this case aside
+            #TODO : fix the timeout part?
             if type(exp) == requests.exceptions.Timeout:
                 return
             self.con = None
@@ -410,9 +466,9 @@ class SatelliteLink(Item):
 
 
         try:
-            self._post('push_broks', {'broks':broks})
+            self.con.post('push_broks', {'broks':broks})
             return True
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return False
             
@@ -426,14 +482,14 @@ class SatelliteLink(Item):
             return []
 
         try:
-            tab = self._get('get_external_commands')
+            tab = self.con.get('get_external_commands')
             tab = cPickle.loads(str(tab))
             # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None
                 return []
             return tab
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return []
         except AttributeError:

@@ -159,7 +159,7 @@ globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 #Now check if the run looks good with var in the direct directory
 check_good_run var var var
@@ -225,8 +225,8 @@ sudo /etc/init.d/shinken-broker -d start
 sudo /etc/init.d/shinken-receiver -d start
 sudo /etc/init.d/shinken-arbiter -d start
 
-echo "We will sleep again 5sec so every one is quite stable...."
-sleep 10
+echo "We will sleep again 15sec so every one is quite stable...."
+sleep 15
 check_good_run /var/lib/shinken /var/run/shinken /var/log/shinken
 
 sudo /etc/init.d/shinken-arbiter status
@@ -276,7 +276,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-ha-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -326,7 +326,7 @@ echo "Now stop the poller-Master"
 # Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
 bin/stop_poller.sh
 # check_good_run var
-sleep 10
+sleep 20
 print_date
 
 # The master should be look dead
@@ -341,7 +341,7 @@ string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $
 echo "Now stop the reactionner"
 bin/stop_reactionner.sh
 # check_good_run var
-sleep 10
+sleep 20
 print_date
 
 # The master should be look dead
@@ -356,7 +356,7 @@ string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spa
 echo "Now we stop... the Broker!"
 bin/stop_broker.sh
 # check_good_run var
-sleep 10
+sleep 20
 print_date
 
 # The master should be look dead
@@ -377,7 +377,7 @@ echo "Now we stop... the Arbiter!"
 > $VAR/nagios.log
 
 bin/stop_arbiter.sh
-sleep 30
+sleep 60
 
 echo "OK AND NOW?"
 string_in_file "Arbiter Master is dead. The arbiter Arbiter-spare take the lead"  $VAR/nagios.log
@@ -405,7 +405,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-lb-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -471,7 +471,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -528,7 +528,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-po
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -587,7 +587,7 @@ globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -647,7 +647,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-ar
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -706,7 +706,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-receiver-d
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 # The number of process changed, we mush look for it
 
@@ -755,7 +755,7 @@ string_in_file "PASSIVE HOST CHECK: localhost;2;Oh yes"   $VAR/nagios.log
 echo "STOPPING MASTER SCHEDULER"
 bin/stop_scheduler.sh
 
-sleep 30
+sleep 60
 
 date +%s
 #Check if slave scheduler is ok

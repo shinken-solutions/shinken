@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import requests
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
+from shinken.http_client import HTTPExceptions
 
 
 class ReceiverLink(SatelliteLink):
@@ -65,8 +65,8 @@ class ReceiverLink(SatelliteLink):
                 return
 
             #r = self.con.push_host_names(sched_id, hnames)
-            self._post('push_host_names', {'sched_id':sched_id, 'hnames':hnames})
-        except requests.exceptions.RequestException, exp:
+            self.con.post('push_host_names', {'sched_id':sched_id, 'hnames':hnames})
+        except HTTPExceptions, exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
