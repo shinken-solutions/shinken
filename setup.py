@@ -623,7 +623,7 @@ if __name__ == "__main__":
             'setproctitle': ['setproctitle']
         },
 
-        scripts=glob('bin/shinken-[!_]*'),
+        scripts=glob('bin/shinken-[!_]*') + ['bin/nagios'],
 
         data_files=data_files,
     )
