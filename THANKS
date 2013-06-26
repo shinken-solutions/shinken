@@ -100,3 +100,5 @@ To pepejey for his bug report about void password in ldap auth module. And NO TH
 To Benoit Dunand-Laisin for his bug report about livestatus command management regression
 To Alexandre Veyrenc for his patch about Graphite management of perfdata with spare in names
 To Frederic Mohier for his fix about nmap discovery and windows
+To Mickaël Falck for his patch about network packs interface new parameters
+
