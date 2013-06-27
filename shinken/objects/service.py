@@ -1103,6 +1103,19 @@ class Services(Items):
                         h = hosts.find_by_name(s.host_name)
                         if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
+                # For some of theses attribute we not just want to
+                # have implicite inheritance but also should try
+                # to merge with the host attribute.
+                #  TODO: In fact that should happen for all list-types
+                if prop in ('contact_groups', 'contacts') and hasattr(s, 'host_name'):
+                    # TODO: maybe the merge should only happen if additive inheritance is expected ?
+                    #       One could check for if service attr starts with '+' ?
+                    h = hosts.find_by_name(s.host_name)
+                    if h is not None and hasattr(h, prop):
+                        l = getattr(s, prop, '').lstrip('+').split(',') + getattr(h, prop, '').lstrip('+').split(',')
+                        # Filter empty and doubled values
+                        attribute_list = set([x for x in l if len(x) >= 1])
+                        setattr(s, prop, ','.join(attribute_list))
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
