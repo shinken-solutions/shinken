@@ -943,7 +943,7 @@ class Items(object):
                 if len(cg) >= 1 and cg[0] == '+':
                     cg = cg[1:]
 
-                cgnames = i.contact_groups.split(',')
+                cgnames = cg.split(',')
                 cgnames = strip_and_uniq(cgnames)
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
