@@ -936,11 +936,19 @@ class Items(object):
     def explode_contact_groups_into_contacts(self, contactgroups):
         for i in self:
             if hasattr(i, 'contact_groups'):
+                # in tempaltes we need to take care, that contact_groups
+                # could still have a leading '+', if we don't remove them now
+                # we will not find them in the given contactgroups anymore
+                cg = i.contact_groups
+                if len(cg) >= 1 and cg[0] == '+':
+                    cg = cg[1:]
+
                 cgnames = i.contact_groups.split(',')
                 cgnames = strip_and_uniq(cgnames)
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
                     if cg is None:
+                        # XXX: Why don't i receive this err when defining contact_groups in a template
                         err = "The contact group '%s' defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue
