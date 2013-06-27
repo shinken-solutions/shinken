@@ -7,7 +7,7 @@ Welcome to the Shinken project.
 Shinken is a modern, Nagios compatible monitoring tool, written in
 Python. Its main goal is to give users a flexible architecture for
 their monitoring system that is designed to scale to large environments.
-It’s as simple as the “cloud computing” makerting slides, but here,
+It’s as simple as the “cloud computing” marketing slides, but here,
 it’s real!
 
 Shinken is backwards-compatible with the Nagios configuration standard
