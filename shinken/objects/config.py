@@ -174,7 +174,7 @@ class Config(Item):
         'enable_predictive_service_dependency_checks': StringProp(managed=False, default='1'),
         'cached_host_check_horizon': IntegerProp(default='0', class_inherit=[(Host, 'cached_check_horizon')]),
         'cached_service_check_horizon': IntegerProp(default='0', class_inherit=[(Service, 'cached_check_horizon')]),
-        'use_large_installation_tweaks': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+        'use_large_installation_tweaks': UnusedProp(text='this option is deprecated because in shinken it is just an alias for enable_environment_macros=0'),
         'free_child_process_memory': UnusedProp(text='this option is automatic in Python processes'),
         'child_processes_fork_twice': UnusedProp(text='fork twice is not use.'),
         'enable_environment_macros': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),

@@ -972,20 +972,29 @@ class Items(object):
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
+    def create_commandcall(self,prop, commands, command):
+        comandcall = dict(commands=commands, call=command)
+        if hasattr(prop, 'enable_environment_macros'):
+            comandcall['enable_environment_macros'] = prop.enable_environment_macros
+
+        if hasattr(prop, 'disable_environment_macros'):
+            comandcall['disable_environment_macros'] = prop.disable_environment_macros
+
+        if hasattr(prop, 'poller_tag'):
+            comandcall['poller_tag']=prop.poller_tag
+        elif hasattr(prop, 'reactionner_tag'):
+            comandcall['reactionner_tag']=prop.reactionner_tag
+        
+        return CommandCall(**comandcall)
+
     # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
         for i in self:
             if hasattr(i, prop):
                 command = getattr(i, prop).strip()
                 if command != '':
-                    if hasattr(i, 'poller_tag'):
-                        cmdCall = CommandCall(commands, command,
-                                              poller_tag=i.poller_tag)
-                    elif hasattr(i, 'reactionner_tag'):
-                        cmdCall = CommandCall(commands, command,
-                                              reactionner_tag=i.reactionner_tag)
-                    else:
-                        cmdCall = CommandCall(commands, command)
+                    cmdCall = self.create_commandcall(i, commands, command)
+                    
                     # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
@@ -1001,14 +1010,7 @@ class Items(object):
                 com_list = []
                 for com in coms:
                     if com != '':
-                        if hasattr(i, 'poller_tag'):
-                            cmdCall = CommandCall(commands, com,
-                                                  poller_tag=i.poller_tag)
-                        elif hasattr(i, 'reactionner_tag'):
-                            cmdCall = CommandCall(commands, com,
-                                                  reactionner_tag=i.reactionner_tag)
-                        else:
-                            cmdCall = CommandCall(commands, com)
+                        cmdCall = self.create_commandcall(i, commands, com)
                         # TODO: catch None?
                         com_list.append(cmdCall)
                     else:  # TODO: catch?
