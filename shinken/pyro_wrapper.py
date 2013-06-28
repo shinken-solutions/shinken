@@ -116,7 +116,7 @@ try:
                 pass
             # Maybe it's just a protocol error, like someone with a telnet
             # tying to talk with us, bypass this
-            except ProtocolError:
+            except Pyro.errors.ProtocolError:
                 pass
                 logger.warning("Someone is talking to me in a strange language!")
 
