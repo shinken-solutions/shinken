@@ -1,0 +1,7 @@
+[consol_labs_stable]
+name=consol_labs_stable
+baseurl=http://labs.consol.de/repo/stable/rhel5/$basearch
+type=yum
+enable=1
+gpgcheck=0
+gpgkey=http://labs.consol.de/repo/stable/RPM-GPG-KEY

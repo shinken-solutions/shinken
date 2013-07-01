@@ -210,9 +210,8 @@ class Broker(BaseSatellite):
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
-                    links[id]['con'].fill_initial_broks()
-            # else:
-            #     print "I do not ask for brok generation"
+                    links[id]['con'].fill_initial_broks(self.name)
+            # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except Pyro_exp_pack, exp:
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
@@ -291,7 +290,7 @@ class Broker(BaseSatellite):
                 con = links[sched_id]['con']
                 if con is not None:  # None = not initialized
                     t0 = time.time()
-                    tmp_broks = con.get_broks()
+                    tmp_broks = con.get_broks(self.name)
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
@@ -303,7 +302,11 @@ class Broker(BaseSatellite):
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError, exp:
-                logger.debug(str(exp))
+                logger.debug("Key error for get_broks : %s" % str(exp))
+                try:
+                    logger.debug(''.join(Pyro.util.getPyroTraceback(exp)))
+                except:
+                    pass
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
@@ -324,13 +327,16 @@ class Broker(BaseSatellite):
                 logger.error(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
+
     # Helper function for module, will give our broks
     def get_retention_data(self):
         return self.broks
 
+
     # Get back our broks from a retention module
     def restore_retention_data(self, data):
         self.broks.extend(data)
+
 
     def do_stop(self):
         act = active_children()
@@ -338,6 +344,7 @@ class Broker(BaseSatellite):
             a.terminate()
             a.join(1)
         super(Broker, self).do_stop()
+
 
     def setup_new_conf(self):
         conf = self.new_conf
@@ -652,7 +659,8 @@ class Broker(BaseSatellite):
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
-
+            self.load_modules_manager()
+            
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 

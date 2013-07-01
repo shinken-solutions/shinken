@@ -30,8 +30,11 @@ from multiprocessing import Queue, Manager, active_children
 from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules import nrpe_poller
-from shinken.modules.nrpe_poller import get_instance
+from shinken.modulesctx import modulesctx
+nrpe_poller = modulesctx.get_module('booster_nrpe')
+get_instance = nrpe_poller.get_instance
+
+from shinken.message import Message
 
 modconf = Module()
 modconf.module_name = "NrpePoller"
@@ -46,6 +49,9 @@ class TestNrpePoller(ShinkenTest):
     #    self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 
     def test_nrpe_poller(self):
+        if os.name == 'nt':
+            return
+        
 
         mod = nrpe_poller.Nrpe_poller(modconf)
 

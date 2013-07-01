@@ -217,8 +217,10 @@ Like temporary attributes such as "imported_from", etc.. """
         else:
             return []
 
+
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
+        
         # If I have the prop, I take mine but I check if I must
         # add a plus property
         if hasattr(self, prop):
@@ -247,12 +249,21 @@ Like temporary attributes such as "imported_from", etc.. """
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
                 if value.startswith('+'):
-                    value = value[1:]
+                    # Templates should keep their + inherited from their parents
+                    if not self.is_tpl():
+                        value = value[1:]
                     still_loop = True
 
                 # Maybe in the previous loop, we set a value, use it too
                 if hasattr(self, prop):
-                    value = ','.join([getattr(self, prop), value])
+                    # If the current value is strong, it will simplify the problem
+                    if value.startswith('+'):
+                        # In this case we can remove the + from our current
+                        # tpl because our value will be final
+                        value = ','.join([getattr(self, prop), value[1:]])
+                    else: # If not, se should keep the + sign of need
+                        value = ','.join([getattr(self, prop), value])
+
 
                 # Ok, we can set it
                 setattr(self, prop, value)
@@ -264,7 +275,7 @@ Like temporary attributes such as "imported_from", etc.. """
                     if self.has_plus(prop):
                         value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
                         # Template should keep their '+'
-                        if self.is_tpl():
+                        if self.is_tpl() and not value.startswith('+'):
                             value = '+' + value
                         setattr(self, prop, value)
                     return value
@@ -284,14 +295,15 @@ Like temporary attributes such as "imported_from", etc.. """
             # Template should keep their '+' chain
             # We must say it's a '+' value, so our son will now that it must
             # still loop
-            if self.is_tpl():
+            if self.is_tpl() and not value.startswith('+'):
                 value = '+' + value
             setattr(self, prop, value)
-
             return value
 
+        # Ok so in the end, we give the value we got if we have one, or None
         # Not even a plus... so None :)
-        return None
+        return getattr(self, prop, None)
+
 
     # We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
@@ -319,12 +331,14 @@ Like temporary attributes such as "imported_from", etc.. """
             self.customs[prop] = cust_in_plus[prop]
         return self.customs
 
+
     def has_plus(self, prop):
         try:
             self.plus[prop]
         except:
             return False
         return True
+
 
     def get_all_plus_and_delete(self):
         res = {}
@@ -333,10 +347,12 @@ Like temporary attributes such as "imported_from", etc.. """
             res[prop] = self.get_plus_and_delete(prop)
         return res
 
+
     def get_plus_and_delete(self, prop):
         val = self.plus[prop]
         del self.plus[prop]
         return val
+
 
     # Check is required prop are set:
     # template are always correct
@@ -356,6 +372,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 state = False
 
         return state
+
 
     # This function is used by service and hosts
     # to transform Nagios2 parameters to Nagios3
@@ -570,6 +587,8 @@ Like temporary attributes such as "imported_from", etc.. """
                     setattr(self, prop, cmdCall)
             else:
                 setattr(self, prop, None)
+
+
 
     # We look at the 'trigger' prop and we create a trigger for it
     def explode_trigger_string_into_triggers(self, triggers):
@@ -1002,6 +1021,43 @@ class Items(object):
             i.linkify_with_triggers(triggers)
 
 
+    # We've got a notificationways property with , separated contacts names
+    # and we want have a list of NotificationWay
+    def linkify_with_checkmodulations(self, checkmodulations):
+        for i in self:
+            if not hasattr(i, 'checkmodulations'):
+                continue
+            new_checkmodulations = []
+            for cw_name in i.checkmodulations:
+                cw = checkmodulations.find_by_name(cw_name)
+                if cw is not None:
+                    new_checkmodulations.append(cw)
+                else:
+                    err = "The checkmodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    i.configuration_errors.append(err)
+            # Get the list, but first make elements uniq
+            i.checkmodulations = new_checkmodulations
+
+
+    # We've got list of macro modulations as list of names, and
+    # we want real objects
+    def linkify_with_macromodulations(self, macromodulations):
+        for i in self:
+            if not hasattr(i, 'macromodulations'):
+                continue
+            new_macromodulations = []
+            for cw_name in i.macromodulations:
+                cw = macromodulations.find_by_name(cw_name)
+                if cw is not None:
+                    new_macromodulations.append(cw)
+                else:
+                    err = "The macromodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    i.configuration_errors.append(err)
+            # Get the list, but first make elements uniq
+            i.macromodulations = new_macromodulations
+
+
+
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         #print "\n"*10, "looking for expression", expr
         if look_in=='hostgroups':
@@ -1051,7 +1107,8 @@ class Items(object):
                             pass
                     # Else it's an host to add, but maybe it's ALL
                     elif h == '*':
-                        for newhost in get_all_host_names_set(hosts):
+                        for newhost in  set(h.host_name for h in hosts.items.values() \
+                                            if getattr(h, 'host_name', '') != '' and not h.is_tpl()):
                             hnames_list.append(newhost)
                             #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
                     else:

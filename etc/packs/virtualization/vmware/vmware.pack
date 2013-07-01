@@ -5,9 +5,34 @@
 
 "path":"virtualization/",
 
-"templates": ["esx", "vmware-vm"],
+"templates": ["esx", "vmware-vm", "vcenter"],
 
-"macros":{}
+"macros":{
+         "_ESX_CPU_WARN": {"type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_ESX_CPU_CRIT": {"type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_ESX_MEM_WARN": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_ESX_MEM_CRIT": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_VM_CPU_WARN": {"type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_VM_CPU_CRIT": {"type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_VM_MEM_WARN": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_VM_MEM_CRIT": {"type":"percent",
+                             "description":"Level for ram usage"
+                             }
+         }
 
 
 }

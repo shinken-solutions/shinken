@@ -565,7 +565,7 @@ class SchedulingItem(Item):
             return None
 
         # Get the command to launch, and put it in queue
-        self.launch_check(self.next_chk,force=force)
+        self.launch_check(self.next_chk, force=force)
 
 
     # If we've got a system time change, we need to compensate it
@@ -1275,10 +1275,21 @@ class SchedulingItem(Item):
             return c_in_progress.id
 
         if force or (not self.is_no_check_dependent()):
+
+            # By default we will use our default check_command
+            check_command = self.check_command
+            # But if a checkway is available, use this one instead.
+            # Take the first available
+            for cw in self.checkmodulations:
+                c_cw = cw.get_check_command(t)
+                if c_cw:
+                    check_command = c_cw
+                    break
+            
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
-            command_line = m.resolve_command(self.check_command, data)
+            command_line = m.resolve_command(check_command, data)
 
             # By default env is void
             env = {}
@@ -1290,17 +1301,17 @@ class SchedulingItem(Item):
             # By default we take the global timeout, but we use the command one if it
             # define it (by default it's -1)
             timeout = cls.check_timeout
-            if self.check_command.timeout != -1:
-                timeout = self.check_command.timeout
+            if check_command.timeout != -1:
+                timeout = check_command.timeout
 
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
             # And reactionner_tag too
             c = Check('scheduled', command_line, self, t, ref_check, \
                       timeout=timeout, \
-                      poller_tag=self.check_command.poller_tag, \
+                      poller_tag=check_command.poller_tag, \
                       env=env, \
-                      module_type=self.check_command.module_type)
+                      module_type=check_command.module_type)
 
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not

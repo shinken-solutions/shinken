@@ -136,6 +136,13 @@ class Host(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Our modulations. By defualt void, but will filled by an inner if need
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
+
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+
     })
 
     # properties set only for running purpose
@@ -290,7 +297,7 @@ class Host(SchedulingItem):
         'pack_id': IntegerProp(default=-1),
 
         # Trigger list
-        'triggers':  StringProp(default=[])
+        'triggers':  StringProp(default=[]),
     })
 
     # Hosts macros and prop that give the information
@@ -673,7 +680,7 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.info('HOST ALERT: %s;%s;%s;%d;%s'
+        console_logger.alert('HOST ALERT: %s;%s;%s;%d;%s'
                             % (self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -710,7 +717,7 @@ class Host(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.info("HOST NOTIFICATION: %s;%s;%s;%s;%s"
+            console_logger.alert("HOST NOTIFICATION: %s;%s;%s;%s;%s"
                                 % (contact.get_name(), self.get_name(),
                                    state, command.get_name(), self.output))
 
@@ -718,7 +725,7 @@ class Host(SchedulingItem):
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.info("HOST EVENT HANDLER: %s;%s;%s;%s;%s"
+            console_logger.alert("HOST EVENT HANDLER: %s;%s;%s;%s;%s"
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -726,7 +733,7 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.info("HOST FLAPPING ALERT: %s;STARTED; "
+        console_logger.alert("HOST FLAPPING ALERT: %s;STARTED; "
                             "Host appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -734,7 +741,7 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.info("HOST FLAPPING ALERT: %s;STOPPED; "
+        console_logger.alert("HOST FLAPPING ALERT: %s;STOPPED; "
                             "Host appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -748,21 +755,21 @@ class Host(SchedulingItem):
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.info("HOST DOWNTIME ALERT: %s;STARTED; "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;STARTED; "
                             "Host has entered a period of scheduled downtime"
                             % (self.get_name()))
 
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.info("HOST DOWNTIME ALERT: %s;STOPPED; Host has "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;STOPPED; Host has "
                             "exited from a period of scheduled downtime"
                             % (self.get_name()))
 
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.info("HOST DOWNTIME ALERT: %s;CANCELLED; "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;CANCELLED; "
                             "Scheduled downtime for host has been cancelled."
                             % (self.get_name()))
 
@@ -963,7 +970,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None, checkmodulations=None, macromodulations=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -981,6 +988,9 @@ class Hosts(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
+        self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
+        
 
     # Fill address by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1005,6 +1015,7 @@ class Hosts(Items):
             # We find the id, we replace the names
             h.parents = new_parents
 
+
     # Link with realms and set a default realm if none
     def linkify_h_by_realms(self, realms):
         default_realm = None
@@ -1025,6 +1036,7 @@ class Hosts(Items):
                 h.realm = default_realm
                 h.got_default_realm = True
 
+
     # We look for hostgroups property in hosts and
     # link them
     def linkify_h_by_hg(self, hostgroups):
@@ -1043,6 +1055,7 @@ class Hosts(Items):
                             err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
                             h.configuration_errors.append(err)
                 h.hostgroups = new_hostgroups
+
 
     # We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups, triggers):
@@ -1063,6 +1076,7 @@ class Hosts(Items):
         # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
 
+
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_h_by_commands(self, commands):
@@ -1072,12 +1086,19 @@ class Hosts(Items):
                 cc = getattr(h, prop, None)
                 if cc:
                     cc.late_linkify_with_command(commands)
+            
+            # Ok also link checkmodulations
+            for cw in h.checkmodulations:
+                cw.late_linkify_cw_by_commands(commands)
+                print cw
+
 
     # Create dependencies:
     # Dependencies at the host level: host parent
     def apply_dependencies(self):
         for h in self:
             h.fill_parents_dependency()
+
 
     # Parent graph: use to find quickly relations between all host, and loop
     # return True if there is a loop

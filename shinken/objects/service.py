@@ -121,6 +121,9 @@ class Service(SchedulingItem):
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
 
+        # Easy Service dep definition
+        'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
+
         # service generator
         'duplicate_foreach':       StringProp(default=''),
         'default_value':           StringProp(default=''),
@@ -135,7 +138,15 @@ class Service(SchedulingItem):
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
 
+        # Our check ways. By defualt void, but will filled by an inner if need
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
+        'macromodulations':       ListProp(default=''),
 
+        # Custom views
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+
+        # UI aggregation
+        'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -234,9 +245,6 @@ class Service(SchedulingItem):
         'state_id_before_impact': IntegerProp(default=0),
         # if the state change, we know so we do not revert it
         'state_changed_since_impact': BoolProp(default=False),
-
-        # Easy Service dep definition
-        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
 
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
@@ -539,9 +547,14 @@ class Service(SchedulingItem):
                                 # because in the "explode" phase, we do not have access to this data! :(
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
-                        if hasattr(self, 'check_command'):
-                            # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
+                        # Here is a list of property where we will expand the $KEY$ by the value
+                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies']
+                        for prop in _the_expandables:
+                            if hasattr(self, prop):
+                                # here we can replace VALUE, VALUE1, VALUE2,...
+                                setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
+                        if hasattr(self, 'aggregation'):
+                            new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:
@@ -683,7 +696,7 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.info('SERVICE ALERT: %s;%s;%s;%s;%d;%s'
+        console_logger.alert('SERVICE ALERT: %s;%s;%s;%s;%d;%s'
                             % (self.host.get_name(), self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -720,7 +733,7 @@ class Service(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.info("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
+            console_logger.alert("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
                                 % (contact.get_name(),
                                    self.host.get_name(), self.get_name(), state,
                                    command.get_name(), self.output))
@@ -729,7 +742,7 @@ class Service(SchedulingItem):
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.info("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
+            console_logger.alert("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -737,7 +750,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.info("SERVICE FLAPPING ALERT: %s;%s;STARTED; "
+        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STARTED; "
                             "Service appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -746,7 +759,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.info("SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
+        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
                             "Service appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -761,7 +774,7 @@ class Service(SchedulingItem):
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.info("SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
                             "Service has entered a period of scheduled "
                             "downtime"
                             % (self.host.get_name(), self.get_name()))
@@ -769,14 +782,14 @@ class Service(SchedulingItem):
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.info("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
                             "has exited from a period of scheduled downtime"
                             % (self.host.get_name(), self.get_name()))
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.info("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
                             "Scheduled downtime for service has been cancelled."
                             % (self.host.get_name(), self.get_name()))
 
@@ -994,7 +1007,7 @@ class Services(Items):
     # service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts,
                 resultmodulations, businessimpactmodulations, escalations,
-                servicegroups, triggers):
+                servicegroups, triggers, checkmodulations, macromodulations):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -1010,6 +1023,9 @@ class Services(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
+        self.linkify_with_checkmodulations(checkmodulations)
+        self.linkify_with_macromodulations(macromodulations)
+        
 
     # We can link services with hosts so
     # We can search in O(hosts) instead

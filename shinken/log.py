@@ -25,9 +25,30 @@
 
 import time
 import logging
+import sys
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
+
+def is_tty():
+    # Look if we are in a tty or not
+    if hasattr(sys.stdout, 'isatty'):
+        return sys.stdout.isatty()
+    return False
+
+if is_tty():
+    # Try to load the terminal color. Won't work under python 2.4
+    try:
+        from shinken.misc.termcolor import cprint
+    except (SyntaxError, ImportError), exp:
+        # Outch can't import a cprint, do a simple print
+        def cprint(s, color):
+            print s
+# Ok it's a daemon mode, if so, just print
+else:
+    def cprint(s, color):
+        print s
+
 
 obj = None
 name = None
@@ -47,6 +68,7 @@ class Log:
 
     def __init__(self):
         self._level = logging.NOTSET
+        self.display_time = True
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -81,6 +103,11 @@ class Log:
 
         self._level = level
         logging.getLogger().setLevel(level)
+
+
+    def set_display_time(self, b):
+        self.display_time = b
+
 
     def debug(self, msg, *args, **kwargs):
         self._log(logging.DEBUG, msg, *args, **kwargs)
@@ -121,9 +148,15 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
+                if self.display_time:
+                    fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
+                else:
+                    fmt = u'%(level)-9s %(name)s%(msg)s\n'
             else:
-                fmt = u'[%(date)s] %(name)s%(msg)s\n'
+                if self.display_time:
+                    fmt = u'[%(date)s] %(name)s%(msg)s\n'
+                else:
+                    fmt = u'%(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
@@ -136,12 +169,18 @@ class Log:
         else:
             s = format % message
 
-        if print_it and len(s) > 1:
+        if print_it and len(s) > 1:            
+            # Take a color so we can print if it's a TTY
+            if is_tty():
+                color = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}.get(level, None)
+            else:
+                color = None
+            
             # Print to standard output.
             # If the daemon is launched with a non UTF8 shell
             # we can have problems in printing, work around it.
             try:
-                print s[:-1]
+                cprint(s[:-1], color)
             except UnicodeEncodeError:
                 print s.encode('ascii', 'ignore')
 
@@ -156,6 +195,7 @@ class Log:
         # If local logging is enabled, log to the defined handler, file.
         if local_log is not None:
             logging.log(level, s.strip())
+
 
     def register_local_log(self, path, level=None):
         """The shinken logging wrapper can write to a local file if needed
@@ -223,6 +263,10 @@ class __ConsoleLogger:
         self._log(Log.ERROR, msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
+        self._log(Log.CRITICAL, msg, *args, **kwargs)
+
+    def alert(self, msg, *args, **kwargs):
+        kwargs.setdefault('display_level', False)
         self._log(Log.CRITICAL, msg, *args, **kwargs)
 
     def _log(self, *args, **kwargs):

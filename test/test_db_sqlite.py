@@ -24,13 +24,18 @@
 
 from shinken_test import *
 from shinken.db_sqlite import DBSqlite
-
+import os
 
 class TestConfig(ShinkenTest):
-    # setUp is inherited from ShinkenTest
+    def setUp(self):
+        if os.name != 'nt':
+            os.popen("test_db_sqlite/create_db_sqlite.sh")
+        else :
+            print "Cannot generate sqlite test dabatase for Windows"
+            return
 
     def create_db(self):
-        self.db = DBSqlite("/usr/local/shinken/var/merlindb.sqlite", table_prefix='')
+        self.db = DBSqlite("test_db_sqlite/test_db_sqlite.sqlite", table_prefix='')
 
     def test_connect_database(self):
         self.create_db()
@@ -41,7 +46,6 @@ class TestConfig(ShinkenTest):
         self.db.connect_database()
         q = "DELETE FROM service WHERE instance_id = '0'"
         self.db.execute_query(q)
-
 
 
 if __name__ == '__main__':

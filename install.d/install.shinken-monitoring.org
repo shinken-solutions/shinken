@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURDIR=`pwd`
-SHINKEN_PACKAGE=shinken-1.2.4.tar.gz
+SHINKEN_PACKAGE=shinken-1.4.tar.gz
 SHINKEN_URI=http://www.shinken-monitoring.org/pub/$SHINKEN_PACKAGE
 
 download_url() {
@@ -51,6 +51,7 @@ do_with_root ./install -p nagios-plugins
 do_with_root ./install -p check_mem
 do_with_root ./install -p manubulon
 do_with_root ./install -a pnp4nagios
+do_with_root ./install -p check_netint
 
 
 # Bail out
