@@ -23,11 +23,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
-import requests
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
-
+from shinken.http_client import HTTPExceptions
 from shinken.log import logger
 
 
@@ -82,12 +81,11 @@ class ArbiterLink(SatelliteLink):
         if self.con is None:
             self.create_connection()
         try:
-            self.con.do_not_run()
+            self.con.get('do_not_run')
             return True
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return False
-
 
     def get_satellite_list(self, daemon_type):
         if self.con is None:
@@ -95,7 +93,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_list(daemon_type)
             return r
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return []
 
@@ -106,7 +104,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_status(daemon_type, name)
             return r
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return {}
 
@@ -117,7 +115,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_all_states()
             return r
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return None
 
@@ -128,7 +126,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_objects_properties(table, *properties)
             return r
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             self.con = None
             return None
 

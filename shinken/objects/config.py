@@ -238,6 +238,7 @@ class Config(Item):
         # SHINKEN SPECIFIC
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled'        : BoolProp(default='1'), # Put to 0 to disable the arbiter to run
+        'daemon_thread_pool_size' : IntegerProp(default='1'),
         'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
         'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
         'no_event_handlers_during_downtimes': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),

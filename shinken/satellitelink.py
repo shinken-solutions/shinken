@@ -25,7 +25,6 @@
 
 import time
 import socket
-import requests
 
 import json
 import zlib
@@ -99,7 +98,7 @@ class SatelliteLink(Item):
 
 
     def create_connection(self):
-        self.con = HTTPClient(self.arb_satmap['address'], self.arb_satmap['port'], timeout=self.timeout, data_timeout=self.data_timeout)
+        self.con = HTTPClient(address=self.arb_satmap['address'], port=self.arb_satmap['port'], timeout=self.timeout, data_timeout=self.data_timeout)
         self.uri = self.con.uri
         
 
@@ -113,7 +112,7 @@ class SatelliteLink(Item):
 
         try:
             #pyro.set_timeout(self.con, self.data_timeout)
-            self.con.post('put_conf', {'conf':conf})
+            self.con.post('put_conf', {'conf':conf}, wait='long')
             #pyro.set_timeout(self.con, self.timeout)
             print "PUT CONF SUCESS", self.get_name()
             return True
@@ -190,122 +189,11 @@ class SatelliteLink(Item):
         b = self.get_update_status_brok()
         self.broks.append(b)
 
+
     # The elements just got a new conf_id, we put it in our list
     # because maybe the satellite is too busy to answer now
     def known_conf_managed_push(self, cfg_id, push_flavor):
         self.managed_confs[cfg_id] = push_flavor
-
-
-    """
-    # Try to get an URI path
-    def _get(self, path, args={}):
-        if self.con is None:
-            self.create_connection()
-        
-        # If the connection failed to initialize, bail out
-        if self.con is None:
-            self.add_failed_check_attempt()
-            return
-        
-        print "REACHING GET", self.uri+path
-        #r = self.con.get(self.uri+path, params=args, timeout=10)
-        c = self.con
-        c.setopt(c.POST, 0)
-        c.setopt(c.CONNECTTIMEOUT, 10)
-        c.setopt(c.TIMEOUT, 10)
-        #if proxy:
-        #    c.setopt(c.PROXY, proxy)
-        print "GO TO", self.uri+path+'?'+urllib.urlencode(args)
-        c.setopt(c.URL, str('fuck'+self.uri+path+'?'+urllib.urlencode(args)))
-        # Ok now manage the response
-        response = StringIO()
-        c.setopt(pycurl.WRITEFUNCTION, response.write)
-        #c.setopt(c.VERBOSE, 1)
-        try:
-            c.perform()
-        except pycurl.error, error:
-            errno, errstr = error
-            print 'An error occurred: ', errstr
-            raise HTTPException ('Connexion error to %s : %s' % (self.get_name(), errstr))
-        r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connexion
-        #c.close()
-        if r != 200:
-            logger.error("There was a critical error : %s" % response.getvalue())
-            raise Exception ('Connexion error to %s : %s' % (self.get_name(), r))
-        else:
-            # Manage special return of pycurl
-            ret  = json.loads(response.getvalue().replace('\\/', '/'))
-            print "GOT RAW RESULT", ret, type(ret)
-            return ret
-    """
-
-    """
-    # Try to get an URI path
-    def _post(self, path, args):
-        if self.con is None:
-            self.create_connection()
-        
-        # If the connection failed to initialize, bail out
-        if self.con is None:
-            self.add_failed_check_attempt()
-            return
-        print "REACHING POST", self.uri+path
-        t0 = time.time()
-        for (k,v) in args.iteritems():
-            #print "ORIG SIZ OF V", len(args[k])
-            args[k] = zlib.compress(cPickle.dumps(v), 2)
-            print "SIZE OF V", len(args[k])
-            #args[k] = zlib.compress(args[k], 2)
-            #print "NEW SIZE OF V", len(args[k]), type(args[k])
-        print "_POST TIME TO CPIKCLE", time.time() - t0
-        # Ok go for it!
-        t0 = time.time()
-        
-        #r = self.con.post(self.uri+path, data=args, timeout=10)
-        print "_POST TIME TO POST", time.time() - t0
-        
-        # If need it will raise an error here
-        #r.raise_for_status()
-
-        #ret = r.content
-        print "CONTENT READ"
-
-        c = self.con
-        c.setopt(c.POST, 1)
-        c.setopt(c.CONNECTTIMEOUT, 10)
-        c.setopt(c.TIMEOUT, 10)
-        #if proxy:
-        #    c.setopt(c.PROXY, proxy)
-        print "GO TO", self.uri+path
-        # Pycurl want a list of tuple as args
-        postargs = [(k,v) for (k,v) in args.iteritems()]
-        c.setopt(c.HTTPPOST, postargs)
-        c.setopt(c.URL, str(self.uri+path))
-        # Ok now manage the response
-        response = StringIO()
-        c.setopt(pycurl.WRITEFUNCTION, response.write)
-        #c.setopt(c.VERBOSE, 1)
-        c.perform()
-        r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connexion
-        #c.close()
-        if r != 200:
-            logger.error("There was a critical error : %s" % response.getvalue())
-            raise Exception ('Connexion error to %s : %s' % (self.get_name(), r))
-        else:
-            # Manage special return of pycurl
-            #ret  = json.loads(response.getvalue().replace('\\/', '/'))
-            ret = response.getvalue()
-            print "GOT RAW RESULT", ret, type(ret)
-            return ret
-
-        
-        
-        # Should return us pong string
-        return ret
-    """
-    
 
 
     def ping(self):
@@ -436,8 +324,6 @@ class SatelliteLink(Item):
             print "EXCEPTION INwhat_i_managed", str(exp)
             # A timeout is not a crime, put this case aside
             #TODO : fix the timeout part?
-            if type(exp) == requests.exceptions.Timeout:
-                return
             self.con = None
             print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
@@ -446,12 +332,8 @@ class SatelliteLink(Item):
     # Return True if the satellite said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
         # If not even the cfg_id in the managed_conf, bail out
-        from pprint import pprint
-        print "DO I MANAGE?", self.get_name(), self.managed_confs, cfg_id
-        pprint(self.managed_confs)
         if not cfg_id in self.managed_confs:
             return False
-
         # maybe it's in but with a false push_flavor. check it :)
         return self.managed_confs[cfg_id] == push_flavor
 
@@ -464,9 +346,10 @@ class SatelliteLink(Item):
         if self.con is None:
             return False
 
-
         try:
-            self.con.post('push_broks', {'broks':broks})
+            # Always do a simple ping to avoid a LOOOONG lock
+            self.con.get('ping')
+            self.con.post('push_broks', {'broks':broks}, wait='long')
             return True
         except HTTPExceptions, exp:
             self.con = None
@@ -482,7 +365,8 @@ class SatelliteLink(Item):
             return []
 
         try:
-            tab = self.con.get('get_external_commands')
+            self.con.get('ping')
+            tab = self.con.get('get_external_commands', wait='long')
             tab = cPickle.loads(str(tab))
             # Protect against bad return
             if not isinstance(tab, list):

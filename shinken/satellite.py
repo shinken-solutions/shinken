@@ -58,12 +58,12 @@ import sys
 import cPickle
 import traceback
 import socket
-import requests
-import json
 import zlib
 import base64
+import threading
 
 from shinken.http_daemon import HTTPDaemon
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 from shinken.message import Message
 from shinken.worker import Worker
@@ -101,6 +101,7 @@ class IForArbiter(Interface):
     def what_i_managed(self):
         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
         return self.app.what_i_managed()
+    what_i_managed.need_lock = False
 
 
     # Call by arbiter if it thinks we are running but we must do not (like
@@ -116,26 +117,32 @@ class IForArbiter(Interface):
         self.app.cur_conf = None
 
 
-    # <WTF??> Inconsistent comments!
-    # methods are only used by the arbiter or the broker?
     # NB: following methods are only used by broker
     # Used by the Arbiter to push broks to broker
-    # </WTF??>
     def push_broks(self, broks):
-        self.app.add_broks_to_queue(broks.values())
+        with self.app.arbiter_broks_lock:
+            self.app.arbiter_broks.extend(broks.values())
     push_broks.method = 'post'
+    # We are using a Lock just for NOT lock this call from the arbiter :)
+    push_broks.need_lock = False
     
 
 
     # The arbiter ask us our external commands in queue
+    # Same than push_broks, we will not using Global lock here,
+    # and only lock for external_commands
     def get_external_commands(self):
-        cmds = self.app.get_external_commands()
-        return cPickle.dumps(cmds)
+        with self.app.external_commands_lock:
+            cmds = self.app.get_external_commands()
+            raw = cPickle.dumps(cmds)
+        return raw
+    get_external_commands.need_lock = False
 
 
     ### NB: only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
+    got_conf.need_lock = False
 
 
     # Use by the receivers to got the host names managed by the schedulers
@@ -190,6 +197,11 @@ class BaseSatellite(Daemon):
         # Now we create the interfaces
         self.interface = IForArbiter(self)
 
+        # Can have a queue of external_commands given by modules
+        # will be taken by arbiter to process
+        self.external_commands = []
+        self.external_commands_lock = threading.RLock()
+
 
     # The arbiter can resent us new conf in the pyro_daemon port.
     # We do not want to loose time about it, so it's not a blocking
@@ -215,51 +227,11 @@ class BaseSatellite(Daemon):
         return r
 
 
-    def _get(self, sched, path, args={}):
-        uri = sched['uri']
-        con = sched['con']
-        if con is None:
-            sched['con'] = requests.Session()
-        if con is None:
-            return None
-
-        r = con.get(uri+path, params=args)
-
-        if r.status_code != requests.codes.ok:
-            print "FUCK", r.content
-        
-        # If need it will raise an error here
-        r.raise_for_status()
-        
-        # Ok get back the content if so
-        return json.loads(r.content)
-
-
-
-    def _post(self, sched, path, args={}):
-        uri = sched['uri']
-        con = sched['con']
-        if con is None:
-            sched['con'] = requests.Session()
-        if con is None:
-            return None
-
-        for (k,v) in args.iteritems():
-            print "TYPE?", type(v)
-            args[k] = cPickle.dumps(v)
-            args[k] = zlib.compress(args[k], 2)
-
-        r = con.post(uri+path, data=args)
-
-        if r.status_code != requests.codes.ok:
-            print "FUCK", r.content
-        
-        # If need it will raise an error here
-        r.raise_for_status()
-        
-        # Ok get back the content if so
-        return r.content
-
+    # Call by arbiter to get our external commands
+    def get_external_commands(self):
+        res = self.external_commands
+        self.external_commands = []
+        return res
 
 
 
@@ -291,10 +263,6 @@ class Satellite(BaseSatellite):
         self.returns_queue = None
         self.q_by_mod = {}
 
-        # Can have a queue of external_commands given by modules
-        # will be taken by arbiter to process
-        self.external_commands = []
-
 
     
     # Initialize or re-initialize connection with scheduler """
@@ -312,8 +280,8 @@ class Satellite(BaseSatellite):
         logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
 
         try:
-            sch_con = sched['con'] = requests.Session()
-        except requests.exceptions.RequestException, exp:
+            sch_con = sched['con'] = HTTPClient(uri=uri)
+        except HTTPExceptions, exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -322,10 +290,9 @@ class Satellite(BaseSatellite):
         # timeout of 120 s
         # and get the running id
         try:
-            new_run_id = self._get(sched, 'get_running_id')
+            new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
-            print "GET BACK RUNNING ID", new_run_id, type(new_run_id)
-        except (requests.exceptions.RequestException, cPickle.PicklingError, KeyError), exp:
+        except (HTTPExceptions, cPickle.PicklingError, KeyError), exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -395,11 +362,11 @@ class Satellite(BaseSatellite):
                 try:
                     con = sched['con']
                     if con is not None:  # None = not initialized
-                        send_ok = self._post(sched, 'put_results', {'results':ret})
+                        send_ok = con.post('put_results', {'results':ret})
                         print "SEND OK"*20, send_ok
 
                 # Not connected or sched is gone
-                except (requests.exceptions.RequestException, KeyError), exp:
+                except (HTTPExceptions, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                     self.pynag_con_init(sched_id)
                     return
@@ -502,12 +469,6 @@ class Satellite(BaseSatellite):
         super(Satellite, self).do_stop()
 
 
-    # Call by arbiter to get our external commands
-    def get_external_commands(self):
-        res = self.external_commands
-        self.external_commands = []
-        return res
-
 
     # A simple function to add objects in self
     # like broks in self.broks, etc
@@ -521,7 +482,8 @@ class Satellite(BaseSatellite):
             return
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command '%s'" % str(elt.__dict__))
-            self.external_commands.append(elt)
+            with self.external_commands_lock:
+                self.external_commands.append(elt)
 
 
     # Someone ask us our broks. We send them, and clean the queue
@@ -672,11 +634,13 @@ class Satellite(BaseSatellite):
                 if con is not None:  # None = not initialized
                     #pyro.set_timeout(con, 120)
                     # OK, go for it :)
-                    tmp = self._get(sched, 'get_checks', {'do_checks':do_checks, 'do_actions':do_actions,
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    tmp = con.get('get_checks', {'do_checks':do_checks, 'do_actions':do_actions,
                                                           'poller_tags':self.poller_tags,
                                                           'reactionner_tags':self.reactionner_tags,
                                                           'worker_name':self.name,
-                                                          'module_types':self.q_by_mod.keys()})
+                                                          'module_types':self.q_by_mod.keys()}, wait='long')
                     # Explicit pickle load
                     tmp = base64.b64decode(tmp)
                     tmp = zlib.decompress(tmp)
@@ -689,7 +653,7 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (requests.exceptions.RequestException, KeyError), exp:
+            except (HTTPExceptions, KeyError), exp:
                 logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
@@ -730,7 +694,9 @@ class Satellite(BaseSatellite):
         # Clean all lists
         self.schedulers.clear()
         self.broks.clear()
-        self.external_commands = self.external_commands[:]
+        with self.external_commands_lock:
+            self.external_commands = self.external_commands[:]
+
 
     def do_loop_turn(self):
         logger.debug("Loop turn")
@@ -893,6 +859,7 @@ class Satellite(BaseSatellite):
                 old_addr = self.schedulers[sched_id]['address']
                 new_port = conf['schedulers'][sched_id]['port']
                 old_port = self.schedulers[sched_id]['port']
+
                 # Should got all the same to be ok :)
                 if new_addr == old_addr and new_port == old_port:
                     already_got = True

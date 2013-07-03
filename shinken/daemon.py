@@ -32,6 +32,7 @@ import select
 import random
 import ConfigParser
 import json
+import threading
 
 # Try to see if we are in an android device or not
 is_android = True
@@ -90,7 +91,6 @@ class InvalidPidFile(Exception): pass
 
 """ Interface for Inter satellites communications """
 class Interface(object):
-    exports = []
 
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
@@ -99,10 +99,11 @@ class Interface(object):
 
     def ping(self):
         return "pong"
-    exports.append({'route':'/ping', 'args':[], 'f':ping})
+    ping.need_lock = False
 
     def get_running_id(self):
         return self.running_id
+    get_running_id.need_lock = False
 
     def put_conf(self, conf):
         self.app.new_conf = conf
@@ -110,12 +111,15 @@ class Interface(object):
 
     def wait_new_conf(self):
         self.app.cur_conf = None
+    wait_new_conf.need_lock = False
 
     def have_conf(self):
         return self.app.cur_conf is not None
+    have_conf.need_lock = False
 
     def set_log_level(self, loglevel):
         return logger.set_level(loglevel)
+
 
 # If we are under android, we can't give parameters
 if is_android:
@@ -150,6 +154,7 @@ class Daemon(object):
         'daemon_enabled':BoolProp(default='1'),
         'spare':         BoolProp(default='0'),
         'max_queue_size': IntegerProp(default='0'),
+        'daemon_thread_pool_size': IntegerProp(default='1'),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -526,10 +531,20 @@ class Daemon(object):
                 daemon.shutdown()
             self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
         # Will be add to the modules manager later
+
+        # Now start the http_daemon thread
+        self.http_thread = None
+        if use_pyro:
+            # Directly acquire it, so the http_thread will wait for us
+            self.http_daemon.lock.acquire()
+            self.http_thread = threading.Thread(None, self.http_daemon_thread, 'http_thread')
+            # Don't lock the main thread just because of the http thread
+            self.http_thread.daemon = True
+            self.http_thread.start()
         
 
+    # TODO: we do not use pyro anymore, change the function name....
     def setup_pyro_daemon(self):
-
         if hasattr(self, 'use_ssl'):  # "common" daemon
             ssl_conf = self
         else:
@@ -553,6 +568,7 @@ class Daemon(object):
             else:
                 PYROSSL_POSTCONNCHECK = 0
 
+        # Let's create the HTTPDaemon, it will be exec after
         self.http_daemon = HTTPDaemon(self.host, self.port, ssl_conf.use_ssl)
         http_daemon.daemon_inst = self.http_daemon
 
@@ -657,6 +673,7 @@ class Daemon(object):
             logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting" % (self.user, self.group, e.strerror, e.errno))
             sys.exit(2)
 
+
     # Parse self.config_file and get all properties in it.
     # If some properties need a pythonization, we do it.
     # Also put default value in the properties if some are missing in the config_file
@@ -742,33 +759,88 @@ class Daemon(object):
             logger.info(line)
 
 
-# Wait up to timeout to handle the pyro daemon requests.
-# If suppl_socks is given it also looks for activity on that list of fd.
-# Returns a 3-tuple:
-# If timeout: first arg is 0, second is [], third is possible system time change value
-# If not timeout (== some fd got activity):
-#  - first arg is elapsed time since wait,
-#  - second arg is sublist of suppl_socks that got activity.
-#  - third arg is possible system time change value, or 0 if no change.
+    # Main fonction of the http daemon thread will loop forever unless we stop the root daemon
+    def http_daemon_thread(self):
+        logger.info("Starting HTTP daemon")
+        
+        # The main thing is to have a pool of X concurrent requests for the http_daemon,
+        # so "no_lock" calls can always be directly answer without having a "locked" version to
+        # finish
+        
+        # Ok create the thread
+        nb_threads = getattr(self, 'daemon_thread_pool_size', 1)
+        # Keep a list of our running threads
+        threads = []
+        logger.info('Using a %d http pool size' % nb_threads)
+        while True:
+            # We must not run too much threads, so we will loop until
+            # we got at least one free slot available
+            free_slots = 0
+            while free_slots <= 0:
+                to_del = [t for t in threads if not t.is_alive()]
+                _ = [t.join() for t in to_del]
+                for t in to_del:
+                    threads.remove(t)
+                free_slots = nb_threads - len(threads)
+                if free_slots <= 0:
+                    time.sleep(0.01)
+            
+            socks = self.http_daemon.get_sockets()
+            # Blocking for 0.1 s max here
+            ins = self.get_socks_activity(socks, 0.1)
+            if len(ins) == 0:  # trivial case: no fd activity:
+                continue
+            # If we got activity, Go for a new thread!
+            for sock in socks:
+                if sock in ins:
+                    # GO!
+                    t = threading.Thread(None, target=self.handle_one_request_thread, name='http-request', args=(sock,))
+                    # We don't want to hang the master thread just because this one is still alive
+                    t.daemon = True
+                    t.start()
+                    threads.append(t)
+                    
+
+                    
+
+    def handle_one_request_thread(self, sock):
+        self.http_daemon.handleRequests(sock)
+
+
+    # Wait up to timeout to handle the pyro daemon requests.
+    # If suppl_socks is given it also looks for activity on that list of fd.
+    # Returns a 3-tuple:
+    # If timeout: first arg is 0, second is [], third is possible system time change value
+    # If not timeout (== some fd got activity):
+    #  - first arg is elapsed time since wait,
+    #  - second arg is sublist of suppl_socks that got activity.
+    #  - third arg is possible system time change value, or 0 if no change.
     def handleRequests(self, timeout, suppl_socks=None):
         if suppl_socks is None:
             suppl_socks = []
         before = time.time()
-        socks = self.http_daemon.get_sockets()
+        socks = []
         if suppl_socks:
             socks.extend(suppl_socks)
+        # Release the lock so the http_thread can manage request during we are waiting
+        if self.http_daemon:
+            self.http_daemon.lock.release()
+        # Ok give me the socks taht moved during the timeout max
         ins = self.get_socks_activity(socks, timeout)
+        # Ok now get back the global lock!
+        if self.http_daemon:
+            self.http_daemon.lock.acquire()
         tcdiff = self.check_for_system_time_change()
         before += tcdiff
         # Increase our sleep time for the time go in select
         self.sleep_time += time.time() - before
         if len(ins) == 0:  # trivial case: no fd activity:
             return 0, [], tcdiff
-        for sock in socks:
-            if sock in ins and sock not in suppl_socks:
-                self.http_daemon.handleRequests(sock)
-                ins.remove(sock)
-        # Tack in elapsed the WHOLE time, even with handling requests
+        # HERE WAS THE HTTP, but now it's managed in an other thread
+        #for sock in socks:
+        #    if sock in ins and sock not in suppl_socks:
+        #        ins.remove(sock)
+        # Track in elapsed the WHOLE time, even with handling requests
         elapsed = time.time() - before
         if elapsed == 0:  # we have done a few instructions in 0 second exactly!? quantum computer?
             elapsed = 0.01  # but we absolutely need to return!= 0 to indicate that we got activity

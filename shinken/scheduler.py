@@ -27,11 +27,9 @@ import time
 import os
 import cStringIO
 import sys
-import socket
 import tempfile
 import traceback
 import json
-import requests
 import cPickle
 import zlib
 from Queue import Empty
@@ -48,7 +46,7 @@ from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
-
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 class Scheduler:
@@ -140,54 +138,6 @@ class Scheduler:
             o.clear()
 
 
-
-    def _get(self, sched, path, args={}):
-        uri = sched['uri']
-        con = sched['con']
-        if con is None:
-            sched['con'] = requests.Session()
-        if con is None:
-            return None
-
-        r = con.get(uri+path, params=args, timeout=10)
-
-        if r.status_code != requests.codes.ok:
-            print "FUCK", r.content
-        
-        # If need it will raise an error here
-        r.raise_for_status()
-        
-        # Ok get back the content if so
-        return json.loads(r.content)
-
-
-
-    def _post(self, sched, path, args={}):
-        uri = sched['uri']
-        con = sched['con']
-        if con is None:
-            sched['con'] = requests.Session()
-        if con is None:
-            return None
-
-        for (k,v) in args.iteritems():
-            print "TYPE?", type(v)
-            args[k] = cPickle.dumps(v)
-            args[k] = zlib.compress(args[k], 2)
-
-        r = con.post(uri+path, data=args, timeout=10)
-
-        if r.status_code != requests.codes.ok:
-            print "FUCK", r.content, r.__dict__, r.raw._original_response.msg.__dict__
-        
-        # If need it will raise an error here
-        r.raise_for_status()
-        
-        # Ok get back the content if so
-        return r.content
-
-
-            
 
     # Load conf for future use
     # we are in_test if the data are from an arbiter object like,
@@ -771,25 +721,17 @@ class Scheduler:
 
         uri = links[id]['uri']
         try:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            #socket.setdefaulttimeout(3)
-            links[id]['con'] = requests.Session()
+            links[id]['con'] = HTTPClient(uri=uri)
             con = links[id]['con']
-            #socket.setdefaulttimeout(None)
-        except requests.exceptions.RequestException, exp:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            #socket.setdefaulttimeout(None)
+        except HTTPExceptions, exp:
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
         try:
             # initial ping must be quick
-            #pyro.set_timeout(con, 5)
-            self._get(links[id], 'ping')
-        except requests.exceptions.RequestException, exp:
+            con.get('ping')
+        except HTTPExceptions, exp:
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -816,9 +758,9 @@ class Scheduler:
                     #pyro.set_timeout(con, 120)
                     logger.debug("Sending %s actions" % len(lst))
                     #con.push_actions(lst, self.instance_id)
-                    self._post(p, 'push_actions', {'actions':lst, 'sched_id':self.instance_id})
+                    con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
-                except requests.exceptions.RequestException, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
@@ -845,9 +787,9 @@ class Scheduler:
                     #pyro.set_timeout(con, 120)
                     logger.debug("Sending %d actions" % len(lst))
                     #con.push_actions(lst, self.instance_id)
-                    self._post(p, 'push_actions', {'actions':lst, 'sched_id':self.instance_id})
+                    con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
-                except requests.exceptions.RequestException, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
@@ -873,7 +815,9 @@ class Scheduler:
                     # initial ping must be quick
                     #pyro.set_timeout(con, 120)
                     #results = con.get_returns(self.instance_id)
-                    results = self._get(p, 'get_returns', {'sched_id':self.instance_id})
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
@@ -881,7 +825,7 @@ class Scheduler:
                     for result in results:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
-                except requests.exceptions.RequestException, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
@@ -904,7 +848,9 @@ class Scheduler:
                     # initial ping must be quick
                     #pyro.set_timeout(con, 120)
                     #results = con.get_returns(self.instance_id)
-                    results = self._get(p, 'get_returns', {'sched_id':self.instance_id})
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
@@ -912,7 +858,7 @@ class Scheduler:
                     for result in results:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
-                except requests.exceptions.RequestException, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return

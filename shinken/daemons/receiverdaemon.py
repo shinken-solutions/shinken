@@ -27,7 +27,6 @@ import os
 import time
 import traceback
 import sys
-import requests
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -38,6 +37,7 @@ from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 
 from shinken.external_command import ExternalCommand, ExternalCommandManager
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 # Our main APP class
@@ -94,13 +94,6 @@ class Receiver(Satellite):
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
             self.unprocessed_external_commands.append(elt)
-
-
-    # Call by arbiter to get our external commands
-    def get_external_commands(self):
-        res = self.external_commands
-        self.external_commands = []
-        return res
 
 
     def push_host_names(self, sched_id, hnames):
@@ -279,10 +272,10 @@ class Receiver(Satellite):
                 logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))
                 try:
                     #con.run_external_commands(cmds)
-                    self._post(sched, 'run_external_commands', {'cmds':cmds})
+                    con.post('run_external_commands', {'cmds':cmds})
                     sent = True
                 # Not connected or sched is gone
-                except (requests.exceptions.RequestException, KeyError), exp:
+                except (HTTPExceptions, KeyError), exp:
                     logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                     self.pynag_con_init(sched_id)
                     return

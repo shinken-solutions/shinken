@@ -239,6 +239,7 @@ class BaseModule(object):
     def manage_signal(self, sig, frame):
         self.interrupted = True
 
+
     def set_signal_handler(self, sigs=None):
         if sigs is None:
             sigs = (signal.SIGINT, signal.SIGTERM)
@@ -247,6 +248,7 @@ class BaseModule(object):
             signal.signal(sig, self.manage_signal)
 
     set_exit_handler = set_signal_handler
+
 
     def do_stop(self):
         """Called just before the module will exit

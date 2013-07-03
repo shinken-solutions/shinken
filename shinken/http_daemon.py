@@ -32,6 +32,8 @@ import cPickle
 import inspect
 import json
 import zlib
+import threading
+
 from log import logger
 
 # Let's load bottlecore! :)
@@ -59,6 +61,9 @@ class HTTPDaemon(object):
             self.uri = 'http://%s:%s' % (self.host, self.port)
             logger.info("Initializing HTTP connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
 
+
+            # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
+            __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
             # And port already use now raise an exception
             try:
                 self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect', quiet=False)
@@ -69,17 +74,22 @@ class HTTPDaemon(object):
                 # must be a problem with pyro workdir:
                 raise InvalidWorkDir(e)
 
+            self.lock = threading.RLock()
+
             #@bottle.error(code=500)
             #def error500(err):
             #    print err.__dict__
             #    return 'FUCKING ERROR 500', str(err)
 
+            
 
-        # Get the server socket but not if disabled
+
+        # Get the server socket but not if disabled or closed
         def get_sockets(self):
-            if self.port == 0:
+            if self.port == 0 or self.srv is None:
                 return []
             return [self.srv.socket]
+
 
 
         def register(self, obj):
@@ -101,46 +111,45 @@ class HTTPDaemon(object):
                 # WARNING : we MUST do a 2 levels function here, or the f_wrapper
                 # will be uniq and so will link to the last function again
                 # and again
-                def register_callback(fname, args, f, obj):
+                def register_callback(fname, args, f, obj, lock):
                     def f_wrapper():
-                        print "CALLING", fname
+                        need_lock = getattr(f, 'need_lock', True)
+                        
                         # Warning : put the bottle.response set inside the wrapper
                         # because outside it will break bottle
-                        #bottle.response.content_type = 'application/json'
-                        #print "Trying to catch the args need by the function", f, fname, args
-                        #print 'And the object', obj
                         d = {}
                         method = getattr(f, 'method', 'get').lower()
-                        #print "GOT FUNCITON METHOD", method
                         for aname in args:
-                            print "LOOKING FOR", aname, "in", fname, method
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
                                 # Post args are zlibed and cPickled
                                 if v is not None:
-                                    print "GOT V", len(v)
                                     v = zlib.decompress(v)
                                     v = cPickle.loads(v)
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:
-                                print "FUCK MISSING ARG"*100, aname
                                 raise Exception('Missing argument %s' % aname)
                             d[aname] = v
+                        if need_lock:
+                            logger.debug("HTTP: calling lock for %s" % fname)
+                            lock.acquire()
+
                         ret = f(**d)
-                        #return json.dumps(ret)
+
+                        # Ok now we can release the lock
+                        if need_lock:
+                            lock.release()
+
                         encode = getattr(f, 'encode', 'json').lower()
-                        return json.dumps(ret)
-                        #if encode == 'json':
-                        #    return json.dumps(ret)
-                        #else:
-                        #    print "RETURN RAW RESULT"
-                        #    return ret
+                        j = json.dumps(ret)
+                        return j
                     # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
-                register_callback(fname, args, f, obj)
-                    
+                register_callback(fname, args, f, obj, self.lock)
+
+            # Add a simple / page
             def slash():
                 return "OK"
             bottle.route('/', callback=slash)

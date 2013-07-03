@@ -147,6 +147,8 @@ class Dispatcher:
                         logger.error('CRITICAL: the arbiter try to send a configureion but it is not a MASTER one?? Look at your configuration.')
                         continue
                     arb.put_conf(self.conf.whole_conf_pack)
+                    # Remind it that WE are the master here!
+                    arb.do_not_run()
                 else:
                     # Ok, it already has the conf. I remember that
                     # it does not have to run, I'm still alive!
@@ -210,18 +212,10 @@ class Dispatcher:
                             # is needed
                             # Or maybe it is alive but I thought that this reactionner managed the conf
                             # and it doesn't. I ask a full redispatch of these cfg for both cases
-
-                            # DBG:
-                            #print "What I manage", satellite.get_name(), satellite.what_i_managed()
-                            #try:
-                            #    satellite.reachable and cfg_id not in satellite.what_i_managed()
-                            #except TypeError, exp:
-                            #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
-                            #    satellite.reachable = False
-
-                            #wim = satellite.managed_confs # what_i_managed()
-                            #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
-                            #print satellite.alive, satellite.reachable, satellite.do_i_manage(cfg_id, push_flavor)
+                            
+                            if push_flavor == 0 and satellite.alive:
+                                logger.warning('[%s] The %s %s manage a unmanaged configuration' % (r.get_name(), kind, satellite.get_name()))
+                                continue
                             if not satellite.alive or (satellite.reachable and not satellite.do_i_manage(cfg_id, push_flavor)):
                                 logger.warning('[%s] The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False  # so we will redispatch all

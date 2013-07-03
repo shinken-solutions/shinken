@@ -27,22 +27,19 @@ import os
 import sys
 import time
 import traceback
-import socket
 import cPickle
-import requests
 import base64
 import zlib
-
+import threading
 from multiprocessing import active_children
 from Queue import Empty
 
 from shinken.satellite import BaseSatellite
-
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids
 from shinken.log import logger
-
 from shinken.external_command import ExternalCommand
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 # Our main APP class
@@ -77,8 +74,13 @@ class Broker(BaseSatellite):
         self.broks = []  # broks to manage
         # broks raised this turn and that needs to be put in self.broks
         self.broks_internal_raised = []
+        # broks raised by the arbiters, we need a lock so the push can be in parallel
+        # to our current activities and won't lock the arbiter
+        self.arbiter_broks = []
+        self.arbiter_broks_lock = threading.RLock()
 
         self.timeout = 1.0
+
 
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
@@ -131,11 +133,7 @@ class Broker(BaseSatellite):
             return t[type]
         return None
 
-    # Call by arbiter to get our external commands
-    def get_external_commands(self):
-        res = self.external_commands
-        self.external_commands = []
-        return res
+
 
     # Check if we do not connect to often to this
     def is_connection_try_too_close(self, elt):
@@ -144,6 +142,7 @@ class Broker(BaseSatellite):
         if now - last_connection < 5:
             return  True
         return False
+
 
     # initialize or re-initialize connection with scheduler or
     # arbiter if type == arbiter
@@ -174,13 +173,10 @@ class Broker(BaseSatellite):
         uri = links[id]['uri']
 
         try:
-            socket.setdefaulttimeout(3)
-            links[id]['con'] = requests.Session()
-            socket.setdefaulttimeout(None)
-        except requests.exceptions.RequestException, exp:
+            con = links[id]['con'] = HTTPClient(uri=uri)
+        except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -188,12 +184,10 @@ class Broker(BaseSatellite):
 
         try:
             # initial ping must be quick
-            #pyro.set_timeout(links[id]['con'], 5)
-            self._get(links[id], 'ping')
-            new_run_id = self._get(links[id], 'get_running_id')
+            con.get('ping')
+            new_run_id = con.get('get_running_id')
             new_run_id = float(new_run_id)
             # data transfer can be longer
-            #pyro.set_timeout(links[id]['con'], 120)
 
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
@@ -204,11 +198,10 @@ class Broker(BaseSatellite):
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
-                    #links[id]['con'].fill_initial_broks(self.name)
-                    self._get(links[id], 'fill_initial_broks', {'bname':self.name})
+                    con.get('fill_initial_broks', {'bname':self.name})
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except requests.exceptions.RequestException, exp:
+        except HTTPExceptions, exp:
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -224,8 +217,6 @@ class Broker(BaseSatellite):
     # DO NOT CHANGE data of b!!!
     # REF: doc/broker-modules.png (4-5)
     def manage_brok(self, b):
-        #logger.info("manage brok")
-
         # Call all modules if they catch the call
         for mod in self.modules_manager.get_internal_instances():
             try:
@@ -237,6 +228,7 @@ class Broker(BaseSatellite):
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
+
     # Add broks (a tab) to different queues for
     # internal and external modules
     def add_broks_to_queue(self, broks):
@@ -244,12 +236,23 @@ class Broker(BaseSatellite):
         # internal modules
         self.broks.extend(broks)
 
+
     # Each turn we get all broks from
     # self.broks_internal_raised and we put them in
     # self.broks
     def interger_internal_broks(self):
         self.add_broks_to_queue(self.broks_internal_raised)
         self.broks_internal_raised = []
+
+
+    # We will get in the broks list the broks from the arbiters,
+    # but as the arbiter_broks list can be push by arbiter without Global lock,
+    # we must protect this with he list lock
+    def interger_arbiter_broks(self):
+        with self.arbiter_broks_lock:
+            self.add_broks_to_queue(self.arbiter_broks)
+            self.arbiter_broks = []
+
 
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
@@ -265,6 +268,7 @@ class Broker(BaseSatellite):
                 except Empty:
                     full_queue = False
 
+
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
     def get_new_broks(self, type='scheduler'):
@@ -277,22 +281,21 @@ class Broker(BaseSatellite):
         # We check for new check in each schedulers and put
         # the result in new_checks
         for sched_id in links:
-            print "GET BROKS FROM"*20, links[sched_id]
             try:
                 con = links[sched_id]['con']
                 if con is not None:  # None = not initialized
                     t0 = time.time()
-                    #tmp_broks = con.get_broks(self.name)
-                    tmp_broks = self._get(links[sched_id], 'get_broks', {'bname':self.name})
-                    t0 = time.time()
-                    _t = base64.b64decode(tmp_broks)#str(tmp_broks))
-                    _t = zlib.decompress(_t)
-                    logger.debug("BROK STR %s" % (time.time() - t0))
-                    t0 = time.time()
-                    tmp_broks = cPickle.loads(_t)#str(tmp_broks))
-                    logger.debug("BROK LOADS %s" % (time.time() - t0))
-                    
-
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    tmp_broks = con.get('get_broks', {'bname':self.name}, wait='long')
+                    try:
+                        _t = base64.b64decode(tmp_broks)
+                        _t = zlib.decompress(_t)
+                        tmp_broks = cPickle.loads(_t)
+                    except (TypeError, zlib.error, cPickle.PickleError), exp:
+                        logger.error('Cannot load broks data from %s : %s' % (links[sched_id]['name'], exp))
+                        links[sched_id]['con'] = None
+                        continue
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
@@ -306,7 +309,7 @@ class Broker(BaseSatellite):
             except KeyError, exp:
                 logger.debug("Key error for get_broks : %s" % str(exp))
                 self.pynag_con_init(sched_id, type=type)
-            except requests.exceptions.RequestException, exp:
+            except HTTPExceptions, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
@@ -521,11 +524,14 @@ class Broker(BaseSatellite):
         self.reactionners.clear()
         self.broks = self.broks[:]
         self.broks_internal_raised = self.broks_internal_raised[:]
+        with self.arbiter_broks_lock:
+            self.arbiter_broks = self.arbiter_broks[:]
         self.external_commands = self.external_commands[:]
 
         # And now modules
         self.have_modules = False
         self.modules_manager.clear_instances()
+
 
     def do_loop_turn(self):
         logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
@@ -565,7 +571,9 @@ class Broker(BaseSatellite):
         # Maybe the last loop we raised some broks internally
         # we should integrate them in broks
         self.interger_internal_broks()
-
+        # Also reap broks sent from the arbiters
+        self.interger_arbiter_broks()
+        
         # And from schedulers
         self.get_new_broks(type='scheduler')
         # And for other satellites

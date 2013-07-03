@@ -28,7 +28,6 @@ import time
 import traceback
 import cPickle
 import zlib
-import requests
 import base64
 
 from shinken.scheduler import Scheduler
