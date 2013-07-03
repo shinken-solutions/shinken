@@ -190,6 +190,10 @@ class Host(SchedulingItem):
         'chk_depend_of_me':     StringProp(default=[]),
         'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
+        # if a checked was triggered by a dependency (host or service).
+        # Reset to false at each HARD state
+        'checked_by_child': BoolProp(default=False),
+
         # no brok ,to much links
         'services':             StringProp(default=[]),
 
@@ -343,7 +347,7 @@ class Host(SchedulingItem):
         'HOSTACTIONURL':     'action_url',
         'HOSTNOTESURL':      'notes_url',
         'HOSTNOTES':         'notes',
-        'HOSTREALM':         'get_realm', 
+        'HOSTREALM':         'get_realm',
         'TOTALHOSTSERVICES': 'get_total_services',
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
@@ -990,7 +994,7 @@ class Hosts(Items):
         self.linkify_with_triggers(triggers)
         self.linkify_with_checkmodulations(checkmodulations)
         self.linkify_with_macromodulations(macromodulations)
-        
+
 
     # Fill address by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1086,7 +1090,7 @@ class Hosts(Items):
                 cc = getattr(h, prop, None)
                 if cc:
                     cc.late_linkify_with_command(commands)
-            
+
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
