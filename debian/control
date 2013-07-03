@@ -6,18 +6,19 @@ Vcs-Git: git://anonscm.debian.org/collab-maint/shinken.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/shinken.git;a=summary
 Standards-Version: 3.9.4
 XS-Python-Version: >= 2.5, << 3.0
-Build-Depends: debhelper (>= 7), quilt, python-setuptools
+Build-Depends: python, debhelper (>= 7), quilt, python-setuptools
 Homepage: http://www.shinken-monitoring.org
 
 Package: shinken
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}),
- shinken-poller (= ${source:Version}),
- shinken-scheduler (= ${source:Version}),
- shinken-reactionner (= ${source:Version}),
- shinken-module-broker-webui-cfgpassword (= ${source:Version}),
- shinken-module-broker-webui-sqlitedb (= ${source:Version}),
- shinken-module-retention-picklefile (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}),
+ shinken-poller (= ${binary:Version}),
+ shinken-scheduler (= ${binary:Version}),
+ shinken-reactionner (= ${binary:Version}),
+ shinken-module-broker-webui-cfgpassword (= ${binary:Version}),
+ shinken-module-broker-webui-sqlitedb (= ${binary:Version}),
+ shinken-module-retention-picklefile (= ${binary:Version}),
+ ${misc:Depends}
 Description: Flexible monitoring tool - Meta-package
  This meta-package install a minimal and fully functionnal monitoring solution
  based on Shinken and its WebUI module.
@@ -29,7 +30,7 @@ Description: Flexible monitoring tool - Meta-package
 Package: shinken-common
 Architecture: any
 Conflicts: shinken-core
-Depends: python (>= ${python:Versions}), pyro | python2-pyro4
+Depends: python (>= ${python:Versions}), pyro | python2-pyro4, ${misc:Depends}
 Description: Flexible monitoring tool - Common files
  Common files for shinken monitoring.
  .
@@ -39,7 +40,7 @@ Description: Flexible monitoring tool - Common files
 
 Package: shinken-arbiter
 Architecture: any
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Description: Flexible monitoring tool - Arbiter component
  Arbiter component for shinken monitoring.
  .
@@ -51,7 +52,7 @@ Description: Flexible monitoring tool - Arbiter component
  for their monitoring system that can easily scale to large environments.
 
 Package: shinken-poller
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Recommends: nagios-plugins-basic
 Architecture: any
 Description: Flexible monitoring tool - Poller component
@@ -63,7 +64,7 @@ Description: Flexible monitoring tool - Poller component
  for their monitoring system that can easily scale to large environments.
 
 Package: shinken-scheduler
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Architecture: any
 Description: Flexible monitoring tool - Scheduler component
  Scheduler component for shinken monitoring. Scheduler drives checks from
@@ -74,7 +75,7 @@ Description: Flexible monitoring tool - Scheduler component
  for their monitoring system that can easily scale to large environments.
 
 Package: shinken-reactionner
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Recommends: bsd-mailx | mailx
 Architecture: any
 Description: Flexible monitoring tool - Reactionner component
@@ -88,7 +89,7 @@ Description: Flexible monitoring tool - Reactionner component
 
 Package: shinken-broker
 Architecture: any
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Description: Flexible monitoring tool - Broker component
  Broker component for shinken monitoring. Broker gets status from other
  components and manage it (store in database, export to other systems,
@@ -100,7 +101,7 @@ Description: Flexible monitoring tool - Broker component
 
 Package: shinken-receiver
 Architecture: any
-Depends: shinken-common (= ${source:Version}), python (>= ${python:Versions})
+Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
 Description: Flexible monitoring tool - Receiver component
  Receiver component for shinken monitoring. It may be used to receive NSCA
  information and passive checks from servers.
@@ -112,7 +113,7 @@ Description: Flexible monitoring tool - Receiver component
 # POLLER MODULES
 Package: shinken-module-poller-nrpe
 Architecture: any
-Depends: shinken-poller (= ${source:Version})
+Depends: shinken-poller (= ${binary:Version}), ${misc:Depends}
 Recommends: python-openssl
 Description:  Flexible monitoring tool - NRPE module for Poller
  NRPE module for Poller. This module makes NRPE requests without NRPE plugin.
@@ -124,7 +125,7 @@ Description:  Flexible monitoring tool - NRPE module for Poller
 # BROKER MODULES
 Package: shinken-module-broker-npcdmod
 Architecture: any
-Depends: shinken-broker (= ${source:Version})
+Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
 Recommends: pnp4nagios
 Description: Flexible monitoring tool - PNP4Nagios module for Broker
  PNP4Nagios module for Broker. This module export performance datas from
@@ -136,7 +137,7 @@ Description: Flexible monitoring tool - PNP4Nagios module for Broker
 
 Package: shinken-module-broker-graphite
 Architecture: any
-Depends: shinken-broker (= ${source:Version})
+Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
 Suggests: graphite-carbon
 Description: Flexible monitoring tool - Graphite module for Broker
  Graphite module for Broker. This module export performance datas from
@@ -148,7 +149,7 @@ Description: Flexible monitoring tool - Graphite module for Broker
 
 Package: shinken-module-broker-livestatus
 Architecture: any
-Depends: shinken-broker (= ${source:Version})
+Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
 Description: Flexible monitoring tool - LiveStatus module for Broker
  LiveStatus module for Broker. This module provides a LiveStatus interface
  to Shinken
@@ -159,7 +160,7 @@ Description: Flexible monitoring tool - LiveStatus module for Broker
 
 Package: shinken-module-broker-livestatus-sqlite
 Architecture: any
-Depends: shinken-module-broker-livestatus (= ${source:Version})
+Depends: shinken-module-broker-livestatus (= ${binary:Version}), ${misc:Depends}
 Description: Shinken Sqlite logstore for LiveStatus broker module
  Sqlite logstore for LiveStatus Broker module. This module provides a
  Sqlite storage for LiveStatus module.
@@ -170,7 +171,7 @@ Description: Shinken Sqlite logstore for LiveStatus broker module
 
 Package: shinken-module-broker-livestatus-mongodb
 Architecture: any
-Depends: python-pymongo, shinken-module-broker-livestatus (= ${source:Version}), mongodb-server
+Depends: python-pymongo, shinken-module-broker-livestatus (= ${binary:Version}), mongodb-server, ${misc:Depends}
 Description: Shinken MongoDB logstore for LiveStatus broker module
  MongoDB logstore for LiveStatus Broker module. This module provides a
  MongoDB storage for LiveStatus module.
@@ -181,7 +182,7 @@ Description: Shinken MongoDB logstore for LiveStatus broker module
 
 Package: shinken-module-broker-webui
 Architecture: any
-Depends: python (>= ${python:Versions}), libjs-jquery, shinken-broker (= ${source:Version})
+Depends: python (>= ${python:Versions}), libjs-jquery, shinken-broker (= ${binary:Version}), ${misc:Depends}
 Description: Shinken WebUI broker module
  WebUI is the standard web interface for Shinken. The interface shows
  current hosts and services status 
@@ -192,7 +193,7 @@ Description: Shinken WebUI broker module
 
 Package: shinken-module-broker-webui-cfgpassword
 Architecture: any
-Depends: shinken-module-broker-webui (= ${source:Version})
+Depends: shinken-module-broker-webui (= ${binary:Version}), ${misc:Depends}
 Description: Shinken cfg_password authentifcation module for WebUI broker
  This module provides an authentication for WebUI. This module get
  credentials from contacts defined in the Shinken configuration.
@@ -203,7 +204,7 @@ Description: Shinken cfg_password authentifcation module for WebUI broker
 
 Package: shinken-module-broker-webui-sqlitedb
 Architecture: any
-Depends: shinken-module-broker-webui (= ${source:Version})
+Depends: shinken-module-broker-webui (= ${binary:Version}), ${misc:Depends}
 Description: Shinken Sqlite storage module for WebUI broker
  This module store user preferences in a sqlite database.
  .
@@ -213,7 +214,7 @@ Description: Shinken Sqlite storage module for WebUI broker
 
 Package: shinken-module-broker-webui-mongodb
 Architecture: any
-Depends: shinken-module-broker-webui-mongodb (= ${source:Version}), mongodb-server
+Depends: shinken-module-broker-webui (= ${binary:Version}), mongodb-server, ${misc:Depends}
 Description: Shinken MongoDB storage module for WebUI broker
  This module store user preferences in a mongodb database.
  .
@@ -224,7 +225,7 @@ Description: Shinken MongoDB storage module for WebUI broker
 # ARBITER MODULES
 Package: shinken-module-arbiter-ws
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}) | shinken-receiver (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
 Description: WebService module for Arbiter or Receiver
  WebService module for the Arbiter and Receiver. It can receiver passive
  check results vai HTTP POST.
@@ -235,7 +236,7 @@ Description: WebService module for Arbiter or Receiver
 
 Package: shinken-module-arbiter-hotdependencies
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}), ${misc:Depends}
 Description: Hot Dependencies module for Arbiter
  With this module you can change host parents without restart the Arbiter.
  .
@@ -245,7 +246,7 @@ Description: Hot Dependencies module for Arbiter
 
 Package: shinken-module-arbiter-collectd
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}) | shinken-receiver (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
 Description: Collectd module for Arbiter or Receiver
  This module will listen on Collectd standard port and can receive passive
  checks results from a collectd daemon.
@@ -256,7 +257,7 @@ Description: Collectd module for Arbiter or Receiver
 
 Package: shinken-module-arbiter-nsca
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}) | shinken-receiver (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
 Description: NSCA module for Arbiter or Receiver
  This module will listen on NSCA standard port and can receive passive check
  results sent from send_nsca scripts.
@@ -268,7 +269,7 @@ Description: NSCA module for Arbiter or Receiver
 # MULTI COMPONENT MODULES
 Package: shinken-module-retention-picklefile
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}) | shinken-scheduler (= ${source:Version}) | shinken-broker (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-scheduler (= ${binary:Version}) | shinken-broker (= ${binary:Version}), ${misc:Depends}
 Description: Retention module for Arbiter, Scheduler or Broker
  This module stores hosts and services states in files and keep it between
  process restarts.
@@ -279,7 +280,7 @@ Description: Retention module for Arbiter, Scheduler or Broker
 
 Package: shinken-module-retention-mongodb
 Architecture: any
-Depends: shinken-scheduler (= ${source:Version}), mongodb-server
+Depends: shinken-scheduler (= ${binary:Version}), mongodb-server, ${misc:Depends}
 Description: MongoDB retention module for Scheduler
  This module stores hosts and services states in a mongodb database
  and keep it between process restarts.
@@ -290,7 +291,7 @@ Description: MongoDB retention module for Scheduler
 
 Package: shinken-module-commandfile
 Architecture: any
-Depends: shinken-arbiter (= ${source:Version}) | shinken-receiver (= ${source:Version}) | shinken-poller (= ${source:Version})
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}) | shinken-poller (= ${binary:Version}), ${misc:Depends}
 Description: Command file module for Arbiter, Receiver or Poller
  Receive passive host and service results, typically from check_mk plugins.
  No other commands or inputs accepted (Restricted to host and service results)
