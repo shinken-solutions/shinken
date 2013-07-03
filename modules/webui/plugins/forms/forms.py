@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -37,7 +36,7 @@ def get_page(arg1='nothing'):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     # we return values for the template (view). But beware, theses values are the
@@ -51,7 +50,7 @@ def form_submit_check(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     t = 'host'
@@ -66,7 +65,7 @@ def form_ack(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user, 'name': name}
@@ -77,7 +76,7 @@ def form_comment(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user, 'name': name}
@@ -87,7 +86,7 @@ def form_comment_delete(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user, 'name': name}
@@ -97,7 +96,7 @@ def form_downtime(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user, 'name': name}
@@ -107,7 +106,7 @@ def form_downtime_delete(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user, 'name': name}

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
 from shinken.misc.perfdata import PerfDatas
 
 ### Will be populated by the UI with it's own value
@@ -133,7 +132,7 @@ def get_page(hname):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     # Ok, we can lookup it
     h = app.datamgr.get_host(hname)

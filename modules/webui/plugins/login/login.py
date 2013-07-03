@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
-
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -37,7 +35,7 @@ def get_page():
 def user_login():
     user = app.get_user_auth()
     if user:
-        redirect("/problems")
+        app.bottle.redirect("/problems")
 
     err = app.request.GET.get('error', None)
     login_text = app.login_text
@@ -46,7 +44,7 @@ def user_login():
 
 
 def user_login_redirect():
-    redirect("/user/login")
+    app.bottle.redirect("/user/login")
     return {}
 
 
@@ -57,7 +55,7 @@ def user_logout():
         app.response.set_cookie('user', False, secret=app.auth_secret, path='/')
     else:
         app.response.set_cookie('user', '', secret=app.auth_secret, path='/')
-    redirect("/user/login")
+    app.bottle.redirect("/user/login")
     return {}
 
 
@@ -71,11 +69,11 @@ def user_auth():
     if is_auth:
         app.response.set_cookie('user', login, secret=app.auth_secret, path='/', expires='Fri, 01 Jan 2100 00:00:00 GMT')
         if is_mobile == '1':
-            redirect("/mobile/main")
+            app.bottle.redirect("/mobile/main")
         else:
-            redirect("/problems")
+            app.bottle.redirect("/problems")
     else:
-        redirect("/user/login?error=Invalid user or Password")
+        app.bottle.redirect("/user/login?error=Invalid user or Password")
 
     return {'app': app, 'is_auth': is_auth}
 
@@ -85,7 +83,7 @@ def user_auth():
 def get_root():
     user = app.request.get_cookie("user", secret=app.auth_secret)
     if user:
-        redirect("/problems")
+        app.bottle.redirect("/problems")
     elif app.remote_user_enable in ['1', '2']:
         user_name=None
         if app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
@@ -94,23 +92,23 @@ def get_root():
             user_name = app.request.environ[app.remote_user_variable]
         if not user_name:
             print "Warning: You need to have a contact having the same name as your user %s"
-            redirect("/user/login")
+            app.bottle.redirect("/user/login")
         c = app.datamgr.get_contact(user_name)
         print "Got", c
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user_name
-            redirect("/user/login")
+            app.bottle.redirect("/user/login")
         else:
             app.response.set_cookie('user', user_name, secret=app.auth_secret, path='/')
-            redirect("/problems")
+            app.bottle.redirect("/problems")
     else:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
 
 def login_mobile():
     user = app.get_user_auth()
     if user:
-        redirect("/mobile/main")
+        app.bottle.redirect("/mobile/main")
 
     err = app.request.GET.get('error', None)
     login_text = app.login_text

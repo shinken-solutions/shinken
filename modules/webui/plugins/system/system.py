@@ -24,7 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -34,7 +33,7 @@ def system_page():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
@@ -52,7 +51,7 @@ def system_widget():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
@@ -82,7 +81,7 @@ def show_log():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()

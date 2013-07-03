@@ -140,7 +140,9 @@ class Webui_broker(BaseModule, Daemon):
         # rg will be able to skip some broks
         self.rg = Regenerator()
 
-
+        self.bottle = bottle
+    
+    
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
         print "Checking photo path", self.photo_dir

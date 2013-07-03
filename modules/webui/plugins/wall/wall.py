@@ -28,8 +28,7 @@ app = None
 
 import time
 
-from shinken.webui.bottle import redirect
-from shinken.modules.webui.helper import hst_srv_sort
+from helper import hst_srv_sort
 from shinken.util import safe_print
 try:
     import json
@@ -89,7 +88,7 @@ def get_page():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
 from shinken.misc.filter  import only_related_to
 from shinken.misc.sorter import hst_srv_sort
 
@@ -51,7 +50,7 @@ def get_view(page):
 
     user = app.get_user_auth()
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     print 'DUMP COMMON GET', app.request.GET.__dict__
 
@@ -112,7 +111,7 @@ def get_view(page):
     elif page == 'all':
         items = app.datamgr.get_all_hosts_and_services()
     else:  # WTF?!?
-        redirect("/problems")
+        app.bottle.redirect("/problems")
 
     # Filter with the user interests
     items = only_related_to(items, user)
@@ -247,7 +246,7 @@ def get_pbs_widget():
 
     user = app.get_user_auth()
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     # We want to limit the number of elements, The user will be able to increase it
     nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))
@@ -308,7 +307,7 @@ def get_last_errors_widget():
 
     user = app.get_user_auth()
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     # We want to limit the number of elements, The user will be able to increase it
     nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))

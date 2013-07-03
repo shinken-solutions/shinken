@@ -35,8 +35,6 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-from shinken.webui.bottle import redirect
-
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -47,7 +45,7 @@ def save_pref():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     key = app.request.forms.get('key', None)
@@ -65,11 +63,12 @@ def save_pref():
 
     return
 
+
 def save_common_pref():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     key = app.request.forms.get('key', None)

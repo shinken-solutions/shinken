@@ -28,8 +28,7 @@
 
 import time
 from shinken.util import safe_print
-from shinken.webui.bottle import redirect
-from shinken.modules.webui.helper import hst_srv_sort
+from helper import hst_srv_sort
 from shinken.misc.sorter import worse_first
 
 try:
@@ -53,7 +52,7 @@ def main():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
         return
 
     all_imp_impacts = app.datamgr.get_important_elements()
@@ -69,7 +68,7 @@ def impacts():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
         return
 
     # We want to limit the number of elements
@@ -97,7 +96,7 @@ def problems():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
         return
 
     # We want to limit the number of elements
@@ -127,7 +126,7 @@ def dashboard():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
         return
 
     # We want to limit the number of elements
@@ -155,7 +154,7 @@ def system_page():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
 
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
@@ -173,7 +172,7 @@ def show_log():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
 
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
@@ -195,14 +194,14 @@ def show_host(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
 
     # Ok we are in a detail page but the user ask for a specific search
     search = app.request.GET.get('global_search', None)
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/host/" + search)
+            app.bottle.redirect("/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
@@ -222,7 +221,7 @@ def show_service(hname, desc):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
 #        return {'app': app, 'elt': None, 'valid_user': False, 'user': user}
 
 
@@ -231,7 +230,7 @@ def show_service(hname, desc):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/mobile/host/" + search)
+            app.bottle.redirect("/mobile/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
@@ -290,7 +289,7 @@ def wall():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/mobile/")
+        app.bottle.redirect("/mobile/")
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)

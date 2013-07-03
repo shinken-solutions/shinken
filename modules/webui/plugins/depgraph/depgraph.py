@@ -24,7 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -46,7 +45,7 @@ def depgraph_host(name):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/depgraph/" + search)
+            app.bottle.redirect("/depgraph/" + search)
 
     h = app.datamgr.get_host(name)
     return {'app': app, 'elt': h, 'user': user, 'valid_user': True, 'loop' : loop, 'loop_time' : loop_time}
@@ -68,7 +67,7 @@ def depgraph_srv(hname, desc):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/depgraph/" + search)
+            app.bottle.redirect("/depgraph/" + search)
 
     s = app.datamgr.get_service(hname, desc)
     return {'app': app, 'elt': s, 'user': user, 'valid_user': True, 'loop' : loop, 'loop_time' : loop_time}

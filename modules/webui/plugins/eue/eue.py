@@ -31,14 +31,7 @@ import os
 import mimetypes
 import math
 
-try:
-    from shinken.webui.bottle import redirect
-    from shinken.webui.bottle import static_file
-    from shinken.webui.bottle import response
-    from shinken.webui.bottle import get, post, request    
-    from shinken.log import logger
-except ImportError:
-    print "Outside of bottle"
+from shinken.log import logger
 
 # Mongodb lib
 try:
@@ -62,7 +55,7 @@ def checkauth():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
     else:
         return user
 
@@ -302,7 +295,7 @@ def eue_media(media):
     else:
         mt = "binary/octet-stream"
 
-    response.set_header('Content-Type', mt)
+    app.bottle.response.set_header('Content-Type', mt)
 
     message,db = getdb('euemedia')
     if not db:
@@ -312,7 +305,7 @@ def eue_media(media):
 
     fh = fs.get_last_version(media)
 
-    response.set_header('Content-Length', fh.length)
+    app.bottle.response.set_header('Content-Length', fh.length)
 
     data = fh.read()
 
@@ -379,7 +372,7 @@ def eue_widget():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     wid = app.request.GET.get('wid', 'widget_system_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
 try:
     import json
 except ImportError:
@@ -45,7 +44,7 @@ def get_page():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     has_user_pref_mod = app.has_user_preference_module()
 
@@ -95,7 +94,7 @@ def get_currently():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
 

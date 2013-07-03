@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.webui.bottle import redirect
-
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -33,7 +31,7 @@ def get_page():
     # so we bail out if it's a false one
     user = app.get_user_auth()
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     # We are looking for hosts that got valid GPS coordinates,
