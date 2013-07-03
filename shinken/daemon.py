@@ -762,7 +762,7 @@ class Daemon(object):
     # Main fonction of the http daemon thread will loop forever unless we stop the root daemon
     def http_daemon_thread(self):
         logger.info("Starting HTTP daemon")
-        
+
         # The main thing is to have a pool of X concurrent requests for the http_daemon,
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish

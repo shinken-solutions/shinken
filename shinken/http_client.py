@@ -56,7 +56,9 @@ class HTTPClient(object):
             self.uri     = "http://%s:%s/" % (self.address, self.port)
         else:
             self.uri = uri
+        self.uri = self.uri.replace('http', 'https')
         self.con     = pycurl.Curl()
+        
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not
         # manage it
         self.con.setopt(pycurl.HTTPHEADER, ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive'])
@@ -64,6 +66,10 @@ class HTTPClient(object):
         self.con.setopt(pycurl.FOLLOWLOCATION, 1)
         self.con.setopt(pycurl.FAILONERROR, True)
         self.con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
+
+        # Also set the SSL options to do not look at the certificates too much
+        self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
+        self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
 
     
     # Try to get an URI path
@@ -88,7 +94,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-        c.setopt(c.VERBOSE, 0)
+        c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
         except pycurl.error, error:
@@ -134,7 +140,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-        #c.setopt(c.VERBOSE, 1)
+        c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
         except pycurl.error, error:

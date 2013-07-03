@@ -33,6 +33,11 @@ import inspect
 import json
 import zlib
 import threading
+try:
+    import ssl
+except ImportError:
+    ssl = None
+from wsgiref import simple_server
 
 from log import logger
 
@@ -48,6 +53,59 @@ class InvalidWorkDir(Exception):
 
 class PortNotFree(Exception):
     pass
+
+
+class WSGIRefServerSelect(bottle.ServerAdapter):
+    def run(self, handler):  # pragma: no cover
+        from wsgiref.simple_server import make_server, WSGIRequestHandler
+        if self.quiet:
+            class QuietHandler(WSGIRequestHandler):
+                def log_request(*args, **kw): pass
+            self.options['handler_class'] = QuietHandler
+        srv = make_server(self.host, self.port, handler, **self.options)
+        return srv
+
+
+
+class SecureServer(simple_server.WSGIServer):
+    pass
+
+
+class SecureHandler (simple_server.WSGIRequestHandler):
+    def handle (self):
+        #for part in self.connection.getpeercert()["subject"]:
+        #    print "DBG", part[0][0]
+        #    if part[0][0] == "commonName":
+        #        print "### client is %s" % part[0][1]
+        #        break
+        #else:
+        #    raise ssl.CertificateError, "no matching user"
+        simple_server.WSGIRequestHandler.handle(self)
+        
+    def get_environ( self):
+        env = simple_server.WSGIRequestHandler.get_environ( self)
+
+        if isinstance( self.request, ssl.SSLSocket):
+            env['HTTPS'] = 'on'
+        return env
+
+
+class SecureAdapter (bottle.ServerAdapter):
+    def run (self, handler):
+        srv = simple_server.make_server(self.host, self.port, handler,
+                                        server_class=SecureServer,
+                                        #handler_class=SecureHandler,
+                                        **self.options)
+        print "SOCKET?", srv.socket
+
+        print srv.__dict__
+        print srv.RequestHandlerClass.__dict__
+        print "ENVIRON"
+        
+        srv.socket = ssl.wrap_socket(srv.socket,
+                        keyfile="/tmp/ssl.key", certfile="/tmp/ssl.cert", server_side=True)
+        return srv
+
 
 
 class HTTPDaemon(object):
@@ -66,7 +124,8 @@ class HTTPDaemon(object):
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
             # And port already use now raise an exception
             try:
-                self.srv = bottle.run(host=self.host, port=self.port, server='wsgirefselect', quiet=False)
+                #self.srv = bottle.run(host=self.host, port=self.port, server=WSGIRefServerSelect, quiet=False)
+                self.srv = bottle.run(host=self.host, port=self.port, server=SecureAdapter, quiet=False)
             except socket.error, exp:
                 msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
                 raise PortNotFree(msg)
@@ -82,8 +141,7 @@ class HTTPDaemon(object):
             #    return 'FUCKING ERROR 500', str(err)
 
             
-
-
+        
         # Get the server socket but not if disabled or closed
         def get_sockets(self):
             if self.port == 0 or self.srv is None:
@@ -161,7 +219,7 @@ class HTTPDaemon(object):
 
         def handleRequests(self, s):
             self.srv.handle_request()
-
+            
             
         def create_uri(address, port, obj_name, use_ssl=False):
             return "PYRO:%s@%s:%d" % (obj_name, address, port)
