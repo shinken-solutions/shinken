@@ -198,8 +198,7 @@ class SchedulingItem(Item):
         if not self.in_checking:
             if cls.global_check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
-                    if self.last_state_update < \
-                            now - (self.freshness_threshold + cls.additional_freshness_latency):
+                    if self.last_state_update <  now - (self.freshness_threshold + cls.additional_freshness_latency):
                         # Raise a log
                         self.raise_freshness_log_entry(int(now - self.last_state_update),
                                                        int(now - self.freshness_threshold))
@@ -546,8 +545,7 @@ class SchedulingItem(Item):
             if self.next_chk <= now:
                 # maybe we do not have a check_period, if so, take always good (24x7)
                 if self.check_period:
-                    self.next_chk = \
-                        self.check_period.get_next_valid_time_from_t(self.next_chk + time_add)
+                    self.next_chk = self.check_period.get_next_valid_time_from_t(self.next_chk + time_add)
                 else:
                     self.next_chk = int(self.next_chk + time_add)
 
