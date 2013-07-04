@@ -5,15 +5,15 @@
 
 "path":"virtualization/",
 
-"templates": ["cluster", "esx", "vmware-vm", "vcenter"],
+"templates": ["vmware-cluster", "esx", "vmware-vm", "vmware-vcenter"],
 
 "macros":{
          "_CLUSTER_CPU_WARN": { "type":"percent",
                              "description":"Level for cpu usage"
-                             }
+                             },
          "_CLUSTER_CPU_CRIT": { "type":"percent",
                              "description":"Level for cpu usage"
-                             }
+                             },
          "_CLUSTER_MEM_WARN": {"type":"percent",
                              "description":"Level for ram usage"
                              },
@@ -59,8 +59,5 @@
          "_VM_MEM_CRIT": {"type":"percent",
                              "description":"Level for ram usage"
                              }
-                            
          }
-
-
 }
