@@ -175,8 +175,11 @@ class SchedulingItem(Item):
 
     # Add an attempt but cannot be more than max_check_attempts
     def add_attempt(self):
-        self.attempt += 1
-        self.attempt = min(self.attempt, self.max_check_attempts)
+        if not self.checked_by_child:
+            self.attempt += 1
+            self.attempt = min(self.attempt, self.max_check_attempts)
+        else:
+            self.checked_by_child = False
 
 
     # Return True if attempt is at max
@@ -986,8 +989,6 @@ class SchedulingItem(Item):
             self.state_type_id = 1
             self.last_hard_state = self.state
             self.last_hard_state_id = self.state_id
-            # State hard, we enable check from a child again
-            self.checked_by_child = False
         else:
             self.state_type_id = 0
 
@@ -1284,7 +1285,7 @@ class SchedulingItem(Item):
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
-        if not force and (self.in_checking and ref_check is not None) and not self.checked_by_child:
+        if not force and (self.in_checking and ref_check is not None):
             now = time.time()
             self.checked_by_child = True
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
