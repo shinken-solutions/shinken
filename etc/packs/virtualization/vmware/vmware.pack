@@ -26,12 +26,6 @@
          "_CLUSTER_HOST_CRIT": {"type":"hosts up",
                              "description":"hosts to be up in the monitored cluster"
                              },
-         "_CLUSTER_FAILOVER_WARN": {"type":"Nb of host",
-                             "description":"Number of hosts available to failover"
-                             },
-         "_CLUSTER_FAILOVER_CRIT": {"type":"Nb of host",
-                             "description":"Number of hosts available to failover"
-                             },
          "_CLUSTER_INTERVAL": {"type":"Seconds",
                              "description":"Monitored period in second. 20(default), 300, 1800, 7200 or 86400"
                              },
