@@ -108,6 +108,23 @@ class SecureAdapter (bottle.ServerAdapter):
 
 
 
+class CherryPyServer(bottle.ServerAdapter):
+    def run(self, handler):  # pragma: no cover
+        from cherrypy import wsgiserver
+        print "Launching CherryPy backend"
+        server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        server.ssl_certificate = "/tmp/ssl.cert"
+        server.ssl_private_key = "/tmp/ssl.key"
+        print dir(server)
+        print server.__dict__
+        #try:
+        #    server.start()
+        #finally:
+        #    server.stop()
+        return server
+
+
+
 class HTTPDaemon(object):
         def __init__(self, host, port, use_ssl=False):
             self.port = port
@@ -125,7 +142,8 @@ class HTTPDaemon(object):
             # And port already use now raise an exception
             try:
                 #self.srv = bottle.run(host=self.host, port=self.port, server=WSGIRefServerSelect, quiet=False)
-                self.srv = bottle.run(host=self.host, port=self.port, server=SecureAdapter, quiet=False)
+                #self.srv = bottle.run(host=self.host, port=self.port, server=SecureAdapter, quiet=False)
+                self.srv = bottle.run(host=self.host, port=self.port, server=CherryPyServer, quiet=False)
             except socket.error, exp:
                 msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
                 raise PortNotFree(msg)
@@ -146,6 +164,7 @@ class HTTPDaemon(object):
         def get_sockets(self):
             if self.port == 0 or self.srv is None:
                 return []
+            return []
             return [self.srv.socket]
 
 

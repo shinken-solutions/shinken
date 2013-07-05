@@ -802,7 +802,8 @@ class BaseRequest(DictMixin):
         convenient access methods and properties. Most of them are read-only."""
 
     #: Maximum size of memory buffer for :attr:`body` in bytes.
-    MEMFILE_MAX = 102400
+    # SHINKEN: *1000
+    MEMFILE_MAX = 1024000000
 
     def __init__(self, environ):
         """ Wrap a WSGI environ dictionary. """

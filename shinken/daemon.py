@@ -766,6 +766,8 @@ class Daemon(object):
         # The main thing is to have a pool of X concurrent requests for the http_daemon,
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish
+        print "GO FOR IT"
+        self.http_daemon.srv.start()
         
         # Ok create the thread
         nb_threads = getattr(self, 'daemon_thread_pool_size', 1)

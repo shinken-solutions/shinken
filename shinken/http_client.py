@@ -66,6 +66,8 @@ class HTTPClient(object):
         self.con.setopt(pycurl.FOLLOWLOCATION, 1)
         self.con.setopt(pycurl.FAILONERROR, True)
         self.con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
+        self.con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
+        
 
         # Also set the SSL options to do not look at the certificates too much
         self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
