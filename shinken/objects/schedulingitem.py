@@ -1283,13 +1283,31 @@ class SchedulingItem(Item):
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
+
+        # Dependency check, we have to create a new check that will be launched only once (now)
+        # Otherwise it will delay the next real check. this can lead to an infinite SOFT state.
         if not force and (self.in_checking and ref_check is not None):
-            now = time.time()
+
             self.checked_by_child = True
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
-            c_in_progress.t_to_go = now  # No, I want a check right NOW
-            c_in_progress.depend_on_me.append(ref_check)
-            return c_in_progress.id
+
+            # c_in_progress has almost everything we need but we cant copy.deepcopy() it
+            # we need another c.id
+            command_line = c_in_progress.command
+            timeout = c_in_progress.timeout
+            poller_tag = c_in_progress.poller_tag
+            env = c_in_progress.env
+            module_type = c_in_progress.module_type
+
+            c = Check('scheduled', command_line, self, t, ref_check,
+                      timeout=timeout,
+                      poller_tag=poller_tag,
+                      env=env,
+                      module_type=module_type)
+
+            self.actions.append(c)
+            #print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
+            return c.id
 
         if force or (not self.is_no_check_dependent()):
 
