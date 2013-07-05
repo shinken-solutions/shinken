@@ -61,6 +61,7 @@ class SatelliteLink(Item):
         'use_timezone':       StringProp(default='NOTSET', to_send=True),
         'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
         'satellitemap':       DictProp(default=None, elts_prop=AddrProp, to_send=True, override=True),
+        'use_ssl':            BoolProp(default='0', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -73,10 +74,10 @@ class SatelliteLink(Item):
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
         'managed_confs':        StringProp(default={}),
     })
-
+    
     def __init__(self, *args, **kwargs):
         super(SatelliteLink, self).__init__(*args, **kwargs)
-
+        
         self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
         if hasattr(self, 'address'):
             self.arb_satmap['address'] = self.address
@@ -86,6 +87,7 @@ class SatelliteLink(Item):
             except:
                 pass
 
+    
     def set_arbiter_satellitemap(self, satellitemap):
         """
             arb_satmap is the satellitemap in current context:
@@ -98,7 +100,9 @@ class SatelliteLink(Item):
 
 
     def create_connection(self):
-        self.con = HTTPClient(address=self.arb_satmap['address'], port=self.arb_satmap['port'], timeout=self.timeout, data_timeout=self.data_timeout)
+        self.con = HTTPClient(address=self.arb_satmap['address'], port=self.arb_satmap['port'],
+                              timeout=self.timeout, data_timeout=self.data_timeout, use_ssl=self.use_ssl
+                              )
         self.uri = self.con.uri
         
 

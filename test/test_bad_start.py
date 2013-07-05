@@ -93,7 +93,7 @@ class template_Daemon_Bad_Start():
         d = self.create_daemon()
 
         d.load_config_file()
-        
+        d.http_backend = 'wsgiref'
         d.port = HIGH_PORT + run  # random high port, I hope no one is using it :)
         run += 1
         self.get_login_and_group(d)

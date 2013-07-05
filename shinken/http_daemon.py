@@ -27,6 +27,7 @@ import select
 import errno
 import time
 import socket
+import select
 import copy
 import cPickle
 import inspect
@@ -37,6 +38,12 @@ try:
     import ssl
 except ImportError:
     ssl = None
+
+try:
+    from cherrypy import wsgiserver as cheery_wsgiserver
+except ImportError:
+    cheery_wsgiserver = None
+    
 from wsgiref import simple_server
 
 from log import logger
@@ -55,102 +62,174 @@ class PortNotFree(Exception):
     pass
 
 
-class WSGIRefServerSelect(bottle.ServerAdapter):
+
+
+
+# CheeryPy is allowing us to have a HTTP 1.1 server, and so have a KeepAlive
+class CherryPyServer(bottle.ServerAdapter):
     def run(self, handler):  # pragma: no cover
-        from wsgiref.simple_server import make_server, WSGIRequestHandler
+        daemon_thread_pool_size = self.options['daemon_thread_pool_size']
+        server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size)
+        logger.info('Initializing a CheeryPy backend with %d threads' % daemon_thread_pool_size)
+        use_ssl = self.options['use_ssl']
+        ca_cert = self.options['ca_cert']
+        ssl_cert = self.options['ssl_cert']
+        ssl_key = self.options['ssl_key']
+        
+        
+        if use_ssl:            
+            server.ssl_certificate = ssl_cert
+            server.ssl_private_key = ssl_key
+        return server
+
+    
+
+class CherryPyBackend(object):
+    def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+        self.port = port
+        try:
+            self.srv = bottle.run(host=host, port=port, server=CherryPyServer, quiet=False, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
+        except socket.error, exp:
+            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
+            raise PortNotFree(msg)
+        except Exception, e:
+            # must be a problem with pyro workdir:
+            raise InvalidWorkDir(e)
+
+    # When call, it do not have a socket
+    def get_sockets(self):
+        return []
+
+    # Will run and LOCK
+    def run(self):
+        try:
+            self.srv.start()
+        except socket.error, exp:
+            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
+            raise PortNotFree(msg)
+        finally:
+            self.srv.stop()
+
+
+# WSGIRef is the default HTTP server, it CAN manage HTTPS, but at a Huge cost for the client, because it's only HTTP1.0
+# so no Keep-Alive, and in HTTPS it's just a nightmare
+class WSGIREFAdapter (bottle.ServerAdapter):
+    def run (self, handler):
+        daemon_thread_pool_size = self.options['daemon_thread_pool_size']
+        from wsgiref.simple_server import WSGIRequestHandler
+        LoggerHandler = WSGIRequestHandler
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
                 def log_request(*args, **kw): pass
-            self.options['handler_class'] = QuietHandler
-        srv = make_server(self.host, self.port, handler, **self.options)
+            LoggerHandler = QuietHandler
+
+        srv = simple_server.make_server(self.host, self.port, handler, handler_class=LoggerHandler)
+        logger.info('Initializing a wsgiref backend with %d threads' % daemon_thread_pool_size)
+        use_ssl = self.options['use_ssl']
+        ca_cert = self.options['ca_cert']
+        ssl_cert = self.options['ssl_cert']
+        ssl_key = self.options['ssl_key']
+        
+        if use_ssl:
+            if not ssl:
+                logger.error("Missing python-openssl librairy, please install it to open a https backend")
+                raise Exception("Missing python-openssl librairy, please install it to open a https backend")
+            srv.socket = ssl.wrap_socket(srv.socket,
+                                         keyfile=ssl_key, certfile=ssl_cert, server_side=True)
         return srv
 
 
-
-class SecureServer(simple_server.WSGIServer):
-    pass
-
-
-class SecureHandler (simple_server.WSGIRequestHandler):
-    def handle (self):
-        #for part in self.connection.getpeercert()["subject"]:
-        #    print "DBG", part[0][0]
-        #    if part[0][0] == "commonName":
-        #        print "### client is %s" % part[0][1]
-        #        break
-        #else:
-        #    raise ssl.CertificateError, "no matching user"
-        simple_server.WSGIRequestHandler.handle(self)
-        
-    def get_environ( self):
-        env = simple_server.WSGIRequestHandler.get_environ( self)
-
-        if isinstance( self.request, ssl.SSLSocket):
-            env['HTTPS'] = 'on'
-        return env
+class WSGIREFBackend(object):
+    def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+        self.daemon_thread_pool_size = daemon_thread_pool_size
+        try:
+            self.srv = bottle.run(host=host, port=port, server=WSGIREFAdapter, quiet=False, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
+        except socket.error, exp:
+            msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
+            raise PortNotFree(msg)
+        except Exception, e:
+            # must be a problem with pyro workdir:
+            raise e
 
 
-class SecureAdapter (bottle.ServerAdapter):
-    def run (self, handler):
-        srv = simple_server.make_server(self.host, self.port, handler,
-                                        server_class=SecureServer,
-                                        #handler_class=SecureHandler,
-                                        **self.options)
-        print "SOCKET?", srv.socket
-
-        print srv.__dict__
-        print srv.RequestHandlerClass.__dict__
-        print "ENVIRON"
-        
-        srv.socket = ssl.wrap_socket(srv.socket,
-                        keyfile="/tmp/ssl.key", certfile="/tmp/ssl.cert", server_side=True)
-        return srv
+    def get_sockets(self):
+        return [self.srv.socket]
 
 
+    def get_socks_activity(self, socks, timeout):
+        try:
+            ins, _, _ = select.select(socks, [], [], timeout)
+        except select.error, e:
+            errnum, _ = e
+            if errnum == errno.EINTR:
+                return []
+            raise
+        return ins
 
-class CherryPyServer(bottle.ServerAdapter):
-    def run(self, handler):  # pragma: no cover
-        from cherrypy import wsgiserver
-        print "Launching CherryPy backend"
-        server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
-        server.ssl_certificate = "/tmp/ssl.cert"
-        server.ssl_private_key = "/tmp/ssl.key"
-        print dir(server)
-        print server.__dict__
-        #try:
-        #    server.start()
-        #finally:
-        #    server.stop()
-        return server
+
+    # Manually manage the number of threads
+    def run(self):
+        # Ok create the thread
+        nb_threads = self.daemon_thread_pool_size
+        # Keep a list of our running threads
+        threads = []
+        logger.info('Using a %d http pool size' % nb_threads)
+        while True:
+            # We must not run too much threads, so we will loop until
+            # we got at least one free slot available
+            free_slots = 0
+            while free_slots <= 0:
+                to_del = [t for t in threads if not t.is_alive()]
+                _ = [t.join() for t in to_del]
+                for t in to_del:
+                    threads.remove(t)
+                free_slots = nb_threads - len(threads)
+                if free_slots <= 0:
+                    time.sleep(0.01)
+            
+            socks = self.get_sockets()
+            # Blocking for 0.1 s max here
+            ins = self.get_socks_activity(socks, 0.1)
+            if len(ins) == 0:  # trivial case: no fd activity:
+                continue
+            # If we got activity, Go for a new thread!
+            for sock in socks:
+                if sock in ins:
+                    # GO!
+                    t = threading.Thread(None, target=self.handle_one_request_thread, name='http-request', args=(sock,))
+                    # We don't want to hang the master thread just because this one is still alive
+                    t.daemon = True
+                    t.start()
+                    threads.append(t)
+                                        
+
+    def handle_one_request_thread(self, sock):
+        self.srv.handle_request()
 
 
 
 class HTTPDaemon(object):
-        def __init__(self, host, port, use_ssl=False):
+        def __init__(self, host, port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
             self.port = port
             self.host = host
-            # Port = 0 means "I don't want pyro"
+            # Port = 0 means "I don't want HTTP server"
             if self.port == 0:
                 return
 
-            self.uri = 'http://%s:%s' % (self.host, self.port)
-            logger.info("Initializing HTTP connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
-
-
+            protocol = 'http'
+            if use_ssl:
+                protocol = 'https'
+            self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
+            logger.info("Opening HTTP socket at %s" % self.uri)
+            
             # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
-            # And port already use now raise an exception
-            try:
-                #self.srv = bottle.run(host=self.host, port=self.port, server=WSGIRefServerSelect, quiet=False)
-                #self.srv = bottle.run(host=self.host, port=self.port, server=SecureAdapter, quiet=False)
-                self.srv = bottle.run(host=self.host, port=self.port, server=CherryPyServer, quiet=False)
-            except socket.error, exp:
-                msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
-                raise PortNotFree(msg)
-            except Exception, e:
-                # must be a problem with pyro workdir:
-                raise InvalidWorkDir(e)
 
+            if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
+                self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+            else:
+                self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+            
             self.lock = threading.RLock()
 
             #@bottle.error(code=500)
@@ -164,9 +243,11 @@ class HTTPDaemon(object):
         def get_sockets(self):
             if self.port == 0 or self.srv is None:
                 return []
-            return []
-            return [self.srv.socket]
+            return self.srv.get_sockets()
 
+
+        def run(self):
+            self.srv.run()
 
 
         def register(self, obj):

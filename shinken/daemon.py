@@ -144,9 +144,9 @@ class Daemon(object):
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
         'use_ssl':       BoolProp(default='0'),
-        'certs_dir':     StringProp(default='etc/certs'),
+        'server_key':     StringProp(default='etc/certs/server.key'),
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
-        'server_cert':   StringProp(default='etc/certs/server.pem'),
+        'server_cert':   StringProp(default='etc/certs/server.cert'),
         'use_local_log': BoolProp(default='1'),
         'log_level':     LogLevelProp(default='INFO'), # TODO : fix the scheduler so we can put back WARNiING here
         'hard_ssl_name_check':    BoolProp(default='0'),
@@ -154,7 +154,8 @@ class Daemon(object):
         'daemon_enabled':BoolProp(default='1'),
         'spare':         BoolProp(default='0'),
         'max_queue_size': IntegerProp(default='0'),
-        'daemon_thread_pool_size': IntegerProp(default='1'),
+        'daemon_thread_pool_size': IntegerProp(default='8'),
+        'http_backend':  StringProp(default='auto'),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -550,26 +551,29 @@ class Daemon(object):
         else:
             ssl_conf = self.conf     # arbiter daemon..
 
+        use_ssl = ssl_conf.use_ssl
+        ca_cert = ssl_cert = ssl_key = ''
+        http_backend = self.http_backend
+
         # The SSL part
-        if ssl_conf.use_ssl:
-            # TODO: get back the ssl connexion!
-            PYROSSL_CERTDIR = os.path.abspath(str(ssl_conf.certs_dir))
-            if not os.path.exists(PYROSSL_CERTDIR):
-                logger.error('Error : the directory %s is missing for SSL certificates (certs_dir). Please fix it in your configuration' % PYROSSL_CERTDIR)
+        if use_ssl:
+            ssl_cert = os.path.abspath(str(ssl_conf.server_cert))
+            if not os.path.exists(ssl_cert):
+                logger.error('Error : the SSL certificate %s is missing (server_cert). Please fix it in your configuration' % ssl_cert)
                 sys.exit(2)
-            logger.debug("Using ssl certificate directory: %s" % PYROSSL_CERTDIR)
-            PYROSSL_CA_CERT = os.path.abspath(str(ssl_conf.ca_cert))
-            logger.debug("Using ssl ca cert file: %s" % PYROSSL_CA_CERT)
-            PYROSSL_CERT = os.path.abspath(str(ssl_conf.server_cert))
-            logger.debug("Using ssl server cert file: %s" % PYROSSL_CERT)
+            ca_cert = os.path.abspath(str(ssl_conf.ca_cert))
+            logger.info("Using ssl ca cert file: %s" % ca_cert)
+            ssl_key = os.path.abspath(str(ssl_conf.server_key))
+            if not os.path.exists(ssl_key):
+                logger.error('Error : the SSL key %s is missing (server_key). Please fix it in your configuration' % ssl_key)
+                sys.exit(2)
+            logger.info("Using ssl server cert/key files: %s/%s" % (ssl_cert, ssl_key))
 
             if ssl_conf.hard_ssl_name_check:
-                PYROSSL_POSTCONNCHECK = 1
-            else:
-                PYROSSL_POSTCONNCHECK = 0
+                logger.info("Enabling hard SSL server name verification")
 
         # Let's create the HTTPDaemon, it will be exec after
-        self.http_daemon = HTTPDaemon(self.host, self.port, ssl_conf.use_ssl)
+        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
         http_daemon.daemon_inst = self.http_daemon
 
 
@@ -767,46 +771,8 @@ class Daemon(object):
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish
         print "GO FOR IT"
-        self.http_daemon.srv.start()
+        self.http_daemon.run()
         
-        # Ok create the thread
-        nb_threads = getattr(self, 'daemon_thread_pool_size', 1)
-        # Keep a list of our running threads
-        threads = []
-        logger.info('Using a %d http pool size' % nb_threads)
-        while True:
-            # We must not run too much threads, so we will loop until
-            # we got at least one free slot available
-            free_slots = 0
-            while free_slots <= 0:
-                to_del = [t for t in threads if not t.is_alive()]
-                _ = [t.join() for t in to_del]
-                for t in to_del:
-                    threads.remove(t)
-                free_slots = nb_threads - len(threads)
-                if free_slots <= 0:
-                    time.sleep(0.01)
-            
-            socks = self.http_daemon.get_sockets()
-            # Blocking for 0.1 s max here
-            ins = self.get_socks_activity(socks, 0.1)
-            if len(ins) == 0:  # trivial case: no fd activity:
-                continue
-            # If we got activity, Go for a new thread!
-            for sock in socks:
-                if sock in ins:
-                    # GO!
-                    t = threading.Thread(None, target=self.handle_one_request_thread, name='http-request', args=(sock,))
-                    # We don't want to hang the master thread just because this one is still alive
-                    t.daemon = True
-                    t.start()
-                    threads.append(t)
-                    
-
-                    
-
-    def handle_one_request_thread(self, sock):
-        self.http_daemon.handleRequests(sock)
 
 
     # Wait up to timeout to handle the pyro daemon requests.

@@ -460,6 +460,7 @@ class Arbiter(Daemon):
         self.group = self.conf.shinken_group
         self.daemon_enabled = self.conf.daemon_enabled
         self.daemon_thread_pool_size = self.conf.daemon_thread_pool_size
+        self.http_backend = self.conf.http_backend
 
         # If the user sets a workdir, lets use it. If not, use the
         # pidfile directory

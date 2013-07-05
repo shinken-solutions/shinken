@@ -53,10 +53,13 @@ class HTTPClient(object):
         self.data_timeout = data_timeout
         
         if not uri:
-            self.uri     = "http://%s:%s/" % (self.address, self.port)
+            if use_ssl:
+                self.uri = "https://%s:%s/" % (self.address, self.port)
+            else:
+                self.uri = "http://%s:%s/" % (self.address, self.port)
         else:
             self.uri = uri
-        self.uri = self.uri.replace('http', 'https')
+        
         self.con     = pycurl.Curl()
         
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not

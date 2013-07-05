@@ -238,7 +238,7 @@ class Config(Item):
         # SHINKEN SPECIFIC
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled'        : BoolProp(default='1'), # Put to 0 to disable the arbiter to run
-        'daemon_thread_pool_size' : IntegerProp(default='1'),
+        'daemon_thread_pool_size' : IntegerProp(default='8'),
         'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
         'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
         'no_event_handlers_during_downtimes': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
@@ -260,9 +260,9 @@ class Config(Item):
         'use_ssl':               BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                                                 (BrokerLink, None), (PollerLink, None), \
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
-        'certs_dir':             StringProp(default='etc/certs'),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
-        'server_cert':           StringProp(default='etc/certs/server.pem'),
+        'server_cert':           StringProp(default='etc/certs/server.cert'),
+        'server_key':           StringProp(default='etc/certs/server.key'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format
