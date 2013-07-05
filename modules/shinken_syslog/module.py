@@ -36,7 +36,7 @@ from shinken.log import logger
 
 properties = {
     'daemons': ['broker'],
-    'type': 'syslog',
+    'type': 'shinken_syslog',
     'external': False,
     'phases': ['running'],
 }
