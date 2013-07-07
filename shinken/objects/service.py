@@ -120,6 +120,7 @@ class Service(SchedulingItem):
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
+	'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
 
         # Easy Service dep definition
         'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
@@ -1103,6 +1104,18 @@ class Services(Items):
                         h = hosts.find_by_name(s.host_name)
                         if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
+                # For some of theses attribute we not just want to
+                # have implicite inheritance but also should try
+                # to merge with the host attribute.
+                # But only if it is explicitly wanted.
+                if getattr(s, 'merge_host_contacts', '0') == '1':
+                    if prop in ('contact_groups', 'contacts') and hasattr(s, 'host_name'):
+                        h = hosts.find_by_name(s.host_name)
+                        if h is not None and hasattr(h, prop):
+                            l = getattr(s, prop, '').lstrip('+').split(',') + getattr(h, prop, '').lstrip('+').split(',')
+                            # Filter empty and doubled values
+                            attribute_list = set([x for x in l if len(x) >= 1])
+                            setattr(s, prop, ','.join(attribute_list))
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
