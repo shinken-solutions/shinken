@@ -22,7 +22,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#set -x
 
 
 
@@ -31,7 +30,7 @@
 
 export myscripts=$(readlink -f $(dirname $0))
 src=$myscripts
-. $myscripts/install.d/shinken.conf
+. "$myscripts"/install.d/shinken.conf
 
 
 function remove(){
@@ -74,6 +73,9 @@ function remove(){
         esac
     fi
 
+    # Remove sudo file used for shinken
+    rm -f /etc/sudoers.d/shinken
+
     if [ -d "$PNPPREFIX" ]
     then
         doremove="n"
@@ -104,10 +106,6 @@ function remove(){
             then
                 rm -Rf $PNPPREFIX.MK
             fi
-            cecho " > Remove sudoers configuration" green
-            sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers
-            cecho " > Remove webserver configuration" green
-            rm -f /etc/${WEBSERVER}/conf.d/zzz_check_mk.conf >> ${LOGFILE} 2>&1
             manage_service ${WEBSERVER} restart
         else
             cecho " > Aborting uninstallation of check_mk multisite" yellow
@@ -314,12 +312,7 @@ function installpkg(){
 
     if [ "$type" == "python" ]
     then
-        if [ "$CODE" = "REDHAT" -a $VERS -eq 5 ]
-        then
-            PYEI="easy_install-2.6"
-        else
-            PYEI="easy_install"
-        fi
+        PYEI="easy_install"
         $PYEI $package >> ${LOGFILE} 2>&1
         return $?
     elif [ "$type" = "pkg" ]
@@ -409,7 +402,7 @@ function prerequisites(){
             ;;
         Fedora)
             case $VERS in
-                16|17)
+                16|17|18)
                     PACKAGES=$YUMPKGS
                     QUERY="rpm -q "
                     ;;
@@ -446,31 +439,7 @@ function prerequisites(){
     export PYEI="easy_install"
     if [ "$CODE" = "REDHAT" ]
     then
-        case $VERS in
-            5)
-                if [ $SKIPPREREQUISITES -eq 1 ]
-                then
-                    cecho " > SKIPPREQUISITES enabled: won't install $RHELSETUPTOOLS " red
-                else
-                    # install setup tools for python 26
-                    export PY="python26"
-                    export PYEI="easy_install-2.6"
-                    if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
-                    then
-                        cecho " > Downloading setuptools for python 2.6" green
-                        wget $WGETPROXY $RHELSETUPTOOLS >> ${LOGFILE} 2>&1
-                        tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
-                    fi
-                    cecho " > Installing setuptools for python 2.6" green
-                    cd setuptools-$SETUPTOOLSVERS >> ${LOGFILE} 2>&1
-                    python26 setup.py install >> ${LOGFILE} 2>&1
-                fi
-                PYLIBS=$PYLIBSRHEL
-                ;;
-            6)
-                PYLIBS=$PYLIBSRHEL6
-                ;;
-        esac
+         PYLIBS=$PYLIBSRHEL6
     elif [ "$CODE" = "Fedora" ]
     then
         case $VERS in
@@ -492,7 +461,7 @@ function prerequisites(){
         module=$(echo $p | awk -F: '{print $1'})
         import=$(echo $p | awk -F: '{print $2'})
 
-        $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
+        $PY "$myscripts"/install.d/tools/checkmodule.py -m $import  >> ${LOGFILE} 2>&1
         if [ $? -eq 2 ]
         then
             if [ $SKIPPREREQUISITES -eq 1 ]
@@ -724,27 +693,6 @@ function relocate(){
         cd $TARGET
     fi
 
-    # when read hat 5 try to use python26
-    if [ "$CODE" = "REDHAT" ]
-    then
-        if [ "$VERS" = "5" ]
-        then
-            cecho " > Translating python version to python26" green
-            for fic in $(find $TARGET | grep "\.py$")
-            do
-                sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
-            done
-            # also try to translate python script without py extension
-            for fic in $(find $TARGET/bin)
-            do
-                if [ ! -z "$(file $fic | grep "python")" ]
-                then
-                    sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
-                fi
-            done
-        fi
-    fi
-
     # set some directives
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER shinken_user=$SKUSER group=$SKGROUP shinken_group=$SKGROUP"
@@ -793,18 +741,13 @@ function fix(){
     chmod -R g+w $TARGET
     chmod -R g+w $ETC
 
+    cecho " > Fix /etc/sudoers file for shinken integration" green
+    cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
+    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
     cecho " > Add Shinken entry for skonf in sudoers" green
-    cp /etc/sudoers /tmp/sudoers.shinken
-    echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /tmp/sudoers.shinken
-    visudo -c -f /tmp/sudoers.shinken >> ${LOGFILE} 2>&1
-    if [ $? -eq 0 ]
-    then
-        mv /tmp/sudoers.shinken /etc/sudoers
-        chmod 0440 /etc/sudoers
-    else
-        cecho " -> Fix sudoers skonf integration failed!" red
-        cecho " -> Look at /tmp/sudoers.shinken file to see where is the issue" red
-    fi
+    echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
+    chmod u=r,g=r,o= /etc/sudoers.d/shinken
+    [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
 }
 
 function enable_initd(){
@@ -816,9 +759,10 @@ function enable_initd(){
             enable_service shinken
             ;;
         systemd)
-            cp -f $src/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
+            cp -f  "$myscripts"/for_fedora/systemd/* ${SYSTEMDPATH}lib/systemd/system
             # Fix path to daemon in service file for systemd
             sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' ${SYSTEMDPATH}lib/systemd/system/shinken*
+            sed -i -e 's/Type=forking/&\nWorkingDirectory=\/usr\/local\/shinken\/shinken/g' ${SYSTEMDPATH}lib/systemd/system/shinken-arbiter
             cecho " > Enabling $DIST startup script" green
             enable_service shinken-arbiter
             enable_service shinken-broker
@@ -936,7 +880,7 @@ function sinstall(){
         mkdir -p $TARGET
     fi
 
-    cp -Rf $src/* $TARGET/
+    cp -Rf  "$myscripts"/* $TARGET/
 
     if [ "$TARGET" == "/" ] || [ -z "$TARGET" ]
     then
@@ -947,14 +891,14 @@ function sinstall(){
     if [ "$TARGET/etc" != "$ETC" ]
     then
         rm -Rf $TARGET/etc
-        cp -Rf $src/etc/* $ETC/
+        cp -Rf  "$myscripts"/etc/* $ETC/
     fi
 
     # We want to copy the src/share into the var
     if [ ! -d $TARGET/var/share ]
     then
 	mkdir -p $TARGET/var/share
-	cp -Rf $src/share/* $TARGET/var/share
+	cp -Rf  "$myscripts"/share/* $TARGET/var/share
     fi
 
     cleanuptarget
@@ -1188,7 +1132,7 @@ function restore(){
 function supdate(){
 
     curpath=$(pwd)
-    if [ "$src" == "$TARGET" ]
+    if [ "$myscripts" == "$TARGET" ]
     then
         cecho "You should use the source tree to update and not use the target folder!!!!!" red
         exit 2
@@ -1200,7 +1144,7 @@ function supdate(){
     backup
     remove
     get_from_git
-    cp -Rf $src $TARGET
+    cp -Rf  "$myscripts" $TARGET
     relocate
     ln -sf $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
@@ -1246,7 +1190,7 @@ function cleanconf(){
         cecho " > Files/Folders list not found" yellow
         exit 2
     else
-        for f in $(cat $myscripts/install.d/config.files)
+        for f in $(cat "$myscripts"/install.d/config.files)
         do
             cecho " > Removing $ETC/$f" green
             rm -Rf $ETC/$f
@@ -1255,9 +1199,8 @@ function cleanconf(){
 }
 
 function fixsudoers(){
-    cecho " > Fix /etc/sudoers file for shinken integration" green
-    cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
-    cat $myscripts/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
+    cecho " > Fix /etc/sudoers.d/shinken file for shinken integration" green
+    cat "$myscripts"/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers.d/shinken
 }
 
 function fixcentreondb(){
@@ -1269,7 +1212,7 @@ function fixcentreondb(){
     pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
     db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 
-    cp $myscripts/install.d/centreon.sql $TMP/centreon.sql
+    cp "$myscripts"/install.d/centreon.sql $TMP/centreon.sql
     sed -i 's#TARGET#'$TARGET'#g' $TMP/centreon.sql
     sed -i 's#CENTREON#'$db'#g' $TMP/centreon.sql
 
@@ -1409,7 +1352,7 @@ function setdaemons(){
 # mongodb
 function install_mongodb(){
     cadre "Install mongodb server" green
-    cd $myscripts
+    cd "$myscripts"
     case $CODE in
         REDHAT)
             if [ ! -f "/etc/yum.repos.d/10gen.repo" ]
@@ -1541,7 +1484,7 @@ function install_nagvis(){
         then
             cecho " > Patching links for multisite use" green
             cd $NAGVISPREFIX/etc
-            patch < $myscripts/install.d/nagvis.multisite.uri.patch >> ${LOGFILE} 2>&1
+            patch < "$myscripts"/install.d/nagvis.multisite.uri.patch >> ${LOGFILE} 2>&1
         fi
     fi
     cecho " > Restart Apache " green
@@ -1637,6 +1580,9 @@ function install_multisite(){
         movepnp=1
     fi
 
+    # Fix sudo configuration in multisite installer script
+    sed -i 's/\/etc\/sudoers/&.d\/shinken/' ./setup.sh
+
     cecho " > Install multisite" green
     ./setup.sh --yes >> ${LOGFILE} 2>&1
 
@@ -1662,7 +1608,7 @@ function install_multisite(){
 #    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
-        cp $src/install.d/multisite.mk $MKPREFIX/etc/
+        cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
@@ -1671,14 +1617,6 @@ function install_multisite(){
     chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
     chmod -R g+rwx $MKPREFIX/etc/conf.d
     $HTTPDINIT restart >> ${LOGFILE} 2>&1
-    exist=$(cat /etc/sudoers | grep "WATO")
-    if [ -z "$exist" ]
-    then
-        cecho " > Enable sudoers commands for check_mk" green
-        echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
-        echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers
-        echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
-    fi
 #    if [ $movepnp -eq 1 ]
 #    then
 #        mv $PNPPREFIX $PNPPREFIX.MK
@@ -1967,12 +1905,10 @@ function install_nconf(){
     chmod g+rwx $ETC/Default_collector
 
     cecho " > configure sudo for deployment (should not work with systemd)" green
-    if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
+    if [ -z "$(cat /etc/sudoers.d/shinken | grep shinken-arbiter)" ]
     then
-        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
-        echo "$HTTPDUSER ALL=NOPASSWD: $TARGET/bin/nagios" >> /etc/sudoers        
+        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers.d/shinken
     fi
-    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
 
     cecho " -> Create nconf user and database" green
     while true
@@ -2006,10 +1942,10 @@ function install_nconf(){
 
     cecho " > Patching nconf for shinken support" green
     cd $NCONFTARGET/include/ajax
-    patch < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
+    patch < "$myscripts"/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
 
     cecho " > Configure deployment.ini file" green
-    cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
+    cp -f "$myscripts"/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
     sed -i "s#__SHINKENTARGET__#"$TARGET"#g" $NCONFTARGET/config/deployment.ini
     sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini
     sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini
@@ -2031,11 +1967,15 @@ function install_nconf(){
     sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
 
-    cecho " > Nconf is installed, you must go to http://localhost/nconf/INSTALL.php and finalize installation" yellow
-    cecho " > Just click next button until process is done" yellow
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" yellow
+    cecho " > mysql credentials and database are:" yellow
+    cecho " --> user: nconf" yellow
+    cecho " --> password: $NCONFP" yellow
+    cecho " --> database: nconf" yellow
+    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is': $TARGET/bin/nagios" yellow
     cecho " > Hit ENTER when you are done with this step" red
     read
-    cecho " > Nconf is ready to use. Point your browser to http://localhost/nconf." yellow
+
     rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
 
 }
@@ -2109,7 +2049,7 @@ function install_notify_by_xmpp(){
 # thruk
 function install_thruk(){
     cadre "Install thruk" green
-    cd $myscripts
+    cd "$myscripts"
     case $CODE in
         REDHAT)
             if [ ! -f "/etc/yum.repos.d/consol-labs.repo" ]
@@ -2198,7 +2138,7 @@ function install_cucumber(){
         if [[ ! -f /etc/yum.repos.d/dag.repo ]]
         then
             cecho " > Enable dag repository for ffmpeg" green
-            cp $myscripts/install.d/dag.repo /etc/yum.repos.d
+            cp "$myscripts"/install.d/dag.repo /etc/yum.repos.d
             yum clean all >> ${LOGFILE} 2>&1
         fi
         cecho " > Installing eue dependencies" green
@@ -2633,7 +2573,7 @@ function install_nagios-plugins(){
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> ${LOGFILE} 2>&1
     cd nagios-plugins-$NAGPLUGVERS
     cecho " > Patching nagios-plugins" green
-    patch -p0 < $myscripts/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
+    patch -p0 < "$myscripts"/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green

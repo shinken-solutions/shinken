@@ -7,7 +7,7 @@ Welcome to the Shinken project.
 Shinken is a modern, Nagios compatible monitoring tool, written in
 Python. Its main goal is to give users a flexible architecture for
 their monitoring system that is designed to scale to large environments.
-It’s as simple as the “cloud computing” makerting slides, but here,
+It’s as simple as the “cloud computing” marketing slides, but here,
 it’s real!
 
 Shinken is backwards-compatible with the Nagios configuration standard
@@ -36,19 +36,13 @@ Mandatory Requirements
 
 `shinken` requires
 
-* `Python`__ 2.4 or higher (Python 2.6 or higher is required if you want to use the Web interface)
+* `Python`__ 2.6 or higher (2.7 will get higher performances)
 * `setuptools`__ or `distribute` Python package for installation (see below)
-* `pyro`__ Python package 3.x or 4.x (caveat: not 3.x for debian squeeze)
 * `pymongo`__ Python Package >= 2.1 for the Shinken WebUI
 * `pycurl`__ Python package for Shinken Skonf configuration pack management
 
-* `multiprocessing`__ Python package when using Python 2.4 or 2.5
-  (`multiprocessing` is already included in Python 2.6 and higher)
-
 __ http://www.python.org/download/
 __ http://pypi.python.org/pypi/setuptools/
-__ http://pypi.python.org/pypi/Pyro4
-__ http://pypi.python.org/pypi/multiprocessing/
 __ http://pypi.python.org/pypi/pymongo/
 __ http://pycurl.sourceforge.net/
 
@@ -90,24 +84,6 @@ Python
 ------
 For Python itself, the version which comes with almost all distributions
 should be okay.
-
-Pyro
-----
-Under ubuntu, you can grab the Pyro module with::
-
-  sudo apt-get install pyro
-
-Under fedora, you can grab the Pyro module with::
-
-  sudo yum install python-pyro
-
-Under other distributions, you can search for it::
-
-  yum search pyro
-
-If you do not find it, or need to install a specific version, you can install it from PyPI::
-
-  easy_install pyro
 
 
 How to install Shinken

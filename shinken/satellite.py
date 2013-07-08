@@ -47,7 +47,7 @@ except ImportError:
 from Queue import Empty
 
 if not is_android:
-    from multiprocessing import Queue, Manager, active_children, cpu_count
+    from multiprocessing import Queue, active_children, cpu_count
 else:
     from Queue import Queue
 
@@ -70,11 +70,6 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-from shinken.brok import Brok
-from shinken.check import Check
-from shinken.notification import Notification
-from shinken.eventhandler import EventHandler
-from shinken.external_command import ExternalCommand
 
 
 
@@ -103,7 +98,6 @@ class IForArbiter(Interface):
         return self.app.what_i_managed()
     what_i_managed.need_lock = False
 
-
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
@@ -127,7 +121,6 @@ class IForArbiter(Interface):
     push_broks.need_lock = False
     
 
-
     # The arbiter ask us our external commands in queue
     # Same than push_broks, we will not using Global lock here,
     # and only lock for external_commands
@@ -138,10 +131,9 @@ class IForArbiter(Interface):
         return raw
     get_external_commands.need_lock = False
 
-
     ### NB: only useful for receiver
     def got_conf(self):
-        return self.app.cur_conf != None
+        return self.app.cur_conf is not None
     got_conf.need_lock = False
 
 
@@ -188,7 +180,6 @@ class BaseSatellite(Daemon):
     """Please Add a Docstring to describe the class here"""
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
-
         super(BaseSatellite, self).__init__(name, config_file, is_daemon, \
                                                 do_replace, debug, debug_file)
         # Ours schedulers
@@ -241,8 +232,8 @@ class Satellite(BaseSatellite):
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
 
-        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, \
-                                            debug, debug_file)
+        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace,
+                                        debug, debug_file)
 
         # Keep broks so they can be eaten by a broker
         self.broks = {}
@@ -286,7 +277,6 @@ class Satellite(BaseSatellite):
             sched['con'] = None
             return
 
-
         # timeout of 120 s
         # and get the running id
         try:
@@ -300,7 +290,8 @@ class Satellite(BaseSatellite):
         # The schedulers have been restarted: it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions" % (self.name, sname))
+            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions"
+                        % (self.name, sname))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
         logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
@@ -343,7 +334,6 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
 
-
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
     def manage_returns(self):
@@ -375,7 +365,6 @@ class Satellite(BaseSatellite):
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     raise
-
 
             # We clean ONLY if the send is OK
             if send_ok:
@@ -417,7 +406,9 @@ class Satellite(BaseSatellite):
         except OSError, exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
-                logger.critical("Got an exception (%s). If you are under Linux, please check that your /dev/shm directory exists and is read-write." % (str(exp)))
+                logger.critical("Got an exception (%s). If you are under Linux, "
+                                "please check that your /dev/shm directory exists and"
+                                " is read-write." % (str(exp)))
             raise
 
         # If we are in the fork module, we do not specify a target
@@ -540,28 +531,41 @@ class Satellite(BaseSatellite):
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
-        # TODO: get a real value for a load
-        wish_worker = 1
-        # I want at least min_workers or wish_workers (the biggest)
-        # but not more than max_workers
-        while len(self.workers) < self.min_workers \
-                  or (wish_worker > len(self.workers) \
-                      and len(self.workers) < self.max_workers):
-            to_del = []
-            for mod in self.q_by_mod:
+        to_del = []
+        logger.debug("[%s] Trying to adjust worker number."
+                     " Actual number : %d, min per module : %d, max per module : %d"
+                     % (self.name, len(self.workers), self.min_workers, self.max_workers))
+
+        # I want at least min_workers by module then if I can, I add worker for load balancing
+        for mod in self.q_by_mod:
+            #At least min_workers
+            while len(self.q_by_mod[mod]) < self.min_workers:
                 try:
                     self.create_and_launch_worker(module_name=mod)
                 # Maybe this modules is not a true worker one.
                 # if so, just delete if from q_by_mod
                 except NotWorkerMod:
                     to_del.append(mod)
+            """
+            # Try to really adjust load if necessary
+            if self.get_max_q_len(mod) > self.max_q_size:
+                if len(self.q_by_mod[mod]) >= self.max_workers:
+                    logger.info("Cannot add a new %s worker, even if load is high. "
+                                "Consider changing your max_worker parameter") % mod
+                else:
+                    try:
+                        self.create_and_launch_worker(module_name=mod)
+                    # Maybe this modules is not a true worker one.
+                    # if so, just delete if from q_by_mod
+                    except NotWorkerMod:
+                        to_del.append(mod)
+            """
 
-            for mod in to_del:
-                logger.debug("[%s] The module %s is not a worker one, I remove it from the worker list" % (self.name,mod))
-                del self.q_by_mod[mod]
-
+        for mod in to_del:
+            logger.debug("[%s] The module %s is not a worker one, "
+                         "I remove it from the worker list" % (self.name, mod))
+            del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
-
 
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
@@ -610,7 +614,7 @@ class Satellite(BaseSatellite):
     # put it in the s queue (from master to slave)
     # REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
-        now = time.time()
+        #now = time.time()  #Unused
 
         # Here are the differences between a
         # poller and a reactionner:
@@ -744,8 +748,9 @@ class Satellite(BaseSatellite):
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
-                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" % \
-                        (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len()))
+                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" %
+                                (sched_id, sched['name'], mod,
+                                 i, q.qsize(), self.get_returns_queue_len()))
 
         # Before return or get new actions, see how we manage
         # old ones: are they still in queue (s)? If True, we
@@ -865,7 +870,8 @@ class Satellite(BaseSatellite):
                     already_got = True
 
             if already_got:
-                logger.info("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                logger.info("[%s] We already got the conf %d (%s)"
+                            % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
 
@@ -965,7 +971,6 @@ class Satellite(BaseSatellite):
             # And even start external ones
             self.modules_manager.start_external_instances()
 
-
             # Allocate Mortal Threads
             for _ in xrange(1, self.min_workers):
                 to_del = []
@@ -978,13 +983,15 @@ class Satellite(BaseSatellite):
                         to_del.append(mod)
 
                 for mod in to_del:
-                    logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
+                    logger.debug("The module %s is not a worker one, "
+                                 "I remove it from the worker list" % mod)
                     del self.q_by_mod[mod]
 
             # Now main loop
             self.do_mainloop()
-        except Exception, exp:
+        except Exception:
             logger.critical("I got an unrecoverable error. I have to exit")
-            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.critical("You can log a bug ticket at "
+                            "https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise

@@ -89,4 +89,5 @@ class Syslog_broker(BaseModule):
     # A log has just arrived, we send it to syslog
     def manage_log_brok(self, b):
         data = b.data
+        syslog.openlog("shinken")
         syslog.syslog(self.priority, data['log'].encode('UTF-8'))

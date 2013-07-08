@@ -5,9 +5,30 @@
 
 "path":"virtualization/",
 
-"templates": ["esx", "vmware-vm", "vcenter"],
+"templates": ["vmware-cluster", "esx", "vmware-vm", "vmware-vcenter"],
 
 "macros":{
+         "_CLUSTER_CPU_WARN": { "type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_CLUSTER_CPU_CRIT": { "type":"percent",
+                             "description":"Level for cpu usage"
+                             },
+         "_CLUSTER_MEM_WARN": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_CLUSTER_MEM_CRIT": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_CLUSTER_HOST_WARN": {"type":"hosts up",
+                             "description":"hosts to be up in the monitored cluster"
+                             },
+         "_CLUSTER_HOST_CRIT": {"type":"hosts up",
+                             "description":"hosts to be up in the monitored cluster"
+                             },
+         "_CLUSTER_INTERVAL": {"type":"Seconds",
+                             "description":"Monitored period in second. 20(default), 300, 1800, 7200 or 86400"
+                             },
          "_ESX_CPU_WARN": {"type":"percent",
                              "description":"Level for cpu usage"
                              },
@@ -33,6 +54,4 @@
                              "description":"Level for ram usage"
                              }
          }
-
-
 }

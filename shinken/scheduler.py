@@ -1466,6 +1466,10 @@ class Scheduler:
         timeout = 1.0  # For the select
 
         gogogo = time.time()
+        
+        # We must reset it if we received a new conf from the Arbiter. 
+        # Otherwise, the stat check average won't be correct
+        self.nb_check_received = 0
 
         self.load_one_min = Load(initial_value=1)
         logger.debug("First loop at %d" % time.time())
