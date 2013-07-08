@@ -846,7 +846,7 @@ class Config(Item):
         else:
             logger.info('Using the multiprocessing serialization pass')            
             t1 = time.time()
-
+            
             # We ask a manager to manage the communication with our children
             m = Manager()
             # The list will got all the strings from the children
