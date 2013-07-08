@@ -24,19 +24,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import shinken.pyro_wrapper as pyro
-Pyro = pyro.Pyro
-PYRO_VERSION = pyro.PYRO_VERSION
-
-
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
-
-# Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+from shinken.http_client import HTTPExceptions
 
 
 class ReceiverLink(SatelliteLink):
@@ -73,8 +64,10 @@ class ReceiverLink(SatelliteLink):
                 self.add_failed_check_attempt()
                 return
 
-            r = self.con.push_host_names(sched_id, hnames)
-        except Pyro_exp_pack, exp:
+            #r = self.con.push_host_names(sched_id, hnames)
+            self.con.get('ping')
+            self.con.post('push_host_names', {'sched_id':sched_id, 'hnames':hnames}, wait='long')
+        except HTTPExceptions, exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 

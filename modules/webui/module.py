@@ -41,7 +41,7 @@ import imp
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
-from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, template
+from shinken.webui.bottlewebui import Bottle, run, static_file, view, route, request, response, template
 from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
 from shinken.modulesctx import modulesctx
@@ -54,7 +54,7 @@ from shinken.misc.datamanager import datamgr
 from helper import helper
 
 # Debug
-import shinken.webui.bottle as bottle
+import shinken.webui.bottlewebui as bottle
 bottle.debug(True)
 
 # Import bottle lib to make bottle happy
@@ -140,7 +140,9 @@ class Webui_broker(BaseModule, Daemon):
         # rg will be able to skip some broks
         self.rg = Regenerator()
 
-
+        self.bottle = bottle
+    
+    
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
         print "Checking photo path", self.photo_dir

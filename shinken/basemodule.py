@@ -157,13 +157,13 @@ class BaseModule(object):
 
 
     # Start this module process if it's external. if not -> donothing
-    def start(self):
+    def start(self, http_daemon=None):
 
         if not self.is_external:
             return
         self.stop_process()
         logger.info("Starting external process for instance %s" % (self.name))
-        p = Process(target=self.main, args=())
+        p = Process(target=self._main, args=())
 
         # Under windows we should not call start() on an object that got
         # its process as object, so we remove it and we set it in a earlier
@@ -195,6 +195,7 @@ class BaseModule(object):
             if self.process.is_alive():
                 os.kill(self.process.pid, 9)
 
+
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
@@ -206,6 +207,7 @@ class BaseModule(object):
                 logger.info("The process is still alive, I help it to die")
                 self.__kill()
             self.process = None
+
 
     ## TODO: are these 2 methods really needed?
     def get_name(self):
@@ -233,8 +235,10 @@ class BaseModule(object):
             brok.prepare()
             return manage(brok)
 
+
     def manage_signal(self, sig, frame):
         self.interrupted = True
+
 
     def set_signal_handler(self, sigs=None):
         if sigs is None:
@@ -244,6 +248,7 @@ class BaseModule(object):
             signal.signal(sig, self.manage_signal)
 
     set_exit_handler = set_signal_handler
+
 
     def do_stop(self):
         """Called just before the module will exit
@@ -265,16 +270,20 @@ class BaseModule(object):
         except:
             pass
 
-    def main(self):
+    def _main(self):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
 
+        from http_daemon import daemon_inst
+        if daemon_inst:
+            daemon_inst.shutdown()
+        
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running.." % (self.name, os.getpid()))
-        while not self.interrupted:
-            self.do_loop_turn()
+        # Will block here!
+        self.main()
         self.do_stop()
         logger.info("[%s]: exiting now.." % (self.name))
 
     # TODO: apparently some modules would uses "work" as the main method??
-    work = main
+    work = _main

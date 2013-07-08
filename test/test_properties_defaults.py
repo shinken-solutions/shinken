@@ -204,9 +204,9 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
 
         # SSL part
         ('use_ssl', '0'),
-        ('certs_dir', 'etc/certs'),
+        ('server_key', 'etc/certs/server.key'),
         ('ca_cert', 'etc/certs/ca.pem'),
-        ('server_cert', 'etc/certs/server.pem'),
+        ('server_cert', 'etc/certs/server.cert'),
         ('hard_ssl_name_check', '0'),
 
         ('human_timestamp_log', '0'),
@@ -220,6 +220,9 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('webui_lock_file', 'webui.pid'),
         ('webui_port', '8080'),
         ('webui_host', '0.0.0.0'),
+        
+        ('use_multiprocesses_serializer', '0'),
+        ('daemon_thread_pool_size', '8'),
         ])
 
     def setUp(self):

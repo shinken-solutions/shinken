@@ -802,7 +802,8 @@ class BaseRequest(DictMixin):
         convenient access methods and properties. Most of them are read-only."""
 
     #: Maximum size of memory buffer for :attr:`body` in bytes.
-    MEMFILE_MAX = 102400
+    # SHINKEN: *1000
+    MEMFILE_MAX = 1024000000
 
     def __init__(self, environ):
         """ Wrap a WSGI environ dictionary. """
@@ -1917,7 +1918,6 @@ class WSGIRefServer(ServerAdapter):
 ## Shinken: add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler):  # pragma: no cover
-        print "Call the Select version"
         from wsgiref.simple_server import make_server, WSGIRequestHandler
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
@@ -2721,7 +2721,7 @@ _HTTP_STATUS_LINES = dict((k, '%d %s' % (k, v)) for (k, v) in HTTP_CODES.iterite
 ### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
 ERROR_PAGE_TEMPLATE = """
 %try:
-    %from shinken.webui.bottle import DEBUG, HTTP_CODES, request, touni
+    %from shinken.webui.bottlecore import DEBUG, HTTP_CODES, request, touni
     %status_name = HTTP_CODES.get(e.status, 'Unknown').title()
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>

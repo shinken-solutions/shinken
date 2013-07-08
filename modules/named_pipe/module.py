@@ -30,6 +30,7 @@
 import os
 import time
 import select
+import errno
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
@@ -119,7 +120,13 @@ class Named_Pipe_arbiter(BaseModule):
             if input == []:
                 time.sleep(1)
                 continue
-            inputready, outputready, exceptready = select.select(input, [], [], 1)
+            try:
+                inputready, outputready, exceptready = select.select(input, [], [], 1)
+            except select.error, e:
+                if e.args[0] == errno.EINTR:
+                    logger.info("[%s] Received exit signal. Bailing out." % self.get_name())
+                    return
+            
             for s in inputready:
                 ext_cmds = self.get()
 

@@ -27,17 +27,13 @@ import time
 import os
 import cStringIO
 import sys
-import socket
 import tempfile
 import traceback
+import json
+import cPickle
+import zlib
 from Queue import Empty
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
-
-from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
 from shinken.notification import Notification
@@ -50,11 +46,7 @@ from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
-
-# Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 class Scheduler:
@@ -144,7 +136,8 @@ class Scheduler:
         del self.waiting_results[:]
         for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks, self.brokers:
             o.clear()
-        
+
+
 
     # Load conf for future use
     # we are in_test if the data are from an arbiter object like,
@@ -728,42 +721,27 @@ class Scheduler:
 
         uri = links[id]['uri']
         try:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            socket.setdefaulttimeout(3)
-            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            links[id]['con'] = HTTPClient(uri=uri)
             con = links[id]['con']
-            socket.setdefaulttimeout(None)
-        except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not compatible with it!
-            # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
+        except HTTPExceptions, exp:
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
         try:
             # initial ping must be quick
-            pyro.set_timeout(con, 5)
-            con.ping()
-        except Pyro.errors.ProtocolError, exp:
+            con.get('ping')
+        except HTTPExceptions, exp:
             logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
-        except Pyro.errors.NamingError, exp:
-            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except KeyError, exp:
             logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-        except Pyro.errors.CommunicationError, exp:
-            logger.warning("The %s '%s' got CommunicationError: %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
 
         logger.info("Connection OK to the %s %s" % (type, links[id]['name']))
+
 
     # We should push actions to our passives satellites
     def push_actions_to_passives_satellites(self):
@@ -777,28 +755,21 @@ class Scheduler:
                 lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
+                    #pyro.set_timeout(con, 120)
                     logger.debug("Sending %s actions" % len(lst))
-                    con.push_actions(lst, self.instance_id)
+                    #con.push_actions(lst, self.instance_id)
+                    con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
-                except Pyro.errors.ProtocolError, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -813,30 +784,24 @@ class Scheduler:
                 lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
+                    #pyro.set_timeout(con, 120)
                     logger.debug("Sending %d actions" % len(lst))
-                    con.push_actions(lst, self.instance_id)
+                    #con.push_actions(lst, self.instance_id)
+                    con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
-                except Pyro.errors.ProtocolError, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
+
 
     # We should get returns from satellites
     def get_actions_from_passives_satellites(self):
@@ -848,32 +813,28 @@ class Scheduler:
             if con is not None:
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
-                    results = con.get_returns(self.instance_id)
+                    #pyro.set_timeout(con, 120)
+                    #results = con.get_returns(self.instance_id)
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
+                    results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
                     for result in results:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
-                except Pyro.errors.ProtocolError, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -885,34 +846,31 @@ class Scheduler:
             if con is not None:
                 try:
                     # initial ping must be quick
-                    pyro.set_timeout(con, 120)
-                    results = con.get_returns(self.instance_id)
+                    #pyro.set_timeout(con, 120)
+                    #results = con.get_returns(self.instance_id)
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
+                    results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
                     for result in results:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
-                except Pyro.errors.ProtocolError, exp:
+                except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
-                except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
-                    p['con'] = None
-                    return
                 # we come back to normal timeout
-                pyro.set_timeout(con, 5)
+                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
+
 
     # Some checks are purely internal, like business based one
     # simply ask their ref to manage it when it's ok to run
@@ -1593,6 +1551,9 @@ class Scheduler:
                 logger.debug('I need to dump my objects!')
                 self.dump_objects()
                 self.need_objects_dump = False
+
+        
+
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

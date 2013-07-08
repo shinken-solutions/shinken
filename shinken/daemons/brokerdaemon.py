@@ -27,29 +27,19 @@ import os
 import sys
 import time
 import traceback
-import socket
 import cPickle
-
+import base64
+import zlib
+import threading
 from multiprocessing import active_children
 from Queue import Empty
 
 from shinken.satellite import BaseSatellite
-
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids
 from shinken.log import logger
-
-import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import Pyro
-
 from shinken.external_command import ExternalCommand
-
-# Pack of common Pyro exceptions
-#Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-#                    Pyro.errors.CommunicationError, \
-#                    Pyro.errors.DaemonError, Pyro.errors.TimeoutError)
-
-from shinken.pyro_wrapper import Pyro_exp_pack
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 # Our main APP class
@@ -62,7 +52,7 @@ class Broker(BaseSatellite):
         'local_log': PathProp(default='brokerd.log'),
     })
 
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
 
         super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
 
@@ -84,8 +74,13 @@ class Broker(BaseSatellite):
         self.broks = []  # broks to manage
         # broks raised this turn and that needs to be put in self.broks
         self.broks_internal_raised = []
+        # broks raised by the arbiters, we need a lock so the push can be in parallel
+        # to our current activities and won't lock the arbiter
+        self.arbiter_broks = []
+        self.arbiter_broks_lock = threading.RLock()
 
         self.timeout = 1.0
+
 
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
@@ -138,11 +133,7 @@ class Broker(BaseSatellite):
             return t[type]
         return None
 
-    # Call by arbiter to get our external commands
-    def get_external_commands(self):
-        res = self.external_commands
-        self.external_commands = []
-        return res
+
 
     # Check if we do not connect to often to this
     def is_connection_try_too_close(self, elt):
@@ -151,6 +142,7 @@ class Broker(BaseSatellite):
         if now - last_connection < 5:
             return  True
         return False
+
 
     # initialize or re-initialize connection with scheduler or
     # arbiter if type == arbiter
@@ -181,13 +173,10 @@ class Broker(BaseSatellite):
         uri = links[id]['uri']
 
         try:
-            socket.setdefaulttimeout(3)
-            links[id]['con'] = Pyro.core.getProxyForURI(uri)
-            socket.setdefaulttimeout(None)
-        except Pyro_exp_pack, exp:
+            con = links[id]['con'] = HTTPClient(uri=uri)
+        except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            socket.setdefaulttimeout(None)
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -195,11 +184,10 @@ class Broker(BaseSatellite):
 
         try:
             # initial ping must be quick
-            pyro.set_timeout(links[id]['con'], 5)
-            links[id]['con'].ping()
-            new_run_id = links[id]['con'].get_running_id()
+            con.get('ping')
+            new_run_id = con.get('get_running_id')
+            new_run_id = float(new_run_id)
             # data transfer can be longer
-            pyro.set_timeout(links[id]['con'], 120)
 
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
@@ -210,17 +198,13 @@ class Broker(BaseSatellite):
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
-                    links[id]['con'].fill_initial_broks(self.name)
+                    con.get('fill_initial_broks', {'bname':self.name})
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except Pyro_exp_pack, exp:
+        except HTTPExceptions, exp:
             logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-#        except Pyro.errors.NamingError, exp:
-#            logger.info("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
-#            links[id]['con'] = None
-#            return
         except KeyError, exp:
             logger.info("the %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
@@ -233,8 +217,6 @@ class Broker(BaseSatellite):
     # DO NOT CHANGE data of b!!!
     # REF: doc/broker-modules.png (4-5)
     def manage_brok(self, b):
-        #logger.info("manage brok")
-
         # Call all modules if they catch the call
         for mod in self.modules_manager.get_internal_instances():
             try:
@@ -246,6 +228,7 @@ class Broker(BaseSatellite):
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
+
     # Add broks (a tab) to different queues for
     # internal and external modules
     def add_broks_to_queue(self, broks):
@@ -253,12 +236,23 @@ class Broker(BaseSatellite):
         # internal modules
         self.broks.extend(broks)
 
+
     # Each turn we get all broks from
     # self.broks_internal_raised and we put them in
     # self.broks
     def interger_internal_broks(self):
         self.add_broks_to_queue(self.broks_internal_raised)
         self.broks_internal_raised = []
+
+
+    # We will get in the broks list the broks from the arbiters,
+    # but as the arbiter_broks list can be push by arbiter without Global lock,
+    # we must protect this with he list lock
+    def interger_arbiter_broks(self):
+        with self.arbiter_broks_lock:
+            self.add_broks_to_queue(self.arbiter_broks)
+            self.arbiter_broks = []
+
 
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
@@ -273,6 +267,7 @@ class Broker(BaseSatellite):
                     self.add(o)
                 except Empty:
                     full_queue = False
+
 
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
@@ -290,7 +285,17 @@ class Broker(BaseSatellite):
                 con = links[sched_id]['con']
                 if con is not None:  # None = not initialized
                     t0 = time.time()
-                    tmp_broks = con.get_broks(self.name)
+                    # Before ask a call that can be long, do a simple ping to be sure it is alive
+                    con.get('ping')
+                    tmp_broks = con.get('get_broks', {'bname':self.name}, wait='long')
+                    try:
+                        _t = base64.b64decode(tmp_broks)
+                        _t = zlib.decompress(_t)
+                        tmp_broks = cPickle.loads(_t)
+                    except (TypeError, zlib.error, cPickle.PickleError), exp:
+                        logger.error('Cannot load broks data from %s : %s' % (links[sched_id]['name'], exp))
+                        links[sched_id]['con'] = None
+                        continue
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
@@ -303,28 +308,19 @@ class Broker(BaseSatellite):
             # Ok, con is not known, so we create it
             except KeyError, exp:
                 logger.debug("Key error for get_broks : %s" % str(exp))
-                try:
-                    logger.debug(''.join(Pyro.util.getPyroTraceback(exp)))
-                except:
-                    pass
                 self.pynag_con_init(sched_id, type=type)
-            except Pyro.errors.ProtocolError, exp:
+            except HTTPExceptions, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError, exp:
                 logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             # scheduler must not have checks
-            except Pyro.errors.NamingError, exp:
-                logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
-            except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
-                logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
-                links[sched_id]['con'] = None
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
             except Exception, x:
                 logger.error(str(x))
-                logger.error(''.join(Pyro.util.getPyroTraceback(x)))
+                logger.error(traceback.format_exc())
                 sys.exit(1)
 
 
@@ -390,7 +386,7 @@ class Broker(BaseSatellite):
             if s['name'] in g_conf['satellitemap']:
                 s = dict(s)  # make a copy
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
             self.schedulers[sched_id]['uri'] = uri
 
             self.schedulers[sched_id]['broks'] = broks
@@ -416,7 +412,7 @@ class Broker(BaseSatellite):
             if a['name'] in g_conf['satellitemap']:
                 a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
-            uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (a['address'], a['port'])
             self.arbiters[arb_id]['uri'] = uri
 
             self.arbiters[arb_id]['broks'] = broks
@@ -445,7 +441,7 @@ class Broker(BaseSatellite):
             if p['name'] in g_conf['satellitemap']:
                 p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
-            uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
 
             self.pollers[pol_id]['broks'] = broks
@@ -476,7 +472,7 @@ class Broker(BaseSatellite):
             if r['name'] in g_conf['satellitemap']:
                 r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
-            uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
+            uri = 'http://%s:%s/' % (r['address'], r['port'])
             self.reactionners[rea_id]['uri'] = uri
 
             self.reactionners[rea_id]['broks'] = broks
@@ -528,11 +524,14 @@ class Broker(BaseSatellite):
         self.reactionners.clear()
         self.broks = self.broks[:]
         self.broks_internal_raised = self.broks_internal_raised[:]
+        with self.arbiter_broks_lock:
+            self.arbiter_broks = self.arbiter_broks[:]
         self.external_commands = self.external_commands[:]
 
         # And now modules
         self.have_modules = False
         self.modules_manager.clear_instances()
+
 
     def do_loop_turn(self):
         logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
@@ -572,7 +571,9 @@ class Broker(BaseSatellite):
         # Maybe the last loop we raised some broks internally
         # we should integrate them in broks
         self.interger_internal_broks()
-
+        # Also reap broks sent from the arbiters
+        self.interger_arbiter_broks()
+        
         # And from schedulers
         self.get_new_broks(type='scheduler')
         # And for other satellites
@@ -661,7 +662,7 @@ class Broker(BaseSatellite):
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             
-            self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf

@@ -33,7 +33,9 @@ class Check(Action):
     """ ODO: Add some comment about this class for the doc"""
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
+
+    ###FIXME : reenable AutoSlots if possible
+    #__metaclass__ = AutoSlots
 
     my_type = 'check'
 

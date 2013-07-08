@@ -32,22 +32,12 @@ from multiprocessing import active_children
 from Queue import Empty
 
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
-
-Pyro = pyro.Pyro
-PYRO_VERSION = pyro.PYRO_VERSION
-
-from shinken.pyro_wrapper import Pyro_exp_pack
-
 from shinken.satellite import Satellite
-
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 
 from shinken.external_command import ExternalCommand, ExternalCommandManager
+from shinken.http_client import HTTPClient, HTTPExceptions
 
 
 # Our main APP class
@@ -104,13 +94,6 @@ class Receiver(Satellite):
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
             self.unprocessed_external_commands.append(elt)
-
-
-    # Call by arbiter to get our external commands
-    def get_external_commands(self):
-        res = self.external_commands
-        self.external_commands = []
-        return res
 
 
     def push_host_names(self, sched_id, hnames):
@@ -207,7 +190,7 @@ class Receiver(Satellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'ForArbiter', self.use_ssl)
+            uri = 'http://%s:%s/' % (s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
@@ -288,25 +271,18 @@ class Receiver(Satellite):
             if len(cmds) > 0 and con:
                 logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))
                 try:
-                    con.run_external_commands(cmds)
+                    #con.run_external_commands(cmds)
+                    con.post('run_external_commands', {'cmds':cmds})
                     sent = True
                 # Not connected or sched is gone
-                except (Pyro_exp_pack, KeyError), exp:
+                except (HTTPExceptions, KeyError), exp:
                     logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
-                    try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
                     logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
-                    try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
-                    except:
-                        pass
                     raise
 
             # If we sent or not the commands, just clean the scheduler list.
@@ -410,7 +386,7 @@ class Receiver(Satellite):
 
             self.load_modules_manager()
 
-            self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf

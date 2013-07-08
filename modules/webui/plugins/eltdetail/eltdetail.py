@@ -27,7 +27,6 @@ app = None
 
 import time
 
-from shinken.webui.bottle import redirect
 from shinken.util import safe_print
 
 
@@ -39,14 +38,14 @@ def show_host(name):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 
     # Ok we are in a detail page but the user ask for a specific search
     search = app.request.GET.get('global_search', None)
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/host/" + search)
+            app.bottle.redirect("/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
@@ -66,7 +65,7 @@ def show_service(hname, desc):
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
 #        return {'app': app, 'elt': None, 'valid_user': False, 'user': user}
 
 
@@ -75,7 +74,7 @@ def show_service(hname, desc):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/host/" + search)
+            app.bottle.redirect("/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())

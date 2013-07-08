@@ -35,8 +35,6 @@ except ImportError:
         raise
 
 
-from shinken.webui.bottle import redirect
-
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -49,7 +47,7 @@ def get_page():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
 
     return {'app': app, 'user': user}
@@ -60,7 +58,7 @@ def get_json():
     
     user = app.get_user_auth()
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         return
     
 

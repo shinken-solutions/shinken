@@ -159,7 +159,7 @@ globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 20
 
 #Now check if the run looks good with var in the direct directory
 check_good_run var var var
@@ -225,8 +225,8 @@ sudo /etc/init.d/shinken-broker -d start
 sudo /etc/init.d/shinken-receiver -d start
 sudo /etc/init.d/shinken-arbiter -d start
 
-echo "We will sleep again 5sec so every one is quite stable...."
-sleep 10
+echo "We will sleep again 15sec so every one is quite stable...."
+sleep 20
 check_good_run /var/lib/shinken /var/run/shinken /var/log/shinken
 
 sudo /etc/init.d/shinken-arbiter status
@@ -276,7 +276,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-ha-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 30
 
 # The number of process changed, we mush look for it
 
@@ -308,13 +308,11 @@ echo "All launch of HA daemons is OK"
 bin/stop_scheduler.sh
 
 # We sleep to be sruethe scheduler see us
-sleep 15
+sleep 60
 NB_SCHEDULERS=2
 print_date
 
 
-# First we look is the arbiter saw the scheduler as dead
-string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
 # Then we look if the scheduler-spare got a conf from arbiter (here, view from the arbiter)
 string_in_file "Dispatch OK of conf in scheduler scheduler-Spare" $VAR/nagios.log
 
@@ -326,7 +324,7 @@ echo "Now stop the poller-Master"
 # Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
 bin/stop_poller.sh
 # check_good_run var
-sleep 10
+sleep 60
 print_date
 
 # The master should be look dead
@@ -341,7 +339,7 @@ string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $
 echo "Now stop the reactionner"
 bin/stop_reactionner.sh
 # check_good_run var
-sleep 10
+sleep 60
 print_date
 
 # The master should be look dead
@@ -356,7 +354,7 @@ string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spa
 echo "Now we stop... the Broker!"
 bin/stop_broker.sh
 # check_good_run var
-sleep 10
+sleep 60
 print_date
 
 # The master should be look dead
@@ -377,7 +375,7 @@ echo "Now we stop... the Arbiter!"
 > $VAR/nagios.log
 
 bin/stop_arbiter.sh
-sleep 30
+sleep 70
 
 echo "OK AND NOW?"
 string_in_file "Arbiter Master is dead. The arbiter Arbiter-spare take the lead"  $VAR/nagios.log
@@ -405,7 +403,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-lb-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 60
 
 # The number of process changed, we mush look for it
 
@@ -443,7 +441,9 @@ POLLER1_PID=`ps -fu shinken | grep poller | grep -v test_stack2 | grep -v grep |
 kill $POLLER1_PID
 
 echo "sleep some few seconds to see the arbiter react"
-sleep 5
+sleep 20
+
+date +%s
 # And we look if the arbiter find that the other poller do not need another configuration send
 string_in_file "Skipping configuration 0 send to the poller poller-Master-2: it already got it" $VAR/nagios.log
 
@@ -463,15 +463,15 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-bcl.cfg
 test/bin/launch_all_debug7.sh
-globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-cbl.cfg
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-bcl.cfg
 
 
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 30
 
 # The number of process changed, we mush look for it
 
@@ -528,7 +528,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-po
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 60
 
 # The number of process changed, we mush look for it
 
@@ -587,7 +587,7 @@ globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 60
 
 # The number of process changed, we mush look for it
 
@@ -617,15 +617,16 @@ string_in_file "OK, no more broker sent need" $VAR/nagios.log
 # We clean the log and restart teh scheduler
 bin/stop_scheduler.sh
 > $VAR/nagios.log
-sleep 3
+sleep 20
 bin/launch_scheduler_debug.sh
-sleep 120
+sleep 180
 
 
 
 string_in_file "Warning : Scheduler scheduler-1 did not managed its configuration 0,I am not happy." $VAR/nagios.log
+string_in_file "The receiver receiver-1 manage a unmanaged configuration" $VAR/nagios.log
 string_in_file "Dispatch OK of conf in scheduler scheduler-1" $VAR/nagios.log
-string_in_file "We already got the conf 0 (scheduler-1)" $VAR/nagios.log
+string_in_file "Dispatch OK of configuration 0 to poller poller-1" $VAR/nagios.log
 
 echo "Now we clean it"
 ./clean.sh
@@ -647,7 +648,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-ar
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 60
 
 # The number of process changed, we mush look for it
 
@@ -706,7 +707,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-receiver-d
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 10
+sleep 60
 
 # The number of process changed, we mush look for it
 
@@ -746,7 +747,7 @@ printf "[111] PROCESS_SERVICE_CHECK_RESULT;localhost;LocalDisks;2;Oh yes\n" > $C
 printf "[111] PROCESS_HOST_CHECK_RESULT;localhost;2;Oh yes\n" > $CMD_FILE
 
 
-sleep 30
+sleep 20
 
 string_in_file "Dispatch OK of configuration 0 to poller newpoller"   $VAR/nagios.log
 string_in_file "PASSIVE HOST CHECK: localhost;2;Oh yes"   $VAR/nagios.log
@@ -755,7 +756,7 @@ string_in_file "PASSIVE HOST CHECK: localhost;2;Oh yes"   $VAR/nagios.log
 echo "STOPPING MASTER SCHEDULER"
 bin/stop_scheduler.sh
 
-sleep 10
+sleep 20
 
 date +%s
 #Check if slave scheduler is ok

@@ -28,4 +28,4 @@ ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/broker.debug"
 
 echo "Launching Broker (which exports all data) in debug mode to the file $DEBUG_PATH"
-"$BIN"/shinken-broker -d -c "$ETC"/brokerd.ini --debug "$DEBUG_PATH"
+"$BIN"/shinken-broker -d -c "$ETC"/brokerd.ini --debug "$DEBUG_PATH" --profile /tmp/broker.profile

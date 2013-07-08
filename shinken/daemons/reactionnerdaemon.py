@@ -52,5 +52,5 @@ class Reactionner(Satellite):
         'local_log': PathProp(default='reactionnerd.log'),
     })
 
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
         super(Reactionner, self).__init__('reactionner', config_file, is_daemon, do_replace, debug, debug_file)

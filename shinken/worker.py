@@ -64,7 +64,7 @@ class Worker:
     _timeout = None
     _c = None
 
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None, loaded_into='unknown'):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None, loaded_into='unknown', http_daemon=None):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -83,6 +83,7 @@ class Worker:
         self.i_am_dying = False
         # Keep a trace where the worker is launch from (poller or reactionner?)
         self.loaded_into = loaded_into
+        self.http_daemon = http_daemon
         
 
     def is_mortal(self):
@@ -237,6 +238,10 @@ class Worker:
             signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
         self.set_proctitle()
+
+        print "I STOP THE http_daemon", self.http_daemon
+        if self.http_daemon:
+            self.http_daemon.shutdown()
 
         timeout = 1.0
         self.checks = []

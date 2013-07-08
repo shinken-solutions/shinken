@@ -232,13 +232,17 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die
             time.sleep(2)
+            # (try to) clean before exit
+            self.do_stop()
             raise
+
 
     # A plugin send us en external command. We just put it
     # in the good queue
     def push_external_command(self, e):
         logger.info("[Livestatus Broker] Got an external command: %s" % str(e.__dict__))
         self.from_q.put(e)
+
 
     # Real main function
     def do_main(self):
@@ -280,6 +284,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.lql_thread.join()
         else:
             self.manage_lql_thread()
+
 
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
@@ -331,6 +336,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     def load_plugins(self):
         pass
 
+
     # It will say if we can launch a page rendering or not.
     # We can only if there is no writer running from now
     def wait_for_no_writers(self):
@@ -347,6 +353,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             # Before checking again, we should wait a bit
             # like 1ms
             time.sleep(0.001)
+
 
     # It will say if we can launch a brok management or not
     # We can only if there is no readers running from now
@@ -371,6 +378,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                 logger.warning("[Livestatus Broker] WARNING: we are in lock/read since more than 30s!")
                 start = time.time()
 
+
     def manage_brok(self, brok):
         """We use this method mostly for the unit tests"""
         brok.prepare()
@@ -385,6 +393,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
+
     def do_stop(self):
         logger.info("[Livestatus Broker] So I quit")
         for s in self.input:
@@ -398,6 +407,8 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.db.close()
         except:
             pass
+
+
 
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing

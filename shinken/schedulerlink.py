@@ -25,10 +25,6 @@
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
-
-from shinken.pyro_wrapper import Pyro
-from shinken.pyro_wrapper import PYRO_VERSION
-
 from shinken.log  import logger
 
 
@@ -66,39 +62,20 @@ class SchedulerLink(SatelliteLink):
             return None
         logger.debug("[SchedulerLink] Sending %d commands" % len(commands))
         try:
-            self.con.run_external_commands(commands)
-        except Pyro.errors.URIError, exp:
+            self.con.post('run_external_commands', {'commands' : commands})
+        except HTTPExceptions, exp:
             self.con = None
-            return False
-        except Pyro.errors.ProtocolError, exp:
-            self.con = None
-            return False
-        except TypeError, exp:
-            try:
-                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
-            except:
-                pass
-
             logger.debug(exp)
-        except Pyro.errors.CommunicationError, exp:
-            self.con = None
-            return False
-        except Exception, exp:
-            try:
-                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
-            except:
-                pass
-
-            logger.debug(exp)
-            self.con = None
             return False
 
     def register_to_my_realm(self):
         self.realm.schedulers.append(self)
 
+
     def give_satellite_cfg(self):
         return {'port': self.port, 'address': self.address, 'name': self.scheduler_name, 'instance_id': self.id, 'active': self.conf is not None,
                 'push_flavor': self.push_flavor}
+
 
     # Some parameters can give as 'overridden parameters' like use_timezone
     # so they will be mixed (in the scheduler) with the standard conf sent by the arbiter

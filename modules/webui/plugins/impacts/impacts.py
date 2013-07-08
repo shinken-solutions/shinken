@@ -25,7 +25,6 @@
 import time
 
 from shinken.util import safe_print
-from shinken.webui.bottle import redirect
 
 # Global value that will be changed by the main app
 app = None
@@ -53,7 +52,7 @@ def show_impacts():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
+        app.bottle.redirect("/user/login")
         #return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
 
     all_imp_impacts = app.datamgr.get_important_elements()
