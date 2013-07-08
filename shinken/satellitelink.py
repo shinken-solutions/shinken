@@ -213,11 +213,11 @@ class SatelliteLink(Item):
         self.managed_confs[cfg_id] = push_flavor
 
     def ping(self):
-        logger.info("Pinging %s" % self.get_name())
+        logger.debug("Pinging %s" % self.get_name())
         try:
             if self.con is None:
                 self.create_connection()
-            logger.info(" (%s)" % (self.uri))
+            logger.debug(" (%s)" % (self.uri))
 
             # If the connection failed to initialize, bail out
             if self.con is None:
