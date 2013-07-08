@@ -65,12 +65,12 @@ class PortNotFree(Exception):
 
 
 
-# CheeryPy is allowing us to have a HTTP 1.1 server, and so have a KeepAlive
+# CherryPy is allowing us to have a HTTP 1.1 server, and so have a KeepAlive
 class CherryPyServer(bottle.ServerAdapter):
     def run(self, handler):  # pragma: no cover
         daemon_thread_pool_size = self.options['daemon_thread_pool_size']
         server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size)
-        logger.info('Initializing a CheeryPy backend with %d threads' % daemon_thread_pool_size)
+        logger.info('Initializing a CherryPy backend with %d threads' % daemon_thread_pool_size)
         use_ssl = self.options['use_ssl']
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
