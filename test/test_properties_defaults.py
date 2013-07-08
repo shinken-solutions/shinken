@@ -222,7 +222,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('webui_host', '0.0.0.0'),
         
         ('use_multiprocesses_serializer', '0'),
-        ('daemon_thread_pool_size', '1'),
+        ('daemon_thread_pool_size', '8'),
         ])
 
     def setUp(self):
