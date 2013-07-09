@@ -531,6 +531,7 @@ class Daemon(object):
             def close_http_daemon(daemon):
                 daemon.shutdown()
             self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
 
         # Now start the http_daemon thread
