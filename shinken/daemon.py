@@ -33,6 +33,7 @@ import random
 import ConfigParser
 import json
 import threading
+import inspect
 
 # Try to see if we are in an android device or not
 is_android = True
@@ -530,7 +531,15 @@ class Daemon(object):
             self.manager = SyncManager()
             def close_http_daemon(daemon):
                 daemon.shutdown()
-            self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            # Some multiprocessing lib got problems with start() that cannot take args
+            # so we must look at it before
+            startargs = inspect.getargspec(self.manager.start)
+            # startargs[0] will be ['self'] if old multiprocessing lib
+            # and ['self', 'initializer', 'initargs'] in newer ones
+            if len(startargs[0]) > 1:
+                self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            else:
+                logger.warning('Your multiprocessing librairy seems too old or strange, please use a vanilla python version isntead')
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
 
