@@ -258,7 +258,7 @@ class build_config(Command):
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('updating path in %s: to "%s"' % (outname, self.var_path))
+            log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
@@ -267,6 +267,7 @@ group=%s
 workdir=%s
 pidfile=%s/%sd.pid
 """ % (self.owner, self.group, self.var_path, self.run_path, dname))
+            
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -426,6 +427,7 @@ def append_file_with(infilename, outfilename, append_string):
     ensure_dir_exist(outfilename)
     f = open(outfilename, "w")
     f.write(buf)
+    f.write('\n')
     f.write(append_string)
     f.close()
 
@@ -525,7 +527,8 @@ config_objects_file_extended = list(config_objects_file)
 
 
 all_etc_files = []
-for p in ['packs', 'arbiters', 'brokers', 'daemons', 'modules',
+# Do not put daemons in this list, because it will override other modification
+for p in ['packs', 'arbiters', 'brokers', 'modules',
           'pollers', 'reactionners', 'realms', 'receivers', 'schedulers']:
     # Get all files in this dir
     _files = gen_data_files('etc/%s' % p)
@@ -549,15 +552,15 @@ config_objects_file = tuple(config_objects_file_extended)
 print config_objects_file
 
 # daemon configs
-daemon_ini_files = (('broker', 'brokerd.ini'),
+daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
-                    ('receiver', 'receiverd.ini'),
+                    ('receiver', 'daemons/receiverd.ini'),
                     ('receiver', 'receiverd-windows.ini'),
-                    ('poller', 'pollerd.ini'),
+                    ('poller', 'daemons/pollerd.ini'),
                     ('poller', 'pollerd-windows.ini'),
-                    ('reactionner', 'reactionnerd.ini'),
+                    ('reactionner', 'daemons/reactionnerd.ini'),
                     ('reactionner', 'reactionnerd-windows.ini'),
-                    ('scheduler', 'schedulerd.ini'),
+                    ('scheduler', 'daemons/schedulerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
 

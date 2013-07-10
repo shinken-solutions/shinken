@@ -61,7 +61,7 @@ ARBITERDEBUGFILE="$LOG/arbiter-debug.log"
 
 ### SCHEDULER PART ###
 # location of the scheduler daemon configuration
-SCHEDULERCFG="$ETC/schedulerd.ini"
+SCHEDULERCFG="$ETC/daemons/schedulerd.ini"
 
 # The command to launch
 SCHEDULERDAEMON=$BIN/shinken-scheduler
@@ -74,7 +74,7 @@ SCHEDULERDEBUGFILE="$LOG/scheduler-debug.log"
 
 ### POLLER PART ###
 # location of the poller daemon configuration
-POLLERCFG="$ETC/pollerd.ini"
+POLLERCFG="$ETC/daemons/pollerd.ini"
 
 # The command to launch
 POLLERDAEMON=$BIN/shinken-poller
@@ -87,7 +87,7 @@ POLLERDEBUGFILE="$LOG/poller-debug.log"
 
 ### REACTIONNER PART ###
 # location of the reactionner daemon configuration
-REACTIONNERCFG="$ETC/reactionnerd.ini"
+REACTIONNERCFG="$ETC/daemons/reactionnerd.ini"
 
 # The command to launch
 REACTIONNERDAEMON=$BIN/shinken-reactionner
@@ -100,7 +100,7 @@ REACTIONNERDEBUGFILE="$LOG/reactionner-debug.log"
 
 ### BROKER PART ###
 # location of the broker daemon configuration
-BROKERCFG="$ETC/brokerd.ini"
+BROKERCFG="$ETC/daemons/brokerd.ini"
 
 # The command to launch
 BROKERDAEMON=$BIN/shinken-broker
@@ -113,7 +113,7 @@ BROKERDEBUGFILE="$LOG/broker-debug.log"
 
 ### RECEIVER PART ###
 # location of the broker receiver configuration
-RECEIVERCFG="$ETC/receiverd.ini"
+RECEIVERCFG="$ETC/daemons/receiverd.ini"
 
 # The command to launch
 RECEIVERDAEMON=$BIN/shinken-receiver

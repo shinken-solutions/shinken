@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Launching Broker (which exports all data)"
-"$BIN"/shinken-broker -d -c "$ETC"/brokerd.ini
+"$BIN"/shinken-broker -d -c "$ETC"/daemons/brokerd.ini

@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Launching Poller (which launches checks)"
-"$BIN"/shinken-poller -d -c "$ETC"/pollerd.ini
+"$BIN"/shinken-poller -d -c "$ETC"/daemons/pollerd.ini

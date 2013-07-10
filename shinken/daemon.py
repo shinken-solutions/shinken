@@ -307,6 +307,7 @@ class Daemon(object):
 
 
     def change_to_workdir(self):
+        self.workdir = os.path.abspath(self.workdir)
         try:
             os.chdir(self.workdir)
         except Exception, e:

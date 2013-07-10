@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Launching Receiver (which manages passive data)"
-"$BIN"/shinken-receiver -d -c "$ETC"/receiverd.ini
+"$BIN"/shinken-receiver -d -c "$ETC"/daemons/receiverd.ini
