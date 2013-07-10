@@ -73,6 +73,52 @@ def safe_print(*args):
     # Ok, now print it :)
     print u' '.join(l)
 
+def split_semicolon(line, maxsplit=None):
+    """Split a line on semicolons characters but not
+       on the escaped semicolons
+    """
+    # Split on ';' character
+    splitted_line = line.split(';')
+
+
+    splitted_line_size = len(splitted_line)
+
+    # if maxsplit is not specified, we set it to the maximum
+    if maxsplit is None:
+        maxsplit = splitted_line_size
+
+
+    # Join parts  to the next one, if ends with a '\'
+    # because we mustn't split if the semicolon is escaped
+    i = 0
+    while i < splitted_line_size:
+
+        # for each part, check if its ends with a '\'
+        ends = splitted_line[i].endswith('\\')
+
+        if ends:
+            # remove the last character '\'
+            splitted_line[i] = splitted_line[i][:-1]
+
+        # append the next part to the current if it is not the last and the current
+        # ends with '\' or if there is more than maxsplit parts
+        if (ends or i>=maxsplit) and i < splitted_line_size-1:
+
+            splitted_line[i] = ";".join([splitted_line[i], splitted_line[i+1]])
+
+            # delete the next part
+            del splitted_line[i+1]
+            splitted_line_size -= 1
+
+
+        # increase i only if we don't have append because after append the new
+        # string can end with '\'
+        else:
+            i += 1
+
+
+    return splitted_line
+
 
 ################################### TIME ##################################
 # @memoized
