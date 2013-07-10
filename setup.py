@@ -29,8 +29,8 @@ try:
     python_version = sys.version_info
 except:
     python_version = (1, 5)
-if python_version < (2, 4):
-    sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
+if python_version < (2, 6):
+    sys.exit("Shinken require as a minimum Python 2.6.x, sorry")
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
@@ -116,6 +116,7 @@ class install(_install):
         ),
     ]
 
+
     def initialize_options(self):
         _install.initialize_options(self)
         self.etc_path = None
@@ -125,6 +126,7 @@ class install(_install):
         self.plugins_path = None
         self.owner = None
         self.group = None
+
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -142,6 +144,7 @@ class install(_install):
             self.owner = DEFAULT_OWNER
         if self.group is None:
             self.group = DEFAULT_GROUP
+
 
 class build_config(Command):
     description = "build the shinken config files"
@@ -275,7 +278,7 @@ pidfile=%s/%sd.pid
                                     "/usr/local/shinken/libexec",
                                     self.plugins_path)
 
-        # And update the nagios.cfg file for all /usr/local/shinken/var
+        # And update the shinken.cfg file for all /usr/local/shinken/var
         # value with good one
         for name in main_config_files:
             inname = os.path.join('etc', name)
@@ -301,8 +304,8 @@ local_log=%s/arbiterd.log
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "nagios.log",
-                                    "%s/nagios.log" % self.log_path)
+                                    "shinken.log",
+                                    "%s/shinken.log" % self.log_path)
 
 
 class install_config(Command):
@@ -485,7 +488,7 @@ etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
-main_config_files = ('nagios.cfg',
+main_config_files = ('shinken.cfg',
                      'nagios-windows.cfg')
 
 additionnal_config_files = ('shinken-specific.cfg',
@@ -516,13 +519,32 @@ config_objects_file = (
                         'certs/ca.pem',
 )
 
-# Now service packs files
-srv_pack_files = gen_data_files('etc/packs')
-# We must remove the etc from the paths
-srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+
 #print "SRV PACK FILES", srv_pack_files
 config_objects_file_extended = list(config_objects_file)
-config_objects_file_extended.extend(srv_pack_files)
+
+
+all_etc_files = []
+for p in ['packs', 'arbiters', 'brokers', 'daemons', 'modules',
+          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers']:
+    # Get all files in this dir
+    _files = gen_data_files('etc/%s' % p)
+    # We must remove the etc from the paths
+    _files = [s.replace('etc/', '') for s in _files]
+    # Declare them in your global lsit now
+    config_objects_file_extended.extend(_files)
+
+# Now service packs files
+#srv_pack_files = gen_data_files('etc/packs')
+
+#srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+# Now service packs files
+#srv_pack_files = gen_data_files('etc/packs')
+# We must remove the etc from the paths
+#srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+
+#config_objects_file_extended.extend(srv_pack_files)
+# Setup ins waiting for a tuple....
 config_objects_file = tuple(config_objects_file_extended)
 print config_objects_file
 

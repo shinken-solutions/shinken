@@ -222,6 +222,11 @@ class Daemon(object):
             self.modules_manager.stop_all()
             print('Stopping inter-process message')
         if self.http_daemon:
+            # Release the lock so the daemon can shutdown without problem
+            try:
+                self.http_daemon.lock.release()
+            except:
+                pass
             self.http_daemon.shutdown()
         logger.quit()
 

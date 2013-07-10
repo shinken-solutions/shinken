@@ -164,7 +164,7 @@ fi
 # Now look if some required variables are pre defined:
 if ! test "$SHINKENCFG"
 then
-    SHINKENCFG="$ETC/nagios.cfg"
+    SHINKENCFG="$ETC/shinken.cfg"
 fi
 
 # If var or run dir is missing, create them and chown them
@@ -282,7 +282,7 @@ do_start() {
         return 5
     }
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
-    # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
+    # Skonf need skonf.cfg, arbiter shinken.cfg, and the other OTHERd.ini
     if [ "$mod" = 'skonf' ]; then
 	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
         rc=$?
@@ -380,7 +380,7 @@ do_stop() {
 #
 do_check() {
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
-    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+    "$BIN/shinken-arbiter" -v -c "$ETC/shinken.cfg" $DEBUGCMD 2>&1
     return $?
 }
 

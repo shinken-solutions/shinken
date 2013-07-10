@@ -31,4 +31,4 @@ ETC="$DIR"/../etc
 cd "$DIR/../var"
 
 echo "Launching Arbiter (which reads configuration and dispatches it)"
-"$BIN"/shinken-arbiter -d -c "$ETC"/nagios.cfg -c "$ETC"/shinken-specific.cfg
+"$BIN"/shinken-arbiter -d -c "$ETC"/shinken.cfg
