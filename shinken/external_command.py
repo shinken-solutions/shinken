@@ -26,7 +26,7 @@
 import os
 import time
 
-from shinken.util import to_int, to_bool
+from shinken.util import to_int, to_bool, split_semicolon
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
@@ -392,7 +392,7 @@ class ExternalCommandManager:
     def get_command_and_args(self, command, extcmd=None):
         #safe_print("Trying to resolve", command)
         command = command.rstrip()
-        elts = command.split(';')  # danger!!! passive checkresults with perfdata
+        elts = split_semicolon(command)  # danger!!! passive checkresults with perfdata
         part1 = elts[0]
 
         elts2 = part1.split(' ')
@@ -434,7 +434,7 @@ class ExternalCommandManager:
         numargs = len(entry['args'])
         if numargs and 'service' in entry['args']:
             numargs += 1
-        elts = command.split(';', numargs)
+        elts = split_semicolon(command, numargs)
 
         logger.debug("mode= %s, global= %s" % (self.mode, str(entry['global'])))
         if self.mode == 'dispatcher' and entry['global']:
