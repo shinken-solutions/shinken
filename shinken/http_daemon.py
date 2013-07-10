@@ -100,6 +100,15 @@ class CherryPyBackend(object):
     def get_sockets(self):
         return []
 
+
+    # We stop our processing, but also try to hard close our socket as cherrypy is not doing it...
+    def stop(self):
+        try:
+            self.srv.stop()
+        except Exception, exp:
+            pass
+
+
     # Will run and LOCK
     def run(self):
         try:
@@ -166,6 +175,15 @@ class WSGIREFBackend(object):
             raise
         return ins
 
+
+    # We are asking us to stop, so we close our sockets
+    def stop(self):
+        for s in self.get_sockets():
+            try:
+                s.close()
+            except:
+                pass
+        
 
     # Manually manage the number of threads
     def run(self):
@@ -331,11 +349,9 @@ class HTTPDaemon(object):
 
         # Close all sockets and delete the server object to be sure
         # no one is still alive
-        def shutdown(con):
-            print "STOP HTTP"
-            for s in con.get_sockets():
-                s.close()
-            con.srv = None
+        def shutdown(self):
+            self.srv.stop()
+            self.srv = None
 
 
 

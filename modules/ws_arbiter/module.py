@@ -53,7 +53,7 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 from shinken.log import logger
 
-from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, abort, parse_auth
+from shinken.webui.bottlewebui import Bottle, run, static_file, view, route, request, response, abort, parse_auth
 
 properties = {
     'daemons': ['arbiter', 'receiver'],
