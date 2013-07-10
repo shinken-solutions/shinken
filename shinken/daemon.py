@@ -608,12 +608,12 @@ class Daemon(object):
     def find_modules_path(self):
         if not hasattr(self, 'modulesdir') or not self.modulesdir:
             logger.error("Your configuration is missing the path to the modules (modulesdir). Please configure it")
-            sys.exit(2)
+            raise Exception("Your configuration is missing the path to the modules (modulesdir). Please configure it")
         self.modulesdir = os.path.abspath(self.modulesdir)
         logger.info("Modules directory: %s" % (self.modulesdir))
         if not os.path.exists(self.modulesdir):
             logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modulesdir)
-            sys.exit(2)
+            raise Exception("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modulesdir)
 
         # Ok remember to populate the modulesctx object
         modulesctx.set_modulesdir(self.modulesdir)
