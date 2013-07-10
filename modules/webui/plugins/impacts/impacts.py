@@ -25,6 +25,7 @@
 import time
 
 from shinken.util import safe_print
+from shinken.misc.filter  import only_related_to
 
 # Global value that will be changed by the main app
 app = None
@@ -55,7 +56,7 @@ def show_impacts():
         app.bottle.redirect("/user/login")
         #return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
 
-    all_imp_impacts = app.datamgr.get_important_elements()
+    all_imp_impacts = only_related_to(app.datamgr.get_important_elements(),user)
     all_imp_impacts.sort(hst_srv_sort)
 
     impacts = {}
