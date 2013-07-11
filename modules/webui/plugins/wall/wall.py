@@ -30,6 +30,7 @@ import time
 
 from helper import hst_srv_sort
 from shinken.util import safe_print
+from shinken.misc.filter  import only_related_to
 try:
     import json
 except ImportError:
@@ -90,7 +91,7 @@ def get_page():
     if not user:
         app.bottle.redirect("/user/login")
 
-    all_imp_impacts = app.datamgr.get_important_elements()
+    all_imp_impacts = only_related_to(app.datamgr.get_important_elements(), user)
     all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
 
@@ -107,7 +108,7 @@ def get_page():
     # Got in json format
     #j_impacts = json.dumps(impacts)
     #print "Return impact in json", j_impacts
-    all_pbs = app.datamgr.get_all_problems()
+    all_pbs =  only_related_to(app.datamgr.get_all_problems(),user)
     now = time.time()
     # Get only the last 10min errors
     all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]

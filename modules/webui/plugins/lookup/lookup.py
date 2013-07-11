@@ -26,6 +26,8 @@
 ### Will be populated by the UI with it's own value
 app = None
 
+from shinken.misc.filter  import only_related_to
+
 try:
     import json
 except ImportError:
@@ -49,7 +51,8 @@ def lookup(name=''):
         print "Lookup %s too short, bail out" % name
         return []
 
-    hnames = (h.host_name for h in app.datamgr.get_hosts())
+    filtered_hosts = only_related_to(app.datamgr.get_hosts(), user)
+    hnames = (h.host_name for h in filtered_hosts)
     r = [n for n in hnames if n.startswith(name)]
 
     return json.dumps(r)
@@ -67,7 +70,8 @@ def lookup_post():
         print "Lookup POST %s too short, bail out" % name
         return []
 
-    hnames = (h.host_name for h in app.datamgr.get_hosts())
+    filtered_hosts = only_related_to(app.datamgr.get_hosts(), user)
+    hnames = (h.host_name for h in filtered_hosts)
     r = [n for n in hnames if n.startswith(name)]
 
     return json.dumps(r)
