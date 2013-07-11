@@ -81,9 +81,9 @@
         %if overall_itproblem == 0:
         <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-ok">OK!</span> </a></li>
         %elif overall_itproblem == 1:
-        <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_all_problems()}}</span> </a></li>
+        <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_all_problems(app.get_user_auth())}}</span> </a></li>
         %elif overall_itproblem == 2:
-        <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_all_problems()}}</span> </a></li>
+        <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_all_problems(app.get_user_auth())}}</span> </a></li>
         %end
         %end
 
