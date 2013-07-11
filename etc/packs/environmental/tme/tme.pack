@@ -1,0 +1,13 @@
+{
+"name": "tme",
+
+"description": "tme sensors check temperature",
+
+"path":"environmental/",
+
+"macros":{	 "_SNMPCOMMUNITY": {"type":"string",
+	                     "description":"The read snmp community allowed on the linux server"
+			     }
+        }
+
+}
