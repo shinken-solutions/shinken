@@ -78,9 +78,9 @@
       %if overall_itproblem == 0:
       <span class=" badger-big badger-ok">OK!</span>
       %elif overall_itproblem == 1:
-      <span class="badger-big badger-warning">{{app.datamgr.get_nb_all_problems()}}</span>
+      <span class="badger-big badger-warning">{{app.datamgr.get_nb_all_problems(app.get_user_auth())}}</span>
       %elif overall_itproblem == 2:
-      <span class=" badger-big badger-critical">{{app.datamgr.get_nb_all_problems()}}</span>
+      <span class=" badger-big badger-critical">{{app.datamgr.get_nb_all_problems(app.get_user_auth())}}</span>
       %end
       %end
     </li>

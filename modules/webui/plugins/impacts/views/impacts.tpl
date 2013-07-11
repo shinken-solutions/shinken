@@ -14,7 +14,7 @@
 	<div class="impacts-panel">
 
 <!--		<div id="result-stats">
-    			<p>Impacts: <span class="label label-important">{{app.datamgr.get_len_overall_state()}}</span> IT Problems: <span class="label label-important"> {{app.datamgr.get_nb_all_problems()}}</span></p>
+    			<p>Impacts: <span class="label label-important">{{app.datamgr.get_len_overall_state()}}</span> IT Problems: <span class="label label-important"> {{app.datamgr.get_nb_all_problems(app.get_user_auth())}}</span></p>
     		</div> -->
     	%# " We look for separate bad and good elements, so we remember last state"
     	%last_was_bad = False
