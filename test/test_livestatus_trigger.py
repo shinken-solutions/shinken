@@ -61,7 +61,6 @@ class TestConfig(ShinkenTest):
 
 
     def update_broker(self, dodeepcopy=False):
-        #import pdb; pdb.set_trace()
         # The brok should be manage in the good order
         ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
