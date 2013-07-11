@@ -191,9 +191,9 @@ class DataManager(object):
     # Get the number of all problems, even the ack ones
     def get_nb_all_problems(self,user):
         res = []
-        res.extend([s for s in only_related_to(self.rg.services,user) if s.state not in ['OK', 'PENDING'] and not s.is_impact])
-        res.extend([h for h in only_related_to(self.rg.hosts,user) if h.state not in ['UP', 'PENDING'] and not h.is_impact])
-        return len(res)
+        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+        return len(only_related_to(res,user))
 
     # Return the number of impacts
     def get_nb_impacts(self):
