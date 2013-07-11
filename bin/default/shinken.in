@@ -43,7 +43,7 @@ SHINKENCFG="$ETC/shinken.cfg"
 
 # We got 2 configs because tools like Centreon don't generate all
 # configuration (only the shinken.cfg part)
-SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+#SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 
 # The command to launch
 ARBITERDAEMON=$BIN/shinken-arbiter

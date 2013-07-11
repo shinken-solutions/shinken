@@ -295,7 +295,7 @@ local_log=%s/arbiterd.log
 """ % (self.owner, self.group, self.run_path, self.log_path)
             )
 
-        # UPDATE Shinken-specific.cfg files too
+        # UPDATE others cfg files too
         for name in additionnal_config_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
@@ -493,9 +493,7 @@ var_root = os.path.dirname(default_paths['var'])
 main_config_files = ('shinken.cfg',
                      'nagios-windows.cfg')
 
-additionnal_config_files = ('shinken-specific.cfg',
-                            'shinken-specific-high-availability.cfg',
-                            'shinken-specific-load-balanced-only.cfg',
+additionnal_config_files = (
                             'skonf.cfg',
                             )
 

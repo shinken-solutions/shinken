@@ -211,7 +211,6 @@ echo "Real install OK"
 # Useful to take it from setup_parameter? It's just for coding here
 ETC=/etc/shinken
 is_file_present $ETC/shinken.cfg
-is_file_present $ETC/shinken-specific.cfg
 string_in_file "servicegroups.cfg" $ETC/shinken.cfg
 is_file_present /usr/bin/shinken-arbiter
 
