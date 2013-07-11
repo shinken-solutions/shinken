@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Stopping arbiter"
-kill $(cat "$DIR"/../var/arbiterd.pid)
+kill $(cat /var/run/shinken/arbiterd.pid)

@@ -29,7 +29,7 @@ DEBUG_PATH="/tmp/arbiter.debug"
 
 # Need to change directory to .../var because arbiter doesn't have a
 # default 'workdir' "properties" attribute:.
-cd "$DIR"/../var
+cd /var/run/shinken
 
 echo "Launching Arbiter (which reads configuration and dispatches it) " \
     "in debug mode to the file $DEBUG_PATH"

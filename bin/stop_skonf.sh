@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Stopping skonf"
-kill $(cat "$DIR"/../var/skonfd.pid)
+kill $(cat /var/run/shinken/skonfd.pid)

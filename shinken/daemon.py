@@ -125,8 +125,10 @@ class Interface(object):
 # If we are under android, we can't give parameters
 if is_android:
     DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
+    DEFAULT_LIB_DIR  = DEFAULT_WORK_DIR
 else:
-    DEFAULT_WORK_DIR = 'var'
+    DEFAULT_WORK_DIR = '/var/run/shinken/'
+    DEFAULT_LIB_DIR  = '/var/lib/shinken/'
 
 
 class Daemon(object):
@@ -140,7 +142,7 @@ class Daemon(object):
         #
         # as returned once the daemon is started.
         'workdir':       PathProp(default=DEFAULT_WORK_DIR),
-        'modulesdir':    PathProp(default='modules'),
+        'modulesdir':    PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'modules')),
         'host':          StringProp(default='0.0.0.0'),
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
@@ -149,7 +151,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.cert'),
         'use_local_log': BoolProp(default='1'),
-        'log_level':     LogLevelProp(default='INFO'), # TODO : fix the scheduler so we can put back WARNiING here
+        'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled':BoolProp(default='1'),
@@ -352,7 +354,7 @@ class Daemon(object):
         ## if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
-            self.debug_output.append("Opening pid file: %s" % self.pidfile)
+            self.debug_output.append("Opening pid file: %s" % p)
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
@@ -376,7 +378,7 @@ class Daemon(object):
         try:
             pid = int(self.fpid.read())
         except:
-            logger.info("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
+            logger.info("Stale pidfile exists at %s (no or invalid or unreadable content). Reusing it." % self.pidfile)
             return
 
         try:

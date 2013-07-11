@@ -497,7 +497,6 @@ additionnal_config_files = ('shinken-specific.cfg',
                             'shinken-specific-high-availability.cfg',
                             'shinken-specific-load-balanced-only.cfg',
                             'skonf.cfg',
-                            'paths.cfg',
                             )
 
 config_objects_file = (

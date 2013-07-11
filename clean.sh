@@ -7,6 +7,7 @@ sudo rm -fr /usr/bin/shinken-*
 sudo rm -fr /etc/shinken
 sudo rm -fr /etc/init.d/shinken*
 sudo rm -fr /var/lib/shinken
+sudo rm -fr /var/run/shinken
 sudo rm -fr /var/log/shinken
 sudo rm -fr /etc/default/shinken
 

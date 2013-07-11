@@ -102,9 +102,9 @@ class Config(Item):
     # *usage_text: if present, will print it to explain why it's no more useful
     properties = {
         'prefix':                   StringProp(default='/usr/local/shinken/'),
-        'workdir':                  StringProp(default=''),
+        'workdir':                  StringProp(default='/var/run/shinken/'),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
-        'modulesdir':               StringProp(default='modules'),
+        'modulesdir':               StringProp(default='/var/lib/shinken/modules'),
         'use_local_log':            BoolProp(default='1'),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
