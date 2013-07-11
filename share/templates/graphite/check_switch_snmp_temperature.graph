@@ -1,0 +1,1 @@
+${uri}render/?width=586&height=308&title=CPU Temperature%20on%20${host}&target=legendValue(alias(${host}.${service}.iso_3_6_1_4_1_25506_2_6_1_1_1_1_12.*,"CPU Temperature"),"last")&yMin=0&fgcolor=000000&bgcolor=FFFFFF&
