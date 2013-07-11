@@ -59,19 +59,21 @@ class TestConfig(ShinkenTest):
         if self.nagios_installed() and hasattr(self, 'nagios_started'):
             self.nagios_loop(1, reflist)
 
+
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            # print "Managing a brok type", brok.type, "of id", brok_id
-            # if brok.type == 'update_service_status':
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
+
 
     def lines_equal(self, text1, text2):
         # gets two multiline strings and compares the contents
@@ -279,11 +281,11 @@ class TestConfigSmall(TestConfig):
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
         print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False        
+        self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
 
-        
+
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
