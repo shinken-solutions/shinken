@@ -74,8 +74,8 @@ def safe_print(*args):
     print u' '.join(l)
 
 def split_semicolon(line, maxsplit=None):
-    """Split a line on semicolons characters but not
-       on the escaped semicolons
+    """Split a line on semicolons characters but not on the escaped semicolons
+
     """
     # Split on ';' character
     splitted_line = line.split(';')
@@ -84,7 +84,7 @@ def split_semicolon(line, maxsplit=None):
     splitted_line_size = len(splitted_line)
 
     # if maxsplit is not specified, we set it to the maximum
-    if maxsplit is None:
+    if maxsplit is None or 0 > maxsplit:
         maxsplit = splitted_line_size
 
 
