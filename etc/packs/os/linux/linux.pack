@@ -36,7 +36,7 @@
                              },
          "_MEMORY_CRIT": {"type":"doublepercent",
                                 "description": "Physical memory and swap critical level"
-                             }
+                             },
          "_NET_IFACES":  {"type":"regex pattern",
                                  "description": "Pattern that will match ethernet device name. Default: en\d+"
                              },
