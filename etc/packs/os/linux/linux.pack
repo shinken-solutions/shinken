@@ -48,15 +48,6 @@
                              },
          "_CHKLOG_CONF": {"type":"absolute path",
                                  "description": "absolute path to checklog conf file. Default: /usr/local/shinken/libexec/logFiles_linux.conf"
-                             },
-         "_NET_IFACES":  {"type":"regex pattern",
-                                 "description": "Pattern that will match ethernet device name. Default: en\d+"
-                             },
-         "_NET_WARN": {"type":"6 comma-separated integer",
-                                 "description": "6 integer as to be specified in_Mbps,out_Mbps,err_in,err_out,discard_in,discard_out. Default: 90,90,0,0,0,0"
-                             },
-         "_NET_CRIT": {"type":"6 comma-separated integer",
-                                 "description": "6 integer as to be specified in_Mbps,out_Mbps,err_in,err_out,discard_in,discard_out. Default: 0,0,0,0,0,0"
                              }
           }
 }
