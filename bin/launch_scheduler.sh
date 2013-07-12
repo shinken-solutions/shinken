@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Launching Scheduler (that is only in charge of scheduling)"
-"$BIN"/shinken-scheduler -d -c "$ETC"/schedulerd.ini
+"$BIN"/shinken-scheduler -d -c "$ETC"/daemons/schedulerd.ini

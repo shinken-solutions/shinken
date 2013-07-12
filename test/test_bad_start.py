@@ -64,7 +64,7 @@ daemons_config = {
     Poller:       "../etc/pollerd.ini",
     Reactionner:  "../etc/reactionnerd.ini",
     Shinken:      "../etc/schedulerd.ini",
-    Arbiter:    ["../etc/nagios.cfg", "../etc/shinken-specific.cfg"]
+    Arbiter:    ["../etc/shinken.cfg"]
 }
 
 HIGH_PORT = 65488

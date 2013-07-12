@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Stopping poller"
-kill $(cat "$DIR"/../var/pollerd.pid)
+kill $(cat /var/run/shinken/pollerd.pid)

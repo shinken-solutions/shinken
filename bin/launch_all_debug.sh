@@ -25,6 +25,9 @@
 DIR="$(cd $(dirname "$0"); pwd)"
 echo "$DIR"
 
+# Prepare the launch by cleaning var/log directories
+. $DIR/preparedev
+
 cd "$DIR/.."
 
 export LANG=us_US.UTF-8

@@ -29,8 +29,8 @@ try:
     python_version = sys.version_info
 except:
     python_version = (1, 5)
-if python_version < (2, 4):
-    sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
+if python_version < (2, 6):
+    sys.exit("Shinken require as a minimum Python 2.6.x, sorry")
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
@@ -116,6 +116,7 @@ class install(_install):
         ),
     ]
 
+
     def initialize_options(self):
         _install.initialize_options(self)
         self.etc_path = None
@@ -125,6 +126,7 @@ class install(_install):
         self.plugins_path = None
         self.owner = None
         self.group = None
+
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -142,6 +144,7 @@ class install(_install):
             self.owner = DEFAULT_OWNER
         if self.group is None:
             self.group = DEFAULT_GROUP
+
 
 class build_config(Command):
     description = "build the shinken config files"
@@ -255,7 +258,7 @@ class build_config(Command):
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('updating path in %s: to "%s"' % (outname, self.var_path))
+            log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
@@ -264,6 +267,7 @@ group=%s
 workdir=%s
 pidfile=%s/%sd.pid
 """ % (self.owner, self.group, self.var_path, self.run_path, dname))
+            
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -275,7 +279,7 @@ pidfile=%s/%sd.pid
                                     "/usr/local/shinken/libexec",
                                     self.plugins_path)
 
-        # And update the nagios.cfg file for all /usr/local/shinken/var
+        # And update the shinken.cfg file for all /usr/local/shinken/var
         # value with good one
         for name in main_config_files:
             inname = os.path.join('etc', name)
@@ -291,7 +295,7 @@ local_log=%s/arbiterd.log
 """ % (self.owner, self.group, self.run_path, self.log_path)
             )
 
-        # UPDATE Shinken-specific.cfg files too
+        # UPDATE others cfg files too
         for name in additionnal_config_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
@@ -301,8 +305,8 @@ local_log=%s/arbiterd.log
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "nagios.log",
-                                    "%s/nagios.log" % self.log_path)
+                                    "shinken.log",
+                                    "%s/shinken.log" % self.log_path)
 
 
 class install_config(Command):
@@ -423,6 +427,7 @@ def append_file_with(infilename, outfilename, append_string):
     ensure_dir_exist(outfilename)
     f = open(outfilename, "w")
     f.write(buf)
+    f.write('\n')
     f.write(append_string)
     f.close()
 
@@ -485,14 +490,11 @@ etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
-main_config_files = ('nagios.cfg',
+main_config_files = ('shinken.cfg',
                      'nagios-windows.cfg')
 
-additionnal_config_files = ('shinken-specific.cfg',
-                            'shinken-specific-high-availability.cfg',
-                            'shinken-specific-load-balanced-only.cfg',
+additionnal_config_files = (
                             'skonf.cfg',
-                            'paths.cfg',
                             )
 
 config_objects_file = (
@@ -516,26 +518,46 @@ config_objects_file = (
                         'certs/ca.pem',
 )
 
-# Now service packs files
-srv_pack_files = gen_data_files('etc/packs')
-# We must remove the etc from the paths
-srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+
 #print "SRV PACK FILES", srv_pack_files
 config_objects_file_extended = list(config_objects_file)
-config_objects_file_extended.extend(srv_pack_files)
+
+
+all_etc_files = []
+# Do not put daemons in this list, because it will override other modification
+for p in ['packs', 'arbiters', 'brokers', 'modules',
+          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers']:
+    # Get all files in this dir
+    _files = gen_data_files('etc/%s' % p)
+    # We must remove the etc from the paths
+    _files = [s.replace('etc/', '') for s in _files]
+    # Declare them in your global lsit now
+    config_objects_file_extended.extend(_files)
+
+# Now service packs files
+#srv_pack_files = gen_data_files('etc/packs')
+
+#srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+# Now service packs files
+#srv_pack_files = gen_data_files('etc/packs')
+# We must remove the etc from the paths
+#srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+
+#config_objects_file_extended.extend(srv_pack_files)
+# Setup ins waiting for a tuple....
 config_objects_file = tuple(config_objects_file_extended)
 print config_objects_file
 
 # daemon configs
-daemon_ini_files = (('broker', 'brokerd.ini'),
+daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
-                    ('receiver', 'receiverd.ini'),
+                    ('receiver', 'daemons/receiverd.ini'),
                     ('receiver', 'receiverd-windows.ini'),
-                    ('poller', 'pollerd.ini'),
+                    ('poller', 'daemons/pollerd.ini'),
                     ('poller', 'pollerd-windows.ini'),
-                    ('reactionner', 'reactionnerd.ini'),
+                    ('reactionner', 'daemons/reactionnerd.ini'),
                     ('reactionner', 'reactionnerd-windows.ini'),
-                    ('scheduler', 'schedulerd.ini'),
+                    ('scheduler', 'daemons/schedulerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
 

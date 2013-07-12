@@ -3,6 +3,9 @@
 DIR=$(cd $(dirname "$0"); pwd)
 echo $DIR
 
+# Prepare the launch by cleaning var/log directories
+. $DIR/../../bin/preparedev
+
 # Schedulers
 $DIR/../../bin/launch_scheduler_debug.sh
 $DIR/test_stack2/launch_scheduler2_debug.sh

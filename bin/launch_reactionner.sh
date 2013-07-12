@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Launching Reactionner (which sends notifications)"
-"$BIN"/shinken-reactionner -d -c "$ETC"/reactionnerd.ini
+"$BIN"/shinken-reactionner -d -c "$ETC"/daemons/reactionnerd.ini

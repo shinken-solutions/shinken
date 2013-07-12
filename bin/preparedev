@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+ME=`whoami`
+HERE="$(cd $(dirname "$0"); pwd)"
+# Log directory
+sudo rm -fr /var/log/shinken/*
+sudo mkdir /var/log/shinken 2>/dev/null
+sudo chown $ME:$ME /var/log/shinken
+
+# Run directory, for 
+sudo rm -fr /var/run/shinken/*
+sudo mkdir /var/run/shinken 2>/dev/null
+sudo chown $ME:$ME /var/run/shinken
+
+# Lib directory, with modules, share and co
+sudo mkdir /var/lib/shinken 2>/dev/null
+# If the directory modules is missing (dir or link) create a link with our modules dir
+if [ ! -L /var/lib/shinken/modules ]; then
+  # Control will enter here if $DIRECTORY doesn't exist.
+  sudo ln -s  $HERE/../modules /var/lib/shinken/modules
+fi
+
+# If the share modules is missing (dir or link) create a link with our share dir
+if [ ! -L /var/lib/shinken/share ]; then
+  # Control will enter here if $DIRECTORY doesn't exist.
+  sudo ln -s  $HERE/../share /var/lib/shinken/share
+fi
+
+sudo chown $ME:$ME /var/run/shinken
+
+

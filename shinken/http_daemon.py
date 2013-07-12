@@ -69,7 +69,7 @@ class PortNotFree(Exception):
 class CherryPyServer(bottle.ServerAdapter):
     def run(self, handler):  # pragma: no cover
         daemon_thread_pool_size = self.options['daemon_thread_pool_size']
-        server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size)
+        server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size, shutdown_timeout=1)
         logger.info('Initializing a CherryPy backend with %d threads' % daemon_thread_pool_size)
         use_ssl = self.options['use_ssl']
         ca_cert = self.options['ca_cert']
@@ -96,6 +96,7 @@ class CherryPyBackend(object):
             # must be a problem with pyro workdir:
             raise InvalidWorkDir(e)
 
+    
     # When call, it do not have a socket
     def get_sockets(self):
         return []
@@ -106,7 +107,7 @@ class CherryPyBackend(object):
         try:
             self.srv.stop()
         except Exception, exp:
-            pass
+            logger.warning('Cannot stop the CherryPy backend : %s' % exp)
 
 
     # Will run and LOCK
@@ -352,7 +353,6 @@ class HTTPDaemon(object):
         def shutdown(self):
             self.srv.stop()
             self.srv = None
-
 
 
         def get_socks_activity(self, timeout):

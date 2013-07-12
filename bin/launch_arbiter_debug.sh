@@ -29,11 +29,11 @@ DEBUG_PATH="/tmp/arbiter.debug"
 
 # Need to change directory to .../var because arbiter doesn't have a
 # default 'workdir' "properties" attribute:.
-cd "$DIR"/../var
+cd /var/run/shinken
 
 echo "Launching Arbiter (which reads configuration and dispatches it) " \
     "in debug mode to the file $DEBUG_PATH"
 
 "$BIN"/shinken-arbiter -d \
-    -c "$ETC"/nagios.cfg -c "$ETC"/shinken-specific.cfg -c "$ETC"/sample.cfg -c "$ETC"/dev.cfg\
+    -c "$ETC"/shinken.cfg  -c "$ETC"/sample.cfg -c "$ETC"/dev.cfg\
     --debug "$DEBUG_PATH" -p /tmp/arbiter.profile

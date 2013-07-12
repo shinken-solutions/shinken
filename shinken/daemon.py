@@ -125,8 +125,10 @@ class Interface(object):
 # If we are under android, we can't give parameters
 if is_android:
     DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
+    DEFAULT_LIB_DIR  = DEFAULT_WORK_DIR
 else:
-    DEFAULT_WORK_DIR = 'var'
+    DEFAULT_WORK_DIR = '/var/run/shinken/'
+    DEFAULT_LIB_DIR  = '/var/lib/shinken/'
 
 
 class Daemon(object):
@@ -140,7 +142,7 @@ class Daemon(object):
         #
         # as returned once the daemon is started.
         'workdir':       PathProp(default=DEFAULT_WORK_DIR),
-        'modulesdir':    PathProp(default='modules'),
+        'modulesdir':    PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'modules')),
         'host':          StringProp(default='0.0.0.0'),
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
@@ -149,7 +151,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.cert'),
         'use_local_log': BoolProp(default='1'),
-        'log_level':     LogLevelProp(default='INFO'), # TODO : fix the scheduler so we can put back WARNiING here
+        'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled':BoolProp(default='1'),
@@ -222,6 +224,11 @@ class Daemon(object):
             self.modules_manager.stop_all()
             print('Stopping inter-process message')
         if self.http_daemon:
+            # Release the lock so the daemon can shutdown without problem
+            try:
+                self.http_daemon.lock.release()
+            except:
+                pass
             self.http_daemon.shutdown()
         logger.quit()
 
@@ -302,6 +309,7 @@ class Daemon(object):
 
 
     def change_to_workdir(self):
+        self.workdir = os.path.abspath(self.workdir)
         try:
             os.chdir(self.workdir)
         except Exception, e:
@@ -346,7 +354,7 @@ class Daemon(object):
         ## if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
-            self.debug_output.append("Opening pid file: %s" % self.pidfile)
+            self.debug_output.append("Opening pid file: %s" % p)
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
@@ -370,7 +378,7 @@ class Daemon(object):
         try:
             pid = int(self.fpid.read())
         except:
-            logger.info("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
+            logger.info("Stale pidfile exists at %s (no or invalid or unreadable content). Reusing it." % self.pidfile)
             return
 
         try:
@@ -539,7 +547,7 @@ class Daemon(object):
             if len(startargs[0]) > 1:
                 self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
             else:
-                logger.warning('Your multiprocessing librairy seems too old or strange, please use a vanilla python version isntead')
+                logger.warning('Your multiprocessing librairy seems too old or strange, please use a vanilla python version instead')
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
 
@@ -603,12 +611,12 @@ class Daemon(object):
     def find_modules_path(self):
         if not hasattr(self, 'modulesdir') or not self.modulesdir:
             logger.error("Your configuration is missing the path to the modules (modulesdir). Please configure it")
-            sys.exit(2)
+            raise Exception("Your configuration is missing the path to the modules (modulesdir). Please configure it")
         self.modulesdir = os.path.abspath(self.modulesdir)
         logger.info("Modules directory: %s" % (self.modulesdir))
         if not os.path.exists(self.modulesdir):
             logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modulesdir)
-            sys.exit(2)
+            raise Exception("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modulesdir)
 
         # Ok remember to populate the modulesctx object
         modulesctx.set_modulesdir(self.modulesdir)

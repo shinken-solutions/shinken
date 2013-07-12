@@ -28,4 +28,4 @@ ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/reactionner.debug"
 
 echo "Launching Reactionner (which sends notifications) in debug mode to the file $DEBUG_PATH"
-"$BIN"/shinken-reactionner -d -c "$ETC"/reactionnerd.ini --debug "$DEBUG_PATH"
+"$BIN"/shinken-reactionner -d -c "$ETC"/daemons/reactionnerd.ini --debug "$DEBUG_PATH"

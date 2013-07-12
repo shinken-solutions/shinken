@@ -28,7 +28,7 @@ ETC="$DIR"/../etc
 
 echo "Stopping broker"
 
-parent=$(cat "$DIR"/../var/brokerd.pid)
+parent=$(cat /var/run/shinken/brokerd.pid)
 
 kill $parent
 sleep 1
@@ -36,7 +36,7 @@ sleep 1
 # kill parent and childs broker processes
 for brokerpid in $(ps -f --ppid $parent | grep "shinken-broker" | awk '{print $2}')
 do
-    echo "KILLING BROKER PROCESS" $brokerpid
+    echo "KILLING MODULE BROKER PROCESS" $brokerpid
     kill $brokerpid
 done
 

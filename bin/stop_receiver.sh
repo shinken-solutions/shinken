@@ -27,4 +27,4 @@ BIN="$DIR"/../bin
 ETC="$DIR"/../etc
 
 echo "Stopping receiver"
-kill $(cat "$DIR"/../var/receiverd.pid)
+kill $(cat /var/run/shinken/receiverd.pid)
