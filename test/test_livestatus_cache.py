@@ -1,38 +1,55 @@
 from shinken_test import *
-import datetime
+import os
+import sys
+import re
+import subprocess
+import shutil
+import time
+import random
+import copy
 
+sys.path.append('../shinken/modules')
 
-def set_to_midnight(dt):
-    midnight = datetime.time(0)
-    return datetime.datetime.combine(dt.date(), midnight)
+from shinken.comment import Comment
 
 
 class TestConfig(ShinkenTest):
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+    def contains_line(self, text, pattern):
+        regex = re.compile(pattern)
+        for line in text.splitlines():
+            if re.search(regex, line):
+                return True
+        return False
 
-    pass
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.livestatus_broker = None
 
 
 class TestConfigBig(TestConfig):
     def setUp(self):
         start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        self.livestatus_broker.query_cache.enabled = True
+        self.init_livestatus(needcache=True)
         print "Cleaning old broks?"
+        self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
 
@@ -42,25 +59,6 @@ class TestConfigBig(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        for arch in os.listdir('tmp/archives'):
-            os.remove('tmp/archives/' + arch)
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
 
     def test_stats(self):
         self.print_header()
