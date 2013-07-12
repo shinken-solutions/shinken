@@ -66,6 +66,11 @@ LiveStatus_broker = livestatus_broker.LiveStatus_broker
 LiveStatus = livestatus_broker.LiveStatus
 LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
 LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
+
+Logline = livestatus_broker.Logline
+LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore_mongodb').LiveStatusLogStoreMongoDB
+LiveStatusLogStoreSqlite = modulesctx.get_module('logstore_sqlite').LiveStatusLogStoreSqlite
+
 from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
@@ -73,43 +78,50 @@ livestatus_modconf.module_name = "livestatus"
 livestatus_modconf.module_type = livestatus_broker.properties['type']
 livestatus_modconf.properties = livestatus_broker.properties.copy()
 
+
 # We overwrite the functions time() and sleep()
 # This way we can modify sleep() so that it immediately returns although
 # for a following time() it looks like thee was actually a delay.
 # This massively speeds up the tests.
+class TimeHacker(object):
 
-time.my_offset = 0
-time.my_starttime = time.time()
-time.my_oldtime = time.time
+    def __init__(self):
+        self.my_offset = 0
+        self.my_starttime = time.time()
+        self.my_oldtime = time.time
+        self.original_time_time = time.time
+        self.original_time_sleep = time.sleep
+        self.in_real_time = True
 
+    def my_time_time(self):
+        return self.my_oldtime() + self.my_offset
 
-def my_time_time():
-    now = time.my_oldtime() + time.my_offset
-    return now
+    def my_time_sleep(self, delay):
+        self.my_offset += delay
 
-original_time_time = time.time
-time.time = my_time_time
+    def time_warp(self, duration):
+        self.my_offset += duration
 
-
-def my_time_sleep(delay):
-    time.my_offset += delay
-
-original_time_sleep = time.sleep
-time.sleep = my_time_sleep
-
-
-def time_warp(duration):
-    time.my_offset += duration
+    def set_my_time(self):
+        if self.in_real_time:
+            time.time = self.my_time_time
+            time.sleep = self.my_time_sleep
+            self.in_real_time = False
 
 # If external processes or time stamps for files are involved, we must
 # revert the fake timing routines, because these externals cannot be fooled.
 # They get their times from the operating system.
-# In this case we write the following lines in the test files:
-#
-# from shinken_test import *
-# # we have an external process, so we must un-fake time functions
-# time.time = original_time_time
-# time.sleep = original_time_sleep
+    def set_real_time(self):
+        if not self.in_real_time:
+            time.time = self.original_time_time
+            time.sleep = self.original_time_sleep
+            self.in_real_time = True
+
+
+#Time hacking for every test!
+time_hacker = TimeHacker()
+time_hacker.set_my_time()
+
 
 class Pluginconf(object):
     pass
@@ -372,7 +384,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched.brokers['Default-Broker']['broks'] = {}
 
 
-    def init_livestatus(self, modconf=None, needcache=False):
+    def init_livestatus(self, modconf=None, dbmodconf=None, needcache=False):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
@@ -385,12 +397,14 @@ class ShinkenTest(unittest.TestCase):
                 'name': 'test', #?
             })
 
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_sqlite',
-            'use_aggressive_sql': "0",
-            'database_file': self.livelogs,
-            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
-        })
+        if dbmodconf is None:
+            dbmodconf = Module({'module_name': 'LogStore',
+                'module_type': 'logstore_sqlite',
+                'use_aggressive_sql': "0",
+                'database_file': self.livelogs,
+                'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
+            })
+
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
         self.livestatus_broker.create_queues()

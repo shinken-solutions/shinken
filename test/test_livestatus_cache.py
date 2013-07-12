@@ -43,6 +43,7 @@ class TestConfig(ShinkenTest):
 
 class TestConfigBig(TestConfig):
     def setUp(self):
+
         start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         Comment.id = 1
@@ -287,10 +288,8 @@ Filter: service_description = test_ok_01
 And: 5
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
-        fake_time_time = time.time
-        fake_time_sleep = time.sleep
-        time.time = original_time_time
-        time.sleep = original_time_sleep
+        time_hacker.set_real_time()
+
         print self.livestatus_broker.db.database_file
         print request
         print "query 1 --------------------------------------------------"
@@ -335,8 +334,8 @@ OutputFormat: json"""
         self.assert_(elapsed3 < elapsed1)
         self.assert_(elapsed4 < elapsed3 / 2)
 
-        #time.time = fake_time_time
-        #time.sleep = fake_time_sleep
+        time_hacker.set_my_time()
+
 
 
 

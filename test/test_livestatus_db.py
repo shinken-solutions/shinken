@@ -718,10 +718,8 @@ Filter: service_description = test_ok_01
 And: 5
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
-        fake_time_time = time.time
-        fake_time_sleep = time.sleep
-        time.time = original_time_time
-        time.sleep = original_time_sleep
+        time_hacker.set_real_time()
+
         print request
         print "query 1 --------------------------------------------------"
         tic = time.time()
@@ -779,9 +777,8 @@ OutputFormat: json"""
         # the numlogs above only counts records in the currently attached db
         numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" % (int(query_start), int(query_end)))
         print "numlogs is", numlogs
+        time_hacker.set_my_time()
 
-        time.time = fake_time_time
-        time.sleep = fake_time_sleep
 
 
 class TestConfigNoLogstore(TestConfig):
