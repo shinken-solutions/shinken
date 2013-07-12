@@ -168,7 +168,7 @@ ResponseHeader: fixed16
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
-        time_warp(-3600)
+        time_hacker.time_warp(-3600)
         num_logs = 0
         host.state = 'DOWN'
         host.state_type = 'SOFT'
@@ -212,7 +212,7 @@ Columns: time type options state host_name"""
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
-        time_warp(-1 * 3600 * 24 * 7)
+        time_hacker.time_warp(-1 * 3600 * 24 * 7)
         num_logs = 0
         while time.time() < now:
             host.state = 'DOWN'
@@ -273,7 +273,7 @@ Columns: time type options state host_name"""
         back4days_noon = int(time.mktime(back4days_noon.timetuple()))
         back4days_morning = int(time.mktime(back4days_morning.timetuple()))
         now = time.time()
-        time_warp(-1 * (now - back4days_noon))
+        time_hacker.time_warp(-1 * (now - back4days_noon))
         now = time.time()
         print "4t is", time.asctime(time.localtime(int(now)))
         logs = 0
@@ -385,7 +385,7 @@ Columns: time type options state host_name"""
         print "expect", logs
 
         # now warp to the time when we entered this test
-        time_warp(-1 * (time.time() - save_now))
+        time_hacker.time_warp(-1 * (time.time() - save_now))
         # and now start the same logging
         today = datetime.datetime.fromtimestamp(time.time())
         today_noon = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
@@ -401,7 +401,7 @@ Columns: time type options state host_name"""
         back4days_noon = int(time.mktime(back4days_noon.timetuple()))
         back4days_morning = int(time.mktime(back4days_morning.timetuple()))
         now = time.time()
-        time_warp(-1 * (now - back4days_noon))
+        time_hacker.time_warp(-1 * (now - back4days_noon))
         now = time.time()
         time.sleep(5)
         print "4t is", time.asctime(time.localtime(int(now)))
@@ -609,7 +609,7 @@ class TestConfigBig(TestConfig):
         #                       events which will be read from db
         #
         loops = int(86400 / 192)
-        time_warp(-1 * days * 86400)
+        time_hacker.time_warp(-1 * days * 86400)
         print "warp back to", time.ctime(time.time())
         # run silently
         old_stdout = sys.stdout
