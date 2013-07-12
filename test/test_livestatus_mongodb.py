@@ -34,16 +34,12 @@ import shutil
 import time
 import random
 import copy
-import unittest
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
-from shinken.objects.service import Service
-from shinken.modules.livestatus.mapping import Logline
-from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
-from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
+
+sys.path.append('../shinken/modules')
+
 from shinken.comment import Comment
+from shinken.objects.service import Service
 
 try:
     import pymongo
@@ -55,89 +51,8 @@ sys.setcheckinterval(10000)
 
 
 class TestConfig(ShinkenTest):
-
-    def tearDown(self):
-        if not has_pymongo:
-            return
-        self.shutdown_livestatus()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                os.remove(os.path.join("tmp/archives", db))
-        self.livestatus_broker = None
-
-    def init_livestatus(self):
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name': 'LiveStatus',
-            'module_type': 'livestatus',
-            'port': str(50000 + os.getpid()),
-            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
-            'host': '127.0.0.1',
-            'socket': 'live',
-            'name': 'test', #?
-        })
-
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_mongodb',
-            'mongodb_uri': "mongodb://127.0.0.1:27017",
-            'database': 'testtest' + self.testid,
-        })
-        modconf.modules = [dbmodconf]
-        self.livestatus_broker = LiveStatus_broker(modconf)
-        self.livestatus_broker.create_queues()
-
-        #--- livestatus_broker.main
-        self.livestatus_broker.log = logger
-        # this seems to damage the logger so that the scheduler can't use it
-        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
-        self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
-        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
-        # We can now output some previouly silented debug ouput
-        self.livestatus_broker.do_load_modules()
-        for inst in self.livestatus_broker.modules_manager.instances:
-            if inst.properties["type"].startswith('logstore'):
-                f = getattr(inst, 'load', None)
-                if f and callable(f):
-                    f(self.livestatus_broker)  # !!! NOT self here !!!!
-                break
-        for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
-        del self.livestatus_broker.debug_output
-        self.livestatus_broker.rg = LiveStatusRegenerator()
-        self.livestatus_broker.datamgr = datamgr
-        datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        self.livestatus_broker.query_cache.disable()
-        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
-        #--- livestatus_broker.main
-
-        self.livestatus_broker.init()
-        for i in self.livestatus_broker.modules_manager.instances:
-            print "instance", i
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-
-        #--- livestatus_broker.do_main
-        self.livestatus_broker.db.open()
-        #--- livestatus_broker.do_main
-
-    def shutdown_livestatus(self):
-        print "drop database", self.livestatus_broker.db.database
-        self.livestatus_broker.db.conn.drop_database(self.livestatus_broker.db.database)
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
+    def setUp(self):
+        subprocess.call(["test_livestatus/test_mongodb.sh", "start", ">/dev/null", "2>&1"])
 
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
@@ -146,29 +61,44 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.livestatus_broker = None
+        subprocess.call(["test_livestatus/test_mongodb.sh", "stop", ">/dev/null", "2>&1"])
+
 
 
 class TestConfigSmall(TestConfig):
     def setUp(self):
         if not has_pymongo:
             return
+        super(self.__class__, self).setUp()
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
+
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
+            'database': 'testtest' + self.testid,
+        })
+
+        self.init_livestatus(dbmodconf=dbmodconf)
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
@@ -197,41 +127,13 @@ class TestConfigSmall(TestConfig):
             host.raise_alert_log_entry()
             self.update_broker()
 
-    def test_hostsbygroup(self):
-        if not has_pymongo:
-            return
-        self.print_header()
-        now = time.time()
-        objlist = []
-        print "-------------------------------------------"
-        print "Service.lsm_host_name", Service.lsm_host_name
-        print "Logline.lsm_current_host_name", Logline.lsm_current_host_name
-        print "-------------------------------------------"
-        for host in self.sched.hosts:
-            objlist.append([host, 0, 'UP'])
-        for service in self.sched.services:
-            objlist.append([service, 0, 'OK'])
-        self.scheduler_loop(1, objlist)
-        self.update_broker()
-        request = """GET hostsbygroup
-ColumnHeaders: on
-Columns: host_name hostgroup_name
-Filter: groups >= allhosts
-OutputFormat: csv
-KeepAlive: on
-ResponseHeader: fixed16
-"""
-
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-
     def test_one_log(self):
         if not has_pymongo:
             return
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
-        time_warp(-3600)
+        time_hacker.time_warp(-3600)
         num_logs = 0
         host.state = 'DOWN'
         host.state_type = 'SOFT'
@@ -259,17 +161,33 @@ Filter: time <= """ + str(int(now + 3600)) + """
 Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        name = 'testtest' + self.testid
+        numlogs = self.livestatus_broker.db.conn[name].logs.find().count()
+        print numlogs
+        self.assert_(numlogs == 2)
+        curs = self.livestatus_broker.db.conn[name].logs.find()
+        self.assert_(curs[0]['state_type'] == 'SOFT')
+        self.assert_(curs[1]['state_type'] == 'HARD')
+
 
 
 class TestConfigBig(TestConfig):
     def setUp(self):
         if not has_pymongo:
             return
+        super(self.__class__, self).setUp()
         start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
+
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
+            'database': 'testtest' + self.testid,
+        })
+
+        self.init_livestatus(dbmodconf=dbmodconf)
         print "Cleaning old broks?"
         self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
@@ -282,65 +200,10 @@ class TestConfigBig(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
 
-    def init_livestatus(self):
-        self.livelogs = "bigbigbig"
-        modconf = Module({'module_name': 'LiveStatus',
-            'module_type': 'livestatus',
-            'port': str(50000 + os.getpid()),
-            'pnp_path': 'tmp/livestatus_broker.pnp_path_test' + self.testid,
-            'host': '127.0.0.1',
-            'socket': 'live',
-            'name': 'test', #?
-        })
-
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_mongodb',
-            'database': 'bigbigbig',
-            'mongodb_uri': "mongodb://127.0.0.1:27017",
-            #'mongodb_uri': "mongodb://10.0.12.50:27017,10.0.12.51:27017",
-        #    'replica_set': 'livestatus',
-            'max_logs_age': '7',
-        })
-        modconf.modules = [dbmodconf]
-        self.livestatus_broker = LiveStatus_broker(modconf)
-        self.livestatus_broker.create_queues()
-
-        #--- livestatus_broker.main
-        self.livestatus_broker.log = logger
-        # this seems to damage the logger so that the scheduler can't use it
-        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
-        self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
-        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
-        # We can now output some previouly silented debug ouput
-        self.livestatus_broker.do_load_modules()
-        for inst in self.livestatus_broker.modules_manager.instances:
-            if inst.properties["type"].startswith('logstore'):
-                f = getattr(inst, 'load', None)
-                if f and callable(f):
-                    f(self.livestatus_broker)  # !!! NOT self here !!!!
-                break
-        for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
-        del self.livestatus_broker.debug_output
-        self.livestatus_broker.rg = LiveStatusRegenerator()
-        self.livestatus_broker.datamgr = datamgr
-        datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        self.livestatus_broker.query_cache.disable()
-        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
-        #--- livestatus_broker.main
-
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-
-        #--- livestatus_broker.do_main
-        self.livestatus_broker.db.open()
-        #--- livestatus_broker.do_main
 
     def count_log_broks(self):
         return len([brok for brok in self.sched.broks.values() if brok.type == 'log'])
+
 
     def test_a_long_history(self):
         if not has_pymongo:
@@ -381,7 +244,7 @@ class TestConfigBig(TestConfig):
         #                       events which will be read from db
         #
         loops = int(86400 / 192)
-        time_warp(-1 * days * 86400)
+        time_hacker.time_warp(-1 * days * 86400)
         print "warp back to", time.ctime(time.time())
         # run silently
         old_stdout = sys.stdout
@@ -425,33 +288,33 @@ class TestConfigBig(TestConfig):
                         should_be += 1
                         sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(2)
-                if i % 17 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
 
                 time.sleep(62)
-                if i % 17 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(1, [
                         [test_ok_00, 0, "OK"],
                         [test_ok_01, 0, "OK"],
                     ])
                 time.sleep(2)
-                if i % 14 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 2, "DOWN"],
                     ])
-                if i % 12 == 0:
+                if i % 2 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 2, "DOWN"],
                     ])
                 time.sleep(62)
-                if i % 14 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 0, "UP"],
                     ])
-                if i % 12 == 0:
+                if i % 2 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 0, "UP"],
                     ])
@@ -465,7 +328,8 @@ class TestConfigBig(TestConfig):
         sys.stdout.close()
         sys.stdout = old_stdout
         self.livestatus_broker.db.commit_and_rotate_log_db()
-        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        name = 'testtest' + self.testid
+        numlogs = self.livestatus_broker.db.conn[name].logs.find().count()
         print "numlogs is", numlogs
 
         # now we have a lot of events
@@ -490,10 +354,8 @@ Filter: service_description = test_ok_01
 And: 5
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
-        fake_time_time = time.time
-        fake_time_sleep = time.sleep
-        time.time = original_time_time
-        time.sleep = original_time_sleep
+        time_hacker.set_real_time()
+
         print request
         print "query 1 --------------------------------------------------"
         tic = time.time()
@@ -563,11 +425,13 @@ OutputFormat: json"""
 
         # now delete too old entries from the database (> 14days)
         # that's the job of commit_and_rotate_log_db()
-        #
-        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
-        times = [x['time'] for x in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
+
+
+        numlogs = self.livestatus_broker.db.conn[name].logs.find().count()
+        times = [x['time'] for x in self.livestatus_broker.db.conn[name].logs.find()]
+        self.assert_(times != [])
         print "whole database", numlogs, min(times), max(times)
-        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+        numlogs = self.livestatus_broker.db.conn[name].logs.find({
             '$and': [
                 {'time': {'$gt': min(times)}},
                 {'time': {'$lte': max(times)}}
@@ -576,7 +440,7 @@ OutputFormat: json"""
         daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for day in xrange(25):
             one_day_earlier = now - 3600*24
-            numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+            numlogs = self.livestatus_broker.db.conn[name].logs.find({
                 '$and': [
                     {'time': {'$gt': one_day_earlier}},
                     {'time': {'$lte': now}}
@@ -588,22 +452,21 @@ OutputFormat: json"""
         now = max(times)
         for day in xrange(25):
             one_day_earlier = now - 3600*24
-            numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+            numlogs = self.livestatus_broker.db.conn[name].logs.find({
                 '$and': [
                     {'time': {'$gt': one_day_earlier}},
                     {'time': {'$lte': now}}
                 ]}).count()
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier
-        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        numlogs = self.livestatus_broker.db.conn[name].logs.find().count()
         # simply an estimation. the cleanup-routine in the mongodb logstore
         # cuts off the old data at midnight, but here in the test we have
         # only accuracy of a day.
         self.assert_(numlogs >= sum(daycount[:7]))
         self.assert_(numlogs <= sum(daycount[:8]))
 
-        time.time = fake_time_time
-        time.sleep = fake_time_sleep
+        time_hacker.set_my_time()
 
     def test_max_logs_age(self):
         if not has_pymongo:
@@ -614,7 +477,7 @@ OutputFormat: json"""
             'mongodb_uri': "mongodb://127.0.0.1:27017",
             'max_logs_age': '7y',
         })
-        
+
         print dbmodconf.max_logs_age
         livestatus_broker = LiveStatusLogStoreMongoDB(dbmodconf)
         self.assert_(livestatus_broker.max_logs_age == 7*365)
