@@ -12,6 +12,7 @@ import string
 import re
 import random
 import unittest
+import copy
 
 # import the shinken library from the parent directory
 import __import_shinken ; del __import_shinken
@@ -353,7 +354,25 @@ class ShinkenTest(unittest.TestCase):
         self.modules_manager.load_and_init()
         self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
-    def init_livestatus(self, modconf=None):
+
+
+    def update_broker(self, dodeepcopy=False):
+        # The brok should be manage in the good order
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
+        ids.sort()
+        for brok_id in ids:
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
+            #    print "Problem?", brok.data['is_problem']
+            if dodeepcopy:
+                brok = copy.deepcopy(brok)
+            brok.prepare()
+            self.livestatus_broker.manage_brok(brok)
+        self.sched.brokers['Default-Broker']['broks'] = {}
+
+
+    def init_livestatus(self, modconf=None, needcache=False):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
@@ -398,7 +417,8 @@ class ShinkenTest(unittest.TestCase):
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
         self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        self.livestatus_broker.query_cache.disable()
+        if not needcache:
+            self.livestatus_broker.query_cache.disable()
         self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
         #--- livestatus_broker.main
 
@@ -416,7 +436,7 @@ if not hasattr(ShinkenTest, 'assertNotIn'):
     def assertNotIn(self, member, container, msg=None):
        self.assertTrue(member not in container)
     ShinkenTest.assertNotIn = assertNotIn
-        
+
 
 if not hasattr(ShinkenTest, 'assertIn'):
     def assertIn(self, member, container, msg=None):
@@ -427,20 +447,20 @@ if not hasattr(ShinkenTest, 'assertIsInstance'):
     def assertIsInstance(self, obj, cls, msg=None):
         self.assertTrue(isinstance(obj, cls))
     ShinkenTest.assertIsInstance = assertIsInstance
-                    
+
 
 if not hasattr(ShinkenTest, 'assertRegexpMatches'):
     def assertRegexpMatches(self, line, patern):
         r = re.search(patern, line)
         self.assertTrue(r is not None)
     ShinkenTest.assertRegexpMatches = assertRegexpMatches
-                    
+
 
 if not hasattr(ShinkenTest, 'assertIs'):
     def assertIs(self, obj, cmp, msg=None):
         self.assertTrue(obj is cmp)
     ShinkenTest.assertIs = assertIs
-                            
+
 
 if __name__ == '__main__':
     unittest.main()

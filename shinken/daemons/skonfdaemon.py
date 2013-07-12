@@ -59,9 +59,9 @@ from shinken.objects.pack import Pack, Packs
 from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
-from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
+from shinken.webui.bottlewebui import Bottle, run, static_file, view, route, request, response
 # Debug
-import shinken.webui.bottle as bottle
+import shinken.webui.bottlewebui as bottle
 bottle.debug(True)
 
 # Import bottle lib to make bottle happy

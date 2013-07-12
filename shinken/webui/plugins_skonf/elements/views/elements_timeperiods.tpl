@@ -1,9 +1,8 @@
-
 %rebase layout_skonf globals(), css=['elements/css/hosts.css'], js=['elements/js/hosts.js'], title='All timeperiods'
 
 <div class="row-fluid">
   <h3 class="span10 no-topmargin">All your timeperiods</h3>
-  <a class="span2 btn btn-small btn-spezial btn-success" href="/elements/add/timeperiod"> <i class="icon-plus"></i> Add new tiemperiod</a>
+  <a class="span2 btn btn-small btn-spezial btn-success" href="/elements/add/timeperiod"> <i class="icon-plus"></i> Add new timeperiod</a>
 </div>
 
 <div class="row-fluid">
