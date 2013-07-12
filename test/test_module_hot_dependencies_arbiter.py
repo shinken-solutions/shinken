@@ -25,12 +25,11 @@ Test the hot dependencies arbiter module.
 
 import os, time
 
-from shinken_test import unittest, ShinkenTest, original_time_time, original_time_sleep
+from shinken_test import unittest, ShinkenTest, time_hacker
 
 # Need to use the real time-functions as we are reading timestamps
 # from the filesystem.
-time.time = original_time_time
-time.sleep = original_time_sleep
+time_hacker.set_real_time()
 
 from shinken.objects.module import Module
 

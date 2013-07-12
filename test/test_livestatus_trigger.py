@@ -42,8 +42,8 @@ from shinken.comment import Comment
 sys.setcheckinterval(10000)
 
 # we have an external process, so we must un-fake time functions
-time.time = original_time_time
-time.sleep = original_time_sleep
+time_hacker.set_real_time()
+
 
 
 class TestConfig(ShinkenTest):

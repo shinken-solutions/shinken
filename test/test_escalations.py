@@ -18,16 +18,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #
 # This file is used to test host- and service-downtimes.
 #
 
 from shinken_test import *
-from shinken_test import original_time_sleep
 
-#time.time = original_time_time
-#time.sleep = original_time_sleep
+time_hacker.set_real_time()
 
 class TestEscalations(ShinkenTest):
 
@@ -518,7 +515,7 @@ class TestEscalations(ShinkenTest):
         # escalation in 5s (5s = interval_length, 1 for escalation time)
         print "---" * 200
         print "We wait a bit, but not enough to go in escalation level2"
-        original_time_sleep(2)
+        sleep(2)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
@@ -529,7 +526,7 @@ class TestEscalations(ShinkenTest):
 
         print "---" * 200
         print "OK NOW we will have an escalation!"
-        original_time_sleep(5)
+        sleep(5)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
@@ -537,7 +534,7 @@ class TestEscalations(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_actions()
-                                        
+
         print "cnn and cur", cnn, svc.current_notification_number
         # We check that we really raise the notif number too
         self.assert_(svc.current_notification_number > cnn)
@@ -555,7 +552,7 @@ class TestEscalations(ShinkenTest):
         # So here we should have a new notification for level2
         print "*--*--" * 20
         print "Ok now another notification during the escalation 2"
-        original_time_sleep(10)
+        sleep(10)
 
         # One more bad, we say: he, it's still near 1 hour, so still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -565,7 +562,7 @@ class TestEscalations(ShinkenTest):
         # Ok now go in the Level3 thing
         print "*--*--" * 20
         print "Ok now goes in level3 too"
-        original_time_sleep(10)
+        sleep(10)
 
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -583,7 +580,7 @@ class TestEscalations(ShinkenTest):
         self.assert_('ToLevel3-shortinterval' in n.already_start_escalations)
 
         # Make a loop for pass the next notification
-        original_time_sleep(5)
+        sleep(5)
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -591,8 +588,8 @@ class TestEscalations(ShinkenTest):
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
 
         # Now way a little bit, and with such low value, the escalation3 value must be ok for this test to pass
-        original_time_sleep(5)
-        
+        sleep(5)
+
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()

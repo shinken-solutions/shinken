@@ -28,9 +28,7 @@ import sys
 from shinken_test import *
 from shinken.action import Action
 
-time.time = original_time_time
-time.sleep = original_time_sleep
-
+time_hacker.set_real_time()
 
 class TestAction(ShinkenTest):
     # setUp is inherited from ShinkenTest

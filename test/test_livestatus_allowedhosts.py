@@ -37,7 +37,7 @@ from shinken.comment import Comment
 from test_livestatus import TestConfig
 
 sys.setcheckinterval(10000)
-
+time_hacker.set_real_time()
 
 class TestConfigAuth(TestConfig):
     def setUp(self):
@@ -87,7 +87,7 @@ class TestConfigAuth(TestConfig):
         self.lql_thread = threading.Thread(None, self.livestatus_broker.manage_lql_thread, 'lqlthread')
         self.lql_thread.start()
         # wait for thread to init
-        original_time_sleep(3)
+        sleep(3)
 
     def query_livestatus(self, ip, port, data):
         print "Query livestatus on %s:%d" % (ip, port)

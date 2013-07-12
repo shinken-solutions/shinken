@@ -25,8 +25,8 @@
 from shinken_test import *
 
 # Restore sleep functions
-time.time = original_time_time
-time.sleep = original_time_sleep
+time_hacker.set_real_time()
+
 
 
 class TestAcksWithExpire(ShinkenTest):
