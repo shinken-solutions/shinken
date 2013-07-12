@@ -532,6 +532,7 @@ class Config(Item):
                 filefrom = line.split('=')[1]
                 continue
 
+            # Remove comments
             line = split_semicolon(line)[0].strip()
 
             # A backslash means, there is more to come

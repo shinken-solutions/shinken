@@ -5,12 +5,12 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
 
-    def test_hostname_antivirg(self):
-        """Check that it is allowed to have a host with the "__ANTI-VIRG__" substring in its hostname"""
-
+    def setUp(self):
         # load the configuration from file
         self.setup_with_file('etc/nagios_antivirg.cfg')
 
+    def test_hostname_antivirg(self):
+        """Check that it is allowed to have a host with the "__ANTI-VIRG__" substring in its hostname"""
 
         # the global configuration must be valid
         self.assert_(
@@ -36,10 +36,6 @@ class TestConfig(ShinkenTest):
 
     def test_parsing_comment(self):
         """Check that the semicolon is a comment delimiter"""
-
-        # load the configuration from file
-        self.setup_with_file('etc/nagios_antivirg.cfg')
-
 
         # the global configuration must be valid
         self.assert_(
@@ -69,10 +65,6 @@ class TestConfig(ShinkenTest):
            the semicolon.
 
         """
-
-        # load the configuration from file
-        self.setup_with_file('etc/nagios_antivirg.cfg')
-
 
         # the global configuration must be valid
         self.assert_(
