@@ -70,6 +70,7 @@ from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from trigger import Trigger, Triggers
 from pack import Pack, Packs
 
+from shinken.util import split_semicolon
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
@@ -530,11 +531,10 @@ class Config(Item):
             if line.startswith("# IMPORTEDFROM="):
                 filefrom = line.split('=')[1]
                 continue
-            # Protect \; to be considered as comments
-            line = line.replace('\;', '__ANTI-VIRG__')
-            line = line.split(';')[0].strip()
-            # Now we removed real comments, replace them with just ;
-            line = line.replace('__ANTI-VIRG__', ';')
+
+            # Remove comments
+            line = split_semicolon(line)[0].strip()
+
             # A backslash means, there is more to come
             if re.search("\\\s*$", line) is not None:
                 continuation_line = True
