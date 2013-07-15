@@ -175,11 +175,9 @@ class SchedulingItem(Item):
 
     # Add an attempt but cannot be more than max_check_attempts
     def add_attempt(self):
-        if not self.checked_by_child:
-            self.attempt += 1
-            self.attempt = min(self.attempt, self.max_check_attempts)
-        else:
-            self.checked_by_child = False
+        self.attempt += 1
+        self.attempt = min(self.attempt, self.max_check_attempts)
+
 
 
     # Return True if attempt is at max
@@ -835,12 +833,14 @@ class SchedulingItem(Item):
                 self.attempt = 1
                 self.state_type = 'HARD'
 
+
         # OK following a NON-OK.
         elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
-                self.add_attempt()
+                if not c.is_dependent:
+                    self.add_attempt()
                 self.raise_alert_log_entry()
                 # Eventhandler gets OK;SOFT;++attempt, no notification needed
                 self.get_event_handlers()
@@ -920,7 +920,8 @@ class SchedulingItem(Item):
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.state_type == 'SOFT':
-                self.add_attempt()
+                if not c.is_dependent:
+                    self.add_attempt()
                 if self.is_max_attempts():
                     # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
@@ -1303,7 +1304,8 @@ class SchedulingItem(Item):
                       timeout=timeout,
                       poller_tag=poller_tag,
                       env=env,
-                      module_type=module_type)
+                      module_type=module_type,
+                      dependency_check=True)
 
             self.actions.append(c)
             #print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)

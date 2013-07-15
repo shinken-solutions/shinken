@@ -188,9 +188,6 @@ class Service(SchedulingItem):
         'act_depend_of_me': ListProp(default=[]),
         # elements that depend of me
         'chk_depend_of_me': ListProp(default=[]),
-        # if a checked was triggered by a dependency (host or service).
-        # Reset to false at each HARD state
-        'checked_by_child': BoolProp(default=False),
 
         'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked

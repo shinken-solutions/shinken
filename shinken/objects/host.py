@@ -190,10 +190,6 @@ class Host(SchedulingItem):
         'chk_depend_of_me':     StringProp(default=[]),
         'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
-        # if a checked was triggered by a dependency (host or service).
-        # Reset to false at each HARD state
-        'checked_by_child': BoolProp(default=False),
-
         # no brok ,to much links
         'services':             StringProp(default=[]),
 
