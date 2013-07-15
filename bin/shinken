@@ -23,7 +23,7 @@
 
 """
 
-Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
+Warning: THIS IS A PREVIEW, and ugly code that looks as a script.
 
 """
 
@@ -37,6 +37,7 @@ import shutil
 import zipfile
 import tarfile
 import pycurl
+import urllib
 import ConfigParser
 from StringIO import StringIO
 
@@ -51,8 +52,9 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.log import logger
+from shinken.log import logger, cprint
 from shinken.objects.config import Config
+
 
 logger.set_level(logger.DEBUG)
 logger.set_display_time(False)
@@ -154,6 +156,54 @@ def read_package_json(fd):
 
 
 
+def search(look_at):
+    # Now really publish it
+    proxy = CONFIG['shinken.io']['proxy']
+    api_key = CONFIG['shinken.io']['api_key']
+    
+    # Ok we will push the file with a 10s timeout
+    c = pycurl.Curl()
+    c.setopt(c.POST, 0)
+    c.setopt(c.CONNECTTIMEOUT, 10)
+    c.setopt(c.TIMEOUT, 10)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+
+    args = {'keywords':','.join(look_at)}
+    c.setopt(c.URL, str(URI + '/searchcli?'+urllib.urlencode(args)))
+    response = StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, response.write)
+    if DEBUG:
+        c.setopt(c.VERBOSE, 1)
+    c.perform()
+    r = c.getinfo(pycurl.HTTP_CODE)
+    c.close()
+    if r != 200:
+        logger.error("There was a critical error : %s" % response.getvalue())
+        sys.exit(2)
+    else:    
+        ret  = json.loads(response.getvalue().replace('\\/', '/'))
+        status = ret.get('status')
+        result   = ret.get('result')
+        if status != 200:
+            logger.log(result)
+            return []
+        return result
+
+
+
+def print_search_matches(matches):
+    if len(matches) == 0:
+        print "Sorry, no match found in shinken.io"
+        return
+    for p in matches:
+        name = p['name']
+        user_id = p['user_id']
+        keywords = p['keywords']
+        description = p['description']
+        cprint('%s ' %  name , 'green', end='')
+        cprint('(%s) [%s] : %s' %  (user_id, ','.join(keywords), description))
+    
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
@@ -253,7 +303,15 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                 to_pack = args[1]
             archive = create_archive(to_pack)
             publish_archive(archive)
-            
+
+
+        if args[0] == 'search':
+            look_at = args[1:]
+            #print "DEBUG: We will search for", look_at
+            matches = search(look_at)
+
+            #print "DEBUG: FOUNDED", matches
+            print_search_matches(matches)
 
 
     if opts.upload:
