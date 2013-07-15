@@ -119,6 +119,7 @@ test_modules_nrpe_poller.py
 test_checkmodulations.py
 test_macromodulations.py
 test_module_file_tag.py
+test_antivirg.py
 
 
 # takes long
