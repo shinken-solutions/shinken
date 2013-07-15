@@ -101,4 +101,6 @@ To Benoit Dunand-Laisin for his bug report about livestatus command management r
 To Alexandre Veyrenc for his patch about Graphite management of perfdata with spare in names
 To Frederic Mohier for his fix about nmap discovery and windows
 To Mickaël Falck for his patch about network packs interface new parameters
+To Squizou for his patch about ; split code
+
 
