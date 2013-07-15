@@ -90,7 +90,7 @@ def split_semicolon(line, maxsplit=None):
     # Join parts  to the next one, if ends with a '\'
     # because we mustn't split if the semicolon is escaped
     i = 0
-    while i < splitted_line_size:
+    while i < splitted_line_size-1:
 
         # for each part, check if its ends with a '\'
         ends = splitted_line[i].endswith('\\')
