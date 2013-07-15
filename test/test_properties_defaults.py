@@ -788,7 +788,6 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('aggregation', ''),
         ('service_dependencies', ''),
         ('custom_views', ''),
-	('merge_host_contacts', '0'),
         ])
 
     def setUp(self):
