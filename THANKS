@@ -101,4 +101,10 @@ To Benoit Dunand-Laisin for his bug report about livestatus command management r
 To Alexandre Veyrenc for his patch about Graphite management of perfdata with spare in names
 To Frederic Mohier for his fix about nmap discovery and windows
 To Mickaël Falck for his patch about network packs interface new parameters
+To Squizou for his patch about ; split code
+To Alexander Springer for his patch about merging host and services contacts
+To Stefan Taute for his patch about syslog module collisions
+To Jean-Claude Computing for his patch about syslog module collisions too
+To Robin Gloster for his bug fix about bad wmi ini dir
+
 

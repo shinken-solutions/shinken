@@ -515,7 +515,7 @@ class TestEscalations(ShinkenTest):
         # escalation in 5s (5s = interval_length, 1 for escalation time)
         print "---" * 200
         print "We wait a bit, but not enough to go in escalation level2"
-        sleep(2)
+        time.sleep(2)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
@@ -526,7 +526,7 @@ class TestEscalations(ShinkenTest):
 
         print "---" * 200
         print "OK NOW we will have an escalation!"
-        sleep(5)
+        time.sleep(5)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
@@ -552,7 +552,7 @@ class TestEscalations(ShinkenTest):
         # So here we should have a new notification for level2
         print "*--*--" * 20
         print "Ok now another notification during the escalation 2"
-        sleep(10)
+        time.sleep(10)
 
         # One more bad, we say: he, it's still near 1 hour, so still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -562,7 +562,7 @@ class TestEscalations(ShinkenTest):
         # Ok now go in the Level3 thing
         print "*--*--" * 20
         print "Ok now goes in level3 too"
-        sleep(10)
+        time.sleep(10)
 
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -580,7 +580,7 @@ class TestEscalations(ShinkenTest):
         self.assert_('ToLevel3-shortinterval' in n.already_start_escalations)
 
         # Make a loop for pass the next notification
-        sleep(5)
+        time.sleep(5)
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -588,7 +588,7 @@ class TestEscalations(ShinkenTest):
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
 
         # Now way a little bit, and with such low value, the escalation3 value must be ok for this test to pass
-        sleep(5)
+        time.sleep(5)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
