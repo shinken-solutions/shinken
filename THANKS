@@ -102,5 +102,6 @@ To Alexandre Veyrenc for his patch about Graphite management of perfdata with sp
 To Frederic Mohier for his fix about nmap discovery and windows
 To Mickaël Falck for his patch about network packs interface new parameters
 To Squizou for his patch about ; split code
+To Alexander Springer for his patch about merging host and services contacts
 
 
