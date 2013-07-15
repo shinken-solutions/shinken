@@ -445,7 +445,6 @@ class Config(Item):
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        print "FILE", cfg_file_name
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
                         res.write('\n')
