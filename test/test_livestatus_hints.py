@@ -37,7 +37,7 @@ from shinken.comment import Comment
 sys.setcheckinterval(10000)
 
 
-class PerfTest(ShinkenTest):
+class PerfTst(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -54,10 +54,10 @@ class PerfTest(ShinkenTest):
         self.sched.broks = {}
 
 
-class TestConfigBig(PerfTest):
+class TestConfigBig(ShinkenTest):
     def setUp(self):
         print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_10r_1000h_20000s.cfg')
+        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         # ...test_router_09
         # ...test_host_0999
         self.testid = str(os.getpid() + random.randint(1, 1000))
@@ -72,6 +72,25 @@ class TestConfigBig(PerfTest):
         self.livestatus_path = None
         self.nagios_config = None
         self.adjust_object_prefixes()
+
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.livestatus_broker = None
 
     def adjust_object_prefixes(self):
         host = [h for h in self.sched.hosts if "host" in h.host_name][0]
@@ -131,7 +150,7 @@ Filter: service_description = %s
 And: 2
 """ % (self.host_format % i, self.service_format % 3)
             if (self.host_format % i) + '/' + (self.service_format % 3) in known_services:
-                real_services += 1 
+                real_services += 1
         request += """Or: %d
 Columns: description display_name state host_alias host_address plugin_output notes last_check next_check state_type current_attempt max_check_attempts last_state_change last_hard_state_change perf_data scheduled_downtime_depth acknowledged host_acknowledged host_scheduled_downtime_depth has_been_checked host_name check_command
 OutputFormat:json
@@ -530,46 +549,6 @@ Stats
 
 
 """
-
-class TestConfigCrazy(TestConfigBig):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_50r_5000h_30000s.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        self.adjust_object_prefixes()
-
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-
-
-class TestConfigSmall(TestConfigBig):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        self.adjust_object_prefixes()
-
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfigSmall, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
 
 if __name__ == '__main__':
