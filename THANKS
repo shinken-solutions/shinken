@@ -105,5 +105,6 @@ To Squizou for his patch about ; split code
 To Alexander Springer for his patch about merging host and services contacts
 To Stefan Taute for his patch about syslog module collisions
 To Jean-Claude Computing for his patch about syslog module collisions too
+To Robin Gloster for his bug fix about bad wmi ini dir
 
 
