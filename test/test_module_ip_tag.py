@@ -31,7 +31,7 @@ from shinken.log import logger
 from shinken.objects.module import Module
 
 from shinken.modulesctx import modulesctx
-ip_tag_arbiter = modulesctx.get_module('ip_tag')
+ip_tag_arbiter = modulesctx.get_module('ip-tag')
 get_instance   = ip_tag_arbiter.get_instance
 
 

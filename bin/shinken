@@ -96,12 +96,20 @@ def create_archive(to_pack):
         logger.error('Missing name entry in the package.json file. Cannot pack')
         sys.exit(2)
 
+
+    # return True for files we want to exclude
+    def tar_exclude_filter(f):
+        # if the file start with .git, we bail out
+        if f.startswith('./.git'):
+            return True
+        return False
+
     # Now prepare a destination file
     tmp_dir  = tempfile.gettempdir()
     tmp_file = os.path.join(tmp_dir, name+'.tar.gz')
     tar = tarfile.open(tmp_file, "w:gz")
     os.chdir(to_pack)
-    tar.add(".",arcname='.')
+    tar.add(".",arcname='.', exclude=tar_exclude_filter)
     tar.close()
     logger.debug("Saved file %s" % tmp_file)
     return tmp_file
@@ -204,6 +212,113 @@ def print_search_matches(matches):
         cprint('%s ' %  name , 'green', end='')
         cprint('(%s) [%s] : %s' %  (user_id, ','.join(keywords), description))
     
+
+def grab_package(pname):
+    print "Trying to grab package", pname
+
+    # Now really publish it
+    proxy = CONFIG['shinken.io']['proxy']
+    api_key = CONFIG['shinken.io']['api_key']
+    
+    # Ok we will push the file with a 10s timeout
+    c = pycurl.Curl()
+    c.setopt(c.POST, 0)
+    c.setopt(c.CONNECTTIMEOUT, 10)
+    c.setopt(c.TIMEOUT, 10)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+
+    c.setopt(c.URL, str(URI + '/grab/%s' % pname))
+    response = StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, response.write)
+    if DEBUG:
+        c.setopt(c.VERBOSE, 1)
+    c.perform()
+    r = c.getinfo(pycurl.HTTP_CODE)
+    c.close()
+    if r != 200:
+        logger.error("There was a critical error : %s" % response.getvalue())
+        sys.exit(2)
+    else:
+        ret = response.getvalue()
+        print "GOT A RETURN OF", len(ret)
+        return ret
+
+
+
+
+def install_package(pname, raw):
+    print "We must install the package", pname, "of size", len(raw)
+    tmpdir = os.path.join(tempfile.gettempdir(), pname)
+    print "WIll unpack the package into", tmpdir
+    
+    if os.path.exists(tmpdir):
+        print "removing previous tmp dir"
+        shutil.rmtree(tmpdir)
+    print "Creating temporary dir", tmpdir
+    os.mkdir(tmpdir)
+
+    # open a file with the content
+    f = StringIO(raw)
+    tar_file = tarfile.open(fileobj=f, mode="r")
+    print "tar file contents:"
+    for i in tar_file.getmembers():
+        path = i.name
+        if path == '.':
+            continue
+        if not path.startswith('./') or '..' in path:
+            print "SECURITY: the path %s seems dangerous!" % path
+            return
+        print "PATH:%s" % path
+    # Extract all in the tmpdir
+    tar_file.extractall(tmpdir)
+    tar_file.close()
+
+
+    package_json_p = os.path.join(tmpdir, 'package.json')
+    if not os.path.exists(package_json_p):
+        print "Error : bad archive : Missing file", package_json_p
+        return None
+    package_json = read_package_json(open(package_json_p))
+    print "WILL Install package with", package_json
+
+    modules_dir = CONFIG['paths']['modules']
+    share_dir   = CONFIG['paths']['share']
+    for d in (modules_dir, share_dir):
+        if not os.path.exists(d):
+            logger.error("The installation directory %s is missing!" % d)
+            return
+
+    p_share  = os.path.join(tmpdir, 'share')
+    p_etc    = os.path.join(tmpdir, 'etc')
+
+    # Now install the package from $TMP$/module/* to $MODULES$/pname/*
+    p_module = os.path.join(tmpdir, 'module')
+    if os.path.exists(p_module):
+        logger.info("Installing the module package data")
+        mod_dest = os.path.join(p_module, pname)
+        if os.path.exists(mod_dest):
+            logger.info("Removing previous module install at %s" % mod_dest)
+            shutil.rmtree(mod_dest)
+        # shutil will do the create dir
+        shutil.copytree(p_module, mod_dest)
+        logger.info("Copy done in the module directory %s" % mod_dest)
+
+    # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
+    p_pack = os.path.join(tmpdir, 'pack')
+    if os.path.exists(p_pack):
+        logger.info("Installing the pack package data")
+        pack_dest = os.path.join(p_pack, pname)
+        if os.path.exists(pack_dest):
+            logger.info("Removing previous pack install at %s" % pack_dest)
+            shutil.rmtree(pack_dest)
+        # shutil will do the create dir
+        shutil.copytree(p_pack, pack_dest)
+        logger.info("Copy done in the pack directory %s" % pack_dest)
+
+    
+        
+
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
@@ -312,6 +427,12 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
 
             #print "DEBUG: FOUNDED", matches
             print_search_matches(matches)
+
+        if args[0] == 'install':
+            to_install = args[1]
+            #print "DEBUG: We will search for", look_at
+            raw = grab_package(to_install)
+            install_package(to_install, raw)
 
 
     if opts.upload:

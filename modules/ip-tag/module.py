@@ -27,7 +27,12 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
-import socket
+try:
+    from gevent import socket
+    from gevent.pool import Pool
+except ImportError:
+    import socket
+    Pool = None
 
 from IPy import IP
 from shinken.basemodule import BaseModule
@@ -69,13 +74,23 @@ class Ip_Tag_Arbiter(BaseModule):
             logger.debug("[IP Tag] Ignoring hosts : %s" % self.ignore_hosts)
         else:
             self.ignore_hosts = []
+        self.pool_size = int(getattr(mod_conf, 'pool_size', '1'))
+
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         logger.info("[IP Tag] Initialization of the ip range tagger module")
 
+
     def hook_early_configuration(self, arb):
         logger.info("[IpTag] in hook late config")
+
+        # Get a pool for gevent jobs
+        if Pool:
+            pool = Pool(100)
+        else:
+            pool = None
+        
         for h in arb.conf.hosts:
             if not hasattr(h, 'address') and not hasattr(h, 'host_name'):
                 continue
@@ -103,11 +118,23 @@ class Ip_Tag_Arbiter(BaseModule):
             except:
                 pass
 
+            if pool:
+                pool.spawn(self.job, h, h_ip, addr)
+            else:
+                self.job(h, h_ip, addr)
+
+        # Now wait for all jobs to finish if need
+        if pool:
+            pool.join()
+
+
+    # Main job, will manage eachhost in asyncronous mode thanks to gevent
+    def job(self, h, h_ip, addr):
             # Ok, try again with name resolution
             if not h_ip:
                 try:
                     h_ip = socket.gethostbyname(addr)
-                except:
+                except Exception, exp:
                     pass
 
             # Ok, maybe we succeed :)
@@ -123,17 +150,13 @@ class Ip_Tag_Arbiter(BaseModule):
                 # set put the value even if the property exists
                 if self.method == 'append':
                     orig_v = getattr(h, self.property, '')
-                    logger.debug("[IP Tag] Orig_v: %s" % str(orig_v))
                     new_v = ','.join([orig_v, self.value])
-                    logger.debug("[IP Tag] Newv %s" % new_v)
                     setattr(h, self.property, new_v)
 
                 # Same but we put before
                 if self.method == 'prepend':
                     orig_v = getattr(h, self.property, '')
-                    logger.debug("[File Tag] Orig_v: %s" % str(orig_v))
                     new_v = ','.join([self.value, orig_v])
-                    logger.debug("[File Tag] Newv %s" % new_v)
                     setattr(h, self.property, new_v)
 
                 if self.method == 'replace':
