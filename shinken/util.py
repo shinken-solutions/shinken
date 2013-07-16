@@ -27,7 +27,7 @@ import time
 import re
 import copy
 import sys
-import shutil
+#import shutil
 import os
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -73,13 +73,12 @@ def safe_print(*args):
     # Ok, now print it :)
     print u' '.join(l)
 
+
 def split_semicolon(line, maxsplit=None):
     """Split a line on semicolons characters but not on the escaped semicolons
-
     """
     # Split on ';' character
     splitted_line = line.split(';')
-
 
     splitted_line_size = len(splitted_line)
 
@@ -90,7 +89,7 @@ def split_semicolon(line, maxsplit=None):
     # Join parts  to the next one, if ends with a '\'
     # because we mustn't split if the semicolon is escaped
     i = 0
-    while i < splitted_line_size-1:
+    while i < splitted_line_size - 1:
 
         # for each part, check if its ends with a '\'
         ends = splitted_line[i].endswith('\\')
@@ -101,20 +100,18 @@ def split_semicolon(line, maxsplit=None):
 
         # append the next part to the current if it is not the last and the current
         # ends with '\' or if there is more than maxsplit parts
-        if (ends or i>=maxsplit) and i < splitted_line_size-1:
+        if (ends or i >= maxsplit) and i < splitted_line_size - 1:
 
-            splitted_line[i] = ";".join([splitted_line[i], splitted_line[i+1]])
+            splitted_line[i] = ";".join([splitted_line[i], splitted_line[i + 1]])
 
             # delete the next part
-            del splitted_line[i+1]
+            del splitted_line[i + 1]
             splitted_line_size -= 1
-
 
         # increase i only if we don't have append because after append the new
         # string can end with '\'
         else:
             i += 1
-
 
     return splitted_line
 
@@ -411,6 +408,7 @@ def strip_and_uniq(tab):
 
 #################### Pattern change application (mainly for host) #######
 
+
 def expand_xy_pattern(pattern):
     ns = NodeSet(str(pattern))
     if len(ns) > 1:
@@ -434,7 +432,7 @@ def got_generation_rule_pattern_change(xy_couples):
     if xy_couples == []:
         return []
     (x, y) = xy_cpl[0]
-    for i in xrange(x, y+1):
+    for i in xrange(x, y + 1):
         n = got_generation_rule_pattern_change(xy_cpl[1:])
         if n != []:
             for e in n:
@@ -454,7 +452,7 @@ def got_generation_rule_pattern_change(xy_couples):
 # output = Unit 3 Port 2 Admin 1
 def apply_change_recursive_pattern_change(s, rule):
     #print "Try to change %s" % s, 'with', rule
-    new_s = s
+    #new_s = s
     (i, m, t) = rule
     #print "replace %s by %s" % (r'%s' % m, str(i)), 'in', s
     s = s.replace(r'%s' % m, str(i))
@@ -568,7 +566,7 @@ def get_key_value_sequence(entry, default_value=None):
                         xy_couples.append((x, y))
                         # We must search if we've gotother X-Y, so
                         # we delete this one, and loop
-                        key = key.replace('[%d-%d]' % (x, y), 'Z'*10)
+                        key = key.replace('[%d-%d]' % (x, y), 'Z' * 10)
                     else:  # no more X-Y in it
                         still_loop = False
 
@@ -612,7 +610,6 @@ def get_key_value_sequence(entry, default_value=None):
     return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
 
 
-
 ############################### Files management #######################
 # We got a file like /tmp/toto/toto2/bob.png And we want to be sure the dir
 # /tmp/toto/toto2/ will really exists so we can copy it. Try to make if if need
@@ -626,7 +623,7 @@ def expect_file_dirs(root, path):
     tmp_dir = root
     for d in dirs:
         _d = os.path.join(tmp_dir, d)
-        logger.info ('Verify the existence of file %s' % (_d))
+        logger.info('Verify the existence of file %s' % (_d))
         if not os.path.exists(_d):
             try:
                 os.mkdir(_d)
