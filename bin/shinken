@@ -78,6 +78,18 @@ URI = 'shinken.io'
 DEBUG = True
 
 
+
+
+def _copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            _copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
 def create_archive(to_pack):
     # First try to look if the directory we are trying to pack is valid
     to_pack = os.path.abspath(to_pack)
@@ -100,7 +112,10 @@ def create_archive(to_pack):
     # return True for files we want to exclude
     def tar_exclude_filter(f):
         # if the file start with .git, we bail out
+        # Also ending with ~ (Thanks emacs...)
         if f.startswith('./.git'):
+            return True
+        if f.endswith('~'):
             return True
         return False
 
@@ -284,19 +299,20 @@ def install_package(pname, raw):
 
     modules_dir = CONFIG['paths']['modules']
     share_dir   = CONFIG['paths']['share']
-    for d in (modules_dir, share_dir):
+    packs_dir   = CONFIG['paths']['packs']
+    etc_dir     = CONFIG['paths']['etc']
+    for d in (modules_dir, share_dir, packs_dir):
         if not os.path.exists(d):
             logger.error("The installation directory %s is missing!" % d)
             return
 
     p_share  = os.path.join(tmpdir, 'share')
-    p_etc    = os.path.join(tmpdir, 'etc')
 
     # Now install the package from $TMP$/module/* to $MODULES$/pname/*
     p_module = os.path.join(tmpdir, 'module')
     if os.path.exists(p_module):
         logger.info("Installing the module package data")
-        mod_dest = os.path.join(p_module, pname)
+        mod_dest = os.path.join(modules_dir, pname)
         if os.path.exists(mod_dest):
             logger.info("Removing previous module install at %s" % mod_dest)
             shutil.rmtree(mod_dest)
@@ -308,13 +324,22 @@ def install_package(pname, raw):
     p_pack = os.path.join(tmpdir, 'pack')
     if os.path.exists(p_pack):
         logger.info("Installing the pack package data")
-        pack_dest = os.path.join(p_pack, pname)
+        pack_dest = os.path.join(packs_dir, pname)
         if os.path.exists(pack_dest):
             logger.info("Removing previous pack install at %s" % pack_dest)
             shutil.rmtree(pack_dest)
         # shutil will do the create dir
         shutil.copytree(p_pack, pack_dest)
         logger.info("Copy done in the pack directory %s" % pack_dest)
+
+    # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
+    p_etc = os.path.join(tmpdir, 'etc')
+    if os.path.exists(p_etc):
+        logger.info("Merging the etc package data into your etc directory")
+        # We don't use shutils because it NEED etc_dir to be non existant...
+        # Come one guys..... cp is not as terrible as this...
+        _copytree(p_etc, etc_dir)
+        logger.info("Copy done in the etc directory %s" % etc_dir)
 
     
         

@@ -109,7 +109,8 @@ class HTTPClient(object):
         # Do NOT close the connexion, we want a keep alive
 
         if r != 200:
-            logger.error("There was a critical error : %s" % response.getvalue())
+            err = response.getvalue()
+            logger.error("There was a critical error : %s" % err)
             raise Exception ('Connexion error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl
@@ -156,7 +157,8 @@ class HTTPClient(object):
         # Do NOT close the connexion
         #c.close()
         if r != 200:
-            logger.error("There was a critical error : %s" % response.getvalue())
+            err = response.getvalue()
+            logger.error("There was a critical error : %s" % err)
             raise Exception ('Connexion error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl

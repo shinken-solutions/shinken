@@ -1,1 +1,2 @@
-check_ping.graph
+${uri}render/?width=586&height=308&target=legendValue(alias(${host}.${service}.rta%2C%22Response%20Time%22)%2C%22last%22)&title=Response%20Time%20on%20${host}&yMin=0
+${uri}render/?width=586&height=308&target=legendValue(alias(${host}.${service}.pl%2C%22Paquet%20lost%20percentage%22)%2C%22last%22)&title=Packet%20Lost%20Percentage%20on%20${host}&yMin=0&yMax=100

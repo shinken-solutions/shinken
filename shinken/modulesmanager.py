@@ -33,6 +33,9 @@ import imp
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+# We need to manage pre-2.0 module types with _ into the new 2.0 - mode
+def uniform_module_type(s):
+    return s.replace('_', '-')
 
 class ModulesManager(object):
     """This class is use to manage modules and call callback"""
@@ -41,7 +44,7 @@ class ModulesManager(object):
         self.modules_path = modules_path
         self.modules_type = modules_type
         self.modules = modules
-        self.allowed_types = [plug.module_type for plug in modules]
+        self.allowed_types = [uniform_module_type(plug.module_type) for plug in modules]
         self.imported_modules = []
         self.modules_assoc = []
         self.instances = []
@@ -57,7 +60,7 @@ class ModulesManager(object):
     # Set the modules requested for this manager
     def set_modules(self, modules):
         self.modules = modules
-        self.allowed_types = [mod.module_type for mod in modules]
+        self.allowed_types = [uniform_module_type(mod.module_type) for mod in modules]
 
 
     def set_max_queue_size(self, max_queue_size):
@@ -116,10 +119,10 @@ class ModulesManager(object):
         # Now we want to find in theses modules the ones we are looking for
         del self.modules_assoc[:]
         for mod_conf in self.modules:
-            module_type = mod_conf.module_type
+            module_type = uniform_module_type(mod_conf.module_type)
             is_find = False
             for module in self.imported_modules:
-                if module.properties['type'] == module_type:
+                if uniform_module_type(module.properties['type']) == module_type:
                     self.modules_assoc.append((mod_conf, module))
                     is_find = True
                     break
