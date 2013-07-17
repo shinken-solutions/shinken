@@ -243,15 +243,6 @@ function recheck_now_all(){
 
 
 /* Now actions buttons : */
-function submit_check_ok_all(){
-    $.each(selected_elements, function(idx, name){
-        submit_check(unid_name(name), '0', 'Forced OK from WebUI');
-    });
-    flush_selected_elements();
-}
-
-
-/* Now actions buttons : */
 function try_to_fix_all(){
     $.each(selected_elements, function(idx, name){
         try_to_fix(unid_name(name));
