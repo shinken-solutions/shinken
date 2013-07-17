@@ -153,6 +153,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                     self.conn = pymongo.Connection(self.mongodb_uri)
             self.db = self.conn[self.database]
             self.db[self.collection].ensure_index([('host_name', pymongo.ASCENDING), ('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='logs_idx')
+            self.db[self.collection].ensure_index([('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='time_1_lineno_1')
             if self.replica_set:
                 pass
                 # This might be a future option prefer_secondary
