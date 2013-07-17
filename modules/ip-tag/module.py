@@ -41,7 +41,7 @@ from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter'],
-    'type': 'ip_tag',
+    'type': 'ip-tag',
     }
 
 
