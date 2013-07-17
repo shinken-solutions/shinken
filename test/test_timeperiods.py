@@ -413,5 +413,48 @@ class TestTimeperiods(ShinkenTest):
         print "T next", t_next
         self.assert_(t_next == "Wed Jul 14 00:00:00 2010")
 
+    def test_dayweek_exclusion_timeperiod_with_day_range(self):
+        self.print_header()
+        t = Timeperiod()
+        # Get the 13 of july 2010 at 15:00, tuesday
+        july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
+        print july_the_13
+
+        # Now we add this timeperiod an exception
+        t2 = Timeperiod()
+        t2.timeperiod_name = ''
+        t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-24:00')
+        t.exclude = [t2]
+
+        t.resolve_daterange(t.dateranges, '2013-03-01 - 2020-03-01 00:00-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_13)
+        t_next = time.asctime(time.localtime(t_next))
+
+        now = time.time()
+        now = time.asctime(time.localtime(now))
+
+        print "T next", t_next
+    #    print "T now", now
+    #    self.assert_(t_next == now)
+        self.assert_(t_next == "Wed Jul 14 00:00:00 2010")
+
+    # short test to check the invalid function of timeranges
+    def test_next_invalid_day(self):
+        self.print_header()
+
+        # Get the 13 of july 2010 at 15:00, tuesday
+        july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
+        print july_the_13
+
+        t = Timeperiod()
+        t.timeperiod_name = 'test_next_invalid_day'
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-24:00')
+        t.exclude = []
+
+        t_next_invalid = t.get_next_invalid_time_from_t(july_the_13)
+        t_next_invalid = time.asctime(time.localtime(t_next_invalid))
+        print "T next invalid", t_next_invalid
+        self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
+
 if __name__ == '__main__':
     unittest.main()
