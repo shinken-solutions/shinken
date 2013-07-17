@@ -85,6 +85,8 @@ def _copytree(src, dst, symlinks=False, ignore=None):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
+            if not os.path.exists(d):
+                os.mkdir(d)
             _copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
@@ -301,6 +303,7 @@ def install_package(pname, raw):
     share_dir   = CONFIG['paths']['share']
     packs_dir   = CONFIG['paths']['packs']
     etc_dir     = CONFIG['paths']['etc']
+    test_dir   = CONFIG['paths'].get('test', '/__DONOTEXISTS__')
     for d in (modules_dir, share_dir, packs_dir):
         if not os.path.exists(d):
             logger.error("The installation directory %s is missing!" % d)
@@ -340,6 +343,19 @@ def install_package(pname, raw):
         # Come one guys..... cp is not as terrible as this...
         _copytree(p_etc, etc_dir)
         logger.info("Copy done in the etc directory %s" % etc_dir)
+
+
+    # Now install the tests from $TMP$/tests/* to $TESTS$/tests/*
+    # if the last one is specified on the configuration file (optionnal)
+    p_tests = os.path.join(tmpdir, 'test')
+    if os.path.exists(p_tests) and os.path.exists(test_dir):
+        logger.info("Merging the test package data into your test directory")
+        # We don't use shutils because it NEED etc_dir to be non existant...
+        # Come one guys..... cp is not as terrible as this...
+        print "COPY", p_tests, test_dir
+        _copytree(p_tests, test_dir)
+        logger.info("Copy done in the test directory %s" % test_dir)
+
 
     
         
