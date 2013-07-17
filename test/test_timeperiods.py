@@ -454,7 +454,8 @@ class TestTimeperiods(ShinkenTest):
         t_next_invalid = t.get_next_invalid_time_from_t(july_the_13)
         t_next_invalid = time.asctime(time.localtime(t_next_invalid))
         print "T next invalid", t_next_invalid
-        self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
+        #self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
+        self.assert_(t_next_invalid == "Wed Jul 14 00:00:00 2010")
 
 if __name__ == '__main__':
     unittest.main()
