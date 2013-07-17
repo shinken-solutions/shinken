@@ -96,9 +96,9 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
 
     properties = dict([
         ('prefix', '/usr/local/shinken/'),
-        ('workdir', ''),
+        ('workdir', '/var/run/shinken/'),
         ('config_base_dir', ''),
-        ('modulesdir', 'modules'),
+        ('modulesdir', '/var/lib/shinken/modules'),
         ('use_local_log', '1'),
         ('log_level', 'WARNING'),
         ('local_log', 'arbiterd.log'),
@@ -220,7 +220,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('webui_lock_file', 'webui.pid'),
         ('webui_port', '8080'),
         ('webui_host', '0.0.0.0'),
-        
+
         ('use_multiprocesses_serializer', '0'),
         ('daemon_thread_pool_size', '8'),
         ])
@@ -788,11 +788,11 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
-        ('macromodulations', ''),        
+        ('macromodulations', ''),
         ('aggregation', ''),
         ('service_dependencies', ''),
         ('custom_views', ''),
-	('merge_host_contacts', '0'),
+        ('merge_host_contacts', '0'),
         ])
 
     def setUp(self):
