@@ -60,12 +60,13 @@ except ImportError, exp:  # Like in nt system or Android
 curdir = os.getcwd()
 
 daemons_config = {
-    Broker:       "../etc/brokerd.ini",
-    Poller:       "../etc/pollerd.ini",
-    Reactionner:  "../etc/reactionnerd.ini",
-    Shinken:      "../etc/schedulerd.ini",
+    Broker:       "../etc/daemons/brokerd.ini",
+    Poller:       "../etc/daemons/pollerd.ini",
+    Reactionner:  "../etc/daemons/reactionnerd.ini",
+    Shinken:      "../etc/daemons/schedulerd.ini",
     Arbiter:    ["../etc/shinken.cfg"]
 }
+
 
 HIGH_PORT = 65488
 run = 0   # We will open some ports but not close them (yes it's not good) and
