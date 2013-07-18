@@ -122,7 +122,7 @@ class AWS_importer_arbiter(BaseModule):
             for (k, v) in n.extra.iteritems():
                 prop = '_EC2_'+k.upper()
                 if isinstance(v, list):
-                    h[prop] = ','.join(v)
+                    h[prop] = ','.join(filter(None,v))
                 elif isinstance(v, dict):
                     h[prop] = ','.join(['%s:%s' % (i, j) for (i,j) in v.iteritems()])
                 else:
