@@ -1,3 +1,0 @@
-[submodule "modules/webui"]
-	path = modules/webui
-	url = git@github.com:shinken-monitoring/mod-webui.git
