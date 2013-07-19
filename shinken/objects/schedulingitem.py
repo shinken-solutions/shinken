@@ -839,7 +839,7 @@ class SchedulingItem(Item):
             self.unacknowledge_problem()
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
-                if not c.is_dependent:
+                if not c.is_dependent():
                     self.add_attempt()
                 self.raise_alert_log_entry()
                 # Eventhandler gets OK;SOFT;++attempt, no notification needed
@@ -920,7 +920,7 @@ class SchedulingItem(Item):
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.state_type == 'SOFT':
-                if not c.is_dependent:
+                if not c.is_dependent():
                     self.add_attempt()
                 if self.is_max_attempts():
                     # Ok here is when we just go to the hard state
