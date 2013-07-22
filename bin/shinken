@@ -40,6 +40,8 @@ import pycurl
 import urllib
 import ConfigParser
 import imp
+import shlex
+import readline
 from StringIO import StringIO
 
 try:
@@ -75,7 +77,122 @@ else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.ini'
 
 
+
+
+# Commander is the main class for managing the CLI session and behavior
+class CLICommander(object):
+    def __init__(self, config):
+        self.keywords = {}
+        self.config = config
+        #We will now try to load the keywords from the modules
+        self.load_cli_mods()
+
+
+    def load_cli_mods(self):
+
+        # Main list of keywords for the first parameter
+        self.keywords = {}
+        cli_mods_dir = os.path.abspath(self.config['paths']['cli'])
+        logger.debug ("WILL LOAD THE CLI DIR %s" %  cli_mods_dir)
+        cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
+        print "BLA?", cli_mods_dirs
+        for d in cli_mods_dirs:
+            f = os.path.join(d, 'cli.py')
+            print "EXISTS?", f
+            if os.path.exists(f):
+                dname = os.path.split(d)[1]
+                # Let's load it, but first att it to sys.path
+                sys.path.append(d)
+                # Load this PATH/cli.py file
+                m = imp.load_source(dname, f)
+                # Link the CONFIG objet into it
+                m.CONFIG = self.config
+                exports = getattr(m, 'exports', {})
+                for (f, v) in exports.iteritems():
+                    m_keywords = v.get('keywords', [])
+                    for k in m_keywords:
+                        e = {'f':f, 'args' : v.get('args', []),
+                             'description':v.get('description', '')}
+                        # Finally save it
+                        self.keywords[k] = e
+                         
+        logger.debug('We load the keywords %s' % self.keywords)
+
+
+    def loop(self):
+        print "CALLING LOOP!"
+        readline.parse_and_bind('tab: complete')
+        readline.parse_and_bind('set editing-mode emacs')
+        # Try to read and save the history when exiting
+        histfile = os.path.join(os.path.expanduser("~"), ".shinken.history")
+        try:
+            readline.read_history_file(histfile)
+        except IOError:
+            pass
+        import atexit
+        atexit.register(readline.write_history_file, histfile)
+
+        while True:
+            try:
+                line = raw_input('> ')
+            except EOFError:
+                print ''
+                break
+            line = line.strip()
+            if line in ['quit', 'bye', 'sayonara']:
+                break
+
+            if not line:
+                continue
+            if line.startswith('!'):
+                self.execute_shell(line[1:])
+                continue
+            # More cleassic command
+            print 'ENTERED: "%s"' % line
+            args = shlex.split(line.encode('utf8', 'ignore'))
+            print "WANT TO CALL WITH ARGS", args
+            self.one_loop(args)
+            
+
+    
+    def execute_shell(self, line):
+        output = os.popen(line).read()
+        print output
+
+
+    # Execute a function based on the command line
+    def one_loop(self, command_args):
+        print "ARGS", command_args
+        keyword = command_args.pop(0)
+        mod = self.keywords.get(keyword, None)
+        if mod is None:
+            logger.error("UNKNOWN command %s" % keyword)
+            return
         
+        # Now prepare a new parser, for the command call this time
+        command_parser = optparse.OptionParser(
+            """""",
+            version="%prog " + VERSION)
+        command_parser.prog = keyword
+
+        f_args = []
+        for a in mod.get('args', []):
+            n = a.get('name', None)
+            if n is None:
+                continue
+            default = a.get('default', Dummy)
+            description = a.get('description', '')
+        
+        print "PARSE"
+        cmd_opts, cmd_args = command_parser.parse_args(command_args)
+        print "FIN PARSE"
+
+        print "Load mod", mod
+
+        f = mod.get('f', None)
+        print "CALLING", f, "WITH", cmd_args
+        f(*cmd_args)
+
 
 
 if __name__ == '__main__':
@@ -101,47 +218,17 @@ if __name__ == '__main__':
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
 
-    # Main list of keywords for the first parameter
-    keywords = {}
-    cli_mods_dir = os.path.abspath(CONFIG['paths']['cli'])
-    logger.debug ("WILL LOAD THE CLI DIR %s" %  cli_mods_dir)
-    cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
-    print "BLA?", cli_mods_dirs
-    cli_mods = []
-    for d in cli_mods_dirs:
-        f = os.path.join(d, 'cli.py')
-        print "EXISTS?", f
-        if os.path.exists(f):
-            dname = os.path.split(d)[1]
-            # Let's load it, but first att it to sys.path
-            sys.path.append(d)
-            m = imp.load_source(dname, f)
-            cli_mods.append(m)
-            # Link the CONFIG objet into it
-            m.CONFIG = CONFIG
-            exports = getattr(m, 'exports', {})
-            for (f, v) in exports.iteritems():
-                m_keywords = v.get('keywords', [])
-                for k in m_keywords:
-                    e = {'f':f, 'args' : v.get('args', []),
-                         'description':v.get('description', '')}
-                    keywords[k] = e 
-                         
-    print "WE LOAD", cli_mods
-    print "And keywords", keywords
+    CLI = CLICommander(CONFIG)
 
-
-
-    def hack_sys_argv():
-        
+    # We should look on the sys.argv if we find a valid keywords to
+    # call in one loop or not.
+    def hack_sys_argv():        
         command_values = []
         internal_values = []
         #print "RARGS", parser.rargs
         founded = False
         for arg in sys.argv:
-            print "IS ARG", arg, "in", keywords
-            if arg in keywords:
-                print "FOUNDED!"
+            if arg in CLI.keywords:
                 founded = True
             # Did we found it?
             if founded:
@@ -149,18 +236,15 @@ if __name__ == '__main__':
             else: # ok still not, it's for the shinekn command so
                 internal_values.append(arg)
 
-        print "INTERNAL", internal_values
-        print "COMMAND", command_values
-
         sys.argv = internal_values
         return command_values
             
     # We will remove specific commands from the sys.argv list and keep
     # them for parsing them after
     command_args = hack_sys_argv()
-    
+
+    # Global command parsing
     opts, args = parser.parse_args()
-    print "VAR ARGS", command_args
 
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
@@ -169,46 +253,16 @@ if __name__ == '__main__':
     # Maybe he/she just want to list our commands?
     if opts.do_list:
         print "Available commands:"
-        for (k,m) in keywords.iteritems():
+        for (k,m) in CLI.keywords.iteritems():
             cprint('%s ' %  k , 'green', end='')
             cprint(': %s' %  m['description'])
-
-            #print k,':', m.get('description', '')
         sys.exit(2)
     
     # if just call shinken, we must open a prompt, but will be for another version
     if len(command_args) == 0:
-        parser.print_help()
+        CLI.loop()
         sys.exit(0)
 
-    print "ARGS", command_args
-    keyword = command_args.pop(0)
-    mod = keywords.get(keyword, None)
-    if mod is None:
-        logger.error("UNKNOWN command %s" % keyword)
-        sys.exit(2)
+    # If it's just a one call shot, do it!
+    CLI.one_loop(command_args)
     
-    # Now prepare a new parser, for the command call this time
-    command_parser = optparse.OptionParser(
-        """""",
-        version="%prog " + VERSION)
-    command_parser.prog = keyword
-
-    f_args = []
-    for a in mod.get('args', []):
-        n = a.get('name', None)
-        if n is None:
-            continue
-        default = a.get('default', Dummy)
-        description = a.get('description', '')
-        
-    print "PARSE"
-    cmd_opts, cmd_args = command_parser.parse_args(command_args)
-    print "FIN PARSE"
-
-    print "Load mod", mod
-
-    f = mod.get('f', None)
-    print "GOT ARGS", cmd_args
-    f(*cmd_args)
-
