@@ -87,6 +87,8 @@ class CLICommander(object):
         #We will now try to load the keywords from the modules
         self.load_cli_mods()
 
+        self.completion_matches = []
+        
 
     def load_cli_mods(self):
 
@@ -122,6 +124,10 @@ class CLICommander(object):
     def loop(self):
         print "CALLING LOOP!"
         readline.parse_and_bind('tab: complete')
+        # Use the CLI as completer
+        readline.set_completer(self.complete)
+
+
         readline.parse_and_bind('set editing-mode emacs')
         # Try to read and save the history when exiting
         histfile = os.path.join(os.path.expanduser("~"), ".shinken.history")
@@ -195,6 +201,40 @@ class CLICommander(object):
 
 
 
+
+    # Complete is a bit strange in readline. It will call it as it do not answser None, by increasing the
+    # state int for each call. So don't loop forever!
+    def complete(self, text, state):
+        #print "STATE?", text, state
+
+        # New completion call
+        if state == 0:
+            self.completion_matches = []
+        
+        #print "TRY TO COMPLETE", text
+        text = text.strip()
+        
+        args = shlex.split(text.encode('utf8', 'ignore'))
+        #print "ARGS", args
+        if len(args) == 0:
+            args = ['']
+        keyword = args[0]
+        # Trying to expand the command name
+        if len(args) == 1 and state == 0:
+            for k in self.keywords:
+                if k.startswith(text):
+                    self.completion_matches.append(k)
+        
+        response = None
+        try:
+            response = self.completion_matches[state]
+        except IndexError:
+            response = None
+
+        #print "CALL", text, "state", state, response
+        return response
+                
+
 if __name__ == '__main__':
     parser = optparse.OptionParser(
         """""",
@@ -220,6 +260,7 @@ if __name__ == '__main__':
 
     CLI = CLICommander(CONFIG)
 
+    
     # We should look on the sys.argv if we find a valid keywords to
     # call in one loop or not.
     def hack_sys_argv():        
