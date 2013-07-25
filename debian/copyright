@@ -2,112 +2,176 @@ Format: http://dep.debian.net/deps/dep5
 Upstream-Name: shinken
 Source: http://www.shinken-monitoring.org/
 
+
 Files: *
 Copyright: 2010-2011 Jean Gabes
            2010-2011 Gerhard Lausser
            Please see /usr/share/shinken/CONTRIBUTORS for full list of contributors
 License: GNU-AGPL
- Shinken is free software: you can redistribute it and/or modify
- it under the terms of the GNU Affero General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Shinken is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Affero General Public License for more details.
- .
- You should have received a copy of the GNU Affero General Public License
- along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
- .
- Please see the complete text of the GNU Affero General Public License
- along with this program. If not, see "http://www.gnu.org/licenses/agpl.html".
+
 
 Files: debian/*
 Copyright: 2011 Arthur Gautier <superbaloo+debian@superbaloo.net>
            2011 Bruno Clermont <bruno@sologroup.gs>
 License: BSD
- Copyright (c) The Regents of the University of California.
- All rights reserved.
- .
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
- 1. Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
- 2. Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
- 3. Neither the name of the University nor the names of its contributors
-    may be used to endorse or promote products derived from this software
-    without specific prior written permission.
- .
- THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- SUCH DAMAGE.
+
 
 Files: debian/*
 Copyright: 2011 Arthur Gautier <superbaloo+debian@superbaloo.net>
            2011 Bruno Clermont <bruno@sologroup.gs>
            2013 Thibault Cohen <titilambert@gmail.com>
 License: GPL-2
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- .
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- .
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation; either version 2 of the
- License, or (at your option) any later version.
- .
- This program is distributed in the hope that it will be useful, but
- is provided AS IS, WITHOUT ANY WARRANTY; without even the implied
- warranty of MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, and
- NON-INFRINGEMENT.  See the GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the 
- Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
- MA 02110-1301, USA.
- .
- In addition, as a special exception, the copyright holders give
- permission to link the code of portions of this program with the
- OpenSSL library under certain conditions as described in each
- individual source file, and distribute linked combinations
- including the two.
- You must obey the GNU General Public License in all respects
- for all of the code used other than OpenSSL.  If you modify
- file(s) with this exception, you may extend this exception to your
- version of the file(s), but you are not obligated to do so.  If you
- do not wish to do so, delete this exception statement from your
- version.  If you delete this exception statement from all source
- files in the program, then also delete it here.
- .
- On Debian system the full text of the GPL V2, can be
- found in `/usr/share/common-licenses/GPL-2'.
 
 
 Comment: Following files a bundled libraries
 Files: shinken/sorteddict.py
 Copyright: 2010 Jan Kaliszewski (zuo)
+License: MIT
+
+
+Files: shinken/webui/htdocs/js/bootstrap*
+       shinken/webui/htdocs/css/bootstrap*
+Copyright 2012 Twitter, Inc.
+License: Apache-2.0
+
+
+Files: shinken/webui/htdocs/js/google-code-prettify/*
+Copyright: 2006-2011 Google Inc.
+           2011 Martin S.
+           2009 Onno Hommes
+           2011 Patrick Wied
+           2011 Zimin A.V.
+License: Apache-2.0
+
+
+Files: shinken/webui/htdocs/js/html5.js
+Copyright: 2011 Alexander Farkas <info@corrupt-system.de>
+           2011 Jonathan Neal <jonathantneal@hotmail.com>
+License: MIT | GPL-2
+
+
+Files: shinken/webui/htdocs/js/jquery-ui-1.8.17.custom.min.js
+Copyright: 2008 Paul Bakaus (ui.jquery.com)
+  Brandon Aaron
+  David Bolter
+  Rich Caloggero
+  Chi Cheng (cloudream@gmail.com)
+  Colin Clark (http://colin.atrc.utoronto.ca/)
+  Michelle D'Souza
+  Aaron Eisenberger (aaronchi@gmail.com)
+  Ariel Flesler
+  Bohdan Ganicky
+  Scott González
+  Marc Grabanski (m@marcgrabanski.com)
+  Klaus Hartl (stilbuero.de)
+  Scott Jehl
+  Cody Lindley
+  Eduardo Lundgren (eduardolundgren@gmail.com)
+  Todd Parker
+  John Resig
+  Patty Toland
+  Ca-Phun Ung (yelotofu.com)
+  Keith Wood (kbwood@virginbroadband.com.au)
+  Maggie Costello Wachs
+  Richard D. Worth (rdworth.org)
+  Jörn Zaefferer (bassistance.de)
+License: GPL-2 or MIT
+
+
+Files: shinken/webui/htdocs/js/jquery.mobile-1.1.0.min.js
+       shinken/webui/htdocs/css/jquery.mobile-1.1.0.min.css
+       shinken/webui/htdocs/js/jquery-1.6.4.min.js
+Copyright: 2011, jQuery Project
+License: GPL-2 or MIT
+
+
+Files: shinken/webui/htdocs/js/jquery.hotkeys.js
+Copyright: 2010, John Resig
+License: GPL-2 or MIT
+
+
+Files: shinken/webui/htdocs/js/jquery-jsonp-2.2.1.min.js
+Copyright: 2012, Julian Aubourg
+License: MIT
+
+
+Files: shinken/webui/htdocs/js/spin.min.js
+Copyright: 2011 Felix Gnass
+License: MIT
+
+
+Files: shinken/webui/htdocs/js/jquery.meow.js
+Copyright: Zachary Stewart
+License:
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Files: shinken/webui/htdocs/js/jquery.pageslide.js
+Copyright: 2011 Scott Robbin
+License: GPL-2 | MIT
+
+
+Files: shinken/webui/htdocs/css/font-awesome*
+Copyright: Dave Gandy
+License: MIT
+
+
+Files: shinken/webui/htdocs/font/*
+Copyright: Dave Gandy
+License: OFL
+
+
+Files: shinken/webui/htdocs/js/jquery-stupidtable.min.js
+Copyright: 2012 Joseph McCullough
+License:
+ Permission is hereby granted, free of charge, to any person obtaining a copy   
+ of this software and associated documentation files (the "Software"), to deal   
+ in the Software without restriction, including without limitation the rights   
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell   
+ copies of the Software, and to permit persons to whom the Software is   
+ furnished to do so, subject to the following conditions:  
+ 
+ The above copyright notice and this permission notice shall be included in all  
+ copies or substantial portions of the Software.  
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR   
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
+ SOFTWARE.
+
+
+License: BSD
+ On Debian systems the full text of the BSD License can be found
+ in the `/usr/share/common-licenses/BSD' file.
+
+License: GPL-2
+ On Debian systems the full text of the GNU General Public License can be found
+ in the `/usr/share/common-licenses/GPL-2' file.
+
+License: Apache-2.0
+ On Debian systems the full text of the Apache-2.0 License can be found
+ in the `/usr/share/common-licenses/Apache-2.0' file.
+
 License: MIT
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -127,3 +191,1037 @@ License: MIT
  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: OFL
+ OFL FAQ - Frequently Asked Questions about the SIL Open Font License (OFL)
+ Version 1.1-update2 - 23 August 2010
+ (See http://scripts.sil.org/OFL for updates)
+ .
+ .
+ CONTENTS OF THIS FAQ
+ 1  USING AND DISTRIBUTING FONTS LICENSED UNDER THE OFL
+ 2  USING OFL FONTS FOR WEB PAGES AND ONLINE WEBFONT SERVICES
+ 3  MODIFYING OFL-LICENSED FONTS
+ 4  LICENSING YOUR ORIGINAL FONTS UNDER THE OFL
+ 5  CHOOSING RESERVED FONT NAMES
+ 6  ABOUT THE FONTLOG
+ 7  MAKING CONTRIBUTIONS TO OFL PROJECTS
+ 8  ABOUT THE LICENSE ITSELF
+ 9  ABOUT SIL INTERNATIONAL
+ APPENDIX A - FONTLOG EXAMPLE
+ .
+ .
+ 1  USING AND DISTRIBUTING FONTS LICENSED UNDER THE OFL
+ .
+ 1.1  Can I use the fonts for a book or other print publication?
+ Yes. You can mention the font and author in the book's colophon if you wish, but that is not required.
+ .
+ 1.2  Can the fonts be included with Free/Libre and Open Source Software collections such as GNU/Linux and BSD distributions?
+ Yes! Fonts licensed under the OFL can be freely included alongside other software under FLOSS (Free/Libre and Open Source Software) licenses. Since fonts are typically aggregated with, not merged into, existing software, there is little need to be concerned about incompatibility with existing software licenses. You may also repackage the fonts and the accompanying components in a .rpm or .deb package and include them in distribution CD/DVDs and online repositories. (Also see section 5.9 about rebuilding from source.)
+ .
+ 1.3  I want to distribute the fonts with my program. Does this mean my program also has to be Free/Libre and Open Source Software?
+ No. Only the portions based on the Font Software are required to be released under the OFL. The intent of the license is to allow aggregation or bundling with software under restricted licensing as well.
+ .
+ 1.4  Can I sell a software package that includes these fonts?
+ Yes, you can do this with both the Original Version and a Modified Version of the fonts. Examples of bundling made possible by the OFL would include: word processors, design and publishing applications, training and educational software, games and entertainment software, mobile device applications, etc.
+ .
+ 1.5  Can I include the fonts on a CD of freeware or commercial fonts?
+ Yes, as long some other font or software is also on the disk, so the OFL font is not sold by itself.
+ .
+ 1.6  Why won't the OFL let me sell the fonts alone?
+ The intent is to keep people from making money by simply redistributing the fonts. The only people who ought to profit directly from the fonts should be the original authors, and those authors have kindly given up potential direct income to distribute their fonts under the OFL. Please honour and respect their contribution!
+ .
+ 1.7  What about sharing OFL fonts with friends on a CD, DVD or USB stick?
+ You are very welcome to share open fonts with friends, family and colleagues through removable media. Just remember to include the full font package, including any copyright notices and licensing information as available in OFL.txt. In the case where you sell the font, it has to come bundled with software.
+ .
+ 1.8  Can I host the fonts on a web site for others to use?
+ Yes, as long as you make the full font package available. In most cases it may be best to point users to the main site that distributes the Original Version so they always get the most recent stable and complete version. See also discussion of webfonts in Section 2.
+ .
+ 1.9  Can I host the fonts on a server for use over our internal network?
+ Yes. If the fonts are transferred from the server to the client computer by means that allow them to be used even if the computer is no longer attached to the network, the full package (copyright notices, licensing information, etc.) should be included.
+ .
+ 1.10  Does the full OFL license text always need to accompany the font?
+ The only situation in which an OFL font can be distributed without the text of the OFL (either in a separate file or in font metadata), is when a font is embedded in a document or bundled within a program. In the case of metadata included within a font, it is legally sufficient to include only a link to the text of the OFL on http://scripts.sil.org/OFL, but we strongly recommend against this. Most modern font formats include metadata fields that will accept the full OFL text, and full inclusion increases the likelihood that users will understand and properly apply the license.
+ .
+ 1.11  What do you mean by 'embedding'? How does that differ from other means of distribution?
+ By 'embedding' we mean inclusion of the font in a document or file in a way that makes extraction (and redistribution) difficult or clearly discouraged. In many cases the names of embedded fonts might also not be obvious to those reading the document, the font data format might be altered, and only a subset of the font - only the glyphs required for the text - might be included. Any other means of delivering a font to another person is considered 'distribution', and needs to be accompanied by any copyright notices and licensing information available in OFL.txt.
+ .
+ 1.12  So can I embed OFL fonts in my document?
+ Yes, either in full or a subset. The restrictions regarding font modification and redistribution do not apply, as the font is not intended for use outside the document.
+ .
+ 1.13  Does embedding alter the license of the document itself?
+ No. Referencing or embedding an OFL font in any document does not change the license of the document itself. The requirement for fonts to remain under the OFL does not apply to any document created using the fonts and their derivatives. Similarly, creating any kind of graphic using a font under OFL does not make the resulting artwork subject to the OFL.
+ .
+ 1.14  If OFL fonts are extracted from a document in which they are embedded (such as a PDF file), what can be done with them? Is this a risk to author(s)?
+ The few utilities that can extract fonts embedded in a PDF will typically output limited amounts of outlines - not a complete font. To create a working font from this method is much more difficult and time consuming than finding the source of the original OFL font. So there is little chance that an OFL font would be extracted and redistributed inappropriately through this method. Even so, copyright laws address any misrepresentation of authorship. All Font Software released under the OFL and marked as such by the author(s) is intended to remain under this license regardless of the distribution method, and cannot be redistributed under any other license. We strongly discourage any font extraction - we recommend directly using the font sources instead - but if you extract font outlines from a document, please be considerate: use your common sense and respect the work of the author(s) and the licensing model.
+ .
+ 1.15  What about distributing fonts with a document? Within a compressed folder structure? Is it distribution, bundling or embedding?
+ Certain document formats may allow the inclusion of an unmodified font within their file structure which consists of a compressed folder containing the various resources forming the document (such as pictures and thumbnails). Including fonts within such a structure is understood as being different from embedding but rather similar to bundling (or mere aggregation) which the license explicitly allows. In this case the font is conveyed unchanged whereas embedding a font usually transforms it from the original format. The OFL does not allow anyone to extract the font from such a structure to then redistribute it under another license. The explicit permission to redistribute and embed does not cancel the requirement for the Font Software to remain under the license chosen by its author(s).
+ .
+ 1.16  What about ebooks shipping with open fonts?
+ The requirements differ depending on whether the fonts are linked, embedded or distributed (bundled or aggregated). Some ebook formats use web technologies to do font linking via @font-face, others are designed for font embedding, some use fonts distributed with the document or reading software, and a few rely solely on the fonts already present on the target system. The license requirements depend on the type of inclusion as discussed in 1.15.
+ .
+ 1.17  Can Font Software released under the OFL be subject to URL-based access restrictions methods or DRM (Digital Rights Management) mechanisms?
+ Yes, but these issues are out-of-scope for the OFL. The license itself neither encourages their use nor prohibits them since such mechanisms are not implemented in the components of the Font Software but through external software. Such restrictions are put in place for many different purposes corresponding to various usage scenarios. One common example is to limit potentially dangerous cross-site scripting attacks. However, in the spirit of libre/open fonts and unrestricted writing systems, we strongly encourage open sharing and reuse of OFL fonts, and the establishment of an environment where such restrictions are unnecessary. Note that whether you wish to use such mechanisms or you prefer not to, you must still abide by the rules set forth by the OFL when using fonts released by their authors under this license. Derivative fonts must be licensed under the OFL, even if they are part of a service for which you charge fees and/or for which access to source code is restricted. You may not sell the fonts on their own - they must be part of a larger software package, bundle or subscription plan. For example, even if the OFL font is distributed in a software package or via an online service using a DRM mechanism, the user would still have the right to extract that font, use, study, modify and redistribute it under the OFL.
+ .
+ 1.18  I've come across a font released under the OFL. How can I easily get more information about the Original Version? How can I know where it stands compared to the Original Version or other Modified Versions?
+ Consult the copyright statement(s) in the license for ways to contact the original authors. Consult the FONTLOG for information on how the font differs from the Original Version, and get in touch with the various contributors via the information in the acknowledgement section. Please consider using the Original Versions of the fonts whenever possible.
+ .
+ 1.19  What do you mean in condition 4? Can you provide examples of abusive promotion / endorsement / advertisement vs. normal acknowledgement?
+ The intent is that the goodwill and reputation of the author(s) should not be used in a way that makes it sound like the original author(s) endorse or approve of a specific Modified Version or software bundle. For example, it would not be right to advertise a word processor by naming the author(s) in a listing of software features, or to promote a Modified Version on a web site by saying "designed by ...". However, it would be appropriate to acknowledge the author(s) if your software package has a list of people who deserve thanks. We realize that this can seem to be a grey area, but the standard used to judge an acknowledgement is that if the acknowledgement benefits the author(s) it is allowed, but if it primarily benefits other parties, or could reflect poorly on the author(s), then it is not.
+ .
+ .
+ 2  USING OFL FONTS FOR WEBPAGES AND ONLINE WEBFONT SERVICES
+ .
+ 2.1  Can I make webpages using these fonts?
+ Yes! Go ahead! Using CSS (Cascading Style Sheets) is recommended. Your three best options: 
+ - referring directly in your stylesheet to open fonts which may be available on the user's system
+ - providing links to download the full package of the font - either from your own website or from elsewhere - so users can install it themselves
+ - using @font-face to distribute the font directly to browsers. This is recommended and explicitly allowed by the licensing model because it is distribution. The font file itself is distributed with other components of the webpage. It is not embedded in the webpage but referenced through a web address which will cause the browser to retrieve and use the corresponding font to render the webpage (see 1.11 and 1.15 for details related to embedding fonts into documents). As you take advantage of the @font-face cross-platform standard, be aware that webfonts are often tuned for a web environment and not intended for installation and use outside a browser. The reasons in favour of using webfonts are to allow design of dynamic text elements instead of static graphics, to make it easier for content to be localized and translated, indexed and searched, and all this with cross-platform open standards without depending on restricted extensions or plugins. You should check the CSS cascade (the order in which fonts are being called or delivered to your users) when testing.
+ .
+ 2.2  Can I make and use WOFF (Web Open Font Format) versions of OFL fonts?
+ Yes, but you need to be careful. A change in font format normally is considered modification, and Reserved Font Names (RFNs) cannot be used. Because of the design of the WOFF format, however, it is possible to create a WOFF version that is not considered modification, and so would not require a name change. You are allowed to create, use and distribute a WOFF version of an OFL font without changing the font name, but only if:
+ .
+ - the original font data remains unchanged except for WOFF compression, and
+ - WOFF-specific metadata is either omitted altogether or present and includes, unaltered, the contents of all equivalent metadata in the original font.
+ .
+ If the original font data or metadata is changed, or the WOFF-specific metadata is incomplete, the font must be considered a Modified Version, the OFL restrictions would apply and the name of the font must be changed: any RFNs cannot be used and copyright notices and licensing information must be included and cannot be deleted or modified. You must come up with a unique name - we recommend one corresponding to your domain or your particular web application. Be aware that only the original author(s) can use RFNs. This is to prevent collisions between a derivative tuned to your audience and the original upstream version and so to reduce confusion.
+ .
+ Please note that most WOFF conversion tools and online services do not meet the two requirements listed above, and so their output must be considered a Modified Version. So be very careful and check to be sure that the tool or service you're using is compressing unchanged data and completely and accurately reflecting the original font metadata.
+ .
+ 2.3  What about other webfont formats such as EOT/EOTLite/CWT/etc.?
+ In most cases these formats alter the original font data more than WOFF, and do not completely support appropriate metadata, so their use must be considered modification and RFNs may not be used.
+ .
+ 2.4  Can I make OFL fonts available through webfont online services?
+ Yes, you are welcome to include OFL fonts in online webfont services as long as you properly meet all the conditions of the license. The origin and open status of the font should be clear among the other fonts you are hosting. Authorship, copyright notices and license information must be sufficiently visible to your users or subscribers so they know where the font comes from and the rights granted by the author(s). Make sure the font file contains the needed copyright notice(s) and licensing information in its metadata. Please double-check the accuracy of every field to prevent contradictory information. Other font formats, including EOT/EOTLite/CWT and superior alternatives like WOFF, already provide fields for this information. Remember that if you modify the font within your library or convert it to another format for any reason the OFL restrictions apply and you need to change the names accordingly. Please respect the author's wishes as expressed in the OFL and do not misrepresent original designers and their work. Don't lump quality open fonts together with dubious freeware or public domain fonts. Consider how you can best work with the original designers and foundries, support their efforts and generate goodwill that will benefit your service. (See 1.17 for details related to URL-based access restrictions methods or DRM mechanisms).
+ .
+ 2.5  Can I make and publish CMS themes or templates that use OFL fonts?  Can I include the fonts themselves in the themes or templates? Can I sell the whole package?
+ Yes, you are very welcome to integrate open fonts into themes and templates for your preferred CMS and make them more widely available. Be aware that you can only sell the fonts and your CMS add-on as part of a software bundle. (See 1.4 for details and examples about selling bundles). 
+ .
+ 2.6  Some webfont formats and services provide ways of "optimising" the font for a particular website or web application; is that allowed? 
+ Yes, it is permitted, but remember that these optimised versions are Modified Versions and so must follow OFL requirements like appropriate renaming. Also you need to bear in mind the other important parameters beyond compression, speed and responsiveness: you need to consider the audience of your particular website or web application, as choosing some optimisation parameters may turn out to be less than ideal for them. Subsetting by removing certain glyphs or features may seriously limit functionality of the font in various languages used by your users. It may also introduce degradation of quality in the rendering or specific bugs on the various platforms compared to the original font. In other words, remember that one person's optimised font may be another person's missing feature. Various advanced typographic features are also available through CSS and may provide the desired effects without the need to modify the font.
+ .
+ .
+ 3  MODIFYING OFL-LICENSED FONTS
+ .
+ 3.1  Can I change the fonts? Are there any limitations to what things I can and cannot change?
+ You are allowed to change anything, as long as such changes do not violate the terms of the license. In other words, you are not allowed to remove the copyright statement(s) from the font, but you could put additional information into it that covers your contribution.
+ .
+ 3.2  I have a font that needs a few extra glyphs - can I take them from an OFL licensed font and copy them into mine?
+ Yes, but if you distribute that font to others it must be under the OFL, and include the information mentioned in condition 2 of the license.
+ .
+ 3.3  Can I charge people for my additional work? In other words, if I add a bunch of special glyphs and/or OpenType/Graphite code, can I sell the enhanced font?
+ Not by itself. Derivative fonts must be released under the OFL and cannot be sold by themselves. It is permitted, however, to include them in a larger software package (such as text editors, office suites or operating systems), even if the larger package is sold. In that case, you are strongly encouraged, but not required, to also make that derived font easily and freely available outside of the larger package.
+ .
+ 3.4  Can I pay someone to enhance the fonts for my use and distribution?
+ Yes. This is a good way to fund the further development of the fonts. Keep in mind, however, that if the font is distributed to others it must be under the OFL. You won't be able to recover your investment by exclusively selling the font, but you will be making a valuable contribution to the community. Please remember how you have benefited from the contributions of others.
+ .
+ 3.5  I need to make substantial revisions to the font to make it work with my program. It will be a lot of work, and a big investment, and I want to be sure that it can only be distributed with my program. Can I restrict its use?
+ No. If you redistribute a Modified Version of the font it must be under the OFL. You may not restrict it in any way beyond what the OFL permits and requires. This is intended to ensure that all released improvements to the fonts become available to everyone. But you will likely get an edge over competitors by being the first to distribute a bundle with the enhancements. Again, please remember how you have benefited from the contributions of others.
+ .
+ 3.6  Do I have to make any derivative fonts (including extended source files, build scripts, documentation, etc.) publicly available?
+ No, but please consider sharing your improvements with others. You may find that you receive in return more than what you gave.
+ .
+ 3.7  If a trademark is claimed in the OFL font, does that trademark need to remain in modified fonts?
+ Yes, any trademark notices must remain in any derivative fonts to respect trademark laws, but you may add any additional trademarks you claim, officially registered or not. For example if an OFL font called "Foo" contains a notice that "Foo is a trademark of Acme", then if you rename the font to "Bar" when creating a Modified Version, the new trademark notice could say "Foo is a trademark of Acme Inc. - Bar is a trademark of Roadrunner Technologies Ltd.". Trademarks work alongside the OFL and are not subject to the terms of the licensing agreement. Please refer to the appropriate trademark laws.
+ .
+ .
+ 4  LICENSING YOUR ORIGINAL FONTS UNDER THE OFL
+ .
+ 4.1  Can I use the SIL OFL for my own fonts?
+ Yes! We heartily encourage everyone to use the OFL to distribute their own original fonts. It is a carefully constructed license that allows great freedom along with enough artistic integrity protection for the work of the authors as well as clear rules for other contributors and those who redistribute the fonts. The licensing model is used successfully by various organisations, both for-profit and not-for-profit, to release fonts of varying levels of scope and complexity.
+ .
+ 4.2  What do I have to do to apply the OFL to my font?
+ If you want to release your fonts under the OFL, we recommend you do the following:
+ .
+ 4.2.1  Put your copyright and Reserved Font Names information at the beginning of the main OFL.txt file in place of the dedicated placeholders. Include this file in your release package.
+ .
+ 4.2.2  Put your copyright and the OFL text with Reserved Font Names into your font files (the copyright and license fields). A link to the OFL text on the OFL web site is an acceptable (but not recommended) alternative. Also add this information to any other components (build scripts, glyph databases, documentation, test files, etc). Depending on the format of your fonts and sources, you can use template human-readable headers or machine-readable metadata.
+ .
+ 4.2.3  Write an initial FONTLOG.txt for your font and include it in the release package.
+ .
+ 4.2.4  Include the relevant practical documentation on the license by including the OFL-FAQ.txt in your package.
+ .
+ 4.3  Will you make my font OFL for me?
+ We won't do the work for you. We can, however, try to answer your questions, unfortunately we do not have the resources to review and check your font packages for correct use of the OFL.
+ .
+ 4.4  Will you distribute my OFL font for me?
+ No, although if the font is of sufficient quality and general interest we may include a link to it on our partial list of OFL fonts on the OFL web site. You may wish to consider other open font catalogs or hosting services, such as the Unifont Font Guide (http://unifont.org/fontguide), The League of Movable Type (http://theleagueofmovabletype.com), Kernest (http://kernest.com/) or the Open Font Library (http://openfontlibrary.org/), which despite the name has no direct relationship to the OFL or SIL. We do not endorse any particular catalog or hosting service - it is your responsibility to determine if the service is right for you.
+ .
+ 4.5  Why should I use the OFL for my fonts?
+ - to meet needs for fonts that can be modified to support minority languages
+ - to provide a legal and clear way for people to respect your work but still use it (and reduce piracy)
+ - to involve others in your font project
+ - to enable your fonts to be expanded with new weights and improved writing system/language support
+ - to allow more technical font developers to add features to your design (such as OpenType and Graphite support)
+ - to renew the life of an old font lying on your hard drive with no business model
+ - to allow your font to be included in Libre Software operating systems like Ubuntu
+ - to give your font world status and wide, unrestricted distribution
+ - to educate students about quality typeface and font design
+ - to expand your test base and get more useful feedback 
+ - to extend your reach to new markets when users see your metadata and go to your website
+ - to get your font more easily into one of the webfont online services
+ - to attract attention for your commercial fonts
+ - to make money through webfont services
+ - to make money by bundling fonts with applications
+ - to make money adjusting and extending existing open fonts
+ - to get a better chance that foundations/NGOs/charities/companies who commission fonts will pick you 
+ - to be part of a sharing design and development community 
+ - to give back and contribute to a growing body of font sources
+ .
+ .
+ 5  CHOOSING RESERVED FONT NAMES
+ .
+ 5.1  What are Reserved Font Names?
+ These are font names, or portions of font names, that the author has chosen to reserve for use only with the Original Version of the font, or for Modified Version(s) created by the original author.
+ .
+ 5.2  Why can't I use the Reserved Font Names in my derivative font names? I'd like people to know where the design came from.
+ The best way to acknowledge the source of the design is to thank the original authors and any other contributors in the files that are distributed with your revised font (although no acknowledgement is required). The FONTLOG is a natural place to do this. Reserved Font Names ensure that the only fonts that have the original names are the unmodified Original Versions. This allows designers to maintain artistic integrity while allowing collaboration to happen. It eliminates potential confusion and name conflicts. When choosing a name, be creative and avoid names that reuse almost all the same letters in the same order or sound like the original. It will help everyone if Original Versions and Modified Versions can easily be distinguished from one another and from other derivatives. Any substitution and matching mechanism is outside the scope of the license.
+ .
+ 5.3  What do you mean by "primary name as presented to the user"? Are you referring to the font menu name?
+ Yes, this applies to the font menu name and other mechanisms that specify a font in a document. It would be fine, however, to keep a text reference to the original fonts in the description field, in your modified source file or in documentation provided alongside your derivative as long as no one could be confused that your modified source is the original. But you cannot use the Reserved Font Names in any way to identify the font to the user (unless the Copyright Holder(s) allow(s) it through a separate agreement). Users who install derivatives (Modified Versions) on their systems should not see any of the original Reserved Font Names in their font menus, for example. Again, this is to ensure that users are not confused and do not mistake one font for another and so expect features only another derivative or the Original Version can actually offer. 
+ .
+ 5.4  Am I not allowed to use any part of the Reserved Font Names?
+ You may not use individual words from the Reserved Font Names, but you would be allowed to use parts of words, as long as you do not use any word from the Reserved Font Names entirely. We do not recommend using parts of words because of potential confusion, but it is allowed. For example, if "Foobar" was a Reserved Font Name, you would be allowed to use "Foo" or "bar", although we would not recommend it. Such an unfortunate choice would confuse the users of your fonts as well as make it harder for other designers to contribute.
+ .
+ 5.5  So what should I, as an author, identify as Reserved Font Names?
+ Original authors are encouraged to name their fonts using clear, distinct names, and only declare the unique parts of the name as Reserved Font Names. For example, the author of a font called "Foobar Sans" would declare "Foobar" as a Reserved Font Name, but not "Sans", as that is a common typographical term, and may be a useful word to use in a derivative font name. Reserved Font Names should also be single words. A font called "Flowing River" should have Reserved Font Names "Flowing" and "River", not "Flowing River". You also need to be very careful about reserving font names which are already linked to trademarks (whether registered or not) which you do not own.
+ .
+ 5.6  Do I, as an author, have to identify any Reserved Font Names?
+ No, but we strongly encourage you to do so. This is to avoid confusion between your work and Modified Versions.
+ .
+ 5.7  Are any names (such as the main font name) reserved by default?
+ No. That is a change to the license as of version 1.1. If you want any names to be Reserved Font Names, they must be specified after the copyright statement(s).
+ .
+ 5.8  Is there any situation in which I can use Reserved Font Names for a Modified Version?
+ The Copyright Holder(s) can give certain trusted parties the right to use any of the Reserved Font Names through separate written agreements. For example, even if "Foobar" is a RFN, you could write up an agreement to give company "XYZ" the right to distribute a modified version with a name that includes "Foobar". This allows for freedom without confusion.
+ .
+ 5.9  Do font rebuilds require a name change? Do I have to change the name of the font when my packaging workflow includes a full rebuild from source?
+ Yes, all rebuilds which change the font data and the smart code are Modified Versions and the requirements of the OFL apply: you need to respect what the Author(s) have chosen in terms of Reserved Font Names. However if a package (or installer) is simply a wrapper or a compressed structure around the final font - leaving them intact on the inside - then no name change is required. Please get in touch with the author(s) and copyright holder(s) to inquire about the presence of font sources beyond the final font file(s) and the recommended build path. That build path may very well be non-trivial and hard to reproduce accurately by the maintainer. If a full font build path is made available by the upstream author(s) please be aware that any regressions and changes you may introduce when doing a rebuild for packaging purposes is your responsibility as a package maintainer since you are effectively creating a separate branch. You should make it very clear to your users that your rebuilt version is not the canonical one from upstream.
+ .
+ 5.10  Can I add other Reserved Font Names when making a derivative font?
+ Yes. List your additional Reserved Font Names after your additional copyright statement, as indicated with example placeholders at the top of the OFL.txt file. Be sure you do not remove any exiting RFNs but only add your own.
+ .
+ .
+ 6  ABOUT THE FONTLOG
+ .
+ 6.1  What is this FONTLOG thing exactly?
+ It has three purposes: 1) to provide basic information on the font to users and other developers, 2) to document changes that have been made to the font or accompanying files, either by the original authors or others, and 3) to provide a place to acknowledge authors and other contributors. Please use it!
+ .
+ 6.2  Is the FONTLOG required?
+ It is not a requirement of the license, but we strongly recommend you have one.
+ .
+ 6.3  Am I required to update the FONTLOG when making Modified Versions?
+ No, but users, designers and other developers might get very frustrated with you if you don't. People need to know how derivative fonts differ from the original, and how to take advantage of the changes, or build on them. There are utilities that can help create and maintain a FONTLOG, such as the FONTLOG support in FontForge.
+ .
+ 6.4  What should the FONTLOG look like?
+ It is typically a separate text file (FONTLOG.txt), but can take other formats. It commonly includes these four sections:
+ .
+ - brief header describing the FONTLOG itself and name of the font family
+ - Basic Font Information - description of the font family, purpose and breadth
+ - ChangeLog - chronological listing of changes
+ - Acknowledgements - list of authors and contributors with contact information
+ .
+ It could also include other sections, such as: where to find documentation, how to make contributions, information on contributing organizations, source code details, and a short design guide. See Appendix A for an example FONTLOG.
+ .
+ .
+ 7  MAKING CONTRIBUTIONS TO OFL PROJECTS
+ .
+ 7.1  Can I contribute work to OFL projects?
+ In many cases, yes. It is common for OFL fonts to be developed by a team of people who welcome contributions from the wider community. Contact the original authors for specific information on how to participate in their projects.
+ .
+ 7.2  Why should I contribute my changes back to the original authors?
+ It would benefit many people if you contributed back in response to what you've received. Your contributions and improvements to the fonts and other components could be a tremendous help and would encourage others to contribute as well and 'give back'. You will then benefit from other people's contributions as well. Sometimes maintaining your own separate version takes more effort than merging back with the original. Be aware that any contributions, however, must be either your own original creation or work that you own, and you may be asked to affirm that clearly when you contribute.
+ .
+ 7.3  I've made some very nice improvements to the font. Will you consider adopting them and putting them into future Original Versions?
+ Most authors would be very happy to receive such contributions. Keep in mind that it is unlikely that they would want to incorporate major changes that would require additional work on their end. Any contributions would likely need to be made for all the fonts in a family and match the overall design and style. Authors are encouraged to include a guide to the design with the fonts. It would also help to have contributions submitted as patches or clearly marked changes - the use of smart source revision control systems like subversion, svk, mercurial, git or bzr is a good idea. Please follow the recommendations given by the author(s) in terms of preferred source formats and configuration parameters for sending contributions. If this is not indicated in a FONTLOG or other documentation of the font, consider asking them directly. Examples of useful contributions are bug fixes, additional glyphs, stylistic alternates (and the smart font code to access them) or improved hinting. Keep in mind that some kinds of changes (esp. hinting) may be technically difficult to integrate.
+ .
+ 7.4  How can I financially support the development of OFL fonts?
+ It is likely that most authors of OFL fonts would accept financial contributions - contact them for instructions on how to do this. Such contributions would support future development. You can also pay for others to enhance the fonts and contribute the results back to the original authors for inclusion in the Original Version.
+ .
+ .
+ 8  ABOUT THE LICENSE ITSELF
+ .
+ 8.1  I see that this is version 1.1 of the license. Will there be later changes?
+ Version 1.1 is the first minor revision of the OFL. We are confident that version 1.1 will meet most needs, but are open to future improvements. Any revisions would be for future font releases, and previously existing licenses would remain in effect. No retroactive changes are possible, although the Copyright Holder(s) can re-release the font under a revised OFL. All versions will be available on our web site: http://scripts.sil.org/OFL.
+ .
+ 8.2  Does this license restrict the rights of the Copyright Holder(s)?
+ No. The Copyright Holder(s) still retain(s) all the rights to their creation; they are only releasing a portion of it for use in a specific way. For example, the Copyright Holder(s) may choose to release a 'basic' version of their font under the OFL, but sell a restricted 'enhanced' version. Only the Copyright Holder(s) can do this.
+ .
+ 8.3  Is the OFL a contract or a license?
+ The OFL is a license and not a contract and so does not require you to sign it to have legal validity. By using, modifying and redistributing components under the OFL you indicate that you accept the license.
+ .
+ 8.4  I really like the terms of the OFL, but want to change it a little. Am I allowed to take ideas and actual wording from the OFL and put them into my own custom license for distributing my fonts?
+ We strongly recommend against creating your very own unique open licensing model. Using a modified or derivative license will likely cut you off - along with the font(s) under that license - from the community of designers using the OFL, potentially expose you and your users to legal liabilities, and possibly put your work and rights at risk. The OFL went though a community and legal review process that took years of effort, and that review is only applicable to an unmodified OFL. The text of the OFL has been written by SIL (with review and consultation from the community) and is copyright (c) 2005-2010 SIL International. You may re-use the ideas and wording (in part, not in whole) in another non-proprietary license provided that you call your license by another unambiguous name, that you do not use the preamble, that you do not mention SIL and that you clearly present your license as different from the OFL so as not to cause confusion by being too similar to the original. If you feel the OFL does not meet your needs for an open license, please contact us.
+ .
+ 8.5  Can I translate the license and the FAQ into other languages?
+ SIL certainly recognises the need for people who are not familiar with English to be able to understand the OFL and its use. Making the license very clear and readable has been a key goal for the OFL, but we know that people understand their own language best.
+ .
+ If you are an experienced translator, you are very welcome to translate the OFL and OFL-FAQ so that designers and users in your language community can understand the license better. But only the original English version of the license has legal value and has been approved by the community. Translations do not count as legal substitutes and should only serve as a way to explain the original license. SIL - as the author and steward of the license for the community at large - does not approve any translation of the OFL as legally valid because even small translation ambiguities could be abused and create problems.
+ .
+ SIL gives permission to publish unofficial translations into other languages provided that they comply with the following guidelines:
+ .
+ - Put the following disclaimer in both English and the target language stating clearly that the translation is unofficial:
+ .
+ "This is an unofficial translation of the SIL Open Font License into <language_name>. It was not published by SIL International, and does not legally state the distribution terms for fonts that use the OFL. A release under the OFL is only valid when using the original English text. However, we recognize that this unofficial translation will help users and designers not familiar with English to better understand and use the OFL. We encourage designers who consider releasing their creation under the OFL to read the OFL-FAQ in their own language if it is available. Please go to http://scripts.sil.org/OFL for the official version of the license and the accompanying OFL-FAQ."
+ .
+ - Keep your unofficial translation current and update it at our request if needed, for example if there is any ambiguity which could lead to confusion.  
+ .
+ If you start such a unofficial translation effort of the OFL and OFL-FAQ please let us know.
+ .
+ .
+ 9  ABOUT SIL INTERNATIONAL
+ .
+ 9.1  Who is SIL International and what do they do?
+ SIL serves language communities worldwide, building their capacity for sustainable language development, by means of research, translation, training and materials development. SIL makes its services available to all without regard to religious belief, political ideology, gender, race, or ethnic background. SIL's members and volunteers share a Christian commitment.
+ .
+ 9.2  What does this have to do with font licensing?
+ The ability to read, write, type and publish in one's own language is one of the most critical needs for millions of people around the world. This requires fonts that are widely available and support lesser-known languages. SIL develops - and encourages others to develop - a complete stack of writing systems implementation components available under open licenses. This open stack includes input methods, smart fonts, smart rendering libraries and smart applications. There has been a need for a common open license that is specifically applicable to fonts and related software (a crucial component of this stack), so SIL developed the SIL Open Font License with the help of the Free/Libre and Open Source Software community.
+ .
+ 9.3  How can I contact SIL?
+ Our main web site is: http://www.sil.org/
+ Our site about complex scripts is: http://scripts.sil.org/
+ Information about this license (and contact information) is at: http://scripts.sil.org/OFL
+ .
+ .
+ APPENDIX A - FONTLOG EXAMPLE
+ .
+ Here is an example of the recommended format for a FONTLOG, although other formats are allowed.
+ .
+ -----
+ FONTLOG for the GlobalFontFamily fonts
+ .
+ This file provides detailed information on the GlobalFontFamily Font Software. This information should be distributed along with the GlobalFontFamily fonts and any derivative works.
+ .
+ Basic Font Information
+ .
+ GlobalFontFamily is a Unicode typeface family that supports all languages that use the Latin script and its variants, and could be expanded to support other scripts.
+ .
+ NewWorldFontFamily is based on the GlobalFontFamily and also supports Greek, Hebrew, Cyrillic and Armenian.
+ .
+ More specifically, this release supports the following Unicode ranges...
+ This release contains...
+ Documentation can be found at...
+ To contribute to the project...
+ .
+ ChangeLog
+ .
+ 1 August 2008 (Tom Parker) GlobalFontFamily version 1.2.1
+ - Tweaked the smart font code (Branch merged with trunk version)
+ - Provided improved build and debugging environment for smart behaviours
+ .
+ 7 February 2007 (Pat Johnson) NewWorldFontFamily Version 1.3
+ - Added Greek and Cyrillic glyphs
+ .
+ 7 March 2006 (Fred Foobar) NewWorldFontFamily Version 1.2
+ - Tweaked contextual behaviours
+ .
+ 1 Feb 2005 (Jane Doe) NewWorldFontFamily Version 1.1
+ - Improved build script performance and verbosity
+ - Extended the smart code documentation
+ - Corrected minor typos in the documentation
+ - Fixed position of combining inverted breve below (U+032F)
+ - Added OpenType/Graphite smart code for Armenian
+ - Added Armenian glyphs (U+0531 -> U+0587) 
+ - Released as "NewWorldFontFamily"
+ .
+ 1 Jan 2005 (Joe Smith) GlobalFontFamily Version 1.0
+ - Initial release
+ .
+ Acknowledgements
+ .
+ If you make modifications be sure to add your name (N), email (E), web-address (if you have one) (W) and description (D). This list is in alphabetical order.
+ .
+ N: Jane Doe
+ E: jane@university.edu
+ W: http://art.university.edu/projects/fonts
+ D: Contributor - Armenian glyphs and code
+ .
+ N: Fred Foobar
+ E: fred@foobar.org
+ W: http://foobar.org
+ D: Contributor - misc Graphite fixes
+ .
+ N: Pat Johnson
+ E: pat@fontstudio.org
+ W: http://pat.fontstudio.org
+ D: Designer - Greek & Cyrillic glyphs based on Roman design
+ .
+ N: Tom Parker
+ E: tom@company.com
+ W: http://www.company.com/tom/projects/fonts
+ D: Engineer - original smart font code
+ .
+ N: Joe Smith
+ E: joe@fontstudio.org
+ W: http://joe.fontstudio.org
+ D: Designer - original Roman glyphs
+ .
+ Fontstudio.org is an not-for-profit design group whose purpose is...
+ Foobar.org is a distributed community of developers...
+ Company.com is a small business who likes to support community designers...
+ University.edu is a renowed educational institution with a strong design department...
+
+
+License: GNU-AGPL
+                     GNU AFFERO GENERAL PUBLIC LICENSE
+                        Version 3, 19 November 2007
+ .
+  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+  Everyone is permitted to copy and distribute verbatim copies
+  of this license document, but changing it is not allowed.
+ .
+                             Preamble
+ .
+   The GNU Affero General Public License is a free, copyleft license for
+ software and other kinds of works, specifically designed to ensure
+ cooperation with the community in the case of network server software.
+ .
+   The licenses for most software and other practical works are designed
+ to take away your freedom to share and change the works.  By contrast,
+ our General Public Licenses are intended to guarantee your freedom to
+ share and change all versions of a program--to make sure it remains free
+ software for all its users.
+ .
+   When we speak of free software, we are referring to freedom, not
+ price.  Our General Public Licenses are designed to make sure that you
+ have the freedom to distribute copies of free software (and charge for
+ them if you wish), that you receive source code or can get it if you
+ want it, that you can change the software or use pieces of it in new
+ free programs, and that you know you can do these things.
+ .
+   Developers that use our General Public Licenses protect your rights
+ with two steps: (1) assert copyright on the software, and (2) offer
+ you this License which gives you legal permission to copy, distribute
+ and/or modify the software.
+ .
+   A secondary benefit of defending all users' freedom is that
+ improvements made in alternate versions of the program, if they
+ receive widespread use, become available for other developers to
+ incorporate.  Many developers of free software are heartened and
+ encouraged by the resulting cooperation.  However, in the case of
+ software used on network servers, this result may fail to come about.
+ The GNU General Public License permits making a modified version and
+ letting the public access it on a server without ever releasing its
+ source code to the public.
+ .
+   The GNU Affero General Public License is designed specifically to
+ ensure that, in such cases, the modified source code becomes available
+ to the community.  It requires the operator of a network server to
+ provide the source code of the modified version running there to the
+ users of that server.  Therefore, public use of a modified version, on
+ a publicly accessible server, gives the public access to the source
+ code of the modified version.
+ .
+   An older license, called the Affero General Public License and
+ published by Affero, was designed to accomplish similar goals.  This is
+ a different license, not a version of the Affero GPL, but Affero has
+ released a new version of the Affero GPL which permits relicensing under
+ this license.
+ .
+   The precise terms and conditions for copying, distribution and
+ modification follow.
+ .
+                        TERMS AND CONDITIONS
+ .
+   0. Definitions.
+ .
+   "This License" refers to version 3 of the GNU Affero General Public License.
+ .
+   "Copyright" also means copyright-like laws that apply to other kinds of
+ works, such as semiconductor masks.
+ .
+   "The Program" refers to any copyrightable work licensed under this
+ License.  Each licensee is addressed as "you".  "Licensees" and
+ "recipients" may be individuals or organizations.
+ .
+   To "modify" a work means to copy from or adapt all or part of the work
+ in a fashion requiring copyright permission, other than the making of an
+ exact copy.  The resulting work is called a "modified version" of the
+ earlier work or a work "based on" the earlier work.
+ .
+   A "covered work" means either the unmodified Program or a work based
+ on the Program.
+ .
+   To "propagate" a work means to do anything with it that, without
+ permission, would make you directly or secondarily liable for
+ infringement under applicable copyright law, except executing it on a
+ computer or modifying a private copy.  Propagation includes copying,
+ distribution (with or without modification), making available to the
+ public, and in some countries other activities as well.
+ .
+   To "convey" a work means any kind of propagation that enables other
+ parties to make or receive copies.  Mere interaction with a user through
+ a computer network, with no transfer of a copy, is not conveying.
+ .
+   An interactive user interface displays "Appropriate Legal Notices"
+ to the extent that it includes a convenient and prominently visible
+ feature that (1) displays an appropriate copyright notice, and (2)
+ tells the user that there is no warranty for the work (except to the
+ extent that warranties are provided), that licensees may convey the
+ work under this License, and how to view a copy of this License.  If
+ the interface presents a list of user commands or options, such as a
+ menu, a prominent item in the list meets this criterion.
+ .
+   1. Source Code.
+ .
+   The "source code" for a work means the preferred form of the work
+ for making modifications to it.  "Object code" means any non-source
+ form of a work.
+ .
+   A "Standard Interface" means an interface that either is an official
+ standard defined by a recognized standards body, or, in the case of
+ interfaces specified for a particular programming language, one that
+ is widely used among developers working in that language.
+ .
+   The "System Libraries" of an executable work include anything, other
+ than the work as a whole, that (a) is included in the normal form of
+ packaging a Major Component, but which is not part of that Major
+ Component, and (b) serves only to enable use of the work with that
+ Major Component, or to implement a Standard Interface for which an
+ implementation is available to the public in source code form.  A
+ "Major Component", in this context, means a major essential component
+ (kernel, window system, and so on) of the specific operating system
+ (if any) on which the executable work runs, or a compiler used to
+ produce the work, or an object code interpreter used to run it.
+ .
+   The "Corresponding Source" for a work in object code form means all
+ the source code needed to generate, install, and (for an executable
+ work) run the object code and to modify the work, including scripts to
+ control those activities.  However, it does not include the work's
+ System Libraries, or general-purpose tools or generally available free
+ programs which are used unmodified in performing those activities but
+ which are not part of the work.  For example, Corresponding Source
+ includes interface definition files associated with source files for
+ the work, and the source code for shared libraries and dynamically
+ linked subprograms that the work is specifically designed to require,
+ such as by intimate data communication or control flow between those
+ subprograms and other parts of the work.
+ .
+   The Corresponding Source need not include anything that users
+ can regenerate automatically from other parts of the Corresponding
+ Source.
+ .
+   The Corresponding Source for a work in source code form is that
+ same work.
+ .
+   2. Basic Permissions.
+ .
+   All rights granted under this License are granted for the term of
+ copyright on the Program, and are irrevocable provided the stated
+ conditions are met.  This License explicitly affirms your unlimited
+ permission to run the unmodified Program.  The output from running a
+ covered work is covered by this License only if the output, given its
+ content, constitutes a covered work.  This License acknowledges your
+ rights of fair use or other equivalent, as provided by copyright law.
+ .
+   You may make, run and propagate covered works that you do not
+ convey, without conditions so long as your license otherwise remains
+ in force.  You may convey covered works to others for the sole purpose
+ of having them make modifications exclusively for you, or provide you
+ with facilities for running those works, provided that you comply with
+ the terms of this License in conveying all material for which you do
+ not control copyright.  Those thus making or running the covered works
+ for you must do so exclusively on your behalf, under your direction
+ and control, on terms that prohibit them from making any copies of
+ your copyrighted material outside their relationship with you.
+ .
+   Conveying under any other circumstances is permitted solely under
+ the conditions stated below.  Sublicensing is not allowed; section 10
+ makes it unnecessary.
+ .
+   3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+ .
+   No covered work shall be deemed part of an effective technological
+ measure under any applicable law fulfilling obligations under article
+ 11 of the WIPO copyright treaty adopted on 20 December 1996, or
+ similar laws prohibiting or restricting circumvention of such
+ measures.
+ .
+   When you convey a covered work, you waive any legal power to forbid
+ circumvention of technological measures to the extent such circumvention
+ is effected by exercising rights under this License with respect to
+ the covered work, and you disclaim any intention to limit operation or
+ modification of the work as a means of enforcing, against the work's
+ users, your or third parties' legal rights to forbid circumvention of
+ technological measures.
+ .
+   4. Conveying Verbatim Copies.
+ .
+   You may convey verbatim copies of the Program's source code as you
+ receive it, in any medium, provided that you conspicuously and
+ appropriately publish on each copy an appropriate copyright notice;
+ keep intact all notices stating that this License and any
+ non-permissive terms added in accord with section 7 apply to the code;
+ keep intact all notices of the absence of any warranty; and give all
+ recipients a copy of this License along with the Program.
+ .
+   You may charge any price or no price for each copy that you convey,
+ and you may offer support or warranty protection for a fee.
+ .
+   5. Conveying Modified Source Versions.
+ .
+   You may convey a work based on the Program, or the modifications to
+ produce it from the Program, in the form of source code under the
+ terms of section 4, provided that you also meet all of these conditions:
+ .
+     a) The work must carry prominent notices stating that you modified
+     it, and giving a relevant date.
+ .
+     b) The work must carry prominent notices stating that it is
+     released under this License and any conditions added under section
+     7.  This requirement modifies the requirement in section 4 to
+     "keep intact all notices".
+ .
+     c) You must license the entire work, as a whole, under this
+     License to anyone who comes into possession of a copy.  This
+     License will therefore apply, along with any applicable section 7
+     additional terms, to the whole of the work, and all its parts,
+     regardless of how they are packaged.  This License gives no
+     permission to license the work in any other way, but it does not
+     invalidate such permission if you have separately received it.
+ .
+     d) If the work has interactive user interfaces, each must display
+     Appropriate Legal Notices; however, if the Program has interactive
+     interfaces that do not display Appropriate Legal Notices, your
+     work need not make them do so.
+ .
+   A compilation of a covered work with other separate and independent
+ works, which are not by their nature extensions of the covered work,
+ and which are not combined with it such as to form a larger program,
+ in or on a volume of a storage or distribution medium, is called an
+ "aggregate" if the compilation and its resulting copyright are not
+ used to limit the access or legal rights of the compilation's users
+ beyond what the individual works permit.  Inclusion of a covered work
+ in an aggregate does not cause this License to apply to the other
+ parts of the aggregate.
+ .
+   6. Conveying Non-Source Forms.
+ .
+   You may convey a covered work in object code form under the terms
+ of sections 4 and 5, provided that you also convey the
+ machine-readable Corresponding Source under the terms of this License,
+ in one of these ways:
+ .
+     a) Convey the object code in, or embodied in, a physical product
+     (including a physical distribution medium), accompanied by the
+     Corresponding Source fixed on a durable physical medium
+     customarily used for software interchange.
+ .
+     b) Convey the object code in, or embodied in, a physical product
+     (including a physical distribution medium), accompanied by a
+     written offer, valid for at least three years and valid for as
+     long as you offer spare parts or customer support for that product
+     model, to give anyone who possesses the object code either (1) a
+     copy of the Corresponding Source for all the software in the
+     product that is covered by this License, on a durable physical
+     medium customarily used for software interchange, for a price no
+     more than your reasonable cost of physically performing this
+     conveying of source, or (2) access to copy the
+     Corresponding Source from a network server at no charge.
+ .
+     c) Convey individual copies of the object code with a copy of the
+     written offer to provide the Corresponding Source.  This
+     alternative is allowed only occasionally and noncommercially, and
+     only if you received the object code with such an offer, in accord
+     with subsection 6b.
+ .
+     d) Convey the object code by offering access from a designated
+     place (gratis or for a charge), and offer equivalent access to the
+     Corresponding Source in the same way through the same place at no
+     further charge.  You need not require recipients to copy the
+     Corresponding Source along with the object code.  If the place to
+     copy the object code is a network server, the Corresponding Source
+     may be on a different server (operated by you or a third party)
+     that supports equivalent copying facilities, provided you maintain
+     clear directions next to the object code saying where to find the
+     Corresponding Source.  Regardless of what server hosts the
+     Corresponding Source, you remain obligated to ensure that it is
+     available for as long as needed to satisfy these requirements.
+ .
+     e) Convey the object code using peer-to-peer transmission, provided
+     you inform other peers where the object code and Corresponding
+     Source of the work are being offered to the general public at no
+     charge under subsection 6d.
+ .
+   A separable portion of the object code, whose source code is excluded
+ from the Corresponding Source as a System Library, need not be
+ included in conveying the object code work.
+ .
+   A "User Product" is either (1) a "consumer product", which means any
+ tangible personal property which is normally used for personal, family,
+ or household purposes, or (2) anything designed or sold for incorporation
+ into a dwelling.  In determining whether a product is a consumer product,
+ doubtful cases shall be resolved in favor of coverage.  For a particular
+ product received by a particular user, "normally used" refers to a
+ typical or common use of that class of product, regardless of the status
+ of the particular user or of the way in which the particular user
+ actually uses, or expects or is expected to use, the product.  A product
+ is a consumer product regardless of whether the product has substantial
+ commercial, industrial or non-consumer uses, unless such uses represent
+ the only significant mode of use of the product.
+ .
+   "Installation Information" for a User Product means any methods,
+ procedures, authorization keys, or other information required to install
+ and execute modified versions of a covered work in that User Product from
+ a modified version of its Corresponding Source.  The information must
+ suffice to ensure that the continued functioning of the modified object
+ code is in no case prevented or interfered with solely because
+ modification has been made.
+ .
+   If you convey an object code work under this section in, or with, or
+ specifically for use in, a User Product, and the conveying occurs as
+ part of a transaction in which the right of possession and use of the
+ User Product is transferred to the recipient in perpetuity or for a
+ fixed term (regardless of how the transaction is characterized), the
+ Corresponding Source conveyed under this section must be accompanied
+ by the Installation Information.  But this requirement does not apply
+ if neither you nor any third party retains the ability to install
+ modified object code on the User Product (for example, the work has
+ been installed in ROM).
+ .
+   The requirement to provide Installation Information does not include a
+ requirement to continue to provide support service, warranty, or updates
+ for a work that has been modified or installed by the recipient, or for
+ the User Product in which it has been modified or installed.  Access to a
+ network may be denied when the modification itself materially and
+ adversely affects the operation of the network or violates the rules and
+ protocols for communication across the network.
+ .
+   Corresponding Source conveyed, and Installation Information provided,
+ in accord with this section must be in a format that is publicly
+ documented (and with an implementation available to the public in
+ source code form), and must require no special password or key for
+ unpacking, reading or copying.
+ .
+   7. Additional Terms.
+ .
+   "Additional permissions" are terms that supplement the terms of this
+ License by making exceptions from one or more of its conditions.
+ Additional permissions that are applicable to the entire Program shall
+ be treated as though they were included in this License, to the extent
+ that they are valid under applicable law.  If additional permissions
+ apply only to part of the Program, that part may be used separately
+ under those permissions, but the entire Program remains governed by
+ this License without regard to the additional permissions.
+ .
+   When you convey a copy of a covered work, you may at your option
+ remove any additional permissions from that copy, or from any part of
+ it.  (Additional permissions may be written to require their own
+ removal in certain cases when you modify the work.)  You may place
+ additional permissions on material, added by you to a covered work,
+ for which you have or can give appropriate copyright permission.
+ .
+   Notwithstanding any other provision of this License, for material you
+ add to a covered work, you may (if authorized by the copyright holders of
+ that material) supplement the terms of this License with terms:
+ .
+     a) Disclaiming warranty or limiting liability differently from the
+     terms of sections 15 and 16 of this License; or
+ .
+     b) Requiring preservation of specified reasonable legal notices or
+     author attributions in that material or in the Appropriate Legal
+     Notices displayed by works containing it; or
+ .
+     c) Prohibiting misrepresentation of the origin of that material, or
+     requiring that modified versions of such material be marked in
+     reasonable ways as different from the original version; or
+ .
+     d) Limiting the use for publicity purposes of names of licensors or
+     authors of the material; or
+ .
+     e) Declining to grant rights under trademark law for use of some
+     trade names, trademarks, or service marks; or
+ .
+     f) Requiring indemnification of licensors and authors of that
+     material by anyone who conveys the material (or modified versions of
+     it) with contractual assumptions of liability to the recipient, for
+     any liability that these contractual assumptions directly impose on
+     those licensors and authors.
+ .
+   All other non-permissive additional terms are considered "further
+ restrictions" within the meaning of section 10.  If the Program as you
+ received it, or any part of it, contains a notice stating that it is
+ governed by this License along with a term that is a further
+ restriction, you may remove that term.  If a license document contains
+ a further restriction but permits relicensing or conveying under this
+ License, you may add to a covered work material governed by the terms
+ of that license document, provided that the further restriction does
+ not survive such relicensing or conveying.
+ .
+   If you add terms to a covered work in accord with this section, you
+ must place, in the relevant source files, a statement of the
+ additional terms that apply to those files, or a notice indicating
+ where to find the applicable terms.
+ .
+   Additional terms, permissive or non-permissive, may be stated in the
+ form of a separately written license, or stated as exceptions;
+ the above requirements apply either way.
+ .
+   8. Termination.
+ .
+   You may not propagate or modify a covered work except as expressly
+ provided under this License.  Any attempt otherwise to propagate or
+ modify it is void, and will automatically terminate your rights under
+ this License (including any patent licenses granted under the third
+ paragraph of section 11).
+ .
+   However, if you cease all violation of this License, then your
+ license from a particular copyright holder is reinstated (a)
+ provisionally, unless and until the copyright holder explicitly and
+ finally terminates your license, and (b) permanently, if the copyright
+ holder fails to notify you of the violation by some reasonable means
+ prior to 60 days after the cessation.
+ .
+   Moreover, your license from a particular copyright holder is
+ reinstated permanently if the copyright holder notifies you of the
+ violation by some reasonable means, this is the first time you have
+ received notice of violation of this License (for any work) from that
+ copyright holder, and you cure the violation prior to 30 days after
+ your receipt of the notice.
+ .
+   Termination of your rights under this section does not terminate the
+ licenses of parties who have received copies or rights from you under
+ this License.  If your rights have been terminated and not permanently
+ reinstated, you do not qualify to receive new licenses for the same
+ material under section 10.
+ .
+   9. Acceptance Not Required for Having Copies.
+ .
+   You are not required to accept this License in order to receive or
+ run a copy of the Program.  Ancillary propagation of a covered work
+ occurring solely as a consequence of using peer-to-peer transmission
+ to receive a copy likewise does not require acceptance.  However,
+ nothing other than this License grants you permission to propagate or
+ modify any covered work.  These actions infringe copyright if you do
+ not accept this License.  Therefore, by modifying or propagating a
+ covered work, you indicate your acceptance of this License to do so.
+ .
+   10. Automatic Licensing of Downstream Recipients.
+ .
+   Each time you convey a covered work, the recipient automatically
+ receives a license from the original licensors, to run, modify and
+ propagate that work, subject to this License.  You are not responsible
+ for enforcing compliance by third parties with this License.
+ .
+   An "entity transaction" is a transaction transferring control of an
+ organization, or substantially all assets of one, or subdividing an
+ organization, or merging organizations.  If propagation of a covered
+ work results from an entity transaction, each party to that
+ transaction who receives a copy of the work also receives whatever
+ licenses to the work the party's predecessor in interest had or could
+ give under the previous paragraph, plus a right to possession of the
+ Corresponding Source of the work from the predecessor in interest, if
+ the predecessor has it or can get it with reasonable efforts.
+ .
+   You may not impose any further restrictions on the exercise of the
+ rights granted or affirmed under this License.  For example, you may
+ not impose a license fee, royalty, or other charge for exercise of
+ rights granted under this License, and you may not initiate litigation
+ (including a cross-claim or counterclaim in a lawsuit) alleging that
+ any patent claim is infringed by making, using, selling, offering for
+ sale, or importing the Program or any portion of it.
+ .
+   11. Patents.
+ .
+   A "contributor" is a copyright holder who authorizes use under this
+ License of the Program or a work on which the Program is based.  The
+ work thus licensed is called the contributor's "contributor version".
+ .
+   A contributor's "essential patent claims" are all patent claims
+ owned or controlled by the contributor, whether already acquired or
+ hereafter acquired, that would be infringed by some manner, permitted
+ by this License, of making, using, or selling its contributor version,
+ but do not include claims that would be infringed only as a
+ consequence of further modification of the contributor version.  For
+ purposes of this definition, "control" includes the right to grant
+ patent sublicenses in a manner consistent with the requirements of
+ this License.
+ .
+   Each contributor grants you a non-exclusive, worldwide, royalty-free
+ patent license under the contributor's essential patent claims, to
+ make, use, sell, offer for sale, import and otherwise run, modify and
+ propagate the contents of its contributor version.
+ .
+   In the following three paragraphs, a "patent license" is any express
+ agreement or commitment, however denominated, not to enforce a patent
+ (such as an express permission to practice a patent or covenant not to
+ sue for patent infringement).  To "grant" such a patent license to a
+ party means to make such an agreement or commitment not to enforce a
+ patent against the party.
+ .
+   If you convey a covered work, knowingly relying on a patent license,
+ and the Corresponding Source of the work is not available for anyone
+ to copy, free of charge and under the terms of this License, through a
+ publicly available network server or other readily accessible means,
+ then you must either (1) cause the Corresponding Source to be so
+ available, or (2) arrange to deprive yourself of the benefit of the
+ patent license for this particular work, or (3) arrange, in a manner
+ consistent with the requirements of this License, to extend the patent
+ license to downstream recipients.  "Knowingly relying" means you have
+ actual knowledge that, but for the patent license, your conveying the
+ covered work in a country, or your recipient's use of the covered work
+ in a country, would infringe one or more identifiable patents in that
+ country that you have reason to believe are valid.
+ .
+   If, pursuant to or in connection with a single transaction or
+ arrangement, you convey, or propagate by procuring conveyance of, a
+ covered work, and grant a patent license to some of the parties
+ receiving the covered work authorizing them to use, propagate, modify
+ or convey a specific copy of the covered work, then the patent license
+ you grant is automatically extended to all recipients of the covered
+ work and works based on it.
+ .
+   A patent license is "discriminatory" if it does not include within
+ the scope of its coverage, prohibits the exercise of, or is
+ conditioned on the non-exercise of one or more of the rights that are
+ specifically granted under this License.  You may not convey a covered
+ work if you are a party to an arrangement with a third party that is
+ in the business of distributing software, under which you make payment
+ to the third party based on the extent of your activity of conveying
+ the work, and under which the third party grants, to any of the
+ parties who would receive the covered work from you, a discriminatory
+ patent license (a) in connection with copies of the covered work
+ conveyed by you (or copies made from those copies), or (b) primarily
+ for and in connection with specific products or compilations that
+ contain the covered work, unless you entered into that arrangement,
+ or that patent license was granted, prior to 28 March 2007.
+ .
+   Nothing in this License shall be construed as excluding or limiting
+ any implied license or other defenses to infringement that may
+ otherwise be available to you under applicable patent law.
+ .
+   12. No Surrender of Others' Freedom.
+ .
+   If conditions are imposed on you (whether by court order, agreement or
+ otherwise) that contradict the conditions of this License, they do not
+ excuse you from the conditions of this License.  If you cannot convey a
+ covered work so as to satisfy simultaneously your obligations under this
+ License and any other pertinent obligations, then as a consequence you may
+ not convey it at all.  For example, if you agree to terms that obligate you
+ to collect a royalty for further conveying from those to whom you convey
+ the Program, the only way you could satisfy both those terms and this
+ License would be to refrain entirely from conveying the Program.
+ .
+   13. Remote Network Interaction; Use with the GNU General Public License.
+ .
+   Notwithstanding any other provision of this License, if you modify the
+ Program, your modified version must prominently offer all users
+ interacting with it remotely through a computer network (if your version
+ supports such interaction) an opportunity to receive the Corresponding
+ Source of your version by providing access to the Corresponding Source
+ from a network server at no charge, through some standard or customary
+ means of facilitating copying of software.  This Corresponding Source
+ shall include the Corresponding Source for any work covered by version 3
+ of the GNU General Public License that is incorporated pursuant to the
+ following paragraph.
+ .
+   Notwithstanding any other provision of this License, you have
+ permission to link or combine any covered work with a work licensed
+ under version 3 of the GNU General Public License into a single
+ combined work, and to convey the resulting work.  The terms of this
+ License will continue to apply to the part which is the covered work,
+ but the work with which it is combined will remain governed by version
+ 3 of the GNU General Public License.
+ .
+   14. Revised Versions of this License.
+ .
+   The Free Software Foundation may publish revised and/or new versions of
+ the GNU Affero General Public License from time to time.  Such new versions
+ will be similar in spirit to the present version, but may differ in detail to
+ address new problems or concerns.
+ .
+   Each version is given a distinguishing version number.  If the
+ Program specifies that a certain numbered version of the GNU Affero General
+ Public License "or any later version" applies to it, you have the
+ option of following the terms and conditions either of that numbered
+ version or of any later version published by the Free Software
+ Foundation.  If the Program does not specify a version number of the
+ GNU Affero General Public License, you may choose any version ever published
+ by the Free Software Foundation.
+ .
+   If the Program specifies that a proxy can decide which future
+ versions of the GNU Affero General Public License can be used, that proxy's
+ public statement of acceptance of a version permanently authorizes you
+ to choose that version for the Program.
+ .
+   Later license versions may give you additional or different
+ permissions.  However, no additional obligations are imposed on any
+ author or copyright holder as a result of your choosing to follow a
+ later version.
+ .
+   15. Disclaimer of Warranty.
+ .
+   THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+ APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+ HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+ OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+ IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+ .
+   16. Limitation of Liability.
+ .
+   IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+ WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+ THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+ GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+ USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+ DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+ PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+ EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGES.
+ .
+   17. Interpretation of Sections 15 and 16.
+ .
+   If the disclaimer of warranty and limitation of liability provided
+ above cannot be given local legal effect according to their terms,
+ reviewing courts shall apply local law that most closely approximates
+ an absolute waiver of all civil liability in connection with the
+ Program, unless a warranty or assumption of liability accompanies a
+ copy of the Program in return for a fee.
+ .
+                      END OF TERMS AND CONDITIONS
+ .
+             How to Apply These Terms to Your New Programs
+ .
+   If you develop a new program, and you want it to be of the greatest
+ possible use to the public, the best way to achieve this is to make it
+ free software which everyone can redistribute and change under these terms.
+ .
+   To do so, attach the following notices to the program.  It is safest
+ to attach them to the start of each source file to most effectively
+ state the exclusion of warranty; and each file should have at least
+ the "copyright" line and a pointer to where the full notice is found.
+ .
+     <one line to give the program's name and a brief idea of what it does.>
+     Copyright (C) <year>  <name of author>
+ .
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Affero General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+ .
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Affero General Public License for more details.
+ .
+     You should have received a copy of the GNU Affero General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ .
+ Also add information on how to contact you by electronic and paper mail.
+ .
+   If your software can interact with users remotely through a computer
+ network, you should also make sure that it provides a way for users to
+ get its source.  For example, if your program is a web application, its
+ interface could display a "Source" link that leads users to an archive
+ of the code.  There are many ways you could offer source, and different
+ solutions will be better for different programs; see section 13 for the
+ specific requirements.
+ .
+   You should also get your employer (if you work as a programmer) or school,
+ if any, to sign a "copyright disclaimer" for the program, if necessary.
+ For more information on this, and how to apply and follow the GNU AGPL, see
+ <http://www.gnu.org/licenses/>.

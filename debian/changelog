@@ -1,3 +1,10 @@
+shinken (1.4-1~exp2) experimental; urgency=low
+
+  * Fix licences in debian/copyright
+
+ -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Thu, 25 Jul 2013 11:41:56 -0400
+
+
 shinken (1.4-1~exp1) experimental; urgency=low
 
   * New upstream release (#672496)
