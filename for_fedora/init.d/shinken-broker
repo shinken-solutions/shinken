@@ -25,16 +25,28 @@
 
 
 
+# Source function library.
+. /etc/init.d/functions
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
+# Source networking configuration.
+. /etc/sysconfig/network
 
-daemon_args="-d -c /etc/shinken/brokerd.ini"             # Arguments to run the daemon with
-pidfile=/var/run/shinken/brokerd.pid
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
 
 exec="/usr/sbin/shinken-broker"
 prog=$(basename $exec)
+
+opts="-d -c /etc/shinken/brokerd.ini"             # Arguments to run the daemon with
+
+pidfile=/var/run/shinken/brokerd.pid
+piddir=/var/run/shinken
+
+user=nagios
+group=root
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
@@ -42,13 +54,11 @@ lockfile=/var/lock/subsys/$prog
 
 start() {
 
-    directory=$(dirname $pidfile)                                                                                                                                    
-    [ ! -d $directory ] && mkdir -p $directory
-    chown nagios:root $directory
+    [ ! -d $piddir ] && mkdir -m 0750 -p $piddir
+    chown $user:$group $piddir
 
     echo -n $"Starting $prog: "
-    $exec $daemon_args
-    # if not running, start it up here, usually something like "daemon $exec"
+    daemon --pidfile=$pidfile $exec $opts
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
@@ -57,8 +67,7 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    killproc -p ${pidfile}
-    # stop it here, often "killproc $prog"
+    killproc -p $pidfile $prog
     retval=$?
     echo
     [ $retval -eq 0 ] && rm -f $lockfile
@@ -67,7 +76,12 @@ stop() {
 
 restart() {
     stop
+    sleep 1
     start
+}
+
+rh_status() {
+    status -p $pidfile $prog
 }
 
 case "$1" in
@@ -78,7 +92,7 @@ case "$1" in
         restart
         ;;
     status)
-        status $prog
+        rh_status
         ;;
     try-restart|condrestart)
         if status $prog >/dev/null ; then
