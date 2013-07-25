@@ -8,6 +8,8 @@ INSTALLED_FILES
 .pydevproject
 .settings
 .gitignore
+modules/*
+etc/modules/*
 
 # Logs and databases #
 ######################
