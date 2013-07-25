@@ -42,7 +42,10 @@ CONFIG = None
 ############# ********************        PUBLISH           ****************###########
 
 def read_package_json(fd):
-    package_json = json.load(fd)
+    buf = fd.read()
+    fd.close()
+    buf = buf.decode('utf8', 'ignore')
+    package_json = json.loads(buf)
     if not package_json:
         logger.error("Bad package.json file")
         sys.exit(2)
