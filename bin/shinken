@@ -39,6 +39,9 @@ import tarfile
 import pycurl
 import urllib
 import ConfigParser
+import imp
+import shlex
+import readline
 from StringIO import StringIO
 
 try:
@@ -74,354 +77,175 @@ else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.ini'
 
 
-URI = 'shinken.io'
-DEBUG = True
 
 
+# Commander is the main class for managing the CLI session and behavior
+class CLICommander(object):
+    def __init__(self, config):
+        self.keywords = {}
+        self.config = config
+        #We will now try to load the keywords from the modules
+        self.load_cli_mods()
 
-
-def _copytree(src, dst, symlinks=False, ignore=None):
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            if not os.path.exists(d):
-                os.mkdir(d)
-            _copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
-
-
-def create_archive(to_pack):
-    # First try to look if the directory we are trying to pack is valid
-    to_pack = os.path.abspath(to_pack)
-    if not os.path.exists(to_pack):
-        logger.error("Error : the directory to pack is missing %s" % to_pack)
-        sys.exit(2)
-    logger.debug("Preparing to pack the directory %s" % to_pack)
-    package_json_p = os.path.join(to_pack, 'package.json')
-    if not os.path.exists(package_json_p):
-        print "Error : Missing file", package_json_p
-        sys.exit(2)
-    package_json = read_package_json(open(package_json_p))
-
-    name = package_json.get('name', None)
-    if not name:
-        logger.error('Missing name entry in the package.json file. Cannot pack')
-        sys.exit(2)
-
-
-    # return True for files we want to exclude
-    def tar_exclude_filter(f):
-        # if the file start with .git, we bail out
-        # Also ending with ~ (Thanks emacs...)
-        if f.startswith('./.git'):
-            return True
-        if f.endswith('~'):
-            return True
-        return False
-
-    # Now prepare a destination file
-    tmp_dir  = tempfile.gettempdir()
-    tmp_file = os.path.join(tmp_dir, name+'.tar.gz')
-    tar = tarfile.open(tmp_file, "w:gz")
-    os.chdir(to_pack)
-    tar.add(".",arcname='.', exclude=tar_exclude_filter)
-    tar.close()
-    logger.debug("Saved file %s" % tmp_file)
-    return tmp_file
-    
-
-def publish_archive(archive):
-    # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
-    api_key = CONFIG['shinken.io']['api_key']
-    
-    # Ok we will push the file with a 10s timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, URI + "/push")
-    c.setopt(c.HTTPPOST, [("api_key", api_key),
-                          ("data",
-                           (c.FORM_FILE, str(archive),
-                            c.FORM_CONTENTTYPE, "application/x-gzip"))
-                          ])
-    response = StringIO()
-    c.setopt(pycurl.WRITEFUNCTION, response.write)
-    if DEBUG:
-        c.setopt(c.VERBOSE, 1)
-    c.perform()
-    r = c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    if r != 200:
-        logger.error("There was a critical error : %s" % response.getvalue())
-        sys.exit(2)
-    else:    
-        ret  = json.loads(response.getvalue().replace('\\/', '/'))
-        status = ret.get('status')
-        text   = ret.get('text')
-        if status == 200:
-            logger.log(text)
-        else:
-            logger.error(text)
-    
-
-
-
-def read_package_json(fd):
-    package_json = json.load(fd)
-    if not package_json:
-        logger.error("Bad package.json file")
-        sys.exit(2)
-    return package_json
-
-
-
-def search(look_at):
-    # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
-    api_key = CONFIG['shinken.io']['api_key']
-    
-    # Ok we will push the file with a 10s timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-
-    args = {'keywords':','.join(look_at)}
-    c.setopt(c.URL, str(URI + '/searchcli?'+urllib.urlencode(args)))
-    response = StringIO()
-    c.setopt(pycurl.WRITEFUNCTION, response.write)
-    if DEBUG:
-        c.setopt(c.VERBOSE, 1)
-    c.perform()
-    r = c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    if r != 200:
-        logger.error("There was a critical error : %s" % response.getvalue())
-        sys.exit(2)
-    else:    
-        ret  = json.loads(response.getvalue().replace('\\/', '/'))
-        status = ret.get('status')
-        result   = ret.get('result')
-        if status != 200:
-            logger.log(result)
-            return []
-        return result
-
-
-
-def print_search_matches(matches):
-    if len(matches) == 0:
-        print "Sorry, no match found in shinken.io"
-        return
-    for p in matches:
-        name = p['name']
-        user_id = p['user_id']
-        keywords = p['keywords']
-        description = p['description']
-        cprint('%s ' %  name , 'green', end='')
-        cprint('(%s) [%s] : %s' %  (user_id, ','.join(keywords), description))
-    
-
-def grab_package(pname):
-    print "Trying to grab package", pname
-
-    # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
-    api_key = CONFIG['shinken.io']['api_key']
-    
-    # Ok we will push the file with a 10s timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-
-    c.setopt(c.URL, str(URI + '/grab/%s' % pname))
-    response = StringIO()
-    c.setopt(pycurl.WRITEFUNCTION, response.write)
-    if DEBUG:
-        c.setopt(c.VERBOSE, 1)
-    c.perform()
-    r = c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    if r != 200:
-        logger.error("There was a critical error : %s" % response.getvalue())
-        sys.exit(2)
-    else:
-        ret = response.getvalue()
-        print "GOT A RETURN OF", len(ret)
-        return ret
-
-
-
-
-def install_package(pname, raw):
-    print "We must install the package", pname, "of size", len(raw)
-    tmpdir = os.path.join(tempfile.gettempdir(), pname)
-    print "WIll unpack the package into", tmpdir
-    
-    if os.path.exists(tmpdir):
-        print "removing previous tmp dir"
-        shutil.rmtree(tmpdir)
-    print "Creating temporary dir", tmpdir
-    os.mkdir(tmpdir)
-
-    # open a file with the content
-    f = StringIO(raw)
-    tar_file = tarfile.open(fileobj=f, mode="r")
-    print "tar file contents:"
-    for i in tar_file.getmembers():
-        path = i.name
-        if path == '.':
-            continue
-        if not path.startswith('./') or '..' in path:
-            print "SECURITY: the path %s seems dangerous!" % path
-            return
-        print "PATH:%s" % path
-    # Extract all in the tmpdir
-    tar_file.extractall(tmpdir)
-    tar_file.close()
-
-
-    package_json_p = os.path.join(tmpdir, 'package.json')
-    if not os.path.exists(package_json_p):
-        print "Error : bad archive : Missing file", package_json_p
-        return None
-    package_json = read_package_json(open(package_json_p))
-    print "WILL Install package with", package_json
-
-    modules_dir = CONFIG['paths']['modules']
-    share_dir   = CONFIG['paths']['share']
-    packs_dir   = CONFIG['paths']['packs']
-    etc_dir     = CONFIG['paths']['etc']
-    test_dir   = CONFIG['paths'].get('test', '/__DONOTEXISTS__')
-    for d in (modules_dir, share_dir, packs_dir):
-        if not os.path.exists(d):
-            logger.error("The installation directory %s is missing!" % d)
-            return
-
-    p_share  = os.path.join(tmpdir, 'share')
-
-    # Now install the package from $TMP$/module/* to $MODULES$/pname/*
-    p_module = os.path.join(tmpdir, 'module')
-    if os.path.exists(p_module):
-        logger.info("Installing the module package data")
-        mod_dest = os.path.join(modules_dir, pname)
-        if os.path.exists(mod_dest):
-            logger.info("Removing previous module install at %s" % mod_dest)
-            shutil.rmtree(mod_dest)
-        # shutil will do the create dir
-        shutil.copytree(p_module, mod_dest)
-        logger.info("Copy done in the module directory %s" % mod_dest)
-
-    # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
-    p_pack = os.path.join(tmpdir, 'pack')
-    if os.path.exists(p_pack):
-        logger.info("Installing the pack package data")
-        pack_dest = os.path.join(packs_dir, pname)
-        if os.path.exists(pack_dest):
-            logger.info("Removing previous pack install at %s" % pack_dest)
-            shutil.rmtree(pack_dest)
-        # shutil will do the create dir
-        shutil.copytree(p_pack, pack_dest)
-        logger.info("Copy done in the pack directory %s" % pack_dest)
-
-    # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
-    p_etc = os.path.join(tmpdir, 'etc')
-    if os.path.exists(p_etc):
-        logger.info("Merging the etc package data into your etc directory")
-        # We don't use shutils because it NEED etc_dir to be non existant...
-        # Come one guys..... cp is not as terrible as this...
-        _copytree(p_etc, etc_dir)
-        logger.info("Copy done in the etc directory %s" % etc_dir)
-
-
-    # Now install the tests from $TMP$/tests/* to $TESTS$/tests/*
-    # if the last one is specified on the configuration file (optionnal)
-    p_tests = os.path.join(tmpdir, 'test')
-    if os.path.exists(p_tests) and os.path.exists(test_dir):
-        logger.info("Merging the test package data into your test directory")
-        # We don't use shutils because it NEED etc_dir to be non existant...
-        # Come one guys..... cp is not as terrible as this...
-        print "COPY", p_tests, test_dir
-        _copytree(p_tests, test_dir)
-        logger.info("Copy done in the test directory %s" % test_dir)
-
-
-    
+        self.completion_matches = []
         
 
+    def load_cli_mods(self):
+
+        # Main list of keywords for the first parameter
+        self.keywords = {}
+        cli_mods_dir = os.path.abspath(self.config['paths']['cli'])
+        logger.debug ("WILL LOAD THE CLI DIR %s" %  cli_mods_dir)
+        cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
+        print "BLA?", cli_mods_dirs
+        for d in cli_mods_dirs:
+            f = os.path.join(d, 'cli.py')
+            print "EXISTS?", f
+            if os.path.exists(f):
+                dname = os.path.split(d)[1]
+                # Let's load it, but first att it to sys.path
+                sys.path.append(d)
+                # Load this PATH/cli.py file
+                m = imp.load_source(dname, f)
+                # Link the CONFIG objet into it
+                m.CONFIG = self.config
+                exports = getattr(m, 'exports', {})
+                for (f, v) in exports.iteritems():
+                    m_keywords = v.get('keywords', [])
+                    for k in m_keywords:
+                        e = {'f':f, 'args' : v.get('args', []),
+                             'description':v.get('description', '')}
+                        # Finally save it
+                        self.keywords[k] = e
+                         
+        logger.debug('We load the keywords %s' % self.keywords)
+
+
+    def loop(self):
+        print "CALLING LOOP!"
+        readline.parse_and_bind('tab: complete')
+        # Use the CLI as completer
+        readline.set_completer(self.complete)
+
+
+        readline.parse_and_bind('set editing-mode emacs')
+        # Try to read and save the history when exiting
+        histfile = os.path.join(os.path.expanduser("~"), ".shinken.history")
+        try:
+            readline.read_history_file(histfile)
+        except IOError:
+            pass
+        import atexit
+        atexit.register(readline.write_history_file, histfile)
+
+        while True:
+            try:
+                line = raw_input('> ')
+            except EOFError:
+                print ''
+                break
+            line = line.strip()
+            if line in ['quit', 'bye', 'sayonara']:
+                break
+
+            if not line:
+                continue
+            if line.startswith('!'):
+                self.execute_shell(line[1:])
+                continue
+            # More cleassic command
+            print 'ENTERED: "%s"' % line
+            args = shlex.split(line.encode('utf8', 'ignore'))
+            print "WANT TO CALL WITH ARGS", args
+            self.one_loop(args)
+            
+
+    
+    def execute_shell(self, line):
+        output = os.popen(line).read()
+        print output
+
+
+    # Execute a function based on the command line
+    def one_loop(self, command_args):
+        print "ARGS", command_args
+        keyword = command_args.pop(0)
+        mod = self.keywords.get(keyword, None)
+        if mod is None:
+            logger.error("UNKNOWN command %s" % keyword)
+            return
+        
+        # Now prepare a new parser, for the command call this time
+        command_parser = optparse.OptionParser(
+            """""",
+            version="%prog " + VERSION)
+        command_parser.prog = keyword
+
+        f_args = []
+        for a in mod.get('args', []):
+            n = a.get('name', None)
+            if n is None:
+                continue
+            default = a.get('default', Dummy)
+            description = a.get('description', '')
+        
+        print "PARSE"
+        cmd_opts, cmd_args = command_parser.parse_args(command_args)
+        print "FIN PARSE"
+
+        print "Load mod", mod
+
+        f = mod.get('f', None)
+        print "CALLING", f, "WITH", cmd_args
+        f(*cmd_args)
+
+
+
+
+    # Complete is a bit strange in readline. It will call it as it do not answser None, by increasing the
+    # state int for each call. So don't loop forever!
+    def complete(self, text, state):
+        #print "STATE?", text, state
+
+        # New completion call
+        if state == 0:
+            self.completion_matches = []
+        
+        #print "TRY TO COMPLETE", text
+        text = text.strip()
+        
+        args = shlex.split(text.encode('utf8', 'ignore'))
+        #print "ARGS", args
+        if len(args) == 0:
+            args = ['']
+        keyword = args[0]
+        # Trying to expand the command name
+        if len(args) == 1 and state == 0:
+            for k in self.keywords:
+                if k.startswith(text):
+                    self.completion_matches.append(k)
+        
+        response = None
+        try:
+            response = self.completion_matches[state]
+        except IndexError:
+            response = None
+
+        #print "CALL", text, "state", state, response
+        return response
+                
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
-        """
-Create   : %prog [options] -c -p pack_file [-s share_dir] [-d dest]
-Upload   : %prog [options] -u -z pack.zip -k API_KEY
-Register : %prog [options] -r -l login -P password -e email
-Retrieve : %prog [options] -g -l login -P password
-Analyse  : %prog [options] -a -k API_KEY /path/stats.json
-
-For more information, look at http://www.shinken-monitoring.org/wiki/packs/create_and_push_packs
-""",
+        """""",
         version="%prog " + VERSION)
-    parser.add_option('-c', '--create', action='store_true',
-                      dest="create_pack", help=('Mode to create a zip file from a pack'))
-    parser.add_option('-p', '--pack-file', dest="pack_file",
-                      help="""Pack .pack file that you want to generate from.""")
-    parser.add_option('-s', '--share-dir', dest="share_dir",
-                       help=('Your share directory with templates and icon sets'))
-    parser.add_option('-d', '--dest', dest="p_dest_dir",
-                      help="""Directory where to """)
-    parser.add_option('-U', '--uri', dest="uri",
-                      help="""Uri to push the pack. Default is community.shinken-monitoring.org""")
     parser.add_option('--proxy', dest="proxy",
                       help="""Proxy URI. Like http://user:password@proxy-server:3128""")
-
-    parser.add_option('-u', '--upload', action='store_true',
-                      dest="upload", help=('Mode to upload a pack zip file to the Shinken Pack website. It need an API key for it.'))
-    parser.add_option('-z', '--zip-file',
-                      dest="zip_file", help=("Your Pack zip file to send in the Shinken Pack website"))
-    # TODO: where is the PACK WEBSITE??? :)
-    parser.add_option('-k', '--api-key',
-                      dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
-
-    parser.add_option('-r', '--register', action='store_true',
-                      dest="register", help=("Mode to register to the Shinken pack website"))
-    parser.add_option('-l', '--login',
-                      dest="login", help=("Login name to the Shinken Pack website, to register or get the API key"))
-    parser.add_option('-P', '--password',
-                      dest="password", help=("Password for the Shinken pack website registration"))
-    parser.add_option('-e', '--email',
-                      dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
-
-    parser.add_option('-g', '--get-key', action='store_true',
-                      dest="getkey", help=("Mode to retrieve your API key"))
-
-    parser.add_option('-a', '--analyse', action='store_true',
-                      dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
-
-    opts, args = parser.parse_args()
-
-    mode = ''
-
-    # For the create pack part
-    pack_file = ''
-    p_dest_dir = tempfile.gettempdir()
-    src_dir = ''
-    _tmp = tempfile.mktemp()
-    share_dir = opts.share_dir or ''
-
-    uri = opts.uri or 'shinken.io'
-    proxy = opts.proxy or None
+    parser.add_option('-A', '--api-key',
+                      dest="api_key", help=("Your API key for uploading the package to the Shinken.io website. If you don't have one, please go to your account page"))
+    parser.add_option('-l', '--list', action='store_true',
+                      dest="do_list", help=("List available commands"))
+    
 
     if not os.path.exists(DEFAULT_CFG):
         logger.debug('Missing configuration file!')
@@ -434,99 +258,52 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
 
+    CLI = CLICommander(CONFIG)
 
-    if opts.create_pack:
-        mode = 'create_pack'
+    
+    # We should look on the sys.argv if we find a valid keywords to
+    # call in one loop or not.
+    def hack_sys_argv():        
+        command_values = []
+        internal_values = []
+        #print "RARGS", parser.rargs
+        founded = False
+        for arg in sys.argv:
+            if arg in CLI.keywords:
+                founded = True
+            # Did we found it?
+            if founded:
+                command_values.append(arg)
+            else: # ok still not, it's for the shinekn command so
+                internal_values.append(arg)
 
-        if not opts.pack_file:
-            parser.error("Requires a pack file (option -p/--pack-file)")
-        pack_file = opts.pack_file
+        sys.argv = internal_values
+        return command_values
+            
+    # We will remove specific commands from the sys.argv list and keep
+    # them for parsing them after
+    command_args = hack_sys_argv()
 
-        if not pack_file.endswith('.pack'):
-            print "Sorry, the pack-file is not a .pack file. exiting"
-            sys.exit(2)
+    # Global command parsing
+    opts, args = parser.parse_args()
 
-        if opts.p_dest_dir:
-            p_dest_dir = opts.p_dest_dir
+    # If the user explicitely set the proxy, take it!
+    if opts.proxy:
+        CONFIG['shinken.io.proxy'] = opts.proxy
 
-        create_pack(pack_file, p_dest_dir, share_dir)
+    # Maybe he/she just want to list our commands?
+    if opts.do_list:
+        print "Available commands:"
+        for (k,m) in CLI.keywords.iteritems():
+            cprint('%s ' %  k , 'green', end='')
+            cprint(': %s' %  m['description'])
+        sys.exit(2)
+    
+    # if just call shinken, we must open a prompt, but will be for another version
+    if len(command_args) == 0:
+        CLI.loop()
+        sys.exit(0)
 
-
-    if len(args) >= 1:
-        if args[0] == 'publish':
-            to_pack = '.'
-            if len(args) == 2:
-                to_pack = args[1]
-            archive = create_archive(to_pack)
-            publish_archive(archive)
-
-
-        if args[0] == 'search':
-            look_at = args[1:]
-            #print "DEBUG: We will search for", look_at
-            matches = search(look_at)
-
-            #print "DEBUG: FOUNDED", matches
-            print_search_matches(matches)
-
-        if args[0] == 'install':
-            to_install = args[1]
-            #print "DEBUG: We will search for", look_at
-            raw = grab_package(to_install)
-            install_package(to_install, raw)
-
-
-    if opts.upload:
-        mode = 'upload'
-        if not opts.zip_file:
-            parser.error("Requires a pack zip file (option -z/--zip-file)")
-        zip_file = opts.zip_file
-
-        if not opts.api_key:
-            parser.error("Requires an API key (option -k/--api-key)")
-        api_key = opts.api_key
-
-        push_pack(zip_file, api_key, uri, proxy)
-
-
-    if opts.register:
-        mode = 'register'
-        if not opts.login:
-            parser.error("Requires a login name (option -l/--login)")
-        login = opts.login
-        if not opts.password:
-            parser.error("Requires a password (option -P/--password)")
-        password = opts.password
-        if not opts.email:
-            parser.error("Requires a valid email (option -e/--email)")
-        email = opts.email
-
-        register(login, password, email, uri, proxy)
-
-
-    if opts.getkey:
-        mode = 'getkey'
-        if not opts.login:
-            parser.error("Requires a login name (option -l/--login)")
-        login = opts.login
-        if not opts.password:
-            parser.error("Requires a password (option -P/--password)")
-        password = opts.password
-
-        getkey(login, password, uri, proxy)
-
-
-
-    if opts.analyse:
-        mode = 'analyse'
-        if not opts.api_key:
-            parser.error("Requires an API key (option -k/--api-key)")
-        api_key = opts.api_key
-        files = args
-        if not files:
-            parser.error("Requires a statistic file to send")
-        if len(files) != 1:
-            parser.error("Too much statistics files to send")
-        p = files[0]
-        print "Sending statistics in file ", p
-        analyse(api_key, p, uri, proxy)
+    # If it's just a one call shot, do it!
+    CLI.one_loop(command_args)
+    
