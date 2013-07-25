@@ -33,6 +33,9 @@
 daemon_args="-d -c /etc/shinken/schedulerd.ini"             # Arguments to run the daemon with
 pidfile=/var/run/shinken/schedulerd.pid
 
+user=nagios
+group=root
+
 exec="/usr/sbin/shinken-scheduler"
 prog=$(basename $exec)
 
@@ -44,7 +47,7 @@ start() {
 
     directory=$(dirname $pidfile)                                                                                                                                    
     [ ! -d $directory ] && mkdir -p $directory
-    chown nagios:root $directory
+    chown $user:$group $directory
 
     echo -n $"Starting $prog: "
     $exec $daemon_args
@@ -78,7 +81,7 @@ case "$1" in
         restart
         ;;
     status)
-        status $prog
+        status -p $pidfile $prog
         ;;
     try-restart|condrestart)
         if status $prog >/dev/null ; then

@@ -80,9 +80,6 @@ restart() {
     start
 }
 
-rh_status() {
-    status -p $pidfile $prog
-}
 
 case "$1" in
     start|stop|restart)
@@ -92,7 +89,7 @@ case "$1" in
         restart
         ;;
     status)
-        rh_status
+        status -p $pidfile $prog
         ;;
     try-restart|condrestart)
         if status $prog >/dev/null ; then

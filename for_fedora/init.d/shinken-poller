@@ -37,6 +37,9 @@
 daemon_args="-d -c /etc/shinken/pollerd.ini"             # Arguments to run the daemon with
 pidfile=/var/run/shinken/pollerd.pid
 
+user=nagios
+group=root
+
 exec="/usr/sbin/shinken-poller"
 prog=$(basename $exec)
 
@@ -48,7 +51,7 @@ start() {
 
     directory=$(dirname $pidfile)                                                                                                                                    
     [ ! -d $directory ] && mkdir -p $directory
-    chown nagios:root $directory
+    chown $user:$group $directory
 
     echo -n $"Starting $prog: "
     $exec $daemon_args
@@ -71,6 +74,7 @@ stop() {
 
 restart() {
     stop
+    sleep 1
     start
 }
 
@@ -82,7 +86,7 @@ case "$1" in
         restart
         ;;
     status)
-        status $prog
+        status -p $pidfile $prog
         ;;
     try-restart|condrestart)
         if status $prog >/dev/null ; then
