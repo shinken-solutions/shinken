@@ -2358,6 +2358,38 @@ function install_HPUX_plugins() {
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_hpux_storage.pl check_snmp_mem >> $TMP/shinken.install.log 2>&1
 }
 
+# CHECK_LOGFILES
+function install_check_logfiles(){
+
+    cadre "Install check_logfiles plugin" green
+
+    cd $TMP
+
+    cecho " > Downloading check_logfiles" green
+        wget $WGETPROXY $CHECKLOGFILES -O check_logfiles-3.5.3.2.tar.gz  >> ${LOGFILE} 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading check_logfiles" red
+            exit 2
+        fi
+    fi
+    cecho " > Extract check_logfiles" green
+    folder=$(ls -1 | grep "^check_logfiles")
+    if [ ! -z "$folder" ]
+    then
+        rm -Rf check_logfiles* >> ${LOGFILE} 2>&1
+    fi
+    tar zxvf check_logfiles-3.5.3.2.tar.gz >> ${LOGFILE} 2>&1
+    folder=$(ls -1 | grep "^check_logfiles")
+    cd $folder
+    cecho " > Build check_logfiles" green
+    autoreconf >> ${LOGFILE} 2>&1
+    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --prefix=$TARGET >> ${LOGFILE} 2>&1
+    make >> ${LOGFILE} 2>&1
+    cecho " > Install check_logfiles.pl" green
+    make install >> ${LOGFILE} 2>&1
+}
+
 # CHECK_NWC_HEALTH
 function install_check_nwc_health(){
 
