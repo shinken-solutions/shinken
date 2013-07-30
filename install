@@ -2366,19 +2366,14 @@ function install_check_logfiles(){
     cd $TMP
 
     cecho " > Downloading check_logfiles" green
-        wget $WGETPROXY $CHECKLOGFILES -O check_logfiles-3.5.3.2.tar.gz  >> ${LOGFILE} 2>&1
-        if [ $? -ne 0 ]
-        then
-            cecho " > Error while downloading check_logfiles" red
-            exit 2
-        fi
+    wget $WGETPROXY $CHECKLOGFILES -O check_logfiles-3.5.3.2.tar.gz  >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading check_logfiles" red
+        exit 2
     fi
     cecho " > Extract check_logfiles" green
-    folder=$(ls -1 | grep "^check_logfiles")
-    if [ ! -z "$folder" ]
-    then
-        rm -Rf check_logfiles* >> ${LOGFILE} 2>&1
-    fi
+    rm -Rf check_logfiles-3.5.3.2 >> ${LOGFILE} 2>&1
     tar zxvf check_logfiles-3.5.3.2.tar.gz >> ${LOGFILE} 2>&1
     folder=$(ls -1 | grep "^check_logfiles")
     cd $folder
@@ -2386,7 +2381,7 @@ function install_check_logfiles(){
     autoreconf >> ${LOGFILE} 2>&1
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --prefix=$TARGET >> ${LOGFILE} 2>&1
     make >> ${LOGFILE} 2>&1
-    cecho " > Install check_logfiles.pl" green
+    cecho " > Install check_logfiles" green
     make install >> ${LOGFILE} 2>&1
 }
 
@@ -3207,6 +3202,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins
+                               check_logfiles
                                check_oracle_health
                                check_mysql_health
 							   check_db2_health
@@ -3298,6 +3294,10 @@ do
             elif [ "$OPTARG" == "check_mem" ]
             then
                 install_check_mem
+                exit 0
+            elif [ "$OPTARG" == "check_logfiles" ]
+            then
+                install_check_logfiles
                 exit 0
             elif [ "$OPTARG" == "check_oracle_health" ]
             then
