@@ -2309,6 +2309,8 @@ function install_check_mongodb(){
 function install_IBM_DS() {
     cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
 
+    cd $TMP
+
     SMcli_bin=$(which SMcli)
     if [ $? -ne 0 ]
     then
@@ -2331,6 +2333,8 @@ function install_IBM_DS() {
 function install_IBM_plugins() {
     cadre "Install check_snmp_aixVGstate.pl, check_snmp_HACMP.pl, check_snmp_Safekit.pl and check_snmp_systemHealth.pl" green
 
+    cd $TMP
+
     cecho "Downloading plugins..." green
     wget $WGETPROXY $CHECKIBM >> ${LOGFILE} 2>&1
 
@@ -2341,21 +2345,13 @@ function install_IBM_plugins() {
 function install_HPUX_plugins() {
     cadre "Install HPUX plugins" green
 
+    cd $TMP
+
     cecho "Downloading plugins..." green
     wget $WGETPROXY $CHECKHPUX >> ${LOGFILE} 2>&1
 
     cecho "Installing plugins..." green
     install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_snmp_hpux_storage.pl check_snmp_mem >> ${LOGFILE} 2>&1
-}
-
-function install_HPUX_plugins() {
-    cadre "Install HPUX plugins" green
-
-    cecho "Downloading plugins..." green
-    wget $WGETPROXY $CHECKHPUX >> ${LOGFILE} 2>&1
-
-    cecho "Installing plugins..." green
-    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_hpux_storage.pl check_snmp_mem >> $TMP/shinken.install.log 2>&1
 }
 
 # CHECK_LOGFILES
