@@ -1184,6 +1184,7 @@ class Scheduler:
                 "instance_id": self.instance_id,
                 "instance_name": self.instance_name,
                 "last_alive": now,
+                "interval_length": self.conf.interval_length,
                 "program_start": self.program_start,
                 "pid": os.getpid(),
                 "daemon_mode": 1,
