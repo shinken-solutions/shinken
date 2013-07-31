@@ -614,6 +614,10 @@ if not is_update:
         data_files.append( (os.path.join(var_root, _path), [p]))
 
 
+
+# compute scripts
+scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
+
 print "All package _data"
 if __name__ == "__main__":
 
@@ -656,7 +660,7 @@ if __name__ == "__main__":
             'setproctitle': ['setproctitle']
         },
 
-        scripts=glob('bin/shinken-[!_]*'),
+        scripts=scripts,
 
         data_files=data_files,
     )

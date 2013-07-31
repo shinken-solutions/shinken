@@ -120,6 +120,7 @@ class CLICommander(object):
 # the Linux Standard Base''',
             'values'  : [('etc', '/etc/shinken'), ('lib','/var/lib/shinken'),
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
+                         ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
                          ]}
                     ,
                     'shinken.io':{
@@ -252,11 +253,21 @@ class CLICommander(object):
                 continue
             default = a.get('default', Dummy)
             description = a.get('description', '')
-        
+            _type = a.get('type', 'standard')
+            if n.startswith('-'):
+                # Get a clean version of the parameter, without - or --
+                dest = n[1:]
+                if dest.startswith('-'):
+                    dest = dest[1:]
+                if _type == 'bool':
+                    command_parser.add_option(n, action='store_true', dest=dest, help=(description))
+                else:
+                    command_parser.add_option(n, dest=dest, help=(description))
+                    
         cmd_opts, cmd_args = command_parser.parse_args(command_args)
         f = mod.get('f', None)
-        #print "CALLING", f, "WITH", cmd_args
-        f(*cmd_args)
+        print "CALLING", f, "WITH", cmd_args, "and", cmd_opts, type(cmd_opts), dir(cmd_opts)
+        f(*cmd_args,**cmd_opts.__dict__)
 
 
 
@@ -368,14 +379,22 @@ if __name__ == '__main__':
         if not cfg:
             cfg = ConfigParser.ConfigParser()
 
+        # Import data from the loaded configuration
+        for section in cfg.sections():
+            if not new_cfg.has_section(section):
+                new_cfg.add_section(section)
+            for (k, v) in cfg.items(section):
+                new_cfg.set(section, k, v)
+
+
         for (s,d) in CLI.ini_defaults.iteritems():
             comment = d.get('comment', '')
             values = d.get('values', [])
+            if comment:
+                new_cfg.add_comment(s, comment)
             if not cfg.has_section(s) and not new_cfg.has_section(s):
                 print "Creating ini section", s
                 new_cfg.add_section(s)
-                if comment:
-                    new_cfg.add_comment(s, comment)
                 modify = True
             for (k,v) in values:
                 if not cfg.has_option(s, k):

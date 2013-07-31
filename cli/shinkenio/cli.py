@@ -248,6 +248,49 @@ def grab_package(pname):
 
 
 
+def grab_local(d):
+    # First try to look if the directory we are trying to pack is valid
+    to_pack = os.path.abspath(d)
+    if not os.path.exists(to_pack):
+        err = "Error : the directory to install is missing %s" % to_pack
+        logger.error(err)
+        raise Exception(err)
+
+    package_json_p = os.path.join(to_pack, 'package.json')
+    if not os.path.exists(package_json_p):
+        print "Error : Missing file", package_json_p
+        sys.exit(2)
+    package_json = read_package_json(open(package_json_p))
+
+    pname = package_json.get('name', None)
+    if not pname:
+        err = 'Missing name entry in the package.json file. Cannot install'
+        logger.error(err)
+        raise Exception(err)
+
+    # return True for files we want to exclude
+    def tar_exclude_filter(f):
+        # if the file start with .git, we bail out
+        # Also ending with ~ (Thanks emacs...)
+        if f.startswith('./.git'):
+            return True
+        if f.endswith('~'):
+            return True
+        return False
+
+    # Now prepare a destination file
+    tmp_file  = tempfile.mktemp()
+    tar = tarfile.open(tmp_file, "w:gz")
+    os.chdir(to_pack)
+    tar.add(".",arcname='.', exclude=tar_exclude_filter)
+    tar.close()
+    fd = open(tmp_file, 'rb')
+    raw = fd.read()
+    fd.close()
+    
+    return (pname, raw)
+
+
 
 def install_package(pname, raw):
     print "We must install the package", pname, "of size", len(raw)
@@ -296,6 +339,9 @@ def install_package(pname, raw):
 
     p_share  = os.path.join(tmpdir, 'share')
 
+    print "TMPDIR", tmpdir
+    print "MODULES DIR", modules_dir
+    print "PNAME", pname
     # Now install the package from $TMP$/module/* to $MODULES$/pname/*
     p_module = os.path.join(tmpdir, 'module')
     if os.path.exists(p_module):
@@ -303,6 +349,7 @@ def install_package(pname, raw):
         mod_dest = os.path.join(modules_dir, pname)
         if os.path.exists(mod_dest):
             logger.info("Removing previous module install at %s" % mod_dest)
+            FUCK
             shutil.rmtree(mod_dest)
         # shutil will do the create dir
         shutil.copytree(p_module, mod_dest)
@@ -345,24 +392,38 @@ def install_package(pname, raw):
     
 
 
-def do_install(pname):
-    raw = grab_package(pname)
+def do_install(pname, local):
+    raw = ''
+    if local:
+        pname, raw = grab_local(pname)
+        
+    if not local:
+        raw = grab_package(pname)
     install_package(pname, raw)
 
 
 
 
 exports = {
-    do_publish : {'keywords': ['publish'], 'args': [{'name' : 'to_pack', 'default':'.', 'description':'Package directory. Default to .'},
-                                                    ],
-                  'description': 'Publish a package on shinken.io. Valid api key required'
-                  },
+    do_publish : {
+        'keywords': ['publish'], 
+        'args': [
+            {'name' : 'to_pack', 'default':'.', 'description':'Package directory. Default to .'},
+            
+            ],
+        'description': 'Publish a package on shinken.io. Valid api key required'
+        },
     
     do_search  : {'keywords': ['search'], 'args': [],
                   'description': 'Search a package on shinken.io by looking at its keywords'
                   },
-    do_install : {'keywords': ['install'], 'args': [{'name' : 'pname', 'description':'Package to install'}],
-                  'description' : 'Grab and install a package from shinken.io'
-                  },
+    do_install : {
+        'keywords': ['install'],
+        'args': [
+            {'name' : 'pname', 'description':'Package to install'},
+            {'name' : '--local', 'description':'Use a local directory instead of the shinken.io version', 'type': 'bool'},
+            ],
+        'description' : 'Grab and install a package from shinken.io'
+        },
     
     }
