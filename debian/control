@@ -225,7 +225,7 @@ Description: Shinken MongoDB storage module for WebUI broker
 # ARBITER MODULES
 Package: shinken-module-arbiter-ws
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}, shinken-module-broker-webui
 Description: WebService module for Arbiter or Receiver
  WebService module for the Arbiter and Receiver. It can receiver passive
  check results vai HTTP POST.

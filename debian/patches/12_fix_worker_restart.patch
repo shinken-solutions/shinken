@@ -1,8 +1,8 @@
-diff --git a/shinken/satellite.py b/shinken/satellite.py
-index 57f107e..11d4dce 100644
---- a/shinken/satellite.py
-+++ b/shinken/satellite.py
-@@ -45,7 +45,7 @@ except ImportError:
+Index: shinken/shinken/satellite.py
+===================================================================
+--- shinken.orig/shinken/satellite.py	2013-07-30 20:50:05.530929586 -0400
++++ shinken/shinken/satellite.py	2013-07-31 00:10:19.000000000 -0400
+@@ -45,7 +45,7 @@
  from Queue import Empty
  
  if not is_android:
@@ -11,7 +11,7 @@ index 57f107e..11d4dce 100644
  else:
      from Queue import Queue
  
-@@ -70,11 +70,11 @@ from shinken.worker import Worker
+@@ -70,11 +70,11 @@
  from shinken.load import Load
  from shinken.daemon import Daemon, Interface
  from shinken.log import logger
@@ -28,7 +28,7 @@ index 57f107e..11d4dce 100644
  
  # Pack of common Pyro exceptions
  from shinken.pyro_wrapper import Pyro_exp_pack
-@@ -102,8 +102,7 @@ class IForArbiter(Interface):
+@@ -102,8 +102,7 @@
      # It will ask me to remove one or more sched_id
      def what_i_managed(self):
          logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
@@ -38,7 +38,7 @@ index 57f107e..11d4dce 100644
  
      # Call by arbiter if it thinks we are running but we must do not (like
      # if I was a spare that take a conf but the master returns, I must die
-@@ -117,7 +116,6 @@ class IForArbiter(Interface):
+@@ -117,7 +116,6 @@
          self.app.schedulers.clear()
          self.app.cur_conf = None
  
@@ -46,7 +46,7 @@ index 57f107e..11d4dce 100644
      # <WTF??> Inconsistent comments!
      # methods are only used by the arbiter or the broker?
      # NB: following methods are only used by broker
-@@ -127,16 +125,13 @@ class IForArbiter(Interface):
+@@ -127,16 +125,13 @@
          self.app.add_broks_to_queue(broks.values())
          return True
  
@@ -64,7 +64,7 @@ index 57f107e..11d4dce 100644
  
      # Use by the receivers to got the host names managed by the schedulers
      def push_host_names(self, sched_id, hnames):
-@@ -180,8 +175,8 @@ class BaseSatellite(Daemon):
+@@ -180,8 +175,8 @@
  
      def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
  
@@ -75,7 +75,7 @@ index 57f107e..11d4dce 100644
  
          # Ours schedulers
          self.schedulers = {}
-@@ -216,8 +211,8 @@ class Satellite(BaseSatellite):
+@@ -216,8 +211,8 @@
  
      def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
  
@@ -86,7 +86,7 @@ index 57f107e..11d4dce 100644
  
          # Keep broks so they can be eaten by a broker
          self.broks = {}
-@@ -238,6 +233,9 @@ class Satellite(BaseSatellite):
+@@ -238,6 +233,9 @@
          self.returns_queue = None
          self.q_by_mod = {}
  
@@ -96,7 +96,7 @@ index 57f107e..11d4dce 100644
          # Can have a queue of external_commands given by modules
          # will be taken by arbiter to process
          self.external_commands = []
-@@ -264,25 +262,29 @@ class Satellite(BaseSatellite):
+@@ -264,25 +262,29 @@
              # But the multiprocessing module is not compatible with it!
              # so we must disable it immediately after
              socket.setdefaulttimeout(None)
@@ -131,7 +131,7 @@ index 57f107e..11d4dce 100644
              sched['wait_homerun'].clear()
          sched['running_id'] = new_run_id
          logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
-@@ -324,7 +326,6 @@ class Satellite(BaseSatellite):
+@@ -324,7 +326,6 @@
          except KeyError:
              pass
  
@@ -139,7 +139,7 @@ index 57f107e..11d4dce 100644
      # Return the chk to scheduler and clean them
      # REF: doc/shinken-action-queues.png (6)
      def manage_returns(self):
-@@ -348,7 +349,9 @@ class Satellite(BaseSatellite):
+@@ -348,7 +349,9 @@
                  except (Pyro_exp_pack, KeyError), exp:
                      logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                      try:
@@ -150,7 +150,7 @@ index 57f107e..11d4dce 100644
                      except:
                          pass
                      self.pynag_con_init(sched_id)
-@@ -356,14 +359,16 @@ class Satellite(BaseSatellite):
+@@ -356,14 +359,16 @@
                  except AttributeError, exp:  # the scheduler must  not be initialized
                      logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                  except Exception, exp:
@@ -170,7 +170,7 @@ index 57f107e..11d4dce 100644
              # We clean ONLY if the send is OK
              if send_ok:
                  sched['wait_homerun'].clear()
-@@ -404,7 +409,9 @@ class Satellite(BaseSatellite):
+@@ -404,7 +409,9 @@
          except OSError, exp:
              # We look for the "Function not implemented" under Linux
              if exp.errno == 38 and os.name == 'posix':
@@ -181,7 +181,7 @@ index 57f107e..11d4dce 100644
              raise
  
          # If we are in the fork module, we do not specify a target
-@@ -422,8 +429,9 @@ class Satellite(BaseSatellite):
+@@ -422,8 +429,9 @@
                  return
          # We want to give to the Worker the name of the daemon (poller or reactionner)
          cls_name = self.__class__.__name__.lower()
@@ -193,7 +193,7 @@ index 57f107e..11d4dce 100644
          w.module_name = module_name
          # save this worker
          self.workers[w.id] = w
-@@ -525,31 +533,54 @@ class Satellite(BaseSatellite):
+@@ -525,31 +533,54 @@
              # So now we can really forgot it
              del self.workers[id]
  
@@ -263,7 +263,7 @@ index 57f107e..11d4dce 100644
      # Get the Queue() from an action by looking at which module
      # it wants with a round robin way to scale the load between
      # workers
-@@ -594,7 +625,7 @@ class Satellite(BaseSatellite):
+@@ -594,7 +625,7 @@
      # put it in the s queue (from master to slave)
      # REF: doc/shinken-action-queues.png (1)
      def get_new_actions(self):
@@ -272,7 +272,7 @@ index 57f107e..11d4dce 100644
  
          # Here are the differences between a
          # poller and a reactionner:
-@@ -618,11 +649,11 @@ class Satellite(BaseSatellite):
+@@ -618,11 +649,11 @@
                  if con is not None:  # None = not initialized
                      pyro.set_timeout(con, 120)
                      # OK, go for it :)
@@ -289,7 +289,7 @@ index 57f107e..11d4dce 100644
                      logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
                      # We 'tag' them with sched_id and put into queue for workers
                      # REF: doc/shinken-action-queues.png (2)
-@@ -634,7 +665,9 @@ class Satellite(BaseSatellite):
+@@ -634,7 +665,9 @@
              except (Pyro_exp_pack, KeyError), exp:
                  logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
                  try:
@@ -300,7 +300,7 @@ index 57f107e..11d4dce 100644
                  except:
                      pass
                  self.pynag_con_init(sched_id)
-@@ -643,7 +676,9 @@ class Satellite(BaseSatellite):
+@@ -643,7 +676,9 @@
              except (AttributeError, Pyro.errors.NamingError), exp:
                  logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
                  try:
@@ -311,7 +311,7 @@ index 57f107e..11d4dce 100644
                  except:
                      pass
              # What the F**k? We do not know what happened,
-@@ -651,7 +686,9 @@ class Satellite(BaseSatellite):
+@@ -651,7 +686,9 @@
              except Exception, exp:
                  logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                  try:
@@ -322,7 +322,7 @@ index 57f107e..11d4dce 100644
                  except:
                      pass
                  raise
-@@ -732,8 +769,9 @@ class Satellite(BaseSatellite):
+@@ -732,8 +769,9 @@
              for mod in self.q_by_mod:
                  # In workers we've got actions send to queue - queue size
                  for (i, q) in self.q_by_mod[mod].items():
@@ -334,7 +334,7 @@ index 57f107e..11d4dce 100644
  
          # Before return or get new actions, see how we manage
          # old ones: are they still in queue (s)? If True, we
-@@ -851,7 +889,8 @@ class Satellite(BaseSatellite):
+@@ -851,7 +889,8 @@
                      already_got = True
  
              if already_got:
@@ -344,7 +344,7 @@ index 57f107e..11d4dce 100644
                  wait_homerun = self.schedulers[sched_id]['wait_homerun']
                  actions = self.schedulers[sched_id]['actions']
  
-@@ -951,7 +990,6 @@ class Satellite(BaseSatellite):
+@@ -949,7 +988,6 @@
              # And even start external ones
              self.modules_manager.start_external_instances()
  
@@ -352,7 +352,7 @@ index 57f107e..11d4dce 100644
              # Allocate Mortal Threads
              for _ in xrange(1, self.min_workers):
                  to_del = []
-@@ -964,13 +1002,15 @@ class Satellite(BaseSatellite):
+@@ -962,13 +1000,15 @@
                          to_del.append(mod)
  
                  for mod in to_del:
