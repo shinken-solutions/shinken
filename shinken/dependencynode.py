@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+from shinken.log import logger
 
 """
 Here is a node class for dependency_node(s) and a factory to create them
@@ -268,14 +269,24 @@ class DependencyNodeFactory(object):
             if pattern.startswith('!'):
                 node.not_value = True
                 pattern = pattern[1:]
-            node.operand = 'object'
-            obj, error = self.find_object(pattern, hosts, services)
-            if obj is not None:
-                # Set host or service
-                node.operand = obj.__class__.my_type
-                node.sons.append(obj)
+            # Is the pattern an host expression to be expanded?
+            if re.match("^[grp]+:", pattern):
+                # o is just extracted its attributes, then trashed.
+                o = self.expand_hosts_expression(pattern, hosts, services)
+                if node.operand != 'of:':
+                    node.operand = '&'
+                node.sons.extend(o.sons)
+                node.configuration_errors.extend(o.configuration_errors)
+                node.switch_zeros_of_values()
             else:
-                node.configuration_errors.append(error)
+                node.operand = 'object'
+                obj, error = self.find_object(pattern, hosts, services)
+                if obj is not None:
+                    # Set host or service
+                    node.operand = obj.__class__.my_type
+                    node.sons.append(obj)
+                else:
+                    node.configuration_errors.append(error)
             return node
         #else:
         #    print "Is complex"
@@ -313,11 +324,11 @@ class DependencyNodeFactory(object):
                         node.sons.append(o)
                     tmp = ''
                     continue
-            
+
             elif c == '(':
                 stacked_par += 1
                 #print "INCREASING STACK TO", stacked_par
-                
+
                 in_par = True
                 tmp = tmp.strip()
                 # Maybe we just start a par, but we got some things in tmp
@@ -334,7 +345,7 @@ class DependencyNodeFactory(object):
                     #o = self.eval_cor_pattern(tmp)
                     #print "1( I've %s got new sons" % pattern , o
                     #node.sons.append(o)
-                    
+
             elif c == ')':
                 #print "Need closeing a sub expression?", tmp
                 stacked_par -= 1
@@ -343,7 +354,7 @@ class DependencyNodeFactory(object):
                     # TODO : real error
                     print "Error : bad expression near", tmp, "too much ')'"
                     continue
-                
+
                 if stacked_par == 0:
                     #print "THIS is closing a sub compress expression", tmp
                     tmp = tmp.strip()
@@ -360,7 +371,7 @@ class DependencyNodeFactory(object):
 
                 # ok here we are still in a huge par, we just close one sub one
                 tmp += c
-            # Manage the NOT for an expression. If we are in a starting bloc, put as 
+            # Manage the NOT for an expression. If we are in a starting bloc, put as
             # a NOT node, but if inside a bloc, don't
             elif c == '!':
                 if stacked_par == 0:
@@ -420,3 +431,87 @@ class DependencyNodeFactory(object):
             if not obj:
                 error = "Business rule uses unknown host %s" % (host_name,)
         return obj, error
+
+
+
+    # Tries to expand a host expression into a dependency node tree using
+    # hostgroup membership or regex on host name as host selector.
+    # Returns a DependencyNode tree.
+    def expand_hosts_expression(self, pattern, hosts, services):
+        error = None
+        node = DependencyNode()
+        node.operand = '&'
+        elts = pattern.split(',')
+        # Flags is the left part of the first : charcter
+        flags = elts[0].strip().split(":")[0]
+        # Name is the right part of the first : charcter
+        name = ":".join(elts[0].strip().split(":")[1:])
+        permissive = "p" in flags
+
+        # Look if we have a service
+        if len(elts) > 1:
+            got_service = True
+            service_description = ",%s" % elts[1].strip()
+        else:
+            got_service = False
+            service_description = ""
+
+        if "g" in flags:
+            expanded_hosts, error = self.lookup_hosts_by_group(name, hosts)
+        elif "r" in flags:
+            expanded_hosts, error = self.lookup_hosts_by_regex(name, hosts)
+        else:
+            error = "Business rule uses unknown host expansion type"
+
+        if error is not None:
+            node.configuration_errors.append(error)
+            return node
+
+        for host_name in expanded_hosts:
+            expr = "%s%s" % (host_name, service_description)
+            o = self.eval_cor_pattern(expr, hosts, services)
+
+            if not o.is_valid():
+                if got_service is True and permissive is True:
+                    # Invalid node is not added (error is ignored).
+                    logger.warning("Business rule got an unknown service for %s. Ignored." % host_name)
+                else:
+                    # Add the invalid node for error to be reported by arbiter.
+                    node.sons.append(o)
+            else:
+                node.sons.append(o)
+
+        return node
+
+
+
+    # Looks for hosts having specified group name in their hostgroups.
+    # Returns a list of Host objects and the error message if error an occurred.
+    def lookup_hosts_by_group(self, group, hosts):
+        error = None
+        expanded_hosts = [h.host_name for h in hosts if group in [g.hostgroup_name for g in h.hostgroups]]
+
+        if not expanded_hosts:
+            error = "Business rule uses unknown or empty hostgroup %s" % group
+
+        return expanded_hosts, error
+
+
+
+    # Looks for hosts wchich name matches specified regex.
+    # Returns a list of Host objects and the error message if error an occurred.
+    def lookup_hosts_by_regex(self, pattern, hosts):
+        error = None
+        expanded_hosts = []
+
+        try:
+            host_re = re.compile(pattern)
+            expanded_hosts = [h.host_name for h in hosts if host_re.match(h.host_name)]
+
+            if not expanded_hosts:
+                error = "Business rule uses regex that no host_name matches: %s" % pattern
+
+        except re.error, e:
+            error = "Business rule uses invalid regex %s: %s" % (pattern, e)
+
+        return expanded_hosts, error
