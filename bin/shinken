@@ -130,7 +130,7 @@ class CLICommander(object):
 ''',
             'values'  : [('proxy',''),('api_key','')]}
                     }
-    
+
 
     def __init__(self, config):
         self.keywords = {}
@@ -176,7 +176,7 @@ class CLICommander(object):
                              'description':v.get('description', '')}
                         # Finally save it
                         self.keywords[k] = e
-                         
+
         logger.debug('We load the keywords %s' % self.keywords)
 
 
@@ -219,9 +219,9 @@ class CLICommander(object):
             args = shlex.split(line.encode('utf8', 'ignore'))
             print "WANT TO CALL WITH ARGS", args
             self.one_loop(args)
-            
 
-    
+
+
     def execute_shell(self, line):
         output = os.popen(line).read()
         print output
@@ -239,7 +239,7 @@ class CLICommander(object):
         if mod is None:
             logger.error("UNKNOWN command %s" % keyword)
             return
-        
+
         # Now prepare a new parser, for the command call this time
         command_parser = optparse.OptionParser(
             '',
@@ -263,7 +263,7 @@ class CLICommander(object):
                     command_parser.add_option(n, action='store_true', dest=dest, help=(description))
                 else:
                     command_parser.add_option(n, dest=dest, help=(description))
-                    
+
         cmd_opts, cmd_args = command_parser.parse_args(command_args)
         f = mod.get('f', None)
         print "CALLING", f, "WITH", cmd_args, "and", cmd_opts, type(cmd_opts), dir(cmd_opts)
@@ -280,10 +280,10 @@ class CLICommander(object):
         # New completion call
         if state == 0:
             self.completion_matches = []
-        
+
         #print "TRY TO COMPLETE", text
         text = text.strip()
-        
+
         args = shlex.split(text.encode('utf8', 'ignore'))
         #print "ARGS", args
         if len(args) == 0:
@@ -294,7 +294,7 @@ class CLICommander(object):
             for k in self.keywords:
                 if k.startswith(text):
                     self.completion_matches.append(k)
-        
+
         response = None
         try:
             response = self.completion_matches[state]
@@ -303,7 +303,7 @@ class CLICommander(object):
 
         #print "CALL", text, "state", state, response
         return response
-                
+
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
@@ -315,7 +315,7 @@ if __name__ == '__main__':
                       dest="api_key", help=("Your API key for uploading the package to the Shinken.io website. If you don't have one, please go to your account page"))
     parser.add_option('-l', '--list', action='store_true',
                       dest="do_list", help=("List available commands"))
-    parser.add_option('--init', action='store_true',                                                                                                                                                          
+    parser.add_option('--init', action='store_true',
                       dest="do_init", help=("Initialize/refill your ~/.shinken.ini file"))
 
 
@@ -333,10 +333,10 @@ if __name__ == '__main__':
 
     CLI = CLICommander(CONFIG)
 
-    
+
     # We should look on the sys.argv if we find a valid keywords to
     # call in one loop or not.
-    def hack_sys_argv():        
+    def hack_sys_argv():
         command_values = []
         internal_values = []
         #print "RARGS", parser.rargs
@@ -352,7 +352,7 @@ if __name__ == '__main__':
 
         sys.argv = internal_values
         return command_values
-            
+
     # We will remove specific commands from the sys.argv list and keep
     # them for parsing them after
     command_args = hack_sys_argv()
@@ -406,8 +406,8 @@ if __name__ == '__main__':
             with open(DEFAULT_CFG, 'wb') as configfile:
                 new_cfg.write(configfile)
         sys.exit(0)
-                
-    
+
+
     # if just call shinken, we must open a prompt, but will be for another version
     if len(command_args) == 0:
         CLI.loop()
@@ -415,4 +415,4 @@ if __name__ == '__main__':
 
     # If it's just a one call shot, do it!
     CLI.one_loop(command_args)
-    
+
