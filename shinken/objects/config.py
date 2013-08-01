@@ -523,6 +523,7 @@ class Config(Item):
         tmp = []
         tmp_type = 'void'
         in_define = False
+        almost_in_define=False
         continuation_line = False
         tmp_line = ''
         lines = buf.split('\n')
@@ -551,12 +552,22 @@ class Config(Item):
             if re.search("^\s*}\s*$", line) is not None:
                 in_define = False
 
+            # { alone in a line can mean start object reading
+            if re.search("^\s*{\s*$", line) is not None and almost_in_define:
+                almost_in_define=False
+                in_define = True
+                continue
+
             if re.search("^\s*#|^\s*$|^\s*}", line) is not None:
                 pass
             # A define must be catch and the type save
             # The old entry must be save before
             elif re.search("^define", line) is not None:
-                in_define = True
+                if re.search(".*{.*$", line) is not None:
+                    in_define = True
+                else:
+                    almost_in_define=True
+
                 if tmp_type not in objectscfg:
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
@@ -818,8 +829,8 @@ class Config(Item):
         self.hostgroups.prepare_for_sending()
         t1 = time.time()
         logger.info('[Arbiter] Serializing the configurations...')
-        
-        
+
+
         # There are two ways of configuration serializing
         # One if to use the serial way, the other is with use_multiprocesses_serializer
         # to call to sub-wrokers to do the job.
@@ -841,11 +852,11 @@ class Config(Item):
             logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
             self.whole_conf_pack = whole_conf_pack
             print "TOTAL serializing in", time.time() - t1
-    
+
         else:
-            logger.info('Using the multiprocessing serialization pass')            
+            logger.info('Using the multiprocessing serialization pass')
             t1 = time.time()
-            
+
             # We ask a manager to manage the communication with our children
             m = Manager()
             # The list will got all the strings from the children
@@ -882,7 +893,7 @@ class Config(Item):
                         processes.remove( (i, p ) )
                     # Don't be too quick to poll!
                     time.sleep(0.1)
-                    
+
                 # Check if we got the good number of configuration, maybe one of the cildren got problems?
                 if len(q) != len(r.confs):
                     logger.error("Something goes wrong in the configuration serializations, please restart Shinken Arbiter")
@@ -911,7 +922,7 @@ class Config(Item):
             if len(whole_queue) != 1:
                 logger.error("Something goes wrong in the whole configuration pack creation, please restart Shinken Arbiter")
                 sys.exit(2)
-                
+
             #Get it and save it
             self.whole_conf_pack = whole_queue.pop()
             logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
@@ -1436,6 +1447,7 @@ class Config(Item):
                   'hostsextinfo', 'servicesextinfo', 'checkmodulations', 'macromodulations'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x))
+
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
@@ -1491,11 +1503,11 @@ class Config(Item):
                 self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
         if not services_tag.issubset(pollers_tag):
-            for tag in services_tag.difference(pollers_tag):        
+            for tag in services_tag.difference(pollers_tag):
                 logger.error("Services exist with poller_tag %s but no poller got this tag" % tag)
                 self.add_error("Error: services exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
-    
+
 
         # Check that all hosts involved in business_rules are from the same realm
         for l in [self.services, self.hosts]:
