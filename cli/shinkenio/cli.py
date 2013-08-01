@@ -92,13 +92,13 @@ def create_archive(to_pack):
     tar.close()
     logger.debug("Saved file %s" % tmp_file)
     return tmp_file
-    
+
 
 def publish_archive(archive):
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
     api_key = CONFIG['shinken.io']['api_key']
-    
+
     # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
@@ -121,7 +121,7 @@ def publish_archive(archive):
     if r != 200:
         logger.error("There was a critical error : %s" % response.getvalue())
         sys.exit(2)
-    else:    
+    else:
         ret  = json.loads(response.getvalue().replace('\\/', '/'))
         status = ret.get('status')
         text   = ret.get('text')
@@ -129,14 +129,14 @@ def publish_archive(archive):
             logger.log(text)
         else:
             logger.error(text)
-    
+
 
 def do_publish(to_pack='.'):
     print "WILL CALL PUBLISH.py with", to_pack
     archive = create_archive(to_pack)
     publish_archive(archive)
-    
-    
+
+
 
 
 ################" *********************** SEARCH *************** ##################
@@ -144,7 +144,7 @@ def search(look_at):
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
     api_key = CONFIG['shinken.io']['api_key']
-    
+
     # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 0)
@@ -164,7 +164,7 @@ def search(look_at):
     if r != 200:
         logger.error("There was a critical error : %s" % response.getvalue())
         sys.exit(2)
-    else:    
+    else:
         ret  = json.loads(response.getvalue().replace('\\/', '/'))
         status = ret.get('status')
         result   = ret.get('result')
@@ -193,7 +193,7 @@ def print_search_matches(matches):
 def do_search(*look_at):
     print "CALL SEARCH WITH ARGS", look_at
     matches = search(look_at)
-    
+
     #print "DEBUG: FOUNDED", matches
     print_search_matches(matches)
 
@@ -222,7 +222,7 @@ def grab_package(pname):
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
     api_key = CONFIG['shinken.io']['api_key']
-    
+
     # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 0)
@@ -287,7 +287,7 @@ def grab_local(d):
     fd = open(tmp_file, 'rb')
     raw = fd.read()
     fd.close()
-    
+
     return (pname, raw)
 
 
@@ -296,7 +296,7 @@ def install_package(pname, raw):
     print "We must install the package", pname, "of size", len(raw)
     tmpdir = os.path.join(tempfile.gettempdir(), pname)
     print "WIll unpack the package into", tmpdir
-    
+
     if os.path.exists(tmpdir):
         print "removing previous tmp dir"
         shutil.rmtree(tmpdir)
@@ -349,7 +349,7 @@ def install_package(pname, raw):
         mod_dest = os.path.join(modules_dir, pname)
         if os.path.exists(mod_dest):
             logger.info("Removing previous module install at %s" % mod_dest)
-            FUCK
+
             shutil.rmtree(mod_dest)
         # shutil will do the create dir
         shutil.copytree(p_module, mod_dest)
@@ -389,14 +389,14 @@ def install_package(pname, raw):
         logger.info("Copy done in the test directory %s" % test_dir)
 
 
-    
+
 
 
 def do_install(pname, local):
     raw = ''
     if local:
         pname, raw = grab_local(pname)
-        
+
     if not local:
         raw = grab_package(pname)
     install_package(pname, raw)
@@ -406,14 +406,14 @@ def do_install(pname, local):
 
 exports = {
     do_publish : {
-        'keywords': ['publish'], 
+        'keywords': ['publish'],
         'args': [
             {'name' : 'to_pack', 'default':'.', 'description':'Package directory. Default to .'},
-            
+
             ],
         'description': 'Publish a package on shinken.io. Valid api key required'
         },
-    
+
     do_search  : {'keywords': ['search'], 'args': [],
                   'description': 'Search a package on shinken.io by looking at its keywords'
                   },
@@ -425,5 +425,5 @@ exports = {
             ],
         'description' : 'Grab and install a package from shinken.io'
         },
-    
+
     }
