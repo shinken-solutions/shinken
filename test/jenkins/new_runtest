@@ -128,7 +128,7 @@ function grab_modules {
     for module in $(cat $MODULE_LIST); do
         git clone $GIT_URL/$module.git /tmp/$module
         $SHINKENCLI install --local /tmp/$module
-
+    done
 }
 
 function main {

@@ -10,4 +10,3 @@ pymongo==2.5
 distribute==0.6.24
 wsgiref==0.1.2
 pycurl
-nosetests
