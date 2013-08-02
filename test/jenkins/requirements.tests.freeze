@@ -1,0 +1,13 @@
+argparse==1.2.1
+coverage==3.5.1
+logilab-astng==0.23.1
+logilab-common==0.57.1
+nose==1.1.2
+pylint==0.25.1
+pep8==1.4.5
+MySQL-python==1.2.3
+pymongo==2.5
+distribute==0.6.24
+wsgiref==0.1.2
+pycurl
+nosetests
