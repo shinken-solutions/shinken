@@ -23,9 +23,10 @@
 
 
 TESTLIST=$(readlink -f $1)
-COVERAGE=$2
-PYLINT=$3
-PEP8=$4
+MODULELIST=$(readlink -f $2)
+COVERAGE=$3
+PYLINT=$4
+PEP8=$5
 test "$COVERAGE" == "COVERAGE" || COVERAGE="NOCOVERAGE"
 test "$PYLINT" == "PYLINT" || PYLINT="NOPYLINT"
 test "$PEP8" == "PEP8" || PYLINT="NOPEP8"
@@ -51,10 +52,6 @@ function check_req {
         exit 2
     fi
 
-    if [[ "$(which nosetests)" == "" ]];then
-        echo "nosetests needed, please install it"
-        exit 2
-    fi
 }
 
 # Check if the reqs changed
@@ -112,7 +109,6 @@ function launch_and_assert {
 }
 
 
-
 # Put into a file the test list
 function generate_all_tests {
     echo "#All tests in the tests directory are listed below" >  $DIR/all_tests.txt
@@ -123,11 +119,35 @@ function generate_all_tests {
     done
 }
 
+
+#Must be in repos/test before launching
 function grab_modules {
     GIT-URL = "https://github.com/shinken-monitoring"
-    for module in $(cat $MODULE_LIST); do
-        git clone $GIT_URL/$module.git /tmp/$module
-        $SHINKENCLI install --local /tmp/$module
+    for module in $(cat $MODULELIST); do
+        git clone $GIT_URL/$module.git tmp/$module
+        $SHINKENCLI install --local tmp/$module
+        cp __import_shinken shinken_test.py tmp/$module/test
+    done
+}
+
+
+function test_modules{
+    for line in $(grep -vE "#|^ *$" $MODULELIST);do
+        for ptest in $( tmp/$line/test/test_*.py);do
+            launch_and_assert $ptest
+            test $? -eq 0 || echo "A test failed : $ptest"
+        done
+    done
+}
+
+function test_core{
+    # We this we drop commented line and empty lines.
+    # We could have used "only" grep -v "#" because the $() return only one line and
+    # multiple space are skipped by the for loop
+    # Safer to drop at the very beginning
+    for line in $(grep -vE "#|^ *$" $TESTLIST);do
+        launch_and_assert $line
+        test $? -eq 0 || echo "A test failed : $line"
     done
 }
 
@@ -143,29 +163,26 @@ function main {
     PYTHONBIN="python"
     PYTHONTOOLS=$(dirname $(which $PYTHONBIN))
     echo "PYTHONTOOLS=$PYTHONTOOLS"
-    # We should be into after /path/to/shinken/test/
+    # We should be into /path/to/shinken/test/
     cd ..
 
-    if [[ ! -d "results" ]]; then
-        mkdir results
-        echo "Creation dir results"
+    if [[ ! -d "$RESULTSDIR" ]]; then
+        mkdir -p $RESULTSDIR
+        echo "Creation dir $RESULTSDIR"
     fi
 
     # Cleanup leftover files from former runs
-    rm -f results/nosetests.xml
+    rm -f $RESULTSDIR/nosetests.xml
     test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/coverage.xml"
     test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/.coverage"
+    #rm -rf tmp/*
+    #ln -s /var/lib/shinken/modules tmp/modules
 
     generate_all_tests
 
-    # We this we drop commented line and empty lines.
-    # We could have used "only" grep -v "#" because the $() return only one line and
-    # multiple space are skipped by the for loop
-    # Safer to drop at the very beginning
-    for line in $(grep -vE "#|^ *$" $TESTLIST);do
-        launch_and_assert $line
-        test $? -eq 0 || echo "A test failed : $line"
-    done
+    test_core
+
+    #test_modules
 
     echo $(pwd)
     # Create the coverage file
