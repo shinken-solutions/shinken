@@ -35,7 +35,7 @@ override_dh_install:
 	cp bin/init.d/shinken-arbiter debian/shinken-arbiter/etc/init.d/shinken-arbiter
 	## Prepare config
 	mkdir -p debian/shinken-arbiter/etc/shinken/shinken-specific
-	cp debian/etc/nagios.cfg debian/shinken-arbiter/etc/shinken/
+	cp debian/etc/shinken.cfg debian/shinken-arbiter/etc/shinken/
 	cp debian/etc/resource.cfg debian/shinken-arbiter/etc/shinken/
 	cp debian/etc/commands.cfg debian/shinken-arbiter/etc/shinken/
 	cp debian/etc/contacts.cfg debian/shinken-arbiter/etc/shinken/
