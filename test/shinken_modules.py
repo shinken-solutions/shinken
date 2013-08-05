@@ -16,8 +16,8 @@ LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
 LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
 
 Logline = livestatus_broker.Logline
-LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore_mongodb').LiveStatusLogStoreMongoDB
-LiveStatusLogStoreSqlite = modulesctx.get_module('logstore_sqlite').LiveStatusLogStoreSqlite
+LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore-mongodb').LiveStatusLogStoreMongoDB
+LiveStatusLogStoreSqlite = modulesctx.get_module('logstore-sqlite').LiveStatusLogStoreSqlite
 
 from shinken.misc.datamanager import datamgr
 
