@@ -48,7 +48,6 @@ class declared(object):
         logger.debug("Calling %s with arguments %s" % (self.f.func_name, args))
         return self.f(*args)
 
-
 @declared
 def critical(obj, output):
     logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
@@ -111,7 +110,7 @@ def perf(obj_ref, metric_name):
         logger.debug("[trigger] I found the perfdata")
         return p[metric_name].value
     logger.debug("[trigger] I am in perf command")
-    return 1
+    return None
 
 
 @declared
