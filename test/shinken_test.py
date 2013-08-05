@@ -48,7 +48,13 @@ from shinken.daemons.arbiterdaemon import Arbiter
 
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
-modulesdir = os.path.join(os.path.dirname(os.path.dirname(myself)), 'modules')
+
+global modulesdir
+modulesdir = "modules"
+
+def define_modulesdir(val):
+    global modulesdir
+    modulesdir = val
 
 class __DUMMY:
     def add(self, obj):
