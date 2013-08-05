@@ -4,7 +4,7 @@
 #
 from  shinken_test import *
 
-define_modulesdir("../modules")
+#define_modulesdir("../modules")
 modulesctx.set_modulesdir(modulesdir)
 
 # Special Livestatus module opening since the module rename
