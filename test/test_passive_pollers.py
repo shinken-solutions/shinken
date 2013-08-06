@@ -202,6 +202,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(broker2.attempt == 1)
         self.assert_(broker2.reachable == False)
 
+        time.sleep(60)
         ### Now add another attempt, still alive, but attemp=2/3
         self.dispatcher.check_alive()
 
@@ -211,6 +212,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(scheduler1.reachable == True)
         # still alive, just unreach
         self.assert_(scheduler2.alive == True)
+        #import pdb; pdb.set_trace()
         self.assert_(scheduler2.attempt == 2)
         self.assert_(scheduler2.reachable == False)
 
@@ -241,6 +243,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(broker2.attempt == 2)
         self.assert_(broker2.reachable == False)
 
+        time.sleep(60)
         ### Now we get BAD, We go DEAD for N2!
         self.dispatcher.check_alive()
 
@@ -287,10 +290,10 @@ class TestPassivePoller(ShinkenTest):
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
-        self.assert_(self.any_log_match('Dispatch OK of for conf in scheduler scheduler-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to reactionner reactionner-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to poller poller-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to broker broker-all-1'))
         self.clear_logs()
 
         # And look if we really dispatch conf as we should
