@@ -60,11 +60,11 @@ except ImportError, exp:  # Like in nt system or Android
 curdir = os.getcwd()
 
 daemons_config = {
-    Broker:       "../etc/daemons/brokerd.ini",
-    Poller:       "../etc/daemons/pollerd.ini",
-    Reactionner:  "../etc/daemons/reactionnerd.ini",
-    Shinken:      "../etc/daemons/schedulerd.ini",
-    Arbiter:    ["../etc/shinken.cfg"]
+    Broker:       "etc/core/daemons/brokerd.ini",
+    Poller:       "etc/core/daemons/pollerd.ini",
+    Reactionner:  "etc/core/daemons/reactionnerd.ini",
+    Shinken:      "etc/core/daemons/schedulerd.ini",
+    Arbiter:    ["etc/core/shinken.cfg"]
 }
 
 
