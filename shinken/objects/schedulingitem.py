@@ -524,12 +524,12 @@ class SchedulingItem(Item):
             time_add = interval * random.uniform(0.0, 1.0)
         else:
             time_add = interval
-            
+
         ## Do the actual Scheduling now
 
         # If not force_time, try to schedule
         if force_time is None:
-            
+
             # Do not calculate next_chk based on current time, but based on the last check execution time.
             # Important for consistency of data for trending.
             if self.next_chk == 0 or self.next_chk is None:
@@ -1285,7 +1285,7 @@ class SchedulingItem(Item):
                 if c_cw:
                     check_command = c_cw
                     break
-            
+
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
@@ -1394,18 +1394,18 @@ class SchedulingItem(Item):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
             state = self.business_rule.get_state()
+            c.output = self.get_business_rule_output()
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0
             c.execution_time = 0
             c.output = 'Host assumed to be UP'
-            c.long_output = c.output
         # Echo is just putting the same state again
         elif c.command == '_echo':
             state = self.state
             c.execution_time = 0
             c.output = self.output
-            c.long_output = c.long_output
+        c.long_output = c.output
         c.check_time = time.time()
         c.exit_status = state
         #print "DBG, setting state", state
