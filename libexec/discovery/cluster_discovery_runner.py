@@ -106,20 +106,23 @@ oid_hacmp_clusterName = ".1.3.6.1.4.1.2.3.1.2.1.5.1.2"
 #  functions #
 ############## 
 
-### Search for files systems presents on the target
+### Search for cluster solution, between safekit or hacmp, presents on the target
 def get_cluster_discovery(oid):
     name= netsnmp.Varbind(oid)
     result = netsnmp.snmpwalk(name, Version=version, DestHost=hostname, Community=community, SecName=snmpv3_user, SecLevel=snmpv3_level, AuthProto=snmpv3_auth, AuthPass=snmpv3_auth_pass)
     nameList = list(result)
     return nameList
 
-### converts the listed files systems writing and display them on the standard output
+### format the modules list and display them on the standard output
 def get_cluster_discovery_output(list):
     names = []
-    for elt in list:
-        names.append(elt)
-    print "%s::%s=1"%(hostname, clSolution)# To add Safekit tag
-    print "%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# Host macros by Safekit modules
+    if list :
+        for elt in list:
+            names.append(elt)
+        print "%s::%s=1"%(hostname, clSolution)# To add tag
+        print "%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# Host macros by Safekit modules
+    else : 
+        print "%s::%s=0"%(hostname, clSolution)# No cluster detected
 
 ###############
 #  execution  #
