@@ -3211,6 +3211,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins
+                               check_vmware_snapshots
                                check_logfiles
                                check_oracle_health
                                check_mysql_health
@@ -3304,7 +3305,7 @@ do
             then
                 install_check_mem
                 exit 0
-            elif [ "$OPTARG" == "check_vmware_snapshot" ]
+            elif [ "$OPTARG" == "check_vmware_snapshots" ]
             then
                 install_vmware_snapshots_plugin
                 exit 0
