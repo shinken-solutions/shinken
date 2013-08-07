@@ -548,7 +548,7 @@ class Daemon(object):
                 self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
             else:
                 self.manager.start()
-                logger.warning('Your multiprocessing librairy seems too old or strange, please use a vanilla python version instead')
+                logger.warning('Your multiprocessing library seems too old or strange, please use a vanilla python version instead')
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
 
