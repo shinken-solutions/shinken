@@ -2381,19 +2381,6 @@ function install_check_logfiles(){
     make install >> ${LOGFILE} 2>&1
 }
 
-function install_vmware_snapshots_plugin() {
-    cadre "Install check_vmware_snapshots.pl" green
-
-    cd $TMP
-
-    cecho "Downloading plugins..." green
-    wget $WGETPROXY $CHECKVMWARESNAPSHOTS >> ${LOGFILE} 2>&1
-
-    cecho "Decompressing and installing plugins..." green
-    tar xzvf check_vmware_snapshots_0.13.tar.gz >> ${LOGFILE} 2>&1
-    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_vmware_snapshots.pl >> ${LOGFILE} 2>&1
-}
-
 # CHECK_NWC_HEALTH
 function install_check_nwc_health(){
 
@@ -2592,6 +2579,10 @@ function install_check_esx3(){
     cecho " > Getting check_disk_vcenter plugin" green
     wget $WGETPROXY $CHECK_DISK_VCENTER_SCRIPT -O check_disk_vcenter.pl >> ${LOGFILE} 2>&1
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_disk_vcenter.pl $LIBEXEC/check_disk_vcenter.pl
+    cecho " > Getting check_vmware_snaphosts.pl" green
+    wget $WGETPROXY $CHECKVMWARESNAPSHOTS >> ${LOGFILE} 2>&1
+    tar xzvf check_vmware_snapshots_0.13.tar.gz >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_vmware_snapshots.pl >> ${LOGFILE} 2>&1
 }
 
 # NAGIOS-PLUGINS
@@ -3211,7 +3202,6 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins
-                               check_vmware_snapshots
                                check_logfiles
                                check_oracle_health
                                check_mysql_health
@@ -3304,10 +3294,6 @@ do
             elif [ "$OPTARG" == "check_mem" ]
             then
                 install_check_mem
-                exit 0
-            elif [ "$OPTARG" == "check_vmware_snapshots" ]
-            then
-                install_vmware_snapshots_plugin
                 exit 0
             elif [ "$OPTARG" == "check_logfiles" ]
             then
