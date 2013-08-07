@@ -2381,6 +2381,19 @@ function install_check_logfiles(){
     make install >> ${LOGFILE} 2>&1
 }
 
+function install_vmware_snapshots_plugin() {
+    cadre "Install check_vmware_snapshots.pl" green
+
+    cd $TMP
+
+    cecho "Downloading plugins..." green
+    wget $WGETPROXY $CHECKVMWARESNAPSHOTS >> ${LOGFILE} 2>&1
+
+    cecho "Decompressing and installing plugins..." green
+    tar xzvf check_vmware_snapshots_0.13.tar.gz >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_vmware_snapshots.pl >> ${LOGFILE} 2>&1
+}
+
 # CHECK_NWC_HEALTH
 function install_check_nwc_health(){
 
@@ -3290,6 +3303,10 @@ do
             elif [ "$OPTARG" == "check_mem" ]
             then
                 install_check_mem
+                exit 0
+            elif [ "$OPTARG" == "check_vmware_snapshot" ]
+            then
+                install_vmware_snapshots_plugin
                 exit 0
             elif [ "$OPTARG" == "check_logfiles" ]
             then
