@@ -77,6 +77,7 @@ launch_and_assert test_external_commands.py
 launch_and_assert test_on_demand_event_handlers.py
 launch_and_assert test_business_correlator.py
 launch_and_assert test_business_correlator_expand_expression.py
+launch_and_assert test_business_correlator_output.py
 launch_and_assert test_properties.py
 launch_and_assert test_realms.py
 launch_and_assert test_host_without_cmd.py
