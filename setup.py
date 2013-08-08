@@ -490,8 +490,8 @@ etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
-main_config_files = ('shinken.cfg',
-                     'nagios-windows.cfg')
+main_config_files = ('shinken.cfg',)
+
 
 additionnal_config_files = (
                             'skonf.cfg',
@@ -550,15 +550,10 @@ print config_objects_file
 
 # daemon configs
 daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
-                    ('broker', 'brokerd-windows.ini'),
                     ('receiver', 'daemons/receiverd.ini'),
-                    ('receiver', 'receiverd-windows.ini'),
                     ('poller', 'daemons/pollerd.ini'),
-                    ('poller', 'pollerd-windows.ini'),
                     ('reactionner', 'daemons/reactionnerd.ini'),
-                    ('reactionner', 'reactionnerd-windows.ini'),
                     ('scheduler', 'daemons/schedulerd.ini'),
-                    ('scheduler', 'schedulerd-windows.ini'),
                     )
 
 resource_cfg_files = ('resource.cfg',)
