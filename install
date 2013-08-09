@@ -1089,26 +1089,26 @@ function restore(){
     if [ -d $NAGVISPREFIX ]
     then
         cecho " --> Restoring Restore Nagvis" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/etc $NAGVISPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/userfiles $NAGVISPREFIX/share/userfiles
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/etc/* $NAGVISPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/userfiles/* $NAGVISPREFIX/share/userfiles
     fi
 
     if [ -d $MKPREFIX ]
     then
         cecho " --> Restoring Restore Check_mk" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/etc $MKPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard $MKPREFIX/share/web/plugins/dashboard
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/perfometer $MKPREFIX/share/web/plugins/perfometer
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/icons $MKPREFIX/share/web/htdocs/images/icons
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/web $MKPREFIX/var/lib/web
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/etc/* $MKPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard/* $MKPREFIX/share/web/plugins/dashboard
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/perfometer/* $MKPREFIX/share/web/plugins/perfometer
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/icons/* $MKPREFIX/share/web/htdocs/images/icons
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/web/* $MKPREFIX/var/lib/web
     fi
 
     if [ -d $PNPPREFIX ]
     then
         cecho " --> Restoring Restore PNP4Nagios" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/etc $PNPPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/var $PNPPREFIX/var
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/templates $PNPPREFIX/share/templates
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/etc/* $PNPPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/var/* $PNPPREFIX/var
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/templates/* $PNPPREFIX/share/templates
     fi
 
     rm -rf $BACKUPDIR/bck-shinken.$1
