@@ -36,6 +36,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.assert_(svc_cor.status_to_short_status("OK") == "O")
         self.assert_(svc_cor.status_to_short_status("WARNING") == "W")
         self.assert_(svc_cor.status_to_short_status("CRITICAL") == "C")
+        self.assert_(svc_cor.status_to_short_status("UNKNOWN") == "U")
         self.assert_(svc_cor.status_to_short_status("UP") == "U")
         self.assert_(svc_cor.status_to_short_status("DOWN") == "D")
         self.assert_(svc_cor.status_to_short_status("FAKE") == "FAKE")

@@ -614,7 +614,7 @@ class Service(SchedulingItem):
         if self.got_business_rule is False or self.business_rule is None:
             return ""
         # Checks that the business rule has a format specified.
-        output_template = getattr(self, "business_rule_output_template", "")
+        output_template = self.business_rule_output_template
         if not output_template:
             return ""
         # No child output if business rule state is OK
@@ -674,13 +674,11 @@ class Service(SchedulingItem):
             "OK": "O",
             "WARNING": "W",
             "CRITICAL": "C",
+            "UNKNOWN": "U",
             "UP": "U",
             "DOWN": "D"
         }
-        if status in mapping:
-            return mapping[status]
-        else:
-            return status
+        return mapping.get(status, status)
 
     # Set unreachable: our host is DOWN, but it mean nothing for a service
     def set_unreachable(self):
