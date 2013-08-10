@@ -283,6 +283,8 @@ class Host(SchedulingItem):
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
+        # Business rules output format template
+        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
 
         # Manage the unknown/unreach during hard state
         # From now its not really used
@@ -343,7 +345,7 @@ class Host(SchedulingItem):
         'HOSTACTIONURL':     'action_url',
         'HOSTNOTESURL':      'notes_url',
         'HOSTNOTES':         'notes',
-        'HOSTREALM':         'get_realm', 
+        'HOSTREALM':         'get_realm',
         'TOTALHOSTSERVICES': 'get_total_services',
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
@@ -990,7 +992,7 @@ class Hosts(Items):
         self.linkify_with_triggers(triggers)
         self.linkify_with_checkmodulations(checkmodulations)
         self.linkify_with_macromodulations(macromodulations)
-        
+
 
     # Fill address by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1086,7 +1088,7 @@ class Hosts(Items):
                 cc = getattr(h, prop, None)
                 if cc:
                     cc.late_linkify_with_command(commands)
-            
+
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
