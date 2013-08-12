@@ -315,7 +315,7 @@ class Daterange:
         if next_future_timerange_invalid is None:
             #print 'DR: get_next_future_timerange_invalid is None'
             #this day is finish, we check for next period
-            (start_time, end_time) = self.get_start_and_end_time(get_day(t)+86400)
+            (start_time, end_time) = self.get_start_and_end_time(get_day(t))
         else:
             #print 'DR: get_next_future_timerange_invalid is', time.asctime(time.localtime(next_future_timerange_invalid))
             (start_time, end_time) = self.get_start_and_end_time(t)
