@@ -50,7 +50,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             bp_rule = svc_cor.business_rule
             self.assert_(bp_rule.operand == '&')
             self.assert_(bp_rule.not_value is False)
-            self.assert_(bp_rule.of_values == (2, 2, 2))
+            self.assert_(bp_rule.of_values == ('2', '2', '2'))
 
             srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
             srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv1")
@@ -71,7 +71,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             bp_rule = svc_cor.business_rule
             self.assert_(bp_rule.operand == 'of:')
             self.assert_(bp_rule.not_value is False)
-            self.assert_(bp_rule.of_values == (1, 2, 2))
+            self.assert_(bp_rule.of_values == ('1', '2', '2'))
 
             srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
             srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv1")
@@ -92,7 +92,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             bp_rule = svc_cor.business_rule
             self.assert_(bp_rule.operand == '&')
             self.assert_(bp_rule.not_value is False)
-            self.assert_(bp_rule.of_values == (2, 2, 2))
+            self.assert_(bp_rule.of_values == ('2', '2', '2'))
 
             sons = bp_rule.sons
             self.assert_(len(sons) == 2)
@@ -100,7 +100,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             for son in sons:
                 self.assert_(son.operand == '&')
                 self.assert_(son.not_value is False)
-                self.assert_(son.of_values == (2, 2, 2))
+                self.assert_(son.of_values == ('2', '2', '2'))
                 self.assert_(len(son.sons) == 2)
                 self.assert_(son.sons[0].operand == 'service')
                 self.assert_(son.sons[1].operand == 'service')
@@ -123,7 +123,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             bp_rule = svc_cor.business_rule
             self.assert_(bp_rule.operand == '|')
             self.assert_(bp_rule.not_value is False)
-            self.assert_(bp_rule.of_values == (2, 2, 2))
+            self.assert_(bp_rule.of_values == ('2', '2', '2'))
 
             sons = bp_rule.sons
             self.assert_(len(sons) == 2)
@@ -131,7 +131,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             for son in sons:
                 self.assert_(son.operand == '&')
                 self.assert_(son.not_value is False)
-                self.assert_(son.of_values == (2, 2, 2))
+                self.assert_(son.of_values == ('2', '2', '2'))
                 self.assert_(len(son.sons) == 2)
                 self.assert_(son.sons[0].operand == 'service')
                 self.assert_(son.sons[1].operand == 'service')
@@ -154,7 +154,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             bp_rule = svc_cor.business_rule
             self.assert_(bp_rule.operand == '&')
             self.assert_(bp_rule.not_value is False)
-            self.assert_(bp_rule.of_values == (2, 2, 2))
+            self.assert_(bp_rule.of_values == ('2', '2', '2'))
 
             hst1 = self.sched.hosts.find_by_name("test_host_01")
             hst2 = self.sched.hosts.find_by_name("test_host_02")

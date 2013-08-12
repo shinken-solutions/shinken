@@ -34,7 +34,7 @@ class DependencyNode(object):
         self.operand = None
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
-        self.of_values = (0, 0, 0)
+        self.of_values = ('0', '0', '0')
         self.is_of_mul = False
         self.configuration_errors = []
         self.not_value = False
@@ -133,6 +133,7 @@ class DependencyNode(object):
         nb_search_crit = self.of_values[2]
 
         # We look for each application
+        nb_sons = len(states)
         nb_ok = len([s for s in states if s == 0])
         nb_warn = len([s for s in states if s == 1])
         nb_crit = len([s for s in states if s == 2])
@@ -143,9 +144,23 @@ class DependencyNode(object):
         # Warn can apply with warn or crit values
         # so a W C can raise a Warning, but not enough for
         # a critical
-        ok_apply = nb_ok >= nb_search_ok
-        warn_apply = nb_warn + nb_crit >= nb_search_warn
-        crit_apply = nb_crit >= nb_search_crit
+        if nb_search_ok.endswith('%'):
+            nb_search_ok = int(nb_search_ok[:-1])
+            ok_apply = float(nb_ok) / nb_sons * 100 >= nb_search_ok
+        else:
+            ok_apply = nb_ok >= int(nb_search_ok)
+
+        if nb_search_warn.endswith('%'):
+            nb_search_warn = int(nb_search_warn[:-1])
+            warn_apply = float(nb_warn) / nb_sons * 100 >= nb_search_warn
+        else:
+            warn_apply = nb_warn + nb_crit >= int(nb_search_warn)
+
+        if nb_search_crit.endswith('%'):
+            nb_search_crit = int(nb_search_crit[:-1])
+            crit_apply = float(nb_crit) / nb_sons * 100 >= nb_search_crit
+        else:
+            crit_apply = nb_crit >= int(nb_search_crit)
 
         #print "What apply?", ok_apply, warn_apply, crit_apply
 
@@ -202,8 +217,8 @@ class DependencyNode(object):
         # Need a list for assignment
         self.of_values = list(self.of_values)
         for i in [0, 1, 2]:
-            if self.of_values[i] == 0:
-                self.of_values[i] = nb_sons
+            if self.of_values[i] == '0':
+                self.of_values[i] = str(nb_sons)
         self.of_values = tuple(self.of_values)
 
 
@@ -242,7 +257,7 @@ class DependencyNodeFactory(object):
         is_of_nb = False
 
         node = DependencyNode()
-        p = "^(\d+),*(\d*),*(\d*) *of: *(.+)"
+        p = "^(\d+%?),*(\d*%?),*(\d*%?) *of: *(.+)"
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:
@@ -254,9 +269,9 @@ class DependencyNodeFactory(object):
             # If multi got (A,B,C)
             if mul_of:
                 node.is_of_mul = True
-                node.of_values = (int(g[0]), int(g[1]), int(g[2]))
+                node.of_values = (g[0], g[1], g[2])
             else:  # if not, use A,0,0, we will change 0 after to put MAX
-                node.of_values = (int(g[0]), 0, 0)
+                node.of_values = (g[0], '0', '0')
             pattern = m.groups()[3]
 
         #print "Is so complex?", pattern, complex_node
