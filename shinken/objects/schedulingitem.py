@@ -1378,8 +1378,6 @@ class SchedulingItem(Item):
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
             #print "Got rule", elts, cmd
-            self.hosts = hosts
-            self.services = services
             self.got_business_rule = True
             rule = ''
             if len(elts) >= 2:
@@ -1490,7 +1488,7 @@ class SchedulingItem(Item):
 
     # We ask us to manage our own internal check,
     # like a business based one
-    def manage_internal_check(self, c):
+    def manage_internal_check(self, hosts, services, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
             try:
@@ -1499,7 +1497,7 @@ class SchedulingItem(Item):
                 # Caution: We consider the that the macro modulation did not
                 # change business rule dependency tree. Only Xof: values should
                 # be modified by modulation.
-                self.create_business_rules(self.hosts, self.services, running=True)
+                self.create_business_rules(hosts, services, running=True)
                 state = self.business_rule.get_state()
                 c.output = self.get_business_rule_output()
             except Exception, e:
