@@ -1362,7 +1362,7 @@ class SchedulingItem(Item):
 
     # Create the whole business rule tree
     # if we need it
-    def create_business_rules(self, hosts, services):
+    def create_business_rules(self, hosts, services, running=False):
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout
@@ -1378,13 +1378,18 @@ class SchedulingItem(Item):
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
             #print "Got rule", elts, cmd
+            self.hosts = hosts
+            self.services = services
             self.got_business_rule = True
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
 
+            data = self.get_data_for_checks()
+            m = MacroResolver()
+            rule = m.resolve_simple_macros_in_string(rule, data)
             fact = DependencyNodeFactory()
-            node = fact.eval_cor_pattern(rule, hosts, services)
+            node = fact.eval_cor_pattern(rule, hosts, services, running)
             #print "got node", node
             self.business_rule = node
 
@@ -1488,8 +1493,19 @@ class SchedulingItem(Item):
     def manage_internal_check(self, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
-            state = self.business_rule.get_state()
-            c.output = self.get_business_rule_output()
+            try:
+                # Re evaluate the business rule to take into account macro
+                # modulation.
+                # Caution: We consider the that the macro modulation did not
+                # change business rule dependency tree. Only Xof: values should
+                # be modified by modulation.
+                self.create_business_rules(self.hosts, self.services, running=True)
+                state = self.business_rule.get_state()
+                c.output = self.get_business_rule_output()
+            except Exception, e:
+                # Notifies the error, and return an UNKNOWN state.
+                c.output = "Error while re-evaluating business rule: %s" % e
+                state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0

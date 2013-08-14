@@ -201,6 +201,12 @@ class ShinkenTest(unittest.TestCase):
         #check = ref.actions.pop()
         check = ref.checks_in_progress[0]
         self.sched.add(check)  # check is now in sched.checks[]
+
+        # Allows to force check scheduling without setting its status nor
+        # output. Useful for manual business rules rescheduling, for instance.
+        if exit_status is None:
+            return
+
         # fake execution
         check.check_time = now
 

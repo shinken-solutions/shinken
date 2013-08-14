@@ -243,7 +243,7 @@ class DependencyNodeFactory(object):
         pass
 
     # the () will be eval in a recursiv way, only one level of ()
-    def eval_cor_pattern(self, pattern, hosts, services):
+    def eval_cor_pattern(self, pattern, hosts, services, running=False):
         pattern = pattern.strip()
         #print "***** EVAL ", pattern
         complex_node = False
@@ -287,7 +287,7 @@ class DependencyNodeFactory(object):
             # Is the pattern an host expression to be expanded?
             if re.match("^[grp]+:", pattern):
                 # o is just extracted its attributes, then trashed.
-                o = self.expand_hosts_expression(pattern, hosts, services)
+                o = self.expand_hosts_expression(pattern, hosts, services, running)
                 if node.operand != 'of:':
                     node.operand = '&'
                 node.sons.extend(o.sons)
@@ -301,7 +301,15 @@ class DependencyNodeFactory(object):
                     node.operand = obj.__class__.my_type
                     node.sons.append(obj)
                 else:
-                    node.configuration_errors.append(error)
+                    if running is False:
+                        node.configuration_errors.append(error)
+                    else:
+                        # As business rules are re-evaluated at run time on
+                        # each scheduling loop, if the rule becomes invalid
+                        # because of a badly written macro modulation, it
+                        # should be notified upper for the error to be
+                        # displayed in the check output.
+                        raise Exception(error)
             return node
         #else:
         #    print "Is complex"
@@ -331,7 +339,7 @@ class DependencyNodeFactory(object):
                         node.operand = c
                     if tmp != '':
                         #print "Will analyse the current str", tmp
-                        o = self.eval_cor_pattern(tmp, hosts, services)
+                        o = self.eval_cor_pattern(tmp, hosts, services, running)
                         # Maybe our son was notted
                         if son_is_not:
                             o.not_value = True
@@ -373,7 +381,7 @@ class DependencyNodeFactory(object):
                 if stacked_par == 0:
                     #print "THIS is closing a sub compress expression", tmp
                     tmp = tmp.strip()
-                    o = self.eval_cor_pattern(tmp, hosts, services)
+                    o = self.eval_cor_pattern(tmp, hosts, services, running)
                     # Maybe our son was notted
                     if son_is_not:
                         o.not_value = True
@@ -402,7 +410,7 @@ class DependencyNodeFactory(object):
         tmp = tmp.strip()
         if tmp != '':
             #print "Managing trainling part", tmp
-            o = self.eval_cor_pattern(tmp, hosts, services)
+            o = self.eval_cor_pattern(tmp, hosts, services, running)
             # Maybe our son was notted
             if son_is_not:
                 o.not_value = True
@@ -452,7 +460,7 @@ class DependencyNodeFactory(object):
     # Tries to expand a host expression into a dependency node tree using
     # hostgroup membership or regex on host name as host selector.
     # Returns a DependencyNode tree.
-    def expand_hosts_expression(self, pattern, hosts, services):
+    def expand_hosts_expression(self, pattern, hosts, services, running=False):
         error = None
         node = DependencyNode()
         node.operand = '&'
@@ -484,7 +492,7 @@ class DependencyNodeFactory(object):
 
         for host_name in expanded_hosts:
             expr = "%s%s" % (host_name, service_description)
-            o = self.eval_cor_pattern(expr, hosts, services)
+            o = self.eval_cor_pattern(expr, hosts, services, running)
 
             if not o.is_valid():
                 if got_service is True and permissive is True:
