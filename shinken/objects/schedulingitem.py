@@ -1382,14 +1382,16 @@ class SchedulingItem(Item):
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
-
-            data = self.get_data_for_checks()
-            m = MacroResolver()
-            rule = m.resolve_simple_macros_in_string(rule, data)
-            fact = DependencyNodeFactory()
-            node = fact.eval_cor_pattern(rule, hosts, services, running)
-            #print "got node", node
-            self.business_rule = node
+            # Only (re-)evaluate the business rule if it has never been
+            # evaluated before, or it contains a macro.
+            if re.match(r"\$[\w\d_-]+\$", rule) or self.business_rule is None:
+                data = self.get_data_for_checks()
+                m = MacroResolver()
+                rule = m.resolve_simple_macros_in_string(rule, data)
+                fact = DependencyNodeFactory()
+                node = fact.eval_cor_pattern(rule, hosts, services, running)
+                #print "got node", node
+                self.business_rule = node
 
 
     # Returns a status string for business rules based services, formatted
