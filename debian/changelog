@@ -1,3 +1,9 @@
+shinken (1:1.4-1~exp4) experimental; urgency=low
+
+  * Change ini paths
+
+ -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Wed, 14 Aug 2013 22:35:24 -0400
+
 shinken (1:1.4-1~exp3) experimental; urgency=low
 
   * Add javascripts sources

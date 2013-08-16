@@ -50,8 +50,8 @@ override_dh_install:
 	mkdir -p debian/shinken-scheduler/etc/init.d/
 	cp bin/init.d/shinken-scheduler debian/shinken-scheduler/etc/init.d/shinken-scheduler
 	## ini file
-	mkdir -p debian/shinken-scheduler/etc/shinken/ini/
-	cp debian/etc/ini/schedulerd.ini debian/shinken-scheduler/etc/shinken/ini/
+	mkdir -p debian/shinken-scheduler/etc/shinken/daemons/
+	cp debian/etc/daemons/schedulerd.ini debian/shinken-scheduler/etc/shinken/daemons/
 	## shinken config
 	mkdir -p debian/shinken-scheduler/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/scheduler.cfg debian/shinken-scheduler/etc/shinken/shinken-specific
@@ -60,8 +60,8 @@ override_dh_install:
 	mkdir -p debian/shinken-poller/etc/init.d/
 	cp bin/init.d/shinken-poller debian/shinken-poller/etc/init.d/shinken-poller
 	## ini file
-	mkdir -p debian/shinken-poller/etc/shinken/ini/
-	cp debian/etc/ini/pollerd.ini debian/shinken-poller/etc/shinken/ini/
+	mkdir -p debian/shinken-poller/etc/shinken/daemons/
+	cp debian/etc/daemons/pollerd.ini debian/shinken-poller/etc/shinken/daemons/
 	## shinken config
 	mkdir -p debian/shinken-poller/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/poller.cfg debian/shinken-poller/etc/shinken/shinken-specific
@@ -70,8 +70,8 @@ override_dh_install:
 	mkdir -p debian/shinken-broker/etc/init.d/
 	cp bin/init.d/shinken-broker debian/shinken-broker/etc/init.d/shinken-broker
 	## ini file
-	mkdir -p debian/shinken-broker/etc/shinken/ini/
-	cp debian/etc/ini/brokerd.ini debian/shinken-broker/etc/shinken/ini/
+	mkdir -p debian/shinken-broker/etc/shinken/daemons/
+	cp debian/etc/daemons/brokerd.ini debian/shinken-broker/etc/shinken/daemons/
 	## shinken config
 	mkdir -p debian/shinken-broker/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/broker.cfg debian/shinken-broker/etc/shinken/shinken-specific
@@ -80,8 +80,8 @@ override_dh_install:
 	mkdir -p debian/shinken-reactionner/etc/init.d/
 	cp bin/init.d/shinken-reactionner debian/shinken-reactionner/etc/init.d/shinken-reactionner
 	## ini file
-	mkdir -p debian/shinken-reactionner/etc/shinken/ini/
-	cp debian/etc/ini/reactionnerd.ini debian/shinken-reactionner/etc/shinken/ini/
+	mkdir -p debian/shinken-reactionner/etc/shinken/daemons/
+	cp debian/etc/daemons/reactionnerd.ini debian/shinken-reactionner/etc/shinken/daemons/
 	## shinken config
 	mkdir -p debian/shinken-reactionner/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/reactionner.cfg debian/shinken-reactionner/etc/shinken/shinken-specific
@@ -90,8 +90,8 @@ override_dh_install:
 	mkdir -p debian/shinken-receiver/etc/init.d/
 	cp bin/init.d/shinken-receiver debian/shinken-receiver/etc/init.d/shinken-receiver
 	## ini file
-	mkdir -p debian/shinken-receiver/etc/shinken/ini/
-	cp debian/etc/ini/receiverd.ini debian/shinken-receiver/etc/shinken/ini/
+	mkdir -p debian/shinken-receiver/etc/shinken/daemons/
+	cp debian/etc/daemons/receiverd.ini debian/shinken-receiver/etc/shinken/daemons/
 	## shinken config
 	mkdir -p debian/shinken-receiver/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/receiver.cfg debian/shinken-receiver/etc/shinken/shinken-specific
