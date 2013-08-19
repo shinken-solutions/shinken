@@ -130,7 +130,7 @@ class Service(SchedulingItem):
         'default_value':           StringProp(default=''),
 
         # Business_Impact value
-        'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':         IntegerProp(default='2', fill_brok=['full_status', 'check_result']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
@@ -699,19 +699,19 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('SERVICE ALERT: %s;%s;%s;%s;%d;%s'
-                            % (self.host.get_name(), self.get_name(),
-                               self.state, self.state_type,
-                               self.attempt, self.output))
+        console_logger.alert('SERVICE ALERT: %s;%s;%s;%s;%d;%d;%s'
+                             % (self.host.get_name(), self.get_name(),
+                                self.state, self.state_type,
+                                self.attempt, self.business_impact, self.output))
 
     # If the configuration allow it, raise an initial log like
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
+            console_logger.info('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%d;%s'
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
-                                   self.attempt, self.output))
+                                   self.attempt, self.business_impact, self.output))
 
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
@@ -753,19 +753,19 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STARTED; "
+        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;%d;STARTED; "
                             "Service appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
-                            % (self.host.get_name(), self.get_name(),
+                            % (self.host.get_name(), self.get_name(), self.business_impact,
                                change_ratio, threshold))
 
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
+        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;%d;STOPPED; "
                             "Service appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
-                            % (self.host.get_name(), self.get_name(),
+                            % (self.host.get_name(), self.get_name(), self.business_impact,
                                change_ratio, threshold))
 
     # If there is no valid time for next check, raise a log entry
@@ -777,24 +777,24 @@ class Service(SchedulingItem):
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;%d;STARTED; "
                             "Service has entered a period of scheduled "
                             "downtime"
-                            % (self.host.get_name(), self.get_name()))
+                            % (self.host.get_name(), self.get_name()), self.business_impact)
 
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;%d;STOPPED; Service "
                             "has exited from a period of scheduled downtime"
-                            % (self.host.get_name(), self.get_name()))
+                            % (self.host.get_name(), self.get_name()), self.business_impact)
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
+        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;%d;CANCELLED; "
                             "Scheduled downtime for service has been cancelled."
-                            % (self.host.get_name(), self.get_name()))
+                            % (self.host.get_name(), self.get_name()), self.business_impact)
 
     # Is stalking?
     # Launch if check is waitconsume==first time

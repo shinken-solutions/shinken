@@ -127,7 +127,7 @@ class Host(SchedulingItem):
         'time_to_orphanage': IntegerProp(default='300', fill_brok=['full_status']),
 
         # Business impact value
-        'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':      IntegerProp(default='2', fill_brok=['full_status', 'check_result']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
@@ -682,18 +682,18 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('HOST ALERT: %s;%s;%s;%d;%s'
+        console_logger.alert('HOST ALERT: %s;%s;%s;%d;%d;%s'
                             % (self.get_name(),
-                               self.state, self.state_type,
+                               self.state, self.state_type, self.business_impact,
                                self.attempt, self.output))
 
     # If the configuration allow it, raise an initial log like
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT HOST STATE: %s;%s;%s;%d;%s'
+            console_logger.info('CURRENT HOST STATE: %s;%s;%s;%d;%d;%s'
                                 % (self.get_name(),
-                                   self.state, self.state_type,
+                                   self.state, self.state_type, self.business_impact,
                                    self.attempt, self.output))
 
     # Add a log entry with a Freshness alert like:
@@ -735,18 +735,18 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STARTED; "
+        console_logger.alert("HOST FLAPPING ALERT: %s;%d;STARTED; "
                             "Host appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
-                            % (self.get_name(), change_ratio, threshold))
+                            % (self.get_name(), self.business_impact, change_ratio, threshold))
 
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STOPPED; "
+        console_logger.alert("HOST FLAPPING ALERT: %s;%d;STOPPED; "
                             "Host appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
-                            % (self.get_name(), change_ratio, threshold))
+                            % (self.get_name(), self.business_impact, change_ratio, threshold))
 
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
@@ -757,23 +757,23 @@ class Host(SchedulingItem):
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STARTED; "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;%d;STARTED; "
                             "Host has entered a period of scheduled downtime"
-                            % (self.get_name()))
+                            % (self.get_name(), self.business_impact))
 
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STOPPED; Host has "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;%d;STOPPED; Host has "
                             "exited from a period of scheduled downtime"
-                            % (self.get_name()))
+                            % (self.get_name(), self.business_impact))
 
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;CANCELLED; "
+        console_logger.alert("HOST DOWNTIME ALERT: %s;%d;CANCELLED; "
                             "Scheduled downtime for host has been cancelled."
-                            % (self.get_name()))
+                            % (self.get_name(), self.business_impact))
 
     # Is stalking?
     # Launch if check is waitconsume==first time
