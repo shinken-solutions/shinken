@@ -1420,10 +1420,6 @@ class SchedulingItem(Item):
         output_template = self.business_rule_output_template
         if not output_template:
             return ""
-        # No child output if business rule state is OK
-        if self.business_rule.get_state() == 0:
-            return "OK: all checks were successful."
-
         # Extracts template strings
         # Current service output format string
         service_template_string = re.sub("\$\(.*\)\$", "$CHILDS_OUTPUT$", output_template)
@@ -1436,12 +1432,18 @@ class SchedulingItem(Item):
 
         # Processes child services output
         childs_output = ""
+        childs = self.business_rule.list_all_elements()
+        ok_count = 0
         # Expands child items format string macros.
-        for child in self.business_rule.list_all_elements():
+        for child in childs:
             # Do not display childs in OK state
             if child.last_hard_state_id == 0:
+                ok_count += 1
                 continue
             childs_output += self.expand_business_rule_item_macros(child_template_string, child)
+
+        if ok_count == len(childs):
+            childs_output = "all checks were successful."
 
         # Expands node's template string macros.
         # State has to be set manually, as the service state attribute is only
@@ -1454,7 +1456,7 @@ class SchedulingItem(Item):
         output = re.sub(r"\$SHORT_STATUS\$", short_status, output, flags=re.I)
         output = self.expand_business_rule_item_macros(output, self)
         output = re.sub("\$CHILDS_OUTPUT\$", childs_output, output)
-        return output
+        return output.strip()
 
     # Expands format string macros with item attributes
     def expand_business_rule_item_macros(self, template_string, item):
