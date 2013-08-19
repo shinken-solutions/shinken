@@ -977,9 +977,6 @@ class Items(object):
         if hasattr(prop, 'enable_environment_macros'):
             comandcall['enable_environment_macros'] = prop.enable_environment_macros
 
-        if hasattr(prop, 'disable_environment_macros'):
-            comandcall['disable_environment_macros'] = prop.disable_environment_macros
-
         if hasattr(prop, 'poller_tag'):
             comandcall['poller_tag']=prop.poller_tag
         elif hasattr(prop, 'reactionner_tag'):

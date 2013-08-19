@@ -53,7 +53,6 @@ class Command(Item):
         'module_type':  StringProp(default=None),
         'timeout':      IntegerProp(default='-1'),
         'enable_environment_macros': BoolProp(default=0),
-        'disable_environment_macros': BoolProp(default=0),
     })
 
     def __init__(self, params={}):
@@ -79,8 +78,6 @@ class Command(Item):
             self.poller_tag = 'None'
         if not hasattr(self, 'enable_environment_macros'):
             self.enable_environment_macros = 0
-        if not hasattr(self, 'disable_environment_macros'):
-            self.disable_environment_macros = 0
         if not hasattr(self, 'reactionner_tag'):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'module_type'):
