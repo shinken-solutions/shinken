@@ -47,6 +47,7 @@ from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.objects.config import Config
 
 
 class Scheduler:
@@ -129,6 +130,8 @@ class Scheduler:
         self.brokers = {}
         self.pollers = {}
         self.reactionners = {}
+        
+	self.conf = Config()
 
 
     def reset(self):
@@ -658,6 +661,7 @@ class Scheduler:
                 if c.status == 'timeout':
                     c.output = "(%s Check Timed Out)" % self.checks[c.id].ref.__class__.my_type.capitalize()
                     c.long_output = c.output
+                    c.exit_status = self.conf.timeout_exit_status
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError, exp:
