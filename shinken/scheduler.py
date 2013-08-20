@@ -131,7 +131,7 @@ class Scheduler:
         self.pollers = {}
         self.reactionners = {}
         
-	self.conf = Config()
+        self.conf = Config()
 
 
     def reset(self):
