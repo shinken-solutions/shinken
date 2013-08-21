@@ -188,7 +188,7 @@ class Config(Item):
         'soft_state_dependencies':  BoolProp(managed=False, default='0'),
         'service_check_timeout':    IntegerProp(default='60', class_inherit=[(Service, 'check_timeout')]),
         'host_check_timeout':       IntegerProp(default='30', class_inherit=[(Host, 'check_timeout')]),
-        'timeout_exit_status':    IntegerProp(default='3'),
+        'timeout_exit_status':      IntegerProp(default='2'),
         'event_handler_timeout':    IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
         'notification_timeout':     IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
         'ocsp_timeout':             IntegerProp(default='15', class_inherit=[(Service, None)]),

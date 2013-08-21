@@ -47,7 +47,6 @@ from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
-from shinken.objects.config import Config
 
 
 class Scheduler:
@@ -130,8 +129,6 @@ class Scheduler:
         self.brokers = {}
         self.pollers = {}
         self.reactionners = {}
-        
-        self.conf = Config()
 
 
     def reset(self):
