@@ -32,9 +32,8 @@ new service.
 """
 
 from item import Item, Items
+from service import Service
 from shinken.autoslots import AutoSlots
-from shinken.util import to_list_of_names, to_name_if_possible
-from shinken.property import BoolProp, IntegerProp, CharProp, StringProp, ListProp
 from shinken.log import logger
 
 
@@ -64,87 +63,7 @@ class Serviceoverride(Item):
     # because when they are applied on the Service instance, they have already
     # been processed by arbiter's previous phases, and linked to other objects
     # (mainly during explode phase).
-    properties = Item.properties.copy()
-    properties.update({
-        'host_name':              StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'hostgroup_name':         StringProp(default='', fill_brok=['full_status']),
-        'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'display_name':           StringProp(default='', fill_brok=['full_status']),
-        #'servicegroups' have already been added members (services) during explode phase.
-        'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
-        'check_command':          StringProp(fill_brok=['full_status']),
-        'initial_state':          CharProp(default='o', fill_brok=['full_status']),
-        'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
-        'check_interval':         IntegerProp(fill_brok=['full_status']),
-        'retry_interval':         IntegerProp(fill_brok=['full_status']),
-        'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'check_period':           StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'obsess_over_service':    BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':        BoolProp(default='0', fill_brok=['full_status']),
-        'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
-        'event_handler':          StringProp(default='', fill_brok=['full_status']),
-        'event_handler_enabled':  BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'low_flap_threshold':     IntegerProp(default='-1', fill_brok=['full_status']),
-        'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'flap_detection_options': ListProp(default='o,w,c,u', fill_brok=['full_status']),
-        'process_perf_data':      BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
-        'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
-        'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
-        'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options':   ListProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
-        'notifications_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
-        'contact_groups':         StringProp(default='', fill_brok=['full_status']),
-        'stalking_options':       ListProp(default='', fill_brok=['full_status']),
-        'notes':                  StringProp(default='', fill_brok=['full_status']),
-        'notes_url':              StringProp(default='', fill_brok=['full_status']),
-        'action_url':             StringProp(default='', fill_brok=['full_status']),
-        'icon_image':             StringProp(default='', fill_brok=['full_status']),
-        'icon_image_alt':         StringProp(default='', fill_brok=['full_status']),
-        'icon_set':               StringProp(default='', fill_brok=['full_status']),
-        'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
-        'parallelize_check':       BoolProp(default='1', fill_brok=['full_status']),
-
-        # Shinken specific
-        'poller_tag':              StringProp(default='None'),
-        'reactionner_tag':         StringProp(default='None'),
-        'resultmodulations':       StringProp(default=''),
-        'business_impact_modulations':    StringProp(default=''),
-        'escalations':             StringProp(default='', fill_brok=['full_status']),
-        'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
-        'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
-
-        # Easy Service dep definition
-        #'service_dependencies' have already been processed during explode phase.
-
-        # service generator
-        #'duplicate_foreach' have already been processed during explode phase.
-        #'default_value' has no meaning here as we want to override default.
-
-        # Business_Impact value
-        'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
-
-        # Load some triggers
-        #'trigger' have already been processed during explode phase.
-
-        # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status']),
-
-        # Our check ways. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
-        'macromodulations':       ListProp(default=''),
-
-        # Custom views
-        'custom_views':           ListProp(default='', fill_brok=['full_status']),
-
-        # UI aggregation
-        'aggregation':            StringProp(default='', fill_brok=['full_status']),
-    })
+    properties = Service.properties.copy()
 
 #######
 #                   __ _                       _   _
@@ -220,7 +139,8 @@ class Serviceoverrides(Items):
             for prop, entry in Serviceoverride.properties.items():
                 # only overrides service properties exlpicitely set in
                 # serviceoverride configuration.
-                excludes = ['host_name', 'service_description', 'use']
+                excludes = ['host_name', 'service_description', 'use',
+                            'servicegroups', 'trigger', 'trigger_name']
                 if hasattr(o, prop) and not prop in excludes:
                     val = getattr(o, prop)
                     setattr(svc, prop, val)
