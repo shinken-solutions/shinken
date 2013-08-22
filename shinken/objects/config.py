@@ -52,6 +52,7 @@ from escalation import Escalation, Escalations
 from serviceescalation import Serviceescalation, Serviceescalations
 from hostescalation import Hostescalation, Hostescalations
 from host import Host, Hosts
+from serviceoverride import Serviceoverride, Serviceoverrides
 from hostgroup import Hostgroup, Hostgroups
 from realm import Realm, Realms
 from contact import Contact, Contacts
@@ -342,6 +343,7 @@ class Config(Item):
         'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns'),
         'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo'),
         'serviceextinfo':   (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo'),
+        'serviceoverride':  (Serviceoverride, Serviceoverrides, 'serviceoverrides'),
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -515,7 +517,7 @@ class Config(Item):
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                  'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
-                 'hostextinfo', 'serviceextinfo']
+                 'hostextinfo', 'serviceextinfo', 'serviceoverride']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
@@ -979,6 +981,10 @@ class Config(Item):
 
             logger.warning("Unmanaged configuration statement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
 
+    # Overrides specific instances properties
+    def apply_overrides(self):
+        self.serviceoverrides.apply_overrides(self.services)
+
     # Use to fill groups values on hosts and create new services
     # (for host group ones)
     def explode(self):
@@ -1027,6 +1033,12 @@ class Config(Item):
         self.services.remove_twins()
         #self.contacts.remove_twins()
         #self.timeperiods.remove_twins()
+
+
+    # Remove overrides instances. They are no more useful once the attributes
+    # have been overriden.
+    def remove_overrides(self):
+        self.serviceoverrides.remove_overrides()
 
 
     # Dependencies are important for scheduling
@@ -1444,7 +1456,8 @@ class Config(Item):
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
-                  'hostsextinfo', 'servicesextinfo', 'checkmodulations', 'macromodulations'):
+                  'hostsextinfo', 'servicesextinfo', 'checkmodulations', 'macromodulations',
+                  'serviceoverrides'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x))
 

@@ -144,6 +144,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
+        self.conf.apply_overrides()
         self.conf.remove_templates()
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
@@ -159,6 +160,7 @@ class ShinkenTest(unittest.TestCase):
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
             return
+        self.conf.remove_overrides()
 
         self.confs = self.conf.cut_into_parts()
         self.conf.prepare_for_sending()
