@@ -46,8 +46,8 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assert_(srv1.max_check_attempts == 3)
 
         # list parameter (all items should appear in the order they are defined)
-        self.assert_(hst1.notification_options == ['s', 'f', 'r', 'u', 'd'])
-        self.assert_(srv1.notification_options == ['s', 'f', 'r', 'c', 'u', 'w'])
+        self.assert_(hst1.notification_options == ['+1', 's', 'f', 'r', 'u', 'd'])
+        self.assert_(srv1.notification_options == ['+1', 's', 'f', 'r', 'c', 'u', 'w'])
 
 
 class TestConfigBroken(ShinkenTest):
@@ -63,7 +63,6 @@ class TestConfigBroken(ShinkenTest):
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
         self.assert_(len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search(r'no support for \+ syntax in multiple valued attributes', log)]) == 1)
 
 
 if __name__ == '__main__':

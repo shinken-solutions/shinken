@@ -92,7 +92,8 @@ class Item(object):
             # delistify attributes if there is only one value
             params[key] = self.compact_unique_attr_value(params[key])
             # checks for attribute value special syntax (+ or _)
-            if len(params[key]) >= 1 and params[key][0] == '+':
+            if not isinstance(params[key], list) and \
+               len(params[key]) >= 1 and params[key][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
@@ -115,13 +116,9 @@ class Item(object):
     def compact_unique_attr_value(self, val):
         if isinstance(val, list):
             if len(val) > 1:
-                for e in val:
-                    if e.startswith('+'):
-                        err = "no support for + syntax in multiple valued attributes"
-                        self.configuration_errors.append(err)
-                        # only return last set element.
-                        return val[-1]
                 return val
+            elif len(val) == 0:
+                return ''
             else:
                 return val[0]
         else:
