@@ -53,6 +53,8 @@ class Itemgroup(Item):
         self.init_running_properties()
 
         for key in params:
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
             setattr(self, key, params[key])
 
 

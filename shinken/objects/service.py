@@ -405,7 +405,7 @@ class Service(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.info(err)
+                logger.error("[service::%s] %s" % (self.get_full_name(), err))
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
