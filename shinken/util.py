@@ -185,12 +185,12 @@ def to_char(val):
 
 
 def to_split(val):
-    split = []
-    if not isinstance(val, list):
-        val = [val]
-    for i in val:
-        split.extend([v.strip() for v in i.split(',') if v])
-    return split
+    if isinstance(val, list):
+        return val
+    val = val.split(',')
+    if val == ['']:
+        val = []
+    return val
 
 
 def to_best_int_float(val):
