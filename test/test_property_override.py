@@ -94,9 +94,9 @@ class TestConfigBroken(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search('Error: service override has no host_name', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Error: service override has no service_description', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search("Error: the service 'proc proc2' for host 'test_host_02' in service override is unknown", log)]) == 1)
+        self.assert_(len([log for log in logs if re.search('Error: invalid service override syntax: fake', log)]) == 1)
+        self.assert_(len([log for log in logs if re.search("Error: trying to override property 'retry_interval' on service 'fakesrv' but it's unknown for this host", log)]) == 1)
+        self.assert_(len([log for log in logs if re.search("Error: trying to override 'host_name', a forbidden property for service 'proc proc2'", log)]) == 1)
 
 
 if __name__ == '__main__':

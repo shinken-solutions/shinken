@@ -365,9 +365,6 @@ class Arbiter(Daemon):
         # Fill default values
         self.conf.fill_default()
 
-        # Overrides specific instances properties
-        self.conf.apply_overrides()
-
         # Remove templates from config
         self.conf.remove_templates()
 
@@ -377,6 +374,9 @@ class Arbiter(Daemon):
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
+
+        # Overrides sepecific service instaces properties
+        self.conf.override_properties()
 
         # Pythonize values
         self.conf.pythonize()
@@ -417,10 +417,6 @@ class Arbiter(Daemon):
 
         # Correct conf?
         self.conf.is_correct()
-
-        # Remove overrides. Once objects properties have been overriden, there
-        # is no reason to keep them as they are not real configuration objects.
-        self.conf.remove_overrides()
 
         # If the conf is not correct, we must get out now
         # if not self.conf.conf_is_correct:
