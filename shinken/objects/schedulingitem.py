@@ -1445,6 +1445,7 @@ class SchedulingItem(Item):
         if ok_count == len(childs):
             childs_output = "all checks were successful."
 
+
         # Expands node's template string macros.
         # State has to be set manually, as the service state attribute is only
         # set on a next scheduler step.
@@ -1457,6 +1458,7 @@ class SchedulingItem(Item):
         output = self.expand_business_rule_item_macros(output, self)
         output = re.sub("\$CHILDS_OUTPUT\$", childs_output, output)
         return output.strip()
+
 
     # Expands format string macros with item attributes
     def expand_business_rule_item_macros(self, template_string, item):
@@ -1473,6 +1475,7 @@ class SchedulingItem(Item):
         output = re.sub(r"\$FULL_NAME\$", full_name, output, flags=re.I)
         return output
 
+
     # Returns status string shorten name.
     def status_to_short_status(self, status):
         mapping = {
@@ -1485,12 +1488,48 @@ class SchedulingItem(Item):
         }
         return mapping.get(status, status)
 
+
+    # Gets business rule state, and processes its notifications behaviour.
+    # When service has business rule smart notificaions enabled, if business
+    # rule state is not OK, all childs are checked for acknowledgement or
+    # downtimes.
+    # If all failing childs have been acknowledged or are under downtime,
+    # the service business_rule_notifications_enabled flag is set False, which
+    # has the effect of disabling notifications for this service.
+    def get_business_rule_state(self):
+        state = self.business_rule.get_state()
+        if self.business_rule_smart_notifications is False:
+            return state
+        if state != 0:
+            # Walks through hosts and services to check if all items in
+            # non ok are are acknowledged or in downtime period.
+            for s in self.business_rule.list_all_elements():
+                if s.last_hard_state_id != 0 and \
+                        s.scheduled_downtime_depth == 0 and \
+                        not s.problem_has_been_acknowledged:
+                    # At least one problem has not been acknowledged or is not
+                    # under downtime. Return invalid state.
+                    if self.business_rule_notifications_enabled is False:
+                        self.business_rule_notifications_enabled = True
+                    return state
+            # All failing sons have been acknowledged or are under schedule
+            # downtime. Return corresponding state, but do not send
+            # notifications.
+            if self.business_rule_notifications_enabled is True:
+                self.business_rule_notifications_enabled = False
+        else:
+            # (Re)enables netifications if they were previously disabled.
+            if self.business_rule_notifications_enabled is False:
+                self.business_rule_notifications_enabled = True
+        return state
+
+
     # We ask us to manage our own internal check,
     # like a business based one
     def manage_internal_check(self, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
-            state = self.business_rule.get_state()
+            state = self.get_business_rule_state()
             c.output = self.get_business_rule_output()
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
