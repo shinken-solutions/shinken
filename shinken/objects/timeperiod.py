@@ -128,6 +128,14 @@ class Timeperiod(Item):
         self.plus = {}
         self.invalid_entries = []
         for key in params:
+            # timeperiod objects are too complicated to support multi valued
+            # attributes. we do as usual, last set value wins.
+            if isinstance(params[key], list):
+                if params[key]:
+                    params[key] = params[key][-1]
+                else:
+                    params[key] = ''
+
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
                 setattr(self, key, params[key])
             else:
@@ -280,13 +288,13 @@ class Timeperiod(Item):
                     # No Exclude so we are good
                     local_min = t1
                     still_loop = False
-                else:               
+                else:
                     for tp in self.exclude:
                         if not tp.is_time_valid(t1) and still_loop is True:
-                            # OK we found a date that is not valid in any exclude timeperiod 
+                            # OK we found a date that is not valid in any exclude timeperiod
                             local_min = t1
                             still_loop = False
-               
+
             if local_min is None:
                 # print "Looking for next valid date"
                 exc_mins = []
@@ -297,8 +305,8 @@ class Timeperiod(Item):
                 s_exc_mins = sorted([d for d in exc_mins if d is not None])
 
                 if s_exc_mins != []:
-                    local_min = s_exc_mins[0] 
-            
+                    local_min = s_exc_mins[0]
+
             if local_min is None:
                 still_loop = False
             else:

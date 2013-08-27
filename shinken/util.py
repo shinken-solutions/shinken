@@ -185,6 +185,8 @@ def to_char(val):
 
 
 def to_split(val):
+    if isinstance(val, list):
+        return val
     val = val.split(',')
     if val == ['']:
         val = []
@@ -326,6 +328,18 @@ def get_customs_values(d):
     return d.values()
 
 
+# Checks that a parameter has an unique value. If it's a list, the last
+# value set wins.
+def unique_value(val):
+    if isinstance(val, list):
+        if val:
+            return val[-1]
+        else:
+            return ''
+    else:
+        return val
+
+
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):
     if x.spare and not y.spare:
@@ -405,6 +419,7 @@ def strip_and_uniq(tab):
         if (val != ''):
             new_tab.add(val)
     return list(new_tab)
+
 
 #################### Pattern change application (mainly for host) #######
 
