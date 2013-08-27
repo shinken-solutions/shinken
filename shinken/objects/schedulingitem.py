@@ -1362,7 +1362,7 @@ class SchedulingItem(Item):
 
     # Create the whole business rule tree
     # if we need it
-    def create_business_rules(self, hosts, services):
+    def create_business_rules(self, hosts, services, running=False):
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout
@@ -1382,11 +1382,16 @@ class SchedulingItem(Item):
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
-
-            fact = DependencyNodeFactory()
-            node = fact.eval_cor_pattern(rule, hosts, services)
-            #print "got node", node
-            self.business_rule = node
+            # Only (re-)evaluate the business rule if it has never been
+            # evaluated before, or it contains a macro.
+            if re.match(r"\$[\w\d_-]+\$", rule) or self.business_rule is None:
+                data = self.get_data_for_checks()
+                m = MacroResolver()
+                rule = m.resolve_simple_macros_in_string(rule, data)
+                fact = DependencyNodeFactory()
+                node = fact.eval_cor_pattern(rule, hosts, services, running)
+                #print "got node", node
+                self.business_rule = node
 
 
     # Returns a status string for business rules based services, formatted
@@ -1487,11 +1492,22 @@ class SchedulingItem(Item):
 
     # We ask us to manage our own internal check,
     # like a business based one
-    def manage_internal_check(self, c):
+    def manage_internal_check(self, hosts, services, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
-            state = self.business_rule.get_state()
-            c.output = self.get_business_rule_output()
+            try:
+                # Re evaluate the business rule to take into account macro
+                # modulation.
+                # Caution: We consider the that the macro modulation did not
+                # change business rule dependency tree. Only Xof: values should
+                # be modified by modulation.
+                self.create_business_rules(hosts, services, running=True)
+                state = self.business_rule.get_state()
+                c.output = self.get_business_rule_output()
+            except Exception, e:
+                # Notifies the error, and return an UNKNOWN state.
+                c.output = "Error while re-evaluating business rule: %s" % e
+                state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0
