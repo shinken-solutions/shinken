@@ -1055,7 +1055,7 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
-        if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
+        if cls.enable_environment_macros or n.enable_environment_macros:
             n.env = m.get_env_macros(data)
 
 
@@ -1231,7 +1231,8 @@ class SchedulingItem(Item):
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
-                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type)
+                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type, 
+                    enable_environment_macros=cmd.enable_environment_macros)
                 if not self.notification_is_blocked_by_contact(child_n, contact):
                     # Update the notification with fresh status information
                     # of the item. Example: during the notification_delay
@@ -1291,13 +1292,12 @@ class SchedulingItem(Item):
             m = MacroResolver()
             data = self.get_data_for_checks()
             command_line = m.resolve_command(check_command, data)
-
             # By default env is void
             env = {}
 
             # And get all environment variables only if needed
-            if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
-                env = m.get_env_macros(data)
+            if cls.enable_environment_macros or check_command.enable_environment_macros:
+               env = m.get_env_macros(data)
 
             # By default we take the global timeout, but we use the command one if it
             # define it (by default it's -1)
