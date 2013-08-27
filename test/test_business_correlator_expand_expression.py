@@ -26,6 +26,9 @@
 import re
 from shinken_test import unittest, ShinkenTest
 
+# Set this variable False to disable profiling test
+PROFILE_BP_RULE_RE_PROCESSING = False
+
 
 class TestBusinesscorrelExpand(ShinkenTest):
 
@@ -167,6 +170,189 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(hst1 in (sons[0].sons[0], sons[1].sons[0]))
             self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
 
+    def test_macro_expansion_bprule_no_macro(self):
+        # Tests macro expansion
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_no_macro")
+        self.assert_(svc_cor.got_business_rule is True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        self.assert_(bp_rule.of_values == ('1', '2', '2'))
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
+
+        # Setting dependent services status
+        self.scheduler_loop(1, [
+            [svc1, 0, 'UP | value1=1 value2=2'],
+            [svc2, 0, 'UP | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'OK')
+        self.assert_(svc1.state_type == 'HARD')
+        self.assert_(svc2.state == 'OK')
+        self.assert_(svc2.state_type == 'HARD')
+
+        self.scheduler_loop(1, [[svc1, 2, 'CRITICAL | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'CRITICAL')
+        self.assert_(svc1.state_type == 'HARD')
+
+        # Forces business rule evaluation.
+        self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
+
+        # Business rule should not have been re-evaluated (no macro in the
+        # bp_rule)
+        self.assert_(svc_cor.business_rule is bp_rule)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.get_state() == 0)
+        self.assert_(svc_cor.last_hard_state_id == 0)
+
+    def test_macro_expansion_bprule_macro_expand(self):
+        # Tests macro expansion
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_macro_expand")
+        self.assert_(svc_cor.got_business_rule is True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        self.assert_(bp_rule.of_values == ('1', '2', '2'))
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
+
+        # Setting dependent services status
+        self.scheduler_loop(1, [
+            [svc1, 0, 'UP | value1=1 value2=2'],
+            [svc2, 0, 'UP | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'OK')
+        self.assert_(svc1.state_type == 'HARD')
+        self.assert_(svc2.state == 'OK')
+        self.assert_(svc2.state_type == 'HARD')
+
+        self.scheduler_loop(1, [[svc1, 2, 'CRITICAL | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'CRITICAL')
+        self.assert_(svc1.state_type == 'HARD')
+
+        # Forces business rule evaluation.
+        self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
+
+        # Business rule should have been re-evaluated (there's a macro)
+        self.assert_(svc_cor.business_rule is not bp_rule)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.get_state() == 0)
+        self.assert_(svc_cor.last_hard_state_id == 0)
+
+    def test_macro_expansion_bprule_macro_modulated(self):
+        # Tests macro modulation
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy_modulated", "bprule_macro_modulated")
+        self.assert_(svc_cor.got_business_rule is True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        self.assert_(bp_rule.of_values == ('2', '2', '2'))
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
+
+        # Setting dependent services status
+        self.scheduler_loop(1, [
+            [svc1, 0, 'UP | value1=1 value2=2'],
+            [svc2, 0, 'UP | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'OK')
+        self.assert_(svc1.state_type == 'HARD')
+        self.assert_(svc2.state == 'OK')
+        self.assert_(svc2.state_type == 'HARD')
+
+        self.scheduler_loop(1, [[svc1, 2, 'CRITICAL | value1=1 value2=2']])
+
+        self.assert_(svc1.state == 'CRITICAL')
+        self.assert_(svc1.state_type == 'HARD')
+
+        # Forces business rule evaluation.
+        self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
+
+        # Business rule should have been re-evaluated (there's a macro)
+        self.assert_(svc_cor.business_rule is not bp_rule)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.get_state() == 2)
+        self.assert_(svc_cor.last_hard_state_id == 2)
+
+        # Tests modulated value
+        mod = self.sched.macromodulations.find_by_name("xof_modulation")
+        mod.customs['_XOF'] = '1'
+
+        # Forces business rule evaluation.
+        self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
+
+        self.assert_(svc_cor.business_rule is not bp_rule)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        self.assert_(bp_rule.of_values == ('1', '2', '2'))
+        self.assert_(bp_rule.get_state() == 0)
+        self.assert_(svc_cor.last_hard_state_id == 0)
+
+        # Tests wrongly written macro modulation (inserts invalid string)
+        mod.customs['_XOF'] = 'fake'
+
+        # Forces business rule evaluation.
+        self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
+
+        self.assert_(svc_cor.business_rule is bp_rule)
+        self.assert_(svc_cor.last_hard_state_id == 3)
+        self.assert_(svc_cor.output.startswith("Error while re-evaluating business rule"))
+
+    def test_macro_expansion_bprule_macro_profile(self):
+        if PROFILE_BP_RULE_RE_PROCESSING is False:
+            return
+
+        import cProfile as profile
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
+
+        # Setting dependent services status
+        self.scheduler_loop(1, [
+            [svc1, 0, 'UP | value1=1 value2=2'],
+            [svc2, 0, 'UP | value1=1 value2=2']], verbose=False)
+
+        self.assert_(svc1.state == 'OK')
+        self.assert_(svc1.state_type == 'HARD')
+        self.assert_(svc2.state == 'OK')
+        self.assert_(svc2.state_type == 'HARD')
+
+        self.scheduler_loop(1, [[svc1, 2, 'CRITICAL | value1=1 value2=2']], verbose=False)
+
+        self.assert_(svc1.state == 'CRITICAL')
+        self.assert_(svc1.state_type == 'HARD')
+
+        print "Profiling without macro"
+
+        def profile_bp_rule_without_macro():
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_no_macro")
+            for i in range(1000):
+                self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True, verbose=False)
+
+        profile.runctx('profile_bp_rule_without_macro()', globals(), locals())
+
+        print "Profiling with macro"
+
+        def profile_bp_rule_macro_expand():
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_macro_expand")
+            for i in range(1000):
+                self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True, verbose=False)
+
+        profile.runctx('profile_bp_rule_macro_expand()', globals(), locals())
+
+        print "Profiling with macro modulation"
+
+        def profile_bp_rule_macro_modulated():
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy_modulated", "bprule_macro_modulated")
+            for i in range(1000):
+                self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True, verbose=False)
+
+        profile.runctx('profile_bp_rule_macro_modulated()', globals(), locals())
 
 
 class TestConfigBroken(ShinkenTest):
