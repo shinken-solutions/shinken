@@ -980,6 +980,10 @@ class Config(Item):
 
             logger.warning("Unmanaged configuration statement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
 
+    # Overrides specific instances properties
+    def override_properties(self):
+        self.services.override_properties(self.hosts)
+
     # Use to fill groups values on hosts and create new services
     # (for host group ones)
     def explode(self):

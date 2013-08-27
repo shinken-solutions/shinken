@@ -148,6 +148,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
+        self.conf.override_properties()
         self.conf.pythonize()
         self.conf.linkify()
         self.conf.apply_dependencies()

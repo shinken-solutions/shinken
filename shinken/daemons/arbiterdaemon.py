@@ -56,7 +56,7 @@ class IForArbiter(Interface):
             return True
         else:  # I've no conf or a bad one
             return False
-    
+
 
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
@@ -64,7 +64,7 @@ class IForArbiter(Interface):
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
-    
+
 
     def get_config(self):
         return self.app.conf
@@ -81,7 +81,7 @@ class IForArbiter(Interface):
             self.app.last_master_speack = time.time()
             self.app.must_run = False
     do_not_run.need_lock = False
-    
+
 
     # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
@@ -114,7 +114,7 @@ class IForArbiter(Interface):
     def what_i_managed(self):
         return {}
     what_i_managed.need_lock = False
-    
+
 
     def get_all_states(self):
         res = {'arbiter': self.app.conf.arbiters,
@@ -375,6 +375,9 @@ class Arbiter(Daemon):
         # search lists
         self.conf.create_reversed_list()
 
+        # Overrides sepecific service instaces properties
+        self.conf.override_properties()
+
         # Pythonize values
         self.conf.pythonize()
 
@@ -512,7 +515,7 @@ class Arbiter(Daemon):
         print "***********"*5
         print "WARNING : this feature is NOT supported in this version!"
         print "***********"*5
-        
+
         migration_module_name = self.migrate.strip()
         mig_mod = self.conf.modules.find_by_name(migration_module_name)
         if not mig_mod:
@@ -546,7 +549,7 @@ class Arbiter(Daemon):
             f(objs)
         # Ok we can exit now
         sys.exit(0)
-        
+
 
 
     # Main loop function
@@ -561,11 +564,11 @@ class Arbiter(Daemon):
             # Maybe we are in a migration phase. If so, we will bailout here
             if self.migrate:
                 self.go_migrate()
-                
+
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
-            
+
             self.uri_arb = self.http_daemon.register(self.interface)#, "ForArbiter")
 
             # ok we are now fully daemonized (if requested)
