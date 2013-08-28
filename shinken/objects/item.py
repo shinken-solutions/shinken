@@ -235,7 +235,10 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def get_templates(self):
         if hasattr(self, 'use') and self.use != '':
-            return self.use.split(',')
+            if isinstance(self.use, list):
+                return self.use
+            else:
+                return self.use.split(',')
         else:
             return []
 
@@ -1003,7 +1006,7 @@ class Items(object):
             comandcall['poller_tag']=prop.poller_tag
         elif hasattr(prop, 'reactionner_tag'):
             comandcall['reactionner_tag']=prop.reactionner_tag
-        
+
         return CommandCall(**comandcall)
 
     # Link one command property
@@ -1013,7 +1016,7 @@ class Items(object):
                 command = getattr(i, prop).strip()
                 if command != '':
                     cmdCall = self.create_commandcall(i, commands, command)
-                    
+
                     # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
