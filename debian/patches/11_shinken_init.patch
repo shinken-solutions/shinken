@@ -1,8 +1,55 @@
-diff --git shinken.orig/bin/init.d/shinken shinken/bin/init.d/shinken
-index ce51dcc..65018e3 100755
---- shinken.orig/bin/init.d/shinken
-+++ shinken/bin/init.d/shinken
-@@ -165,10 +165,6 @@
+diff --git a/bin/init.d/shinken b/bin/init.d/shinken
+index 5e7e495..89dedc2 100755
+--- a/bin/init.d/shinken
++++ b/bin/init.d/shinken
+@@ -43,6 +43,19 @@
+ 
+ NAME="shinken"
+ 
++
++## This permits to overhidde the default "default shinken cfg file":
++[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
++## so you can now do:
++## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
++## to easily use your own config
++
++#echo "Using $SHINKEN_DEFAULT_FILE .."
++
++# Reads configuration variable file if it is present
++[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
++
++
+ ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
+ if [ -z "$SHINKEN_MODULE_FILE" ]; then
+     SCRIPTNAME=$0
+@@ -106,16 +119,6 @@ DEBUG=false
+ CMD=""
+ SUBMODULES=""
+ 
+-## This permits to overhidde the default "default shinken cfg file":
+-[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
+-## so you can now do:
+-## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
+-## to easily use your own config
+-
+-#echo "Using $SHINKEN_DEFAULT_FILE .."
+-
+-
+-
+ usage() {
+     cat << END
+ Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+@@ -152,20 +155,11 @@ else
+     done
+ fi
+ 
+-
+-# Reads configuration variable file if it is present
+-[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+-
+-
+ # Now look if some required variables are pre defined:
+ if ! test "$SHINKENCFG"
  then
      SHINKENCFG="$ETC/nagios.cfg"
  fi
@@ -13,7 +60,7 @@ index ce51dcc..65018e3 100755
  
  # If var or run dir is missing, create them and chown them
  [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
-@@ -287,13 +283,20 @@
+@@ -284,13 +278,20 @@ do_start() {
      [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
      # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
      if [ "$mod" = 'skonf' ]; then
@@ -37,7 +84,7 @@ index ce51dcc..65018e3 100755
          rc=$?
      fi
      # debug:
-@@ -376,7 +379,13 @@
+@@ -373,7 +374,13 @@ do_stop() {
  #
  do_check() {
      [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
@@ -52,3 +99,62 @@ index ce51dcc..65018e3 100755
      return $?
  }
  
+diff --git a/debian/patches/11_shinken_init.patch b/debian/patches/11_shinken_init.patch
+index 158dffe..e69de29 100644
+--- a/debian/patches/11_shinken_init.patch
++++ b/debian/patches/11_shinken_init.patch
+@@ -1,54 +0,0 @@
+-diff --git shinken.orig/bin/init.d/shinken shinken/bin/init.d/shinken
+-index ce51dcc..65018e3 100755
+---- shinken.orig/bin/init.d/shinken
+-+++ shinken/bin/init.d/shinken
+-@@ -165,10 +165,6 @@
+- then
+-     SHINKENCFG="$ETC/nagios.cfg"
+- fi
+--if ! test "$SHINKENSPECIFICCFG"
+--then
+--    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+--fi
+- 
+- # If var or run dir is missing, create them and chown them
+- [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
+-@@ -287,13 +283,20 @@
+-     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
+-     # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
+-     if [ "$mod" = 'skonf' ]; then
+--	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+-+        output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+-         rc=$?
+-     elif [ "$mod" != "arbiter" ]; then
+--        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+-+        modINI=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
+-+        modinifile=$(eval echo ${modINI})
+-+        output=$("$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
+-         rc=$?
+-     else
+--        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+-+        if ! test "$SHINKENSPECIFICCFG"
+-+        then
+-+            output=$("$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+-+        else
+-+            output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+-+        fi
+-         rc=$?
+-     fi
+-     # debug:
+-@@ -376,7 +379,13 @@
+- #
+- do_check() {
+-     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+--    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+-+    if ! test "$SHINKENSPECIFICCFG"
+-+        then
+-+            "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" $DEBUGCMD 2>&1
+-+        else
+-+            "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1
+-+    fi
+-+
+-     return $?
+- }
+- 
