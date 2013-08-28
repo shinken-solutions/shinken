@@ -65,6 +65,8 @@ class Command(Item):
         self.customs = {}
 
         for key in params:
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
             # Manage customs values
             if key.startswith('_'):
                 self.customs[key.upper()] = params[key]

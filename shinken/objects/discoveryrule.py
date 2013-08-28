@@ -70,6 +70,10 @@ class Discoveryrule(MatchingItem):
         self.not_matches = {}  # for rules that should NOT match
         self.writing_properties = {}
 
+        for key in params:
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
+
         # Get the properties of the Class we want
         if not 'creation_type' in params:
             params['creation_type'] = 'service'

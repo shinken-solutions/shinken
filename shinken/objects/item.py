@@ -34,7 +34,7 @@ try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
-    
+
 from copy import copy
 
 from shinken.graph import Graph
@@ -89,7 +89,11 @@ class Item(object):
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
-            if len(params[key]) >= 1 and params[key][0] == '+':
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
+            # checks for attribute value special syntax (+ or _)
+            if not isinstance(params[key], list) and \
+               len(params[key]) >= 1 and params[key][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
@@ -97,10 +101,28 @@ class Item(object):
                 else:
                     self.plus[key] = params[key][1:]  # we remove the +
             elif key[0] == "_":
+                if isinstance(params[key], list):
+                    err = "no support for _ syntax in multiple valued attributes"
+                    self.configuration_errors.append(err)
+                    continue
                 custom_name = key.upper()
                 self.customs[custom_name] = params[key]
             else:
                 setattr(self, key, params[key])
+
+
+    # When values to set on attributes are unique (single element list),
+    # return the value directly rather than setting list element.
+    def compact_unique_attr_value(self, val):
+        if isinstance(val, list):
+            if len(val) > 1:
+                return val
+            elif len(val) == 0:
+                return ''
+            else:
+                return val[0]
+        else:
+            return val
 
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():
@@ -220,7 +242,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
-        
+
         # If I have the prop, I take mine but I check if I must
         # add a plus property
         if hasattr(self, prop):
@@ -248,7 +270,7 @@ Like temporary attributes such as "imported_from", etc.. """
             if value is not None:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
-                if value.startswith('+'):
+                if not isinstance(value, list) and value.startswith('+'):
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
                         value = value[1:]
@@ -257,7 +279,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 # Maybe in the previous loop, we set a value, use it too
                 if hasattr(self, prop):
                     # If the current value is strong, it will simplify the problem
-                    if value.startswith('+'):
+                    if not isinstance(value, list) and value.startswith('+'):
                         # In this case we can remove the + from our current
                         # tpl because our value will be final
                         value = ','.join([getattr(self, prop), value[1:]])
@@ -395,7 +417,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # Register is not by default in the properties
         if not 'register' in properties:
             properties.append('register')
-            
+
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
