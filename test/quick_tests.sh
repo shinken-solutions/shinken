@@ -165,6 +165,10 @@ launch_and_assert test_livestatus_db.py
 launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_antivirg.py
 launch_and_assert test_multi_attribute.py
+launch_and_assert test_property_override.py
+launch_and_assert test_business_correlator_expand_expression.py
+launch_and_assert test_business_correlator_output.py
+
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.

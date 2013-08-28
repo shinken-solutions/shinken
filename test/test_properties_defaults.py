@@ -527,6 +527,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('checkmodulations', ''),
         ('macromodulations', ''),
         ('custom_views', ''),
+        ('service_overrides', ''),
         ])
 
     def setUp(self):

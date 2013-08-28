@@ -129,4 +129,6 @@ test_macromodulations.py
 test_antivirg.py
 test_business_correlator_expand_expression.py
 test_business_correlator_output.py
+test_multi_attribute.py
+test_property_override.py
 
