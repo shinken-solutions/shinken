@@ -25,7 +25,7 @@
 
 from item import Item, Items
 from shinken.brok import Brok
-from shinken.property import StringProp, IntegerProp
+from shinken.property import StringProp, IntegerProp, BoolProp
 from shinken.autoslots import AutoSlots
 
 
@@ -52,6 +52,7 @@ class Command(Item):
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
         'timeout':      IntegerProp(default='-1'),
+        'enable_environment_macros': BoolProp(default=0),
     })
 
     def __init__(self, params={}):
@@ -64,6 +65,8 @@ class Command(Item):
         self.customs = {}
 
         for key in params:
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
             # Manage customs values
             if key.startswith('_'):
                 self.customs[key.upper()] = params[key]
@@ -75,6 +78,8 @@ class Command(Item):
 
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
+        if not hasattr(self, 'enable_environment_macros'):
+            self.enable_environment_macros = 0
         if not hasattr(self, 'reactionner_tag'):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'module_type'):

@@ -1055,7 +1055,7 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
-        if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
+        if cls.enable_environment_macros or n.enable_environment_macros:
             n.env = m.get_env_macros(data)
 
 
@@ -1231,7 +1231,8 @@ class SchedulingItem(Item):
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
-                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type)
+                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type,
+                    enable_environment_macros=cmd.enable_environment_macros)
                 if not self.notification_is_blocked_by_contact(child_n, contact):
                     # Update the notification with fresh status information
                     # of the item. Example: during the notification_delay
@@ -1291,13 +1292,12 @@ class SchedulingItem(Item):
             m = MacroResolver()
             data = self.get_data_for_checks()
             command_line = m.resolve_command(check_command, data)
-
             # By default env is void
             env = {}
 
             # And get all environment variables only if needed
-            if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
-                env = m.get_env_macros(data)
+            if cls.enable_environment_macros or check_command.enable_environment_macros:
+               env = m.get_env_macros(data)
 
             # By default we take the global timeout, but we use the command one if it
             # define it (by default it's -1)
@@ -1362,7 +1362,7 @@ class SchedulingItem(Item):
 
     # Create the whole business rule tree
     # if we need it
-    def create_business_rules(self, hosts, services):
+    def create_business_rules(self, hosts, services, running=False):
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout
@@ -1382,11 +1382,16 @@ class SchedulingItem(Item):
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
-
-            fact = DependencyNodeFactory()
-            node = fact.eval_cor_pattern(rule, hosts, services)
-            #print "got node", node
-            self.business_rule = node
+            # Only (re-)evaluate the business rule if it has never been
+            # evaluated before, or it contains a macro.
+            if re.match(r"\$[\w\d_-]+\$", rule) or self.business_rule is None:
+                data = self.get_data_for_checks()
+                m = MacroResolver()
+                rule = m.resolve_simple_macros_in_string(rule, data)
+                fact = DependencyNodeFactory()
+                node = fact.eval_cor_pattern(rule, hosts, services, running)
+                #print "got node", node
+                self.business_rule = node
 
 
     # Returns a status string for business rules based services, formatted
@@ -1526,11 +1531,22 @@ class SchedulingItem(Item):
 
     # We ask us to manage our own internal check,
     # like a business based one
-    def manage_internal_check(self, c):
+    def manage_internal_check(self, hosts, services, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
-            state = self.get_business_rule_state()
-            c.output = self.get_business_rule_output()
+            try:
+                # Re evaluate the business rule to take into account macro
+                # modulation.
+                # Caution: We consider the that the macro modulation did not
+                # change business rule dependency tree. Only Xof: values should
+                # be modified by modulation.
+                self.create_business_rules(hosts, services, running=True)
+                state = self.get_business_rule_state()
+                c.output = self.get_business_rule_output()
+            except Exception, e:
+                # Notifies the error, and return an UNKNOWN state.
+                c.output = "Error while re-evaluating business rule: %s" % e
+                state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0

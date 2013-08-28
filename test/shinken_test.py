@@ -148,6 +148,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
+        self.conf.override_properties()
         self.conf.pythonize()
         self.conf.linkify()
         self.conf.apply_dependencies()
@@ -222,12 +223,13 @@ class ShinkenTest(unittest.TestCase):
         check.status = 'waitconsume'
         self.sched.waiting_results.append(check)
 
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
+    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61, verbose=True):
         for ref in reflist:
             (obj, exit_status, output) = ref
             obj.checks_in_progress = []
         for loop in range(1, count + 1):
-            print "processing check", loop
+            if verbose is True:
+                print "processing check", loop
             for ref in reflist:
                 (obj, exit_status, output) = ref
                 obj.update_in_checking()
@@ -236,7 +238,7 @@ class ShinkenTest(unittest.TestCase):
             self.sched.consume_results()
             self.sched.get_new_actions()
             self.sched.get_new_broks()
-            self.worker_loop()
+            self.worker_loop(verbose)
             for ref in reflist:
                 (obj, exit_status, output) = ref
                 obj.checks_in_progress = []
@@ -245,7 +247,7 @@ class ShinkenTest(unittest.TestCase):
             if do_sleep:
                 time.sleep(sleep_time)
 
-    def worker_loop(self):
+    def worker_loop(self, verbose=True):
         self.sched.delete_zombie_checks()
         self.sched.delete_zombie_actions()
         checks = self.sched.get_to_run_checks(True, False, worker_name='tester')
@@ -253,14 +255,16 @@ class ShinkenTest(unittest.TestCase):
         #print "------------ worker loop checks ----------------"
         #print checks
         #print "------------ worker loop actions ----------------"
-        self.show_actions()
+        if verbose is True:
+            self.show_actions()
         #print "------------ worker loop new ----------------"
         for a in actions:
             a.status = 'inpoller'
             a.check_time = time.time()
             a.exit_status = 0
             self.sched.put_results(a)
-        self.show_actions()
+        if verbose is True:
+            self.show_actions()
         #print "------------ worker loop end ----------------"
 
     def show_logs(self):

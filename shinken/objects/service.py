@@ -411,7 +411,7 @@ class Service(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.info(err)
+                logger.error("[service::%s] %s" % (self.get_full_name(), err))
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -1043,6 +1043,50 @@ class Services(Items):
         self.linkify_with_checkmodulations(checkmodulations)
         self.linkify_with_macromodulations(macromodulations)
 
+    def override_properties(self, hosts):
+        for host in hosts:
+            # We're only looking for hosts having service overrides defined
+            if not hasattr(host, 'service_overrides'):
+                continue
+            cache = {}
+            for ovr in host.service_overrides:
+                # Checks service override syntax
+                match = re.match(r'^([^,]+),([^\s]+)\s+(.*)$', ovr)
+                if match is None:
+                    err = "Error: invalid service override syntax: %s" % ovr
+                    host.configuration_errors.append(err)
+                    continue
+                name, prop, value = match.groups()
+                # To speep up search if several properties are overriden on the
+                # same service, we keep them in temporary cache
+                key = "%s/%s" % (host.host_name, name)
+                if key in cache:
+                    service = cache[key]
+                else:
+                    # Looks for corresponding service
+                    # As hosts and service are not yet linked, we have to walk
+                    # through services to find which is associated to host.
+                    service = None
+                    for s in self:
+                        if not hasattr(s, "host_name") or not hasattr(s, "service_description"):
+                            # this is a template
+                            continue
+                        if s.host_name == host.host_name and s.service_description == name:
+                            service = s
+                            break
+                    if service is None:
+                        err = "Error: trying to override property '%s' on service '%s' but it's unknown for this host" % (prop, name)
+                        host.configuration_errors.append(err)
+                        continue
+                    cache[key] = service
+                # Checks if override is allowed
+                excludes = ['host_name', 'service_description', 'use',
+                            'servicegroups', 'trigger', 'trigger_name']
+                if prop in excludes:
+                    err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, name)
+                    host.configuration_errors.append(err)
+                    continue
+                setattr(service, prop, value)
 
     # We can link services with hosts so
     # We can search in O(hosts) instead

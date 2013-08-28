@@ -527,6 +527,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('checkmodulations', ''),
         ('macromodulations', ''),
         ('custom_views', ''),
+        ('service_overrides', ''),
         ('business_rule_output_template', ''),
         ('business_rule_smart_notifications', False),
         ])

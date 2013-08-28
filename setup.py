@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-# Shinken requires Python 2.4, but does not support Python 3.x yet.
+# Shinken requires Python 2.6, but does not support Python 3.x yet.
 import sys
 try:
     python_version = sys.version_info
@@ -479,10 +479,6 @@ else:
     raise "Unsupported platform, sorry"
 
 required_pkgs = []
-if sys.version_info < (2, 5):
-    required_pkgs.append('pyro<4')
-else:
-    required_pkgs.append('pyro')
 if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 

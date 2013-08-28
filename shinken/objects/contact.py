@@ -235,7 +235,7 @@ class Contacts(Items):
                 if nw is not None:
                     new_notificationways.append(nw)
                 else:
-                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), nw_name)
+                    err = "The 'notificationways' of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), nw_name)
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))

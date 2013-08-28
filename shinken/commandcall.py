@@ -58,10 +58,11 @@ class CommandCall(DummyCommandCall):
         'args':            StringProp(default=[]),
         'timeout':         IntegerProp(default='-1'),
         'late_relink_done':BoolProp(default=False),
+        'enable_environment_macros': BoolProp(default=0),
     }
 
     def __init__(self, commands, call, poller_tag='None',
-                 reactionner_tag='None'):
+                 reactionner_tag='None', enable_environment_macros=0):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -80,6 +81,7 @@ class CommandCall(DummyCommandCall):
             self.poller_tag = poller_tag  # from host/service
             self.reactionner_tag = reactionner_tag
             self.module_type = self.command.module_type
+            self.enable_environment_macros = self.command.enable_environment_macros
             self.timeout = int(self.command.timeout)
             if self.valid and poller_tag is 'None':
                 # from command if not set
