@@ -1032,10 +1032,14 @@ class Services(Items):
     def override_properties(self, hosts):
         for host in hosts:
             # We're only looking for hosts having service overrides defined
-            if not hasattr(host, 'service_overrides'):
+            if not hasattr(host, 'service_overrides') or not host.service_overrides:
                 continue
             cache = {}
-            for ovr in host.service_overrides:
+            if isinstance(host.service_overrides, list):
+                service_overrides = host.service_overrides
+            else:
+                service_overrides = [host.service_overrides]
+            for ovr in service_overrides:
                 # Checks service override syntax
                 match = re.match(r'^([^,]+),([^\s]+)\s+(.*)$', ovr)
                 if match is None:

@@ -79,7 +79,7 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger, console_logger
-from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
 from shinken.daemon import get_cur_user, get_cur_group
 
 no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
@@ -255,7 +255,7 @@ class Config(Item):
         'enable_problem_impacts_states_change': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
 
         # More a running value in fact
-        'resource_macros_names': StringProp(default=[]),
+        'resource_macros_names': ListProp(default=[]),
 
         # SSL PART
         # global boolean for know if we use ssl or not
@@ -625,7 +625,7 @@ class Config(Item):
         raw_objects['command'].append(bp_rule)
         host_up = {'command_name': '_internal_host_up', 'command_line': '_internal_host_up'}
         raw_objects['command'].append(host_up)
-        echo_obj = {'command_name': ['_echo'], 'command_line': '_echo'}
+        echo_obj = {'command_name': '_echo', 'command_line': '_echo'}
         raw_objects['command'].append(echo_obj)
 
     # We've got raw objects in string, now create real Instances
