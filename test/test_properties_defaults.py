@@ -55,7 +55,8 @@ class PropertiesTester(object):
         for name, value in self.properties.iteritems():
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
-            self.assertEqual(item.properties[name].default, value)
+            if hasattr(item.properties[name], 'default'):
+                self.assertEqual(item.properties[name].default, value)
 
     def test_all_props_are_tested(self):
         item = self.item # shortcut
@@ -223,6 +224,8 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
 
         ('use_multiprocesses_serializer', '0'),
         ('daemon_thread_pool_size', '8'),
+        ('enable_environment_macros', '1'),
+        ('timeout_exit_status', '2'),
         ])
 
     def setUp(self):
@@ -244,6 +247,7 @@ class TestCommand(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('reactionner_tag', 'None'),
         ('module_type', None),
         ('timeout', '-1'),
+        ('enable_environment_macros', 0),
         ])
 
     def setUp(self):
