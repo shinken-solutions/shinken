@@ -132,6 +132,8 @@ class Host(SchedulingItem):
         'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
         # Business rules notifications mode
         'business_rule_smart_notifications': BoolProp(default=False, fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),

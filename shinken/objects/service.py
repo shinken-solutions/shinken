@@ -127,6 +127,8 @@ class Service(SchedulingItem):
         'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
         # Business rules notifications mode
         'business_rule_smart_notifications': BoolProp(default=False, fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
 
         # Easy Service dep definition
         'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?

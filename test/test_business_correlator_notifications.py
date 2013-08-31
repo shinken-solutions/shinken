@@ -102,6 +102,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.assert_(svc_cor.got_business_rule is True)
         self.assert_(svc_cor.business_rule is not None)
         self.assert_(svc_cor.business_rule_smart_notifications is True)
+        self.assert_(svc_cor.business_rule_downtime_as_ack is False)
 
         dummy = self.sched.hosts.find_by_name("dummy")
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
@@ -129,12 +130,22 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.scheduler_loop(1, [[svc_cor, None, None]])
         self.assert_(svc2.scheduled_downtime_depth > 0)
 
+        self.assert_(svc_cor.business_rule_notifications_enabled is True)
+        self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
+        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
+        self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
+        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
+
+        svc_cor.business_rule_downtime_as_ack = True
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+
         self.assert_(svc_cor.business_rule_notifications_enabled is False)
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is True)
         self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
         self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
         self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
-
 
 if __name__ == '__main__':
     unittest.main()

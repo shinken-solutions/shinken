@@ -1506,26 +1506,32 @@ class SchedulingItem(Item):
         if self.business_rule_smart_notifications is False:
             return state
         if state != 0:
-            # Walks through hosts and services to check if all items in
-            # non ok are are acknowledged or in downtime period.
-            for s in self.business_rule.list_all_elements():
-                if s.last_hard_state_id != 0 and \
-                        s.scheduled_downtime_depth == 0 and \
-                        not s.problem_has_been_acknowledged:
-                    # At least one problem has not been acknowledged or is not
-                    # under downtime. Return invalid state.
-                    if self.business_rule_notifications_enabled is False:
-                        self.business_rule_notifications_enabled = True
-                    return state
-            # All failing sons have been acknowledged or are under schedule
-            # downtime. Return corresponding state, but do not send
-            # notifications.
-            if self.business_rule_notifications_enabled is True:
-                self.business_rule_notifications_enabled = False
-        else:
-            # (Re)enables netifications if they were previously disabled.
-            if self.business_rule_notifications_enabled is False:
-                self.business_rule_notifications_enabled = True
+            # Walks through problems to check if all items in non ok are
+            # acknowledged or in downtime period.
+            notify = False
+            for s in self.source_problems:
+                if s.last_hard_state_id != 0:
+                    if s.problem_has_been_acknowledged:
+                        # Problem hast been acknowledged
+                        continue
+                    # Only check problems under downtime if we are
+                    # explicitely told to do so.
+                    if self.business_rule_downtime_as_ack is True and \
+                            s.scheduled_downtime_depth > 0:
+                        # Problem is under downtime, and downtimes should be
+                        # traeted as acknowledgements
+                        continue
+                    notify = True
+            if notify is False:
+                # All problems have been acknowledged or are under scheduled
+                # downtime. Return corresponding state, but do not send
+                # notifications.
+                if self.business_rule_notifications_enabled is True:
+                    self.business_rule_notifications_enabled = False
+                return state
+        # (Re)enables netifications if they were previously disabled.
+        if self.business_rule_notifications_enabled is False:
+            self.business_rule_notifications_enabled = True
         return state
 
 
