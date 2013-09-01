@@ -1494,45 +1494,30 @@ class SchedulingItem(Item):
         return mapping.get(status, status)
 
 
-    # Gets business rule state, and processes its notifications behaviour.
-    # When service has business rule smart notificaions enabled, if business
-    # rule state is not OK, all childs are checked for acknowledgement or
-    # downtimes.
-    # If all failing childs have been acknowledged or are under downtime,
-    # the service business_rule_notifications_enabled flag is set False, which
-    # has the effect of disabling notifications for this service.
-    def get_business_rule_state(self):
-        state = self.business_rule.get_state()
-        if self.business_rule_smart_notifications is False:
-            return state
-        if state != 0:
-            # Walks through problems to check if all items in non ok are
-            # acknowledged or in downtime period.
-            notify = False
-            for s in self.source_problems:
-                if s.last_hard_state_id != 0:
-                    if s.problem_has_been_acknowledged:
-                        # Problem hast been acknowledged
-                        continue
-                    # Only check problems under downtime if we are
-                    # explicitely told to do so.
-                    if self.business_rule_downtime_as_ack is True and \
-                            s.scheduled_downtime_depth > 0:
-                        # Problem is under downtime, and downtimes should be
-                        # traeted as acknowledgements
-                        continue
-                    notify = True
-            if notify is False:
-                # All problems have been acknowledged or are under scheduled
-                # downtime. Return corresponding state, but do not send
-                # notifications.
-                if self.business_rule_notifications_enabled is True:
-                    self.business_rule_notifications_enabled = False
-                return state
-        # (Re)enables netifications if they were previously disabled.
-        if self.business_rule_notifications_enabled is False:
-            self.business_rule_notifications_enabled = True
-        return state
+    # Processes business rule notifications behaviour. If all problems have
+    # been acknowledged, no notifications should be sent if state is not OK.
+    # By default, downtimes are ignored, unless explicitely told to be treated
+    # as acknowledgements through with the business_rule_downtime_as_ack set.
+    def business_rule_notification_is_blocked(self):
+        # Walks through problems to check if all items in non ok are
+        # acknowledged or in downtime period.
+        acknowledged = 0
+        for s in self.source_problems:
+            if s.last_hard_state_id != 0:
+                if s.problem_has_been_acknowledged:
+                    # Problem hast been acknowledged
+                    acknowledged += 1
+                # Only check problems under downtime if we are
+                # explicitely told to do so.
+                elif self.business_rule_downtime_as_ack is True and \
+                        s.scheduled_downtime_depth > 0:
+                    # Problem is under downtime, and downtimes should be
+                    # traeted as acknowledgements
+                    acknowledged += 1
+        if acknowledged == len(self.source_problems):
+            return True
+        else:
+            return False
 
 
     # We ask us to manage our own internal check,
@@ -1547,7 +1532,7 @@ class SchedulingItem(Item):
                 # change business rule dependency tree. Only Xof: values should
                 # be modified by modulation.
                 self.create_business_rules(hosts, services, running=True)
-                state = self.get_business_rule_state()
+                state = self.business_rule.get_state()
                 c.output = self.get_business_rule_output()
             except Exception, e:
                 # Notifies the error, and return an UNKNOWN state.

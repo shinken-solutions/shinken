@@ -260,8 +260,6 @@ class Service(SchedulingItem):
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
-        # Business rules notifications state
-        'business_rule_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
 
 
         # Here it's the elements we are depending on
@@ -938,7 +936,7 @@ class Service(SchedulingItem):
         # childs have been acknowledged or are under downtime.
         if self.got_business_rule is True \
                 and self.business_rule_smart_notifications is True \
-                and self.business_rule_notifications_enabled is False \
+                and self.business_rule_notification_is_blocked() is True \
                 and type == 'PROBLEM':
             return True
 
