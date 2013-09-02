@@ -214,6 +214,7 @@ class SchedulingItem(Item):
         # we should warn potentials impact of our problem
         # and they should be cool to register them so I've got
         # my impacts list
+        impacts = list(self.impacts)
         for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
             # Check if the status is ok for impact
             for s in status:
@@ -222,9 +223,13 @@ class SchedulingItem(Item):
                     # not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
                         new_impacts = impact.register_a_problem(self)
-                        self.impacts.extend(new_impacts)
-                        # Make element unique in this list
-                        self.impacts = list(set(self.impacts))
+                        impacts.extend(new_impacts)
+
+        # Only update impacts and create new brok if impacts changed.
+        s_impacts = set(impacts)
+        if s_impacts == set(self.impacts):
+            return
+        self.impacts = list(s_impacts)
 
         # We can update our business_impact value now
         self.update_business_impact_value()
@@ -917,7 +922,7 @@ class SchedulingItem(Item):
             if self.state_type == 'SOFT':
                 self.add_attempt()
                 if self.is_max_attempts():
-                    # Ok here is when we just go to the hard state
+                   # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
@@ -955,14 +960,6 @@ class SchedulingItem(Item):
                         if not no_action:
                             self.create_notifications('PROBLEM')
 
-                        # PROBLEM/IMPACT
-                        # Maybe our new state can raise the problem
-                        # when the last one was not
-                        # I'm a problem only if I'm the root problem,
-                        # so not no_action:
-                        if not no_action:
-                            self.set_myself_as_problem()
-
                 elif self.in_scheduled_downtime_during_last_check == True:
                     # during the last check i was in a downtime. but now
                     # the status is still critical and notifications
@@ -970,6 +967,15 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         self.create_notifications('PROBLEM')
+
+                # PROBLEM/IMPACT
+                # Forces problem/impact registration even if no state change
+                # was detected as we may have a non OK state restored from
+                # retetion data. This way, we rebuild problem/impact hierarchy.
+                # I'm a problem only if I'm the root problem,
+                # so not no_action:
+                if not no_action:
+                    self.set_myself_as_problem()
 
         self.update_hard_unknown_phase_state()
         # Reset this flag. If it was true, actions were already taken
