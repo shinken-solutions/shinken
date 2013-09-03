@@ -127,6 +127,14 @@ class Host(SchedulingItem):
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
         'service_overrides':    ListProp(default=''),
 
+        # BUSINESS CORRELATOR PART
+        # Business rules output format template
+        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
+        # Business rules notifications mode
+        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
 
@@ -283,8 +291,6 @@ class Host(SchedulingItem):
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
-        # Business rules output format template
-        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
 
         # Manage the unknown/unreach during hard state
         # From now its not really used
@@ -911,6 +917,14 @@ class Host(SchedulingItem):
 
         # Block if flapping
         if self.is_flapping and type not in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
+            return True
+
+        # Block if business rule smart notifications is enabled and all its
+        # childs have been acknowledged or are under downtime.
+        if self.got_business_rule is True \
+                and self.business_rule_smart_notifications is True \
+                and self.business_rule_notification_is_blocked() is True \
+                and type == 'PROBLEM':
             return True
 
         return False
