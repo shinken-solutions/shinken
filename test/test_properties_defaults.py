@@ -532,6 +532,9 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('macromodulations', ''),
         ('custom_views', ''),
         ('service_overrides', ''),
+        ('business_rule_output_template', ''),
+        ('business_rule_smart_notifications', False),
+        ('business_rule_downtime_as_ack', False),
         ])
 
     def setUp(self):
@@ -798,6 +801,9 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('service_dependencies', ''),
         ('custom_views', ''),
         ('merge_host_contacts', '0'),
+        ('business_rule_output_template', ''),
+        ('business_rule_smart_notifications', False),
+        ('business_rule_downtime_as_ack', False),
         ])
 
     def setUp(self):

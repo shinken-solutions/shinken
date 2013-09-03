@@ -122,6 +122,14 @@ class Service(SchedulingItem):
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
 
+        # BUSINESS CORRELATOR PART
+        # Business rules output format template
+        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
+        # Business rules notifications mode
+        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+
         # Easy Service dep definition
         'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
 
@@ -252,8 +260,6 @@ class Service(SchedulingItem):
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
-        # Business rules output format template
-        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
 
 
         # Here it's the elements we are depending on
@@ -924,6 +930,14 @@ class Service(SchedulingItem):
 
         # Block if host is down
         if self.host.state != self.host.ok_up:
+            return True
+
+        # Block if business rule smart notifications is enabled and all its
+        # childs have been acknowledged or are under downtime.
+        if self.got_business_rule is True \
+                and self.business_rule_smart_notifications is True \
+                and self.business_rule_notification_is_blocked() is True \
+                and type == 'PROBLEM':
             return True
 
         return False
