@@ -144,23 +144,24 @@ class DependencyNode(object):
         # Warn can apply with warn or crit values
         # so a W C can raise a Warning, but not enough for
         # a critical
-        if nb_search_ok.endswith('%'):
-            nb_search_ok = int(nb_search_ok[:-1])
-            ok_apply = float(nb_ok) / nb_sons * 100 >= nb_search_ok
-        else:
-            ok_apply = nb_ok >= int(nb_search_ok)
+        def get_state_for(nb_tot, nb_real, nb_search):
+            if nb_search.endswith('%'):
+                nb_search = int(nb_search[:-1])
+                if nb_search < 0:
+                    # nb_search is negative, so +
+                    nb_search = max(100 + nb_search, 0)
+                apply_for = float(nb_real) / nb_tot * 100 >= nb_search
+            else:
+                nb_search = int(nb_search)
+                if nb_search < 0:
+                    # nb_search is negative, so +
+                    nb_search = max(nb_tot + nb_search, 0)
+                apply_for = nb_real >= nb_search
+            return apply_for
 
-        if nb_search_warn.endswith('%'):
-            nb_search_warn = int(nb_search_warn[:-1])
-            warn_apply = float(nb_warn) / nb_sons * 100 >= nb_search_warn
-        else:
-            warn_apply = nb_warn + nb_crit >= int(nb_search_warn)
-
-        if nb_search_crit.endswith('%'):
-            nb_search_crit = int(nb_search_crit[:-1])
-            crit_apply = float(nb_crit) / nb_sons * 100 >= nb_search_crit
-        else:
-            crit_apply = nb_crit >= int(nb_search_crit)
+        ok_apply = get_state_for(nb_sons, nb_ok, nb_search_ok)
+        warn_apply = get_state_for(nb_sons, nb_warn + nb_crit, nb_search_warn)
+        crit_apply = get_state_for(nb_sons, nb_crit, nb_search_crit)
 
         #print "What apply?", ok_apply, warn_apply, crit_apply
 
@@ -257,7 +258,7 @@ class DependencyNodeFactory(object):
         is_of_nb = False
 
         node = DependencyNode()
-        p = "^(\d+%?),*(\d*%?),*(\d*%?) *of: *(.+)"
+        p = "^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:
