@@ -56,6 +56,8 @@ class PropertiesTester(object):
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
             if hasattr(item.properties[name], 'default'):
+                if item.properties[name].default != value:
+                    print "%s, %s: %s, %s" % (name, value, item.properties[name].default, value)
                 self.assertEqual(item.properties[name].default, value)
 
     def test_all_props_are_tested(self):
@@ -533,8 +535,8 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('custom_views', ''),
         ('service_overrides', ''),
         ('business_rule_output_template', ''),
-        ('business_rule_smart_notifications', False),
-        ('business_rule_downtime_as_ack', False),
+        ('business_rule_smart_notifications', '0'),
+        ('business_rule_downtime_as_ack', '0'),
         ])
 
     def setUp(self):
@@ -802,8 +804,8 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('custom_views', ''),
         ('merge_host_contacts', '0'),
         ('business_rule_output_template', ''),
-        ('business_rule_smart_notifications', False),
-        ('business_rule_downtime_as_ack', False),
+        ('business_rule_smart_notifications', '0'),
+        ('business_rule_downtime_as_ack', '0'),
         ])
 
     def setUp(self):

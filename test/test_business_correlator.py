@@ -223,13 +223,22 @@ class TestBusinesscorrel(ShinkenTest):
 
     # We will try a simple 1of: bd1 OR/AND db2
     def test_simple_1of_business_correlator(self):
-        self.run_simple_1of_business_correlator(with_pct=False)
-    # We will try a simple 1of: bd1 OR/AND db2
+        self.run_simple_1of_business_correlator()
 
+    # We will try a simple -1of: bd1 OR/AND db2
+    def test_simple_1of_neg_business_correlator(self):
+        self.run_simple_1of_business_correlator(with_neg=True)
+
+    # We will try a simple 50%of: bd1 OR/AND db2
     def test_simple_1of_pct_business_correlator(self):
         self.run_simple_1of_business_correlator(with_pct=True)
 
-    def run_simple_1of_business_correlator(self, with_pct=False):
+    # We will try a simple -50%of: bd1 OR/AND db2
+    def test_simple_1of_pct_neg_business_correlator(self):
+        self.run_simple_1of_business_correlator(with_pct=True, with_neg=True)
+
+
+    def run_simple_1of_business_correlator(self, with_pct=False, with_neg=False):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -252,19 +261,35 @@ class TestBusinesscorrel(ShinkenTest):
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
         self.assert_(svc_bd2.business_rule is None)
-        if with_pct == False:
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of")
+        if with_pct is True:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_pct_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_pct")
         else:
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_pct")
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
-        if with_pct == False:
-            self.assert_(bp_rule.of_values == ('1', '2', '2'))
+        if with_pct is True:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
         else:
-            self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('1', '2', '2'))
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -328,13 +353,21 @@ class TestBusinesscorrel(ShinkenTest):
 
     # We will try a simple 1of: test_router_0 OR/AND test_host_0
     def test_simple_1of_business_correlator_with_hosts(self):
-        self.run_simple_1of_business_correlator_with_hosts(with_pct=False)
+        self.run_simple_1of_business_correlator_with_hosts()
+
+    # We will try a simple -1of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_neg_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts(with_neg=True)
 
     # We will try a simple 50%of: test_router_0 OR/AND test_host_0
     def test_simple_1of_pct_business_correlator_with_hosts(self):
         self.run_simple_1of_business_correlator_with_hosts(with_pct=True)
 
-    def run_simple_1of_business_correlator_with_hosts(self, with_pct=False):
+    # We will try a simple -50%of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_pct_neg_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts(with_pct=True, with_neg=True)
+
+    def run_simple_1of_business_correlator_with_hosts(self, with_pct=False, with_neg=False):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -347,20 +380,35 @@ class TestBusinesscorrel(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
         router.act_depend_of = []  # ignore the router
-
-        if with_pct == False:
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_with_host")
+        if with_pct is True:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_pct_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_pct")
         else:
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_with_host_pct")
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
-        if with_pct == False:
-            self.assert_(bp_rule.of_values == ('1', '2', '2'))
+        if with_pct is True:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
         else:
-            self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('1', '2', '2'))
 
         sons = bp_rule.sons
         print "Sons,", sons
