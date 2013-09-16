@@ -1347,7 +1347,92 @@ function setdaemons(){
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
 
-# addons installation
+###########################
+### addons installation ###
+###########################
+
+function install_graphite()
+{
+    cadre "Install graphite add-on" green
+    cd $TMP
+    cecho "Downloading Graphite" green
+
+    rm -rf graphite-web carbon whisper
+    git clone https://github.com/graphite-project/graphite-web.git -b 0.9.x > $LOGFILE 2>&1
+    git clone https://github.com/graphite-project/carbon.git -b 0.9.x > $LOGFILE 2>&1
+    git clone https://github.com/graphite-project/whisper.git -b 0.9.x > $LOGFILE 2>&1
+
+    cecho "Installing Whisper component" green
+    cd whisper
+    python setup.py install > $LOGFILE
+
+    cecho "Installing Carbon component" green
+    cd ../carbon
+    python setup.py install > $LOGFILE
+
+    cecho "Configuring Carbon" green
+    cd ..
+    cd /opt/graphite/conf
+    cp carbon.conf.example carbon.conf
+    cp storage-aggregation.conf.example storage-aggregation.conf
+    cp storage-schemas.conf.example storage-schemas.conf
+
+    cecho "Installing Graphite webapp" green
+    cd - > /dev/null 2>&1
+    cd graphite-web
+    python check-dependencies.py > $LOGFILE
+    python setup.py install > $LOGFILE
+
+    cecho "Configuring Graphite webapp" green
+    # Set TZ to avoid issue with 4H graph into shinken and set default database engine
+    cd /opt/graphite/webapp/graphite
+    cp local_settings.py.example local_settings.py
+    sed -i -r -e "s/^.(SECRET_KEY = ).*/\1'POk#dr5*4znkd6511z'/" -e "s/.TIME_ZONE.*/TIME_ZONE = \'Europe\/Paris\'/" -e 's/#(DATABASES = .*| *.default.: .*| *.NAME.*,| *.ENGINE.*| *.USER.*| *.PASSWORD.*| *.HOST.*| *.PORT.*|    \}|\})/\1/' local_settings.py
+    python manage.py syncdb --noinput > $LOGFILE
+    python manage.py createsuperuser --username=root --email=default@mail.org --noinput > $LOGFILE
+    case $CODE in
+        REDHAT|Fedora)
+            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/conf.d/graphite.conf
+            ;;
+        DEBIAN)
+            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/sites-available/graphite.conf
+            a2ensite graphite.conf
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST. Webapp not properly integrated into apache configuration." yellow
+            exit 2
+            ;;
+    esac
+    cp /opt/graphite/conf/graphite.wsgi.example /opt/graphite/conf/graphite.wsgi
+    # Fix permissions and activate vhost for graphite webapp. VERY IMPORTANT TO HAVE GOOD PERMISSIONS!
+    chown apache:apache /opt/graphite/storage/log/webapp
+    chown apache:apache /opt/graphite/storage/
+    chown apache:apache /opt/graphite/storage/graphite.db
+
+    cecho "If you want to be able to log in graphite webapp using root account" yellow
+    cecho "you have to set its password using command 'python manage.py changepassword' inside" yellow
+    cecho "/opt/graphite/webapp/graphite directory." yellow
+    cadre "Graphite addon installation finished" green
+}
+
+function uninstall_graphite()
+{
+    cadre "Uninstalling graphite add-on" green
+    rm -rf /opt/graphite
+    case $CODE in
+        REDHAT|Fedora)
+            rm -f /etc/httpd/conf.d/graphite.conf
+            ;;
+        DEBIAN)
+            a2disite graphite.conf
+            rm -f /etc/httpd/sites-available/graphite.conf
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST. Webapp not properly deleted into apache configuration." yellow
+            exit 2
+            ;;
+    esac
+}
 
 # mongodb
 function install_mongodb(){
@@ -3223,6 +3308,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
+                               graphite
                                multisite
                                nagvis
                                mongodb
@@ -3384,6 +3470,10 @@ do
             then
                 install_pnp4nagios
                 exit 0
+            elif [ "$OPTARG" == "graphite" ]
+            then
+                install_graphite
+                exit 0
             elif [ "$OPTARG" == "multisite" ]
             then
                 install_multisite
@@ -3457,6 +3547,10 @@ do
                 case $OPTARG in
                     pnp4nagios)
                         uninstall_pnp4nagios
+                        exit 0
+                        ;;
+                    graphite)
+                        uninstall_graphite
                         exit 0
                         ;;
                     nagvis)
