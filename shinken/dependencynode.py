@@ -25,6 +25,16 @@
 
 import re
 from shinken.log import logger
+from shinken.util import filter_any, filter_none
+from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group
+from shinken.util import filter_service_by_name
+from shinken.util import filter_service_by_regex_name
+from shinken.util import filter_service_by_regex_host_name
+from shinken.util import filter_service_by_host_name
+from shinken.util import filter_service_by_pb_rule_teg
+from shinken.util import filter_service_by_hostgroup_name
+from shinken.util import filter_service_by_servicegroup_name
+
 
 """
 Here is a node class for dependency_node(s) and a factory to create them
@@ -249,8 +259,12 @@ class DependencyNode(object):
 
 """ TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
-    def __init__(self):
-        pass
+
+    host_flags = "gr"
+    service_flags = "grt"
+
+    def __init__(self, bound_item):
+        self.bound_item = bound_item
 
 
     # the () will be eval in a recursiv way, only one level of ()
@@ -424,10 +438,11 @@ class DependencyNodeFactory(object):
         if pattern.startswith('!'):
             node.not_value = True
             pattern = pattern[1:]
-        # Is the pattern an host expression to be expanded?
-        if re.match("^[grp]+:", pattern):
+        # Is the pattern an expression to be expanded?
+        if re.search(r"^([%s]+|\*):" % self.host_flags, pattern) or \
+                re.search(r",\s*([%s]+:.*|\*)$" % self.service_flags, pattern):
             # o is just extracted its attributes, then trashed.
-            o = self.expand_hosts_expression(pattern, hosts, services, running)
+            o = self.expand_expression(pattern, hosts, services, running)
             if node.operand != 'of:':
                 node.operand = '&'
             node.sons.extend(o.sons)
@@ -464,6 +479,9 @@ class DependencyNodeFactory(object):
         # h_name, service_desc are , separated
         elts = pattern.split(',')
         host_name = elts[0].strip()
+        # If host_name is empty, use the host_name the business rule is bound to
+        if not host_name:
+            host_name = self.bound_item.host_name
         # Look if we have a service
         if len(elts) > 1:
             is_service = True
@@ -479,82 +497,110 @@ class DependencyNodeFactory(object):
         return obj, error
 
 
-    # Tries to expand a host expression into a dependency node tree using
-    # hostgroup membership or regex on host name as host selector.
-    # Returns a DependencyNode tree.
-    def expand_hosts_expression(self, pattern, hosts, services, running=False):
+    # Tries to expand a host or service expression into a dependency node tree
+    # using (host|service)group membership, regex, or tags as item selector.
+    def expand_expression(self, pattern, hosts, services, running=False):
         error = None
         node = DependencyNode()
         node.operand = '&'
-        elts = pattern.split(',')
-        # Flags is the left part of the first : charcter
-        flags = elts[0].strip().split(":")[0]
-        # Name is the right part of the first : charcter
-        name = ":".join(elts[0].strip().split(":")[1:])
-        permissive = "p" in flags
-
-        # Look if we have a service
-        if len(elts) > 1:
-            got_service = True
-            service_description = ",%s" % elts[1].strip()
+        elts = [e.strip() for e in pattern.split(',')]
+        # If host_name is empty, use the host_name the business rule is bound to
+        if not elts[0]:
+            elts[0] = self.bound_item.host_name
+        filters = []
+        # Looks for hosts/services using appropriate filters
+        try:
+            if len(elts) > 1:
+                # We got a service expression
+                host_expr, service_expr = elts
+                filters.extend(self.get_srv_host_filters(host_expr))
+                filters.extend(self.get_srv_service_filters(service_expr))
+                items = services.find_by_filter(filters)
+            else:
+                # We got an host expression
+                host_expr = elts[0]
+                filters.extend(self.get_host_filters(host_expr))
+                items = hosts.find_by_filter(filters)
+        except re.error, e:
+            error = "Business rule uses invalid regex %s: %s" % (pattern, e)
         else:
-            got_service = False
-            service_description = ""
+            if not items:
+                error = "Business rule got an empty result for pattern %s" % pattern
 
-        if "g" in flags:
-            expanded_hosts, error = self.lookup_hosts_by_group(name, hosts)
-        elif "r" in flags:
-            expanded_hosts, error = self.lookup_hosts_by_regex(name, hosts)
-        else:
-            error = "Business rule uses unknown host expansion type"
-
-        if error is not None:
-            node.configuration_errors.append(error)
+        # Checks if we got result
+        if error:
+            if running is False:
+                node.configuration_errors.append(error)
+            else:
+                # As business rules are re-evaluated at run time on
+                # each scheduling loop, if the rule becomes invalid
+                # because of a badly written macro modulation, it
+                # should be notified upper for the error to be
+                # displayed in the check output.
+                raise Exception(error)
             return node
 
-        for host_name in expanded_hosts:
-            expr = "%s%s" % (host_name, service_description)
-            o = self.eval_cor_pattern(expr, hosts, services, running)
+        # Creates dependency node subtree
+        for item in items:
+            # Creates a host/service node
+            son = DependencyNode()
+            son.operand = item.__class__.my_type
+            son.sons.append(item)
+            # Appends it to wrapping node
+            node.sons.append(son)
 
-            if not o.is_valid():
-                if got_service is True and permissive is True:
-                    # Invalid node is not added (error is ignored).
-                    logger.warning("Business rule got an unknown service for %s. Ignored." % host_name)
-                else:
-                    # Add the invalid node for error to be reported by arbiter.
-                    node.sons.append(o)
-            else:
-                node.sons.append(o)
-
+        node.switch_zeros_of_values()
         return node
 
 
-    # Looks for hosts having specified group name in their hostgroups.
-    # Returns a list of Host objects and the error message if error an occurred.
-    def lookup_hosts_by_group(self, group, hosts):
-        error = None
-        expanded_hosts = [h.host_name for h in hosts if group in [g.hostgroup_name for g in h.hostgroups]]
+    # Generates filter list on a hosts host_name
+    def get_host_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
+        if match is None:
+            return [filter_host_by_name(expr)]
+        flags, expr = match.groups()
 
-        if not expanded_hosts:
-            error = "Business rule uses unknown or empty hostgroup %s" % group
+        if "g" in flags:
+            return [filter_host_by_group(expr)]
+        elif "r" in flags:
+            return [filter_host_by_regex(expr)]
+        else:
+            return [filter_none]
 
-        return expanded_hosts, error
+
+    # Generates filter list on services host_name
+    def get_srv_host_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
+        if match is None:
+            return [filter_service_by_host_name(expr)]
+        flags, expr = match.groups()
+
+        if "g" in flags:
+            return [filter_service_by_hostgroup_name(expr)]
+        elif "r" in flags:
+            return [filter_service_by_regex_host_name(expr)]
+        else:
+            return [filter_none]
 
 
-    # Looks for hosts wchich name matches specified regex.
-    # Returns a list of Host objects and the error message if error an occurred.
-    def lookup_hosts_by_regex(self, pattern, hosts):
-        error = None
-        expanded_hosts = []
+    # Generates filter list on services service_description
+    def get_srv_service_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.service_flags, expr)
+        if match is None:
+            return [filter_service_by_name(expr)]
+        flags, expr = match.groups()
 
-        try:
-            host_re = re.compile(pattern)
-            expanded_hosts = [h.host_name for h in hosts if host_re.match(h.host_name)]
-
-            if not expanded_hosts:
-                error = "Business rule uses regex that no host_name matches: %s" % pattern
-
-        except re.error, e:
-            error = "Business rule uses invalid regex %s: %s" % (pattern, e)
-
-        return expanded_hosts, error
+        if "g" in flags:
+            return [filter_service_by_servicegroup_name(expr)]
+        elif "r" in flags:
+            return [filter_service_by_regex_name(expr)]
+        elif "t" in flags:
+            return [filter_service_by_pb_rule_teg(expr)]
+        else:
+            return [filter_none]
