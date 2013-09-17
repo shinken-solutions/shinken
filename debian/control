@@ -31,80 +31,9 @@ Package: shinken-common
 Architecture: any
 Conflicts: shinken-core
 Depends: python (>= ${python:Versions}), pyro | python2-pyro4, ${misc:Depends}
+Recommends: nagios-plugins-basic, bsd-mailx | mailx
 Description: Flexible monitoring tool - Common files
  Common files for shinken monitoring.
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-arbiter
-Architecture: any
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Description: Flexible monitoring tool - Arbiter component
- Arbiter component for shinken monitoring.
- .
- This component dispatchs configuration to other components envolved in shinken
- infrastructure.
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-poller
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Recommends: nagios-plugins-basic
-Architecture: any
-Description: Flexible monitoring tool - Poller component
- Poller component for shinken monitoring. This component actually do checks and
- request your infrastructure components.
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-scheduler
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Architecture: any
-Description: Flexible monitoring tool - Scheduler component
- Scheduler component for shinken monitoring. Scheduler drives checks from
- poller.
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-reactionner
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Recommends: bsd-mailx | mailx
-Architecture: any
-Description: Flexible monitoring tool - Reactionner component
- Reactionner component for shinken monitoring. This component handles
- notifications like sending emails, alerting you through irc, jabber or sms.
- It may launch commands on envolved computers or relaunch services.
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-broker
-Architecture: any
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Description: Flexible monitoring tool - Broker component
- Broker component for shinken monitoring. Broker gets status from other
- components and manage it (store in database, export to other systems,
- provide remote RPC, ...).
- .
- Shinken is a new, Nagios compatible monitoring tool, written in Python. The
- main goal of Shinken is to allow users to have a fully flexible architecture
- for their monitoring system that can easily scale to large environments.
-
-Package: shinken-receiver
-Architecture: any
-Depends: shinken-common (= ${binary:Version}), python (>= ${python:Versions}), ${misc:Depends}
-Description: Flexible monitoring tool - Receiver component
- Receiver component for shinken monitoring. It may be used to receive NSCA
- information and passive checks from servers.
  .
  Shinken is a new, Nagios compatible monitoring tool, written in Python. The
  main goal of Shinken is to allow users to have a fully flexible architecture
@@ -113,7 +42,7 @@ Description: Flexible monitoring tool - Receiver component
 # POLLER MODULES
 Package: shinken-module-poller-nrpe
 Architecture: any
-Depends: shinken-poller (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Recommends: python-openssl
 Description:  Flexible monitoring tool - NRPE module for Poller
  NRPE module for Poller. This module makes NRPE requests without NRPE plugin.
@@ -125,7 +54,7 @@ Description:  Flexible monitoring tool - NRPE module for Poller
 # BROKER MODULES
 Package: shinken-module-broker-npcdmod
 Architecture: any
-Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Recommends: pnp4nagios
 Description: Flexible monitoring tool - PNP4Nagios module for Broker
  PNP4Nagios module for Broker. This module export performance datas from
@@ -137,7 +66,7 @@ Description: Flexible monitoring tool - PNP4Nagios module for Broker
 
 Package: shinken-module-broker-graphite
 Architecture: any
-Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Suggests: graphite-carbon
 Description: Flexible monitoring tool - Graphite module for Broker
  Graphite module for Broker. This module export performance datas from
@@ -149,7 +78,7 @@ Description: Flexible monitoring tool - Graphite module for Broker
 
 Package: shinken-module-broker-livestatus
 Architecture: any
-Depends: shinken-broker (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Flexible monitoring tool - LiveStatus module for Broker
  LiveStatus module for Broker. This module provides a LiveStatus interface
  to Shinken
@@ -182,7 +111,7 @@ Description: Shinken MongoDB logstore for LiveStatus broker module
 
 Package: shinken-module-broker-webui
 Architecture: any
-Depends: python (>= ${python:Versions}), libjs-jquery, shinken-broker (= ${binary:Version}), ${misc:Depends}
+Depends: python (>= ${python:Versions}), libjs-jquery, shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Shinken WebUI broker module
  WebUI is the standard web interface for Shinken. The interface shows
  current hosts and services status 
@@ -225,7 +154,7 @@ Description: Shinken MongoDB storage module for WebUI broker
 # ARBITER MODULES
 Package: shinken-module-arbiter-ws
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}, shinken-module-broker-webui
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}, shinken-module-broker-webui
 Description: WebService module for Arbiter or Receiver
  WebService module for the Arbiter and Receiver. It can receiver passive
  check results vai HTTP POST.
@@ -236,7 +165,7 @@ Description: WebService module for Arbiter or Receiver
 
 Package: shinken-module-arbiter-hotdependencies
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Hot Dependencies module for Arbiter
  With this module you can change host parents without restart the Arbiter.
  .
@@ -246,7 +175,7 @@ Description: Hot Dependencies module for Arbiter
 
 Package: shinken-module-arbiter-collectd
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Collectd module for Arbiter or Receiver
  This module will listen on Collectd standard port and can receive passive
  checks results from a collectd daemon.
@@ -257,7 +186,7 @@ Description: Collectd module for Arbiter or Receiver
 
 Package: shinken-module-arbiter-nsca
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: NSCA module for Arbiter or Receiver
  This module will listen on NSCA standard port and can receive passive check
  results sent from send_nsca scripts.
@@ -269,7 +198,7 @@ Description: NSCA module for Arbiter or Receiver
 # MULTI COMPONENT MODULES
 Package: shinken-module-retention-picklefile
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-scheduler (= ${binary:Version}) | shinken-broker (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Retention module for Arbiter, Scheduler or Broker
  This module stores hosts and services states in files and keep it between
  process restarts.
@@ -280,7 +209,7 @@ Description: Retention module for Arbiter, Scheduler or Broker
 
 Package: shinken-module-retention-mongodb
 Architecture: any
-Depends: shinken-scheduler (= ${binary:Version}), mongodb-server, ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), mongodb-server, ${misc:Depends}
 Description: MongoDB retention module for Scheduler
  This module stores hosts and services states in a mongodb database
  and keep it between process restarts.
@@ -291,7 +220,7 @@ Description: MongoDB retention module for Scheduler
 
 Package: shinken-module-commandfile
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}) | shinken-receiver (= ${binary:Version}) | shinken-poller (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Description: Command file module for Arbiter, Receiver or Poller
  Receive passive host and service results, typically from check_mk plugins.
  No other commands or inputs accepted (Restricted to host and service results)
