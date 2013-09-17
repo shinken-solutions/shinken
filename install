@@ -1412,6 +1412,9 @@ function install_graphite()
     cecho "If you want to be able to log in graphite webapp using root account" yellow
     cecho "you have to set its password using command 'python manage.py changepassword' inside" yellow
     cecho "/opt/graphite/webapp/graphite directory." yellow
+    echo ""
+    cecho "Do not forget to configure broker and webui to include graphite module" yellow
+    echo ""
     cadre "Graphite addon installation finished" green
 }
 
