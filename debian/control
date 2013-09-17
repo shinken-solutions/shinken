@@ -11,10 +11,7 @@ Homepage: http://www.shinken-monitoring.org
 
 Package: shinken
 Architecture: any
-Depends: shinken-arbiter (= ${binary:Version}),
- shinken-poller (= ${binary:Version}),
- shinken-scheduler (= ${binary:Version}),
- shinken-reactionner (= ${binary:Version}),
+Depends: shinken-common (= ${binary:Version}),
  shinken-module-broker-webui-cfgpassword (= ${binary:Version}),
  shinken-module-broker-webui-sqlitedb (= ${binary:Version}),
  shinken-module-retention-picklefile (= ${binary:Version}),
