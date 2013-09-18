@@ -744,9 +744,25 @@ def filter_service_by_servicegroup_name(group):
     return inner_filter
 
 
-def filter_service_by_pb_rule_teg(aggregate):
+def filter_host_by_bp_rule_tag(tag):
+
+    def inner_filter(host):
+        return tag in host.business_rule_tags
+
+    return inner_filter
+
+
+def filter_service_by_host_bp_rule_tag(tag):
 
     def inner_filter(service):
-        return aggregate in service.business_rule_tags
+        return tag in service.host.business_rule_tags
+
+    return inner_filter
+
+
+def filter_service_by_bp_rule_tag(tag):
+
+    def inner_filter(service):
+        return tag in service.business_rule_tags
 
     return inner_filter

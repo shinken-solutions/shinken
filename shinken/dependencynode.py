@@ -31,9 +31,11 @@ from shinken.util import filter_service_by_name
 from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_regex_host_name
 from shinken.util import filter_service_by_host_name
-from shinken.util import filter_service_by_pb_rule_teg
+from shinken.util import filter_service_by_bp_rule_tag
 from shinken.util import filter_service_by_hostgroup_name
 from shinken.util import filter_service_by_servicegroup_name
+from shinken.util import filter_host_by_bp_rule_tag
+from shinken.util import filter_service_by_host_bp_rule_tag
 
 
 """
@@ -260,7 +262,7 @@ class DependencyNode(object):
 """ TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
 
-    host_flags = "gr"
+    host_flags = "grt"
     service_flags = "grt"
 
     def __init__(self, bound_item):
@@ -566,6 +568,8 @@ class DependencyNodeFactory(object):
             return [filter_host_by_group(expr)]
         elif "r" in flags:
             return [filter_host_by_regex(expr)]
+        elif "t" in flags:
+            return [filter_host_by_bp_rule_tag(expr)]
         else:
             return [filter_none]
 
@@ -583,6 +587,8 @@ class DependencyNodeFactory(object):
             return [filter_service_by_hostgroup_name(expr)]
         elif "r" in flags:
             return [filter_service_by_regex_host_name(expr)]
+        elif "t" in flags:
+            return [filter_service_by_host_bp_rule_tag(expr)]
         else:
             return [filter_none]
 
@@ -601,6 +607,6 @@ class DependencyNodeFactory(object):
         elif "r" in flags:
             return [filter_service_by_regex_name(expr)]
         elif "t" in flags:
-            return [filter_service_by_pb_rule_teg(expr)]
+            return [filter_service_by_bp_rule_tag(expr)]
         else:
             return [filter_none]
