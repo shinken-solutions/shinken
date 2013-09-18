@@ -17,7 +17,10 @@ clean:
 
 override_dh_install:
 	# Common
+	mkdir -p debian/shinken-common/etc/init.d/
+	mkdir -p debian/shinken-common/etc/shinken/daemons/
 	mkdir -p debian/shinken-common/etc/default/
+	mkdir -p debian/shinken-common/etc/shinken/shinken-specific
 	cp debian/shinken-common.default debian/shinken-common/etc/default/shinken
 	sed -i "s|\$$ETC\\$$|$(ETC)|g" debian/shinken-common/etc/default/shinken
 	sed -i "s|\$$VAR\\$$|$(VAR)|g" debian/shinken-common/etc/default/shinken
@@ -25,76 +28,58 @@ override_dh_install:
 	sed -i "s|\$$RUN\\$$|$(RUN)|g" debian/shinken-common/etc/default/shinken
 	sed -i "s|\$$LOG\\$$|$(LOG)|g" debian/shinken-common/etc/default/shinken
 	## Prepare init script
-	mkdir -p debian/shinken-common/etc/init.d/
 	cp bin/init.d/shinken debian/shinken-common/etc/init.d/shinken
 	sed -i -r 's/^# Default-Start:     2 3 4 5/# Default-Start:/g' debian/shinken-common/etc/init.d/shinken
 	#cp debian/shinken-common.init debian/shinken-common/etc/init.d/shinken
 	# Arbiter
 	## Prepare init script
-	mkdir -p debian/shinken-arbiter/etc/init.d/
-	cp bin/init.d/shinken-arbiter debian/shinken-arbiter/etc/init.d/shinken-arbiter
+	cp bin/init.d/shinken-arbiter debian/shinken-common/etc/init.d/shinken-arbiter
 	## Prepare config
-	mkdir -p debian/shinken-arbiter/etc/shinken/shinken-specific
-	cp debian/etc/shinken.cfg debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/resource.cfg debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/commands.cfg debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/contacts.cfg debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/templates.cfg debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/timeperiods.cfg debian/shinken-arbiter/etc/shinken/
-	cp -r debian/etc/hosts debian/shinken-arbiter/etc/shinken/
-	cp -r debian/etc/packs debian/shinken-arbiter/etc/shinken/
-	cp debian/etc/shinken-specific/arbiter.cfg debian/shinken-arbiter/etc/shinken/shinken-specific
-	cp debian/etc/shinken-specific/realms.cfg debian/shinken-arbiter/etc/shinken/shinken-specific
+	cp debian/etc/shinken.cfg debian/shinken-common/etc/shinken/
+	cp debian/etc/resource.cfg debian/shinken-common/etc/shinken/
+	cp debian/etc/commands.cfg debian/shinken-common/etc/shinken/
+	cp debian/etc/contacts.cfg debian/shinken-common/etc/shinken/
+	cp debian/etc/templates.cfg debian/shinken-common/etc/shinken/
+	cp debian/etc/timeperiods.cfg debian/shinken-common/etc/shinken/
+	cp -r debian/etc/hosts debian/shinken-common/etc/shinken/
+	cp -r debian/etc/packs debian/shinken-common/etc/shinken/
+	cp debian/etc/shinken-specific/arbiter.cfg debian/shinken-common/etc/shinken/shinken-specific
+	cp debian/etc/shinken-specific/realms.cfg debian/shinken-common/etc/shinken/shinken-specific
 	# Scheduler
 	## init script
-	mkdir -p debian/shinken-scheduler/etc/init.d/
-	cp bin/init.d/shinken-scheduler debian/shinken-scheduler/etc/init.d/shinken-scheduler
+	cp bin/init.d/shinken-scheduler debian/shinken-common/etc/init.d/shinken-scheduler
 	## ini file
-	mkdir -p debian/shinken-scheduler/etc/shinken/daemons/
-	cp debian/etc/daemons/schedulerd.ini debian/shinken-scheduler/etc/shinken/daemons/
+	cp debian/etc/daemons/schedulerd.ini debian/shinken-common/etc/shinken/daemons/
 	## shinken config
-	mkdir -p debian/shinken-scheduler/etc/shinken/shinken-specific
-	cp debian/etc/shinken-specific/scheduler.cfg debian/shinken-scheduler/etc/shinken/shinken-specific
+	cp debian/etc/shinken-specific/scheduler.cfg debian/shinken-common/etc/shinken/shinken-specific
 	# Poller
 	## init script
-	mkdir -p debian/shinken-poller/etc/init.d/
-	cp bin/init.d/shinken-poller debian/shinken-poller/etc/init.d/shinken-poller
+	cp bin/init.d/shinken-poller debian/shinken-common/etc/init.d/shinken-poller
 	## ini file
-	mkdir -p debian/shinken-poller/etc/shinken/daemons/
-	cp debian/etc/daemons/pollerd.ini debian/shinken-poller/etc/shinken/daemons/
+	cp debian/etc/daemons/pollerd.ini debian/shinken-common/etc/shinken/daemons/
 	## shinken config
-	mkdir -p debian/shinken-poller/etc/shinken/shinken-specific
-	cp debian/etc/shinken-specific/poller.cfg debian/shinken-poller/etc/shinken/shinken-specific
+	cp debian/etc/shinken-specific/poller.cfg debian/shinken-common/etc/shinken/shinken-specific
 	# Broker
 	## init script
-	mkdir -p debian/shinken-broker/etc/init.d/
 	cp bin/init.d/shinken-broker debian/shinken-broker/etc/init.d/shinken-broker
 	## ini file
-	mkdir -p debian/shinken-broker/etc/shinken/daemons/
 	cp debian/etc/daemons/brokerd.ini debian/shinken-broker/etc/shinken/daemons/
 	## shinken config
-	mkdir -p debian/shinken-broker/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/broker.cfg debian/shinken-broker/etc/shinken/shinken-specific
 	# Reactionner
 	## init script
-	mkdir -p debian/shinken-reactionner/etc/init.d/
-	cp bin/init.d/shinken-reactionner debian/shinken-reactionner/etc/init.d/shinken-reactionner
+	cp bin/init.d/shinken-reactionner debian/shinken-common/etc/init.d/shinken-reactionner
 	## ini file
-	mkdir -p debian/shinken-reactionner/etc/shinken/daemons/
-	cp debian/etc/daemons/reactionnerd.ini debian/shinken-reactionner/etc/shinken/daemons/
+	cp debian/etc/daemons/reactionnerd.ini debian/shinken-common/etc/shinken/daemons/
 	## shinken config
-	mkdir -p debian/shinken-reactionner/etc/shinken/shinken-specific
-	cp debian/etc/shinken-specific/reactionner.cfg debian/shinken-reactionner/etc/shinken/shinken-specific
+	cp debian/etc/shinken-specific/reactionner.cfg debian/shinken-common/etc/shinken/shinken-specific
 	# Receiver
 	## init script
-	mkdir -p debian/shinken-receiver/etc/init.d/
-	cp bin/init.d/shinken-receiver debian/shinken-receiver/etc/init.d/shinken-receiver
+	cp bin/init.d/shinken-receiver debian/shinken-common/etc/init.d/shinken-receiver
 	## ini file
-	mkdir -p debian/shinken-receiver/etc/shinken/daemons/
-	cp debian/etc/daemons/receiverd.ini debian/shinken-receiver/etc/shinken/daemons/
+	cp debian/etc/daemons/receiverd.ini debian/shinken-common/etc/shinken/daemons/
 	## shinken config
-	mkdir -p debian/shinken-receiver/etc/shinken/shinken-specific
-	cp debian/etc/shinken-specific/receiver.cfg debian/shinken-receiver/etc/shinken/shinken-specific
+	cp debian/etc/shinken-specific/receiver.cfg debian/shinken-common/etc/shinken/shinken-specific
 	# Fix lsb tags
 	sed -i -r 's/^(# Required-Start:.*|# Required-Stop:.*)$$/\1 $$remote_fs/' \
       debian/shinken-common/etc/init.d/shinken
@@ -102,21 +87,21 @@ override_dh_install:
       debian/shinken-common/etc/init.d/shinken
 	sed -n -i '1h;1!H;$${;g;s/### BEGIN INIT INFO Redhat.*### END INIT INFO//g;p;}' \
       debian/shinken-broker/etc/init.d/shinken-broker \
-      debian/shinken-arbiter/etc/init.d/shinken-arbiter \
-      debian/shinken-poller/etc/init.d/shinken-poller \
-      debian/shinken-receiver/etc/init.d/shinken-receiver \
-      debian/shinken-reactionner/etc/init.d/shinken-reactionner \
-      debian/shinken-scheduler/etc/init.d/shinken-scheduler
+      debian/shinken-common/etc/init.d/shinken-arbiter \
+      debian/shinken-common/etc/init.d/shinken-poller \
+      debian/shinken-common/etc/init.d/shinken-receiver \
+      debian/shinken-common/etc/init.d/shinken-reactionner \
+      debian/shinken-common/etc/init.d/shinken-scheduler
 	# Fix init.d-script-does-not-implement-required-option
 	sed -i -r 's/^(.*)\|restart\|(.*)\)([:blank:]*)/\1|restart|force-reload|\2)\3/' \
       debian/shinken-common/etc/init.d/shinken
 	sed -i -r 's#^"\$$curdir/shinken" \$$@ (.*)#case "\$$1" in \nstart)\n  "\$$curdir/shinken" start \1\n    ;;\n  stop)\n    "\$$curdir/shinken" stop \1\n    ;;\n  check|checkconfig)\n    "\$$curdir/shinken" checkconfig \1\n    ;;\n  reload)\n    "\$$curdir/shinken" reload \1\n    ;;\n  restart|force-reload)\n    "\$$curdir/shinken" restart \1\n    ;;\n  *)\n    echo "Usage: /etc/init.d/shinken-\1 [-d] {start|stop|reload|restart|check}\n\n  -d  start requested module(s) in debug mode, only useful with start|restart\n" || true\n    exit 1\nesac\n#' \
       debian/shinken-broker/etc/init.d/shinken-broker \
-      debian/shinken-poller/etc/init.d/shinken-poller \
-      debian/shinken-receiver/etc/init.d/shinken-receiver \
-      debian/shinken-reactionner/etc/init.d/shinken-reactionner \
-      debian/shinken-scheduler/etc/init.d/shinken-scheduler \
-      debian/shinken-arbiter/etc/init.d/shinken-arbiter
+      debian/shinken-common/etc/init.d/shinken-poller \
+      debian/shinken-common/etc/init.d/shinken-receiver \
+      debian/shinken-common/etc/init.d/shinken-reactionner \
+      debian/shinken-common/etc/init.d/shinken-scheduler \
+      debian/shinken-common/etc/init.d/shinken-arbiter
 	# MODULES
 	## Shinken-module-arbiter-collectd
 	mkdir -p debian/shinken-module-arbiter-collectd/etc/shinken/shinken-specific

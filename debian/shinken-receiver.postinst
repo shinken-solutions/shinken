@@ -1,9 +1,0 @@
-#!/bin/bash
-#DEBHELPER#
-
-set -e
-
-mkdir -p /var/log/shinken/
-chown -R shinken:shinken /var/log/shinken/
-
-update-rc.d shinken-receiver defaults

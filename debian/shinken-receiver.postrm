@@ -1,6 +1,0 @@
-#!/bin/bash
-#DEBHELPER#
-
-set -e
-
-update-rc.d -f shinken-receiver remove

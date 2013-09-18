@@ -1,2 +1,0 @@
-bin/shinken-receiver /usr/lib/python2.7/dist-packages/shinken/bin/
-shinken/daemons/receiverdaemon.py /usr/lib/python2.7/dist-packages/shinken/daemons

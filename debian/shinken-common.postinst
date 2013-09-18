@@ -15,3 +15,9 @@ chown -R shinken:shinken /var/lib/shinken/
 update-rc.d shinken stop 20 0 1 6 .
 #update-rc.d shinken defaults
 
+update-rc.d shinken-arbiter defaults
+update-rc.d shinken-scheduler defaults
+update-rc.d shinken-poller defaults
+update-rc.d shinken-broker defaults
+update-rc.d shinken-receiver defaults
+update-rc.d shinken-reactionner defaults

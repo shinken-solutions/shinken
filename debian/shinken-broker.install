@@ -1,2 +1,0 @@
-bin/shinken-broker /usr/lib/python2.7/dist-packages/shinken/bin/
-shinken/daemons/brokerdaemon.py /usr/lib/python2.7/dist-packages/shinken/daemons
