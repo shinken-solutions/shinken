@@ -292,9 +292,10 @@ pidfile=%s/%sd.pid
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
+workdir=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % (self.owner, self.group, self.run_path, self.log_path)
+""" % (self.owner, self.group, self.var_path, self.run_path, self.log_path)
             )
 
         # UPDATE others cfg files too
