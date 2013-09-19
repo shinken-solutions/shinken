@@ -478,9 +478,7 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
 else:
     raise "Unsupported platform, sorry"
 
-required_pkgs = []
-if sys.version_info < (2, 6):
-    required_pkgs.append('multiprocessing')
+required_pkgs = ['pycurl']
 
 etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])
