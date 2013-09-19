@@ -11,6 +11,8 @@ sed  -i 's|$LOG$|/var/log/shinken/|g' /etc/default/shinken
 
 mkdir -p /var/lib/shinken/
 chown -R shinken:shinken /var/lib/shinken/
+mkdir -p /var/log/shinken/
+chown -R shinken:shinken /var/log/shinken/
 
 update-rc.d shinken stop 20 0 1 6 .
 #update-rc.d shinken defaults
