@@ -262,11 +262,13 @@ class build_config(Command):
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
+#Overriding default values
 user=%s
 group=%s
 workdir=%s
+logdir=%s
 pidfile=%s/%sd.pid
-""" % (self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner, self.group, self.var_path, self.log_path, self.run_path, dname))
             
 
         # And now the resource.cfg path with the value of libexec path
