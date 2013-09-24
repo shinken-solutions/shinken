@@ -1353,22 +1353,31 @@ function setdaemons(){
 
 function install_graphite()
 {
+
+    if [ $SKIPPREREQUISITES -eq 1 ]
+    then
+        cecho " SKIPPREREQUISITES enabled: won't install nconf prerequisites" yellow
+    else
+            cecho " > Installing prerequisites" green
+            installpkg python $GRAPHITEPKG
+    fi
+
     cadre "Install graphite add-on" green
     cd $TMP
     cecho "Downloading Graphite" green
 
     rm -rf graphite-web carbon whisper
-    git clone ${GRAPHITE-WEB_GITHUB} > $LOGFILE 2>&1
-    git clone ${CARBON_GITHUB} > $LOGFILE 2>&1
-    git clone ${WHISPER_GITHUB} > $LOGFILE 2>&1
+    git clone ${GRAPHITE_WEB_GITHUB} >> $LOGFILE 2>&1
+    git clone ${CARBON_GITHUB} >> $LOGFILE 2>&1
+    git clone ${WHISPER_GITHUB} >> $LOGFILE 2>&1
 
     cecho "Installing Whisper component" green
     cd whisper
-    python setup.py install > $LOGFILE
+    python setup.py install >> $LOGFILE 2>&1
 
     cecho "Installing Carbon component" green
     cd ../carbon
-    python setup.py install > $LOGFILE
+    python setup.py install >> $LOGFILE 2>&1
 
     cecho "Configuring Carbon" green
     cd ..
@@ -1380,8 +1389,8 @@ function install_graphite()
     cecho "Installing Graphite webapp" green
     cd - > /dev/null 2>&1
     cd graphite-web
-    python check-dependencies.py > $LOGFILE
-    python setup.py install > $LOGFILE
+    python check-dependencies.py >> $LOGFILE 2>&1
+    python setup.py install >> $LOGFILE 2>&1
 
     cecho "Configuring Graphite webapp" green
     # Set TZ to avoid issue with 4H graph into shinken and set default database engine
@@ -1389,7 +1398,7 @@ function install_graphite()
     cp local_settings.py.example local_settings.py
     sed -i -r -e "s/^.(SECRET_KEY = ).*/\1'POk#dr5*4znkd6511z'/" -e "s/.TIME_ZONE.*/TIME_ZONE = \'Europe\/Paris\'/" -e 's/#(DATABASES = .*| *.default.: .*| *.NAME.*,| *.ENGINE.*| *.USER.*| *.PASSWORD.*| *.HOST.*| *.PORT.*|    \}|\})/\1/' local_settings.py
     python manage.py syncdb --noinput > $LOGFILE
-    python manage.py createsuperuser --username=root --email=default@mail.org --noinput > $LOGFILE
+    python manage.py createsuperuser --username=root --email=default@mail.org --noinput >> $LOGFILE 2>&1
     case $CODE in
         REDHAT|Fedora)
             cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/conf.d/graphite.conf
@@ -1409,6 +1418,7 @@ function install_graphite()
     chown apache:apache /opt/graphite/storage/
     chown apache:apache /opt/graphite/storage/graphite.db
 
+    echo ""
     cecho "If you want to be able to log in graphite webapp using root account" yellow
     cecho "you have to set its password using command 'python manage.py changepassword' inside" yellow
     cecho "/opt/graphite/webapp/graphite directory." yellow
