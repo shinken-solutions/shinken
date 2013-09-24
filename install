@@ -3293,7 +3293,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_logfiles
                                check_oracle_health
                                check_mysql_health
-							   check_db2_health
+                               check_db2_health
                                capture_plugin
                                check_wmi_plus
                                check_mongodb

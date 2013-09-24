@@ -262,11 +262,13 @@ class build_config(Command):
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
+#Overriding default values
 user=%s
 group=%s
 workdir=%s
+logdir=%s
 pidfile=%s/%sd.pid
-""" % (self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner, self.group, self.var_path, self.log_path, self.run_path, dname))
             
 
         # And now the resource.cfg path with the value of libexec path
@@ -290,9 +292,10 @@ pidfile=%s/%sd.pid
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
+workdir=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % (self.owner, self.group, self.run_path, self.log_path)
+""" % (self.owner, self.group, self.var_path, self.run_path, self.log_path)
             )
 
         # UPDATE others cfg files too
@@ -478,9 +481,7 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
 else:
     raise "Unsupported platform, sorry"
 
-required_pkgs = []
-if sys.version_info < (2, 6):
-    required_pkgs.append('multiprocessing')
+required_pkgs = ['pycurl']
 
 etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])

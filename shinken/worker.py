@@ -163,6 +163,7 @@ class Worker:
                 # action launching
                 if r == 'toomanyopenfiles':
                     # We should die as soon as we return all checks
+                    logger.error("[%d] I am dying Too many open files %s ... " % (self.id, chk))
                     self.i_am_dying = True
 
     # Check the status of checks
