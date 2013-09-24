@@ -1358,9 +1358,9 @@ function install_graphite()
     cecho "Downloading Graphite" green
 
     rm -rf graphite-web carbon whisper
-    git clone https://github.com/graphite-project/graphite-web.git -b 0.9.x > $LOGFILE 2>&1
-    git clone https://github.com/graphite-project/carbon.git -b 0.9.x > $LOGFILE 2>&1
-    git clone https://github.com/graphite-project/whisper.git -b 0.9.x > $LOGFILE 2>&1
+    git clone ${GRAPHITE-WEB_GITHUB} > $LOGFILE 2>&1
+    git clone ${CARBON_GITHUB} > $LOGFILE 2>&1
+    git clone ${WHISPER_GITHUB} > $LOGFILE 2>&1
 
     cecho "Installing Whisper component" green
     cd whisper
