@@ -38,14 +38,14 @@ def only_related_to(lst, user):
     r = set()
     for i in lst:
         # Maybe the user is a direct contact
-        if user in i.contacts:
+        if user in i.contacts and user.min_business_impact <= i.business_impact:
             r.add(i)
             continue
         # TODO: add a notified_contact pass
 
         # Maybe it's a contact of a linked elements (source problems or impacts)
         is_find = False
-        for s in i.source_problems:
+        for s in i.source_problems and user.min_business_impact <= s.business_impact:
             if user in s.contacts:
                 r.add(i)
                 is_find = True
@@ -54,7 +54,7 @@ def only_related_to(lst, user):
             continue
         # Now impacts related maybe?
         for imp in i.impacts:
-            if user in imp.contacts:
+            if user in imp.contacts and user.min_business_impact <= imp.business_impact:
                 r.add(i)
 
     return list(r)
