@@ -63,7 +63,8 @@ class Load:
             self.last_update = now
         except OverflowError: #if the time change without notice, we overflow :(
             pass
-            
+        except ZeroDivisionError: #do not care
+            pass
 
     
     def get_load(self):
