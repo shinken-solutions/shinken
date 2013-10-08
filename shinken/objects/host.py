@@ -135,7 +135,7 @@ class Host(SchedulingItem):
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
         # Business tags for dynamic business rule expansion
-        'business_rule_tags': ListProp(default='', fill_brok=['full_status']),
+        'business_rule_labels': ListProp(default='', fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),

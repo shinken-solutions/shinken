@@ -31,11 +31,11 @@ from shinken.util import filter_service_by_name
 from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_regex_host_name
 from shinken.util import filter_service_by_host_name
-from shinken.util import filter_service_by_bp_rule_tag
+from shinken.util import filter_service_by_bp_rule_label
 from shinken.util import filter_service_by_hostgroup_name
 from shinken.util import filter_service_by_servicegroup_name
-from shinken.util import filter_host_by_bp_rule_tag
-from shinken.util import filter_service_by_host_bp_rule_tag
+from shinken.util import filter_host_by_bp_rule_label
+from shinken.util import filter_service_by_host_bp_rule_label
 
 
 """
@@ -262,8 +262,8 @@ class DependencyNode(object):
 """ TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
 
-    host_flags = "grt"
-    service_flags = "grt"
+    host_flags = "grl"
+    service_flags = "grl"
 
     def __init__(self, bound_item):
         self.bound_item = bound_item
@@ -500,7 +500,7 @@ class DependencyNodeFactory(object):
 
 
     # Tries to expand a host or service expression into a dependency node tree
-    # using (host|service)group membership, regex, or tags as item selector.
+    # using (host|service)group membership, regex, or labels as item selector.
     def expand_expression(self, pattern, hosts, services, running=False):
         error = None
         node = DependencyNode()
@@ -568,8 +568,8 @@ class DependencyNodeFactory(object):
             return [filter_host_by_group(expr)]
         elif "r" in flags:
             return [filter_host_by_regex(expr)]
-        elif "t" in flags:
-            return [filter_host_by_bp_rule_tag(expr)]
+        elif "l" in flags:
+            return [filter_host_by_bp_rule_label(expr)]
         else:
             return [filter_none]
 
@@ -587,8 +587,8 @@ class DependencyNodeFactory(object):
             return [filter_service_by_hostgroup_name(expr)]
         elif "r" in flags:
             return [filter_service_by_regex_host_name(expr)]
-        elif "t" in flags:
-            return [filter_service_by_host_bp_rule_tag(expr)]
+        elif "l" in flags:
+            return [filter_service_by_host_bp_rule_label(expr)]
         else:
             return [filter_none]
 
@@ -606,7 +606,7 @@ class DependencyNodeFactory(object):
             return [filter_service_by_servicegroup_name(expr)]
         elif "r" in flags:
             return [filter_service_by_regex_name(expr)]
-        elif "t" in flags:
-            return [filter_service_by_bp_rule_tag(expr)]
+        elif "l" in flags:
+            return [filter_service_by_bp_rule_label(expr)]
         else:
             return [filter_none]
