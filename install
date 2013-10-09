@@ -248,15 +248,16 @@ function setdirectives(){
     mpath=$3
 
     cecho "    > Going to $mpath" green
-    cd $mpath
+    pushd $mpath >> ${LOGFILE} 2>&1
 
     for pair in $directives
     do
         directive=$(echo $pair | awk -F= '{print $1}')
         value=$(echo $pair | awk -F= '{print $2}')
         cecho "       > Setting $directive to $value in $fic" green
-        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $ETC/$(basename $fic)
+        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $fic
     done
+    popd >> ${LOGFILE} 2>&1
 }
 
 ##############################
@@ -698,17 +699,17 @@ function relocate(){
     # set some directives
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER shinken_user=$SKUSER group=$SKGROUP shinken_group=$SKGROUP"
-    for fic in $(ls -1 $ETC/*.ini $ETC/skonf.cfg)
+    for fic in $(ls -1 $ETC/daemons/*.ini $ETC/skonf.cfg)
     do
         cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $TARGET
+        setdirectives "$directives" $fic $ETC/daemons 
     done
-    directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
-    for fic in $(ls -1 $ETC/nagios*cfg)
-    do
-        cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $TARGET
-    done
+    #directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    #for fic in $(ls -1 $ETC/nagios*cfg)
+    #do
+    #    cecho " > Processing $fic" green;
+    #    setdirectives "$directives" $fic $TARGET
+    #done
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
