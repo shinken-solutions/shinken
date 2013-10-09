@@ -312,7 +312,8 @@ function installpkg(){
 
     if [ "$type" == "python" ]
     then
-        PYEI="easy_install"
+        PVER=$(pythonvershort)
+        PYEI="easy_install-$PVER"
         $PYEI $package >> ${LOGFILE} 2>&1
         return $?
     elif [ "$type" = "pkg" ]
@@ -436,7 +437,8 @@ function prerequisites(){
     fi
     # python prereq
     export PY="python"
-    export PYEI="easy_install"
+    PVER=$(pythonvershort)
+    PYEI="easy_install-$PVER"
     if [ "$CODE" = "REDHAT" ]
     then
          PYLIBS=$PYLIBSRHEL6
@@ -454,7 +456,7 @@ function prerequisites(){
 
     # this is a fix for MySQL-python complainig about outdated version of distribute
     cecho " > Installing distribute" green
-    easy_install -U distribute >> ${LOGFILE} 2>&1
+    $PYEI -U distribute >> ${LOGFILE} 2>&1
 
     for p in $PYLIBS
     do
@@ -484,7 +486,7 @@ function prerequisites(){
     if [ $MANAGEPYRO == 1 ]
     then
         cecho " > Installing managed python (experimental) " green
-        easy_install pip
+        $PYEI pip
         yes | pip uninstall Pyro
         yes | pip uninstall Pyro4
         pyroset
