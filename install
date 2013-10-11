@@ -436,9 +436,21 @@ function prerequisites(){
             exit 2
         fi
     fi
+
+    export PY="python-$(pythonvershort)"
+    which $PY >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then 
+        export PY="python$(pythonvershort)"
+    fi
+
+    # distribute
+    wget --no-check-certificate $WGETPROXY $SETUPTOOLS >> ${LOGFILE} 2>&1
+    tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
+    cd setuptools-$SETUPTOOLSVERS  
+    $PY setup.py install >> ${LOGFILE} 2>&1 
+
     # python prereq
-    export PY="python"
-    PVER=$(pythonvershort)
     PYEI="easy_install-$PVER"
     if [ "$CODE" = "REDHAT" ]
     then
