@@ -444,7 +444,7 @@ function prerequisites(){
         export PY="python$(pythonvershort)"
     fi
 
-    # distribute
+    # setuptools 
     wget --no-check-certificate $WGETPROXY $SETUPTOOLS >> ${LOGFILE} 2>&1
     tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
     cd setuptools-$SETUPTOOLSVERS  
@@ -454,7 +454,13 @@ function prerequisites(){
     PYEI="easy_install-$PVER"
     if [ "$CODE" = "REDHAT" ]
     then
-         PYLIBS=$PYLIBSRHEL6
+        if [ "$VERS" = "5" ]
+        then
+            PYLIBS=$PYLIBSRHEL
+        elif [ "$VERS" = "6" ]
+        then
+            PYLIBS=$PYLIBSRHEL6
+        fi
     elif [ "$CODE" = "Fedora" ]
     then
         case $VERS in
@@ -499,9 +505,10 @@ function prerequisites(){
     if [ $MANAGEPYRO == 1 ]
     then
         cecho " > Installing managed python (experimental) " green
-        $PYEI pip
-        yes | pip uninstall Pyro
-        yes | pip uninstall Pyro4
+        #$PYEI pip
+        export PIP="pip-$(pythonvershort)"
+        yes | $PIP uninstall Pyro
+        yes | $PIP uninstall Pyro4
         pyroset
         $PYEI "$PYRO"
     fi
