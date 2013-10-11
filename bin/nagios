@@ -85,6 +85,7 @@ while getopts "v:sxpud" opt; do
     case $opt in
         v)
             COMMAND="$opt"
+            ARG_OPT_v="$OPTARG"
             ;;
 
         s|x|p|u|d)
@@ -103,12 +104,12 @@ shift $(( OPTIND - 1 ))
 ### run commands
 case "$COMMAND" in
     v)
-        if [ -z "$1" ]; then
+        if [ -z "$ARG_OPT_v" ]; then
             echo "You must provide a nagios configuration file"
             exit 2
         else
 	    # well shinken arbiter does not act really as nagios so we need to provide at least a -c argument for configfile
-	    $PY $DIR/shinken-arbiter.py -v -c $1
+	    $PY $DIR/shinken-arbiter.py -v -c $ARG_OPT_v
 	    exit $?
         fi
         ;;
