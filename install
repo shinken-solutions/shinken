@@ -456,8 +456,8 @@ function prerequisites(){
     fi
 
     # this is a fix for MySQL-python complainig about outdated version of distribute
-    cecho " > Installing distribute" green
-    $PYEI -U distribute >> ${LOGFILE} 2>&1
+    #cecho " > Installing distribute" green
+    #$PYEI -U distribute >> ${LOGFILE} 2>&1
 
     for p in $PYLIBS
     do
@@ -703,6 +703,16 @@ function relocate(){
     do
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $ETC/daemons 
+    done
+    daemons="arbiters schedulers brokers reactionners receivers pollers modules"
+    for element in $dameons
+    do
+        cecho "  > processing $element" green
+        files=$(ls -1 *.cfg)
+        for file in $files
+        do
+            cecho "    > processing $file" green
+        done
     done
     #directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
     #for fic in $(ls -1 $ETC/nagios*cfg)
