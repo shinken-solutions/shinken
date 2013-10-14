@@ -1461,7 +1461,7 @@ class SchedulingItem(Item):
         # State has to be set manually, as the service state attribute is only
         # set on a next scheduler step.
         output = service_template_string
-        mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL"}
+        mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL", 3: "UNKNOWN"}
         status = mapping[self.business_rule.get_state()]
         output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
         short_status = self.status_to_short_status(status)
