@@ -437,14 +437,18 @@ function prerequisites(){
         fi
     fi
 
+
+    cecho " > Defining which python version to use :" green
     export PY="python-$(pythonvershort)"
     which $PY >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
     then 
         export PY="python$(pythonvershort)"
     fi
+    cecho " > $PY" green
 
     # setuptools 
+    cecho " > Installing setuptools" green
     wget --no-check-certificate $WGETPROXY $SETUPTOOLS >> ${LOGFILE} 2>&1
     tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
     cd setuptools-$SETUPTOOLSVERS  
