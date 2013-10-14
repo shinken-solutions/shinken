@@ -715,6 +715,22 @@ class Items(object):
         else:
             return None
 
+    # Search items using a list of filter callbacks. Each callback is passed
+    # the item instances and should return a boolean value indicating if it
+    # matched the filter.
+    # Returns a list of items matching all filters.
+    def find_by_filter(self, filters):
+        items = []
+        for i in self:
+            failed = False
+            for f in filters:
+                if not f(i):
+                    failed = True
+                    break
+            if failed is False:
+                items.append(i)
+        return items
+
     # prepare_for_conf_sending to flatten some properties
     def prepare_for_sending(self):
         for i in self:

@@ -35,18 +35,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_business_correlator_expand_expression.cfg')
 
-    # Tries to expand hostgroup based expression, and compare it with its
-    # manually written counterpart.
-    def test_hostgroup_expansion(self):
-        for ruleid in range(1, 10):
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_%s0" % ruleid)
-            bp_rule0 = svc_cor.business_rule
-            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_%s1" % ruleid)
-            bp_rule1 = svc_cor.business_rule
-            self.assert_(str(bp_rule0) == str(bp_rule1))
-
     def test_hostgroup_expansion_bprule_simple_host_srv(self):
-        for name in ("bprule_00", "bprule_50"):
+        for name in ("bprule_00", "bprule_01", "bprule_02", "bprule_03", "bprule_04", "bprule_05", "bprule_06"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -67,7 +57,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_simple_xof_host_srv(self):
-        for name in ("bprule_10", "bprule_60"):
+        for name in ("bprule_10", "bprule_11", "bprule_12", "bprule_13", "bprule_14", "bprule_15", "bprule_16"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -88,7 +78,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_combined_and(self):
-        for name in ("bprule_20", "bprule_70"):
+        for name in ("bprule_20", "bprule_21", "bprule_22", "bprule_23", "bprule_24", "bprule_25", "bprule_26"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -119,7 +109,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(hst2_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_combined_or(self):
-        for name in ("bprule_30", "bprule_80"):
+        for name in ("bprule_30", "bprule_31", "bprule_32", "bprule_33", "bprule_34", "bprule_35", "bprule_36"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -150,7 +140,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(hst2_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_simple_hosts(self):
-        for name in ("bprule_40", "bprule_90"):
+        for name in ("bprule_40", "bprule_41", "bprule_42", "bprule_43"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -169,6 +159,69 @@ class TestBusinesscorrelExpand(ShinkenTest):
 
             self.assert_(hst1 in (sons[0].sons[0], sons[1].sons[0]))
             self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
+
+    def test_hostgroup_expansion_bprule_xof_hosts(self):
+        for name in ("bprule_50", "bprule_51", "bprule_52", "bprule_53"):
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
+            self.assert_(svc_cor.got_business_rule is True)
+            self.assert_(svc_cor.business_rule is not None)
+            bp_rule = svc_cor.business_rule
+            self.assert_(bp_rule.operand == 'of:')
+            self.assert_(bp_rule.not_value is False)
+            self.assert_(bp_rule.of_values == ('1', '2', '2'))
+
+            hst1 = self.sched.hosts.find_by_name("test_host_01")
+            hst2 = self.sched.hosts.find_by_name("test_host_02")
+
+            sons = bp_rule.sons
+            self.assert_(len(sons) == 2)
+            self.assert_(sons[0].operand == 'host')
+            self.assert_(sons[1].operand == 'host')
+
+            self.assert_(hst1 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
+
+    def test_hostgroup_expansion_bprule_same_host_srv(self):
+        for name in ("bprule_60", "bprule_61"):
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_01", name)
+            self.assert_(svc_cor.got_business_rule is True)
+            self.assert_(svc_cor.business_rule is not None)
+            bp_rule = svc_cor.business_rule
+            self.assert_(bp_rule.operand == '&')
+            self.assert_(bp_rule.not_value is False)
+            self.assert_(bp_rule.of_values == ('2', '2', '2'))
+
+            srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+            srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv2")
+
+            sons = bp_rule.sons
+            self.assert_(len(sons) == 2)
+            self.assert_(sons[0].operand == 'service')
+            self.assert_(sons[1].operand == 'service')
+
+            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
+
+    def test_hostgroup_expansion_bprule_xof_same_host_srv(self):
+        for name in ("bprule_70", "bprule_71"):
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_01", name)
+            self.assert_(svc_cor.got_business_rule is True)
+            self.assert_(svc_cor.business_rule is not None)
+            bp_rule = svc_cor.business_rule
+            self.assert_(bp_rule.operand == 'of:')
+            self.assert_(bp_rule.not_value is False)
+            self.assert_(bp_rule.of_values == ('1', '2', '2'))
+
+            srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+            srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv2")
+
+            sons = bp_rule.sons
+            self.assert_(len(sons) == 2)
+            self.assert_(sons[0].operand == 'service')
+            self.assert_(sons[1].operand == 'service')
+
+            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
 
     def test_macro_expansion_bprule_no_macro(self):
         # Tests macro expansion
@@ -367,13 +420,8 @@ class TestConfigBroken(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search('Business rule uses unknown or empty hostgroup', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('Business rule uses invalid regex', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Business rule uses regex that no host_name matches', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Business rule uses unknown service', log)]) == 2)
-        # With permissive flag set, there should only be warnings regarding
-        # unknown services.
-        self.assert_(len([log for log in logs if re.search('Business rule got an unknown service for.*Ignored', log)]) == 2)
+        self.assert_(len([log for log in logs if re.search('Business rule got an empty result', log)]) == 3)
 
 
 if __name__ == '__main__':
