@@ -758,6 +758,16 @@ function relocate(){
     sed -i "s#/etc/shinken#"$ETC"#g" skonf.cfg
     sed -i "s#/tmp#"$TMP"#g" skonf.cfg
     sed -i "s#/var/lib/shinken/share#"$TARGET"/share#g" skonf.cfg
+
+
+    # relocate she bang python in every python files
+    PY=$(which $(pythonver))
+    for f in $(grep "\#\!.*python" $TARGET/bin/shinken* | grep -v "\.py" | awk -F: '{print $1}')
+    do
+        cecho "Relocate python interpreter to $PY in $f" green
+        sed -i "s#/usr/bin/env python#$PY#g" $f
+    done
+
 }
 
 function fix(){
@@ -939,11 +949,12 @@ function sinstall(){
 
     cleanuptarget
     relocate
+    # DEV TO BE REMOVE
+    exit 2
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     mkdir -p $TARGET/var/archives
-    enableretention
+    #enableretention
     enable_initd
-
     if [[ $NOMONGO -eq 1 ]]
     then
         cecho " > Skip mongo installation" green
@@ -1742,7 +1753,7 @@ function install_multisite(){
 #    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
-        cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
+    cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
