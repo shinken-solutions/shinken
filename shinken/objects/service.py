@@ -260,6 +260,8 @@ class Service(SchedulingItem):
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
+        # Previously processed business rule (with macro expanded)
+        'processed_business_rule': StringProp(default="", fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
 
