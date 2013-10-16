@@ -134,7 +134,10 @@ class DependencyNode(object):
         # First we get the state of all our sons
         states = [s.get_state() for s in self.sons]
         # Next we calculate the worst state
-        worst_state = max(states)
+        if 2 in states:
+            worst_state = 2
+        else:
+            worst_state = max(states)
         # Then we handle eventual not value
         if self.not_value:
             return self.get_reverse_state(worst_state)
@@ -211,7 +214,10 @@ class DependencyNode(object):
             return 0
         else:
             #print "not mul, return worst", worse_state
-            worst_state = max(states)
+            if 2 in states:
+                worst_state = 2
+            else:
+                worst_state = max(states)
             if self.not_value:
                 return self.get_reverse_state(worst_state)
             return worst_state
