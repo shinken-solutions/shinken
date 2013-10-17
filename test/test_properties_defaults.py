@@ -537,7 +537,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_output_template', ''),
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
-        ('business_rule_labels', ''),
+        ('labels', ''),
         ])
 
     def setUp(self):
@@ -807,7 +807,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_output_template', ''),
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
-        ('business_rule_labels', ''),
+        ('labels', ''),
         ])
 
     def setUp(self):
