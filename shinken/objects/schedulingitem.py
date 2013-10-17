@@ -1394,9 +1394,16 @@ class SchedulingItem(Item):
                 data = self.get_data_for_checks()
                 m = MacroResolver()
                 rule = m.resolve_simple_macros_in_string(rule, data)
-                fact = DependencyNodeFactory()
+                prev = getattr(self, "processed_business_rule", "")
+
+                if rule == prev:
+                    # Business rule did not change (no macro was modulated)
+                    return
+
+                fact = DependencyNodeFactory(self)
                 node = fact.eval_cor_pattern(rule, hosts, services, running)
                 #print "got node", node
+                self.processed_business_rule = rule
                 self.business_rule = node
 
 
@@ -1461,7 +1468,7 @@ class SchedulingItem(Item):
         # State has to be set manually, as the service state attribute is only
         # set on a next scheduler step.
         output = service_template_string
-        mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL"}
+        mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL", 3: "UNKNOWN"}
         status = mapping[self.business_rule.get_state()]
         output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
         short_status = self.status_to_short_status(status)
@@ -1543,6 +1550,8 @@ class SchedulingItem(Item):
             except Exception, e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
+                logger.debug("[%s] Error while re-evaluating business rule:\n%s" %
+                             (self.get_name(), traceback.format_exc()))
                 state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
