@@ -747,7 +747,7 @@ def filter_service_by_servicegroup_name(group):
 def filter_host_by_bp_rule_label(label):
 
     def inner_filter(host):
-        return label in host.business_rule_labels
+        return label in host.labels
 
     return inner_filter
 
@@ -755,7 +755,7 @@ def filter_host_by_bp_rule_label(label):
 def filter_service_by_host_bp_rule_label(label):
 
     def inner_filter(service):
-        return label in service.host.business_rule_labels
+        return label in service.host.labels
 
     return inner_filter
 
@@ -763,6 +763,6 @@ def filter_service_by_host_bp_rule_label(label):
 def filter_service_by_bp_rule_label(label):
 
     def inner_filter(service):
-        return label in service.business_rule_labels
+        return label in service.labels
 
     return inner_filter
