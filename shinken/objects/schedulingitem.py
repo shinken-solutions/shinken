@@ -1394,9 +1394,16 @@ class SchedulingItem(Item):
                 data = self.get_data_for_checks()
                 m = MacroResolver()
                 rule = m.resolve_simple_macros_in_string(rule, data)
+                prev = getattr(self, "processed_business_rule", "")
+
+                if rule == prev:
+                    # Business rule did not change (no macro was modulated)
+                    return
+
                 fact = DependencyNodeFactory(self)
                 node = fact.eval_cor_pattern(rule, hosts, services, running)
                 #print "got node", node
+                self.processed_business_rule = rule
                 self.business_rule = node
 
 

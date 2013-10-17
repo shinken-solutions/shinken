@@ -228,6 +228,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_no_macro")
         self.assert_(svc_cor.got_business_rule is True)
         self.assert_(svc_cor.business_rule is not None)
+        self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == ('1', '2', '2'))
@@ -265,6 +266,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_macro_expand")
         self.assert_(svc_cor.got_business_rule is True)
         self.assert_(svc_cor.business_rule is not None)
+        self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == ('1', '2', '2'))
@@ -290,8 +292,9 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Forces business rule evaluation.
         self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
 
-        # Business rule should have been re-evaluated (there's a macro)
-        self.assert_(svc_cor.business_rule is not bp_rule)
+        # Business rule should not have been re-evaluated (macro did not change
+        # value)
+        self.assert_(svc_cor.business_rule is bp_rule)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.get_state() == 0)
         self.assert_(svc_cor.last_hard_state_id == 0)
@@ -301,6 +304,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy_modulated", "bprule_macro_modulated")
         self.assert_(svc_cor.got_business_rule is True)
         self.assert_(svc_cor.business_rule is not None)
+        self.assert_(svc_cor.processed_business_rule == "2 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == ('2', '2', '2'))
@@ -326,8 +330,9 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Forces business rule evaluation.
         self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
 
-        # Business rule should have been re-evaluated (there's a macro)
-        self.assert_(svc_cor.business_rule is not bp_rule)
+        # Business rule should not have been re-evaluated (macro did not change
+        # value)
+        self.assert_(svc_cor.business_rule is bp_rule)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.get_state() == 2)
         self.assert_(svc_cor.last_hard_state_id == 2)
@@ -339,6 +344,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Forces business rule evaluation.
         self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
 
+        self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
         self.assert_(svc_cor.business_rule is not bp_rule)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
@@ -352,6 +358,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Forces business rule evaluation.
         self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
 
+        # Business rule should have been re-evaluated (macro was modulated)
         self.assert_(svc_cor.business_rule is bp_rule)
         self.assert_(svc_cor.last_hard_state_id == 3)
         self.assert_(svc_cor.output.startswith("Error while re-evaluating business rule"))
