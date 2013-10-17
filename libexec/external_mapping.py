@@ -57,7 +57,7 @@ except ImportError:
 VERSION = '0.2'
 
 
-def main(input_file, output_file):
+def main(input_file, output_file, type):
     # Check if input_file is newer than output_file
     if os.path.exists(output_file):
         if os.path.getmtime(output_file) >= os.path.getmtime(input_file):
@@ -71,7 +71,10 @@ def main(input_file, output_file):
                 # this is a comment line, skip it
                 continue
             parts = line.split(':')
-            v = (('host', parts[0].strip()), ('host', parts[1].strip()))
+            if type == 'service' :
+                v = (('service', parts[0].strip()), ('service', parts[1].strip()))
+            else:
+                v = (('host', parts[0].strip()), ('host', parts[1].strip()))
             r.append(v)
     finally:
         flatmappingfile.close()
@@ -92,6 +95,8 @@ if __name__ == "__main__":
     parser.add_option("-i", "--input", dest='input_file',
                       default='/tmp/shinken_flat_mapping',
                       help="Path of the flat mapping input file.")
+    parser.add_option("-t", "--type", dest='type',
+                      default='host', help='it is a service or host dependency. ( host | service. Default : host)')
 
     opts, args = parser.parse_args()
     if args:
