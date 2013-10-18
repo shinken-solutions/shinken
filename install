@@ -396,7 +396,7 @@ function prerequisites(){
                         cecho " > $EPELPKG already installed" green
                     fi
                     ;;
-                *)                    
+                *)
                     cecho " > Unsupported RedHat/CentOs version" red
                     exit 2
                     ;;
@@ -442,17 +442,17 @@ function prerequisites(){
     export PY="python-$(pythonvershort)"
     which $PY >> ${LOGFILE} 2>&1
     if [ $? -ne 0 ]
-    then 
+    then
         export PY="python$(pythonvershort)"
     fi
     cecho " > $PY" green
 
-    # setuptools 
+    # setuptools
     cecho " > Installing setuptools" green
     wget --no-check-certificate $WGETPROXY $SETUPTOOLS >> ${LOGFILE} 2>&1
     tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
-    cd setuptools-$SETUPTOOLSVERS  
-    $PY setup.py install >> ${LOGFILE} 2>&1 
+    cd setuptools-$SETUPTOOLSVERS
+    $PY setup.py install >> ${LOGFILE} 2>&1
 
     # python prereq
     PYEI="easy_install-$PVER"
@@ -725,7 +725,7 @@ function relocate(){
     for fic in $(ls -1 $ETC/daemons/*.ini $ETC/skonf.cfg)
     do
         cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $ETC/daemons 
+        setdirectives "$directives" $fic $ETC/daemons
     done
     daemons="arbiters schedulers brokers reactionners receivers pollers modules"
     for element in $dameons
@@ -746,7 +746,7 @@ function relocate(){
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
-    rm $TARGET/bin/default/shinken.in 
+    rm $TARGET/bin/default/shinken.in
     # relocate init file
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
@@ -1072,8 +1072,8 @@ function backup(){
         cecho " --> Backup pnp4nagios/share/templates" green
         cp -Rfp $PNPPREFIX/share/templates $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
     fi
-    
-    cecho " > Compressing backup file" green    
+
+    cecho " > Compressing backup file" green
     tar czPf $BACKUPDIR/bck-shinken.$DATE.tar.gz $BACKUPDIR/bck-shinken.$DATE
     cecho " > Removing backup folder. Backup is now at " green
     echo $BACKUPDIR/bck-shinken.$DATE.tar.gz
@@ -1160,7 +1160,7 @@ function restore(){
 
     rm -rf $BACKUPDIR/bck-shinken.$1
 
-    # Start Shinken after restore	
+    # Start Shinken after restore
     sstart
     if [ -f /etc/init.d/npcd ]
     then
@@ -1406,7 +1406,13 @@ function install_graphite()
         cecho " SKIPPREREQUISITES enabled: won't install nconf prerequisites" yellow
     else
             cecho " > Installing prerequisites" green
+            cd $TMP
             installpkg python $GRAPHITEPKG
+            case $CODE in
+              DEBIAN)
+                installpkg pkg $GRAPHITEPKGDEB
+                ;;
+            esac
     fi
 
     cadre "Install graphite add-on" green
@@ -1451,7 +1457,9 @@ function install_graphite()
             cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/conf.d/graphite.conf
             ;;
         DEBIAN)
-            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/sites-available/graphite.conf
+            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/apache2/sites-available/graphite.conf
+            sed -i 's%@DJANGO_ROOT@%/usr/local/lib/python2.7/dist-packages/Django-1.5.4-py2.7.egg/django/%g' /etc/apache2/sites-available/graphite.conf
+            sed -i 's%WSGISocketPrefix .*$%WSGISocketPrefix /var/run/apache2/wsgi%' /etc/apache2/sites-available/graphite.conf
             a2ensite graphite.conf
             ;;
         *)
@@ -1461,9 +1469,20 @@ function install_graphite()
     esac
     cp /opt/graphite/conf/graphite.wsgi.example /opt/graphite/conf/graphite.wsgi
     # Fix permissions and activate vhost for graphite webapp. VERY IMPORTANT TO HAVE GOOD PERMISSIONS!
-    chown apache:apache /opt/graphite/storage/log/webapp
-    chown apache:apache /opt/graphite/storage/
-    chown apache:apache /opt/graphite/storage/graphite.db
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/log/webapp
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/graphite.db
+
+    echo ""
+    cecho " > Reboot Apache"
+    case $CODE in
+      DEBIAN)
+        /etc/init.d/apache2 restart
+        ;;
+      REDHAT|Fedora)
+        /etc/init.d/httpd restart
+        ;;
+    esac
 
     echo ""
     cecho "If you want to be able to log in graphite webapp using root account" yellow
@@ -1537,7 +1556,7 @@ function install_mongodb(){
             cecho " > Installing mongodb server" green
             if [ ! -f ${SYSTEMDPATH}lib/systemd/system/mongod.service ]
             then
-                    installpkg pkg $MONGOPKGS 
+                    installpkg pkg $MONGOPKGS
             else
                 cecho "Already installed" yellow
             fi
@@ -2165,7 +2184,7 @@ function install_notify_by_xmpp(){
             fi
         fi
     done
-    
+
     while true
     do
         creads " -> Please provide the password of this account:" yellow
@@ -2315,11 +2334,11 @@ function install_cucumber(){
     done
 
     cecho " --> Alter max_ouput_length for webui" green
-    do_skmacro set_webui_ouptput_length.macro 200 
-  
+    do_skmacro set_webui_ouptput_length.macro 200
+
     cecho " --> Deploy example eue service" green
     IP=$(ifconfig  | grep adr | awk -F: '{print $2}' | awk '{print $1}' | head -n 1)
-    install -b -g $SKGROUP -o $SKUSER -m 0664 $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services 
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services
     install -b -g $SKGROUP -o $SKUSER -m 0664 $LIBEXEC/eue/glpi.ini.in $LIBEXEC/eue/glpi.ini
     sed -i "s/@@IPWEBUI@@/"$IP"/g" $LIBEXEC/eue/glpi.ini
 
@@ -2737,7 +2756,7 @@ function install_nagios-plugins(){
     cecho " > Installing prerequisites" green
     case $CODE in
         REDHAT|Fedora)
-            installpkg pkg $NAGPLUGYUMPKG 
+            installpkg pkg $NAGPLUGYUMPKG
             ;;
         DEBIAN)
             DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> ${LOGFILE} 2>&1
@@ -3456,7 +3475,7 @@ do
             elif [ "$OPTARG" == "check_db2_health" ]
             then
                 install_check_db2_health
-                exit 0				
+                exit 0
             elif [ "$OPTARG" == "capture_plugin" ]
             then
                 install_capture_plugin
@@ -3580,7 +3599,7 @@ do
             ;;
         -i|--install)
             FROMSRC=1
-            sinstall 
+            sinstall
             exit 0
             ;;
         -u|--uninstall)

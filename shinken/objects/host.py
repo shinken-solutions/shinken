@@ -126,6 +126,7 @@ class Host(SchedulingItem):
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
         'service_overrides':    ListProp(default=''),
+        'labels':               ListProp(default='', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -134,8 +135,6 @@ class Host(SchedulingItem):
         'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
-        # Business tags for dynamic business rule expansion
-        'business_rule_labels': ListProp(default='', fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
