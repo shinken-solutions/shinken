@@ -949,8 +949,6 @@ function sinstall(){
 
     cleanuptarget
     relocate
-    # DEV TO BE REMOVE
-    exit 2
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     mkdir -p $TARGET/var/archives
     #enableretention
