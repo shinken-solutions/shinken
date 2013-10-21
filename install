@@ -773,6 +773,22 @@ function relocate(){
 function fix(){
     cadre "Applying various fixes" green
 
+    # fix some path
+    for f in $(grep -R "/var/run/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/run/shinken#"$TARGET"/var#g" $f
+    done
+
+    for f in $(grep -R "/var/log/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/log/shinken#"$TARGET"/var#g" $f
+    done
+
+    for f in $(grep -R "/var/lib/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/lib/shinken#"$TARGET"#g" $f
+    done
+
     # fix the htpasswd.users file path for WEBUI authentication
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
@@ -794,6 +810,8 @@ function fix(){
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
     chmod u=r,g=r,o= /etc/sudoers.d/shinken
     [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
+
+
 }
 
 function enable_initd(){
@@ -949,8 +967,6 @@ function sinstall(){
 
     cleanuptarget
     relocate
-    # DEV TO BE REMOVE
-    exit 2
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     mkdir -p $TARGET/var/archives
     #enableretention
@@ -1459,7 +1475,7 @@ function install_graphite()
         DEBIAN)
             cp /opt/graphite/examples/example-graphite-vhost.conf /etc/apache2/sites-available/graphite.conf
             sed -i 's%@DJANGO_ROOT@%/usr/local/lib/python2.7/dist-packages/Django-1.5.4-py2.7.egg/django/%g' /etc/apache2/sites-available/graphite.conf
-            sed -i 's%WSGISocketPrefix .*$%WSGISocketPrefix /var/run/apache2/wsgi%' /etc/apache2/sites-available/graphite.conf
+            sed -i 's%WSGISocketPrefix .*$%WSGISocketPrefix /usr/local/shinken/var/apache2/wsgi%' /etc/apache2/sites-available/graphite.conf
             a2ensite graphite.conf
             ;;
         *)
