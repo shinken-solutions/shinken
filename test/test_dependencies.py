@@ -193,7 +193,15 @@ class TestConfig(ShinkenTest):
         # But he should raise a problem (C here) of we ask for its parents
         self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=True) == True)
 
-
+    def test_disabled_host_service_dependencies(self):
+        self.print_header()
+        now = time.time()
+        test_host_0 = self.sched.hosts.find_by_name("test_host_0")
+        test_host_0.checks_in_progress = []
+        test_host_0.act_depend_of = []  # ignore the router
+        test_host_0_test_ok_0_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_disbld_hst_dep")
+        self.assert_(len(test_host_0_test_ok_0_d.act_depend_of) == 0)
+        self.assert_(test_host_0_test_ok_0_d not in [x[0] for x in test_host_0.act_depend_of_me])
 
 
 if __name__ == '__main__':

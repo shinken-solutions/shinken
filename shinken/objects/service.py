@@ -122,6 +122,7 @@ class Service(SchedulingItem):
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
         'labels':                  ListProp(default='', fill_brok=['full_status']),
+        'depends_host':            BoolProp(default='1', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -465,10 +466,11 @@ class Service(SchedulingItem):
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
+    # TODO: implement "not host dependent" feature.
     def fill_daddy_dependency(self):
         #  Depend of host, all status, is a networkdep
         # and do not have timeperiod, and follow parents dep
-        if self.host is not None:
+        if self.host is not None and self.depends_host:
             # I add the dep in MY list
             self.act_depend_of.append((self.host,
                                         ['d', 'u', 's', 'f'],
