@@ -151,7 +151,6 @@ function test_core {
     # multiple space are skipped by the for loop
     # Safer to drop at the very beginning
     for line in $(grep -vE "#|^ *$" $TESTLIST);do
->>>>>>> 023cb21382f64f429081baf0f79579fb0294a14e
         launch_and_assert $line
         test $? -eq 0 || echo "A test failed : $line"
     done
