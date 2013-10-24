@@ -131,3 +131,7 @@ class DB(object):
     def fetchone(self):
         """Just get an entry"""
         return self.db_cursor.fetchone()
+        
+    def fetchall(self):
+        """Get all entry"""
+        return self.db_cursor.fetchall()

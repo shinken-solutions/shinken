@@ -124,7 +124,17 @@ class Host(SchedulingItem):
         'business_impact_modulations': StringProp(default=''),
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage': IntegerProp(default='300', fill_brok=['full_status']),
+        'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
+        'service_overrides':    ListProp(default=''),
+        'labels':               ListProp(default='', fill_brok=['full_status']),
+
+        # BUSINESS CORRELATOR PART
+        # Business rules output format template
+        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
+        # Business rules notifications mode
+        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
@@ -142,7 +152,6 @@ class Host(SchedulingItem):
 
         # Custom views
         'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
-
     })
 
     # properties set only for running purpose
@@ -281,6 +290,8 @@ class Host(SchedulingItem):
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
+        # Previously processed business rule (with macro expanded)
+        'processed_business_rule': StringProp(default="", fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
 
@@ -343,7 +354,7 @@ class Host(SchedulingItem):
         'HOSTACTIONURL':     'action_url',
         'HOSTNOTESURL':      'notes_url',
         'HOSTNOTES':         'notes',
-        'HOSTREALM':         'get_realm', 
+        'HOSTREALM':         'get_realm',
         'TOTALHOSTSERVICES': 'get_total_services',
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
@@ -911,6 +922,14 @@ class Host(SchedulingItem):
         if self.is_flapping and type not in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
+        # Block if business rule smart notifications is enabled and all its
+        # childs have been acknowledged or are under downtime.
+        if self.got_business_rule is True \
+                and self.business_rule_smart_notifications is True \
+                and self.business_rule_notification_is_blocked() is True \
+                and type == 'PROBLEM':
+            return True
+
         return False
 
     # Get a oc*p command if item has obsess_over_*
@@ -990,7 +1009,7 @@ class Hosts(Items):
         self.linkify_with_triggers(triggers)
         self.linkify_with_checkmodulations(checkmodulations)
         self.linkify_with_macromodulations(macromodulations)
-        
+
 
     # Fill address by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1086,7 +1105,7 @@ class Hosts(Items):
                 cc = getattr(h, prop, None)
                 if cc:
                     cc.late_linkify_with_command(commands)
-            
+
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)

@@ -72,6 +72,8 @@ class Discoveryrun(MatchingItem):
         # -> in self.matches or self.not_matches
         # in writing properties if start with + (means 'add this')
         for key in params:
+            # delistify attributes if there is only one value
+            params[key] = self.compact_unique_attr_value(params[key])
             if key in cls.properties:
                 setattr(self, key, params[key])
             else:

@@ -185,6 +185,8 @@ def to_char(val):
 
 
 def to_split(val):
+    if isinstance(val, list):
+        return val
     val = val.split(',')
     if val == ['']:
         val = []
@@ -326,6 +328,18 @@ def get_customs_values(d):
     return d.values()
 
 
+# Checks that a parameter has an unique value. If it's a list, the last
+# value set wins.
+def unique_value(val):
+    if isinstance(val, list):
+        if val:
+            return val[-1]
+        else:
+            return ''
+    else:
+        return val
+
+
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):
     if x.spare and not y.spare:
@@ -405,6 +419,7 @@ def strip_and_uniq(tab):
         if (val != ''):
             new_tab.add(val)
     return list(new_tab)
+
 
 #################### Pattern change application (mainly for host) #######
 
@@ -631,3 +646,123 @@ def expect_file_dirs(root, path):
                 return False
         tmp_dir = _d
     return True
+
+
+######################## Services/hosts search filters  #######################
+# Filters used in services or hosts find_by_filter method
+# Return callback functions which are passed host or service instances, and
+# should return a boolean value that indicates if the inscance mached the
+# filter
+def filter_any(name):
+
+    def inner_filter(host):
+        return True
+
+    return inner_filter
+
+
+def filter_none(name):
+
+    def inner_filter(host):
+        return False
+
+    return inner_filter
+
+
+def filter_host_by_name(name):
+
+    def inner_filter(host):
+        return host.host_name == name
+
+    return inner_filter
+
+
+def filter_host_by_regex(regex):
+    host_re = re.compile(regex)
+
+    def inner_filter(host):
+        return host_re.match(host.host_name) is not None
+
+    return inner_filter
+
+
+def filter_host_by_group(group):
+
+    def inner_filter(host):
+        return group in [g.hostgroup_name for g in host.hostgroups]
+
+    return inner_filter
+
+
+def filter_service_by_name(name):
+
+    def inner_filter(service):
+        return service.service_description == name
+
+    return inner_filter
+
+
+def filter_service_by_regex_name(regex):
+    host_re = re.compile(regex)
+
+    def inner_filter(service):
+        return host_re.match(service.service_description) is not None
+
+    return inner_filter
+
+
+def filter_service_by_host_name(host_name):
+
+    def inner_filter(service):
+        return service.host.host_name == host_name
+
+    return inner_filter
+
+
+def filter_service_by_regex_host_name(regex):
+    host_re = re.compile(regex)
+
+    def inner_filter(service):
+        return host_re.match(service.host.host_name) is not None
+
+    return inner_filter
+
+
+def filter_service_by_hostgroup_name(group):
+
+    def inner_filter(service):
+        return group in [g.hostgroup_name for g in service.host.hostgroups]
+
+    return inner_filter
+
+
+def filter_service_by_servicegroup_name(group):
+
+    def inner_filter(service):
+        return group in [g.servicegroup_name for g in service.servicegroups]
+
+    return inner_filter
+
+
+def filter_host_by_bp_rule_label(label):
+
+    def inner_filter(host):
+        return label in host.labels
+
+    return inner_filter
+
+
+def filter_service_by_host_bp_rule_label(label):
+
+    def inner_filter(service):
+        return label in service.host.labels
+
+    return inner_filter
+
+
+def filter_service_by_bp_rule_label(label):
+
+    def inner_filter(service):
+        return label in service.labels
+
+    return inner_filter

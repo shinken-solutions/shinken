@@ -25,7 +25,7 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int
+from shinken.util import to_float, to_split, to_char, to_int, unique_value
 from shinken.log  import logger
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
@@ -153,6 +153,7 @@ class BoolProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
+        val = unique_value(val)
         return _boolean_states[val.lower()]
 
 
@@ -161,6 +162,7 @@ class IntegerProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
+        val = unique_value(val)
         return to_int(val)
 
 
@@ -169,6 +171,7 @@ class FloatProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
+        val = unique_value(val)
         return to_float(val)
 
 
@@ -177,6 +180,7 @@ class CharProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
+        val = unique_value(val)
         return to_char(val)
 
 
@@ -185,6 +189,7 @@ class StringProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
+        val = unique_value(val)
         return val
 
 
@@ -208,6 +213,7 @@ class LogLevelProp(StringProp):
     """ A string property representing a logging level """
 
     def pythonize(self, val):
+        val = unique_value(val)
         return logger.get_level_id(val)
 
 
@@ -226,7 +232,7 @@ class DictProp(Property):
         self.elts_prop = elts_prop()
 
     def pythonize(self, val):
-
+        val = unique_value(val)
         #import traceback; traceback.print_stack()
         def split(kv):
             m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
@@ -255,6 +261,7 @@ class AddrProp(Property):
             i.e: val = "192.168.10.24:445"
             NOTE: port is optional
         """
+        val = unique_value(val)
         m = re.match("^([^:]*)(?::(\d+))?$", val)
         if m is None:
             raise ValueError

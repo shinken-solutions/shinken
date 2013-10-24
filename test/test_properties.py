@@ -76,11 +76,14 @@ class TestBoolProp(PropertyTests, ShinkenTest, unittest.TestCase):
         self.assertEqual(p.pythonize("yes"), True)
         self.assertEqual(p.pythonize("true"), True)
         self.assertEqual(p.pythonize("on"), True)
+        self.assertEqual(p.pythonize(["off", "on"]), True)
         # allowed strings for `False`
         self.assertEqual(p.pythonize("0"), False)
         self.assertEqual(p.pythonize("no"), False)
         self.assertEqual(p.pythonize("false"), False)
         self.assertEqual(p.pythonize("off"), False)
+        self.assertEqual(p.pythonize(["on", "off"]), False)
+
 
 
 class TestIntegerProp(PropertyTests, ShinkenTest, unittest.TestCase):
@@ -93,6 +96,7 @@ class TestIntegerProp(PropertyTests, ShinkenTest, unittest.TestCase):
         self.assertEqual(p.pythonize("1"), 1)
         self.assertEqual(p.pythonize("0"), 0)
         self.assertEqual(p.pythonize("1000.33"), 1000)
+        self.assertEqual(p.pythonize(["2000.66", "1000.33"]), 1000)
 
 
 class TestFloatProp(PropertyTests, ShinkenTest, unittest.TestCase):
@@ -105,6 +109,7 @@ class TestFloatProp(PropertyTests, ShinkenTest, unittest.TestCase):
         self.assertEqual(p.pythonize("1"), 1.0)
         self.assertEqual(p.pythonize("0"), 0.0)
         self.assertEqual(p.pythonize("1000.33"), 1000.33)
+        self.assertEqual(p.pythonize(["2000.66", "1000.33"]), 1000.33)
 
 
 class TestStringProp(PropertyTests, ShinkenTest, unittest.TestCase):
@@ -118,6 +123,7 @@ class TestStringProp(PropertyTests, ShinkenTest, unittest.TestCase):
         self.assertEqual(p.pythonize("yes"), "yes")
         self.assertEqual(p.pythonize("0"), "0")
         self.assertEqual(p.pythonize("no"), "no")
+        self.assertEqual(p.pythonize(["yes", "no"]), "no")
 
 
 class TestCharProp(PropertyTests, ShinkenTest, unittest.TestCase):
@@ -129,6 +135,7 @@ class TestCharProp(PropertyTests, ShinkenTest, unittest.TestCase):
         p = self.prop_class()
         self.assertEqual(p.pythonize("c"), "c")
         self.assertEqual(p.pythonize("cxxxx"), "c")
+        self.assertEqual(p.pythonize(["bxxxx", "cxxxx"]), "c")
         # this raises IndexError. is this intented?
         ## self.assertEqual(p.pythonize(""), "")
 
@@ -160,6 +167,7 @@ class TestListProp(PropertyTests, ShinkenTest, unittest.TestCase):
         p = self.prop_class()
         self.assertEqual(p.pythonize(""), [])
         self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
+        self.assertEquals(p.pythonize(["1,2,3", "4,5,6"]), ["1,2,3", "4,5,6"])
 
 
 class TestLogLevelProp(PropertyTests, ShinkenTest, unittest.TestCase):
@@ -178,6 +186,7 @@ class TestLogLevelProp(PropertyTests, ShinkenTest, unittest.TestCase):
         ## 'FATAL' is not defined in std-module `logging._levelNames`
         #self.assertEqual(p.pythonize("FATAL"), 50)
         self.assertEqual(p.pythonize("CRITICAL"), 50)
+        self.assertEqual(p.pythonize(["NOTSET", "CRITICAL"]), 50)
 
 
 ## :todo: fix DictProp error if no `elts_prop` are passed
@@ -227,6 +236,9 @@ class TestAddrProp(PropertyTests, ShinkenTest, unittest.TestCase):
         self.assertRaises(ValueError, p.pythonize, ":")
         # no address, only port number
         self.assertEqual(p.pythonize(":445"),
+                         {'address': "",
+                          'port': 445})
+        self.assertEqual(p.pythonize([":444", ":445"]),
                          {'address': "",
                           'port': 445})
 

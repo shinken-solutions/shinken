@@ -25,6 +25,18 @@
 
 import re
 from shinken.log import logger
+from shinken.util import filter_any, filter_none
+from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group
+from shinken.util import filter_service_by_name
+from shinken.util import filter_service_by_regex_name
+from shinken.util import filter_service_by_regex_host_name
+from shinken.util import filter_service_by_host_name
+from shinken.util import filter_service_by_bp_rule_label
+from shinken.util import filter_service_by_hostgroup_name
+from shinken.util import filter_service_by_servicegroup_name
+from shinken.util import filter_host_by_bp_rule_label
+from shinken.util import filter_service_by_host_bp_rule_label
+
 
 """
 Here is a node class for dependency_node(s) and a factory to create them
@@ -34,7 +46,7 @@ class DependencyNode(object):
         self.operand = None
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
-        self.of_values = (0, 0, 0)
+        self.of_values = ('0', '0', '0')
         self.is_of_mul = False
         self.configuration_errors = []
         self.not_value = False
@@ -63,76 +75,88 @@ class DependencyNode(object):
         # If we are a host or a service, wee just got the host/service
         # hard state
         if self.operand in ['host', 'service']:
-            state = self.sons[0].last_hard_state_id
-            #print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
-            # Make DOWN look as CRITICAL (2 instead of 1)
+            return self.get_simple_node_state()
+        else:
+            return self.get_complex_node_state()
+
+
+    # Returns a simple node direct state (such as an host or a service). No
+    # calculation is needed
+    def get_simple_node_state(self):
+        state = self.sons[0].last_hard_state_id
+        #print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
+        # Make DOWN look as CRITICAL (2 instead of 1)
+        if self.operand == 'host' and state == 1:
+            state = 2
+        # Maybe we are a NOT node, so manage this
+        if self.not_value:
+            # We inverse our states
             if self.operand == 'host' and state == 1:
-                state = 2
-            # Maybe we are a NOT node, so manage this
-            if self.not_value:
-                # We inverse our states
-                if self.operand == 'host' and state == 1:
-                    return 0
-                if self.operand == 'host' and state == 0:
-                    return 1
-                # Critical -> OK
-                if self.operand == 'service' and state == 2:
-                    return 0
-                # OK -> CRITICAL (warning is untouched)
-                if self.operand == 'service' and state == 0:
-                    return 2
-            return state
-
-        # First we get the state of all our sons
-        states = []
-        for s in self.sons:
-            st = s.get_state()
-            states.append(st)
-
-        # We will surely need the worst state
-        worst_state = max(states)
-
-        # Suggestion: What about returning min(states) for the | operand?
-        # We don't need make a difference between an 0 and another no?
-        # If you do so, it may be more efficient with lots of services
-        # or host to return OK, but otherwise I can't see the reason for
-        # this subcase.
-
-        # We look for the better state but not OK/UP
-        no_ok = [s for s in states if s != 0]
-        if len(no_ok) != 0:
-            best_not_good = min(no_ok)
-
-        # Now look at the rule. For a or
-        if self.operand == '|':
-            if 0 in states:
-                if self.not_value:
-                    return self.get_reverse_state(0)
-                #print "We find a OK/UP match in an OR", states
                 return 0
-            # no ok/UP-> return worst state
-            else:
-                if self.not_value:
-                    return self.get_reverse_state(best_not_good)
-                #print "I send the best not good state...in an OR", best_not_good, states
-                return best_not_good
+            if self.operand == 'host' and state == 0:
+                return 1
+            # Critical -> OK
+            if self.operand == 'service' and state == 2:
+                return 0
+            # OK -> CRITICAL (warning is untouched)
+            if self.operand == 'service' and state == 0:
+                return 2
+        return state
 
-        # With an AND, we just send the worst state
-        if self.operand == '&':
-            if self.not_value:
-                return self.get_reverse_state(worst_state)
-            #print "We raise worst state for a AND", worst_state,states
-            return worst_state
 
-        # Ok we've got a 'of:' rule
+    # Calculates a complex node state based on its sons state, and its operator
+    def get_complex_node_state(self):
+        if self.operand == '|':
+            return self.get_complex_or_node_state()
+
+        elif self.operand == '&':
+            return self.get_complex_and_node_state()
+
+        #  It's an Xof rule
+        else:
+            return self.get_complex_xof_node_state()
+
+
+    # Calculates a complex node state with an | operand
+    def get_complex_or_node_state(self):
+        # First we get the state of all our sons
+        states = [s.get_state() for s in self.sons]
+        # Next we calculate the best state
+        best_state = min(states)
+        # Then we handle eventual not value
+        if self.not_value:
+            return self.get_reverse_state(best_state)
+        return best_state
+
+
+    # Calculates a complex node state with an & operand
+    def get_complex_and_node_state(self):
+        # First we get the state of all our sons
+        states = [s.get_state() for s in self.sons]
+        # Next we calculate the worst state
+        if 2 in states:
+            worst_state = 2
+        else:
+            worst_state = max(states)
+        # Then we handle eventual not value
+        if self.not_value:
+            return self.get_reverse_state(worst_state)
+        return worst_state
+
+
+    # Calculates a complex node state with an Xof operand
+    def get_complex_xof_node_state(self):
+        # First we get the state of all our sons
+        states = [s.get_state() for s in self.sons]
+
         # We search for OK, WARN or CRIT applications
         # And we will choice between them
-
         nb_search_ok = self.of_values[0]
         nb_search_warn = self.of_values[1]
         nb_search_crit = self.of_values[2]
 
         # We look for each application
+        nb_sons = len(states)
         nb_ok = len([s for s in states if s == 0])
         nb_warn = len([s for s in states if s == 1])
         nb_crit = len([s for s in states if s == 2])
@@ -143,9 +167,24 @@ class DependencyNode(object):
         # Warn can apply with warn or crit values
         # so a W C can raise a Warning, but not enough for
         # a critical
-        ok_apply = nb_ok >= nb_search_ok
-        warn_apply = nb_warn + nb_crit >= nb_search_warn
-        crit_apply = nb_crit >= nb_search_crit
+        def get_state_for(nb_tot, nb_real, nb_search):
+            if nb_search.endswith('%'):
+                nb_search = int(nb_search[:-1])
+                if nb_search < 0:
+                    # nb_search is negative, so +
+                    nb_search = max(100 + nb_search, 0)
+                apply_for = float(nb_real) / nb_tot * 100 >= nb_search
+            else:
+                nb_search = int(nb_search)
+                if nb_search < 0:
+                    # nb_search is negative, so +
+                    nb_search = max(nb_tot + nb_search, 0)
+                apply_for = nb_real >= nb_search
+            return apply_for
+
+        ok_apply = get_state_for(nb_sons, nb_ok, nb_search_ok)
+        warn_apply = get_state_for(nb_sons, nb_warn + nb_crit, nb_search_warn)
+        crit_apply = get_state_for(nb_sons, nb_crit, nb_search_crit)
 
         #print "What apply?", ok_apply, warn_apply, crit_apply
 
@@ -175,6 +214,10 @@ class DependencyNode(object):
             return 0
         else:
             #print "not mul, return worst", worse_state
+            if 2 in states:
+                worst_state = 2
+            else:
+                worst_state = max(states)
             if self.not_value:
                 return self.get_reverse_state(worst_state)
             return worst_state
@@ -202,8 +245,8 @@ class DependencyNode(object):
         # Need a list for assignment
         self.of_values = list(self.of_values)
         for i in [0, 1, 2]:
-            if self.of_values[i] == 0:
-                self.of_values[i] = nb_sons
+            if self.of_values[i] == '0':
+                self.of_values[i] = str(nb_sons)
         self.of_values = tuple(self.of_values)
 
 
@@ -224,11 +267,16 @@ class DependencyNode(object):
 
 """ TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
-    def __init__(self):
-        pass
+
+    host_flags = "grl"
+    service_flags = "grl"
+
+    def __init__(self, bound_item):
+        self.bound_item = bound_item
+
 
     # the () will be eval in a recursiv way, only one level of ()
-    def eval_cor_pattern(self, pattern, hosts, services):
+    def eval_cor_pattern(self, pattern, hosts, services, running=False):
         pattern = pattern.strip()
         #print "***** EVAL ", pattern
         complex_node = False
@@ -239,10 +287,17 @@ class DependencyNodeFactory(object):
             if m in pattern:
                 complex_node = True
 
-        is_of_nb = False
+        # If it's a simple node, evaluate it directly
+        if complex_node is False:
+            return self.eval_simple_cor_pattern(pattern, hosts, services, running)
+        else:
+            return self.eval_complex_cor_pattern(pattern, hosts, services, running)
 
-        node = DependencyNode()
-        p = "^(\d+),*(\d*),*(\d*) *of: *(.+)"
+
+    # Checks if an expression is an Xof pattern, and parses its components if
+    # so. In such a case, once parsed, returns the cleaned patten.
+    def eval_xof_pattern(self, node, pattern):
+        p = "^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:
@@ -254,78 +309,25 @@ class DependencyNodeFactory(object):
             # If multi got (A,B,C)
             if mul_of:
                 node.is_of_mul = True
-                node.of_values = (int(g[0]), int(g[1]), int(g[2]))
+                node.of_values = (g[0], g[1], g[2])
             else:  # if not, use A,0,0, we will change 0 after to put MAX
-                node.of_values = (int(g[0]), 0, 0)
+                node.of_values = (g[0], '0', '0')
             pattern = m.groups()[3]
+        return pattern
 
-        #print "Is so complex?", pattern, complex_node
 
-        # if it's a single host/service
-        if not complex_node:
-            #print "Try to find?", pattern
-            # If it's a not value, tag the node and find
-            # the name without this ! operator
-            if pattern.startswith('!'):
-                node.not_value = True
-                pattern = pattern[1:]
-            # Is the pattern an host expression to be expanded?
-            if re.match("^[grp]+:", pattern):
-                # o is just extracted its attributes, then trashed.
-                o = self.expand_hosts_expression(pattern, hosts, services)
-                if node.operand != 'of:':
-                    node.operand = '&'
-                node.sons.extend(o.sons)
-                node.configuration_errors.extend(o.configuration_errors)
-                node.switch_zeros_of_values()
-            else:
-                node.operand = 'object'
-                obj, error = self.find_object(pattern, hosts, services)
-                if obj is not None:
-                    # Set host or service
-                    node.operand = obj.__class__.my_type
-                    node.sons.append(obj)
-                else:
-                    node.configuration_errors.append(error)
-            return node
-        #else:
-        #    print "Is complex"
+    # Evaluate a complex correlation expression, such as an &, |, nested
+    # expressions in par, and so on.
+    def eval_complex_cor_pattern(self, pattern, hosts, services, running=False):
+        node = DependencyNode()
+        pattern = self.eval_xof_pattern(node, pattern)
 
         in_par = False
         tmp = ''
-        son_is_not = False # We keep is the next son will ne not or not
+        son_is_not = False  # We keep is the next son will be not or not
         stacked_par = 0
         for c in pattern:
-            #print "MATCHING", c, pattern
-            if c == '&' or c == '|':
-                # Maybe we are in a par, if so, just stack it
-                if in_par:
-                    #print " & in a par, just staking it"
-                    tmp += c
-                else:
-                    # Oh we got a real cut in an expression, if so, cut it
-                    #print "REAL & for cutting"
-                    tmp = tmp.strip()
-                    # Look at the rule viability
-                    current_rule = node.operand
-                    if current_rule is not None and current_rule != 'of:' and c != current_rule:
-                        # Should be logged as a warning / info? :)
-                        return None
-
-                    if current_rule != 'of:':
-                        node.operand = c
-                    if tmp != '':
-                        #print "Will analyse the current str", tmp
-                        o = self.eval_cor_pattern(tmp, hosts, services)
-                        # Maybe our son was notted
-                        if son_is_not:
-                            o.not_value = True
-                            son_is_not = False
-                        node.sons.append(o)
-                    tmp = ''
-                    continue
-
-            elif c == '(':
+            if c == '(':
                 stacked_par += 1
                 #print "INCREASING STACK TO", stacked_par
 
@@ -342,9 +344,6 @@ class DependencyNodeFactory(object):
                 # but not if it's the first one so
                 if stacked_par > 1:
                     tmp += c
-                    #o = self.eval_cor_pattern(tmp)
-                    #print "1( I've %s got new sons" % pattern , o
-                    #node.sons.append(o)
 
             elif c == ')':
                 #print "Need closeing a sub expression?", tmp
@@ -358,7 +357,7 @@ class DependencyNodeFactory(object):
                 if stacked_par == 0:
                     #print "THIS is closing a sub compress expression", tmp
                     tmp = tmp.strip()
-                    o = self.eval_cor_pattern(tmp, hosts, services)
+                    o = self.eval_cor_pattern(tmp, hosts, services, running)
                     # Maybe our son was notted
                     if son_is_not:
                         o.not_value = True
@@ -371,15 +370,48 @@ class DependencyNodeFactory(object):
 
                 # ok here we are still in a huge par, we just close one sub one
                 tmp += c
-            # Manage the NOT for an expression. If we are in a starting bloc, put as
-            # a NOT node, but if inside a bloc, don't
+
+            # Expressions in par will be parsed in a sub node after. So just
+            # stack pattern
+            elif in_par:
+                tmp += c
+
+            # Until here, we're not in par
+
+            # Manage the NOT for an expression. Only allow ! at the beginning
+            # of an host or an host,service expression.
             elif c == '!':
-                if stacked_par == 0:
-                    son_is_not = True
-                    # DO NOT keep the c in tmp, we consumed it
-                else:
-                    tmp += c
-            # Maybe it's a classic character, if so, continue
+                tmp = tmp.strip()
+                if tmp and tmp[0] != '!':
+                    print "Error : bad expression near", tmp, "wrong position for '!'"
+                    continue
+                # Flags next node not state
+                son_is_not = True
+                # DO NOT keep the c in tmp, we consumed it
+
+            #print "MATCHING", c, pattern
+            elif c == '&' or c == '|':
+                # Oh we got a real cut in an expression, if so, cut it
+                #print "REAL & for cutting"
+                tmp = tmp.strip()
+                # Look at the rule viability
+                if node.operand is not None and node.operand != 'of:' and c != node.operand:
+                    # Should be logged as a warning / info? :)
+                    return None
+
+                if node.operand != 'of:':
+                    node.operand = c
+                if tmp != '':
+                    #print "Will analyse the current str", tmp
+                    o = self.eval_cor_pattern(tmp, hosts, services, running)
+                    # Maybe our son was notted
+                    if son_is_not:
+                        o.not_value = True
+                        son_is_not = False
+                    node.sons.append(o)
+                tmp = ''
+
+            # Maybe it's a classic character or we're in par, if so, continue
             else:
                 tmp += c
 
@@ -387,7 +419,7 @@ class DependencyNodeFactory(object):
         tmp = tmp.strip()
         if tmp != '':
             #print "Managing trainling part", tmp
-            o = self.eval_cor_pattern(tmp, hosts, services)
+            o = self.eval_cor_pattern(tmp, hosts, services, running)
             # Maybe our son was notted
             if son_is_not:
                 o.not_value = True
@@ -395,16 +427,53 @@ class DependencyNodeFactory(object):
             #print "4end I've %s got new sons" % pattern , o
             node.sons.append(o)
 
-
         # We got our nodes, so we can update 0 values of of_values
         # with the number of sons
         node.switch_zeros_of_values()
 
-        #print "End, tmp", tmp
-        #print "R %s:" % pattern
-        #print "Node:", node
         return node
 
+
+    # Evaluate a simple correlation expression, such as an host, an host + a
+    # service, or expand an host or service expression.
+    def eval_simple_cor_pattern(self, pattern, hosts, services, running=False):
+        node = DependencyNode()
+        pattern = self.eval_xof_pattern(node, pattern)
+
+        #print "Try to find?", pattern
+        # If it's a not value, tag the node and find
+        # the name without this ! operator
+        if pattern.startswith('!'):
+            node.not_value = True
+            pattern = pattern[1:]
+        # Is the pattern an expression to be expanded?
+        if re.search(r"^([%s]+|\*):" % self.host_flags, pattern) or \
+                re.search(r",\s*([%s]+:.*|\*)$" % self.service_flags, pattern):
+            # o is just extracted its attributes, then trashed.
+            o = self.expand_expression(pattern, hosts, services, running)
+            if node.operand != 'of:':
+                node.operand = '&'
+            node.sons.extend(o.sons)
+            node.configuration_errors.extend(o.configuration_errors)
+            node.switch_zeros_of_values()
+        else:
+            node.operand = 'object'
+            obj, error = self.find_object(pattern, hosts, services)
+            if obj is not None:
+                # Set host or service
+                node.operand = obj.__class__.my_type
+                node.sons.append(obj)
+            else:
+                if running is False:
+                    node.configuration_errors.append(error)
+                else:
+                    # As business rules are re-evaluated at run time on
+                    # each scheduling loop, if the rule becomes invalid
+                    # because of a badly written macro modulation, it
+                    # should be notified upper for the error to be
+                    # displayed in the check output.
+                    raise Exception(error)
+        return node
 
 
     # We've got an object, like h1,db1 that mean the
@@ -418,6 +487,9 @@ class DependencyNodeFactory(object):
         # h_name, service_desc are , separated
         elts = pattern.split(',')
         host_name = elts[0].strip()
+        # If host_name is empty, use the host_name the business rule is bound to
+        if not host_name:
+            host_name = self.bound_item.host_name
         # Look if we have a service
         if len(elts) > 1:
             is_service = True
@@ -433,85 +505,114 @@ class DependencyNodeFactory(object):
         return obj, error
 
 
-
-    # Tries to expand a host expression into a dependency node tree using
-    # hostgroup membership or regex on host name as host selector.
-    # Returns a DependencyNode tree.
-    def expand_hosts_expression(self, pattern, hosts, services):
+    # Tries to expand a host or service expression into a dependency node tree
+    # using (host|service)group membership, regex, or labels as item selector.
+    def expand_expression(self, pattern, hosts, services, running=False):
         error = None
         node = DependencyNode()
         node.operand = '&'
-        elts = pattern.split(',')
-        # Flags is the left part of the first : charcter
-        flags = elts[0].strip().split(":")[0]
-        # Name is the right part of the first : charcter
-        name = ":".join(elts[0].strip().split(":")[1:])
-        permissive = "p" in flags
-
-        # Look if we have a service
-        if len(elts) > 1:
-            got_service = True
-            service_description = ",%s" % elts[1].strip()
+        elts = [e.strip() for e in pattern.split(',')]
+        # If host_name is empty, use the host_name the business rule is bound to
+        if not elts[0]:
+            elts[0] = self.bound_item.host_name
+        filters = []
+        # Looks for hosts/services using appropriate filters
+        try:
+            if len(elts) > 1:
+                # We got a service expression
+                host_expr, service_expr = elts
+                filters.extend(self.get_srv_host_filters(host_expr))
+                filters.extend(self.get_srv_service_filters(service_expr))
+                items = services.find_by_filter(filters)
+            else:
+                # We got an host expression
+                host_expr = elts[0]
+                filters.extend(self.get_host_filters(host_expr))
+                items = hosts.find_by_filter(filters)
+        except re.error, e:
+            error = "Business rule uses invalid regex %s: %s" % (pattern, e)
         else:
-            got_service = False
-            service_description = ""
+            if not items:
+                error = "Business rule got an empty result for pattern %s" % pattern
 
-        if "g" in flags:
-            expanded_hosts, error = self.lookup_hosts_by_group(name, hosts)
-        elif "r" in flags:
-            expanded_hosts, error = self.lookup_hosts_by_regex(name, hosts)
-        else:
-            error = "Business rule uses unknown host expansion type"
-
-        if error is not None:
-            node.configuration_errors.append(error)
+        # Checks if we got result
+        if error:
+            if running is False:
+                node.configuration_errors.append(error)
+            else:
+                # As business rules are re-evaluated at run time on
+                # each scheduling loop, if the rule becomes invalid
+                # because of a badly written macro modulation, it
+                # should be notified upper for the error to be
+                # displayed in the check output.
+                raise Exception(error)
             return node
 
-        for host_name in expanded_hosts:
-            expr = "%s%s" % (host_name, service_description)
-            o = self.eval_cor_pattern(expr, hosts, services)
+        # Creates dependency node subtree
+        for item in items:
+            # Creates a host/service node
+            son = DependencyNode()
+            son.operand = item.__class__.my_type
+            son.sons.append(item)
+            # Appends it to wrapping node
+            node.sons.append(son)
 
-            if not o.is_valid():
-                if got_service is True and permissive is True:
-                    # Invalid node is not added (error is ignored).
-                    logger.warning("Business rule got an unknown service for %s. Ignored." % host_name)
-                else:
-                    # Add the invalid node for error to be reported by arbiter.
-                    node.sons.append(o)
-            else:
-                node.sons.append(o)
-
+        node.switch_zeros_of_values()
         return node
 
 
+    # Generates filter list on a hosts host_name
+    def get_host_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
+        if match is None:
+            return [filter_host_by_name(expr)]
+        flags, expr = match.groups()
 
-    # Looks for hosts having specified group name in their hostgroups.
-    # Returns a list of Host objects and the error message if error an occurred.
-    def lookup_hosts_by_group(self, group, hosts):
-        error = None
-        expanded_hosts = [h.host_name for h in hosts if group in [g.hostgroup_name for g in h.hostgroups]]
-
-        if not expanded_hosts:
-            error = "Business rule uses unknown or empty hostgroup %s" % group
-
-        return expanded_hosts, error
+        if "g" in flags:
+            return [filter_host_by_group(expr)]
+        elif "r" in flags:
+            return [filter_host_by_regex(expr)]
+        elif "l" in flags:
+            return [filter_host_by_bp_rule_label(expr)]
+        else:
+            return [filter_none]
 
 
+    # Generates filter list on services host_name
+    def get_srv_host_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
+        if match is None:
+            return [filter_service_by_host_name(expr)]
+        flags, expr = match.groups()
 
-    # Looks for hosts wchich name matches specified regex.
-    # Returns a list of Host objects and the error message if error an occurred.
-    def lookup_hosts_by_regex(self, pattern, hosts):
-        error = None
-        expanded_hosts = []
+        if "g" in flags:
+            return [filter_service_by_hostgroup_name(expr)]
+        elif "r" in flags:
+            return [filter_service_by_regex_host_name(expr)]
+        elif "l" in flags:
+            return [filter_service_by_host_bp_rule_label(expr)]
+        else:
+            return [filter_none]
 
-        try:
-            host_re = re.compile(pattern)
-            expanded_hosts = [h.host_name for h in hosts if host_re.match(h.host_name)]
 
-            if not expanded_hosts:
-                error = "Business rule uses regex that no host_name matches: %s" % pattern
+    # Generates filter list on services service_description
+    def get_srv_service_filters(self, expr):
+        if expr == "*":
+            return [filter_any]
+        match = re.search(r"^([%s]+):(.*)" % self.service_flags, expr)
+        if match is None:
+            return [filter_service_by_name(expr)]
+        flags, expr = match.groups()
 
-        except re.error, e:
-            error = "Business rule uses invalid regex %s: %s" % (pattern, e)
-
-        return expanded_hosts, error
+        if "g" in flags:
+            return [filter_service_by_servicegroup_name(expr)]
+        elif "r" in flags:
+            return [filter_service_by_regex_name(expr)]
+        elif "l" in flags:
+            return [filter_service_by_bp_rule_label(expr)]
+        else:
+            return [filter_none]

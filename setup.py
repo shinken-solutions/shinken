@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-# Shinken requires Python 2.4, but does not support Python 3.x yet.
+# Shinken requires Python 2.6, but does not support Python 3.x yet.
 import sys
 try:
     python_version = sys.version_info
@@ -262,11 +262,13 @@ class build_config(Command):
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
+#Overriding default values
 user=%s
 group=%s
 workdir=%s
+logdir=%s
 pidfile=%s/%sd.pid
-""" % (self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner, self.group, self.var_path, self.log_path, self.run_path, dname))
             
 
         # And now the resource.cfg path with the value of libexec path
@@ -290,9 +292,10 @@ pidfile=%s/%sd.pid
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
+workdir=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % (self.owner, self.group, self.run_path, self.log_path)
+""" % (self.owner, self.group, self.var_path, self.run_path, self.log_path)
             )
 
         # UPDATE others cfg files too
@@ -478,20 +481,14 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
 else:
     raise "Unsupported platform, sorry"
 
-required_pkgs = []
-if sys.version_info < (2, 5):
-    required_pkgs.append('pyro<4')
-else:
-    required_pkgs.append('pyro')
-if sys.version_info < (2, 6):
-    required_pkgs.append('multiprocessing')
+required_pkgs = ['pycurl']
 
 etc_root = os.path.dirname(default_paths['etc'])
 var_root = os.path.dirname(default_paths['var'])
 
 # nagios/shinken global config
-main_config_files = ('shinken.cfg',
-                     'nagios-windows.cfg')
+main_config_files = ('shinken.cfg',)
+
 
 additionnal_config_files = (
                             'skonf.cfg',
@@ -550,15 +547,10 @@ print config_objects_file
 
 # daemon configs
 daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
-                    ('broker', 'brokerd-windows.ini'),
                     ('receiver', 'daemons/receiverd.ini'),
-                    ('receiver', 'receiverd-windows.ini'),
                     ('poller', 'daemons/pollerd.ini'),
-                    ('poller', 'pollerd-windows.ini'),
                     ('reactionner', 'daemons/reactionnerd.ini'),
-                    ('reactionner', 'reactionnerd-windows.ini'),
                     ('scheduler', 'daemons/schedulerd.ini'),
-                    ('scheduler', 'schedulerd-windows.ini'),
                     )
 
 resource_cfg_files = ('resource.cfg',)

@@ -55,7 +55,10 @@ class PropertiesTester(object):
         for name, value in self.properties.iteritems():
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
-            self.assertEqual(item.properties[name].default, value)
+            if hasattr(item.properties[name], 'default'):
+                if item.properties[name].default != value:
+                    print "%s, %s: %s, %s" % (name, value, item.properties[name].default, value)
+                self.assertEqual(item.properties[name].default, value)
 
     def test_all_props_are_tested(self):
         item = self.item # shortcut
@@ -223,6 +226,8 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
 
         ('use_multiprocesses_serializer', '0'),
         ('daemon_thread_pool_size', '8'),
+        ('enable_environment_macros', '1'),
+        ('timeout_exit_status', '2'),
         ])
 
     def setUp(self):
@@ -244,6 +249,7 @@ class TestCommand(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('reactionner_tag', 'None'),
         ('module_type', None),
         ('timeout', '-1'),
+        ('enable_environment_macros', 0),
         ])
 
     def setUp(self):
@@ -527,6 +533,11 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('checkmodulations', ''),
         ('macromodulations', ''),
         ('custom_views', ''),
+        ('service_overrides', ''),
+        ('business_rule_output_template', ''),
+        ('business_rule_smart_notifications', '0'),
+        ('business_rule_downtime_as_ack', '0'),
+        ('labels', ''),
         ])
 
     def setUp(self):
@@ -793,6 +804,10 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('service_dependencies', ''),
         ('custom_views', ''),
         ('merge_host_contacts', '0'),
+        ('business_rule_output_template', ''),
+        ('business_rule_smart_notifications', '0'),
+        ('business_rule_downtime_as_ack', '0'),
+        ('labels', ''),
         ])
 
     def setUp(self):

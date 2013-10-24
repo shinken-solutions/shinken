@@ -114,13 +114,22 @@ class Service(SchedulingItem):
 
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
-        'reactionner_tag':              StringProp(default='None'),
+        'reactionner_tag':         StringProp(default='None'),
         'resultmodulations':       StringProp(default=''),
         'business_impact_modulations':    StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage':      IntegerProp(default="300", fill_brok=['full_status']),
-	'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
+        'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
+        'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
+        'labels':                  ListProp(default='', fill_brok=['full_status']),
+
+        # BUSINESS CORRELATOR PART
+        # Business rules output format template
+        'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
+        # Business rules notifications mode
+        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        # Treat downtimes as acknowledgements in smart notifications
+        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
 
         # Easy Service dep definition
         'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
@@ -250,8 +259,11 @@ class Service(SchedulingItem):
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
+        # Previously processed business rule (with macro expanded)
+        'processed_business_rule': StringProp(default="", fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule': StringProp(default=None),
+
 
         # Here it's the elements we are depending on
         # so our parents as network relation, or a host
@@ -402,7 +414,7 @@ class Service(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.info(err)
+                logger.error("[service::%s] %s" % (self.get_full_name(), err))
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -584,7 +596,6 @@ class Service(SchedulingItem):
 #                                  __/ |
 #                                 |___/
 ####
-
 
     # Set unreachable: our host is DOWN, but it mean nothing for a service
     def set_unreachable(self):
@@ -924,6 +935,14 @@ class Service(SchedulingItem):
         if self.host.state != self.host.ok_up:
             return True
 
+        # Block if business rule smart notifications is enabled and all its
+        # childs have been acknowledged or are under downtime.
+        if self.got_business_rule is True \
+                and self.business_rule_smart_notifications is True \
+                and self.business_rule_notification_is_blocked() is True \
+                and type == 'PROBLEM':
+            return True
+
         return False
 
     # Get a oc*p command if item has obsess_over_*
@@ -1026,7 +1045,55 @@ class Services(Items):
         self.linkify_with_triggers(triggers)
         self.linkify_with_checkmodulations(checkmodulations)
         self.linkify_with_macromodulations(macromodulations)
-        
+
+    def override_properties(self, hosts):
+        for host in hosts:
+            # We're only looking for hosts having service overrides defined
+            if not hasattr(host, 'service_overrides') or not host.service_overrides:
+                continue
+            cache = {}
+            if isinstance(host.service_overrides, list):
+                service_overrides = host.service_overrides
+            else:
+                service_overrides = [host.service_overrides]
+            for ovr in service_overrides:
+                # Checks service override syntax
+                match = re.match(r'^([^,]+),([^\s]+)\s+(.*)$', ovr)
+                if match is None:
+                    err = "Error: invalid service override syntax: %s" % ovr
+                    host.configuration_errors.append(err)
+                    continue
+                name, prop, value = match.groups()
+                # To speep up search if several properties are overriden on the
+                # same service, we keep them in temporary cache
+                key = "%s/%s" % (host.host_name, name)
+                if key in cache:
+                    service = cache[key]
+                else:
+                    # Looks for corresponding service
+                    # As hosts and service are not yet linked, we have to walk
+                    # through services to find which is associated to host.
+                    service = None
+                    for s in self:
+                        if not hasattr(s, "host_name") or not hasattr(s, "service_description"):
+                            # this is a template
+                            continue
+                        if s.host_name == host.host_name and s.service_description == name:
+                            service = s
+                            break
+                    if service is None:
+                        err = "Error: trying to override property '%s' on service '%s' but it's unknown for this host" % (prop, name)
+                        host.configuration_errors.append(err)
+                        continue
+                    cache[key] = service
+                # Checks if override is allowed
+                excludes = ['host_name', 'service_description', 'use',
+                            'servicegroups', 'trigger', 'trigger_name']
+                if prop in excludes:
+                    err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, name)
+                    host.configuration_errors.append(err)
+                    continue
+                setattr(service, prop, value)
 
     # We can link services with hosts so
     # We can search in O(hosts) instead
@@ -1104,18 +1171,6 @@ class Services(Items):
                         h = hosts.find_by_name(s.host_name)
                         if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
-                # For some of theses attribute we not just want to
-                # have implicite inheritance but also should try
-                # to merge with the host attribute.
-                # But only if it is explicitly wanted.
-                if getattr(s, 'merge_host_contacts', '0') == '1':
-                    if prop in ('contact_groups', 'contacts') and hasattr(s, 'host_name'):
-                        h = hosts.find_by_name(s.host_name)
-                        if h is not None and hasattr(h, prop):
-                            l = getattr(s, prop, '').lstrip('+').split(',') + getattr(h, prop, '').lstrip('+').split(',')
-                            # Filter empty and doubled values
-                            attribute_list = set([x for x in l if len(x) >= 1])
-                            setattr(s, prop, ','.join(attribute_list))
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):

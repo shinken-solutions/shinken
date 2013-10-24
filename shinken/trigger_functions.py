@@ -48,25 +48,34 @@ class declared(object):
         logger.debug("Calling %s with arguments %s" % (self.f.func_name, args))
         return self.f(*args)
 
+@declared
+def up(obj, output):
+    set_value(obj, output, None, 0)
+
+
+@declared
+def down(obj, output):
+    set_value(obj, output, None, 1)
+
+
+@declared
+def ok(obj, output):
+    set_value(obj, output, None, 0)
+
+
+@declared
+def warning(obj, output):
+    set_value(obj, output, None, 1)
+
 
 @declared
 def critical(obj, output):
-    logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
-    now = time.time()
-    cls = obj.__class__
-    i = obj.launch_check(now, force=True)
-    for chk in obj.checks_in_progress:
-        if chk.id == i:
-            logger.debug("[trigger] I found the check I want to change")
-            c = chk
-            # Now we 'transform the check into a result'
-            # So exit_status, output and status is eaten by the host
-            c.exit_status = 2
-            c.get_outputs(output, obj.max_plugins_output_length)
-            c.status = 'waitconsume'
-            c.check_time = now
-            #self.sched.nb_check_received += 1
-            # Ok now this result will be read by scheduler the next loop
+    set_value(obj, output, None, 2)
+
+
+@declared
+def unknown(obj, output):
+    set_value(obj, output, None, 3)
 
 
 @declared
@@ -111,7 +120,7 @@ def perf(obj_ref, metric_name):
         logger.debug("[trigger] I found the perfdata")
         return p[metric_name].value
     logger.debug("[trigger] I am in perf command")
-    return 1
+    return None
 
 
 @declared

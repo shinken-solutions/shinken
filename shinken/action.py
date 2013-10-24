@@ -102,6 +102,7 @@ class __Action(object):
             local_env[p] = self.env[p].encode('utf8')
         return local_env
 
+
     def execute(self):
         """
         Start this action command. The command will be executed in a
@@ -121,6 +122,7 @@ class __Action(object):
         self.stderrdata = ''
 
         return self.execute__()  ## OS specific part
+
 
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
@@ -326,6 +328,13 @@ if os.name != 'nt':
             # preexec_fn=os.setsid and so we can launch a whole kill
             # tree instead of just the first one
             os.killpg(self.process.pid, 9)
+            # Try to force close the descriptors, because python seems to have problems with them
+            for fd in [self.process.stdout, self.process.stderr]:
+                try:
+                    fd.close()
+                except:
+                    pass
+
 
 else:
 

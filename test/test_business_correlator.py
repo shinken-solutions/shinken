@@ -223,6 +223,22 @@ class TestBusinesscorrel(ShinkenTest):
 
     # We will try a simple 1of: bd1 OR/AND db2
     def test_simple_1of_business_correlator(self):
+        self.run_simple_1of_business_correlator()
+
+    # We will try a simple -1of: bd1 OR/AND db2
+    def test_simple_1of_neg_business_correlator(self):
+        self.run_simple_1of_business_correlator(with_neg=True)
+
+    # We will try a simple 50%of: bd1 OR/AND db2
+    def test_simple_1of_pct_business_correlator(self):
+        self.run_simple_1of_business_correlator(with_pct=True)
+
+    # We will try a simple -50%of: bd1 OR/AND db2
+    def test_simple_1of_pct_neg_business_correlator(self):
+        self.run_simple_1of_business_correlator(with_pct=True, with_neg=True)
+
+
+    def run_simple_1of_business_correlator(self, with_pct=False, with_neg=False):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -245,13 +261,35 @@ class TestBusinesscorrel(ShinkenTest):
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
         self.assert_(svc_bd2.business_rule is None)
-        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of")
+        if with_pct is True:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_pct_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_pct")
+        else:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
-        self.assert_(bp_rule.of_values == (1, 2, 2))
+        # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
+        if with_pct is True:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+        else:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('1', '2', '2'))
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -315,6 +353,21 @@ class TestBusinesscorrel(ShinkenTest):
 
     # We will try a simple 1of: test_router_0 OR/AND test_host_0
     def test_simple_1of_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts()
+
+    # We will try a simple -1of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_neg_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts(with_neg=True)
+
+    # We will try a simple 50%of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_pct_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts(with_pct=True)
+
+    # We will try a simple -50%of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_pct_neg_business_correlator_with_hosts(self):
+        self.run_simple_1of_business_correlator_with_hosts(with_pct=True, with_neg=True)
+
+    def run_simple_1of_business_correlator_with_hosts(self, with_pct=False, with_neg=False):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -327,14 +380,35 @@ class TestBusinesscorrel(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
         router.act_depend_of = []  # ignore the router
-
-        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_with_host")
+        if with_pct is True:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_pct_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_pct")
+        else:
+            if with_neg is True:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host_neg")
+            else:
+                svc_cor = self.sched.services.find_srv_by_name_and_hostname(
+                        "test_host_0", "Simple_1Of_with_host")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
-        self.assert_(bp_rule.of_values == (1, 2, 2))
+        # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
+        if with_pct is True:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+        else:
+            if with_neg is True:
+                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+            else:
+                self.assert_(bp_rule.of_values == ('1', '2', '2'))
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -880,6 +954,13 @@ class TestBusinesscorrel(ShinkenTest):
 
     # We will try a simple 1of: bd1 OR/AND db2
     def test_complex_ABCof_business_correlator(self):
+        self.run_complex_ABCof_business_correlator(with_pct=False)
+
+    # We will try a simple 1of: bd1 OR/AND db2
+    def test_complex_ABCof_pct_business_correlator(self):
+        self.run_complex_ABCof_business_correlator(with_pct=True)
+
+    def run_complex_ABCof_business_correlator(self, with_pct=False):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -912,12 +993,18 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(E.got_business_rule == False)
         self.assert_(E.business_rule is None)
 
-        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Complex_ABCOf")
+        if with_pct == False:
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Complex_ABCOf")
+        else:
+            svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Complex_ABCOf_pct")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        self.assert_(bp_rule.of_values == (5, 1, 1))
+        if with_pct == False:
+            self.assert_(bp_rule.of_values == ('5', '1', '1'))
+        else:
+            self.assert_(bp_rule.of_values == ('100%', '20%', '20%'))
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -1003,15 +1090,24 @@ class TestBusinesscorrel(ShinkenTest):
         # 5,2,1 -> OK (we want warning only if we got 2 bad states, so not here)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 0, 'OK']])
         # 4 of: -> 4,5,5
-        bp_rule.of_values = (4, 5, 5)
+        if with_pct == False:
+            bp_rule.of_values = ('4', '5', '5')
+        else:
+            bp_rule.of_values = ('80%', '100%', '100%')
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
         # 5,1,1
-        bp_rule.of_values = (5, 1, 1)
+        if with_pct == False:
+            bp_rule.of_values = ('5', '1', '1')
+        else:
+            bp_rule.of_values = ('100%', '20%', '20%')
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
         # 5,2,1
-        bp_rule.of_values = (5, 2, 1)
+        if with_pct == False:
+            bp_rule.of_values = ('5', '2', '1')
+        else:
+            bp_rule.of_values = ('100%', '40%', '20%')
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 0)
 
@@ -1020,11 +1116,17 @@ class TestBusinesscorrel(ShinkenTest):
         # 4,1,1 -> Critical (2 states raise the waring, but on raise critical, so worse state is critical)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit']])
         # 4 of: -> 4,5,5
-        bp_rule.of_values = (4, 5, 5)
+        if with_pct == False:
+            bp_rule.of_values = ('4', '5', '5')
+        else:
+            bp_rule.of_values = ('80%', '100%', '100%')
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 2)
         # 4,1,1
-        bp_rule.of_values = (4, 1, 1)
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '1')
+        else:
+            bp_rule.of_values = ('40%', '20%', '20%')
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 2)
 
@@ -1034,15 +1136,24 @@ class TestBusinesscorrel(ShinkenTest):
         # * 4,1,3 -> warning (the warning rule is raised, but the critical is not)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit'], [C, 2, 'Crit']])
         # * 2 of: 2,5,5
-        bp_rule.of_values = (2, 5, 5)
+        if with_pct == False:
+            bp_rule.of_values = ('2', '5', '5')
+        else:
+            bp_rule.of_values = ('40%', '100%', '100%')
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
         # * 4,1,1
-        bp_rule.of_values = (4, 1, 1)
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '1')
+        else:
+            bp_rule.of_values = ('80%', '20%', '20%')
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 2)
         # * 4,1,3
-        bp_rule.of_values = (4, 1, 3)
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '3')
+        else:
+            bp_rule.of_values = ('80%', '20%', '60%')
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
 
@@ -1200,7 +1311,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd1 in svc_cor.parent_dependencies)
         self.assert_(svc_bd2 in svc_cor.parent_dependencies)
         self.assert_(router in svc_cor.parent_dependencies)
-        
+
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -1239,8 +1350,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(son0_1_1_0.sons[0] == svc_lvs1)
         self.assert_(son0_1_1_1.operand == 'service')
         self.assert_(son0_1_1_1.sons[0] == svc_lvs2)
-                
-        
+
+
         # Now state working on the states
         self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10'],
                                 [svc_lvs1, 0, 'OK'], [svc_lvs2, 0, 'OK'], [router, 0, 'UP'] ])
@@ -1307,7 +1418,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(router.state == 'DOWN')
         self.assert_(router.state_type == 'HARD')
         self.assert_(router.last_hard_state_id == 1)
-        
+
         # Must be CRITICAL (CRITICAL VERSUS DOWN -> DOWN)
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -1317,7 +1428,7 @@ class TestBusinesscorrel(ShinkenTest):
         for p in svc_cor.source_problems:
             print p.get_full_name()
         self.assert_(router in svc_cor.source_problems)
-                                                        
+
 
 
 
@@ -1342,7 +1453,7 @@ class TestBusinesscorrel(ShinkenTest):
         host.act_depend_of = []  # ignore the router
         A = self.sched.hosts.find_by_name("test_darthelmet_A")
         B = self.sched.hosts.find_by_name("test_darthelmet_B")
-        
+
         self.assert_(host.got_business_rule == True)
         self.assert_(host.business_rule is not None)
         bp_rule = host.business_rule

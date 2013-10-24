@@ -36,7 +36,7 @@ class TestNotifMacros(ShinkenTest):
         # in the main config file
         #
         print "Get the hosts and services"
-        now = time.time()
+        #now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
@@ -49,11 +49,12 @@ class TestNotifMacros(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         # Should got a notif here
         self.assert_(len(svc.notifications_in_progress.values()) > 0)
-        n = svc.notifications_in_progress.values()[0]
+        #n = svc.notifications_in_progress.values()[0]
         got_notif = False
+        r = 'plugins/macros_check.sh "_HOSTADMINEMAIL=" "monemail@masociete.domain" ' \
+            '"_HOSTCOMPANYNAME=" "masociete" "_CONTACTTESTC=" "sender@masociete.domain" "toto"'
         for a in self.sched.actions.values():
             print a.command
-            r = 'plugins/macros_check.sh "_HOSTADMINEMAIL=" "monemail@masociete.domain" "_HOSTCOMPANYNAME=" "masociete" "_CONTACTTESTC=" "sender@masociete.domain" "toto"'
             if a.command == r:
                 got_notif = True
         self.assert_(got_notif)

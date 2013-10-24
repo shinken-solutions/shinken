@@ -143,6 +143,9 @@ CMD=$1
 shift
 SUBMODULES=$*
 
+# Reads configuration variable file if it is present
+[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+
 if [ -z "$SUBMODULES" ]; then
     SUBMODULES=$AVAIL_MODULES
 else
@@ -155,11 +158,6 @@ else
         [ $found = 0 ] && { usage >&2 ; exit 2 ; }
     done
 fi
-
-
-# Reads configuration variable file if it is present
-[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
-
 
 # Now look if some required variables are pre defined:
 if ! test "$SHINKENCFG"

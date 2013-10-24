@@ -79,7 +79,7 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger, console_logger
-from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
 from shinken.daemon import get_cur_user, get_cur_group
 
 no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
@@ -176,7 +176,7 @@ class Config(Item):
         'enable_predictive_service_dependency_checks': StringProp(managed=False, default='1'),
         'cached_host_check_horizon': IntegerProp(default='0', class_inherit=[(Host, 'cached_check_horizon')]),
         'cached_service_check_horizon': IntegerProp(default='0', class_inherit=[(Service, 'cached_check_horizon')]),
-        'use_large_installation_tweaks': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+        'use_large_installation_tweaks': UnusedProp(text='this option is deprecated because in shinken it is just an alias for enable_environment_macros=0'),
         'free_child_process_memory': UnusedProp(text='this option is automatic in Python processes'),
         'child_processes_fork_twice': UnusedProp(text='fork twice is not use.'),
         'enable_environment_macros': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
@@ -188,6 +188,7 @@ class Config(Item):
         'soft_state_dependencies':  BoolProp(managed=False, default='0'),
         'service_check_timeout':    IntegerProp(default='60', class_inherit=[(Service, 'check_timeout')]),
         'host_check_timeout':       IntegerProp(default='30', class_inherit=[(Host, 'check_timeout')]),
+        'timeout_exit_status':      IntegerProp(default='2'),
         'event_handler_timeout':    IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
         'notification_timeout':     IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
         'ocsp_timeout':             IntegerProp(default='15', class_inherit=[(Service, None)]),
@@ -254,7 +255,7 @@ class Config(Item):
         'enable_problem_impacts_states_change': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
 
         # More a running value in fact
-        'resource_macros_names': StringProp(default=[]),
+        'resource_macros_names': ListProp(default=[]),
 
         # SSL PART
         # global boolean for know if we use ssl or not
@@ -589,6 +590,7 @@ class Config(Item):
         if not tmp_type in objectscfg:
             objectscfg[tmp_type] = []
 
+
         objectscfg[tmp_type].append(tmp)
         objects = {}
 
@@ -603,10 +605,13 @@ class Config(Item):
                 tmp = {}
                 for line in items:
                     elts = self._cut_line(line)
-                    if elts != []:
-                        prop = elts[0]
-                        value = ' '.join(elts[1:])
-                        tmp[prop] = value
+                    if elts == []:
+                        continue
+                    prop = elts[0]
+                    if not prop in tmp:
+                        tmp[prop] = []
+                    value = ' '.join(elts[1:])
+                    tmp[prop].append(value)
                 if tmp != {}:
                     objects[type].append(tmp)
 
@@ -978,6 +983,10 @@ class Config(Item):
                 logger.info(s)
 
             logger.warning("Unmanaged configuration statement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
+
+    # Overrides specific instances properties
+    def override_properties(self):
+        self.services.override_properties(self.hosts)
 
     # Use to fill groups values on hosts and create new services
     # (for host group ones)

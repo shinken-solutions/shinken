@@ -248,15 +248,16 @@ function setdirectives(){
     mpath=$3
 
     cecho "    > Going to $mpath" green
-    cd $mpath
+    pushd $mpath >> ${LOGFILE} 2>&1
 
     for pair in $directives
     do
         directive=$(echo $pair | awk -F= '{print $1}')
         value=$(echo $pair | awk -F= '{print $2}')
         cecho "       > Setting $directive to $value in $fic" green
-        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $ETC/$(basename $fic)
+        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $fic
     done
+    popd >> ${LOGFILE} 2>&1
 }
 
 ##############################
@@ -312,7 +313,8 @@ function installpkg(){
 
     if [ "$type" == "python" ]
     then
-        PYEI="easy_install"
+        PVER=$(pythonvershort)
+        PYEI="easy_install-$PVER"
         $PYEI $package >> ${LOGFILE} 2>&1
         return $?
     elif [ "$type" = "pkg" ]
@@ -394,7 +396,7 @@ function prerequisites(){
                         cecho " > $EPELPKG already installed" green
                     fi
                     ;;
-                *)                    
+                *)
                     cecho " > Unsupported RedHat/CentOs version" red
                     exit 2
                     ;;
@@ -434,12 +436,35 @@ function prerequisites(){
             exit 2
         fi
     fi
+
+
+    cecho " > Defining which python version to use :" green
+    export PY="python-$(pythonvershort)"
+    which $PY >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        export PY="python$(pythonvershort)"
+    fi
+    cecho " > $PY" green
+
+    # setuptools
+    cecho " > Installing setuptools" green
+    wget --no-check-certificate $WGETPROXY $SETUPTOOLS >> ${LOGFILE} 2>&1
+    tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> ${LOGFILE} 2>&1
+    cd setuptools-$SETUPTOOLSVERS
+    $PY setup.py install >> ${LOGFILE} 2>&1
+
     # python prereq
-    export PY="python"
-    export PYEI="easy_install"
+    PYEI="easy_install-$PVER"
     if [ "$CODE" = "REDHAT" ]
     then
-         PYLIBS=$PYLIBSRHEL6
+        if [ "$VERS" = "5" ]
+        then
+            PYLIBS=$PYLIBSRHEL
+        elif [ "$VERS" = "6" ]
+        then
+            PYLIBS=$PYLIBSRHEL6
+        fi
     elif [ "$CODE" = "Fedora" ]
     then
         case $VERS in
@@ -453,8 +478,8 @@ function prerequisites(){
     fi
 
     # this is a fix for MySQL-python complainig about outdated version of distribute
-    cecho " > Installing distribute" green
-    easy_install -U distribute >> ${LOGFILE} 2>&1
+    #cecho " > Installing distribute" green
+    #$PYEI -U distribute >> ${LOGFILE} 2>&1
 
     for p in $PYLIBS
     do
@@ -484,9 +509,10 @@ function prerequisites(){
     if [ $MANAGEPYRO == 1 ]
     then
         cecho " > Installing managed python (experimental) " green
-        easy_install pip
-        yes | pip uninstall Pyro
-        yes | pip uninstall Pyro4
+        #$PYEI pip
+        export PIP="pip-$(pythonvershort)"
+        yes | $PIP uninstall Pyro
+        yes | $PIP uninstall Pyro4
         pyroset
         $PYEI "$PYRO"
     fi
@@ -696,21 +722,31 @@ function relocate(){
     # set some directives
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER shinken_user=$SKUSER group=$SKGROUP shinken_group=$SKGROUP"
-    for fic in $(ls -1 $ETC/*.ini $ETC/skonf.cfg)
+    for fic in $(ls -1 $ETC/daemons/*.ini $ETC/skonf.cfg)
     do
         cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $TARGET
+        setdirectives "$directives" $fic $ETC/daemons
     done
-    directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
-    for fic in $(ls -1 $ETC/nagios*cfg)
+    daemons="arbiters schedulers brokers reactionners receivers pollers modules"
+    for element in $dameons
     do
-        cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $TARGET
+        cecho "  > processing $element" green
+        files=$(ls -1 *.cfg)
+        for file in $files
+        do
+            cecho "    > processing $file" green
+        done
     done
+    #directives="workdir=$TARGET/var shinken_user=$SKUSER shinken_group=$SKGROUP local_log=$TARGET/var/arbiter.log lock_file=$TARGET/var/arbiter.pid"
+    #for fic in $(ls -1 $ETC/nagios*cfg)
+    #do
+    #    cecho " > Processing $fic" green;
+    #    setdirectives "$directives" $fic $TARGET
+    #done
     # relocate default file
     cd $TARGET/bin/default
     cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
-    rm $TARGET/bin/default/shinken.in 
+    rm $TARGET/bin/default/shinken.in
     # relocate init file
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
@@ -722,10 +758,36 @@ function relocate(){
     sed -i "s#/etc/shinken#"$ETC"#g" skonf.cfg
     sed -i "s#/tmp#"$TMP"#g" skonf.cfg
     sed -i "s#/var/lib/shinken/share#"$TARGET"/share#g" skonf.cfg
+
+
+    # relocate she bang python in every python files
+    PY=$(which $(pythonver))
+    for f in $(grep "\#\!.*python" $TARGET/bin/shinken* | grep -v "\.py" | awk -F: '{print $1}')
+    do
+        cecho "Relocate python interpreter to $PY in $f" green
+        sed -i "s#/usr/bin/env python#$PY#g" $f
+    done
+
 }
 
 function fix(){
     cadre "Applying various fixes" green
+
+    # fix some path
+    for f in $(grep -R "/var/run/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/run/shinken#"$TARGET"/var#g" $f
+    done
+
+    for f in $(grep -R "/var/log/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/log/shinken#"$TARGET"/var#g" $f
+    done
+
+    for f in $(grep -R "/var/lib/shinken" $TARGET/ | awk -F: '{print $1}' | sort | uniq)
+    do
+        sed -i "s#/var/lib/shinken#"$TARGET"#g" $f
+    done
 
     # fix the htpasswd.users file path for WEBUI authentication
     export PYTHONPATH=$TARGET
@@ -748,6 +810,8 @@ function fix(){
     echo "$SKUSER ALL=(ALL) NOPASSWD: /usr/bin/nmap" >> /etc/sudoers.d/shinken
     chmod u=r,g=r,o= /etc/sudoers.d/shinken
     [ $? -ne 0 ] && cecho "$DIST isn't supported, you must fix sudo permission at your own !!!" red
+
+
 }
 
 function enable_initd(){
@@ -905,9 +969,8 @@ function sinstall(){
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     mkdir -p $TARGET/var/archives
-    enableretention
+    #enableretention
     enable_initd
-
     if [[ $NOMONGO -eq 1 ]]
     then
         cecho " > Skip mongo installation" green
@@ -1025,8 +1088,8 @@ function backup(){
         cecho " --> Backup pnp4nagios/share/templates" green
         cp -Rfp $PNPPREFIX/share/templates $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
     fi
-    
-    cecho " > Compressing backup file" green    
+
+    cecho " > Compressing backup file" green
     tar czPf $BACKUPDIR/bck-shinken.$DATE.tar.gz $BACKUPDIR/bck-shinken.$DATE
     cecho " > Removing backup folder. Backup is now at " green
     echo $BACKUPDIR/bck-shinken.$DATE.tar.gz
@@ -1089,31 +1152,31 @@ function restore(){
     if [ -d $NAGVISPREFIX ]
     then
         cecho " --> Restoring Restore Nagvis" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/etc $NAGVISPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/userfiles $NAGVISPREFIX/share/userfiles
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/etc/* $NAGVISPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/nagvis/userfiles/* $NAGVISPREFIX/share/userfiles
     fi
 
     if [ -d $MKPREFIX ]
     then
         cecho " --> Restoring Restore Check_mk" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/etc $MKPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard $MKPREFIX/share/web/plugins/dashboard
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/perfometer $MKPREFIX/share/web/plugins/perfometer
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/icons $MKPREFIX/share/web/htdocs/images/icons
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/web $MKPREFIX/var/lib/web
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/etc/* $MKPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/dashboard/* $MKPREFIX/share/web/plugins/dashboard
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/perfometer/* $MKPREFIX/share/web/plugins/perfometer
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/icons/* $MKPREFIX/share/web/htdocs/images/icons
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/check_mk/web/* $MKPREFIX/var/lib/web
     fi
 
     if [ -d $PNPPREFIX ]
     then
         cecho " --> Restoring Restore PNP4Nagios" green
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/etc $PNPPREFIX/etc
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/var $PNPPREFIX/var
-	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/templates $PNPPREFIX/share/templates
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/etc/* $PNPPREFIX/etc
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/var/* $PNPPREFIX/var
+	 cp -Rfp $BACKUPDIR/bck-shinken.$1/pnp4nagios/templates/* $PNPPREFIX/share/templates
     fi
 
     rm -rf $BACKUPDIR/bck-shinken.$1
 
-    # Start Shinken after restore	
+    # Start Shinken after restore
     sstart
     if [ -f /etc/init.d/npcd ]
     then
@@ -1347,7 +1410,124 @@ function setdaemons(){
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
 
-# addons installation
+###########################
+### addons installation ###
+###########################
+
+function install_graphite()
+{
+
+    if [ $SKIPPREREQUISITES -eq 1 ]
+    then
+        cecho " SKIPPREREQUISITES enabled: won't install nconf prerequisites" yellow
+    else
+            cecho " > Installing prerequisites" green
+            cd $TMP
+            installpkg python $GRAPHITEPKG
+            case $CODE in
+              DEBIAN)
+                installpkg pkg $GRAPHITEPKGDEB
+                ;;
+            esac
+    fi
+
+    cadre "Install graphite add-on" green
+    cd $TMP
+    cecho "Downloading Graphite" green
+
+    rm -rf graphite-web carbon whisper
+    git clone ${GRAPHITE_WEB_GITHUB} >> $LOGFILE 2>&1
+    git clone ${CARBON_GITHUB} >> $LOGFILE 2>&1
+    git clone ${WHISPER_GITHUB} >> $LOGFILE 2>&1
+
+    cecho "Installing Whisper component" green
+    cd whisper
+    python setup.py install >> $LOGFILE 2>&1
+
+    cecho "Installing Carbon component" green
+    cd ../carbon
+    python setup.py install >> $LOGFILE 2>&1
+
+    cecho "Configuring Carbon" green
+    cd ..
+    cd /opt/graphite/conf
+    cp carbon.conf.example carbon.conf
+    cp storage-aggregation.conf.example storage-aggregation.conf
+    cp storage-schemas.conf.example storage-schemas.conf
+
+    cecho "Installing Graphite webapp" green
+    cd - > /dev/null 2>&1
+    cd graphite-web
+    python check-dependencies.py >> $LOGFILE 2>&1
+    python setup.py install >> $LOGFILE 2>&1
+
+    cecho "Configuring Graphite webapp" green
+    # Set TZ to avoid issue with 4H graph into shinken and set default database engine
+    cd /opt/graphite/webapp/graphite
+    cp local_settings.py.example local_settings.py
+    sed -i -r -e "s/^.(SECRET_KEY = ).*/\1'POk#dr5*4znkd6511z'/" -e "s/.TIME_ZONE.*/TIME_ZONE = \'Europe\/Paris\'/" -e 's/#(DATABASES = .*| *.default.: .*| *.NAME.*,| *.ENGINE.*| *.USER.*| *.PASSWORD.*| *.HOST.*| *.PORT.*|    \}|\})/\1/' local_settings.py
+    python manage.py syncdb --noinput > $LOGFILE
+    python manage.py createsuperuser --username=root --email=default@mail.org --noinput >> $LOGFILE 2>&1
+    case $CODE in
+        REDHAT|Fedora)
+            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/httpd/conf.d/graphite.conf
+            ;;
+        DEBIAN)
+            cp /opt/graphite/examples/example-graphite-vhost.conf /etc/apache2/sites-available/graphite.conf
+            sed -i 's%@DJANGO_ROOT@%/usr/local/lib/python2.7/dist-packages/Django-1.5.4-py2.7.egg/django/%g' /etc/apache2/sites-available/graphite.conf
+            sed -i 's%WSGISocketPrefix .*$%WSGISocketPrefix /usr/local/shinken/var/apache2/wsgi%' /etc/apache2/sites-available/graphite.conf
+            a2ensite graphite.conf
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST. Webapp not properly integrated into apache configuration." yellow
+            exit 2
+            ;;
+    esac
+    cp /opt/graphite/conf/graphite.wsgi.example /opt/graphite/conf/graphite.wsgi
+    # Fix permissions and activate vhost for graphite webapp. VERY IMPORTANT TO HAVE GOOD PERMISSIONS!
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/log/webapp
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/
+    chown $HTTPDUSER:$HTTPDGROUP /opt/graphite/storage/graphite.db
+
+    echo ""
+    cecho " > Reboot Apache"
+    case $CODE in
+      DEBIAN)
+        /etc/init.d/apache2 restart
+        ;;
+      REDHAT|Fedora)
+        /etc/init.d/httpd restart
+        ;;
+    esac
+
+    echo ""
+    cecho "If you want to be able to log in graphite webapp using root account" yellow
+    cecho "you have to set its password using command 'python manage.py changepassword' inside" yellow
+    cecho "/opt/graphite/webapp/graphite directory." yellow
+    echo ""
+    cecho "Do not forget to configure broker and webui to include graphite module" yellow
+    echo ""
+    cadre "Graphite addon installation finished" green
+}
+
+function uninstall_graphite()
+{
+    cadre "Uninstalling graphite add-on" green
+    rm -rf /opt/graphite
+    case $CODE in
+        REDHAT|Fedora)
+            rm -f /etc/httpd/conf.d/graphite.conf
+            ;;
+        DEBIAN)
+            a2disite graphite.conf
+            rm -f /etc/httpd/sites-available/graphite.conf
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST. Webapp not properly deleted into apache configuration." yellow
+            exit 2
+            ;;
+    esac
+}
 
 # mongodb
 function install_mongodb(){
@@ -1392,7 +1572,7 @@ function install_mongodb(){
             cecho " > Installing mongodb server" green
             if [ ! -f ${SYSTEMDPATH}lib/systemd/system/mongod.service ]
             then
-                    installpkg pkg $MONGOPKGS 
+                    installpkg pkg $MONGOPKGS
             else
                 cecho "Already installed" yellow
             fi
@@ -1608,7 +1788,7 @@ function install_multisite(){
 #    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
-        cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
+    cp  "$myscripts"/install.d/multisite.mk $MKPREFIX/etc/
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
@@ -2020,7 +2200,7 @@ function install_notify_by_xmpp(){
             fi
         fi
     done
-    
+
     while true
     do
         creads " -> Please provide the password of this account:" yellow
@@ -2170,11 +2350,11 @@ function install_cucumber(){
     done
 
     cecho " --> Alter max_ouput_length for webui" green
-    do_skmacro set_webui_ouptput_length.macro 200 
-  
+    do_skmacro set_webui_ouptput_length.macro 200
+
     cecho " --> Deploy example eue service" green
     IP=$(ifconfig  | grep adr | awk -F: '{print $2}' | awk '{print $1}' | head -n 1)
-    install -b -g $SKGROUP -o $SKUSER -m 0664 $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services 
+    install -b -g $SKGROUP -o $SKUSER -m 0664 $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services
     install -b -g $SKGROUP -o $SKUSER -m 0664 $LIBEXEC/eue/glpi.ini.in $LIBEXEC/eue/glpi.ini
     sed -i "s/@@IPWEBUI@@/"$IP"/g" $LIBEXEC/eue/glpi.ini
 
@@ -2579,6 +2759,10 @@ function install_check_esx3(){
     cecho " > Getting check_disk_vcenter plugin" green
     wget $WGETPROXY $CHECK_DISK_VCENTER_SCRIPT -O check_disk_vcenter.pl >> ${LOGFILE} 2>&1
     install -b -g $SKGROUP -o $SKUSER -m 0775 check_disk_vcenter.pl $LIBEXEC/check_disk_vcenter.pl
+    cecho " > Getting check_vmware_snaphosts.pl" green
+    wget $WGETPROXY $CHECKVMWARESNAPSHOTS >> ${LOGFILE} 2>&1
+    tar xzvf check_vmware_snapshots_0.13.tar.gz >> ${LOGFILE} 2>&1
+    install -b -g $SKGROUP -o $SKUSER -m 0775 -t $LIBEXEC check_vmware_snapshots.pl >> ${LOGFILE} 2>&1
 }
 
 # NAGIOS-PLUGINS
@@ -2588,7 +2772,7 @@ function install_nagios-plugins(){
     cecho " > Installing prerequisites" green
     case $CODE in
         REDHAT|Fedora)
-            installpkg pkg $NAGPLUGYUMPKG 
+            installpkg pkg $NAGPLUGYUMPKG
             ;;
         DEBIAN)
             DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> ${LOGFILE} 2>&1
@@ -3201,7 +3385,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_logfiles
                                check_oracle_health
                                check_mysql_health
-							   check_db2_health
+                               check_db2_health
                                capture_plugin
                                check_wmi_plus
                                check_mongodb
@@ -3219,6 +3403,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
+                               graphite
                                multisite
                                nagvis
                                mongodb
@@ -3306,7 +3491,7 @@ do
             elif [ "$OPTARG" == "check_db2_health" ]
             then
                 install_check_db2_health
-                exit 0				
+                exit 0
             elif [ "$OPTARG" == "capture_plugin" ]
             then
                 install_capture_plugin
@@ -3380,6 +3565,10 @@ do
             then
                 install_pnp4nagios
                 exit 0
+            elif [ "$OPTARG" == "graphite" ]
+            then
+                install_graphite
+                exit 0
             elif [ "$OPTARG" == "multisite" ]
             then
                 install_multisite
@@ -3426,7 +3615,7 @@ do
             ;;
         -i|--install)
             FROMSRC=1
-            sinstall 
+            sinstall
             exit 0
             ;;
         -u|--uninstall)
@@ -3453,6 +3642,10 @@ do
                 case $OPTARG in
                     pnp4nagios)
                         uninstall_pnp4nagios
+                        exit 0
+                        ;;
+                    graphite)
+                        uninstall_graphite
                         exit 0
                         ;;
                     nagvis)

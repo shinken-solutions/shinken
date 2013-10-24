@@ -30,6 +30,7 @@ will find all scheduling related functions, like the schedule
 or the consume_check. It's a very important class!
 """
 
+import re
 import random
 import time
 import traceback
@@ -213,6 +214,7 @@ class SchedulingItem(Item):
         # we should warn potentials impact of our problem
         # and they should be cool to register them so I've got
         # my impacts list
+        impacts = list(self.impacts)
         for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
             # Check if the status is ok for impact
             for s in status:
@@ -221,9 +223,13 @@ class SchedulingItem(Item):
                     # not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
                         new_impacts = impact.register_a_problem(self)
-                        self.impacts.extend(new_impacts)
-                        # Make element unique in this list
-                        self.impacts = list(set(self.impacts))
+                        impacts.extend(new_impacts)
+
+        # Only update impacts and create new brok if impacts changed.
+        s_impacts = set(impacts)
+        if s_impacts == set(self.impacts):
+            return
+        self.impacts = list(s_impacts)
 
         # We can update our business_impact value now
         self.update_business_impact_value()
@@ -524,12 +530,12 @@ class SchedulingItem(Item):
             time_add = interval * random.uniform(0.0, 1.0)
         else:
             time_add = interval
-            
+
         ## Do the actual Scheduling now
 
         # If not force_time, try to schedule
         if force_time is None:
-            
+
             # Do not calculate next_chk based on current time, but based on the last check execution time.
             # Important for consistency of data for trending.
             if self.next_chk == 0 or self.next_chk is None:
@@ -916,7 +922,7 @@ class SchedulingItem(Item):
             if self.state_type == 'SOFT':
                 self.add_attempt()
                 if self.is_max_attempts():
-                    # Ok here is when we just go to the hard state
+                   # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
@@ -954,14 +960,6 @@ class SchedulingItem(Item):
                         if not no_action:
                             self.create_notifications('PROBLEM')
 
-                        # PROBLEM/IMPACT
-                        # Maybe our new state can raise the problem
-                        # when the last one was not
-                        # I'm a problem only if I'm the root problem,
-                        # so not no_action:
-                        if not no_action:
-                            self.set_myself_as_problem()
-
                 elif self.in_scheduled_downtime_during_last_check == True:
                     # during the last check i was in a downtime. but now
                     # the status is still critical and notifications
@@ -969,6 +967,15 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         self.create_notifications('PROBLEM')
+
+                # PROBLEM/IMPACT
+                # Forces problem/impact registration even if no state change
+                # was detected as we may have a non OK state restored from
+                # retetion data. This way, we rebuild problem/impact hierarchy.
+                # I'm a problem only if I'm the root problem,
+                # so not no_action:
+                if not no_action:
+                    self.set_myself_as_problem()
 
         self.update_hard_unknown_phase_state()
         # Reset this flag. If it was true, actions were already taken
@@ -1054,7 +1061,7 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
-        if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
+        if cls.enable_environment_macros or n.enable_environment_macros:
             n.env = m.get_env_macros(data)
 
 
@@ -1230,7 +1237,8 @@ class SchedulingItem(Item):
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
-                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type)
+                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type,
+                    enable_environment_macros=cmd.enable_environment_macros)
                 if not self.notification_is_blocked_by_contact(child_n, contact):
                     # Update the notification with fresh status information
                     # of the item. Example: during the notification_delay
@@ -1285,18 +1293,17 @@ class SchedulingItem(Item):
                 if c_cw:
                     check_command = c_cw
                     break
-            
+
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
             command_line = m.resolve_command(check_command, data)
-
             # By default env is void
             env = {}
 
             # And get all environment variables only if needed
-            if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
-                env = m.get_env_macros(data)
+            if cls.enable_environment_macros or check_command.enable_environment_macros:
+               env = m.get_env_macros(data)
 
             # By default we take the global timeout, but we use the command one if it
             # define it (by default it's -1)
@@ -1361,7 +1368,7 @@ class SchedulingItem(Item):
 
     # Create the whole business rule tree
     # if we need it
-    def create_business_rules(self, hosts, services):
+    def create_business_rules(self, hosts, services, running=False):
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout
@@ -1381,31 +1388,182 @@ class SchedulingItem(Item):
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
+            # Only (re-)evaluate the business rule if it has never been
+            # evaluated before, or it contains a macro.
+            if re.match(r"\$[\w\d_-]+\$", rule) or self.business_rule is None:
+                data = self.get_data_for_checks()
+                m = MacroResolver()
+                rule = m.resolve_simple_macros_in_string(rule, data)
+                prev = getattr(self, "processed_business_rule", "")
 
-            fact = DependencyNodeFactory()
-            node = fact.eval_cor_pattern(rule, hosts, services)
-            #print "got node", node
-            self.business_rule = node
+                if rule == prev:
+                    # Business rule did not change (no macro was modulated)
+                    return
+
+                fact = DependencyNodeFactory(self)
+                node = fact.eval_cor_pattern(rule, hosts, services, running)
+                #print "got node", node
+                self.processed_business_rule = rule
+                self.business_rule = node
+
+
+    # Returns a status string for business rules based services, formatted
+    # using format string as output template.
+    # The template may embed output formatting for itself, and for its child
+    # (dependant) itmes. Childs format string is expanded into the $( and )$,
+    # using the string between brackets as format string.
+    # Output is generated by expanding the following macros.
+    #
+    #   SERVICE_DESCRIPTION:    The service name
+    #   HOST_NAME:              The item name
+    #   FULL_NAME:              The item name
+    #   STATUS:                 The item status string (may be OK, WARN, CRIT,
+    #                           UP, DOWN)
+    #   SHORT_STATUS:           The item shorten status string (O, W, C, U, D)
+    #
+    # Caution: only childs in state not OK are displayed.
+    #
+    # Example:
+    #   A business rule with a format string looking like
+    #       "$STATUS$ [ $($STATUS$: $HOST_NAME$,$SERVICE_DESCRIPTION$ )$ ]"
+    #   Would return
+    #       "CRITICAL [ CRITICAL: host1,srv1 WARNING: host2,srv2  ]"
+    def get_business_rule_output(self):
+        got_business_rule = hasattr(self, 'got_business_rule') and \
+                            self.got_business_rule is True
+        # Checks that the service is a business rule.
+        if got_business_rule is False or self.business_rule is None:
+            return ""
+        # Checks that the business rule has a format specified.
+        output_template = self.business_rule_output_template
+        if not output_template:
+            return ""
+        # Extracts template strings
+        # Current service output format string
+        service_template_string = re.sub("\$\(.*\)\$", "$CHILDS_OUTPUT$", output_template)
+        # Childs output format string
+        elts = re.findall(r"\$\((.*)\)\$", output_template)
+        if not len(elts):
+            child_template_string = ""
+        else:
+            child_template_string = elts[0]
+
+        # Processes child services output
+        childs_output = ""
+        childs = self.business_rule.list_all_elements()
+        ok_count = 0
+        # Expands child items format string macros.
+        for child in childs:
+            # Do not display childs in OK state
+            if child.last_hard_state_id == 0:
+                ok_count += 1
+                continue
+            childs_output += self.expand_business_rule_item_macros(child_template_string, child)
+
+        if ok_count == len(childs):
+            childs_output = "all checks were successful."
+
+
+        # Expands node's template string macros.
+        # State has to be set manually, as the service state attribute is only
+        # set on a next scheduler step.
+        output = service_template_string
+        mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL", 3: "UNKNOWN"}
+        status = mapping[self.business_rule.get_state()]
+        output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
+        short_status = self.status_to_short_status(status)
+        output = re.sub(r"\$SHORT_STATUS\$", short_status, output, flags=re.I)
+        output = self.expand_business_rule_item_macros(output, self)
+        output = re.sub("\$CHILDS_OUTPUT\$", childs_output, output)
+        return output.strip()
+
+
+    # Expands format string macros with item attributes
+    def expand_business_rule_item_macros(self, template_string, item):
+        output = template_string
+        status = getattr(item, "state", "")
+        output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
+        short_status = self.status_to_short_status(status)
+        output = re.sub(r"\$SHORT_STATUS\$", short_status, output, flags=re.I)
+        service_description = getattr(item, "service_description", "")
+        output = re.sub(r"\$SERVICE_DESCRIPTION\$", service_description, output, flags=re.I)
+        host_name = getattr(item, "host_name", "")
+        output = re.sub(r"\$HOST_NAME\$", host_name, output, flags=re.I)
+        full_name = item.get_full_name()
+        output = re.sub(r"\$FULL_NAME\$", full_name, output, flags=re.I)
+        return output
+
+
+    # Returns status string shorten name.
+    def status_to_short_status(self, status):
+        mapping = {
+            "OK": "O",
+            "WARNING": "W",
+            "CRITICAL": "C",
+            "UNKNOWN": "U",
+            "UP": "U",
+            "DOWN": "D"
+        }
+        return mapping.get(status, status)
+
+
+    # Processes business rule notifications behaviour. If all problems have
+    # been acknowledged, no notifications should be sent if state is not OK.
+    # By default, downtimes are ignored, unless explicitely told to be treated
+    # as acknowledgements through with the business_rule_downtime_as_ack set.
+    def business_rule_notification_is_blocked(self):
+        # Walks through problems to check if all items in non ok are
+        # acknowledged or in downtime period.
+        acknowledged = 0
+        for s in self.source_problems:
+            if s.last_hard_state_id != 0:
+                if s.problem_has_been_acknowledged:
+                    # Problem hast been acknowledged
+                    acknowledged += 1
+                # Only check problems under downtime if we are
+                # explicitely told to do so.
+                elif self.business_rule_downtime_as_ack is True and \
+                        s.scheduled_downtime_depth > 0:
+                    # Problem is under downtime, and downtimes should be
+                    # traeted as acknowledgements
+                    acknowledged += 1
+        if acknowledged == len(self.source_problems):
+            return True
+        else:
+            return False
 
 
     # We ask us to manage our own internal check,
     # like a business based one
-    def manage_internal_check(self, c):
+    def manage_internal_check(self, hosts, services, c):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
-            state = self.business_rule.get_state()
+            try:
+                # Re evaluate the business rule to take into account macro
+                # modulation.
+                # Caution: We consider the that the macro modulation did not
+                # change business rule dependency tree. Only Xof: values should
+                # be modified by modulation.
+                self.create_business_rules(hosts, services, running=True)
+                state = self.business_rule.get_state()
+                c.output = self.get_business_rule_output()
+            except Exception, e:
+                # Notifies the error, and return an UNKNOWN state.
+                c.output = "Error while re-evaluating business rule: %s" % e
+                logger.debug("[%s] Error while re-evaluating business rule:\n%s" %
+                             (self.get_name(), traceback.format_exc()))
+                state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0
             c.execution_time = 0
             c.output = 'Host assumed to be UP'
-            c.long_output = c.output
         # Echo is just putting the same state again
         elif c.command == '_echo':
             state = self.state
             c.execution_time = 0
             c.output = self.output
-            c.long_output = c.long_output
+        c.long_output = c.output
         c.check_time = time.time()
         c.exit_status = state
         #print "DBG, setting state", state

@@ -236,7 +236,7 @@ class Scheduler:
                 f.write(s)
             for a in self.actions.values():
                 s = '%s: %s:%s:%s:%s:%s:%s\n' % (a.__class__.my_type.upper(), a.id, a.status, a.t_to_go, a.reactionner_tag, a.command, a.worker)
-                f.write(s)                
+                f.write(s)
             for b in self.broks.values():
                 s = 'BROK: %s:%s\n' % (b.id, b.type)
                 f.write(s)
@@ -592,7 +592,7 @@ class Scheduler:
                                 # a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # or maybe before because we have an escalation that need to raise up before
                                 a.t_to_go = item.get_next_notification_time(a)
-                                
+
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
                             else:
@@ -650,7 +650,7 @@ class Scheduler:
 
             except AttributeError, exp:  # bad object, drop it
                 logger.warning('put_results:: get bad notification : %s ' % str(exp))
-            
+
 
 
         elif c.is_a == 'check':
@@ -658,6 +658,7 @@ class Scheduler:
                 if c.status == 'timeout':
                     c.output = "(%s Check Timed Out)" % self.checks[c.id].ref.__class__.my_type.capitalize()
                     c.long_output = c.output
+                    c.exit_status = self.conf.timeout_exit_status
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError, exp:
@@ -879,7 +880,7 @@ class Scheduler:
         for c in self.checks.values():
             # must be ok to launch, and not an internal one (business rules based)
             if c.internal and c.status == 'scheduled' and c.is_launchable(now):
-                c.ref.manage_internal_check(c)
+                c.ref.manage_internal_check(self.hosts, self.services, c)
                 # it manage it, now just ask to consume it
                 # like for all checks
                 c.status = 'waitconsume'
@@ -896,7 +897,7 @@ class Scheduler:
         res.update(self.broks)
         # and clean the global broks too now
         self.broks.clear()
-        
+
         return res
 
 
@@ -1467,8 +1468,8 @@ class Scheduler:
         timeout = 1.0  # For the select
 
         gogogo = time.time()
-        
-        # We must reset it if we received a new conf from the Arbiter. 
+
+        # We must reset it if we received a new conf from the Arbiter.
         # Otherwise, the stat check average won't be correct
         self.nb_check_received = 0
 
@@ -1553,7 +1554,7 @@ class Scheduler:
                 self.dump_objects()
                 self.need_objects_dump = False
 
-        
+
 
 
         # WE must save the retention at the quit BY OURSELF

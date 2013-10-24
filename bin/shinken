@@ -390,12 +390,12 @@ if __name__ == '__main__':
         for (s,d) in CLI.ini_defaults.iteritems():
             comment = d.get('comment', '')
             values = d.get('values', [])
-            if comment:
-                new_cfg.add_comment(s, comment)
             if not cfg.has_section(s) and not new_cfg.has_section(s):
                 print "Creating ini section", s
                 new_cfg.add_section(s)
                 modify = True
+            if comment:
+                new_cfg.add_comment(s, comment)
             for (k,v) in values:
                 if not cfg.has_option(s, k):
                     new_cfg.set(s,k,v)

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 
-from shinken_test import *
 #
+from  shinken_test import *
 
+#define_modulesdir("../modules")
 modulesctx.set_modulesdir(modulesdir)
 
 # Special Livestatus module opening since the module rename
@@ -15,8 +16,8 @@ LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
 LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
 
 Logline = livestatus_broker.Logline
-LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore_mongodb').LiveStatusLogStoreMongoDB
-LiveStatusLogStoreSqlite = modulesctx.get_module('logstore_sqlite').LiveStatusLogStoreSqlite
+LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore-mongodb').LiveStatusLogStoreMongoDB
+LiveStatusLogStoreSqlite = modulesctx.get_module('logstore-sqlite').LiveStatusLogStoreSqlite
 
 from shinken.misc.datamanager import datamgr
 

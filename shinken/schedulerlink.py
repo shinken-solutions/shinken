@@ -26,7 +26,7 @@
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log  import logger
-
+from shinken.http_client import HTTPExceptions
 
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
@@ -62,7 +62,7 @@ class SchedulerLink(SatelliteLink):
             return None
         logger.debug("[SchedulerLink] Sending %d commands" % len(commands))
         try:
-            self.con.post('run_external_commands', {'commands' : commands})
+            self.con.post('run_external_commands', {'cmds' : commands})
         except HTTPExceptions, exp:
             self.con = None
             logger.debug(exp)
