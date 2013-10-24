@@ -198,12 +198,12 @@ function main {
 
     if [[ $PYLINT == "PYLINT" ]]; then
         echo "Pylint Checking"
-        ${PYTHONTOOLS}/pylint --rcfile $DIR/pylint.rc $SHINKENDIR > results/pylint.txt
+        ${PYTHONTOOLS}/pylint --rcfile $DIR/pylint.rc $SHINKENDIR/shinken > "$RESULTSDIR/pylint.txt"
     fi
 
     if [[ $PEP8 == "PEP8" ]]; then
         echo "Pep8 Checking"
-        ${PYTHONTOOLS}/pep8 --max-line-length=100 --ignore=E303 $SHINKENDIR > results/pep8.txt
+        ${PYTHONTOOLS}/pep8 --max-line-length=100 --ignore=E303 $SHINKENDIR/shinken > "$RESULTSDIR/pep8.txt"
     fi
 
     if [[ $COVERAGE == "COVERAGE" && $PYLINT == "PYLINT" ]]; then
