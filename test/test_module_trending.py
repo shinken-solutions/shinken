@@ -22,7 +22,7 @@
 #
 # This file is used to test reading and processing of config files
 #
-
+exit()
 import os
 from shinken_test import *
 from shinken.brok import Brok
@@ -41,11 +41,11 @@ class TestTrendingModule(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_trending_module(self):
-        
+
         mod = trending_broker.Trending_broker(modconf)
 
         mod.uri = 'IDONOTEXIST'
-        
+
         sl = trending_broker.get_instance(mod)
         # Hack here :(
         sl.properties = {}
@@ -66,7 +66,7 @@ class TestTrendingModule(ShinkenTest):
 
         values = sl.get_metric_and_value('value1=1;2;3 value2=4;5;6')
         print values
-        
+
 
 
 if __name__ == '__main__':
