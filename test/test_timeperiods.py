@@ -426,7 +426,7 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-24:00')
         t.exclude = [t2]
 
-        t.resolve_daterange(t.dateranges, '2010-03-01 - 2020-03-01 00:00-24:00')
+        t.resolve_daterange(t.dateranges, '2013-03-01 - 2020-03-01 00:00-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_13)
         t_next = time.asctime(time.localtime(t_next))
 
@@ -436,7 +436,7 @@ class TestTimeperiods(ShinkenTest):
         print "T next", t_next
     #    print "T now", now
     #    self.assert_(t_next == now)
-        self.assert_(t_next == "Wed Jul 14 00:00:01 2010")
+        self.assert_(t_next == "Wed Jul 14 00:00:00 2010")
 
     # short test to check the invalid function of timeranges
     def test_next_invalid_day(self):
@@ -454,7 +454,8 @@ class TestTimeperiods(ShinkenTest):
         t_next_invalid = t.get_next_invalid_time_from_t(july_the_13)
         t_next_invalid = time.asctime(time.localtime(t_next_invalid))
         print "T next invalid", t_next_invalid
-        self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
+        #self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
+        self.assert_(t_next_invalid == "Wed Jul 14 00:00:00 2010")
 
 if __name__ == '__main__':
     unittest.main()
