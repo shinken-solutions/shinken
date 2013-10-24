@@ -34,7 +34,7 @@ import re
 import random
 import time
 import traceback
-from datetime import datetime
+#from datetime import datetime
 
 from item import Item
 
@@ -140,7 +140,8 @@ class SchedulingItem(Item):
 
         # Now we get the low_flap_threshold and high_flap_threshold values
         # They can be from self, or class
-        (low_flap_threshold, high_flap_threshold) = (self.low_flap_threshold, self.high_flap_threshold)
+        (low_flap_threshold, high_flap_threshold) = \
+            (self.low_flap_threshold, self.high_flap_threshold)
         if low_flap_threshold == -1:
             cls = self.__class__
             low_flap_threshold = cls.global_low_flap_threshold
@@ -179,6 +180,7 @@ class SchedulingItem(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
 
 
+
     # Return True if attempt is at max
     def is_max_attempts(self):
         return self.attempt >= self.max_check_attempts
@@ -195,9 +197,10 @@ class SchedulingItem(Item):
         if not self.in_checking:
             if cls.global_check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
-                    if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
+                    if self.last_state_update <  now - (self.freshness_threshold + cls.additional_freshness_latency):
                         # Raise a log
-                        self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
+                        self.raise_freshness_log_entry(int(now - self.last_state_update),
+                                                       int(now - self.freshness_threshold))
                         # And a new check
                         return self.launch_check(now)
         return None
@@ -255,7 +258,6 @@ class SchedulingItem(Item):
             now = time.time()
             period = cm.modulation_period
             if period is None or period.is_time_valid(now):
-                #print "My self", self.get_name(), "go from crit", self.business_impact, "to crit", cm.business_impact
                 self.business_impact = cm.business_impact
                 in_modulation = True
                 # We apply the first available, that's all
@@ -264,7 +266,8 @@ class SchedulingItem(Item):
         # If we truly have impacts, we get the max business_impact
         # if it's huge than ourselves
         if len(self.impacts) != 0:
-            self.business_impact = max(self.business_impact, max([e.business_impact for e in self.impacts]))
+            self.business_impact = max(self.business_impact,
+                                       max([e.business_impact for e in self.impacts]))
             return
 
         # If we are not a problem, we setup our own_crit if we are not in a
@@ -477,8 +480,7 @@ class SchedulingItem(Item):
                     i = dep.launch_check(now, ref_check)
                     if i is not None:
                         checks.append(i)
-#                else:
-#                    print "DBG: **************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
+
         return checks
 
 
@@ -536,7 +538,8 @@ class SchedulingItem(Item):
         # If not force_time, try to schedule
         if force_time is None:
 
-            # Do not calculate next_chk based on current time, but based on the last check execution time.
+            # Do not calculate next_chk based on current time,
+            # but based on the last check execution time.
             # Important for consistency of data for trending.
             if self.next_chk == 0 or self.next_chk is None:
                 self.next_chk = now
@@ -550,7 +553,8 @@ class SchedulingItem(Item):
                 else:
                     self.next_chk = int(self.next_chk + time_add)
 
-            # Maybe we load next_chk from retention and  the value of the next_chk is still the past even
+            # Maybe we load next_chk from retention and
+            # the value of the next_chk is still the past even
             # after add an interval
             if self.next_chk < now:
                 interval = min(interval, cls.max_check_spread * cls.interval_length)
@@ -633,20 +637,23 @@ class SchedulingItem(Item):
 
         # The external command always pass
         # if not, only if we enable them (auto launch)
-        if self.event_handler is None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
+        if self.event_handler is None \
+                or ((not self.event_handler_enabled
+                    or not cls.enable_event_handlers) and not externalcmd):
             return
 
         # If we do not force and we are in downtime, bailout
         # if the no_event_handlers_during_downtimes is 1 in conf
-        if cls.no_event_handlers_during_downtimes and not externalcmd and self.in_scheduled_downtime:
+        if cls.no_event_handlers_during_downtimes \
+                and not externalcmd and self.in_scheduled_downtime:
             return
 
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)
         rt = self.event_handler.reactionner_tag
-        e = EventHandler(cmd, timeout=cls.event_handler_timeout, \
-                             ref=self, reactionner_tag=rt)
+        e = EventHandler(cmd, timeout=cls.event_handler_timeout,
+                         ref=self, reactionner_tag=rt)
         #print "DBG: Event handler call created"
         #print "DBG: ",e.__dict__
         self.raise_event_handler_log_entry(self.event_handler)
@@ -661,12 +668,15 @@ class SchedulingItem(Item):
         status_updated = False
         for dt in self.downtimes:
             # activate flexible downtimes (do not activate triggered downtimes)
-            if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= self.last_chk and self.state_id != 0 and dt.trigger_id == 0:
+            if not dt.fixed \
+                    and not dt.is_in_effect \
+                    and dt.start_time <= self.last_chk \
+                    and self.state_id != 0 and dt.trigger_id == 0:
                 n = dt.enter()  # returns downtimestart notifications
                 if n is not None:
                     self.actions.append(n)
                 status_updated = True
-        if status_updated == True:
+        if status_updated:
             self.broks.append(self.get_update_status_brok())
 
 
@@ -685,7 +695,7 @@ class SchedulingItem(Item):
         # state
         if not self.in_hard_unknown_reach_phase:
             if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN' \
-            or self.state == 'UNREACHABLE' and self.last_state != 'UNREACHABLE':
+                    or self.state == 'UNREACHABLE' and self.last_state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = True
                 # We also backup with which state we was before enter this phase
                 self.state_before_hard_unknown_reach_phase = self.last_state
@@ -820,25 +830,23 @@ class SchedulingItem(Item):
 
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
-            #print "Case 1 (OK following a previous OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
             # action in return can be notification or other checks (dependencies)
-            if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
-                if self.is_max_attempts() and self.state_type == 'SOFT':
+            if self.state_type == 'SOFT' and self.last_state != 'PENDING':
+                if self.is_max_attempts():
                     self.state_type = 'HARD'
-                else:
-                    self.state_type = 'SOFT'
             else:
                 self.attempt = 1
                 self.state_type = 'HARD'
 
+
         # OK following a NON-OK.
         elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
-            #print "Case 2 (OK following a NON-OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
-                self.add_attempt()
+                if not c.is_dependent():
+                    self.add_attempt()
                 self.raise_alert_log_entry()
                 # Eventhandler gets OK;SOFT;++attempt, no notification needed
                 self.get_event_handlers()
@@ -888,7 +896,6 @@ class SchedulingItem(Item):
 
         # NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
-            #print "Case 4: NON-OK follows OK: code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
@@ -918,9 +925,9 @@ class SchedulingItem(Item):
         # check at self.max_check_attempts
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
-            #print "Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" % (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
-                self.add_attempt()
+                if not c.is_dependent():
+                    self.add_attempt()
                 if self.is_max_attempts():
                    # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
@@ -953,14 +960,23 @@ class SchedulingItem(Item):
                 if self.state != self.last_state:
                     self.update_hard_unknown_phase_state()
                     #print self.last_state, self.last_state_type, self.state_type, self.state
-                    if not self.in_hard_unknown_reach_phase and not self.was_in_hard_unknown_reach_phase:
+                    if not self.in_hard_unknown_reach_phase \
+                            and not self.was_in_hard_unknown_reach_phase:
                         self.unacknowledge_problem_if_not_sticky()
                         self.raise_alert_log_entry()
                         self.remove_in_progress_notifications()
                         if not no_action:
                             self.create_notifications('PROBLEM')
 
-                elif self.in_scheduled_downtime_during_last_check == True:
+                        # PROBLEM/IMPACT
+                        # Maybe our new state can raise the problem
+                        # when the last one was not
+                        # I'm a problem only if I'm the root problem,
+                        # so not no_action:
+                        if not no_action:
+                            self.set_myself_as_problem()
+
+                elif self.in_scheduled_downtime_during_last_check:
                     # during the last check i was in a downtime. but now
                     # the status is still critical and notifications
                     # are possible again. send an alert immediately
@@ -993,7 +1009,8 @@ class SchedulingItem(Item):
         # Fill last_hard_state_change to now
         # if we just change from SOFT->HARD or
         # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
-        if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
+        if self.state_type == 'HARD' \
+                and (self.last_state_type == 'SOFT' or self.last_state != self.state):
             self.last_hard_state_change = int(time.time())
 
         # update event/problem-counters
@@ -1075,7 +1092,8 @@ class SchedulingItem(Item):
 
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
-            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb,
+                              in_notif_time, cls.interval_length):
                 return True
 
         return False
@@ -1095,14 +1113,17 @@ class SchedulingItem(Item):
         # if filled and less than the self value
         in_notif_time = time.time() - n.creation_time
         for es in self.escalations:
-            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
-                if es.notification_interval != -1 and es.notification_interval < notification_interval:
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb,
+                              in_notif_time, cls.interval_length):
+                if es.notification_interval != -1 \
+                        and es.notification_interval < notification_interval:
                     notification_interval = es.notification_interval
 
         # So take the by default time
         std_time = n.t_to_go + notification_interval * cls.interval_length
 
-        # Maybe the notification comes from retention data and next notification alert is in the past
+        # Maybe the notification comes from retention data
+        # and next notification alert is in the past
         # if so let use the now value instead
         if std_time < now:
             std_time = now + notification_interval * cls.interval_length
@@ -1135,7 +1156,8 @@ class SchedulingItem(Item):
 
         contacts = set()
         for es in self.escalations:
-            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb,
+                              in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
                 # And we tag this escalations as started now
                 n.already_start_escalations.add(es.get_name())
@@ -1159,7 +1181,8 @@ class SchedulingItem(Item):
                     # this happens at initial
                     t_wished = now + self.first_notification_delay * cls.interval_length
                 else:
-                    t_wished = last_time_non_ok_or_up + self.first_notification_delay * cls.interval_length
+                    t_wished = last_time_non_ok_or_up + \
+                        self.first_notification_delay * cls.interval_length
             if self.notification_period is None:
                 t = int(now)
             else:
@@ -1168,7 +1191,8 @@ class SchedulingItem(Item):
             # We follow our order
             t = t_wished
 
-        if self.notification_is_blocked_by_item(type, t_wished) and self.first_notification_delay == 0 and self.notification_interval == 0:
+        if self.notification_is_blocked_by_item(type, t_wished) \
+                and self.first_notification_delay == 0 and self.notification_interval == 0:
             # If notifications are blocked on the host/service level somehow
             # and repeated notifications are not configured,
             # we can silently drop this one
@@ -1188,9 +1212,9 @@ class SchedulingItem(Item):
             # downtime/flap/etc do not change the notification number
             next_notif_nb = self.current_notification_number
 
-        n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
-            timeout=cls.notification_timeout, \
-            notif_nb=next_notif_nb)
+        n = Notification(type, 'scheduled', 'VOID', None, self, None, t,
+                         timeout=cls.notification_timeout,
+                         notif_nb=next_notif_nb)
 
         # Keep a trace in our notifications queue
         self.notifications_in_progress[n.id] = n
@@ -1275,12 +1299,32 @@ class SchedulingItem(Item):
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
+
+        # Dependency check, we have to create a new check that will be launched only once (now)
+        # Otherwise it will delay the next real check. this can lead to an infinite SOFT state.
         if not force and (self.in_checking and ref_check is not None):
-            now = time.time()
+
+            self.checked_by_child = True
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
-            c_in_progress.t_to_go = now  # No, I want a check right NOW
-            c_in_progress.depend_on_me.append(ref_check)
-            return c_in_progress.id
+
+            # c_in_progress has almost everything we need but we cant copy.deepcopy() it
+            # we need another c.id
+            command_line = c_in_progress.command
+            timeout = c_in_progress.timeout
+            poller_tag = c_in_progress.poller_tag
+            env = c_in_progress.env
+            module_type = c_in_progress.module_type
+
+            c = Check('scheduled', command_line, self, t, ref_check,
+                      timeout=timeout,
+                      poller_tag=poller_tag,
+                      env=env,
+                      module_type=module_type,
+                      dependency_check=True)
+
+            self.actions.append(c)
+            #print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
+            return c.id
 
         if force or (not self.is_no_check_dependent()):
 
@@ -1314,10 +1358,10 @@ class SchedulingItem(Item):
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
             # And reactionner_tag too
-            c = Check('scheduled', command_line, self, t, ref_check, \
-                      timeout=timeout, \
-                      poller_tag=check_command.poller_tag, \
-                      env=env, \
+            c = Check('scheduled', command_line, self, t, ref_check,
+                      timeout=timeout,
+                      poller_tag=check_command.poller_tag,
+                      env=env,
                       module_type=check_command.module_type)
 
             # We keep a trace of all checks in progress
@@ -1594,5 +1638,7 @@ class SchedulingItem(Item):
         for t in self.triggers:
             try:
                 t.eval(self)
-            except Exception, exp:
-                logger.error("We got an exception from a trigger on %s for %s" % (self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())))
+            except Exception:
+                logger.error("We got an exception from a trigger on %s for %s" %
+                            (self.get_full_name().decode('utf8', 'ignore'),
+                             str(traceback.format_exc())))
