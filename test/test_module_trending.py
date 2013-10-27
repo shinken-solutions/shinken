@@ -22,7 +22,7 @@
 #
 # This file is used to test reading and processing of config files
 #
-exit()
+
 import os
 from shinken_test import *
 from shinken.brok import Brok
