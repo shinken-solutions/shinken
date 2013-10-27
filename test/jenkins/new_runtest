@@ -186,8 +186,8 @@ function main {
     generate_all_tests
 
     test_core
-    #grab_modules
-    #test_modules
+    grab_modules
+    test_modules
 
     # Create the coverage file
     if [[ $COVERAGE == "COVERAGE" ]]; then
@@ -198,12 +198,16 @@ function main {
 
     if [[ $PYLINT == "PYLINT" ]]; then
         echo "Pylint Checking"
-        ${PYTHONTOOLS}/pylint --rcfile $DIR/pylint.rc $SHINKENDIR/shinken > "$RESULTSDIR/pylint.txt"
+        cd $SHINKENDIR
+        ${PYTHONTOOLS}/pylint --rcfile $DIR/pylint.rc shinken > "test/$RESULTSDIR/pylint.txt"
+        cd -
     fi
 
     if [[ $PEP8 == "PEP8" ]]; then
         echo "Pep8 Checking"
-        ${PYTHONTOOLS}/pep8 --max-line-length=100 --ignore=E303 $SHINKENDIR/shinken > "$RESULTSDIR/pep8.txt"
+        cd $SHINKENDIR
+        ${PYTHONTOOLS}/pep8 --max-line-length=100 --ignore=E303 shinken > "test/$RESULTSDIR/pep8.txt"
+        cd -
     fi
 
     if [[ $COVERAGE == "COVERAGE" && $PYLINT == "PYLINT" ]]; then
