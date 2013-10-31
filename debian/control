@@ -26,7 +26,7 @@ Description: Flexible monitoring tool - Meta-package
 Package: shinken-common
 Architecture: any
 Conflicts: shinken-core
-Depends: python (>= ${python:Versions}), pyro | python2-pyro4, ${misc:Depends}
+Depends: ${python:Depends}, pyro | python2-pyro4, ${misc:Depends}
 Recommends: nagios-plugins-basic, bsd-mailx | mailx
 Description: Flexible monitoring tool - Common files
  Common files for shinken monitoring.
