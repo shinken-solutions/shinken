@@ -1,0 +1,156 @@
+diff --git a/for_fedora/init.d/shinken-arbiter b/for_fedora/init.d/shinken-arbiter
+index 56e3249..e4afaa4 100644
+--- a/for_fedora/init.d/shinken-arbiter
++++ b/for_fedora/init.d/shinken-arbiter
+@@ -29,7 +29,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/nagios.cfg -c /etc/shinken/shinken-specific.cfg"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/shinken.cfg"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/arbiterd.pid
+ 
+ exec="/usr/sbin/shinken-arbiter"
+@@ -77,10 +77,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
+diff --git a/for_fedora/init.d/shinken-broker b/for_fedora/init.d/shinken-broker
+index 1da5475..6aed7b3 100644
+--- a/for_fedora/init.d/shinken-broker
++++ b/for_fedora/init.d/shinken-broker
+@@ -30,7 +30,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/brokerd.ini"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/daemons/brokerd.ini"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/brokerd.pid
+ 
+ exec="/usr/sbin/shinken-broker"
+@@ -78,10 +78,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
+diff --git a/for_fedora/init.d/shinken-poller b/for_fedora/init.d/shinken-poller
+index 057b081..c5a64d8 100644
+--- a/for_fedora/init.d/shinken-poller
++++ b/for_fedora/init.d/shinken-poller
+@@ -34,7 +34,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/pollerd.ini"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/daemons/pollerd.ini"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/pollerd.pid
+ 
+ exec="/usr/sbin/shinken-poller"
+@@ -82,10 +82,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
+diff --git a/for_fedora/init.d/shinken-reactionner b/for_fedora/init.d/shinken-reactionner
+index bc24653..1a09a9d 100644
+--- a/for_fedora/init.d/shinken-reactionner
++++ b/for_fedora/init.d/shinken-reactionner
+@@ -30,7 +30,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/reactionnerd.ini"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/daemons/reactionnerd.ini"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/reactionnerd.pid
+ 
+ exec="/usr/sbin/shinken-reactionner"
+@@ -78,10 +78,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
+diff --git a/for_fedora/init.d/shinken-receiver b/for_fedora/init.d/shinken-receiver
+index 3590ed4..3d08da0 100644
+--- a/for_fedora/init.d/shinken-receiver
++++ b/for_fedora/init.d/shinken-receiver
+@@ -29,7 +29,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/receiverd.ini"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/daemons/receiverd.ini"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/receiverd.pid
+ 
+ exec="/usr/sbin/shinken-receiver"
+@@ -77,10 +77,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
+diff --git a/for_fedora/init.d/shinken-scheduler b/for_fedora/init.d/shinken-scheduler
+index 16c0460..fd0b5dd 100644
+--- a/for_fedora/init.d/shinken-scheduler
++++ b/for_fedora/init.d/shinken-scheduler
+@@ -30,7 +30,7 @@
+ . /etc/rc.d/init.d/functions
+ 
+ 
+-daemon_args="-d -c /etc/shinken/schedulerd.ini"             # Arguments to run the daemon with
++daemon_args="-d -c /etc/shinken/daemons/schedulerd.ini"             # Arguments to run the daemon with
+ pidfile=/var/run/shinken/schedulerd.pid
+ 
+ exec="/usr/sbin/shinken-scheduler"
+@@ -78,10 +78,10 @@ case "$1" in
+         restart
+         ;;
+     status)
+-        status $prog
++        status -p pidfile
+         ;;
+     try-restart|condrestart)
+-        if status $prog >/dev/null ; then
++        if status -p pidfile >/dev/null ; then
+             restart
+         fi
+ 	;;
