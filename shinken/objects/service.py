@@ -561,7 +561,7 @@ class Service(SchedulingItem):
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                         # Here is a list of property where we will expand the $KEY$ by the value
-                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies']
+                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler']
                         for prop in _the_expandables:
                             if hasattr(self, prop):
                                 # here we can replace VALUE, VALUE1, VALUE2,...
