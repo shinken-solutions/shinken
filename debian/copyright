@@ -47,7 +47,7 @@ License: Apache-2.0
 Files: shinken/webui/htdocs/js/html5.js
 Copyright: 2011 Alexander Farkas <info@corrupt-system.de>
            2011 Jonathan Neal <jonathantneal@hotmail.com>
-License: MIT | GPL-2
+License: MIT or GPL-2
 
 
 Files: shinken/webui/htdocs/js/jquery-ui-1.8.17.custom.min.js
@@ -125,7 +125,7 @@ License:
 
 Files: shinken/webui/htdocs/js/jquery.pageslide.js
 Copyright: 2011 Scott Robbin
-License: GPL-2 | MIT
+License: GPL-2 or MIT
 
 
 Files: shinken/webui/htdocs/css/font-awesome*
