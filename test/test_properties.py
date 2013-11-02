@@ -167,7 +167,7 @@ class TestListProp(PropertyTests, ShinkenTest, unittest.TestCase):
         p = self.prop_class()
         self.assertEqual(p.pythonize(""), [])
         self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
-        self.assertEquals(p.pythonize(["1,2,3", "4,5,6"]), ["1,2,3", "4,5,6"])
+        self.assertEquals(p.pythonize(["1,2,3", "4,5,6"]), ["1","2","3","4","5","6"])
 
 
 class TestLogLevelProp(PropertyTests, ShinkenTest, unittest.TestCase):

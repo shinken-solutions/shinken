@@ -64,6 +64,27 @@ class TestConfigBroken(ShinkenTest):
 
         self.assert_(len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) == 1)
 
+class TestMultiValuedWithCommaAttribute(ShinkenTest):
+
+    def setUp(self):
+        self.setup_with_file('etc/nagios_multi_attribute_with_comma.cfg')
+
+
+    def test_multi_valued_attributes(self):
+        srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        self.assert_(srv1 is not None)
+
+        # list parameter (all items should appear)
+        print("hello %s" % srv1.notification_options)
+        self.assert_('+1' in srv1.notification_options)
+        self.assert_('s' in srv1.notification_options)
+        self.assert_('f' in srv1.notification_options)
+        self.assert_('c' in srv1.notification_options)
+        self.assert_('u' in srv1.notification_options)
+
+        # list parameter (inherited attributes should not appear)
+        self.assert_('r' not in srv1.notification_options)
+        self.assert_('w' not in srv1.notification_options)
 
 if __name__ == '__main__':
     unittest.main()

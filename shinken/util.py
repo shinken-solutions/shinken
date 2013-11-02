@@ -186,6 +186,10 @@ def to_char(val):
 
 def to_split(val):
     if isinstance(val, list):
+        merged_val = []
+        for j in val:
+            merged_val = merged_val + to_split(j)
+            val = merged_val
         return val
     val = val.split(',')
     if val == ['']:
