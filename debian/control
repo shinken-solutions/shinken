@@ -107,7 +107,7 @@ Description: Shinken MongoDB logstore for LiveStatus broker module
 
 Package: shinken-module-broker-webui
 Architecture: any
-Depends: ${python:Depends}, libjs-jquery, shinken-common (= ${binary:Version}), ${misc:Depends}
+Depends: ${python:Depends}, libjs-jquery, shinken-common (= ${binary:Version}), fonts-font-awesome, ${misc:Depends}
 Description: Shinken WebUI broker module
  WebUI is the standard web interface for Shinken. The interface shows
  current hosts and services status 

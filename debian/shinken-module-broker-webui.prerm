@@ -8,3 +8,5 @@ rm /usr/lib/python2.7/dist-packages/shinken/modules/webui_broker/__init__.pyc ||
 
 rm /usr/lib/python2.7/dist-packages/shinken/webui/htdocs || true
 rm /usr/share/shinken/htdocs/js/jquery.js || true
+rm /usr/share/shinken/htdocs/font/FontAwesome.otf || true
+rm /usr/share/shinken/htdocs/font/fontawesome-webfont.ttf || true
