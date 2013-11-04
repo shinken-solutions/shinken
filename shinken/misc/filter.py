@@ -28,11 +28,23 @@ Helper functions for some filtering, like for user based
 """
 
 
+# Tells whether an host/service should be hidden to the user.
+def is_svc_hidden(svc, user):
+    if user.hide_ui_problems:
+        # This problem should be hidden to the user
+        if svc.hide_in_ui_problems:
+            return True
+        # If problem is a service, and host should be hidden, hide service also
+        if hasattr(svc, "host") and svc.host is not None and svc.host.hide_in_ui_problems:
+            return True
+    return False
+
+
 # Get only user relevant items for the user
 def only_related_to(lst, user):
     # if the user is an admin, show all
     if user.is_admin:
-        return lst
+        return [i for i in lst if not is_svc_hidden(i, user)]
 
     # Ok the user is a simple user, we should filter
     r = set()
@@ -57,4 +69,4 @@ def only_related_to(lst, user):
             if user in imp.contacts:
                 r.add(i)
 
-    return list(r)
+    return [i for i in r if not is_svc_hidden(i, user)]
