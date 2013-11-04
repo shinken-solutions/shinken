@@ -977,7 +977,10 @@ class Items(object):
     def explode_contact_groups_into_contacts(self, contactgroups):
         for i in self:
             if hasattr(i, 'contact_groups'):
-                cgnames = i.contact_groups.split(',')
+                if isinstance(i.contact_groups, list):
+                    cgnames = i.contact_groups
+                else:
+                    cgnames = i.contact_groups.split(',')
                 cgnames = strip_and_uniq(cgnames)
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
