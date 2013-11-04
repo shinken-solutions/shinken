@@ -53,6 +53,8 @@ They connect here and see if they are still OK with our running_id, if not, they
                        reactionner_tags=['None'], worker_name='none', \
                        module_types=['fork']):
         #print "We ask us checks"
+        do_checks = (do_checks == 'True')
+        do_actions = (do_actions == 'True')
         res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags, reactionner_tags, worker_name, module_types)
         #print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
