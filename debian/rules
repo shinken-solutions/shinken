@@ -134,6 +134,8 @@ override_dh_install:
 	cp debian/etc/shinken-specific/broker-webui.cfg debian/shinken-module-broker-webui/etc/shinken/shinken-specific/
 	### Delete jquery file to get it from debian pacakge
 	rm debian/shinken-module-broker-webui/usr/share/shinken/htdocs/js/jquery.js
+	rm debian/shinken-module-broker-webui/usr/share/shinken/htdocs/font/FontAwesome.otf
+	rm debian/shinken-module-broker-webui/usr/share/shinken/htdocs/font/fontawesome-webfont.ttf
 	## Shinken-module-broker-webui-cfgpassword
 	mkdir -p debian/shinken-module-broker-webui-cfgpassword/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/broker-webui-cfgpassword.cfg debian/shinken-module-broker-webui-cfgpassword/etc/shinken/shinken-specific/
