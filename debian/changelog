@@ -1,33 +1,18 @@
-shinken (1:1.4-1~exp4) experimental; urgency=low
-
-  * Change ini paths
-
- -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Wed, 14 Aug 2013 22:35:24 -0400
-
-shinken (1:1.4-1~exp3) experimental; urgency=low
-
-  * Add javascripts sources
-  * Update shinken init script
-  * Fix ws_arbiter dependencies
-
- -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Wed, 31 Jul 2013 00:03:48 -0400
-
-shinken (1.4-1~exp2) experimental; urgency=low
-
-  * Fix licences in debian/copyright
-
- -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Thu, 25 Jul 2013 11:41:56 -0400
-
-shinken (1.4-1~exp1) experimental; urgency=low
+shinken (1.4-1) unstable; urgency=low
 
   * New upstream release (#672496)
   * Refactor of the build process
   * Split modules in separate packages
   * Shinken package is now a package which configures Shinken elements to have
     a ready-to-go solution
+  * Fix licences in debian/copyright
+  * Add javascripts sources
+  * Update shinken init script
+  * Fix ws_arbiter dependencies
+  * Change ini paths
 
   [ Sylvestre Ledru ]
-  * Standards-Version updated to 3.9.4
+  * Standards-Version updated to 3.9.5
   * watch file added
 
  -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Fri, 21 Jun 2013 15:07:56 +0200
