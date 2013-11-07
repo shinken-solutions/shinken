@@ -2,14 +2,16 @@ diff --git a/bin/init.d/shinken b/bin/init.d/shinken
 index 5e7e495..a424ecc 100755
 --- a/bin/init.d/shinken
 +++ b/bin/init.d/shinken
-@@ -40,9 +40,23 @@
+@@ -40,11 +40,22 @@
  # Deadlink :(
  # http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
- 
+
 +. /lib/lsb/init-functions
- 
+
  NAME="shinken"
- 
+
+-## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
+-AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 +
 +## This permits to overhidde the default "default shinken cfg file":
 +[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
@@ -22,10 +24,9 @@ index 5e7e495..a424ecc 100755
 +# Reads configuration variable file if it is present
 +[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 +
-+
+
  ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
  if [ -z "$SHINKEN_MODULE_FILE" ]; then
-     SCRIPTNAME=$0
 @@ -106,16 +120,6 @@ DEBUG=false
  CMD=""
  SUBMODULES=""

@@ -43,6 +43,9 @@
 
 NAME="shinken"
 
+## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
+AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
+
 ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
 if [ -z "$SHINKEN_MODULE_FILE" ]; then
     SCRIPTNAME=$0
