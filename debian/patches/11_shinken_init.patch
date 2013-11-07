@@ -186,3 +186,4 @@ index 6498433..cc0c8d8 100755
 +. /lib/lsb/init-functions
  
  NAME="shinken-skonf"
+
