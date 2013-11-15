@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 #
+# Copyright (C) 2013:
+#    Forlot Romain <rforlot@yahoo.com>
+#
 # This file is part of Shinken.
 #
 # Shinken is free software: you can redistribute it and/or modify
