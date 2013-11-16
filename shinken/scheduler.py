@@ -1412,7 +1412,7 @@ class Scheduler:
                     worker_names[a.worker] += 1
 
         for w in worker_names:
-            logger.warning("%d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))
+            logger.warning("%d actions never came back for the satellite '%s'. I reenable them for polling" % (worker_names[w], w))
 
     # Each loop we are going to send our broks to our modules (if need)
     def send_broks_to_modules(self):
