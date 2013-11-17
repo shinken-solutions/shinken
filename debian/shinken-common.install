@@ -1,3 +1,4 @@
+doc /usr/share/doc/shinken
 shinken/*.py /usr/lib/python2.7/dist-packages/shinken
 shinken/clients /usr/lib/python2.7/dist-packages/shinken
 shinken/core /usr/lib/python2.7/dist-packages/shinken
