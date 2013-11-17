@@ -1,15 +1,29 @@
 diff --git a/bin/init.d/shinken b/bin/init.d/shinken
-index 5e7e495..a424ecc 100755
+index ce51dcc..4c49de2 100755
 --- a/bin/init.d/shinken
 +++ b/bin/init.d/shinken
+@@ -23,10 +23,10 @@
+ 
+ ### BEGIN INIT INFO
+ # Provides:          shinken
+-# Required-Start:    $local_fs
+-# Required-Stop:     $local_fs
++# Required-Start:    $local_fs $remote_fs
++# Required-Stop:     $local_fs $remote_fs
+ # Default-Start:     2 3 4 5
+-# Default-Stop:      S 0 1 6
++# Default-Stop:      0 1 6
+ # Short-Description: Shinken monitoring daemon
+ # Description:       Shinken is a monitoring tool composed of many separated modules:
+ #     - arbiter     : the main one : control everything else.
 @@ -40,11 +40,22 @@
  # Deadlink :(
  # http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
-
+ 
 +. /lib/lsb/init-functions
-
+ 
  NAME="shinken"
-
+ 
 -## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
 -AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 +
@@ -24,10 +38,10 @@ index 5e7e495..a424ecc 100755
 +# Reads configuration variable file if it is present
 +[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 +
-
+ 
  ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
  if [ -z "$SHINKEN_MODULE_FILE" ]; then
-@@ -106,16 +120,6 @@ DEBUG=false
+@@ -109,16 +120,6 @@ DEBUG=false
  CMD=""
  SUBMODULES=""
  
@@ -44,7 +58,7 @@ index 5e7e495..a424ecc 100755
  usage() {
      cat << END
  Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
-@@ -152,20 +156,11 @@ else
+@@ -155,20 +156,11 @@ else
      done
  fi
  
@@ -65,7 +79,7 @@ index 5e7e495..a424ecc 100755
  
  # If var or run dir is missing, create them and chown them
  [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
-@@ -284,13 +279,20 @@ do_start() {
+@@ -287,13 +279,20 @@ do_start() {
      [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
      # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
      if [ "$mod" = 'skonf' ]; then
@@ -89,7 +103,7 @@ index 5e7e495..a424ecc 100755
          rc=$?
      fi
      # debug:
-@@ -373,7 +375,13 @@ do_stop() {
+@@ -376,7 +375,13 @@ do_stop() {
  #
  do_check() {
      [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
@@ -104,8 +118,17 @@ index 5e7e495..a424ecc 100755
      return $?
  }
  
+@@ -528,7 +533,7 @@ do_cmd_on() {
+ ## Main:
+ 
+ case "$CMD" in
+-    start|stop|restart|status)
++    start|stop|restart|force-reload|status)
+         do_cmd_on "$CMD" "$SUBMODULES"
+         ;;
+     check|checkconfig|reload)
 diff --git a/bin/init.d/shinken-arbiter b/bin/init.d/shinken-arbiter
-index 02ca504..b828bf1 100755
+index 02ca504..12779aa 100755
 --- a/bin/init.d/shinken-arbiter
 +++ b/bin/init.d/shinken-arbiter
 @@ -37,6 +37,7 @@
@@ -116,11 +139,56 @@ index 02ca504..b828bf1 100755
  
  NAME="shinken-arbiter"
  
+@@ -44,7 +45,32 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ arbiter
++case "$1" in 
++  start)
++    "$curdir/shinken" start arbiter
++    ;;
++  stop)
++    "$curdir/shinken" stop arbiter
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig arbiter
++    ;;
++  status)
++    "$curdir/shinken" status arbiter
++    ;;
++  reload)
++    "$curdir/shinken" reload arbiter
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart arbiter
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-arbiter [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
+ 
 diff --git a/bin/init.d/shinken-broker b/bin/init.d/shinken-broker
-index b92f0ad..6c8f09c 100755
+index b92f0ad..82bdbbd 100755
 --- a/bin/init.d/shinken-broker
 +++ b/bin/init.d/shinken-broker
-@@ -44,6 +44,7 @@
+@@ -34,16 +34,12 @@
+ #                    configuration
+ ### END INIT INFO
+ 
+-### BEGIN INIT INFO Redhat
+-# Shinken        Starts Shinken Broker
+-#
+-# chkconfig: 345 99 01
+-# description: Start Shinken broker daemon
+-### END INIT INFO
++
+ 
  # Author: Gabes Jean <naparuba@gmail.com>
  #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
  
@@ -128,11 +196,55 @@ index b92f0ad..6c8f09c 100755
  
  NAME="shinken-broker"
  
+@@ -51,6 +47,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ broker
++case "$1" in 
++  start)
++    "$curdir/shinken" start broker
++    ;;
++  stop)
++    "$curdir/shinken" stop broker
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig broker
++    ;;
++  status)
++    "$curdir/shinken" status broker
++    ;;
++  reload)
++    "$curdir/shinken" reload broker
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart broker
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-broker [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
 diff --git a/bin/init.d/shinken-poller b/bin/init.d/shinken-poller
-index 04a6cfa..361d4fb 100755
+index 04a6cfa..67d0b2f 100755
 --- a/bin/init.d/shinken-poller
 +++ b/bin/init.d/shinken-poller
-@@ -45,6 +45,7 @@
+@@ -35,16 +35,12 @@
+ #                    configuration
+ ### END INIT INFO
+ 
+-### BEGIN INIT INFO Redhat
+-# Shinken        Starts Shinken Poller
+-#
+-# chkconfig: 345 99 01
+-# description: Start Shinken poller daemon
+-### END INIT INFO
++
+ 
  # Author: Gabes Jean <naparuba@gmail.com>
  #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
  
@@ -140,11 +252,55 @@ index 04a6cfa..361d4fb 100755
  
  NAME="shinken-poller"
  
+@@ -52,6 +48,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ poller
++case "$1" in 
++  start)
++    "$curdir/shinken" start poller
++    ;;
++  stop)
++    "$curdir/shinken" stop poller
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig poller
++    ;;
++  status)
++    "$curdir/shinken" status poller
++    ;;
++  reload)
++    "$curdir/shinken" reload poller
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart poller
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-poller [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
 diff --git a/bin/init.d/shinken-reactionner b/bin/init.d/shinken-reactionner
-index db29e3e..9fcec9f 100755
+index db29e3e..6132394 100755
 --- a/bin/init.d/shinken-reactionner
 +++ b/bin/init.d/shinken-reactionner
-@@ -44,6 +44,7 @@
+@@ -34,16 +34,12 @@
+ #                    ordered by the schedulers specified in the configuration
+ ### END INIT INFO
+ 
+-### BEGIN INIT INFO Redhat
+-# Shinken        Starts Shinken Reactionner
+-#
+-# chkconfig: 345 99 01
+-# description: Start Shinken reactionner daemon
+-### END INIT INFO
++
+ 
  # Author: Gabes Jean <naparuba@gmail.com>
  #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
  
@@ -152,11 +308,55 @@ index db29e3e..9fcec9f 100755
  
  NAME="shinken-reactionner"
  
+@@ -51,6 +47,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ reactionner
++case "$1" in 
++  start)
++    "$curdir/shinken" start reactionner
++    ;;
++  stop)
++    "$curdir/shinken" stop reactionner
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig reactionner
++    ;;
++  status)
++    "$curdir/shinken" status reactionner
++    ;;
++  reload)
++    "$curdir/shinken" reload reactionner
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart reactionner
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-reactionner [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
 diff --git a/bin/init.d/shinken-receiver b/bin/init.d/shinken-receiver
-index e7b8b5f..241119a 100755
+index e7b8b5f..7b77053 100755
 --- a/bin/init.d/shinken-receiver
 +++ b/bin/init.d/shinken-receiver
-@@ -44,6 +44,7 @@
+@@ -34,16 +34,12 @@
+ #                    configuration
+ ### END INIT INFO
+ 
+-### BEGIN INIT INFO Redhat
+-# Shinken        Starts Shinken Receiver
+-#
+-# chkconfig: 345 99 01
+-# description: Start Shinken receiver daemon
+-### END INIT INFO
++
+ 
  # Author: Gabes Jean <naparuba@gmail.com>
  #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
  
@@ -164,11 +364,55 @@ index e7b8b5f..241119a 100755
  
  NAME="shinken-receiver"
  
+@@ -51,6 +47,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ receiver
++case "$1" in 
++  start)
++    "$curdir/shinken" start receiver
++    ;;
++  stop)
++    "$curdir/shinken" stop receiver
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig receiver
++    ;;
++  status)
++    "$curdir/shinken" status receiver
++    ;;
++  reload)
++    "$curdir/shinken" reload receiver
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart receiver
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-receiver [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
 diff --git a/bin/init.d/shinken-scheduler b/bin/init.d/shinken-scheduler
-index 5af33ff..74fdadf 100755
+index 5af33ff..645fa37 100755
 --- a/bin/init.d/shinken-scheduler
 +++ b/bin/init.d/shinken-scheduler
-@@ -44,6 +44,7 @@
+@@ -34,16 +34,12 @@
+ #                    in the configuration received from the arbiter
+ ### END INIT INFO
+ 
+-### BEGIN INIT INFO Redhat
+-# Shinken        Starts Shinken Scheduler
+-#
+-# chkconfig: 345 99 01
+-# description: Start Shinken scheduler daemon
+-### END INIT INFO
++
+ 
  # Author: Gabes Jean <naparuba@gmail.com>
  #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
  
@@ -176,8 +420,41 @@ index 5af33ff..74fdadf 100755
  
  NAME="shinken-scheduler"
  
+@@ -51,6 +47,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ scheduler
++case "$1" in 
++  start)
++    "$curdir/shinken" start scheduler
++    ;;
++  stop)
++    "$curdir/shinken" stop scheduler
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig scheduler
++    ;;
++  status)
++    "$curdir/shinken" status scheduler
++    ;;
++  reload)
++    "$curdir/shinken" reload scheduler
++    ;;
++  restart|force-reload)
++    "$curdir/shinken" restart scheduler
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-scheduler [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
 diff --git a/bin/init.d/shinken-skonf b/bin/init.d/shinken-skonf
-index 6498433..cc0c8d8 100755
+index 6498433..f3ff737 100755
 --- a/bin/init.d/shinken-skonf
 +++ b/bin/init.d/shinken-skonf
 @@ -43,6 +43,7 @@
@@ -187,4 +464,232 @@ index 6498433..cc0c8d8 100755
 +. /lib/lsb/init-functions
  
  NAME="shinken-skonf"
-
+ 
+@@ -50,6 +51,31 @@ curdir=$(dirname "$0")
+ 
+ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
+ 
+-"$curdir/shinken" $@ skonf
++case "$1" in 
++  start)
++    "$curdir/shinken" start skonf
++    ;;
++  stop)
++    "$curdir/shinken" stop skonf
++    ;;
++  check|checkconfig)
++    "$curdir/shinken" checkconfig skonf
++    ;;
++  status)
++    "$curdir/shinken" status skonf
++    ;;
++  reload)
++    "$curdir/shinken" reload skonf
++   ;;
++  restart|force-reload)
++    "$curdir/shinken" restart skonf
++    ;;
++  *)
++    echo "Usage: /etc/init.d/shinken-skonf [-d] {start|stop|reload|restart|check}
++
++  -d  start requested module(s) in debug mode, only useful with start|restart
++" || true
++    exit 1
++esac
+ 
+ exit $?
+diff --git a/debian/patches/11_shinken_init.patch b/debian/patches/11_shinken_init.patch
+index 865d7a3..d06286b 100644
+--- a/debian/patches/11_shinken_init.patch
++++ b/debian/patches/11_shinken_init.patch
+@@ -1,190 +0,0 @@
+-diff --git a/bin/init.d/shinken b/bin/init.d/shinken
+-index 5e7e495..a424ecc 100755
+---- a/bin/init.d/shinken
+-+++ b/bin/init.d/shinken
+-@@ -40,11 +40,22 @@
+- # Deadlink :(
+- # http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+-
+-+. /lib/lsb/init-functions
+-
+- NAME="shinken"
+-
+--## If you want to give a test to the BETA skonf tool, you can add skonf to the list below
+--AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
+-+
+-+## This permits to overhidde the default "default shinken cfg file":
+-+[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
+-+## so you can now do:
+-+## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
+-+## to easily use your own config
+-+
+-+#echo "Using $SHINKEN_DEFAULT_FILE .."
+-+
+-+# Reads configuration variable file if it is present
+-+[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+-+
+-
+- ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
+- if [ -z "$SHINKEN_MODULE_FILE" ]; then
+-@@ -106,16 +120,6 @@ DEBUG=false
+- CMD=""
+- SUBMODULES=""
+- 
+--## This permits to overhidde the default "default shinken cfg file":
+--[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
+--## so you can now do:
+--## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
+--## to easily use your own config
+--
+--#echo "Using $SHINKEN_DEFAULT_FILE .."
+--
+--
+--
+- usage() {
+-     cat << END
+- Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+-@@ -152,20 +156,11 @@ else
+-     done
+- fi
+- 
+--
+--# Reads configuration variable file if it is present
+--[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+--
+--
+- # Now look if some required variables are pre defined:
+- if ! test "$SHINKENCFG"
+- then
+-     SHINKENCFG="$ETC/nagios.cfg"
+- fi
+--if ! test "$SHINKENSPECIFICCFG"
+--then
+--    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+--fi
+- 
+- # If var or run dir is missing, create them and chown them
+- [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
+-@@ -284,13 +279,20 @@ do_start() {
+-     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
+-     # Skonf need skonf.cfg, arbiter nagios.cfg, and the other OTHERd.ini
+-     if [ "$mod" = 'skonf' ]; then
+--	output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+-+        output=$("$modfilepath" -d -c "$SKONFCFG" $DEBUGCMD 2>&1)
+-         rc=$?
+-     elif [ "$mod" != "arbiter" ]; then
+--        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+-+        modINI=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
+-+        modinifile=$(eval echo ${modINI})
+-+        output=$("$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
+-         rc=$?
+-     else
+--        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+-+        if ! test "$SHINKENSPECIFICCFG"
+-+        then
+-+            output=$("$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+-+        else
+-+            output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+-+        fi
+-         rc=$?
+-     fi
+-     # debug:
+-@@ -373,7 +375,13 @@ do_stop() {
+- #
+- do_check() {
+-     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+--    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+-+    if ! test "$SHINKENSPECIFICCFG"
+-+        then
+-+            "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" $DEBUGCMD 2>&1
+-+        else
+-+            "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1
+-+    fi
+-+
+-     return $?
+- }
+- 
+-diff --git a/bin/init.d/shinken-arbiter b/bin/init.d/shinken-arbiter
+-index 02ca504..b828bf1 100755
+---- a/bin/init.d/shinken-arbiter
+-+++ b/bin/init.d/shinken-arbiter
+-@@ -37,6 +37,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-arbiter"
+- 
+-diff --git a/bin/init.d/shinken-broker b/bin/init.d/shinken-broker
+-index b92f0ad..6c8f09c 100755
+---- a/bin/init.d/shinken-broker
+-+++ b/bin/init.d/shinken-broker
+-@@ -44,6 +44,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-broker"
+- 
+-diff --git a/bin/init.d/shinken-poller b/bin/init.d/shinken-poller
+-index 04a6cfa..361d4fb 100755
+---- a/bin/init.d/shinken-poller
+-+++ b/bin/init.d/shinken-poller
+-@@ -45,6 +45,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-poller"
+- 
+-diff --git a/bin/init.d/shinken-reactionner b/bin/init.d/shinken-reactionner
+-index db29e3e..9fcec9f 100755
+---- a/bin/init.d/shinken-reactionner
+-+++ b/bin/init.d/shinken-reactionner
+-@@ -44,6 +44,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-reactionner"
+- 
+-diff --git a/bin/init.d/shinken-receiver b/bin/init.d/shinken-receiver
+-index e7b8b5f..241119a 100755
+---- a/bin/init.d/shinken-receiver
+-+++ b/bin/init.d/shinken-receiver
+-@@ -44,6 +44,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-receiver"
+- 
+-diff --git a/bin/init.d/shinken-scheduler b/bin/init.d/shinken-scheduler
+-index 5af33ff..74fdadf 100755
+---- a/bin/init.d/shinken-scheduler
+-+++ b/bin/init.d/shinken-scheduler
+-@@ -44,6 +44,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-scheduler"
+- 
+-diff --git a/bin/init.d/shinken-skonf b/bin/init.d/shinken-skonf
+-index 6498433..cc0c8d8 100755
+---- a/bin/init.d/shinken-skonf
+-+++ b/bin/init.d/shinken-skonf
+-@@ -43,6 +43,7 @@
+- # Author: Gabes Jean <naparuba@gmail.com>
+- #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+- 
+-+. /lib/lsb/init-functions
+- 
+- NAME="shinken-skonf"
+-
