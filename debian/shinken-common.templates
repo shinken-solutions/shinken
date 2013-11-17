@@ -1,5 +1,6 @@
 Template: shinken-common/select-daemon
 Type: multiselect
 Choices: arbiter, scheduler, poller, broker, reactionner, receiver
+Default: arbiter, scheduler, poller, broker, reactionner
  Description: Which daemon do you want to use:
  Please choose which Shinken daemon you want to use.

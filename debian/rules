@@ -80,28 +80,6 @@ override_dh_install:
 	cp debian/etc/daemons/receiverd.ini debian/shinken-common/etc/shinken/daemons/
 	## shinken config
 	cp debian/etc/shinken-specific/receiver.cfg debian/shinken-common/etc/shinken/shinken-specific
-	# Fix lsb tags
-	sed -i -r 's/^(# Required-Start:.*|# Required-Stop:.*)$$/\1 $$remote_fs/' \
-      debian/shinken-common/etc/init.d/shinken
-	sed -i -r 's/(# Default-Stop:.*)S (.*)/\1\2/' \
-      debian/shinken-common/etc/init.d/shinken
-	sed -n -i '1h;1!H;$${;g;s/### BEGIN INIT INFO Redhat.*### END INIT INFO//g;p;}' \
-      debian/shinken-common/etc/init.d/shinken-broker \
-      debian/shinken-common/etc/init.d/shinken-arbiter \
-      debian/shinken-common/etc/init.d/shinken-poller \
-      debian/shinken-common/etc/init.d/shinken-receiver \
-      debian/shinken-common/etc/init.d/shinken-reactionner \
-      debian/shinken-common/etc/init.d/shinken-scheduler
-	# Fix init.d-script-does-not-implement-required-option
-	sed -i -r 's/^(.*)\|restart\|(.*)\)([:blank:]*)/\1|restart|force-reload|\2)\3/' \
-      debian/shinken-common/etc/init.d/shinken
-	sed -i -r 's#^"\$$curdir/shinken" \$$@ (.*)#case "\$$1" in \nstart)\n  "\$$curdir/shinken" start \1\n    ;;\n  stop)\n    "\$$curdir/shinken" stop \1\n    ;;\n  check|checkconfig)\n    "\$$curdir/shinken" checkconfig \1\n    ;;\n  reload)\n    "\$$curdir/shinken" reload \1\n    ;;\n  restart|force-reload)\n    "\$$curdir/shinken" restart \1\n    ;;\n  *)\n    echo "Usage: /etc/init.d/shinken-\1 [-d] {start|stop|reload|restart|check}\n\n  -d  start requested module(s) in debug mode, only useful with start|restart\n" || true\n    exit 1\nesac\n#' \
-      debian/shinken-common/etc/init.d/shinken-broker \
-      debian/shinken-common/etc/init.d/shinken-poller \
-      debian/shinken-common/etc/init.d/shinken-receiver \
-      debian/shinken-common/etc/init.d/shinken-reactionner \
-      debian/shinken-common/etc/init.d/shinken-scheduler \
-      debian/shinken-common/etc/init.d/shinken-arbiter
 	# MODULES
 	## Shinken-module-arbiter-collectd
 	mkdir -p debian/shinken-module-arbiter-collectd/etc/shinken/shinken-specific
