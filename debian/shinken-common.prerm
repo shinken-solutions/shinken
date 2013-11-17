@@ -22,9 +22,9 @@ case "$1" in
         all_daemons='arbiter scheduler poller broker reactionner receiver'
         for daemon_ in $all_daemons; do
             if [ -x /usr/sbin/invoke-rc.d ]; then
-                invoke-rc.d shinken-$daemon_ stop
+                invoke-rc.d shinken-$daemon_ stop > /dev/null 2>&1 || true
             else
-                /etc/init.d/shinken-$daemon_ stop
+                /etc/init.d/shinken-$daemon_ stop > /dev/null 2>&1 || true
             fi
         done
         ;;
