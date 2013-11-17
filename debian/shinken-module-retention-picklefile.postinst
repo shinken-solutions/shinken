@@ -1,7 +1,0 @@
-#!/bin/bash
-#DEBHELPER#
-
-set -e
-
-mkdir -p /var/lib/shinken/
-chown -R shinken:shinken /var/lib/shinken/

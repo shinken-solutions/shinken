@@ -154,6 +154,12 @@ override_dh_install:
 	## Shinken-module-retention-picklefile
 	mkdir -p debian/shinken-module-retention-picklefile/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/retention-picklefile.cfg debian/shinken-module-retention-picklefile/etc/shinken/shinken-specific/
+	# Prepare config files
+	sed -i 's|$$ETC$$|/etc/shinken/|g' debian/shinken-common/etc/default/shinken
+	sed -i 's|$$VAR$$|/var/lib/shinken/|g' debian/shinken-common/etc/default/shinken
+	sed -i 's|$$SCRIPTS_BIN$$|/usr/share/pyshared/shinken/bin/|g' debian/shinken-common/etc/default/shinken
+	sed -i 's|$$RUN$$|/var/run/shinken/|g' debian/shinken-common/etc/default/shinken
+	sed -i 's|$$LOG$$|/var/log/shinken/|g' debian/shinken-common/etc/default/shinken
 	# INSTALL
 	dh_install
 

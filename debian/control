@@ -10,6 +10,7 @@ Build-Depends: python, debhelper (>= 9), quilt, python-setuptools
 Homepage: http://www.shinken-monitoring.org
 
 Package: shinken
+Breaks: shinken (<< 1.4)
 Architecture: any
 Depends: shinken-common (= ${binary:Version}), ${misc:Depends},
  shinken-module-broker-webui-cfgpassword (= ${binary:Version}),
@@ -25,8 +26,9 @@ Description: Flexible monitoring tool - Meta-package
 
 Package: shinken-common
 Architecture: any
-Conflicts: shinken-core
-Depends: ${python:Depends}, pyro | python2-pyro4, ${misc:Depends}
+Breaks: shinken-core (<< 1.4), shinken (<< 1.4)
+Replaces: shinken-arbiter, shinken-broker, shinken-discovery, shinken-poller, shinken-reactionner, shinken-receiver, shinken-scheduler, shinken-core
+Depends: ${python:Depends}, pyro | python2-pyro4, ${misc:Depends}, adduser
 Recommends: nagios-plugins-basic, bsd-mailx | mailx
 Description: Flexible monitoring tool - Common files
  Common files for shinken monitoring.
@@ -96,7 +98,8 @@ Description: Shinken Sqlite logstore for LiveStatus broker module
 
 Package: shinken-module-broker-livestatus-mongodb
 Architecture: any
-Depends: python-pymongo, shinken-module-broker-livestatus (= ${binary:Version}), mongodb-server, ${misc:Depends}
+Depends: python-pymongo, shinken-module-broker-livestatus (= ${binary:Version}), ${misc:Depends}
+Recommends: mongodb-server
 Description: Shinken MongoDB logstore for LiveStatus broker module
  MongoDB logstore for LiveStatus Broker module. This module provides a
  MongoDB storage for LiveStatus module.
@@ -206,7 +209,8 @@ Description: Retention module for Arbiter, Scheduler or Broker
 
 Package: shinken-module-retention-mongodb
 Architecture: any
-Depends: shinken-common (= ${binary:Version}), mongodb-server, ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
+Recommends: mongodb-server
 Description: MongoDB retention module for Scheduler
  This module stores hosts and services states in a mongodb database
  and keep it between process restarts.
