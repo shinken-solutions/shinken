@@ -30,15 +30,8 @@ case "$1" in
     update-rc.d -f shinken-scheduler remove > /dev/null
     update-rc.d -f shinken-poller remove > /dev/null
     update-rc.d -f shinken-broker remove > /dev/null
-    update-rc.d -f shinken-receiver remove > /dev/null
     update-rc.d -f shinken-reactionner remove > /dev/null
-
-    ## No need shinken user anymore
-    #userdel shinken >/dev/null 2>&1 || true
-
-    ## No need shinken group anymore
-    #groupdel shinken >/dev/null 2>&1 || true
-
+    update-rc.d -f shinken-receiver remove > /dev/null
     ;;
   disappear)
     if test "$2" != overwriter; then

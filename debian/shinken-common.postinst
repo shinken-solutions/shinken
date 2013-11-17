@@ -51,22 +51,54 @@ case "$1" in
     dpkg-statoverride --remove /var/lib/shinken/ >/dev/null 2>&1 || true
     dpkg-statoverride --update --add shinken shinken 02750 /var/lib/shinken/ >/dev/null 2>&1 || true
 
-    ## Ensure shinken starts automatically
-    #update-rc.d shinken stop 20 0 1 6 . >/dev/null
+    # We don't we the shinken script
+    # TODO: find a better solution
+    # Maybe move the shinken script in an other folder ?
+    update-rc.d -f shinken defaults > /dev/null
+    update-rc.d -f shinken remove > /dev/null
 
+    ## Ensure shinken starts automatically
     # Get daemons
     db_get shinken-common/select-daemon
     select_daemons="$RET"
 
-    all_daemons='arbiter scheduler poller broker reactionner receiver'
-    for daemon_ in $all_daemons; do
-        if [[ $select_daemons =~ $daemon_ ]]
-        then
-            update-rc.d -f shinken-$daemon_ defaults > /dev/null
-        else
-            update-rc.d -f shinken-$daemon_ remove > /dev/null
-        fi
-    done
+    if [[ $select_daemons =~ 'arbiter' ]]
+    then
+        update-rc.d -f shinken-arbiter defaults > /dev/null
+    else
+        update-rc.d -f shinken-arbiter remove > /dev/null
+    fi
+    if [[ $select_daemons =~ 'scheduler' ]]
+    then
+        update-rc.d -f shinken-scheduler defaults > /dev/null
+    else
+        update-rc.d -f shinken-scheduler remove > /dev/null
+    fi
+    if [[ $select_daemons =~ 'poller' ]]
+    then
+        update-rc.d -f shinken-poller defaults > /dev/null
+    else
+        update-rc.d -f shinken-poller remove > /dev/null
+    fi
+    if [[ $select_daemons =~ 'broker' ]]
+    then
+        update-rc.d -f shinken-broker defaults > /dev/null
+    else
+        update-rc.d -f shinken-broker remove > /dev/null
+    fi
+    if [[ $select_daemons =~ 'reactionner' ]]
+    then
+        update-rc.d -f shinken-reactionner defaults > /dev/null
+    else
+        update-rc.d -f shinken-reactionner remove > /dev/null
+    fi
+    if [[ $select_daemons =~ 'receiver' ]]
+    then
+        update-rc.d -f shinken-receiver defaults > /dev/null
+    else
+        update-rc.d -f shinken-receiver remove > /dev/null
+    fi
+
     db_reset shinken-common/select-daemon || true
 
     ;;

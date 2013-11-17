@@ -1,0 +1,21 @@
+Template: shinken/instructions
+Type: note
+_Description: To make Shinken working you have to
+ * Add WebUI and PickleRetentionBroker modules in the Broker config file
+   'modules' line must be like:
+       modules WebUI, PickleRetentionBroker
+ * Add SQLitedb and Cfg_password modules in the WebUI config file
+   'modules' line must be like:
+       modules SQLitedb,Cfg_password
+ * Add PickleRetentionArbiter module in Arbiter config file
+   'modules' line must be like:
+       modules PickleRetentionArbiter
+ * Add PickleRetention module in Scheduler config file
+   'modules' line must be like:
+       modules PickleRetention
+ * Then restart Shinken
+ .
+ * To access to Shinken:
+   - Address: http://127.0.0.1:7767
+   - Username: admin
+   - Password: admin

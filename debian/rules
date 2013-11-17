@@ -14,6 +14,7 @@ clean:
 	find -type d -name build -print0 | xargs -0 -r rm -rf \;
 	find -type d -name Shinken.egg-info -print0 | xargs -0 -r rm -rf \;
 	dh clean --with python2 --install-layout=deb,quilt
+	debconf-updatepo
 
 override_dh_install:
 	# Common
@@ -154,3 +155,7 @@ override_dh_installinit:
 	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.ico" -exec chmod -x {} \;
 	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.svg" -exec chmod -x {} \;
 	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.otf" -exec chmod -x {} \;
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_installdebconf

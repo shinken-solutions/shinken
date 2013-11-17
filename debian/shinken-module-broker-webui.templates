@@ -1,0 +1,5 @@
+Template: shinken-module-broker-webui/instructions
+Type: note
+_Description: Recommendation for the WebUI module
+ Change 'auth_secret' option in
+ /etc/shinken/shinken-specific/broker-webui.cfg
