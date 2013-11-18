@@ -169,6 +169,7 @@ launch_and_assert test_property_override.py
 launch_and_assert test_business_correlator_expand_expression.py
 launch_and_assert test_business_correlator_output.py
 launch_and_assert test_business_correlator_notifications.py
+launch_and_assert test_misc_filter.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.
