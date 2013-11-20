@@ -127,7 +127,6 @@ class Host(SchedulingItem):
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
         'service_overrides':    ListProp(default=''),
         'labels':               ListProp(default='', fill_brok=['full_status']),
-        'hide_in_ui_problems':  BoolProp(default='0', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
