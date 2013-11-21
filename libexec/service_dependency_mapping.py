@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2013:
-#    Forlot Romain <rforlot@yahoo.com>
-#
 # This file is part of Shinken.
 #
 # Shinken is free software: you can redistribute it and/or modify
@@ -174,10 +171,10 @@ class ShinkenAdmin():
         try:
             dependent_host_parent = self.get_host_dependency(dependent['host_object'])
             if parent['host_name'] == dependent_host_parent:
-                res.append( (ptuple, dtuple) )
+                res = (ptuple, dtuple)
         except IndexError:
             if parent['host_name'] == dependent['host_name']:
-                res.append( (ptuple, dtuple) )
+                res = (ptuple, dtuple)
 
         return res
 
