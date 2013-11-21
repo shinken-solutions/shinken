@@ -212,6 +212,18 @@ class ShinkenAdmin():
                 res += elt
         return res
 
+    def clean_empty_value(self, r):
+        '''
+        Empty value comes from unused config pack and then service dep
+        is created but without nothing...
+        '''
+        r_cleaned = []
+        for elt in r:
+            if elt != []:
+                r_cleaned.append(elt)
+
+        return r_cleaned
+
     def main(self, output_file, config, verbose):
         self.do_connect(verbose)
 
@@ -223,6 +235,9 @@ class ShinkenAdmin():
 
         # Make the map
         r = self.load_svc_mapping(hosts, svc_dep, verbose)
+
+        # Clean mapping from empty value
+        r = self.clean_empty_value(r)
 
         # Write ouput file
         try:
