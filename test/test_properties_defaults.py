@@ -309,7 +309,6 @@ class TestContact(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('retain_status_information', '1'),
         ('notificationways', ''),
         ('password', 'NOPASSWORDSET'),
-        ('hide_ui_problems', '0'),
         ])
 
     def setUp(self):
@@ -539,7 +538,6 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
-        ('hide_in_ui_problems', '0'),
         ])
 
     def setUp(self):
@@ -810,7 +808,6 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
-        ('hide_in_ui_problems', '0'),
         ])
 
     def setUp(self):
