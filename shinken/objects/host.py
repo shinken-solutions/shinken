@@ -125,7 +125,7 @@ class Host(SchedulingItem):
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
-        'service_overrides':    ListProp(default=''),
+        'service_overrides':    ListProp(default='', split_on_coma=False),
         'labels':               ListProp(default='', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
