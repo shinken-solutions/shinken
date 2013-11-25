@@ -184,9 +184,11 @@ def to_char(val):
     return val[0]
 
 
-def to_split(val):
+def to_split(val, split_on_coma=True):
     if isinstance(val, list):
         return val
+    if not split_on_coma:
+        return [val]
     val = val.split(',')
     if val == ['']:
         val = []

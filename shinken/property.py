@@ -58,7 +58,7 @@ class Property(object):
                  fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
-                 override=False, managed=True):
+                 override=False, managed=True, split_on_coma=True):
 
         """
         `default`: default value to be used if this property is not set.
@@ -78,6 +78,9 @@ class Property(object):
         `retention`: if set, we will save this property in the retention files
         `retention_preparation`: function, if set, will go this function before
                      being save to the retention data
+        `split_on_coma`: indicates that list property value should not be
+                     splitted on coma delimiter (values conain comas that
+                     we want to keep).
 
         Only for the initial call:
 
@@ -114,6 +117,7 @@ class Property(object):
         self.override = override
         self.managed = managed
         self.unused = False
+        self.split_on_coma = split_on_coma
 
 
 class UnusedProp(Property):
@@ -206,7 +210,7 @@ class ListProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
-        return to_split(val)
+        return to_split(val, self.split_on_coma)
 
 
 class LogLevelProp(StringProp):
