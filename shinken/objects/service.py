@@ -130,6 +130,9 @@ class Service(SchedulingItem):
         'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        # Enforces child nodes notification options
+        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
+        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
 
         # Easy Service dep definition
         'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
