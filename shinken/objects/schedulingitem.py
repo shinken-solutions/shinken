@@ -1580,6 +1580,13 @@ class SchedulingItem(Item):
                 #print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
+                # Enforces child hosts/services notification options if told to
+                # do so (business_rule_(host|service)_notification_options)
+                # set.
+                if e.my_type == "host" and self.business_rule_host_notification_options:
+                    e.notification_options = self.business_rule_host_notification_options
+                if e.my_type == "service" and self.business_rule_service_notification_options:
+                    e.notification_options = self.business_rule_service_notification_options
 
 
     def rebuild_ref(self):
