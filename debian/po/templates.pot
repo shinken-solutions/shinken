@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shinken\n"
 "Report-Msgid-Bugs-To: shinken@packages.debian.org\n"
-"POT-Creation-Date: 2013-11-17 15:36-0500\n"
+"POT-Creation-Date: 2013-12-04 18:02-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,18 +16,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-#. Type: multiselect
-#. Description
-#: ../shinken-common.templates:1001
-msgid "Which daemon do you want to use:"
-msgstr ""
-
-#. Type: multiselect
-#. Description
-#: ../shinken-common.templates:1001
-msgid "Please choose which Shinken daemon you want to use."
-msgstr ""
 
 #. Type: note
 #. Description
@@ -45,34 +33,11 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../shinken.templates:1001
-msgid "To make Shinken working you have to"
+msgid "To access to Shinken"
 msgstr ""
 
 #. Type: note
 #. Description
 #: ../shinken.templates:1001
-msgid ""
-"* Add WebUI and PickleRetentionBroker modules in the Broker config file\n"
-"  'modules' line must be like:\n"
-"      modules WebUI, PickleRetentionBroker\n"
-"* Add SQLitedb and Cfg_password modules in the WebUI config file\n"
-"  'modules' line must be like:\n"
-"      modules SQLitedb,Cfg_password\n"
-"* Add PickleRetentionArbiter module in Arbiter config file\n"
-"  'modules' line must be like:\n"
-"      modules PickleRetentionArbiter\n"
-"* Add PickleRetention module in Scheduler config file\n"
-"  'modules' line must be like:\n"
-"      modules PickleRetention\n"
-"* Then restart Shinken"
-msgstr ""
-
-#. Type: note
-#. Description
-#: ../shinken.templates:1001
-msgid ""
-"* To access to Shinken:\n"
-"  - Address: http://127.0.0.1:7767\n"
-"  - Username: admin\n"
-"  - Password: admin"
+msgid "* Address: http://127.0.0.1:7767 * Username: admin * Password: admin"
 msgstr ""

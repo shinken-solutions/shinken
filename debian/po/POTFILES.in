@@ -1,3 +1,2 @@
-[type: gettext/rfc822deb] shinken-common.templates
 [type: gettext/rfc822deb] shinken-module-broker-webui.templates
 [type: gettext/rfc822deb] shinken.templates
