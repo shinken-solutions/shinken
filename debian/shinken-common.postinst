@@ -58,48 +58,12 @@ case "$1" in
     update-rc.d -f shinken remove > /dev/null
 
     ## Ensure shinken starts automatically
-    # Get daemons
-    db_get shinken-common/select-daemon
-    select_daemons="$RET"
-
-    if [[ $select_daemons =~ 'arbiter' ]]
-    then
-        update-rc.d -f shinken-arbiter defaults > /dev/null
-    else
-        update-rc.d -f shinken-arbiter remove > /dev/null
-    fi
-    if [[ $select_daemons =~ 'scheduler' ]]
-    then
-        update-rc.d -f shinken-scheduler defaults > /dev/null
-    else
-        update-rc.d -f shinken-scheduler remove > /dev/null
-    fi
-    if [[ $select_daemons =~ 'poller' ]]
-    then
-        update-rc.d -f shinken-poller defaults > /dev/null
-    else
-        update-rc.d -f shinken-poller remove > /dev/null
-    fi
-    if [[ $select_daemons =~ 'broker' ]]
-    then
-        update-rc.d -f shinken-broker defaults > /dev/null
-    else
-        update-rc.d -f shinken-broker remove > /dev/null
-    fi
-    if [[ $select_daemons =~ 'reactionner' ]]
-    then
-        update-rc.d -f shinken-reactionner defaults > /dev/null
-    else
-        update-rc.d -f shinken-reactionner remove > /dev/null
-    fi
-    if [[ $select_daemons =~ 'receiver' ]]
-    then
-        update-rc.d -f shinken-receiver defaults > /dev/null
-    else
-        update-rc.d -f shinken-receiver remove > /dev/null
-    fi
-
-    db_reset shinken-common/select-daemon || true
+    update-rc.d -f shinken-arbiter defaults > /dev/null
+    update-rc.d -f shinken-scheduler defaults > /dev/null
+    update-rc.d -f shinken-poller defaults > /dev/null
+    update-rc.d -f shinken-broker defaults > /dev/null
+    update-rc.d -f shinken-reactionner defaults > /dev/null
+    update-rc.d -f shinken-receiver defaults > /dev/null
 
     ;;
   abort-upgrade)

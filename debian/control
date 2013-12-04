@@ -27,9 +27,16 @@ Description: Flexible monitoring tool - Meta-package
 Package: shinken-common
 Architecture: any
 Breaks: shinken-core (<< 1.4), shinken (<< 1.4)
-Replaces: shinken-arbiter, shinken-broker, shinken-discovery, shinken-poller, shinken-reactionner, shinken-receiver, shinken-scheduler, shinken-core
+Replaces: shinken-arbiter, shinken-broker, shinken-discovery,
+ shinken-poller, shinken-reactionner, shinken-receiver,
+ shinken-scheduler, shinken-core
 Depends: ${python:Depends}, pyro | python2-pyro4, ${misc:Depends}, adduser
-Recommends: nagios-plugins-basic, bsd-mailx | mailx
+Recommends: nagios-plugins-basic, bsd-mailx | mailx,
+ shinken-common (= ${binary:Version}), ${misc:Depends},
+ shinken-module-broker-webui (= ${binary:Version}),
+ shinken-module-broker-webui-cfgpassword (= ${binary:Version}),
+ shinken-module-broker-webui-sqlitedb (= ${binary:Version}),
+ shinken-module-retention-picklefile (= ${binary:Version}),
 Description: Flexible monitoring tool - Common files
  Common files for shinken monitoring.
  .
