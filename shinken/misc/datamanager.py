@@ -250,14 +250,22 @@ class DataManager(object):
         all_services = self.rg.services
         problem_services = []
         problem_services.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
-        return (100-(len(problem_services) *100)/len(all_services))
+        if len(all_services) == 0:
+            res = 0
+        else:
+            res = (100-(len(problem_services) *100)/len(all_services))
+        return res
               
     # Get percent of all Hosts
     def get_per_hosts_state(self):
         all_hosts = self.rg.hosts
         problem_hosts = []
         problem_hosts.extend([s for s in self.rg.hosts if s.state not in ['UP', 'PENDING'] and not s.is_impact])
-        return (100-(len(problem_hosts) *100)/len(all_hosts))
+        if len(all_hosts) == 0:
+            res = 0
+        else:
+            res = (100-(len(problem_hosts) *100)/len(all_hosts))
+        return res
               
 
     # For all business impacting elements, and give the worse state
