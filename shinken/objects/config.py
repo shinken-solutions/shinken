@@ -1744,7 +1744,7 @@ class Config(Item):
                                 % (r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "The realm %s have hosts but no scheduler!" % r.get_name()
+                err = "The realm %s has hosts but no scheduler!" % r.get_name()
                 self.add_error(err)
                 r.packs = []  # Dumb pack
                 continue

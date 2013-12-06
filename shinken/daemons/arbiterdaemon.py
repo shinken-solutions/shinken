@@ -127,9 +127,9 @@ class IForArbiter(Interface):
 
 
     # Try to give some properties of our objects
-    def get_objects_properties(self, table, *properties):
+    def get_objects_properties(self, table, properties=[]):
         logger.debug('ASK:: table= %s, properties= %s' % (str(table), str(properties)))
-        objs = getattr(self.app.conf, table, None)
+        objs = getattr(self.conf, table, None)
         logger.debug("OBJS:: %s" % str(objs))
         if not objs:
             return ''
@@ -140,7 +140,7 @@ class IForArbiter(Interface):
                 v = getattr(obj, prop, '')
                 l.append(v)
             res.append(l)
-        return res
+        return "OKIIIII"
 
 
 # Main Arbiter Class
@@ -172,6 +172,7 @@ class Arbiter(Daemon):
 
         self.interface = IForArbiter(self)
         self.conf = Config()
+
 
 
     # Use for adding things like broks

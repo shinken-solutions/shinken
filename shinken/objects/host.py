@@ -125,7 +125,7 @@ class Host(SchedulingItem):
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
-        'service_overrides':    ListProp(default=''),
+        'service_overrides':    ListProp(default='', split_on_coma=False),
         'labels':               ListProp(default='', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
@@ -135,6 +135,9 @@ class Host(SchedulingItem):
         'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        # Enforces child nodes notification options
+        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
+        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
