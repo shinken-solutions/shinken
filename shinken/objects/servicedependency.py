@@ -212,6 +212,9 @@ class Servicedependencies(Items):
 
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
+                if s is None:
+                    self.configuration_errors.append("Service %s not found for host %s"
+                                                     % (s_name, hst_name))
                 sd.dependent_service_description = s
 
                 s_name = sd.service_description
@@ -219,6 +222,9 @@ class Servicedependencies(Items):
 
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
+                if s is None:
+                    self.configuration_errors.append("Service %s not found for host %s"
+                                                     % (s_name, hst_name))
                 sd.service_description = s
 
             except AttributeError, exp:
