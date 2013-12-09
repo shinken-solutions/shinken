@@ -1,2 +1,0 @@
-bin/shinken-poller /usr/lib/python2.7/dist-packages/shinken/bin/
-shinken/daemons/pollerdaemon.py /usr/lib/python2.7/dist-packages/shinken/daemons
