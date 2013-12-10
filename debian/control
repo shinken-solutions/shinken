@@ -96,6 +96,18 @@ Description: Flexible monitoring tool - LiveStatus module for Broker
  main goal of Shinken is to allow users to have a fully flexible architecture
  for their monitoring system that can easily scale to large environments.
 
+Package: shinken-module-broker-livestatus-null
+Architecture: any
+Depends: shinken-module-broker-livestatus (= ${binary:Version}), ${misc:Depends}
+Conflicts: shinken-core
+Description: Shinken Null logstore for LiveStatus broker module
+ Null logstore for LiveStatus Broker module. This module provides a
+ fake storage for LiveStatus module.
+ .
+ Shinken is a new, Nagios compatible monitoring tool, written in Python. The
+ main goal of Shinken is to allow users to have a fully flexible architecture
+ for their monitoring system that can easily scale to large environments.
+
 Package: shinken-module-broker-livestatus-sqlite
 Architecture: any
 Depends: shinken-module-broker-livestatus (= ${binary:Version}), ${misc:Depends}
