@@ -16,20 +16,23 @@ Reference
    brokerlink
    brok
    check
+   clients/index
    commandcall
    comment
    complexexpression
    contactdowntime
+   core/index
    daemon
+   daemons/index
    daterange
    db_mysql
    db_oracle
    db
    db_sqlite
    dependencynode
+   discovery/index
    dispatcher
    downtime
-   easter
    eventhandler
    external_command
    graph
@@ -40,9 +43,12 @@ Reference
    macroresolver
    memoized
    message
+   misc/index
    modulesctx
    modulesmanager
    notification
+   objects/index
+   plugins/index
    pollerlink
    property
    reactionnerlink
@@ -54,15 +60,8 @@ Reference
    singleton
    skonfuiworker
    sorteddict
+   trending/index
    trigger_functions
    util
-   worker
-   plugins/index
-   discovery/index
    webui/index
-   misc/index
-   clients/index
-   objects/index
-   trending/index
-   daemons/index
-   core/index
+   worker
