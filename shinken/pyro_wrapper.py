@@ -116,7 +116,7 @@ try:
                 pass
             # Maybe it's just a protocol error, like someone with a telnet
             # tying to talk with us, bypass this
-            except ProtocolError:
+            except Pyro.errors.ProtocolError:
                 pass
                 logger.warning("Someone is talking to me in a strange language!")
 
@@ -240,7 +240,7 @@ except AttributeError, exp:
                 else:
                     Pyro.core.Daemon.events(self, [s])
             # Catch bad protocol attemps, like a telnet connexion
-            except ProtocolError:
+            except Pyro.errors.ProtocolError:
                 pass
                 logger.warning("Someone is talking to me in a strange language!")
 
