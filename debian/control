@@ -124,7 +124,7 @@ Package: shinken-module-broker-livestatus-mongodb
 Architecture: any
 Depends: python-pymongo, shinken-module-broker-livestatus (= ${binary:Version}), ${misc:Depends}
 Conflicts: shinken-core
-Recommends: mongodb-server
+suggests: mongodb-server
 Description: Shinken MongoDB logstore for LiveStatus broker module
  MongoDB logstore for LiveStatus Broker module. This module provides a
  MongoDB storage for LiveStatus module.
@@ -245,7 +245,7 @@ Package: shinken-module-retention-mongodb
 Architecture: any
 Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
 Conflicts: shinken-core
-Recommends: mongodb-server
+suggests: mongodb-server
 Description: MongoDB retention module for Scheduler
  This module stores hosts and services states in a mongodb database
  and keep it between process restarts.
