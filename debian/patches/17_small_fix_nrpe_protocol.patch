@@ -1,0 +1,13 @@
+diff --git a/shinken/modules/nrpe_poller.py b/shinken/modules/nrpe_poller.py
+index 9abe9b6..c09a595 100644
+--- a/shinken/modules/nrpe_poller.py
++++ b/shinken/modules/nrpe_poller.py
+@@ -156,7 +156,7 @@ class NRPE:
+         self.rc = response[3]
+         # the output is fill with \x00 at the end. We
+         # should clean them
+-        self.message = response[4].strip('\x00')
++        self.message = re.sub('\x00.*$', '', response[4])
+         crc_orig = response[2]
+ 
+         return (self.rc, self.message)
