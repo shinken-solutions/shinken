@@ -2,8 +2,9 @@
 
 
 
-WebUI integration with Shinken 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+WebUI integration with Shinken
+==============================
 
 
 The WebUI is an external broker module. So it's an external process launched by the broker that "eats" broks (broker messages) from the brokers. So it can get *all* broks if you place this broker in your top level realm.
