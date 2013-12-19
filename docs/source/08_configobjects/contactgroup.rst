@@ -2,9 +2,9 @@
 
 
 
-=========================
-Contact Group Definition 
-=========================
+========================
+Contact Group Definition
+========================
 
 
 
@@ -27,8 +27,8 @@ Bold directives are required, while the others are optional.
 
 ===================== =======================
 define contactgroup{                         
-**contactgroup_name** ***contactgroup_name***
-**alias**             ***alias***            
+**contactgroup_name** **contactgroup_name**
+**alias**             **alias**
 members               *contacts*             
 contactgroup_members  *contactgroups*        
 }                                            
@@ -69,4 +69,4 @@ This directive is used to define a list of the *short names* of :ref:`contacts <
 
    contactgroup_members
   
-This optional directive can be used to include contacts from other “sub" contact groups in this contact group. Specify a comma-delimited list of short names of other contact groups whose members should be included in this group.
+This optional directive can be used to include contacts from other "sub" contact groups in this contact group. Specify a comma-delimited list of short names of other contact groups whose members should be included in this group.

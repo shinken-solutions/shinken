@@ -37,7 +37,9 @@ More precisely:
 
   * Multi platform is also important. If we only focused on GNU/Linux, a large user segment would be left out (Windows!). Of course, some features inherited from Nagios are Unix-only like named pipes, but we should promote other ways for users to bypass this (like commands sent to livestatus or in a web based API for example). Such "os limited" points must be *limited to modules*.
 
-  * UTF8 compatible: ¤§² should be a valid name for a server. Some users want to have Japanese and Chinese characters. UFT8 is not an option in the 21st century.
+.. FIXME: * UTF8 compatible: ``¤§²`` should be a valid name for a server. Some users want to have Japanese and Chinese characters. UFT8 is not an option in the 21st century.
+
+  * UTF8 compatible: ``§²`` should be a valid name for a server. Some users want to have Japanese and Chinese characters. UFT8 is not an option in the 21st century.
 
   * Nearly compatible with Nagios configuration: No mistake, __nearly__. Shinken is not a Nagios fork. It will never be 100% compatible with it, because some Nagios parameters will never be useful in our architecture like external_command_buffer_slots (why impose artificial limits?) or retained_host_attribute_mask (has anyone used these?). We could manage them. But are they useful? No. Users won't use them, so let's focus on innovation that users want. If there truly is a use case for some oddball feature, we can consider backporting, on condition it is not incompatible or rendered obsolete by the Shinken architecture. Though it will compete with other feature requests and project direction.
 

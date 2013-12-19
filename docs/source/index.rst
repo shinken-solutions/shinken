@@ -28,7 +28,6 @@ Contents:
    14_development/index
    89_modules/index
    99_references/index
-   99_references/index
 
 
 
