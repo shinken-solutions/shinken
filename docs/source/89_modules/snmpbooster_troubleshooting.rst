@@ -1,6 +1,7 @@
 .. _snmpbooster_troubleshooting:
 
-^==== SnmpBooster Troubleshooting ====
+SnmpBooster Troubleshooting
+===========================
 
   * Jump back to :ref:`SnmpBooster documentation index <setup_active_module_checks>`
 
