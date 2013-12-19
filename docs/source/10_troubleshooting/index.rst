@@ -3,8 +3,8 @@
     \newpage
 
 
-Config
-======
+Troubleshooting
+===============
 
 .. raw:: LaTeX
 

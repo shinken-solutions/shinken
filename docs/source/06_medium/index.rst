@@ -3,8 +3,8 @@
     \newpage
 
 
-The Basics
-==========
+Medium
+======
 
 .. raw:: LaTeX
 

@@ -3,8 +3,8 @@
     \newpage
 
 
-Config
-======
+Shinken Architecture
+====================
 
 .. raw:: LaTeX
 

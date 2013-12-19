@@ -9,26 +9,25 @@ Welcome to Shinken's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   01_about/index
-   02_gettingstarted/index
-   03_configuringshinken/index
-   04_runningshinken/index
-   05_thebasics/index
-   06_medium/index
-   07_advancedtopics/index
-   08_configobjects/index
-   08_securityandperformancetuning/index
-   09_architecture/index
-   10_troubleshooting/index
-   11_integrationwithothersoftware/index
-   12_how_to_monitor/index
-   13_how_to_contribute/index
-   14_development/index
-   89_modules/index
-   99_references/index
-
+    01_about/index
+    02_gettingstarted/index
+    03_configuringshinken/index
+    04_runningshinken/index
+    05_thebasics/index
+    06_medium/index
+    07_advancedtopics/index
+    08_configobjects/index
+    09_architecture/index
+    10_troubleshooting/index
+    11_integrationwithothersoftware/index
+    12_securityandperformancetuning/index
+    13_how_to_monitor/index
+    14_how_to_contribute/index
+    15_development/index
+    89_modules/index
+    99_references/index
 
 
 

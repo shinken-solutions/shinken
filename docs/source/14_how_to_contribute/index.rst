@@ -3,8 +3,8 @@
     \newpage
 
 
-Security and Performance Tuning
-===============================
+How to contribute
+=================
 
 .. raw:: LaTeX
 
