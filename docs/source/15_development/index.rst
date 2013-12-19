@@ -12,6 +12,8 @@ Development
 
 .. toctree::
 
+   programming_rules
+   test_driven_development
    development-pluginapi
    development-modules
    development-hackingcode
