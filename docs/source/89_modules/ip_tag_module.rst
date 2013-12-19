@@ -1,6 +1,8 @@
 .. _ip_tag_module:
 
 
+Ip Tag module
+=============
 
 Why tag a host based on it's IP address? 
 -----------------------------------------
@@ -13,7 +15,7 @@ This is handled by the arbiter ip_tag module.
 
 
 Ip_tag module 
---------------
+-------------
 
 
 The ip_tag module is an arbiter module that looks up the host address during the configuration parsing and compares it to an predefined IP range (IPV4 or IPV6). If the range matches, it can apply or add a property, such as poller_tag. Other types of tags could be related to locations, functions, administrative groups, etc.

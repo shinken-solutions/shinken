@@ -1,6 +1,9 @@
 .. _vmware_arbiter_module:
 
 
+VMWare Arbiter module
+=====================
+
 
 How it works 
 ~~~~~~~~~~~~~
