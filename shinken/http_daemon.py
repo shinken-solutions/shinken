@@ -43,7 +43,7 @@ try:
     from cherrypy import wsgiserver as cheery_wsgiserver
 except ImportError:
     cheery_wsgiserver = None
-    
+
 from wsgiref import simple_server
 
 from log import logger
@@ -75,14 +75,14 @@ class CherryPyServer(bottle.ServerAdapter):
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
-        
-        
-        if use_ssl:            
+
+
+        if use_ssl:
             server.ssl_certificate = ssl_cert
             server.ssl_private_key = ssl_key
         return server
 
-    
+
 
 class CherryPyBackend(object):
     def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
@@ -96,7 +96,7 @@ class CherryPyBackend(object):
             # must be a problem with pyro workdir:
             raise InvalidWorkDir(e)
 
-    
+
     # When call, it do not have a socket
     def get_sockets(self):
         return []
@@ -139,7 +139,7 @@ class WSGIREFAdapter (bottle.ServerAdapter):
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
-        
+
         if use_ssl:
             if not ssl:
                 logger.error("Missing python-openssl librairy, please install it to open a https backend")
@@ -184,7 +184,7 @@ class WSGIREFBackend(object):
                 s.close()
             except:
                 pass
-        
+
 
     # Manually manage the number of threads
     def run(self):
@@ -205,7 +205,7 @@ class WSGIREFBackend(object):
                 free_slots = nb_threads - len(threads)
                 if free_slots <= 0:
                     time.sleep(0.01)
-            
+
             socks = self.get_sockets()
             # Blocking for 0.1 s max here
             ins = self.get_socks_activity(socks, 0.1)
@@ -220,7 +220,7 @@ class WSGIREFBackend(object):
                     t.daemon = True
                     t.start()
                     threads.append(t)
-                                        
+
 
     def handle_one_request_thread(self, sock):
         self.srv.handle_request()
@@ -235,12 +235,14 @@ class HTTPDaemon(object):
             if self.port == 0:
                 return
 
+            self.registered_fun = []
+
             protocol = 'http'
             if use_ssl:
                 protocol = 'https'
             self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
             logger.info("Opening HTTP socket at %s" % self.uri)
-            
+
             # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
 
@@ -248,7 +250,7 @@ class HTTPDaemon(object):
                 self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
             else:
                 self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
-            
+
             self.lock = threading.RLock()
 
             #@bottle.error(code=500)
@@ -256,8 +258,8 @@ class HTTPDaemon(object):
             #    print err.__dict__
             #    return 'FUCKING ERROR 500', str(err)
 
-            
-        
+
+
         # Get the server socket but not if disabled or closed
         def get_sockets(self):
             if self.port == 0 or self.srv is None:
@@ -271,8 +273,13 @@ class HTTPDaemon(object):
 
         def register(self, obj):
             methods = inspect.getmembers(obj, predicate=inspect.ismethod)
+            merge = [fname for (fname, f) in methods if fname in self.registered_fun ]
+            if merge != []:
+                methods_in = [m.__name__ for m in obj.__class__.__dict__.values() if inspect.isfunction(m)]
+                methods = [m for m in methods if m[0] in methods_in]
+                print "picking only bound methods of class and not parents"
+            print "List to register :%s" % methods
             for (fname, f) in methods:
-                # Slip private functions
                 if fname.startswith('_'):
                     continue
                 # Get the args of the function to catch them in the queries
@@ -284,14 +291,15 @@ class HTTPDaemon(object):
                 # remove useless self in args, because we alredy got a bonded method f
                 if 'self' in args:
                     args.remove('self')
-                print "Registering", fname, args
+                print "Registering", fname, args, obj
+                self.registered_fun.append(fname)
                 # WARNING : we MUST do a 2 levels function here, or the f_wrapper
                 # will be uniq and so will link to the last function again
                 # and again
                 def register_callback(fname, args, f, obj, lock):
                     def f_wrapper():
                         need_lock = getattr(f, 'need_lock', True)
-                        
+
                         # Warning : put the bottle.response set inside the wrapper
                         # because outside it will break bottle
                         d = {}
@@ -338,8 +346,8 @@ class HTTPDaemon(object):
 
         def handleRequests(self, s):
             self.srv.handle_request()
-            
-            
+
+
         def create_uri(address, port, obj_name, use_ssl=False):
             return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
