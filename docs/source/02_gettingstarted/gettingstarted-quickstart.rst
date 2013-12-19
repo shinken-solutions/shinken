@@ -21,9 +21,13 @@ Guides
 Installation guides are currently available for the following OSs :
 
   * :ref:`10 Minute installation Guide for GNU/Linux and Windows <shinken_10min_start>`
+  * :ref:`Shinken installation requirements <shinken_installation_requirements>`
+  * :ref:`Shinken 1.2 installation requirements <prerequisites_1_2>`
+  * :ref:`Shinken installation script <install_script>`
   * :ref:`GNU/Linux Quickstart <gettingstarted-quickstart-gnulinux>`
   * :ref:`Windows Quickstart <gettingstarted-quickstart-windows>`
   * :ref:`Nokia N900 <gettingstarted-quickstart-nokia>`
+  * :ref:`Shinken/Thruk/PNP4Nagios on Red Hat <redhat_thruk_pnp4nagios_howto>`
 
 
 
@@ -32,13 +36,7 @@ Post-Installation Modifications
 ================================
 
 
-Once you get Shinken installed and running properly, you'll no doubt want to start monitoring more than just your local machine. Check out the following docs for how to go about monitoring other things...
-
-Monitoring templates are available to get you started.
-
-  * :ref:`Getting Started <start>`
-
-Otherwise the official documentation will get you there.
+Once you get Shinken installed and running properly, you'll no doubt want to start monitoring more than just your local machine. Check out the following docs for how to go about monitoring other things:
 
   * :ref:`Monitoring Windows machines <gettingstarted-monitoring-windows>`
   * :ref:`Monitoring GNU/Linux or other Unix machines <gettingstarted-monitoring-linux>`
@@ -47,3 +45,7 @@ Otherwise the official documentation will get you there.
   * :ref:`Monitoring network printers <gettingstarted-monitoring-printers>`
   * :ref:`Monitoring publicly available services ("HTTP", "FTP", "SSH", etc.) <gettingstarted-monitoring-publicservices>`
 
+
+Also, you can check the next documentations:
+
+  * :ref:`How to monitor <how_to_monitor>`

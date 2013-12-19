@@ -19,7 +19,7 @@ Introduction
 
 
 
-.. image:: /_static/images///official/images/switch.png
+.. image:: /_static/images/official/images/switch.png
    :scale: 90 %
 
 
@@ -40,7 +40,7 @@ Overview
 
 
 
-.. image:: /_static/images//official/images/monitoring-routers-shinken.png
+.. image:: /_static/images/official/images/monitoring-routers-shinken.png
    :scale: 90 %
 
 
@@ -88,22 +88,12 @@ The first time you configure Shinken to monitor a network switch, you'll need to
 
 Edit the main Shinken config file.
 
-  
 ::
 
-              "linux:~ # "
-
-**
-  
-::
-
-                "vi /etc/shinken/nagios.cfg"
-
-**
+  linux:~ # vi /etc/shinken/nagios.cfg
 
 Remove the leading pound (#) sign from the following line in the main configuration file:
 
-  
 ::
 
   #cfg_file=/etc/shinken/objects/switch.cfg
@@ -122,22 +112,12 @@ You'll need to create some :ref:`object definitions <configuringshinken-objectde
 
 Open the "switch.cfg" file for editing.
 
-  
 ::
 
-              "linux:~ # "
-
-**
-  
-::
-
-                "vi /etc/shinken/objects/switch.cfg"
-
-**
+  linux:~ # vi /etc/shinken/objects/switch.cfg
 
 Add a new :ref:`host <configuringshinken/configobjects/host>` definition for the switch that you're going to monitor. If this is the *first* switch you're monitoring, you can simply modify the sample host definition in "switch.cfg". Change the "host_name", "alias", and "address" fields to appropriate values for the switch.
 
-  
 ::
 
   define host{
@@ -146,7 +126,7 @@ Add a new :ref:`host <configuringshinken/configobjects/host>` definition for the
       alias      Linksys SRW224P Switch ; A longer name associated with the switch
       address    192.168.1.253          ; IP address of the switch
       hostgroups allhosts,switches      ; Host groups this switch is associated with
-      }
+  }
   
 
 
@@ -156,7 +136,7 @@ Monitoring Services
 
 Now you can add some service definitions (to the same configuration file) to monitor different aspects of the switch. If this is the *first* switch you're monitoring, you can simply modify the sample service definition in "switch.cfg".
 
-Replace “*"linksys-srw224p"*" in the example definitions below with the name you specified in the "host_name" directive of the host definition you just added.
+Replace *linksys-srw224p* in the example definitions below with the name you specified in the "host_name" directive of the host definition you just added.
 
 
 
@@ -166,7 +146,6 @@ Monitoring Packet Loss and RTA
 
 Add the following service definition in order to monitor packet loss and round trip average between the Shinken host and the switch every 5 minutes under normal conditions.
 
-  
 ::
 
   define service{
@@ -180,46 +159,18 @@ Add the following service definition in order to monitor packet loss and round t
   
 | 
 
-.. image:: /_static/images///official/images//callouts/1.png
-   :scale: 90 %
-
- | Inherit values from a template |
-| 
-
-.. image:: /_static/images///official/images//callouts/2.png
-   :scale: 90 %
-
- | The name of the host the service is associated with |
-| 
-
-.. image:: /_static/images///official/images//callouts/3.png
-   :scale: 90 %
-
- | The service description |
-| 
-
-.. image:: /_static/images///official/images//callouts/4.png
-   :scale: 90 %
-
- | The command used to monitor the service |
-| 
-
-.. image:: /_static/images///official/images//callouts/5.png
-   :scale: 90 %
-
- | Check the service every 5 minutes under normal conditions |
-| 
-
-.. image:: /_static/images///official/images//callouts/6.png
-   :scale: 90 %
-
- | Re-check the service every minute until its final/hard state is determined |
+1. Inherit values from a template
+2. The name of the host the service is associated with
+3. The service description
+4. The command used to monitor the service
+5. Check the service every 5 minutes under normal conditions
+6. Re-check the service every minute until its final/hard state is determined
 
 This service will be:
 
-  * CRITICAL if the round trip average (RTA) is greater than 600 milliseconds or the packet loss is 60% or more
-  * WARNING if the RTA is greater than 200 ms or the packet loss is 20% or more
-  * OK if the RTA is less than 200 ms and the packet loss is less than 20%
+* CRITICAL if the round trip average (RTA) is greater than 600 milliseconds or the packet loss is 60% or more
+* WARNING if the RTA is greater than 200 ms or the packet loss is 20% or more
+* OK if the RTA is less than 200 ms and the packet loss is less than 20%
 
 
 
@@ -231,7 +182,6 @@ If your switch or router supports "SNMP", you can monitor a lot of information b
 
 Add the following service definition to monitor the uptime of the switch.
 
-  
 ::
 
   define service{
@@ -239,13 +189,12 @@ Add the following service definition to monitor the uptime of the switch.
       host_name            linksys-srw224p
       service_description  Uptime
       check_command        check_snmp!-C public -o sysUpTime.0
-      }
+  }
   
 In the "check_command" directive of the service definition above, the "-C public" tells the plugin that the "SNMP" community name to be used is "public" and the "-o sysUpTime.0" indicates which OID should be checked.
 
 If you want to ensure that a specific port/interface on the switch is in an up state, you could add a service definition like this:
 
-  
 ::
 
   define service{
@@ -253,7 +202,7 @@ If you want to ensure that a specific port/interface on the switch is in an up s
       host_name           linksys-srw224p
       service_description Port 1 Link Status
       check_command       check_snmp!-C public -o ifOperStatus.1 -r 1 -m RFC1213-MIB
-      }
+  }
   
 In the example above, the "-o ifOperStatus.1" refers to the OID for the operational status of port 1 on the switch.
 
@@ -275,7 +224,6 @@ If you're monitoring bandwidth usage on your switches or routers using `MRTG`_, 
 
 You'll need to let the **check_mrtgtraf** plugin know what log file the MRTG data is being stored in, along with thresholds, etc. In my example, I'm monitoring one of the ports on a Linksys switch. The MRTG log file is stored in "/var/lib/mrtg/192.168.1.253_1.log". Here's the service definition I use to monitor the bandwidth data that's stored in the log file...
 
-  
 ::
 
   define service{

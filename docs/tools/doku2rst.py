@@ -5,7 +5,7 @@ import re
 import os
 from urllib import urlretrieve
 
-input_folder = "pages/official/"
+input_folder = "pages/"
 output_folder = "../source"
 
 chapters = {'about': '01',

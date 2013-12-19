@@ -20,7 +20,7 @@ Introduction
 
 
 
-.. image:: /_static/images///official/images/printer.png
+.. image:: /_static/images/official/images/printer.png
    :scale: 90 %
 
 
@@ -90,22 +90,12 @@ The first time you configure Shinken to monitor a network printer, you'll need t
 
 Edit the main Nagios config file.
 
-  
 ::
 
-              "linux:~ # "
-
-**
-  
-::
-
-                "vi /etc/shinken/nagios.cfg"
-
-**
+  linux:~ # vi /etc/shinken/nagios.cfg
 
 Remove the leading pound (#) sign from the following line in the main configuration file:
 
-  
 ::
 
   #cfg_file=/etc/shinken/objects/printer.cfg
@@ -124,14 +114,12 @@ You'll need to create some :ref:`object definitions <configuringshinken-objectde
 
 Open the "printer.cfg" file for editing.
 
-  
 ::
 
-  	"linux:~ # "**"vi /etc/shinken/objects/printer.cfg"**
+  	linux:~ # vi /etc/shinken/objects/printer.cfg
   
 Add a new :ref:`host <configuringshinken/configobjects/host>` definition for the networked printer that you're going to monitor. If this is the *first* printer you're monitoring, you can simply modify the sample host definition in "printer.cfg". Change the "host_name", "alias", and "address" fields to appropriate values for the printer.
 
-  
 ::
 
   define host{
@@ -148,7 +136,6 @@ Replace "hplj2605dn" in the example definitions below with the name you specifie
 
 Add the following service definition to check the status of the printer. The service uses the **check_hpjd** plugin to check the status of the printer every 10 minutes by default. The "SNMP" community string used to query the printer is "public" in this example.
 
-  
 ::
 
   define service{
@@ -162,7 +149,6 @@ Add the following service definition to check the status of the printer. The ser
   
 Add the following service definition to ping the printer every 10 minutes by default. This is useful for monitoring RTA, packet loss, and general network connectivity.
 
-  
 ::
 
   define service{

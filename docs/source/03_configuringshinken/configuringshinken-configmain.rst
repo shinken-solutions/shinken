@@ -108,7 +108,7 @@ Example :
   log_level=WARNING
   
   
-This variable specifies which logs will be raised by the arbiter daemon. For others daemons, it can be defined in their local *d.ini files.
+This variable specifies which logs will be raised by the arbiter daemon. For others daemons, it can be defined in their local \*d.ini files.
 
 
 
@@ -139,6 +139,7 @@ Beware : if you set the human format, some automatic parsing log tools won't wor
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-cfg_file:
 
 Object Configuration File 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +166,7 @@ This directive is used to specify an :ref:`Object Configuration Overview <config
 
 Remark : the *cfg_file* can be a relative path, so it can be relative from the file that is reading. For example if you set "cfg_file=hosts.cfg" in the file "cfg_file=/etc/shinken/nagios.cfg", the file that will be read is "/etc/shinken/hosts.cfg".
 
-
+.. _configuringshinken-configmain#configuringshinken-configmain-cfg_dir:
 
 Object Configuration Directory 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

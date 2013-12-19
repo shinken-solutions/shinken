@@ -45,11 +45,10 @@ Creating A Host Definition
 ===========================
 
 
-Before you can monitor a service, you first need to define a :ref:`host <configuringshinken/configobjects/host>` that is associated with the service. You can place host definitions in any object configuration file specified by a :ref:`cfg_file <configuringshinken-configmain#configuringshinken-configmain-cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuringshinken-configmain#configuringshinken-configmain-cfg_dir>` directive. If you have already created a host definition, you can skip this step.
+Before you can monitor a service, you first need to define a :ref:`host <host>` that is associated with the service. You can place host definitions in any object configuration file specified by a :ref:`cfg_file <configuringshinken-configmain#configuringshinken-configmain-cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuringshinken-configmain#configuringshinken-configmain-cfg_dir>` directive. If you have already created a host definition, you can skip this step.
 
 For this example, lets say you want to monitor a variety of services on a remote host. Let's call that host *remotehost*. The host definition can be placed in its own file or added to an already exiting object configuration file. Here's what the host definition for *remotehost* might look like:
 
-  
 ::
 
   define host{
@@ -58,7 +57,7 @@ For this example, lets say you want to monitor a variety of services on a remote
       alias         Some Remote Host    ; A longer name associated with the host
       address       192.168.1.50        ; IP address of the host
       hostgroups    allhosts            ; Host groups this host is associated with
-      }
+  }
   
 Now that a definition has been added for the host that will be monitored, we can start defining services that should be monitored. As with host definitions, service definitions can be placed in any object configuration file.
 

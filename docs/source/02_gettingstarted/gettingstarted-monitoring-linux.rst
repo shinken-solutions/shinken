@@ -39,7 +39,7 @@ Overview
 There are several different ways to monitor attributes or remote Linux/Unix servers. One is by using shared "SSH" keys and the **check_by_ssh** plugin to execute plugins on remote servers. This method will not be covered here, but can result in high load on your monitoring server if you are monitoring hundreds or thousands of services. The overhead of setting up/destroying "SSH" connections is the cause of this.
 
 
-.. image:: /_static/images//official/images/nrpe-shinken.png
+.. image:: /_static/images/official/images/nrpe-shinken.png
    :scale: 90 %
 
 
