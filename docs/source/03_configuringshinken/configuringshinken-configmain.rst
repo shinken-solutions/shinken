@@ -10,11 +10,12 @@
 
 When creating and/or editing configuration files, keep the following in mind:
 
-  * Lines that start with a '"#"' character are taken to be comments and are not processed
-  * Variable names are case-sensitive
-  * If you want to configure a process to use a specific module:
-      * You must define the module in a **modules_xxx.cfg** file in the **shinken-specific.d** directory
-      * You must reference it in the **modules** section for that process, e.g. the **broker.cfg** file
+* Lines that start with a '"#"' character are taken to be comments and are not processed
+* Variable names are case-sensitive
+* If you want to configure a process to use a specific module:
+
+  * You must define the module in a **modules_xxx.cfg** file in the **shinken-specific.d** directory
+  * You must reference it in the **modules** section for that process, e.g. the **broker.cfg** file
 
 
 Config File Location and sample 
@@ -61,7 +62,6 @@ Defined in shinken-specific.cfg file.
 
 Format
 
-  
 ::
 
   define broker{
@@ -72,7 +72,6 @@ Format
   
 Example for logging module named "Simple_log"
 
-  
 ::
 
    define module{
@@ -96,13 +95,12 @@ Defined in nagios.cfg file.
 
 Format
 
-  
 ::
 
   log_level=[DEBUG,INFO,WARNING,ERROR,CRITICAL]
   
 Example :
-  
+
 ::
 
   log_level=WARNING
@@ -120,14 +118,12 @@ Say if the timespam should be a unixtime (default) or a human read one.
 
 Format :
 
-  
 ::
 
   human_timestamp_log=[0/1]
   
 Example
 
-  
 ::
 
   human_timestamp_log=0
@@ -148,14 +144,12 @@ Defined in nagios.cfg file.
 
 Format :
 
-  
 ::
 
   cfg_file=<file_name>
   
 Example
 
-  
 ::
 
   cfg_file=/usr/local/shinken/etc/hosts.cfg
@@ -174,12 +168,13 @@ Object Configuration Directory
 Defined in nagios.cfg file.
 
 Format:
-  
+
 ::
 
   cfg_dir=<directory_name>
+
 Example:
-  
+
 ::
 
   cfg_dir=/etc/shinken/commands
@@ -188,13 +183,15 @@ Example:
   
 This directive is used to specify a directory which contains :ref:`Object Configuration Overview <configuringshinken-configobject>` that Shinken should use for monitoring. All files in the directory with a .cfg extension are processed as object config files. Additionally, it will recursively process all config files in subdirectories of the directory you specify here. You can separate your configuration files into different directories and specify multiple
 
-  
 ::
 
   cfg_dir=
   
 statements to have all config files in each directory processed.
 
+
+
+.. _configuringshinken-configmain#configuringshinken-configmain-resource_file:
 
 
 Resource File 
@@ -205,7 +202,7 @@ Defined in nagios.cfg file.
 Format:
    resource_file=<file_name>
 Example:
-  
+
 ::
 
   resource_file=/etc/shinken/resource.cfg
@@ -214,6 +211,7 @@ This is used to specify an optional resource file that can contain "$USERn$" :re
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-nagios_user:
 
 Arbiter Daemon User 
 ~~~~~~~~~~~~~~~~~~~~
@@ -221,12 +219,13 @@ Arbiter Daemon User
 Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
 
 Format:
-  
+
 ::
 
   user=username
+
 Example:
-  
+
 ::
 
   user=shinken
@@ -234,7 +233,7 @@ Example:
 This is used to set the effective user that the **Arbiter** process (main process) should run as. After initial program startup, Shinken will drop its effective privileges and run as this user.
 
 
-
+.. _configuringshinken-configmain#configuringshinken-configmain-nagios_group:
 
 Arbiter Daemon user Group 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -242,12 +241,13 @@ Arbiter Daemon user Group
 Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
 
 Format:
-  
+
 ::
 
   group=groupname
+
 Example:
-  
+
 ::
 
   group=shinken
@@ -263,12 +263,13 @@ Bypass security checks for the Arbiter daemon
 Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
 
 Format:
-  
+
 ::
 
   idontcareaboutsecurity=<0/1>
+
 Example:
-  
+
 ::
 
   idontcareaboutsecurity=0
@@ -286,12 +287,13 @@ Notifications Option
 
 
 Format:
-  
+
 ::
 
   enable_notifications=<0/1>
+
 Example:
-  
+
 ::
 
   enable_notifications=1
@@ -303,18 +305,20 @@ Values are as follows:
   * 1 = Enable notifications (default)
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-log_rotation_method:
 
 Log Rotation Method (Not fully implemented) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   log_rotation_method=<n/h/d/w/m>
+
 Example:
-  
+
 ::
 
   log_rotation_method=d
@@ -335,23 +339,26 @@ External Command Check Option
 
 
 Format:
-  
+
 ::
 
   check_external_commands=<0/1>
+
 Example:
-  
+
 ::
 
   check_external_commands=1
   
 This option determines whether or not Shinken will check the :ref:`External Command File <configuringshinken-configmain#configuringshinken-configmain-command_file>` for commands that should be executed with the **arbiter daemon**. More information on external commands can be found :ref:`here <advancedtopics-extcommands>`.
+
   * 0 = Don't check external commands (default)
   * 1 = Check external commands (default)
 
 .. note::  FIX ME : Find the real default value
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-command_file:
 
 External Command File 
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -359,17 +366,20 @@ External Command File
 Defined in nagios.cfg file.
 
 Format:
-  
+
 ::
 
   command_file=<file_name>
+
 Example:
-  
+
 ::
 
   command_file=/var/lib/shinken/rw/nagios.cmd
   
 This is the file that Shinken will check for external commands to process with the **arbiter daemon**. The :ref:`command CGI <thebasics-cgis#thebasics-cgis-cmd_cgi>` writes commands to this file. The external command file is implemented as a named pipe (FIFO), which is created when Nagios starts and removed when it shuts down. More information on external commands can be found :ref:`here <advancedtopics-extcommands>`.
+
+.. FIXME: where is thebasics-cgis#thebasics-cgis-cmd_cgi ?
 
 .. tip::  This external command file is not managed under Windows system. Please use others way to send commands like the LiveStatus module for example.
 
@@ -389,18 +399,20 @@ lock_file=/var/lib/shinken/arbiterd.pid
 This option specifies the location of the lock file that Shinken **arbiter daemon** should create when it runs as a daemon (when started with the "-d" command line argument). This file contains the process id (PID) number of the running **arbiter** process.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-retain_state_information:
 
 State Retention Option (Not implemented) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   retain_state_information=<0/1>
+
 Example:
-  
+
 ::
 
   retain_state_information=1
@@ -409,7 +421,7 @@ This option determines whether or not Shinken will retain state information for 
   * 0 = Don't retain state information
   * 1 = Retain state information (default)
 
-.. note::  Idea to approve : Mark it as Unused : ` Related topic`_. A Shinken module replace it.
+.. note::  Idea to approve : Mark it as Unused : `Related topic`_. A Shinken module replace it.
 
 
 
@@ -418,12 +430,13 @@ State Retention File
 
 
 Format:  
-  
+
 ::
 
   state_retention_file=<file_name>
+
 Example:  
-  
+
 ::
 
   state_retention_file=/var/lib/shinken/retention.dat
@@ -439,12 +452,13 @@ Automatic State Retention Update Interval
 
 
 Format:
-  
+
 ::
 
   retention_update_interval=<minutes>
+
 Example:
-  
+
 ::
 
   retention_update_interval=60
@@ -465,13 +479,14 @@ Service/Host Check Execution Option
 
 
 Format:
-  
+
 ::
 
   execute_service_checks=<0/1>
   execute_host_checks=<0/1>
+
 Example:
-  
+
 ::
 
   execute_service_checks=1
@@ -489,13 +504,14 @@ Passive Service/Host Check Acceptance Option
 
 
 Format:
-  
+
 ::
 
   accept_passive_service_checks=<0/1>
   accept_passive_host_checks=<0/1>
+
 Example:
-  
+
 ::
 
   accept_passive_service_checks=1
@@ -513,12 +529,13 @@ Event Handler Option
 
 
 Format:
-  
+
 ::
 
   enable_event_handlers=<0/1>
+
 Example:
-  
+
 ::
 
   enable_event_handlers=1
@@ -535,12 +552,13 @@ Event Handler during downtimes
 
 
 Format:
-  
+
 ::
 
   no_event_handlers_during_downtimes=<0/1>
+
 Example:
-  
+
 ::
 
   no_event_handlers_during_downtimes=1
@@ -551,6 +569,7 @@ This option determines whether or not Shinken will run :ref:`event handlers <adv
   * 1 = Enable event handlers
 
 References:
+
   * http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg01394.html
   * https://github.com/naparuba/shinken/commit/9ce28d80857c137e5b915b39bbb8c1baecc821f9
 
@@ -561,12 +580,13 @@ Syslog Logging Option
 
 
 Format:  
-  
+
 ::
 
   use_syslog=<0/1>
+
 Example:  
-  
+
 ::
 
   use_syslog=1
@@ -585,12 +605,13 @@ Notification Logging Option
 
 
 Format:
-  
+
 ::
 
   log_notifications=<0/1>
+
 Example:
-  
+
 ::
 
   log_notifications=1
@@ -607,13 +628,14 @@ Service/Host Check Retry Logging Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   log_service_retries=<0/1>
   log_host_retries=<0/1>
+
 Example:
-  
+
 ::
 
   log_service_retries=0
@@ -631,12 +653,13 @@ Event Handler Logging Option
 
 
 Format:
-  
+
 ::
 
   log_event_handlers=<0/1>
+
 Example:
-  
+
 ::
 
   log_event_handlers=1
@@ -652,9 +675,17 @@ This variable determines whether or not service and host :ref:`event handlers <a
 Initial States Logging Option (Not implemented) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Format:  
 
-Format:  log_initial_states=<0/1>
-Example:  log_initial_states=1
+::
+
+  log_initial_states=<0/1>
+
+Example:
+
+::
+
+  log_initial_states=1
 
 This variable determines whether or not Shinken will force all initial host and service states to be logged, even if they result in an OK state. Initial service and host states are normally only logged when there is a problem on the first check. Enabling this option is useful if you are using an application that scans the log file to determine long-term state statistics for services and hosts.
 
@@ -669,12 +700,13 @@ External Command Logging Option
 
 
 Format:
-  
+
 ::
 
   log_external_commands=<0/1>
+
 Example:
-  
+
 ::
 
   log_external_commands=1
@@ -692,12 +724,13 @@ Passive Check Logging Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   log_passive_checks=<0/1>
+
 Example:
-  
+
 ::
 
   log_passive_checks=1
@@ -715,19 +748,22 @@ Global Host/Service Event Handler Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   global_host_event_handler=<command>
   global_service_event_handler=<command>
+
 Example:
-  
+
 ::
 
   global_host_event_handler=log-host-event-to-db
   global_service_event_handler=log-service-event-to-db
   
 This option allows you to specify a host event handler command that is to be run for every host state change. The global event handler is executed immediately prior to the event handler that you have optionally specified in each host definition. The command argument is the short name of a command that you define in your :ref:`Object Configuration Overview <configuringshinken-configobject>`. The maximum amount of time that this command can run is controlled by the :ref:`Event Handler Timeout <configuringshinken-configmain#configuringshinken-configmain-event_handler_timeout>` option. More information on event handlers can be found :ref:`here <advancedtopics-eventhandlers>`.
+
+.. FIXME where is configuringshinken-configmain#configuringshinken-configmain-global_service_event_handler ??
 
 Such commands should not be so useful with the new Shinken distributed architecture. If you use it, look if you can avoid it because such commands will kill your performances.
 
@@ -738,12 +774,13 @@ Maximum Host/Service Check Spread
 
 
 Format:
-  
+
 ::
 
   max_service_check_spread=<minutes>
+
 Example:
-  
+
 ::
 
   max_service_check_spread=30
@@ -757,12 +794,13 @@ Timing Interval Length
 
 
 Format:
-  
+
 ::
 
   interval_length=<seconds>
+
 Example:
-  
+
 ::
 
   interval_length=60
@@ -779,7 +817,7 @@ Tuning and advanced parameters
 -------------------------------
 
 Others parameters are useful for advanced features like flapping detection or performance tuning. Please look at the 
-:ref:`configuringshinken-configmain-advanced` <configuringshinken-configmain-advanced> page for them.
+:ref:`configuringshinken-configmain-advanced <configuringshinken-configmain-advanced>` page for them.
 
 
 
@@ -787,7 +825,7 @@ Others parameters are useful for advanced features like flapping detection or pe
 Old CGI related parameter 
 --------------------------
 
-If you are using the old CGI from Nagios, please migrate to a new WebUI. For historical perspective you can find information on the :ref:`specific CGI parameters` <specific CGI parameters>.
+If you are using the old CGI from Nagios, please migrate to a new WebUI. For historical perspective you can find information on the :ref:`specific CGI parameters <specific_cgi_parameters>`.
 
 
 
@@ -796,8 +834,8 @@ Unused parameters
 
 The below parameters are inherited from Nagios but are not used in Shinken. You can defined them but if you don't it will be the same :)
 
-They are listed on another page :ref:`Unused Nagios parameters` <Unused Nagios parameters>.
+They are listed on another page :ref:`Unused Nagios parameters <unused_nagios_parameters>`.
 
 
 
-.. _ Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html
+.. _Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html

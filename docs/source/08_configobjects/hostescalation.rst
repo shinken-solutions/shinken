@@ -1,4 +1,5 @@
 .. _hostescalation:
+.. _configuringshinken/configobjects/hostescalation:
 
 
 

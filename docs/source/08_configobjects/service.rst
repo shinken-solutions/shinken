@@ -1,4 +1,5 @@
 .. _service:
+.. _configuringshinken/configobjects/service:
 
 
 

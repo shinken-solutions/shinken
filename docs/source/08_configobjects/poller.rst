@@ -1,4 +1,5 @@
 .. _poller:
+.. _configuringshinken/configobjects/poller:
 
 
 

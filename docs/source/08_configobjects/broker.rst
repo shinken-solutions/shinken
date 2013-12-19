@@ -1,4 +1,5 @@
 .. _broker:
+.. _configuringshinken/configobjects/broker:
 
 
 

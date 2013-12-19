@@ -1,4 +1,5 @@
 .. _servicedependency:
+.. _configuringshinken/configobjects/servicedependency:
 
 
 

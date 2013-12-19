@@ -1,4 +1,5 @@
 .. _arbiter:
+.. _configuringshinken/configobjects/arbiter:
 
 
 

@@ -1,4 +1,6 @@
 .. _serviceextinfo:
+.. _configuringshinken/configobjects/serviceextinfo:
+
 
 
 

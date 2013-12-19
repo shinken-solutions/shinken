@@ -1,4 +1,5 @@
 .. _serviceescalation:
+.. _configuringshinken/configobjects/serviceescalation:
 
 
 

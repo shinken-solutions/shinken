@@ -1,4 +1,6 @@
 .. _contactgroup:
+.. _configuringshinken/configobjects/contactgroup:
+
 
 
 

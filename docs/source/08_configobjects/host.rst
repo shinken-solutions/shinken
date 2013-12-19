@@ -1,6 +1,5 @@
 .. _host:
-
-
+.. _configuringshinken/configobjects/host:
 
 ================
 Host Definition 

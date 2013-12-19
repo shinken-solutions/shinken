@@ -1,4 +1,5 @@
 .. _scheduler:
+.. _configuringshinken/configobjects/scheduler:
 
 
 

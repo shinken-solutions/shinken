@@ -1,4 +1,5 @@
 .. _realm:
+.. _configuringshinken/configobjects/realm:
 
 
 

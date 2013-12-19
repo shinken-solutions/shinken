@@ -1,4 +1,5 @@
 .. _command:
+.. _configuringshinken/configobjects/command:
 
 
 

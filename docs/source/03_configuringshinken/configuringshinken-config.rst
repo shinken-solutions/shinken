@@ -3,9 +3,9 @@
 
 
 
-========================
- Configuration Overview 
-========================
+======================
+Configuration Overview
+======================
 
 
 
@@ -37,7 +37,7 @@ Resource File(s)
 
 
 
-.. image:: /_static/images//official/images/configoverview-shinken.png
+.. image:: /_static/images/official/images/configoverview-shinken.png
    :scale: 90 %
 
 
@@ -45,7 +45,7 @@ Resource File(s)
 Resource files can be used to store user-defined macros. The main point of having resource files is to use them to store sensitive configuration information (like passwords), without making them available to the CGIs.
 
 You can specify one or more optional resource files by using the :ref:`resource_file <configuringshinken-configmain#configuringshinken-configmain-resource_file>` directive in your main configuration file.
-
+ngshinken-configmain#configuringshinken-configmain-resource_file
 
 
 Object Definition Files 

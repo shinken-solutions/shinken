@@ -1,4 +1,5 @@
 .. _servicegroup:
+.. _configuringshinken/configobjects/servicegroup:
 
 
 

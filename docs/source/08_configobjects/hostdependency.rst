@@ -1,4 +1,5 @@
 .. _hostdependency:
+.. _configuringshinken/configobjects/hostdependency:
 
 
 

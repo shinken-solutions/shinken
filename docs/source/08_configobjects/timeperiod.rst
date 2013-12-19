@@ -1,4 +1,6 @@
 .. _timeperiod:
+.. _configuringshinken/configobjects/timeperiod:
+
 
 
 

@@ -62,9 +62,6 @@ Hosts
 ------
 
   
-::
-
-  
 :ref:`Hosts <configuringshinken/configobjects/host>` are one of the central objects in the monitoring logic. Important attributes of hosts are as follows:
 
   * Hosts are usually physical devices on your network (servers, workstations, routers, switches, printers, etc).

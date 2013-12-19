@@ -1,4 +1,6 @@
 .. _hostextinfo:
+.. _configuringshinken/configobjects/hostextinfo:
+
 
 
 

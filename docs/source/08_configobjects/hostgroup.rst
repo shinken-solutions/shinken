@@ -1,4 +1,5 @@
 .. _hostgroup:
+.. _configuringshinken/configobjects/hostgroup:
 
 
 
