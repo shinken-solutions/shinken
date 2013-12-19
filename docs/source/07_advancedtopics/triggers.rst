@@ -1,5 +1,9 @@
 .. _triggers:
 
+========
+Triggers
+========
+
 .. warning::  This is currently in Beta. DO NOT use in production. 
 <note >Not up to date. See the bottom part for something recent 
 A trigger object is something that can be called after a "change" on an object. It's a bit like Zabbix trigger, and should be used only if you need it. In most cases, direct check is easier to setup :)

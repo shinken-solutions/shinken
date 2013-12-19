@@ -1,6 +1,9 @@
 .. _setup_notification_escalations:
 
 
+Notifications and escalations
+=============================
+
 
 Escalations 
 ------------

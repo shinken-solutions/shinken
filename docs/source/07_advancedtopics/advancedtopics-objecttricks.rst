@@ -1,6 +1,8 @@
 .. _advancedtopics-objecttricks:
 
-
+===============
+Advanced tricks
+===============
 
 
 Time-Saving Tricks For Object Definitions 

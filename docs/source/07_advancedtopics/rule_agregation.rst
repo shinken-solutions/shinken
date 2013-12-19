@@ -1,5 +1,8 @@
 .. _rule_agregation:
 
+================
+Aggregation rule
+================
 
 
 Goal 

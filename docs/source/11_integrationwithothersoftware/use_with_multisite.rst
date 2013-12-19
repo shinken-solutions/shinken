@@ -1,6 +1,10 @@
 .. _use_with_multisite:
 
 
+==========================
+Use Shinken with Multisite
+==========================
+
 
 Check_MK Multisite 
 -------------------

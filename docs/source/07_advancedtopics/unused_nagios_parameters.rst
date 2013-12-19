@@ -1,6 +1,11 @@
 .. _unused_nagios_parameters:
 
 
+========================
+Unused nagios parameters
+========================
+
+
 The parameters below are managed in Nagios but not in Shinken because they are useless in the architecture. If you really need one of them, please use Nagios instead or send us a patch :)
 
 .. note::  The title is quite ambiguous : a not implemented parameter is different from an unused parameter. 

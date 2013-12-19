@@ -1,6 +1,10 @@
 .. _use_with_graphite:
 
 
+=========================
+Use Shinken with Graphite
+=========================
+
 
 Graphite 
 ---------

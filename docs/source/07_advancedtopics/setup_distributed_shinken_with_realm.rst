@@ -1,6 +1,11 @@
 .. _setup_distributed_shinken_with_realm:
 
 
+==============================================
+Shinken's distributed architecture with realms
+==============================================
+
+
 
 Multi customers and/or sites: REALMS 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

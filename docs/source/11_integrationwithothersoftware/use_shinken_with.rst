@@ -1,6 +1,10 @@
 .. _use_shinken_with:
 
 
+====================
+Use Shinken with ...
+====================
+
 
 Shinken interface 
 ------------------

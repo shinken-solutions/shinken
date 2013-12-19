@@ -2,8 +2,8 @@
 
 
 
-= Monitoring a DMZ  
-~~~~~~~~~~~~~~~~~~~~
+Monitoring a DMZ  
+================
 
 
 There is two ways for monitoring a DMZ network:

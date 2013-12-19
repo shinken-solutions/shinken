@@ -1,6 +1,10 @@
 .. _use_with_centreon:
 
 
+=========================
+Use Shinken with Centreon
+=========================
+
 
 Centreon 
 ---------

@@ -1,5 +1,8 @@
 .. _use_the_discovery_with_shinken:
 
+======================
+Discovery with Shinken
+======================
 
 
 Simple use of the discovery tool 

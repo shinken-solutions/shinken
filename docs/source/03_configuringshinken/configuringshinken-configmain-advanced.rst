@@ -1,5 +1,7 @@
 .. _configuringshinken-configmain-advanced:
 
+Main advanced configuration
+===========================
 
 
 Tuning and advanced parameters 

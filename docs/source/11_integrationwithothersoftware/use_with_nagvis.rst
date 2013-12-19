@@ -1,6 +1,10 @@
 .. _use_with_nagvis:
 
 
+=======================
+Use Shinken with Nagvis
+=======================
+
 
 NagVis 
 -------

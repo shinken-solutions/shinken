@@ -3,9 +3,9 @@
 
 
 
-====================
-SEND SMS BY GATEWAY 
-====================
+===================
+Send sms by gateway
+===================
 
 
 Shinken can be used to send sms to you and other people when you got an alert. 

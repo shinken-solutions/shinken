@@ -2,6 +2,9 @@
 
 The parameters below are deprecated and are **only** useful if you use the old Nagios CGI UI. 
 
+=============
+Nagios CGI UI
+=============
 
 
 Object Cache File 

@@ -3,6 +3,9 @@
 .. _use_with_pnp#using_shinken_with_pnp4nagios:
 
 
+===========================
+Use Shinken with PNP4Nagios
+===========================
 
 PNP4Nagios 
 -----------

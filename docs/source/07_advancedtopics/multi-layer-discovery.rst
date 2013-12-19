@@ -1,9 +1,9 @@
 .. _multi-layer-discovery:
 
 
-
+=====================
 Multi layer discovery 
-======================
+=====================
 
 
 Shinken provides a discovery mecanism in several steps. There are on a side the **runners** (cf :ref:`Runners description <use_the_discovery_with_shinken_advanced>`) which are script that output in formatted way properties list of scanned host and on another side discovery rules which use properties list to tag hosts when some of these properties are meaningful.
@@ -18,7 +18,6 @@ There are two kinds of rules, those which generate a host definition and those w
 
 
 
-==================
 Runners available 
 ==================
 
@@ -26,7 +25,7 @@ Runners available
 
 
 Filesystems 
-============
+~~~~~~~~~~~
 
 
 
@@ -180,7 +179,7 @@ Pay attention to double "$$", it is needed cause macros interpretation. When mor
 
 
 Cluster 
-========
+~~~~~~~
 
 
 

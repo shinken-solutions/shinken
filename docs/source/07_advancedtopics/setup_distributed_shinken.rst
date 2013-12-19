@@ -1,5 +1,8 @@
 .. _setup_distributed_shinken:
 
+==================================
+Shinken's distributed architecture
+==================================
 
 
 Shinken's distributed architecture for load balancing 

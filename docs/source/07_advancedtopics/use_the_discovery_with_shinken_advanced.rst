@@ -1,5 +1,10 @@
 .. _use_the_discovery_with_shinken_advanced:
 
+===============================
+Advanced discovery with Shinken
+===============================
+
+
 .. important::  This topic assumes you have read and understood :ref:`simple discovery with Shinken <use_the_discovery_with_shinken>`.
 
 

@@ -1,6 +1,8 @@
 .. _shinken_and_thruk:
 
-
+=====
+Thruk
+=====
 
 Shinken installation 
 ~~~~~~~~~~~~~~~~~~~~~
