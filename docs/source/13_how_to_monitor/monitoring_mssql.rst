@@ -2,8 +2,8 @@
 
 
 
-Monitoring Microsoft Mssql server =
------------------------------------
+Monitoring Microsoft Mssql server
+=================================
 
 
 **Abstract**

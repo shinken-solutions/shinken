@@ -2,8 +2,8 @@
 
 
 
-Monitoring VMware Machines =
-----------------------------
+Monitoring VMware Machines
+==========================
 
 
 **Abstract**

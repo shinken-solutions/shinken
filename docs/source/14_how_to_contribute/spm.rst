@@ -1,5 +1,9 @@
 .. _spm:
 
+
+Shinken Package Manager
+=======================
+
 .. important::  I don't now how you get here :)  it's a poc of the design of a shinken pack manager. A pack can be a module, a configuration pack or what ever you want.
 
 A pack can be about :

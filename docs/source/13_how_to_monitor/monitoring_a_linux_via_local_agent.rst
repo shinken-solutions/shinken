@@ -3,7 +3,7 @@
 
 
 Monitoring a Linux via a Local Agent 
--------------------------------------
+====================================
 
 
 .. note::  **TODO** Documentation needs to be written

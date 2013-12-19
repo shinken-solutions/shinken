@@ -2,8 +2,8 @@
 
 
 
-Monitoring a printer =
-----------------------
+Monitoring a printer
+====================
 
 
 

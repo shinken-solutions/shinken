@@ -1,6 +1,8 @@
 .. _windows_monitoring_with_nsclient:
 
 
+Monitoring Windows witn NSClient++
+==================================
 
 Guideline 
 ----------

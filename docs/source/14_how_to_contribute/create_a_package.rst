@@ -1,6 +1,8 @@
 .. _create_a_package:
 
 
+Shinken modules and Shinken packs
+=================================
 
 
 Packages layout 

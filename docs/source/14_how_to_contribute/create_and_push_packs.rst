@@ -1,6 +1,9 @@
 .. _create_and_push_packs:
 
 
+Shinken packs
+=============
+
 
 What are Packs? 
 ~~~~~~~~~~~~~~~~

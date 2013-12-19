@@ -2,8 +2,8 @@
 
 
 
-Monitoring Linux Devices =
---------------------------
+Monitoring Linux Devices
+========================
 
 
 This document describes how you can monitor "private" services and attributes of GNU/Linux devices, such as:
