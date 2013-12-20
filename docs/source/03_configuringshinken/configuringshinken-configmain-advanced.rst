@@ -23,12 +23,13 @@ Performance Data Processor Command Timeout
 
 
 Format:  
-  
+
 ::
 
   perfdata_timeout=<seconds>
+
 Example:  
-  
+
 ::
 
   perfdata_timeout=5
@@ -36,13 +37,23 @@ Example:
 This is the maximum number of seconds that Shinken will allow a :ref:`host performance data processor command <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_processing_command>` or :ref:`service performance data processor command <configuringshinken-configmain#configuringshinken-configmain-service_perfdata_file_processing_command>` to be run. If a command exceeds this time limit it will be killed and a warning will be logged.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-process_performance_data:
 
 Performance Data Processing Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Format:  process_performance_data=<0/1>
-Example:  process_performance_data=1
+Format:
+
+::
+
+  process_performance_data=<0/1>
+
+Example:
+
+::
+
+  process_performance_data=1
 
 This value determines whether or not Shinken will process host and service check :ref:`performance data <advancedtopics-perfdata>`.
 
@@ -58,13 +69,14 @@ Host/Service Performance Data Processing Command
 
 
 Format:
-  
+
 ::
 
   host_perfdata_command=<command>
   service_perfdata_command=<command>
+
 Example:
-  
+
 ::
 
   host_perfdata_command=process-host-perfdata
@@ -74,18 +86,20 @@ This option allows you to specify a command to be run after every host/service c
 
 
 
+
 Host/Service Performance Data File 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   host_perfdata_file=<file_name>
   service_perfdata_file=<file_name>
+
 Example:
-  
+
 ::
 
   host_perfdata_file=/usr/local/shinken/var/host-perfdata.dat
@@ -94,18 +108,20 @@ Example:
 This option allows you to specify a file to which host/service :ref:`performance data <advancedtopics-perfdata>` will be written after every host check. Data will be written to the performance file as specified by the :ref:`Host Performance Data File Template <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_template>` option or the service one. Performance data is only written to this file if the :ref:`Performance Data Processing Option <configuringshinken-configmain#configuringshinken-configmain-process_performance_data>` option is enabled globally and if the "process_perf_data" directive in the :ref:`host definition <configuringshinken/configobjects/host>` is enabled.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_template:
 
 Host Performance Data File Template 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   host_perfdata_file_template=<template>
+
 Example:
-  
+
 ::
 
   host_perfdata_file_template=[HOSTPERFDATA]\t$TIMET$\t$HOSTNAME$\t$HOSTEXECUTIONTIME$\t$HOSTOUTPUT$\t$HOSTPERFDATA$
@@ -119,12 +135,13 @@ Service Performance Data File Template
 
 
 Format:
-  
+
 ::
 
   service_perfdata_file_template=<template>
+
 Example:
-  
+
 ::
 
   service_perfdata_file_template=[SERVICEPERFDATA]\t$TIMET$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$
@@ -133,18 +150,22 @@ This option determines what (and how) data is written to the :ref:`service perfo
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file:
+.. _configuringshinken-configmain#configuringshinken-configmain-service_perfdata_file:
+
 Host/Service Performance Data File Mode 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   host_perfdata_file_mode=<mode>
   service_perfdata_file_mode=<mode>
+
 Example:
-  
+
 ::
 
   host_perfdata_file_mode=a
@@ -157,19 +178,22 @@ This option determines how the :ref:`host performance data file <configuringshin
   * p = Open in non-blocking read/write mode (useful when writing to pipes)
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_processing_interval:
+.. _configuringshinken-configmain#configuringshinken-configmain-service_perfdata_file_processing_interval:
 
 Host/Service Performance Data File Processing Interval (Unused) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   host_perfdata_file_processing_interval=<seconds>
   service_perfdata_file_processing_interval=<seconds>
+
 Example:
-  
+
 ::
 
   host_perfdata_file_processing_interval=0
@@ -178,25 +202,28 @@ Example:
 This option allows you to specify the interval (in seconds) at which the :ref:`host performance data file <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file>` (orthe service one) is processed using the :ref:`host performance data file processing command <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_command>`. A value of 0 indicates that the performance data file should not be processed at regular intervals.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_processing_command:
+.. _configuringshinken-configmain#configuringshinken-configmain-service_perfdata_file_processing_command:
 
 Host/Service Performance Data File Processing Command (Unused) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   host_perfdata_file_processing_command=<command>
   service_perfdata_file_processing_command=<command>
+
 Example:
-  
+
 ::
 
   host_perfdata_file_processing_command=process-host-perfdata-file
   service_perfdata_file_processing_command=process-service-perfdata-file
   
-This option allows you to specify the command that should be executed to process the :ref:`host performance data file <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file>` (or the service one). The command argument is the short name of a :ref:`command definition <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-command>` that you define in your object configuration file. The interval at which this command is executed is determined by the :ref:`host_perfdata_file_processing_interval <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_processing_interval>` directive.
+This option allows you to specify the command that should be executed to process the :ref:`host performance data file <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file>` (or the service one). The command argument is the short name of a :ref:`command definition <command>` that you define in your object configuration file. The interval at which this command is executed is determined by the :ref:`host_perfdata_file_processing_interval <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file_processing_interval>` directive.
 
 
 
@@ -211,12 +238,13 @@ Passive Host Checks Are SOFT Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   passive_host_checks_are_soft=<0/1>
+
 Example:
-  
+
 ::
 
   passive_host_checks_are_soft=1
@@ -233,13 +261,14 @@ Predictive Host/Service Dependency Checks Option (Unused)
 
 
 Format:
-  
+
 ::
 
   enable_predictive_host_dependency_checks=<0/1>
   enable_predictive_service_dependency_checks=<0/1>
+
 Example:
-  
+
 ::
 
   enable_predictive_host_dependency_checks=1
@@ -258,13 +287,14 @@ Orphaned Host/Service Check Option
 
 
 Format:
-  
+
 ::
 
   check_for_orphaned_services=<0/1>
   check_for_orphaned_hosts=<0/1>
+
 Example:
-  
+
 ::
 
   check_for_orphaned_services=1
@@ -288,12 +318,13 @@ Max Plugins Output Length
 
 
 Format:
-  
+
 ::
 
   max_plugins_output_length=<int>
+
 Example:
-  
+
 ::
 
   max_plugins_output_length=8192
@@ -307,12 +338,13 @@ Enable problem/impacts states change
 
 
 Format:
-  
+
 ::
 
   enable_problem_impacts_states_change=<0/1>
+
 Example:
-  
+
 ::
 
   enable_problem_impacts_states_change=0
@@ -345,13 +377,14 @@ Cached Host/Service Check Horizon
 
 
 Format:
-  
+
 ::
 
   cached_host_check_horizon=<seconds>
   cached_service_check_horizon=<seconds>
+
 Example:
-  
+
 ::
 
    cached_host_check_horizon=15
@@ -369,12 +402,13 @@ Large Installation Tweaks Option
 
 
 Format:
-  
+
 ::
 
   use_large_installation_tweaks=<0/1>
+
 Example:
-  
+
 ::
 
   use_large_installation_tweaks=0
@@ -391,12 +425,13 @@ Environment Macros Option
 
 
 Format:
-  
+
 ::
 
   enable_environment_macros=<0/1>
+
 Example:
-  
+
 ::
 
   enable_environment_macros=0
@@ -419,12 +454,13 @@ Flap Detection Option
 
 
 Format:
-  
+
 ::
 
   enable_flap_detection=<0/1>
+
 Example:
-  
+
 ::
 
   enable_flap_detection=1
@@ -443,13 +479,14 @@ Low Service/Host Flap Threshold
 
 
 Format:
-  
+
 ::
 
   low_service_flap_threshold=<percent>
   low_host_flap_threshold=<percent>
+
 Example:
-  
+
 ::
 
   low_service_flap_threshold=25.0
@@ -464,13 +501,14 @@ High Service/Host Flap Threshold
 
 
 Format:
-  
+
 ::
 
   high_service_flap_threshold=<percent>
   high_host_flap_threshold=<percent>
+
 Example:
-  
+
 ::
 
   high_service_flap_threshold=50.0
@@ -486,11 +524,15 @@ Flap History
 
 Format:
 
-  
 ::
 
   flap_history=<int>
-Example:  flap_history=20
+  
+Example:
+
+::
+
+  flap_history=20
 
 This option is used to set the history size of states keep by the scheduler to make the flapping calculation. By default, the value is 20 states kept.
 
@@ -512,12 +554,13 @@ Service/Host Check Timeout
 
 
 Format:
-  
+
 ::
 
   service_check_timeout=<seconds>
+
 Example:
-  
+
 ::
 
   service_check_timeout=60
@@ -533,15 +576,16 @@ Various commands Timeouts
 
 
 Format:
-  
+
 ::
 
   event_handler_timeout=<seconds>  # default: 30s
   notification_timeout=<seconds>   # default: 30s
   ocsp_timeout=<seconds>           # default: 15s
   ochp_timeout=<seconds>           # default: 15s
+
 Example:
-  
+
 ::
 
   event_handler_timeout=60
@@ -560,18 +604,21 @@ Old Obsess Over commands
 -------------------------
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-ocsp_command:
+.. _configuringshinken-configmain#configuringshinken-configmain-obsess_over_services:
 
 Obsess Over Services Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   obsess_over_services=<0/1>
+
 Example:
-  
+
 ::
 
   obsess_over_services=1
@@ -587,26 +634,38 @@ Obsessive Compulsive Service Processor Command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Format:  ocsp_command=<command>
-Example:  ocsp_command=obsessive_service_handler
+Format:
 
-This option allows you to specify a command to be run after every service check, which can be useful in :ref:`distributed monitoring <advancedtopics-distributed>`. This command is executed after any :ref:`event handler <advancedtopics-eventhandlers>` or :ref:`notification <thebasics-notifications>` commands. The command argument is the short name of a :ref:`command definition <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-command>` that you define in your object configuration file.
+::
+
+  ocsp_command=<command>
+
+Example:
+
+::
+
+  ocsp_command=obsessive_service_handler
+
+This option allows you to specify a command to be run after every service check, which can be useful in :ref:`distributed monitoring <advancedtopics-distributed>`. This command is executed after any :ref:`event handler <advancedtopics-eventhandlers>` or :ref:`notification <thebasics-notifications>` commands. The command argument is the short name of a :ref:`command definition <command>` that you define in your object configuration file.
 
 It's used nearly only for the old school distributed architecture. If you use it, please look at new architecture capabilities that are far efficient than the old one. More information on distributed monitoring can be found :ref:`here <advancedtopics-distributed>`. This command is only executed if the :ref:`Obsess Over Services Option <configuringshinken-configmain#configuringshinken-configmain-obsess_over_services>` option is enabled globally and if the "obsess_over_service" directive in the :ref:`service definition <configuringshinken/configobjects/service>` is enabled.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-ochp_command:
+.. _configuringshinken-configmain#configuringshinken-configmain-obsess_over_hosts:
 
 Obsess Over Hosts Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   obsess_over_hosts=<0/1>
+
 Example:
-  
+
 ::
 
   obsess_over_hosts=1
@@ -623,17 +682,18 @@ Obsessive Compulsive Host Processor Command
 
 
 Format:
-  
+
 ::
 
   ochp_command=<command>
+
 Example:
-  
+
 ::
 
   ochp_command=obsessive_host_handler
   
-This option allows you to specify a command to be run after every host check, which can be useful in :ref:`distributed monitoring <advancedtopics-distributed>`. This command is executed after any :ref:`event handler <advancedtopics-eventhandlers>` or :ref:`notification <thebasics-notifications>` commands. The command argument is the short name of a :ref:`command definition <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-command>` that you define in your object configuration file. 
+This option allows you to specify a command to be run after every host check, which can be useful in :ref:`distributed monitoring <advancedtopics-distributed>`. This command is executed after any :ref:`event handler <advancedtopics-eventhandlers>` or :ref:`notification <thebasics-notifications>` commands. The command argument is the short name of a :ref:`command definition <command>` that you define in your object configuration file. 
 
 This command is only executed if the :ref:`Obsess Over Hosts Option <configuringshinken-configmain#configuringshinken-configmain-obsess_over_hosts>` option is enabled globally and if the "obsess_over_host" directive in the :ref:`host definition <configuringshinken/configobjects/host>` is enabled.
 
@@ -645,19 +705,21 @@ Freshness check
 ----------------
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-check_service_freshness:
 
 Host/Service Freshness Checking Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   check_service_freshness=<0/1>
   check_host_freshness=<0/1>
+
 Example:
-  
+
 ::
 
   check_service_freshness=0
@@ -675,13 +737,14 @@ Host/Service Freshness Check Interval
 
 
 Format:
-  
+
 ::
 
   service_freshness_check_interval=<seconds>
   host_freshness_check_interval=<seconds>
+
 Example:
-  
+
 ::
 
   service_freshness_check_interval=60
@@ -696,12 +759,13 @@ Additional Freshness Threshold Latency Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   additional_freshness_latency=<#>
+
 Example:
-  
+
 ::
 
   additional_freshness_latency=15
@@ -720,12 +784,13 @@ Date Format (Not implemented)
 
 
 Format:
-  
+
 ::
 
   date_format=<option>
+
 Example:
-  
+
 ::
 
   date_format=us
@@ -749,12 +814,13 @@ Timezone Option
 
 
 Format:
-  
+
 ::
 
   use_timezone=<tz>
+
 Example:
-  
+
 ::
 
   use_timezone=US/Mountain
@@ -769,12 +835,13 @@ Illegal Object Name Characters
 
 
 Format:
-  
+
 ::
 
   illegal_object_name_chars=<chars...>
+
 Example:
-  
+
 ::
 
   illegal_object_name_chars=`~!$%^&*"|'<>?,()=
@@ -788,12 +855,13 @@ Illegal Macro Output Characters
 
 
 Format:
-  
+
 ::
 
   illegal_macro_output_chars=<chars...>
+
 Example:
-  
+
 ::
 
   illegal_macro_output_chars=`~$^&"|'<>
@@ -809,19 +877,20 @@ This option allows you to specify illegal characters that should be stripped fro
   * "$SERVICEACKAUTHOR$"
   * "$SERVICEACKCOMMENT$"
 
-
+.. _configuringshinken-configmain#configuringshinken-configmain-use_regexp_matching:
 
 Regular Expression Matching Option (Not implemented) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Format:
-  
+
 ::
 
   use_regexp_matching=<0/1>
+
 Example:
-  
+
 ::
 
   use_regexp_matching=0
@@ -838,17 +907,18 @@ True Regular Expression Matching Option (Not implemented)
 
 
 Format:
-  
+
 ::
 
   use_true_regexp_matching=<0/1>
+
 Example:
-  
+
 ::
 
   use_true_regexp_matching=0
   
-If you've enabled regular expression matching of various object directives using the :ref:`Regular Expression Matching Option <configuringshinken-configmain#configuringshinken-configmain-use_regexp_matching>` option, this option will determine when object directives are treated as regular expressions. If this option is disabled (the default), directives will only be treated as regular expressions if they contain *, ?, +, or \.. If this option is enabled, all appropriate directives will be treated as regular expression - be careful when enabling this! More information on how this works can be found :ref:`here <advancedtopics-objecttricks>`.
+If you've enabled regular expression matching of various object directives using the :ref:`Regular Expression Matching Option <configuringshinken-configmain#configuringshinken-configmain-use_regexp_matching>` option, this option will determine when object directives are treated as regular expressions. If this option is disabled (the default), directives will only be treated as regular expressions if they contain \*, ?, +, or \.. If this option is enabled, all appropriate directives will be treated as regular expression - be careful when enabling this! More information on how this works can be found :ref:`here <advancedtopics-objecttricks>`.
 
   * 0 = Don't use true regular expression matching (default)
   * 1 = Use true regular expression matching
@@ -860,12 +930,13 @@ Administrator Email Address (unused)
 
 
 Format:
-  
+
 ::
 
   admin_email=<email_address>
+
 Example:
-  
+
 ::
 
   admin_email=root@localhost.localdomain
@@ -879,12 +950,13 @@ Administrator Pager (unused)
 
 
 Format:
-  
+
 ::
 
   admin_pager=<pager_number_or_pager_email_gateway>
+
 Example:
-  
+
 ::
 
   admin_pager=pageroot@localhost.localdomain

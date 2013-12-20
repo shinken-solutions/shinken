@@ -3,9 +3,9 @@
 
 
 
-=========================
- Custom Object Variables 
-=========================
+=======================
+Custom Object Variables 
+=======================
 
 
 
@@ -38,7 +38,6 @@ Examples
 
 Here's an example of how custom variables can be defined in different types of object definitions:
 
-  
 ::
 
   define host{
