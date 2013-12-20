@@ -196,7 +196,7 @@ class Shinken(BaseSatellite):
         # Now all checks and actions
         for c in self.sched.checks.values():
             # Already launch checks should not be touch
-            if c.status == 'scheduled':
+            if c.status == 'scheduled' and c.t_to_go is not None:
                 t_to_go = c.t_to_go
                 ref = c.ref
                 new_t = max(0, t_to_go + difference)
