@@ -33,7 +33,7 @@ Configuring the Landscape import module
 In your shinken-specific.cfg file, just add (or uncomment):
 
 
-  
+
 ::
 
   define module {

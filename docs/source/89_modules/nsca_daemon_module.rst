@@ -1,5 +1,9 @@
 .. _nsca_daemon_module:
 
+NSCA module
+===========
+
+
 The NSCA daemon module is used to receive send_nsca packets and submit them to the Shinken command pipe. The NSCA module can be loaded by the Receiver or Arbiter process. It will listen on port TCP/5667 for send_nsca packets.
 
 .. tip::  Passive checks can be submitted :ref:`natively to the Shinken command pipe <thebasics-passivechecks>` or from remote hosts to modules, such as NSCA, AMQP or collectd, loaded in the Shinken Arbiter or Receiver process. AMQP is implemented for integration with the Canopsis Hypervisor, but could be re-used for generic messaging.

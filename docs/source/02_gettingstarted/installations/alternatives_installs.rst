@@ -24,7 +24,7 @@ On Ubuntu or Debian
 
 
 Save time, use the very good installation script from `Nicolargo`_! Thanks a lot to him :)
-  
+
 ::
 
   cd ~
@@ -51,7 +51,7 @@ Make sure you've installed the following packages on your Windows installation b
 Take the files instsrv.exe and srvany.exe from the directory of the resource kit (typically "c:\program files\Windows Resource Kits\Tools") and put them in the directory "c:\shinken\windows" (it should already exist by decompressing the archive, or you are a directory level to deep).
 
 To install all services, launch the installation batch file:
-  
+
 ::
 
   c:\shinken\windows\install-all.bat
@@ -69,47 +69,38 @@ Prerequisites:
 
 Install python Pyro: 
 
-  
 ::
 
-  
   # yum install python-pyro
 
 
 Install Shinken:
 
 Download RPM to the url http://hvad.fedorapeople.org/fedora/shinken/RPM/
-  
+
 ::
 
-  
   # yum localinstall --nogpgcheck shinken-0.8.1-1.fc15.noarch.rpm shinken-arbiter-0.8.1-1.fc15.noarch.rpm shinken-broker-0.8.1-1.fc15.noarch.rpm shinken-poller-0.8.1-1.fc15.noarch.rpm shinken-reactionner-0.8.1-1.fc15.noarch.rpm shinken-receiver-0.8.1-1.fc15.noarch.rpm shinken-scheduler-0.8.1-1.fc15.noarch.rpm
 
 
 Enable Shinken services:
 
-  
 ::
 
-  
   # for i in arbiter poller reactionner scheduler broker; do systemctl enable shinken-$i.service ; done    
 
 
 Start Shinken services:
 
-  
 ::
 
-  
   # for i in arbiter poller reactionner scheduler broker; do systemctl start shinken-$i.service ; done    
 
 
 Stop Shinken services:
 
-  
 ::
 
-  
   # for i in arbiter poller reactionner scheduler broker; do systemctl stop shinken-$i.service ; done 
 
 
@@ -120,26 +111,23 @@ On Debian with DEB packages
 
 Shinken is packaged on the debian "sid":
 Prerequisites:
-  
+
 ::
 
-  
   aptitude install shinken python-simplejson python-pysqlite2 python-mysqldb python-redis python-memcache
 
 
 Start Shinken services:
-  
+
 ::
 
-  
   # for i in  broker poller reactionner receiver scheduler arbiter ; do /etc/init.d/shinken-$i start ;done
 
 
 Stop Shinken services:
-  
+
 ::
 
-  
   for i in  broker poller reactionner receiver scheduler arbiter ; do /etc/init.d/shinken-$i stop ;done
 
 
@@ -155,7 +143,7 @@ Shinken asks for few dependencies:
   * Pyro, a Python module (version >= 4.5 is possible)
 
 To know which Python version you are running, just type 
-  
+
 ::
 
   python -V
@@ -166,10 +154,9 @@ Dependencies for Debian folks
 ******************************
 
 To get Dependencies launch:
-  
+
 ::
 
-  
   sudo apt-get install pyro nagios-plugins-extra
 
 
@@ -181,10 +168,9 @@ Dependencies for Centos5/RH5 with python 2.4
 .. important::   Python version 2.4 is the default version of python on CentOS/RH5, so this is the easiest way to install Shinken on CentOS. The problem is that some advanced Shinken functionalities need ''at least'' python 2.6
 
 First get the dependencies  (as root or with sudo):
-  
+
 ::
 
-  
   yum install gcc nagios-plugins python-devel python-simplejson
   wget http://pypi.python.org/packages/source/P/Pyro/Pyro-3.10.tar.gz#md5=7fc6b8b939073d4adb0e8939c59aaf1e
   tar xvfz Pyro-3.10.tar.gz
@@ -212,10 +198,9 @@ Dependencies for Centos5/RH5 with python 2.6
 .. important::   Python version 2.4 is the default version on CentOS5/RH5. This version of python is deeply linked to the OS (yum package manager for instance), so you can't just ''update'' python. In order to add python 2.6 on your system, you will need to add packages from at least 2 additional repositories: '''RPMForge''' and '''EPEL release'''
 
 First, add the additional repositories
-  
+
 ::
 
-  
    wget http://apt.sw.be/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.2-2.el5.rf.i386.rpm
    rpm -Uvh rpmforge-release-0.5.2-2.el5.rf.i386.rpm
    wget http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
@@ -223,16 +208,15 @@ First, add the additional repositories
   
   
 Then install the dependencies
-  
+
 ::
 
-  
    yum install gcc nagios-plugins python26-devel python26-simplejson
    wget http://pypi.python.org/packages/source/P/Pyro4/Pyro4-4.11.tar.gz#md5=8126e7049206b7b09f324750f50cee2d
    tar xvfz Pyro4-4.11.tar.gz
    cd Pyro4-4.11
    python26 setup.py install
-  
+     
    cd ~
    wget http://pypi.python.org/packages/2.6/s/setuptools/setuptools-0.6c11-py2.6.egg#md5=bfa92100bd772d5a213eedd356d64086
    sh setuptools-0.6c11-py2.6.egg
@@ -244,10 +228,9 @@ Shinken installation
 ---------------------
 
 Create the Shinken user:
-  
+
 ::
 
-  
   sudo adduser shinken
   sudo passwd shinken
 
@@ -256,7 +239,6 @@ Create the Shinken user:
 
 Then, get Shinken package and install it:
 
-  
 ::
 
   cd ~
@@ -269,11 +251,8 @@ Then, get Shinken package and install it:
   
 .. important::  Replace ''python26'' instead of ''python'' in the command line "sudo python setup.py install --install-scripts=/usr/bin" if you run CentOS5/RH5 and you wish shinken to be installed with python 2.6 support
   
-::
-
-  
 You will get:
-  
+
 ::
 
   new binaries into /usr/bin (files shinken-*)
@@ -288,18 +267,19 @@ Discover your network
 The network discovery scans your network and sets up a standardized monitoring configuration for all your hosts and network services. To run it, ou need to install the nmap network discovery tool.
 
 Ubuntu:
-  
+
 ::
 
   sudo apt-get install nmap
+
 RedHat/Centos:
-  
+
 ::
 
   yum install nmap
   
 Now, you are ready to run the network discovery tool:
-  
+
 ::
 
   [ -d /etc/shinken/discovery ] && sudo mkdir /etc/shinken/discovery
@@ -320,7 +300,7 @@ This next section will use the `Nicolargo`_ installation script, thank you once 
 If you have already run the Nicolargo script for Debian, you can skip this part.
 
 To install Thruk, launch:
-  
+
 ::
 
   perl -V:version -V:archname
@@ -335,13 +315,15 @@ To install Thruk, launch:
   wget -O /etc/init.d/thruk https://raw.github.com/nicolargo/shinkenautoinstall/master/thruk
   chown root:root /etc/init.d/thruk
   chmod a+rx /etc/init.d/thruk
+
 For Ubuntu/Debian:
-  
+
 ::
 
   update-rc.d thruk defaults
+
 For RedHat/Centos:
-  
+
 ::
 
   chkconfig thruk --add
@@ -354,19 +336,16 @@ First launch
 
 You are now ready to start the system, launch Shinken and Thruk.
 
-  
 ::
 
-  
   /etc/init.d/shinken start
   /etc/init.d/thruk start
 
 
 You can validate that the software is running smoothly by *tailing* the main log file at:
-  
+
 ::
 
-  
   tail -f /var/lib/shinken/shinken.log
 
 
@@ -376,7 +355,7 @@ Congrats, you just launched your next monitoring tool ^_^
 
 Now you can go through the rest of the wiki to learn how to work with the configuration, and customize it as you need. There are tutorials in the getting started section for common tasks and there is an official documentation manual that provides in depth coverage of features and options.
 
-Now are ready to learn how to configure the Shinken daemons, your gentle introduction to distributed monitoring, by reading the :ref:`configure Shinken` <configure Shinken> page.
+Now are ready to learn how to configure the Shinken daemons, your gentle introduction to distributed monitoring, by reading the :ref:`configure Shinken <configure_shinken>` page.
 
 .. _PyWin32: http://sourceforge.net/projects/pywin32/files/pywin32/
 .. _Windows Resource Kit: http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD

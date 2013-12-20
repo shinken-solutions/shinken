@@ -12,7 +12,7 @@ Default Shinken configuration
 ------------------------------
 
 
-If you followed the :ref:`shinken_10min_start` <shinken_10min_start> tutorial you were able to install and launch Shinken.
+If you followed the :ref:`10 Minute Shinken Installation Guide <shinken_10min_start>` tutorial you were able to install and launch Shinken.
 
 The default configuration deployed with the Shinken sources contains:
   * one arbiter
@@ -33,7 +33,7 @@ The schedulers, pollers, reactionners and brokers daemons need to know in which 
 
 .. note::  If you plan on using the default directories, user (shinken) and tcp port you shouldn't have to edit these files.
 
-Each daemon has one configuration file. The default location is ///usr/local/shinken/etc//. 
+Each daemon has one configuration file. The default location is /usr/local/shinken/etc/. 
 
 .. important::  Remember that all daemons can be on different servers: the daemons configuration files need to be on the server which is running the daemon, not necessarily on every server
 
@@ -70,12 +70,12 @@ Let's see what it looks like:
 So here we have a scheduler:
     * workdir: working directory of the daemon. By default /usr/local/shinken/var
     * pidfile: pid file of the daemon (so we can kill it :) ). By default /usr/local/shinken/var/schedulerd.pid for a scheduler.
-    * port: TCP port to listen to. By default
-    *   - scheduler: 7768
-    *   - poller: 7771
-    *   - reactionner: 7769
-    *   - broker: 7772
-    *   - arbiter: 7770 (the arbiter configuration will be seen later)
+    * port: TCP port to listen to. By default:
+       - scheduler: 7768
+       - poller: 7771
+       - reactionner: 7769
+       - broker: 7772
+       - arbiter: 7770 (the arbiter configuration will be seen later)
     * host: IP interface to listen on. The default 0.0.0.0 means all interfaces
     * user: user used by the daemon to run. By default shinken
     * group: group of the user. By default shinken.
@@ -111,10 +111,11 @@ Each objects type corresponds to a daemon:
   * reactionner
   * broker
   * receiver
+
 The names were chosen to understand their roles more easily. :)
 
 They have these parameters in common:
-  * *_name: name of the resource
+  * \*_name: name of the resource
   * address: IP or DNS address to connect to the daemon
   * port: I think you can find it on your own by now :)
   * [spare]: 1 or 0, is a spare or not. :ref:`See advanced features for this <advanced_features>`.
@@ -155,7 +156,6 @@ Module references, :ref:`list of overall modules <the_shinken_architecture>`:
   * Reactionner modules
 
 
-
 Configuration example 
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -163,45 +163,31 @@ Here is an example of a simple configuration (which you already used without kno
 
 Here, we have a server named server-1 that has 192.168.0.1 as its IP address:
 
-  
 ::
 
-  
   define arbiter{
-  
-::
-
        arbiter_name  arbiter-1
        host_name     server-1
        address       192.168.0.1
        port          7770
        spare         0
-       }
+  }
   
   define scheduler{
-  
-::
-
        scheduler_name	scheduler-1
        address	        192.168.0.1
        port	        7768
        spare	        0
-       }
+  }
   
   define reactionner{
-  
-::
-
        reactionner_name	    reactionner-1
        address	            192.168.0.1
        port	            7769
        spare	            0
-       }
+  }
   
   define poller{
-  
-::
-
        poller_name     poller-1
        address         192.168.0.1
        port            7771
@@ -209,29 +195,20 @@ Here, we have a server named server-1 that has 192.168.0.1 as its IP address:
   }
   
   define broker{
-  
-::
-
        broker_name	broker-1
        address	        192.168.0.1
        port	        7772
        spare	        0
        modules          Status-Dat,Simple-log
-       }
+  }
   
   define module{
-  
-::
-
        module_name      Simple-log
        module_type      simple_log
        path             /usr/local/shinken/var/shinken.log
   }
   
   define module{
-  
-::
-
        module_name              Status-Dat
        module_type              status_dat
        status_file              /usr/local/shinken/var/status.data
@@ -265,7 +242,7 @@ launch all daemons
 ~~~~~~~~~~~~~~~~~~~
 
 To launch daemons, simply type:
-  
+
 ::
 
   daemon_path -d -c daemon_configuration.ini 
@@ -279,20 +256,18 @@ The command lines arguments are:
   * --debug: path of the debug file
 
 So a standard launch of the resources looks like:
-  
+
 ::
 
-  
   /usr/local/shinken/bin/shinken-scheduler -d -c /usr/local/shinken/etc/schedulerd.ini
   /usr/local/shinken/bin/shinken-poller -d -c /usr/local/shinken/etc/pollerd.ini
   /usr/local/shinken/bin/shinken-reactionner -d -c /usr/local/shinken/etc/reactionnerd.ini
   /usr/local/shinken/bin/shinken-broker -d -c /usr/local/shinken/etc/brokerd.ini
 
 Now we can start the arbiter with the global configuration:
-  
+
 ::
 
-  
   #First we should check the configuration for errors
   python bin/shinken-arbiter -v -c etc/nagios.cfg -c etc/shinken-specific.cfg
   
@@ -310,4 +285,4 @@ What next
 
 You are ready to continue to the next section, :ref:`get DATA IN Shinken <#Getting data in Shinken>`.
 
-If you feel in the mood for testing even more shinken features, now would be the time to look at :ref:`advanced_features` <advanced_features> to play with distributed and high availability architectures!
+If you feel in the mood for testing even more shinken features, now would be the time to look at :ref:`advanced_features <advanced_features>` to play with distributed and high availability architectures!

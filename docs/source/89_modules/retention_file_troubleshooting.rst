@@ -1,5 +1,9 @@
 .. _retention_file_troubleshooting:
 
+
+Retention troubleshooting
+=========================
+
 The retention file contains the state of your host and services, so that they are kept when shinken is restarted.
 
 Sometimes you'll want to inspect (and possibly fix) the retention file, in case you need to work-around a bug or simply better understand what is stored there.
