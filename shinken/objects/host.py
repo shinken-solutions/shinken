@@ -495,6 +495,24 @@ class Host(SchedulingItem):
             except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
+    def get_groupname(self):
+        groupname = ''
+        for hg in self.hostgroups:
+            # console_logger.info('get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
+            # groupname = "%s [%s]" % (hg.alias, hg.get_name())
+            groupname = "%s" % (hg.alias)
+        return groupname
+
+    def get_groupnames(self):
+        groupnames = ''
+        for hg in self.hostgroups:
+            # console_logger.info('get_groupnames : %s' % (hg.get_name()))
+            if groupnames == '':
+                groupnames = hg.get_name()
+            else:
+                groupnames = "%s, %s" % (groupnames, hg.get_name())
+        return groupnames
+
     # For debugging purpose only
     def get_dbg_name(self):
         return self.host_name
