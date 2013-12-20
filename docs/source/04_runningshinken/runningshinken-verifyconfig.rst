@@ -2,13 +2,6 @@
 
 
 
-
-==============================
- Verifying Your Configuration 
-==============================
-
-
-
 Verifying Your Configuration 
 =============================
 
@@ -23,7 +16,6 @@ How to verify the configuration
 
 In order to verify your configuration, run Shinken-arbiter with the "-v" command line option like so:
 
-  
 ::
 
   linux:~ # /usr/local/shinken/bin/shinken-arbiter -v -c /usr/local/shinken/etc/nagios.cfg -c /usr/local/shinken/etc/shinken-specific.cfg
@@ -37,10 +29,10 @@ Important caveats
 
 
 
-  - Shinken will not check the syntax of module variables
-  - Shinken will not check the validity of data passed to modules
-  - Shinken will NOT notify you if you mistyped an expected variable, it will treat it as a custom variable.
-  - Shinken sometimes uses variables that expect lists, the order of items in lists is important, check the relevant documentation
+1. Shinken will not check the syntax of module variables
+2. Shinken will not check the validity of data passed to modules
+3. Shinken will NOT notify you if you mistyped an expected variable, it will treat it as a custom variable.
+4. Shinken sometimes uses variables that expect lists, the order of items in lists is important, check the relevant documentation
 
 
 
