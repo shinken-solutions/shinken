@@ -77,7 +77,7 @@ You can pass arguments to commands as well, which is quite handy if you'd like t
     ...
   }
   
-In the example above, the service check command has two arguments (which can be referenced with :ref:`$ARGn$ <thebasics-macrolist#thebasics-macrolist-arg>` macros). The $ARG1$ macro will be "200.0,80%" and "$ARG2$" will be "400.0,40%" (both without quotes). Assuming we are using the host definition given earlier and a **check_ping** command defined like this:
+In the example above, the service check command has two arguments (which can be referenced with :ref:`$ARGn$ <$ARGn$>` macros). The $ARG1$ macro will be "200.0,80%" and "$ARG2$" will be "400.0,40%" (both without quotes). Assuming we are using the host definition given earlier and a **check_ping** command defined like this:
 
   
 ::
@@ -194,16 +194,16 @@ Macro Cleansing
 
 Some macros are stripped of potentially dangerous shell metacharacters before being substituted into commands to be executed. Which characters are stripped from the macros depends on the setting of the :ref:`illegal_macro_output_chars <configuringshinken-configmain#configuringshinken-configmain-illegal_macro_output_chars>` directive. The following macros are stripped of potentially dangerous characters:
 
-  - :ref:`$HOSTOUTPUT$ <thebasics-macrolist#thebasics-macrolist-hostoutput>`
-  - :ref:`$LONGHOSTOUTPUT$ <thebasics-macrolist#thebasics-macrolist-longhostoutput>`
-  - :ref:`$HOSTPERFDATA$ <thebasics-macrolist#thebasics-macrolist-hostperfdata>`
-  - :ref:`$HOSTACKAUTHOR$ <thebasics-macrolist#thebasics-macrolist-hostackauthor>`
-  - :ref:`$HOSTACKCOMMENT$ <thebasics-macrolist#thebasics-macrolist-hostackcomment>`
-  - :ref:`$SERVICEOUTPUT$ <thebasics-macrolist#thebasics-macrolist-serviceoutput>`
-  - :ref:`$LONGSERVICEOUTPUT$ <thebasics-macrolist#thebasics-macrolist-longserviceoutput>`
-  - :ref:`$SERVICEPERFDATA$ <thebasics-macrolist#thebasics-macrolist-serviceperfdata>`
-  - :ref:`$SERVICEACKAUTHOR$ <thebasics-macrolist#thebasics-macrolist-serviceackauthor>`
-  - :ref:`$SERVICEACKCOMMENT$ <thebasics-macrolist#thebasics-macrolist-serviceackcomment>`
+  - :ref:`$HOSTOUTPUT$ <$HOSTOUTPUT$>`
+  - :ref:`$LONGHOSTOUTPUT$ <$LONGHOSTOUTPUT$>`
+  - :ref:`$HOSTPERFDATA$ <$HOSTPERFDATA$>`
+  - :ref:`$HOSTACKAUTHOR$ <$HOSTACKAUTHOR$>`
+  - :ref:`$HOSTACKCOMMENT$ <$HOSTACKCOMMENT$>`
+  - :ref:`$SERVICEOUTPUT$ <$SERVICEOUTPUT$>`
+  - :ref:`$LONGSERVICEOUTPUT$ <$LONGSERVICEOUTPUT$>`
+  - :ref:`$SERVICEPERFDATA$ <$SERVICEPERFDATA$>`
+  - :ref:`$SERVICEACKAUTHOR$ <$SERVICEACKAUTHOR$>`
+  - :ref:`$SERVICEACKCOMMENT$ <$SERVICEACKCOMMENT$>`
 
 
 

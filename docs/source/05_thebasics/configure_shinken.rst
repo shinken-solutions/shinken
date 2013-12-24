@@ -38,10 +38,9 @@ Each daemon has one configuration file. The default location is /usr/local/shink
 .. important::  Remember that all daemons can be on different servers: the daemons configuration files need to be on the server which is running the daemon, not necessarily on every server
 
 Let's see what it looks like:
-  
+
 ::
 
-  
   $cat etc/schedulerd.ini
   
   [daemon]
@@ -68,9 +67,11 @@ Let's see what it looks like:
   max_queue_size=100000
 
 So here we have a scheduler:
+
     * workdir: working directory of the daemon. By default /usr/local/shinken/var
     * pidfile: pid file of the daemon (so we can kill it :) ). By default /usr/local/shinken/var/schedulerd.pid for a scheduler.
     * port: TCP port to listen to. By default:
+
        - scheduler: 7768
        - poller: 7771
        - reactionner: 7769
@@ -100,7 +101,7 @@ Daemon declaration in the global configuration
 
 Now each daemon knows in which directory to run, and on which tcp port to listen. A daemon is a resource in the Shinken architecture. Such resources must be declared in the global configuration (where the Arbiter is) for them to be utilized.
 
-The global configuration file is:  ///usr/local/shinken/etc/shinken-specific.cfg//
+The global configuration file is:  **/usr/local/shinken/etc/shinken-specific.cfg/**
 
 The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
 
@@ -133,7 +134,7 @@ Some daemons have special parameters:
 For the arbiter:
   * host_name: hostname of the server where the arbiter is installed. It's mandatory for a high availability environment (2 arbiters or more).
 For pollers:
-  * poller_tags: "tags" that the poller manages. See advanced features for this.
+  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this`.
 
 
 
