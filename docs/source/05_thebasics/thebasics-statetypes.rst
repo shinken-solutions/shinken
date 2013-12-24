@@ -48,7 +48,7 @@ The following things occur when hosts or services experience SOFT state changes:
 
 SOFT states are only logged if you enabled the :ref:`log_service_retries <configuringshinken-configmain#configuringshinken-configmain-log_service_retries>` or :ref:`log_host_retries <configuringshinken-configmain#configuringshinken-configmain-log_host_retries>` options in your main configuration file.
 
-The only important thing that really happens during a soft state is the execution of event handlers. Using event handlers can be particularly useful if you want to try and proactively fix a problem before it turns into a HARD state. The :ref:`$HOSTSTATETYPE$ <thebasics-macrolist#thebasics-macrolist-hoststatetype>` or :ref:`$SERVICESTATETYPE$ <thebasics-macrolist#thebasics-macrolist-servicestatetype>` macros will have a value of "SOFT" when event handlers are executed, which allows your event handler scripts to know when they should take corrective action. More information on event handlers can be found :ref:`here <advancedtopics-eventhandlers>`.
+The only important thing that really happens during a soft state is the execution of event handlers. Using event handlers can be particularly useful if you want to try and proactively fix a problem before it turns into a HARD state. The :ref:`$HOSTSTATETYPE$ <$HOSTSTATETYPE$>` or :ref:`$SERVICESTATETYPE$ <$SERVICESTATETYPE$>` macros will have a value of "SOFT" when event handlers are executed, which allows your event handler scripts to know when they should take corrective action. More information on event handlers can be found :ref:`here <advancedtopics-eventhandlers>`.
 
 
 
@@ -70,7 +70,7 @@ The following things occur when hosts or services experience HARD state changes:
   * Event handlers are executed to handle the HARD state.
   * Contacts are notifified of the host or service problem or recovery.
 
-The :ref:`$HOSTSTATETYPE$ <thebasics-macrolist#thebasics-macrolist-hoststatetype>` or :ref:`$SERVICESTATETYPE$ <thebasics-macrolist#thebasics-macrolist-servicestatetype>` macros will have a value of "HARD" when event handlers are executed, which allows your event handler scripts to know when they should take corrective action. More information on event handlers can be found :ref:`here <advancedtopics-eventhandlers>`.
+The :ref:`$HOSTSTATETYPE$ <$HOSTSTATETYPE$>` or :ref:`$SERVICESTATETYPE$ <$SERVICESTATETYPE$>` macros will have a value of "HARD" when event handlers are executed, which allows your event handler scripts to know when they should take corrective action. More information on event handlers can be found :ref:`here <advancedtopics-eventhandlers>`.
 
 
 

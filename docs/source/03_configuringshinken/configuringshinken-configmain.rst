@@ -55,6 +55,9 @@ Below you will find descriptions of each main Shinken configuration file option.
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-log_file:
+
+
 Log File 
 ~~~~~~~~~
 
@@ -110,6 +113,7 @@ This variable specifies which logs will be raised by the arbiter daemon. For oth
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-date_format:
 
 Human format for log timestamp 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -281,6 +285,8 @@ The Shinken daemons do not need root right. Without a good reason do not run the
   * 1 = Make crazy your security manager
 
 
+
+.. _configuringshinken-configmain#configuringshinken-configmain-enable_notifications:
 
 Notifications Option 
 ~~~~~~~~~~~~~~~~~~~~~

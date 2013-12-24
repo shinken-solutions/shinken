@@ -18,14 +18,11 @@ Example
 
 For example, you can have the below configuration:
 your contact, a happy admin:
-  
+
 ::
 
   
   define contact{
-  
-::
-
     contact_name                    happy_admin
     alias                           happy_admin
     email                           admin@localhost
@@ -35,15 +32,12 @@ your contact, a happy admin:
 
 
 And now define our notification ways:
-  
+
 ::
 
   
   # Email the whole 24x7 is okay
   define notificationway{
-  
-::
-
        notificationway_name            email_in_day
        service_notification_period     24x7
        host_notification_period        24x7
@@ -55,9 +49,6 @@ And now define our notification ways:
   
   # But SMS only at night
   define notificationway{
-  
-::
-
        notificationway_name            sms_at_night
        service_notification_period     night
        host_notification_period        night

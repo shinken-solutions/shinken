@@ -21,23 +21,19 @@ It's quite simple: you 'tag' objects, and the pollers have got tags too. You've 
 
 Let take an example with a 'windows' tag:
 
-  
+ 
 ::
-
   
   define command{
   
-::
-
    command_name   CheckWMI
    command_line   c:\shinken\libexec\check_wmi.exe -H $HOSTADRESS$ -r $ARG1$
    poller_tag     Windows
   }
   
+
   define poller{
   
-::
-
    poller_name  poller-windows
    address      192.168.0.4
    port     7771

@@ -38,9 +38,9 @@ Configuration Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-**:ref:`The basics of enabling passive check results in the Shinken configuration <thebasics-passivechecks>`**
+:ref:`The basics of enabling passive check results in the Shinken configuration <thebasics-passivechecks>`
 
-**:ref:`State handling for passive check results <advancedtopics-passivestatetranslation>`**
+:ref:`State handling for passive check results <advancedtopics-passivestatetranslation>`
 
 
 
@@ -92,7 +92,7 @@ NSCAweb protocol
 
 A much more evolved protocol for sending data than NSCA. Use curl from the command line to send your data, or submit check results using an HTTP post in your software.
 
-The python NSCAweb listener, `github.com/smetj/nscaweb`_, can be hacked to act as a Shinken Receiver module. It might also be possible to wrestle the current Web Service receiver module to process NSCAweb sent messages, the format is the same. 
+The python NSCAweb listener, http://github.com/smetj/nscaweb, can be hacked to act as a Shinken Receiver module. It might also be possible to wrestle the current Web Service receiver module to process NSCAweb sent messages, the format is the same. 
 .. important::  Should someone be interested in implementing an NSCAweb Shinken Receiver module, support will be provided.
 
 
@@ -124,5 +124,3 @@ AMQP protocol
 
 
 Adding a Shinken Receiver module to act as a consumer of AMQP messages can be implemented without much fuss. There are no planned implementations of this module, but should someone be interested in implementing one, support will be provided. A new broker module for the Canopsis Hypervisor acts as an AMQP endpoint, so this can be used to develop an AMQP consumer or provider. There is also a Python MQ implementation called Krolyk by Jelle Smet that submits check results from AMQP to the Shinken command pipe.
-.. _WS module : https://github.com/naparuba/shinken/blob/master/shinken/modules/ws_arbiter.py
-.. _github.com/smetj/nscaweb: https://github.com/smetj/nscaweb

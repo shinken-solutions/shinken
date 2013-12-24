@@ -12,7 +12,7 @@ There is two ways for monitoring a DMZ network:
 
 If you can take the first, use it :)
 
-If you can't because your security manager is not happy about it, you should put a poller in the DMZ. So look at the page :ref:`setup_distributed_shinken` <setup_distributed_shinken> first, because you will need a distributed architecture.
+If you can't because your security manager is not happy about it, you should put a poller in the DMZ. So look at the page :ref:`setup_distributed_shinken` first, because you will need a distributed architecture.
 
 Pollers a "dumb" things. They look for jobs to all scheduler (of their realm, if you don't know what is it from now, it's not important). So if you just put a poller in the DMZ network aside another in the LAN, some checks for the dmz will be take by the LAN one, and some for the lan will be take by the DMZ one. It's not a good thing of course :)
 
@@ -41,14 +41,11 @@ Configuration part
 
 
 So you need to declare in the /etc/shinken.shinken-specific.cfg (or c:\shinken\etc\shinen-specific.cfg):
-  
+ 
 ::
-
   
   define poller{
   
-::
-
     poller_name    poller-DMZ
     address        server-dmz
     port           7771
@@ -58,13 +55,10 @@ So you need to declare in the /etc/shinken.shinken-specific.cfg (or c:\shinken\e
 
 And "tag" some hosts and/or some services. 
 
-  
+ 
 ::
-
   
   define host{
-  
-::
 
    host_name  server-DMZ-1
    [...]

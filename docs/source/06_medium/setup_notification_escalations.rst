@@ -26,10 +26,8 @@ Definition and sample
 
 Notifications are escalated if and only if one or more escalation linked to your host/service matches the current notification that is being sent out. Look at the example below:
   
-::
+ 
 
-  
-  
 ::
 
   define escalation{
@@ -43,10 +41,7 @@ Notifications are escalated if and only if one or more escalation linked to your
   
 And then you can call it from a service (or an host):
   
-::
 
-  
-  
 ::
 
   define service{
@@ -73,10 +68,8 @@ When defining notification escalations, look if it's interesting that were membe
 
 In our previous example it becomes:
   
-::
+ 
 
-  
-  
 ::
 
   define escalation{
@@ -99,10 +92,8 @@ It can be interesting to have more than one level for escalations. Like if probl
 
 All you need is to define theses two escalations and link them to your host/service:
   
-::
+ 
 
-  
-  
 ::
 
   define escalation{
@@ -124,10 +115,7 @@ All you need is to define theses two escalations and link them to your host/serv
   
 And for your service:
   
-::
 
-  
-  
 ::
 
   define service{
@@ -148,10 +136,8 @@ Overlapping Escalation Ranges
 
 Notification escalation definitions can have notification ranges that overlap. Take the following example:
   
-::
 
-  
-  
+
 ::
 
   define escalation{
@@ -198,10 +184,7 @@ It's also interesting to see that with escalation, if the notification interval 
 Let take an example where your service got:
 
   
-::
 
-  
-  
 ::
 
   define service{
@@ -211,10 +194,7 @@ Let take an example where your service got:
   
 Then with the escalations objects:
   
-::
 
-  
-  
 ::
 
   define escalation{
@@ -268,11 +248,7 @@ The Nagios legacy escalations definitions are still managed, but it's strongly a
 
 Hera are example of theses legacy definitions:
 
-  
-::
 
-  
-  
 ::
 
   define serviceescalation{

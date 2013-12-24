@@ -113,7 +113,7 @@ Notification Type Macro
 ========================
 
 
-When crafting your notification commands, you need to take into account what type of notification is occurring. The :ref:`$NOTIFICATIONTYPE$ <thebasics-macrolist#thebasics-macrolist-notificationtype>` macro contains a string that identifies exactly that. The table below lists the possible values for the macro and their respective descriptions:
+When crafting your notification commands, you need to take into account what type of notification is occurring. The :ref:`$NOTIFICATIONTYPE$ <$NOTIFICATIONTYPE$>` macro contains a string that identifies exactly that. The table below lists the possible values for the macro and their respective descriptions:
 
 
 
@@ -153,13 +153,11 @@ If you're looking for an alternative to using email for sending messages to your
   * `Gnokii`_ (SMS software for contacting Nokia phones via GSM network)
   * `QuickPage`_ (alphanumeric pager software)
   * `Sendpage`_ (paging software)
-  * <del>`SMS Client`_ (command line utility for sending messages to pagers and mobile phones)</del> (this page is not working, 2012 march)
 
 If you want to try out a non-traditional method of notification, you might want to mess around with audio alerts. If you want to have audio alerts played on the monitoring server (with synthesized speech), check out `Festival`_. If you'd rather leave the monitoring box alone and have audio alerts played on another box, check out the `Network Audio System (NAS)`_ and `rplay`_ projects.
 
 
 .. _Gnokii: http://www.gnokii.org/
-.. _SMS Client: http://www.smsclient.org/
 .. _Festival: http://www.cstr.ed.ac.uk/projects/festival/
 .. _rplay: http://rplay.doit.org/
 .. _Network Audio System (NAS): http://radscan.com/nas
