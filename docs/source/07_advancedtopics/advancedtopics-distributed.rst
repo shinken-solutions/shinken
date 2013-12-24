@@ -48,17 +48,21 @@ Shinken Daemon roles
 
 
     * **Arbiter**: The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons. Additionally, it manages the high availability features: if a particular daemon dies, it re-routes the configuration managed by this failed daemon to the configured spare. Finally, it receives input from users (such as external commands from nagios.cmd) or passive check results and routes them to the appropriate daemon. Passive check results are forwarded to the Scheduler responsible for the check. There can only be one active arbiter with other arbiters acting as hot standby spares in the architecture.
+
       * Modules for data collection: NSCA, TSCA, Ws_arbiter (web service)
       * Modules for configuration data storage: MongoDB, 
       * Modules for status retention: PickleRententionArbiter
       * Modules for configuration manipulation: IP_Tag, MySQLImport, GLPI, vmware autolinking and other task specific modules
 
 
+
     * **Scheduler**: The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively. The scheduler daemon is also responsible for processing the check result queue, analyzing the results, doing correlation and following up actions accordingly (if a service is down, ask for a host check). It does not launch checks or notifications. It just keeps a queue of pending checks and notifications for other daemons of the architecture (like pollers or reactionners). This permits distributing load equally across many pollers. There can be many schedulers for load-balancing or hot standby roles. Status persistence is achieved using a retention module.
+
       * Modules for status retention: pickle, nagios, memcache, redis and MongoDB are available.
 
 
     * **Poller**: The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers. Pollers can be tagged for specialized checks (ex. Windows versus Unix, customer A versus customer B, DMZ) There can be many pollers for load-balancing or hot standby spare roles.
+
       * Module for data acquisition: :ref:`NRPE Module <setup_nrpe_booster_module>`
       * Module for data acquisition: CommandFile (Used for check_mk integration which depends on the nagios.cmd named pipe )
       * Module for data acquisition: `SNMPbooster`_ (in development)
@@ -68,6 +72,7 @@ Shinken Daemon roles
       * Module for external communications: AndroidSMS
 
     * **Broker**: The broker daemon exports and manages data from schedulers.  The management can is done exclusively with modules. Multiple :ref:`Broker modules <the broker modules >` can be enabled simultaneously.
+
       * Module for centralizing Shinken logs: Simple-log (flat file)
       * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, couchdb 
       * Modules for exporting data: Graphite-Perfdata, NPCDMOD(PNP4Nagios) and Syslog
@@ -77,6 +82,7 @@ Shinken Daemon roles
 
 
     * **Receiver** (optional): The receiver daemon receives passive check data and serves as a distributed passive command buffer that will be read by the arbiter daemon. There can be many receivers for load-balancing and hot standby spare roles. The receiver can also use modules to accept data from different protocols. Anyone serious about using passive check results should use a receiver to ensure that when the arbiter is not available (when updating a configuration) all check results are buffered by the receiver and forwarded when the arbiter is back on-line.
+
       * Module for passive data collection: :ref:`NSCA <nsca_daemon_module>`, :ref:`TSCA <tsca_daemon_module>`, :ref:`Ws_arbiter (web service) <ws_daemon_module>`
 
 This architecture is fully flexible and scalable: the daemons that require more performance are the poller and the schedulers. The administrator can add as many as he wants. The broker daemon should be on a well provisioned server for larger installations, as only a single broker can be active at one time. A picture is worth a thousand words: 
@@ -109,6 +115,8 @@ This action is done in two parts:
 
 
 
+.. _advancedtopics-distributed#creating_independent_packs:
+
 Creating independent packs 
 ---------------------------
 
@@ -135,6 +143,8 @@ In this example, we will have two packs:
 
 
 
+.. _advancedtopics-distributed#the_packs_aggregations_into_scheduler_configurations:
+
 The packs aggregations into scheduler configurations 
 -----------------------------------------------------
 
@@ -149,6 +159,8 @@ When all relation packs are created, the Arbiter aggregates them into N configur
 
 
 
+
+.. _advancedtopics-distributed#the_configurations_sending_to_satellites:
 
 The configurations sending to satellites 
 -----------------------------------------
@@ -167,6 +179,8 @@ The high availability
 The shinken architecture is a high availability one. Before looking at how this works,let's take a look at how the load balancing works if it's now already done.
 
 
+
+.. _advancedtopics-distributed#when_a_node_dies:
 
 When a node dies 
 -----------------
@@ -220,6 +234,8 @@ The pollers can be tagged with multiple poller_tags. If they are tagged, they wi
 
 
 
+.. _advancedtopics-distributed#use_cases:
+
 Use cases 
 ----------
 
@@ -272,6 +288,8 @@ We will use a generic term for this site managment, **Realms**.
 
 
 
+.. _advancedtopics-distributed#realms_in_few_words:
+
 Realms in few words 
 --------------------
 
@@ -279,6 +297,8 @@ Realms in few words
 A realm is a pool of resources (scheduler, poller, reactionner and broker) that hosts or hostgroups can be attached to. A host or hostgroup can be attached to only one realm. All "dependancies" or parents of this hosts must be in the same realm. A realm can be tagged "default"' and realm untagged hosts will be put into it. In a realm, pollers, reactionners and brokers will only get jobs from schedulers of the same realm.
 
 
+
+.. _advancedtopics-distributed#realms_are_not_poller_tags:
 
 Realms are not poller_tags! 
 ----------------------------
@@ -295,6 +315,8 @@ If you need a scheduler/poller in a customer LAN, use realms.
 
 
 
+.. _advancedtopics-distributed#sub_realms:
+
 Sub realms 
 -----------
 
@@ -302,6 +324,8 @@ Sub realms
 A realm can contain another realm. It does not change anything for schedulers: they are only responsible for hosts of their realm not the ones of the sub realms. The realm tree is useful for satellites like reactionners or brokers: they can get jobs from the schedulers of their realm, but also from schedulers of sub realms. Pollers can also get jobs from sub realms, but it's less useful so it's disabled by default. Warning: having more than one broker in a scheduler is not a good idea. The jobs for brokers can be taken by only one broker. For the Arbiter it does not change a thing: there is still only one Arbiter and one configuration whatever realms you have.
 
 
+
+.. _advancedtopics-distributed#example_of_realm_usage:
 
 Example of realm usage 
 -----------------------

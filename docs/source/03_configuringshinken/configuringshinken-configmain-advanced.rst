@@ -64,6 +64,9 @@ If you want to use tools like PNP, NagiosGrapher or Graphite set it to 1.
 
 
 
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-host_perfdata_command:
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-service_perfdata_command:
+
 Host/Service Performance Data Processing Command 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -256,6 +259,9 @@ This option determines whether or not Shinken will treat :ref:`passive host chec
 
 
 
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-enable_predictive_host_dependency_checks:
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-enable_predictive_service_dependency_checks:
+
 Predictive Host/Service Dependency Checks Option (Unused) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -353,6 +359,8 @@ This option is used to know if we apply or not the state change when an host or 
 
 
 
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-soft_state_dependencies:
+
 Soft State Dependencies Option (Not implemented) 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -448,6 +456,8 @@ Flapping parameters
 --------------------
 
 
+
+.. _configuringshinken-configmain-advanced#configuringshinken-configmain-enable_flap_detection:
 
 Flap Detection Option 
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -706,6 +716,7 @@ Freshness check
 
 
 .. _configuringshinken-configmain#configuringshinken-configmain-check_service_freshness:
+.. _configuringshinken-configmain#configuringshinken-configmain-check_host_freshness:
 
 Host/Service Freshness Checking Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -731,6 +742,10 @@ This option determines whether or not Shinken will periodically check the “fre
   * 1 = Check host/service freshness (default)
 
 
+
+
+.. _configuringshinken-configmain#configuringshinken-configmain-service_freshness_check_interval:
+.. _configuringshinken-configmain#configuringshinken-configmain-host_freshness_check_interval:
 
 Host/Service Freshness Check Interval 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

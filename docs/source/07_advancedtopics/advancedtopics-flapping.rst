@@ -157,7 +157,7 @@ Enabling Flap Detection
 
 In order to enable the flap detection features in Shinken, you'll need to:
 
-  * Set :ref:`enable_flap_detection <configuringshinken-configmain#configuringshinken-configmain-enable_flap_detection>` directive is set to 1.
+  * Set :ref:`enable_flap_detection <configuringshinken-configmain-advanced#configuringshinken-configmain-enable_flap_detection>` directive is set to 1.
   * Set the "flap_detection_enabled" directive in your host and service definitions is set to 1.
 
 If you want to disable flap detection on a global basis, set the :ref:`enable_flap_detection <configuringshinken-configmain#configuringshinken-configmain-enable_flap_detection>` directive to 0.

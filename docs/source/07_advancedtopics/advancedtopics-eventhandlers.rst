@@ -96,9 +96,9 @@ Writing Event Handler Commands
 
 Event handler commands will likely be shell or perl scripts, but they can be any type of executable that can run from a command prompt. At a minimum, the scripts should take the following :ref:`macros <thebasics-macros>` as arguments:
 
-For Services: :ref:`$SERVICESTATE$ <thebasics-macrolist#thebasics-macrolist-servicestate>`, :ref:`$SERVICESTATETYPE$ <thebasics-macrolist#thebasics-macrolist-servicestatetype>`, :ref:`$SERVICEATTEMPT$ <thebasics-macrolist#thebasics-macrolist-serviceattempt>`
+For Services: :ref:`$SERVICESTATE$ <$SERVICESTATE$>`, :ref:`$SERVICESTATETYPE$ <$SERVICESTATETYPE$>`, :ref:`$SERVICEATTEMPT$ <$SERVICEATTEMPT$>`
 
-For Hosts: :ref:`$HOSTSTATE$ <thebasics-macrolist#thebasics-macrolist-hoststate>`, :ref:`$HOSTSTATETYPE$ <thebasics-macrolist#thebasics-macrolist-hoststatetype>`, :ref:`$HOSTATTEMPT$ <thebasics-macrolist#thebasics-macrolist-hostattempt>`
+For Hosts: :ref:`$HOSTSTATE$ <$HOSTSTATE$>`, :ref:`$HOSTSTATETYPE$ <$HOSTSTATETYPE$>`, :ref:`$HOSTATTEMPT$ <$HOSTATTEMPT$>`
 
 The scripts should examine the values of the arguments passed to it and take any necessary action based upon those values. The best way to understand how event 
 handlers work is to see an example. Lucky for you, one is provided :ref:`below <advancedtopics-eventhandlers#Service Event Handler Example>`.
@@ -117,6 +117,7 @@ Ideally you should evaluate the types of event handlers you will be implementing
 
 
 
+.. _advancedtopics-eventhandlers#Service Event Handler Example:
 Service Event Handler Example 
 ==============================
 

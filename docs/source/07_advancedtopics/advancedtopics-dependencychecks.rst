@@ -52,8 +52,8 @@ Predictive dependency checks involve rather little overhead, so I would recommen
 
 Enabling predictive dependency checks is easy:
 
-  * Predictive host dependency checks are controlled by the :ref:`"enable_predictive_host_dependency_checks" <configuringshinken-configmain#configuringshinken-configmain-enable_predictive_host_dependency_checks>` option.
-  * Predictive service dependency checks are controlled by the :ref:`"enable_predictive_service_dependency_checks" <configuringshinken-configmain#configuringshinken-configmain-enable_predictive_service_dependency_checks>` option.
+  * Predictive host dependency checks are controlled by the :ref:`"enable_predictive_host_dependency_checks" <configuringshinken-configmain-advanced#configuringshinken-configmain-enable_predictive_host_dependency_checks>` option.
+  * Predictive service dependency checks are controlled by the :ref:`"enable_predictive_service_dependency_checks" <configuringshinken-configmain-advanced#configuringshinken-configmain-enable_predictive_service_dependency_checks>` option.
 
 
 

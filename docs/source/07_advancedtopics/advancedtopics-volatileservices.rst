@@ -58,6 +58,8 @@ How about an example... Let's say you're running `PortSentry`_ to detect port sc
 
 
 
+.. _advancedtopics-volatileservices#shinken_configuration:
+
 Shinken Configuration 
 ----------------------
 
@@ -69,6 +71,8 @@ Shinken Configuration
   * Set this "is_volatile" directive in the service definition to 1.
 
 
+
+.. _advancedtopics-volatileservices#portsentry_configuration:
 
 PortSentry Configuration 
 -------------------------
@@ -84,6 +88,8 @@ Edit your PortSentry configuration file ("portsentry.conf") and define a command
 Make sure to replace host_name with the short name of the host that the service is associated with.
 
 
+
+.. _advancedtopics-volatileservices#port_scan_script:
 
 Port Scan Script 
 -----------------
