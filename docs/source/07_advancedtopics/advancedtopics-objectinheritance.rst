@@ -15,7 +15,7 @@ Introduction
 
 This documentation attempts to explain object inheritance and how it can be used in your :ref:`object definitions <configuringshinken-objectdefinitions>`.
 
-If you are confused about how recursion and inheritance work after reading this, take a look at the sample object config files provided in the Shinken distribution. If that still doesn't help, drop an email message with a *detailed* description of your problem to the *nagios-users* mailing list.
+If you are confused about how recursion and inheritance work after reading this, take a look at the sample object config files provided in the Shinken distribution. If that still doesn't help, have a look to the :ref:`shinken resources for help <how_to_contribute>`.
 
 
 
@@ -269,6 +269,8 @@ In this case, the host *bighost1* will not inherit the value of the "event_handl
   
 
 
+.. _advancedtopics-objectinheritance#advancedtopics-objectinheritance-add_string:
+
 Additive Inheritance of String Values 
 ======================================
 
@@ -375,10 +377,10 @@ Multiple Inheritance Sources
 
 Thus far, all examples of inheritance have shown object definitions inheriting variables/values from just a single source. You are also able to inherit variables/values from multiple sources for more complex configurations, as shown below.
 
-# Generic host template  
-  
+
 ::
 
+  # Generic host template
   
   define host{
     name                        generic-host
@@ -387,11 +389,10 @@ Thus far, all examples of inheritance have shown object definitions inheriting v
     register                    0
   }
   
-# Development web server template  
-  
+
 ::
 
-  
+  # Development web server template
   define host{
    name                    development-server
    check_interval          15
@@ -400,11 +401,10 @@ Thus far, all examples of inheritance have shown object definitions inheriting v
    register                        0
   }
   
-# Development web server
-  
+
 ::
 
-  
+  # Development web server  
   define host{  
     use                    generic-host,development-server
     host_name              devweb1
@@ -420,11 +420,11 @@ Thus far, all examples of inheritance have shown object definitions inheriting v
 
 In the example above, devweb1 is inheriting variables/values from two sources: generic-host and development-server. You'll notice that a check_interval variable is defined in both sources. Since generic-host was the first template specified in devweb1's use directive, its value for the "check_interval" variable is inherited by the devweb1 host. After inheritance, the effective definition of devweb1 would be as follows:
 
-# Development web server
 
-  
+
 ::
 
+  # Development web serve
   define host{
   	        host_name               devweb1
   	        active_checks_enabled   1
@@ -443,8 +443,19 @@ When you use multiple inheritance sources, it is important to know how Shinken h
 
 
 
-========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= ====================================================================================
-Consider the following host definition that references three templates:# Development web server  define host{           use        1, 4, 8           host_name  devweb1   		...	   		        }If some of those referenced templates themselves inherit variables/values from one or more other templates, the precendence rules are shown to the right.Testing, trial, and error will help you better understand exactly how things work in complex inheritance situations like this. :-) .. image:: /_static/images///official/images/multiple-templates2.png
+Consider the following host definition that references three templates:
+
+::
+
+  # Development web server
+  define host{
+             use        1, 4, 8
+             host_name  devweb1
+     		 ...
+  }
+
+If some of those referenced templates themselves inherit variables/values from one or more other templates, the precendence rules are shown below. Testing, trial, and error will help you better understand exactly how things work in complex inheritance situations like this. :-) 
+
+.. image:: /_static/images///official/images/multiple-templates2.png
    :scale: 90 %
-========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= ====================================================================================
 

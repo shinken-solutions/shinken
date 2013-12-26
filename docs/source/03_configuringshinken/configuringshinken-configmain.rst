@@ -336,10 +336,12 @@ This is the rotation method that you would like Shinken to use for your log file
   * d = Daily (rotate the log at midnight each day)
   * w = Weekly (rotate the log at midnight on Saturday)
   * m = Monthly (rotate the log at midnight on the last day of the month)
+
 .. tip::  From now, only the d (Daily) parameter is managed. 
 
 
 .. _configuringshinken-configmain#configuringshinken-configmain-check_external_commands:
+
 External Command Check Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -480,6 +482,8 @@ Scheduling parameters
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-execute_service_checks:
+
 Service/Host Check Execution Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -505,6 +509,8 @@ This option determines whether or not Shinken will execute service/host checks. 
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-accept_passive_service_checks:
+
 Passive Service/Host Check Acceptance Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -529,6 +535,8 @@ This option determines whether or not Shinken will accept :ref:`passive service/
   * 1 = Accept passive service/host checks (default)
 
 
+
+.. _configuringshinken-configmain#configuringshinken-configmain-enable_event_handlers:
 
 Event Handler Option 
 ~~~~~~~~~~~~~~~~~~~~~
@@ -794,6 +802,8 @@ Example:
 This option determines the maximum number of minutes from when Shinken starts that all hosts/services (that are scheduled to be regularly checked) are checked. This option will ensure that the initial checks of all hosts/services occur within the timeframe you specify. Default value is 30 (minutes).
 
 
+
+.. _configuringshinken-configmain#configuringshinken-configmain-interval_length:
 
 Timing Interval Length 
 ~~~~~~~~~~~~~~~~~~~~~~~

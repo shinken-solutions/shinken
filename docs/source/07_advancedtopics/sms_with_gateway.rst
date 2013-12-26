@@ -35,14 +35,9 @@ In the same file you need also to add these lines in each contact you want that 
 Then you need to add this at the end of the contacts.cfg
 
 
-  
 ::
-
   
   define notificationway{
-  
-::
-
        notificationway_name            SMS           // Here you need to put the name of the notifications ways you write up
        service_notification_period     24x7          // Here I will receive ams all the time, If you wanna receive them for only the night replace 24x7 by night. 
        host_notification_period        24x7          // Same as above
@@ -61,24 +56,19 @@ Then you need to add this at the end of the contacts.cfg
 
 And add these line at the end. 
 
-  
+
 ::
 
   
   # Notify Service by SMS-OVH
   define command {
-  
-::
-
     command_name        notify-service-by-ovhsms     // Should be the same as in the contacts.cfg
     command_line        $PLUGINSDIR$/ovhsms.sh  $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SE$ // Tell wich script shinken as to use to send sms. We will create it after. 
   }
   
+
   # Notify host by SMS-OVH
   define command {
-  
-::
-
     command_name        notify-host-by-ovhsms      * * Should be the same as in the contacts.cfg
     command_line        $PLUGINSDIR$/ovhsms.sh $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SER$ // Tell wich script shinken as to use to send sms. We will create it after.
   }
@@ -95,7 +85,7 @@ First you need to be the shinken user so do a : su shinken
 do a : cd /usr/local/shinken/libexec/
 and then create and edit your new script with the name you set above :  nano -w ovhsms.sh
 
-  
+
 ::
 
   
@@ -120,6 +110,6 @@ and then create and edit your new script with the name you set above :  nano -w 
 ===========
 
    
-   Save your file and do : "exit" 
+Save your file and do : "exit" 
 To exit the shinken user.
 Then set down one of your host or service to test if you receive it.  

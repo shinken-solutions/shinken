@@ -32,6 +32,8 @@ Object types that are not listed above (i.e. timeperiods, commands, etc.) do not
 
 
 
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-service:
+
 Service Definitions 
 ====================
 
@@ -105,6 +107,9 @@ If you want to create identical services on numerous hosts or hostgroups, but wo
   }
   
 
+
+
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-serviceescalation:
 
 Service Escalation Definitions 
 ===============================
@@ -232,6 +237,8 @@ If you want to create service escalations for all services that belong in one or
   
 
 
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-servicedependency:
+
 Service Dependency Definitions 
 ===============================
 
@@ -348,6 +355,8 @@ If you want to create service dependencies for multiple services that are depend
   
 
 
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-hostescalation:
+
 Host Escalation Definitions 
 ============================
 
@@ -418,6 +427,8 @@ If you want to create identical host escalations on numerous hosts or hostgroups
   
 
 
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-hostdependency:
+
 Host Dependency Definitions 
 ============================
 
@@ -456,6 +467,9 @@ If you want to create host escalations for all hosts in in one or more hostgroup
   }
   
 
+
+
+.. _advancedtopics-objecttricks#advancedtopics-objecttricks-hostgroup:
 
 Hostgroups 
 ===========

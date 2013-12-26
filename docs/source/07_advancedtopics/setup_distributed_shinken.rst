@@ -14,7 +14,7 @@ The load balancing feature is very easy to obtain with Shinken. If I say that th
 If you use the distributed architecture for load balancing, know that load is typically present in 2 processes:
   * pollers: they launch checks, they use a lot of CPU resources
   * schedulers: they schedule, potentially lots of checks
-For both, a limit of 150000 checks/5min is a reasonable goal on an average server(4 cores@3Ghz). Scaling can be achieved horizontally by simply adding more servers and declaring them as pollers or schedulers.
+For both, a limit of 150000 checks/5min is a reasonable goal on an average server(4 cores\@3Ghz). Scaling can be achieved horizontally by simply adding more servers and declaring them as pollers or schedulers.
 
 .. tip::  The scheduler is NOT a multi-threaded process, so even if you add cores to your server, it won't change it's performances.
 
@@ -75,15 +75,11 @@ Declare the new poller on the main configuration file
 Ok, now you have a brand new poller declared on your new server, server2. **But server1 needs to know that it must give work to it. This is done by declaring the new poller in the shinken-specific.cfg file.**
 
 Edit your /etc/shinken-specific.cfg file (or c:\shinken\etc\shinken-specific.cfg under Windows) and define your new poller under the existing poller-1 definition (on server1):
-  
-::
 
+::
   
   #Pollers launch checks                                                                                                                                                                                          
   define poller{
-  
-::
-
        poller_name      poller-2
        address          server2
        port             7771
@@ -91,13 +87,10 @@ Edit your /etc/shinken-specific.cfg file (or c:\shinken\etc\shinken-specific.cfg
 
 
 Be sure to have also those lines: 
-  
+
 ::
 
   define scheduler{
-  
-::
-
        scheduler_name scheduler-1 ; just the name
        address  192.168.0.1           ; ip or dns address of the daemon
        port     7768                  ; tcp port of the daemon 

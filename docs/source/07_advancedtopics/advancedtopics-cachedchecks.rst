@@ -18,7 +18,7 @@ Introduction
 .. image:: /_static/images///official/images/cachedchecks1.png
    :scale: 90 %
 
- The performance of Shinken' monitoring logic can be significantly improved by implementing the use of cached checks. Cached checks allow Shinken to forgot executing a host or service check command if it determines a relatively recent check result will do instead.
+The performance of Shinken' monitoring logic can be significantly improved by implementing the use of cached checks. Cached checks allow Shinken to forgot executing a host or service check command if it determines a relatively recent check result will do instead.
 
 
 

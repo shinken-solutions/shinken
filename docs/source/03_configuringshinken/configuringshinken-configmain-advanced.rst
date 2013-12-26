@@ -379,6 +379,8 @@ Performance tuning
 -------------------
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-cached_host_check_horizon:
+.. _configuringshinken-configmain#configuringshinken-configmain-cached_service_check_horizon:
 
 Cached Host/Service Check Horizon 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -404,6 +406,8 @@ This option determines the maximum amount of time (in seconds) that the state of
 
 
 
+
+.. _configuringshinken-configmain#configuringshinken-configmain-use_large_installation_tweaks:
 
 Large Installation Tweaks Option 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

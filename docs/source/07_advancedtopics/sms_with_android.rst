@@ -35,6 +35,7 @@ Install the Pyro lib on your phone
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Go to http://pypi.python.org/pypi/Pyro4/ and download the same Pyro that you are using in Shinken.
+
   * Connect your phone to a computer, and open the sdcard disk.
   * Untar the Pyro4 tar ball, and copy the Pyro4 library directory (the one IN the Pyro4-10 directory, NOT the 4.10 directory itself) and copy/paste it in SDCARD/com.googlecode.pythonforandroid\extras\python directory. Be sure the file SDCARD\com.googlecode.pythonforandroid\extras\python\Pyro\__init__.py exists, or you put the wrong directory here.
   * Don't close your sdcard explorer
@@ -67,14 +68,10 @@ Declare this daemon in the central configuration
 
 The phone(s) will be a new reactionner daemon. You should want to only launch SMS with it, not mail commands or nother notifications. So you will have to define this reactionner to manage only the SMS commands. There is an example of such SMS-reactionner in the sample etc/shinken-specific.cfg file and the module AndroidSMS need by this reactionner to send SMS with android.
 
-  
-::
 
+::
   
   define reactionner{
-  
-::
-
        reactionner_name             reactionner-Android
        address                      WIFIIPOFYOURPHONE
        port                         7769
@@ -90,39 +87,31 @@ The phone(s) will be a new reactionner daemon. You should want to only launch SM
   # Reactionner can be launched under an android device
   # and can be used to send SMS with this module
   define module{
-  
-::
-
        module_name      AndroidSMS
        module_type      android_sms
   }
 
 The important lines are:
+
  * address: put the Wifi address of your phone
  * modules: load the Android module to be able to manage sms sent.
  * reactionner_tags: only android_sms commands will be send to this reactionner.
 
-In the commands.cfg, there are example of sms sending commands::
-  
+In the commands.cfg, there are example of sms sending commands
+
 ::
 
-  
   # For Android SMS things
   # You need both reactionner_tag and module_type in most cases!
   define command{
-  
-::
-
        command_name                    notify-host-by-android-sms
        command_line                    android_sms  $CONTACTPAGER$ Host: $HOSTNAME$\nAddress: $HOSTADDRESS$\nState: $HOSTSTATE$\nInfo: $OUTPUT$\nDate: $DATETIME$
        reactionner_tag                 android_sms
        module_type                     android_sms
   }
   
-  define command{
-  
-::
 
+  define command{
        command_name                    notify-service-by-android-sms
        command_line                    android_sms  $CONTACTPAGER$ Service: $SERVICEDESC$\nHost: $HOSTNAME$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\nInfo: $OUTPUT$\nDate: $DATETIME$
        reactionner_tag                 android_sms
@@ -141,14 +130,10 @@ Add SMS notification ways
 
 In order to use SMS, it is a good thing to add notification way dedicated to send SMS, separated from email notifications.
 Edit templates and add theses lines to declare a new notification way using SMS (:ref:`more about notification ways <setup_notification_ways>`) :
-  
-::
 
+::
   
   define notificationway{
-  
-::
-
        notificationway_name            android-sms
        service_notification_period     24x7
        host_notification_period        24x7
@@ -166,14 +151,9 @@ Add SMS to your contacts
 
 You only need to add theses commands to your contacts (or contact templates, or notification ways) to send them SMS:
 
-  
 ::
-
   
   define contact{
-  
-::
-
         name                            generic-contact         ; The name of this contact template
         [...]
         notificationways                email,android-sms       ; Use email and sms to notify the contact
@@ -204,17 +184,15 @@ How to send ACK from SMS?
 All you need is to send a SMS to the phone with the format:
 
 For a service:
-  
-::
 
+::
   
    ACK  host_name/service_description
   
 For an host:
-  
+
 ::
 
-  
    ACK  host_name
   
   

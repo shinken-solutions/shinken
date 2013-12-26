@@ -20,10 +20,12 @@ That is where the site/customers management is useful. In Shinken, it's managed 
 A realm is a group of resources that will manage hosts or hostgroups. Such a link will be unique: a host cannot be in multiple realms. If you put an hostgroup in a realm, all hosts in this group will be in the realm (unless a host already has the realm set, the host value will be taken).
 
 A realm is:
+
  * at least a scheduler
  * at least a poller
  * can have a reactionner
  * can have a broker
+
 In a realm, all realm pollers will take all realm schedulers jobs.
 
 .. important::  Very important: there is only ONE arbiter (and a spare of course) for ALL realms. The arbiter manages all realms and all that is inside.
@@ -92,65 +94,49 @@ Configuration of the realms
 
 
 Here is the configuration for the shared architecture:
-  
-::
 
+::
   
   define realm {
-  
-::
-
    realm_name       All
    realm_members    Europe,US,Asia
    default          1    ;Is the default realm. Should be unique!       
   }
-  define realm{
-  
-::
 
+
+  define realm{
    realm_name       Europe
    realm_members    Paris   ;This realm is IN Europe
   }
 
 
 An now the satellites:
-  
-::
 
+::
   
   define scheduler{
-  
-::
-
    scheduler_name       scheduler_Paris
    realm                Paris             ;It will only manage Paris hosts
   }
-  define reactionner{
-  
-::
 
+
+  define reactionner{
    reactionner_name     reactionner-master
    realm                All                ;Will reach ALL schedulers
   }
 
 And in host/hostgroup definition:
-  
-::
 
+::
   
   define host{
-  
-::
-
    host_name         server-paris
    realm             Paris         ;Will be put in the Paris realm
    [...]
   }
   
-  define hostgroups{
-  
-::
 
+  define hostgroups{
    hostgroup_name		linux-servers
    alias			Linux Servers
    members			srv1,srv2
@@ -169,14 +155,10 @@ In the previous samples, if you put numerous brokers into the realm, each schedu
 You can activate multi-brokers features with a realm parameter, the broker_complete_links option (0 by default).
 
 You will have to enable this option in ALL your realms! For example:
-  
-::
 
+::
   
   define realm{
-  
-::
-
    realm_name       Europe
    broker_complete_links  1
   }

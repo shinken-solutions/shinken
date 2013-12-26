@@ -106,4 +106,5 @@ Once the scan is completed, you can restart Shinken and enjoy your new hosts and
 More about discovery 
 ~~~~~~~~~~~~~~~~~~~~~
 
-If you want to know more about the discovery process, like how to create a discovery script or define creation rules, consult the :ref:`advanced discovery <use the discovery with shinken advanced >` documentation.
+If you want to know more about the discovery process, like how to create a discovery script or define creation rules, consult the :ref:`advanced discovery <use_the_discovery_with_shinken_advanced>` documentation.
+

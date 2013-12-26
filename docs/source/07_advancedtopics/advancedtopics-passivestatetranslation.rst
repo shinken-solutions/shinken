@@ -13,5 +13,5 @@ Introduction
 =============
 
 
-This Nagios option is no more useful in thye Shinken architecture.
+This Nagios option is no more useful in the Shinken architecture.
 

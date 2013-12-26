@@ -164,7 +164,7 @@ Scaling metric acquisition
 Metrics or performance data (in Nagios speak) are embedded with check results. A check result can have zero or more performance metrics associated with it.
 Theses are transparently passed off to systems outside of Shinken using a Broker module. The Graphite broker module can easily send more than 2000 metrics per second. We have not tested the upper limit. Graphite itself can be configured to reach upper bounds of 80K metrics per second.
 
-If a metric does not need its own service, it should be combined with a similar natured check being run on the server. Services are the expensive commodity, as they have all the intelligence like to them such as timeouts, retries, dependencies, etc. With Shinken 1.2 and fast servers, you should not exceed __60K services__ for optimum performance.
+If a metric does not need its own service, it should be combined with a similar natured check being run on the server. Services are the expensive commodity, as they have all the intelligence like to them such as timeouts, retries, dependencies, etc. With Shinken 1.2 and fast servers, you should not exceed **60K services**  for optimum performance.
 
 Recommended protocols for scalable passive acquisition
 

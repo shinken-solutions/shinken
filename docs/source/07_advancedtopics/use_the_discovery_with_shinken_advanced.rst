@@ -30,11 +30,7 @@ A discovery script can be anything you can launch from a shell, just like plugin
 The raw data is being sent to standard out.
 
 Here is an example of the output of the nmap script for a standard Linux box:
-  
-::
 
-  
-  
 ::
 
   $ libexec/nmap_discovery_runner.py -t localhost
@@ -50,10 +46,7 @@ Here is an example of the output of the nmap script for a standard Linux box:
   
 So the output format is:
   
-::
 
-  
-  
 ::
 
   objectname::key=value
@@ -79,11 +72,7 @@ Host rule
 
 
 Here is an example of how to create a "generic" host for anything that is detected by nmap and answers to a ping request:
-  
-::
 
-  
-  
 ::
 
   define discoveryrule {
@@ -109,10 +98,7 @@ Service rule
 
 Here is an example for a port matching rule service creation:
   
-::
 
-  
-  
 ::
 
   define discoveryrule {
@@ -138,14 +124,10 @@ The ! (not) key
 You can ask **not** to match a rule. It's very easy, just add a ! character before the key name.
 
 For example:
-  
-::
 
+::
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Ftp
        
        openports                ^21$
@@ -168,14 +150,10 @@ By default, when you put a new host/service property, it will replace all previo
 
 For example, we want to add the "ftp" and "http" templates on the host, without removing all previously inserted values.
 
-  
+
 ::
 
-  
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Ftp
        creation_type            host
        openports                ^21$
@@ -183,9 +161,6 @@ For example, we want to add the "ftp" and "http" templates on the host, without 
   }
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Http
        creation_type            host
        openports                ^21$
@@ -194,14 +169,10 @@ For example, we want to add the "ftp" and "http" templates on the host, without 
   
   
 If both ports are open, it will create an host with:
-  
-::
 
+::
   
   define host {
-  
-::
-
     host_name   localhost
     use         ftp,http
   }
@@ -223,14 +194,10 @@ Sometimes you need to simply remove a property that conflicts with a new one. Fo
 
 For exemple we want to add the "router-os" template but not the "linux" template on the host and do not remove previously inserted values.
    
-  
-::
 
+::
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Ftp
        creation_type            host
        openports                ^21$
@@ -238,9 +205,6 @@ For exemple we want to add the "router-os" template but not the "linux" template
   }
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Http
        creation_type            host
        openports                ^21$
@@ -248,9 +212,6 @@ For exemple we want to add the "router-os" template but not the "linux" template
   }
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       Linux
        creation_type            host
        os                       linux
@@ -258,27 +219,19 @@ For exemple we want to add the "router-os" template but not the "linux" template
   }
   
   define discoveryrule {
-  
-::
-
        discoveryrule_name       RouterOS
        creation_type            host
        macvendor                routerboard
        +use                     router-os
-  
--use                     linux
+       -use                     linux
   }
 
 
 If both ports are open, os detected is linux and the macvendor is routerboard it will create an host with:
-  
-::
 
+::
   
   define host {
-  
-::
-
     host_name   myrouter
     use         ftp,http,router-os
   }

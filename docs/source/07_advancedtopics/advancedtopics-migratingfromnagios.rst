@@ -15,11 +15,15 @@ How to to import existing Nagios states
 It's possible with the *nagios_retention_file* module in fact.
 
 **The "migration" is done in two phases :**
-  - First you launch shinken with both NagiosRetention and PickleRetention modules. It will load data from NagiosRetention and save them in a more "efficient" file. So add in *shinken-specififc.cfg* file both modules for your scheduler object: 
+
+- First you launch shinken with both NagiosRetention and PickleRetention modules. It will load data from NagiosRetention and save them in a more "efficient" file. So add in *shinken-specififc.cfg* file both modules for your scheduler object: 
+
 ::
 
-  modules                 NagiosRetention ,PickleRetention</code>
-  - Then you remove the NagiosRetention (it's a read only module, don't fear for your nagios retention file) and restart with just PickleRetention. <code>modules                 PickleRetention
+  modules                 NagiosRetention ,PickleRetention
+
+- Then you remove the NagiosRetention (it's a read only module, don't fear for your nagios retention file) and restart with just PickleRetention. <code>modules                 PickleRetention
+
 You're done.
 
 

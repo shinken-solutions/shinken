@@ -45,13 +45,10 @@ This makes it compatible with all your current habits and UIs. As the service ag
 
 Here is a configuration for the ERP service example, attached to a dummy host named "servicedelivery".
 
-  
-::
 
+::
   
   define service{
-  
-::
 
      use         standard-service
      host_name   servicedelivery
@@ -72,13 +69,10 @@ In some cases, you know that in a cluster of N elements, you need at least X of 
 
 Here is an example of the same ERP but with 3 http web servers, and you need at least 2 of them (to handle the load) :
 
-  
-::
 
+::
   
   define service{
-  
-::
 
      use         standard-service
      host_name   servicedelivery
@@ -97,14 +91,11 @@ The NOT rule
 You can define a not state rule. It can be useful for active/passive setups for example. You just need to add a ! before your element name.
 
 For example :
-  
-::
 
+::
   
   define service{
   
-::
-
      use         generic-service
      host_name   servicedelivery
      service_description  Cluster_state

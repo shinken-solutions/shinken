@@ -44,6 +44,7 @@ How it works:
 
 
 FS discovery runner provides two modes : __macros__ and __tags__ modes. First one, __macros__ mode, will output a comma-separated list of filesystems under host macro '_fs', the other one will output tags with filesystems mountpoint.
+
 .. important::  All filesystems will output with character **/** replaced by an underscore _.
 
 
@@ -54,14 +55,10 @@ Macros mode.
 
 It is the easiest mode. It will add a line into host definition with host macro '_fs' with comma-separated list of filesystems. Then it is only needed to write a service definition using 
 that macro with shinken directive "duplicate_foreach". Here is an example :
-  
-::
 
+::
   
   define service{
-  
-::
-
    service_description    Disks$KEY$
    use            generic-service
    register       0
@@ -83,14 +80,10 @@ This mode will let you more flexibility to monitor filesystems. Each filesystems
 filesystem name.
 Example if you want to monitor "/var" filesystem on a host with following filesystems "/usr", "/var", "/opt", "/home", "/". You will need a discovery rules to match "/var", then a host 
 template materializing the tag and a service applied to host template :
-  
-::
 
+::
   
   define discoveryrule {
-  
-::
-
         discoveryrule_name     fs_var
         creation_type          host
         fs                     var$
@@ -98,27 +91,19 @@ template materializing the tag and a service applied to host template :
   }
 
 will match "/var" filesystem and tell to tag with "fs_var".
-  
-::
 
+::
   
   define host{
-  
-::
-
         name                   fs_var
         register               0
   }
 
 Host template used be scanned host.
-  
-::
 
+::
   
   define service{
-  
-::
-
         host_name              fs_var
         use                    10min_short
         service_description    Usage_var
@@ -130,14 +115,10 @@ Host template used be scanned host.
 and service applied to "fs_var" host template, itself applied to scanned host.
 
 Now, if you want to apply same treatment to several filesystems, like "/var" and "/home" by example :
-  
-::
 
+::
   
   define discoveryrule {
-  
-::
-
         discoveryrule_name     fs_var_home
         creation_type          host
         fs                     var$|home$
@@ -145,27 +126,18 @@ Now, if you want to apply same treatment to several filesystems, like "/var" and
   }
 
 
-  
 ::
-
   
   define host{
-  
-::
-
         name                   fs_var_home
         register               0
   }
 
 
-  
-::
 
+::
   
   define service{
-  
-::
-
         host_name              fs_var_home
         use                    10min_short
         service_description    Usage_var_and_home
@@ -199,8 +171,10 @@ How it works
 
 Runner does only detects HACMP/PowerHA and Safekit clustering solutions for the moment. It will scan OID and return cluster name or module name list, depends on Safekit or HACMP.
 For an host with two Safekit modules **test** and **prod**, runner will output :
-  
+
 ::
 
   # ./cluster_discovery_runnner.py -H sydlrtsm1 -O linux -C public
-sydlrtsm1::safekit=Test,Prod
+  sydlrtsm1::safekit=Test,Prod
+
+
