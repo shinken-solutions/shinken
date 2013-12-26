@@ -488,6 +488,9 @@ More information on how flap detection and handling works can be found :ref:`her
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-low_host_flap_threshold:
+.. _configuringshinken-configmain#configuringshinken-configmain-low_service_flap_threshold:
+
 Low Service/Host Flap Threshold 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -509,6 +512,8 @@ Example:
 This option is used to set the low threshold for detection of host/service flapping. For more information on how flap detection and handling works (and how this option affects things) read :ref:`this <advancedtopics-flapping>`.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-high_host_flap_threshold:
+.. _configuringshinken-configmain#configuringshinken-configmain-high_service_flap_threshold:
 
 High Service/Host Flap Threshold 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -563,6 +568,9 @@ Commands/checks timeout
 
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-host_check_timeout:
+.. _configuringshinken-configmain#configuringshinken-configmain-service_check_timeout:
+
 Service/Host Check Timeout 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -584,6 +592,9 @@ This is the maximum number of seconds that Shinken will allow service checks to 
 There is often widespread confusion as to what this option really does. It is meant to be used as a last ditch mechanism to kill off plugins which are misbehaving and not exiting in a timely manner. It should be set to something high (like 60 seconds or more), so that each check normally finishes executing within this time limit. If a check runs longer than this limit, Shinken will kill it off thinking it is a runaway processes.
 
 
+
+.. _configuringshinken-configmain#configuringshinken-configmain-event_handler_timeout:
+.. _onfiguringshinken-configmain#configuringshinken-configmain-notification_timeout:
 
 Various commands Timeouts 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

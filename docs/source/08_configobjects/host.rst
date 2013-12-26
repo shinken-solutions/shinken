@@ -146,7 +146,7 @@ This directive is used to identify the *short name(s)* of the :ref:`hostgroup(s)
 
    check_command
   
-This directive is used to specify the *short name* of the :ref:`command <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuringshinken-configmain#configuringshinken-configmain-host_check_timeout>` option.
+This directive is used to specify the *short name* of the :ref:`command` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuringshinken-configmain#configuringshinken-configmain-host_check_timeout>` option.
 
    initial_state
   
@@ -166,11 +166,11 @@ This directive is used to define the number of “time units" between regularly 
   
 This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuringshinken-configmain#configuringshinken-configmain-interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advancedtopics-checkscheduling>` documentation.
 
-   active_checks_enabled:ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   active_checks_enabled 
   
 This directive is used to determine whether or not active checks (either regularly scheduled or on-demand) of this host are enabled. Values: 0 = disable active host checks, 1 = enable active host checks.
 
-   passive_checks_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   passive_checks_enabled 
   
 This directive is used to determine whether or not passive checks are enabled for this host. Values: 0 = disable passive host checks, 1 = enable passive host checks.
 
@@ -178,7 +178,7 @@ This directive is used to determine whether or not passive checks are enabled fo
   
 This directive is used to specify the short name of the :ref:`time period <configuringshinken/configobjects/timeperiod>` during which active checks of this host can be made.
 
-   obsess_over_host :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   obsess_over_host 
   
 This directive determines whether or not checks for the host will be “obsessed" over using the :ref:`ochp_command <configuringshinken-configmain#configuringshinken-configmain-ochp_command>`.
 
@@ -194,7 +194,7 @@ This directive is used to specify the freshness threshold (in seconds) for this 
   
 This directive is used to specify the *short name* of the :ref:`command <configuringshinken/configobjects/command>` that should be run whenever a change in the state of the host is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advancedtopics-eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuringshinken-configmain#configuringshinken-configmain-event_handler_timeout>` option.
 
-   event_handler_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   event_handler_enabled 
   
 This directive is used to determine whether or not the event handler for this host is enabled. Values: 0 = disable host event handler, 1 = enable host event handler.
 
@@ -206,7 +206,7 @@ This directive is used to specify the low state change threshold used in flap de
   
 This directive is used to specify the high state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advancedtopics-flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`high_host_flap_threshold <configuringshinken-configmain#configuringshinken-configmain-high_host_flap_threshold>` directive will be used.
 
-   flap_detection_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   flap_detection_enabled 
   
 This directive is used to determine whether or not flap detection is enabled for this host. More information on flap detection can be found :ref:`here <advancedtopics-flapping>`. Values: 0 = disable host flap detection, 1 = enable host flap detection.
 
@@ -214,7 +214,7 @@ This directive is used to determine whether or not flap detection is enabled for
   
 This directive is used to determine what host states the :ref:`flap detection logic <advancedtopics-flapping>` will use for this host. Valid options are a combination of one or more of the following: **o** = UP states, **d** = DOWN states, **u** = UNREACHABLE states.
 
-   process_perf_data :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   process_perf_data 
   
 This directive is used to determine whether or not the processing of performance data is enabled for this host. Values: 0 = disable performance data processing, 1 = enable performance data processing.
 
@@ -252,17 +252,17 @@ This directive is used to determine when notifications for the host should be se
 
 If you specify **d,r** in this field, notifications will only be sent out when the host goes DOWN and when it recovers from a DOWN state.
 
-   notifications_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   notifications_enabled 
   
 This directive is used to determine whether or not notifications for this host are enabled. Values: 0 = disable host notifications, 1 = enable host notifications.
 
-stalking_options
+   stalking_options
 
 This directive determines which host states "stalking" is enabled for. Valid options are a combination of one or more of the following: **o** = stalk on UP states, **d** = stalk on DOWN states, and **u** = stalk on UNREACHABLE states. More information on state stalking can be found :ref:`here <advancedtopics-stalking>`.
 
    notes
   
-This directive is used to define an optional string of notes pertaining to the host. If you specify a note here, you will see the it in the :ref:`extended information <thebasics-cgis>` CGI (when you are viewing information about the specified host).
+This directive is used to define an optional string of notes pertaining to the host. If you specify a note here, you will see the it in the extended information CGI (when you are viewing information about the specified host).
 
    notes_url
   
@@ -270,7 +270,7 @@ This variable is used to define an optional URL that can be used to provide more
 
    action_url
   
-This directive is used to define one or more optional URL that can be used to provide more actions to be performed on the host. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing host information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///).
+This directive is used to define one or more optional URL that can be used to provide more actions to be performed on the host. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing host information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. */cgi-bin/shinken/*).
 :ref:`Configure multiple action_urls. <multiple_urls>`
 
    icon_image
@@ -283,21 +283,21 @@ This variable is used to define an optional string that is used in the ALT tag o
 
    vrml_image
   
-This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this host. This image will be used as the texture map for the specified host in the :ref:`statuswrl <thebasics-cgis#thebasics-cgis-statuswrl_cgi>` CGI. Unlike the image you use for the *<icon_image>* variable, this one should probably *not* have any transparency. If it does, the host object will look a bit wierd. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").
+This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this host. This image will be used as the texture map for the specified host in the statuswrl CGI. Unlike the image you use for the *<icon_image>* variable, this one should probably *not* have any transparency. If it does, the host object will look a bit wierd. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").
 
    statusmap_image
   
-This variable is used to define the name of an image that should be associated with this host in the :ref:`statusmap <thebasics-cgis#thebasics-cgis-statusmap_cgi>` CGI. You can specify a JPEG, PNG, and GIF image if you want, although I would strongly suggest using a GD2 format image, as other image formats will result in a lot of wasted CPU time when the statusmap image is generated. GD2 images can be created from PNG images by using the **pngtogd2** utility supplied with Thomas Boutell's `gd library`_. The GD2 images should be created in *uncompressed* format in order to minimize CPU load when the statusmap CGI is generating the network map image. The image will look best if it is 40x40 pixels in size. You can leave these option blank if you are not using the statusmap CGI. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").
+This variable is used to define the name of an image that should be associated with this host in the statusmap CGI. You can specify a JPEG, PNG, and GIF image if you want, although I would strongly suggest using a GD2 format image, as other image formats will result in a lot of wasted CPU time when the statusmap image is generated. GD2 images can be created from PNG images by using the **pngtogd2** utility supplied with Thomas Boutell's `gd library`_. The GD2 images should be created in *uncompressed* format in order to minimize CPU load when the statusmap CGI is generating the network map image. The image will look best if it is 40x40 pixels in size. You can leave these option blank if you are not using the statusmap CGI. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").
 
    2d_coords
   
-This variable is used to define coordinates to use when drawing the host in the :ref:`statusmap <thebasics-cgis#thebasics-cgis-statusmap_cgi>` CGI. Coordinates should be given in positive integers, as they correspond to physical pixels in the generated image. The origin for drawing (0,0) is in the upper left hand corner of the image and extends in the positive x direction (to the right) along the top of the image and in the positive y direction (down) along the left hand side of the image. For reference, the size of the icons drawn is usually about 40x40 pixels (text takes a little extra space). The coordinates you specify here are for the upper left hand corner of the host icon that is drawn.
+This variable is used to define coordinates to use when drawing the host in the statusmap CGI. Coordinates should be given in positive integers, as they correspond to physical pixels in the generated image. The origin for drawing (0,0) is in the upper left hand corner of the image and extends in the positive x direction (to the right) along the top of the image and in the positive y direction (down) along the left hand side of the image. For reference, the size of the icons drawn is usually about 40x40 pixels (text takes a little extra space). The coordinates you specify here are for the upper left hand corner of the host icon that is drawn.
 
 Don't worry about what the maximum x and y coordinates that you can use are. The CGI will automatically calculate the maximum dimensions of the image it creates based on the largest x and y coordinates you specify.
 
    3d_coords
   
-This variable is used to define coordinates to use when drawing the host in the :ref:`statuswrl <thebasics-cgis#thebasics-cgis-statuswrl_cgi>` CGI. Coordinates can be positive or negative real numbers. The origin for drawing is (0.0,0.0,0.0). For reference, the size of the host cubes drawn is 0.5 units on each side (text takes a little more space). The coordinates you specify here are used as the center of the host cube.
+This variable is used to define coordinates to use when drawing the host in the statuswrl CGI. Coordinates can be positive or negative real numbers. The origin for drawing is (0.0,0.0,0.0). For reference, the size of the host cubes drawn is 0.5 units on each side (text takes a little more space). The coordinates you specify here are used as the center of the host cube.
 
    realm
   
@@ -331,6 +331,7 @@ This variable is used to set the icon in the Shinken Webui. For now, values are 
 
    maintenance_period
   
-Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <official/thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
+Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
+
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/

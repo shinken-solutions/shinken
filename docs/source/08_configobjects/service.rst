@@ -122,9 +122,9 @@ This is possibleto define "complex" hostgroup expression with the folowing opera
   * , : it's use to make a OR, like the | sign.
   * ( and ) : they are use like in all math expressions.
 
-For example the above definition is valid :
+For example the above definition is valid ::
 
-hostgroup_name=(linux|windows)&!qualification,routers
+ hostgroup_name=(linux|windows)&!qualification,routers
 
 This service wil be apply on hosts that are in the routers group or (in linux or windows and not in qualification group).
 
@@ -157,9 +157,10 @@ There is also a command with the reserved name "bp_rule". It is defined internal
   * , : it's use to make a OR, like the | sign.
   * ( and ) : they are used like in all math expressions.
 
-For example the following definition of a business process rule is valid :
+For example the following definition of a business process rule is valid ::
 
-bp_rule!(websrv1,apache | websrv2,apache) & dbsrv1,oracle
+ bp_rule!(websrv1,apache | websrv2,apache) & dbsrv1,oracle
+
 If at least one of the apaches on servers websrv1 and websrv2 is OK and if the oracle database on dbsrv1 is OK then the rule and thus the service is OK
 
    initial_state
@@ -171,7 +172,8 @@ By default Shinken will assume that all services are in OK states when in starts
   * **u** = UNKNOWN
   * **c** = CRITICAL.
 
-   max_check_attempts
+
+  max_check_attempts
   
 This directive is used to define the number of times that Shinken will retry the service check command if it returns any state other than an OK state. Setting this value to 1 will cause Shinken to generate an alert without retrying the service check again.
 
@@ -183,7 +185,7 @@ This directive is used to define the number of “time units" to wait before sch
   
 This directive is used to define the number of “time units" to wait before scheduling a re-check of the service. Services are rescheduled at the retry interval when they have changed to a non-OK state. Once the service has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuringshinken-configmain#configuringshinken-configmain-interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advancedtopics-checkscheduling>` documentation.
 
-   active_checks_enabled:ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+   active_checks_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
   
 This directive is used to determine whether or not active checks of this service are enabled. Values:
 
@@ -218,7 +220,7 @@ This directive is used to specify the freshness threshold (in seconds) for this 
 
    event_handler
   
-This directive is used to specify the *short name* of the :ref:`command <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-command>` that should be run whenever a change in the state of the service is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advancedtopics-eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuringshinken-configmain#configuringshinken-configmain-event_handler_timeout>` option.
+This directive is used to specify the *short name* of the :ref:`command` that should be run whenever a change in the state of the service is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advancedtopics-eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuringshinken-configmain#configuringshinken-configmain-event_handler_timeout>` option.
 
    event_handler_enabled :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
   
@@ -242,7 +244,7 @@ This directive is used to determine whether or not flap detection is enabled for
   * 0 = disable service flap detection
   * 1 = enable service flap detection.
 
-   flap_detection_options
+  flap_detection_options
   
 This directive is used to determine what service states the :ref:`flap detection logic <advancedtopics-flapping>` will use for this service. Valid options are a combination of one or more of the following :
 
@@ -251,28 +253,28 @@ This directive is used to determine what service states the :ref:`flap detection
   * **c** = CRITICAL states
   * **u** = UNKNOWN states.
 
-   process_perf_data :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
+  process_perf_data :ref:`* <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-retention_notes>`
   
 This directive is used to determine whether or not the processing of performance data is enabled for this service. Values:
 
   * 0 = disable performance data processing
   * 1 = enable performance data processing
 
-   retain_status_information
+  retain_status_information
   
 This directive is used to determine whether or not status-related information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuringshinken-configmain#configuringshinken-configmain-retain_state_information>` directive. Value:
 
   * 0 = disable status information retention
   * 1 = enable status information retention.
 
-   retain_nonstatus_information
+  retain_nonstatus_information
   
 This directive is used to determine whether or not non-status information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuringshinken-configmain#configuringshinken-configmain-retain_state_information>` directive. Value:
 
   * 0 = disable non-status information retention
   * 1 = enable non-status information retention
 
-   notification_interval
+  notification_interval
   
 This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* in a non-OK state. Unless you've changed the :ref:`interval_length <configuringshinken-configmain#configuringshinken-configmain-interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this service - only one problem notification will be sent out.
 
@@ -305,7 +307,7 @@ This directive is used to determine whether or not notifications for this servic
   * 0 = disable service notifications
   * 1 = enable service notifications.
 
-   contacts
+  contacts
   
 This is a list of the *short names* of the :ref:`contacts <configuringshinken/configobjects/contact>` that should be notified whenever there are problems (or recoveries) with this service. Multiple contacts should be separated by commas. Useful if you want notifications to go to just a few people and don't want to configure :ref:`contact groups <configuringshinken/configobjects/contactgroup>`. You must specify at least one contact or contact group in each service definition.
 
@@ -373,4 +375,5 @@ This variable is used to set the icon in the Shinken Webui. For now, values are 
    maintenance_period
   
 Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <official/thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
+
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

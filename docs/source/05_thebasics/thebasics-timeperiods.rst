@@ -48,6 +48,8 @@ Examples of different timeperiod directives can be found :ref:`here <configuring
 
 
 
+.. _thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks:
+
 How Time Periods Work With Host and Service Checks 
 ===================================================
 
