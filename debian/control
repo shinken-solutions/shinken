@@ -86,7 +86,8 @@ Description: Flexible monitoring tool - Graphite module for Broker
 
 Package: shinken-module-broker-livestatus
 Architecture: any
-Depends: shinken-common (= ${binary:Version}), ${misc:Depends}
+Depends: shinken-common (= ${binary:Version}), ${misc:Depends},
+ shinken-module-broker-livestatus-sqlite | shinken-module-broker-livestatus-null | shinken-module-broker-livestatus-mongodb
 Conflicts: shinken-core
 Description: Flexible monitoring tool - LiveStatus module for Broker
  LiveStatus module for Broker. This module provides a LiveStatus interface
