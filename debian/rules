@@ -166,7 +166,3 @@ override_dh_fixperms:
 	  -o -name "*.svg" \
 	  -o -name "*.otf" \) \
 	  -exec chmod -x {} \;
-
-# Build architecture-independent files here.
-binary-indep: build install
-	dh_installdebconf
