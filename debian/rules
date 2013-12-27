@@ -97,6 +97,7 @@ override_dh_install:
 	## shinken-module-broker-graphite
 	mkdir -p debian/shinken-module-broker-graphite/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/broker-graphite.cfg debian/shinken-module-broker-graphite/etc/shinken/shinken-specific/
+	cp debian/etc/shinken-specific/broker-webui-graphite.cfg debian/shinken-module-broker-graphite/etc/shinken/shinken-specific/
 	## shinken-module-broker-livestatus
 	mkdir -p debian/shinken-module-broker-livestatus/etc/shinken/shinken-specific
 	cp debian/etc/shinken-specific/broker-livestatus.cfg debian/shinken-module-broker-livestatus/etc/shinken/shinken-specific/

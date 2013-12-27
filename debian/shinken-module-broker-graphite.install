@@ -1,2 +1,3 @@
 shinken/modules/graphite_broker.py /usr/lib/python2.7/dist-packages/shinken/modules
+shinken/modules/graphite_ui.py /usr/lib/python2.7/dist-packages/shinken/modules
 share/templates/graphite/ /usr/share/shinken/templates/
