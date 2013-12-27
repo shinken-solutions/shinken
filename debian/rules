@@ -151,17 +151,21 @@ override_dh_install:
 
 override_dh_installinit:
 	dh_installinit --no-start --name=shinken
-	# MODULES
-	## Shinken-module-broker-webui
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.png" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.css" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.ttf" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.eot" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.woff" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.gif" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.ico" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.svg" -exec chmod -x {} \;
-	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ -name "*.otf" -exec chmod -x {} \;
+
+override_dh_fixperms:
+	dh_fixperms
+	## shinken-module-broker-webui
+	find debian/shinken-module-broker-webui/usr/share/shinken/htdocs/ \
+	  \( -name "*.png" \
+	  -o -name "*.css" \
+	  -o -name "*.ttf" \
+	  -o -name "*.eot" \
+	  -o -name "*.woff" \
+	  -o -name "*.gif" \
+	  -o -name "*.ico" \
+	  -o -name "*.svg" \
+	  -o -name "*.otf" \) \
+	  -exec chmod -x {} \;
 
 # Build architecture-independent files here.
 binary-indep: build install
