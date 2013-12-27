@@ -10,10 +10,10 @@ LOG=/var/log/shinken/
 %:
 	dh $@ --with python2 --install-layout=deb,quilt
 
-clean:
-	find -type d -name build -print0 | xargs -0 -r rm -rf \;
-	find -type d -name Shinken.egg-info -print0 | xargs -0 -r rm -rf \;
-	dh clean --with python2 --install-layout=deb,quilt
+override_dh_clean:
+	rm -rf ./build
+	rm -rf ./Shinken.egg-info
+	dh_clean
 	debconf-updatepo
 
 override_dh_install:
