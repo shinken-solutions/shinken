@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/arbiter-nsca.cfg etc/shinken/shinken-specific/
 shinken/modules/nsca.py /usr/lib/python2.7/dist-packages/shinken/modules
