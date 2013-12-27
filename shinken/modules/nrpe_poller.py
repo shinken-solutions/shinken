@@ -474,7 +474,7 @@ class Nrpe_poller(BaseModule):
         except Exception, exp:
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Worker '%d' exit with an unmanaged exception : %s" % (self.id, output.getvalue()))
+            logger.error("NRPE exited with an unmanaged exception : %s" % output.getvalue())
             output.close()
             # Ok I die now
             raise
