@@ -8,4 +8,5 @@ shinken/plugins/__init__.py /usr/lib/python2.7/dist-packages/shinken/plugins/
 shinken/modules/__init__.py /usr/lib/python2.7/dist-packages/shinken/modules/
 shinken/trending /usr/lib/python2.7/dist-packages/shinken
 shinken/daemons /usr/lib/python2.7/dist-packages/shinken
+shinken/discovery /usr/lib/python2.7/dist-packages/shinken
 bin/shinken-* /usr/lib/python2.7/dist-packages/shinken/bin/
