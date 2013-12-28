@@ -51,13 +51,8 @@ launch_and_assert test_bad_contact_call.py
 launch_and_assert test_action.py
 launch_and_assert test_config.py
 launch_and_assert test_dependencies.py
-launch_and_assert test_npcdmod.py
 launch_and_assert test_problem_impact.py
 launch_and_assert test_command.py
-launch_and_assert test_module_simplelog.py
-launch_and_assert test_module_service_perfdata.py
-launch_and_assert test_module_host_perfdata.py
-launch_and_assert test_module_pickle_retention.py
 launch_and_assert test_service_tpl_on_host_tpl.py
 launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
@@ -87,25 +82,17 @@ launch_and_assert test_contactdowntimes.py
 launch_and_assert test_nullinheritance.py
 launch_and_assert test_create_link_from_ext_cmd.py
 launch_and_assert test_dispatcher.py
-launch_and_assert test_module_hot_dependencies_arbiter.py
-launch_and_assert test_module_hack_cmd_poller_tag.py
 launch_and_assert test_unknown_do_not_change.py
 launch_and_assert test_customs_on_service_hosgroups.py
-launch_and_assert test_modules_nrpe_poller.py
 launch_and_assert test_poller_tag_get_checks.py
 launch_and_assert test_reactionner_tag_get_notif.py
 launch_and_assert test_orphaned.py
-launch_and_assert test_module_pickle_retention_broker.py
-launch_and_assert test_module_pickle_retention_arbiter.py
-launch_and_assert test_module_nagios_retention.py
 launch_and_assert test_discovery_def.py
 launch_and_assert test_hostgroup_no_host.py
 launch_and_assert test_nocontacts.py
 launch_and_assert test_srv_nohost.py
 launch_and_assert test_srv_badhost.py
-launch_and_assert test_module_named_pipe_arbiter.py
 launch_and_assert test_nohostsched.py
-launch_and_assert test_modulemanager.py
 launch_and_assert test_clean_sched_queues.py
 launch_and_assert test_bad_notification_period.py
 launch_and_assert test_no_notification_period.py
@@ -122,7 +109,6 @@ launch_and_assert test_hostdep_withno_depname.py
 launch_and_assert test_service_withhost_exclude.py
 launch_and_assert test_regenerator.py
 launch_and_assert test_missing_object_value.py
-launch_and_assert test_uihelper.py
 launch_and_assert test_linkify_template.py
 launch_and_assert test_module_on_module.py
 launch_and_assert test_disable_active_checks.py
@@ -130,7 +116,6 @@ launch_and_assert test_no_event_handler_during_downtime.py
 launch_and_assert test_inheritance_and_plus.py
 launch_and_assert test_parse_perfdata.py
 launch_and_assert test_service_template_inheritance.py
-launch_and_assert test_module_ip_tag.py
 launch_and_assert test_dot_virg_in_command.py
 launch_and_assert test_bad_escalation_on_groups.py
 launch_and_assert test_no_host_template.py
@@ -142,13 +127,11 @@ launch_and_assert test_objects_and_notifways.py
 launch_and_assert test_freshness.py
 launch_and_assert test_star_in_hostgroups.py
 launch_and_assert test_protect_esclamation_point.py
-launch_and_assert test_module_passwd_ui.py
 launch_and_assert test_css_in_command.py
 launch_and_assert test_servicedependency_implicit_hostgroup.py
 launch_and_assert test_pack_hash_memory.py
 launch_and_assert test_triggers.py
 launch_and_assert test_update_output_ext_command.py
-launch_and_assert test_livestatus_allowedhosts.py
 launch_and_assert test_hostgroup_with_space.py
 launch_and_assert test_conf_in_symlinks.py
 launch_and_assert test_uknown_event_handler.py
@@ -156,12 +139,9 @@ launch_and_assert test_servicedependency_complexes.py
 launch_and_assert test_timeout.py
 launch_and_assert test_python_crash_with_recursive_bp_rules.py
 launch_and_assert test_missing_timeperiod.py
-launch_and_assert test_module_trending.py
 launch_and_assert test_multiple_not_hostgroups.py
 launch_and_assert test_checkmodulations.py
 launch_and_assert test_macromodulations.py
-launch_and_assert test_module_file_tag.py
-launch_and_assert test_livestatus_db.py
 launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_antivirg.py
 launch_and_assert test_multi_attribute.py
@@ -173,7 +153,6 @@ launch_and_assert test_bad_servicedependencies.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.
-launch_and_assert test_livestatus.py
 
 # Can failed on non prepared box
 launch_and_assert test_bad_start.py
