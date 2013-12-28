@@ -175,5 +175,14 @@ __ http://www.shinken-monitoring.org/wiki/
 If you find a bug
 ================================
 
-You can consult the open issues list or submit a new issue at:
-https://github.com/naparuba/shinken/issues
+Brackets bugs are tracked in the `issue list on GitHub`__ . Always search for existing issues before filing a new one (use the search field at the top of the page).
+When filing a new bug, please remember to include:
+
+*	A helpful title - use descriptive keywords in the title and body so others can find your bug (avoiding duplicates).
+*	Steps to reproduce the problem, with actual vs. expected results
+*	Brackets sprint number (or if you're pulling directly from the Git repo, your current commit SHA - use git rev-parse HEAD)
+*	OS version
+*	If the problem happens with specific code, link to test files (gist.github.com is a great place to upload code).
+*	Screenshots are very helpful if you're seeing an error message or a UI display problem. (Just drag an image into the issue description field to include it).
+
+__ http://github.com/naparuba/shinken/issues/
