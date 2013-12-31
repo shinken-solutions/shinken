@@ -95,11 +95,13 @@ function prepare_environment {
 # Launch the given test with nose test. Nose test has a different behavior than the standard unit test.
 function launch_and_assert {
     SCRIPT=$1
-    NAME=$(echo $(basename $SCRIPT) | sed s/\\.py^//g | tr [a-z] [A-Z])
+    NAME=$(echo $(basename $SCRIPT) | sed s/\\.py$//g | tr [a-z] [A-Z])
     if test $COVERAGE == "NOCOVERAGE"; then
       ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT --xunit-file="$RESULTSDIR/xml/$NAME.xml"
     else
       ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT --xunit-file="$RESULTSDIR/xml/$NAME.xml"
+      mv .coverage .coverage.$COUNT
+      COUNT=$((COUNT + 1))
     fi
     if [ $? != 0 ]
         then
@@ -185,13 +187,16 @@ function main {
 
     # Cleanup leftover files from former runs
     rm -f "$RESULTSDIR/xml/nosetests.xml"
-    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/xml/coverage.xml"
-    test $COVERAGE == "COVERAGE" && rm -f ".coverage"
+    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/xml/*"
+    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/htmlcov/*"
+    test $COVERAGE == "COVERAGE" && rm -f ".coverage*"
     rm -rf tmp/*
     ln -s /var/lib/shinken/modules tmp/modules
 
     generate_all_tests
 
+    # Init Count for coverage
+    COUNT=1
     test_core
     grab_modules
     test_modules
@@ -199,6 +204,7 @@ function main {
     # Create the coverage file
     if [[ $COVERAGE == "COVERAGE" ]]; then
         echo "Merging coverage files"
+        ${PYTHONTOOLS}/coverage combine
         ${PYTHONTOOLS}/coverage xml --omit=/usr/lib -o "$RESULTSDIR/xml/coverage.xml"
         ${PYTHONTOOLS}/coverage html --omit=/usr/lib -d "$RESULTSDIR/htmlcov"
     fi
