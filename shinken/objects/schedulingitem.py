@@ -1077,6 +1077,7 @@ class SchedulingItem(Item):
 
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
+            #print "is eligible : %s for update?" % es.escalation_name
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 return True
 
@@ -1087,6 +1088,7 @@ class SchedulingItem(Item):
     # by taking the standard notification_interval or ask for
     # our escalation if one of them need a smaller value to escalade
     def get_next_notification_time(self, n):
+        import pdb; pdb.set_trace()
         res = None
         now = time.time()
         cls = self.__class__
@@ -1116,12 +1118,15 @@ class SchedulingItem(Item):
         in_notif_time = now - n.creation_time
 
         for es in self.escalations:
+        #    if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
             # If the escalation was already raised, we do not look for a new "early start"
             if es.get_name() not in n.already_start_escalations:
                 r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
                 # If we got a real result (time base escalation), we add it
-                if r is not None and r < res:
+                if r is not None and now < r < res:
                     res = r
+                    # Consider the escalation started
+                    #n.already_start_escalations.add(es.get_name())
 
         # And we take the minimum of this result. Can be standard or escalation asked
         return res
@@ -1137,6 +1142,7 @@ class SchedulingItem(Item):
 
         contacts = set()
         for es in self.escalations:
+            #print "is eligible : %s for contacts?" % es.escalation_name
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
                 # And we tag this escalations as started now
@@ -1236,6 +1242,7 @@ class SchedulingItem(Item):
             notif_commands = contact.get_notification_commands(cls.my_type)
 
             for cmd in notif_commands:
+                #print "THIS contact : %s will be notified with this command : %s" % (contact.contact_name, cmd)
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
