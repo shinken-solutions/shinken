@@ -95,7 +95,7 @@ function prepare_environment {
 # Launch the given test with nose test. Nose test has a different behavior than the standard unit test.
 function launch_and_assert {
     SCRIPT=$1
-    NAME=$(echo $SCRIPT | sed s/\\.py^//g | tr [a-z] [A-Z])
+    NAME=$(echo $(basename $SCRIPT) | sed s/\\.py^//g | tr [a-z] [A-Z])
     if test $COVERAGE == "NOCOVERAGE"; then
       ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT --xunit-file="$RESULTSDIR/xml/$NAME.xml"
     else
