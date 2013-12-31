@@ -95,10 +95,11 @@ function prepare_environment {
 # Launch the given test with nose test. Nose test has a different behavior than the standard unit test.
 function launch_and_assert {
     SCRIPT=$1
+    NAME=$(echo $SCRIPT | sed s/\\.py^//g | tr [a-z] [A-Z])
     if test $COVERAGE == "NOCOVERAGE"; then
-      ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT --xunit-file="$RESULTSDIR/TEST-$(basename $SCRIPT).xml"
+      ${PYTHONTOOLS}/nosetests -v -s --with-xunit ./$SCRIPT --xunit-file="$RESULTSDIR/xml/$NAME.xml"
     else
-      ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT --xunit-file="$RESULTSDIR/TEST-$(basename $SCRIPT).xml"
+      ${PYTHONTOOLS}/nosetests -v -s --with-xunit --with-coverage ./$SCRIPT --xunit-file="$RESULTSDIR/xml/$NAME.xml"
     fi
     if [ $? != 0 ]
         then
@@ -176,10 +177,16 @@ function main {
         echo "Creation dir $RESULTSDIR"
     fi
 
+    for dir in "xml" "htmlcov"; do
+        if [[ ! -d "$RESULTSDIR/$dir" ]]; then
+            mkdir $RESULTSDIR/$dir
+        fi
+    done
+
     # Cleanup leftover files from former runs
-    rm -f $RESULTSDIR/nosetests.xml
-    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/coverage.xml"
-    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/.coverage"
+    rm -f "$RESULTSDIR/xml/nosetests.xml"
+    test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/xml/coverage.xml"
+    test $COVERAGE == "COVERAGE" && rm -f ".coverage"
     rm -rf tmp/*
     ln -s /var/lib/shinken/modules tmp/modules
 
@@ -192,8 +199,8 @@ function main {
     # Create the coverage file
     if [[ $COVERAGE == "COVERAGE" ]]; then
         echo "Merging coverage files"
-        ${PYTHONTOOLS}/coverage xml --omit=/usr/lib -o "$RESULTSDIR/coverage.xml"
-        ${PYTHONTOOLS}/coverage html --omit=/usr/lib -d "$RESULTSDIR"
+        ${PYTHONTOOLS}/coverage xml --omit=/usr/lib -o "$RESULTSDIR/xml/coverage.xml"
+        ${PYTHONTOOLS}/coverage html --omit=/usr/lib -d "$RESULTSDIR/htmlcov"
     fi
 
     if [[ $PYLINT == "PYLINT" ]]; then
