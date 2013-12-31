@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/retention-picklefile.cfg etc/shinken/shinken-specific/
 shinken/modules/pickle_retention_file_generic.py /usr/lib/python2.7/dist-packages/shinken/modules

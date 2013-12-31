@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/poller-nrpe.cfg etc/shinken/shinken-specific/
 shinken/modules/nrpe_poller.py /usr/lib/python2.7/dist-packages/shinken/modules
