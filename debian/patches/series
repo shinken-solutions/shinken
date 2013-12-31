@@ -5,3 +5,5 @@
 14_fix_fedora_init_shinken.patch
 15_fix_setup_python24.patch
 16_clean_trigger_functions.patch
+# Patch not confirmed ...
+#17_small_fix_nrpe_protocol.patch

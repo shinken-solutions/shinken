@@ -1,1 +1,2 @@
 shinken/modules/hot_dependencies_arbiter.py /usr/lib/python2.7/dist-packages/shinken/modules
+debian/etc/shinken-specific/arbiter-hotdependencies.cfg etc/shinken/shinken-specific/

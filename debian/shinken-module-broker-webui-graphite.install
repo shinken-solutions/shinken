@@ -1,0 +1,3 @@
+shinken/modules/graphite_ui.py /usr/lib/python2.7/dist-packages/shinken/modules
+debian/etc/shinken-specific/broker-webui-graphite.cfg etc/shinken/shinken-specific/
+share/templates/graphite/ /usr/share/shinken/templates/
