@@ -35,18 +35,18 @@ class ModulesContext(object):
         pass
 
     def set_modulesdir(self, modulesdir):
-        self.modulesdir = modulesdir
+        self.modules_dir = modulesdir
 
     def get_modulesdir(self):
-        return self.modulesdir
+        return self.modules_dir
 
 
     # Useful for a module to load another one, and get a handler to it
     def get_module(self, name):
-        mod_dir  = os.path.abspath(os.path.join(self.modulesdir, name))
+        mod_dir  = os.path.abspath(os.path.join(self.modules_dir, name))
         if not mod_dir in sys.path:
             sys.path.append(mod_dir)
-        mod_path = os.path.join(self.modulesdir, name, 'module.py')
+        mod_path = os.path.join(self.modules_dir, name, 'module.py')
         try:
             r = imp.load_source(name, mod_path)
         except:

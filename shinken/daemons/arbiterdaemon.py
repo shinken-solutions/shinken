@@ -285,7 +285,7 @@ class Arbiter(Daemon):
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.me.modules]))
 
-        self.modulesdir = getattr(self.conf, 'modulesdir', '')
+        self.modules_dir = getattr(self.conf, 'modules_dir', '')
 
         # Ok it's time to load the module manager now!
         self.load_modules_manager()

@@ -105,7 +105,7 @@ class Config(Item):
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default='/var/run/shinken/'),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
-        'modulesdir':               StringProp(default='/var/lib/shinken/modules'),
+        'modules_dir':               StringProp(default='/var/lib/shinken/modules'),
         'use_local_log':            BoolProp(default='1'),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
@@ -349,7 +349,8 @@ class Config(Item):
     # so from Nagios2 format, to Nagios3 ones
     old_properties = {
         'nagios_user':  'shinken_user',
-        'nagios_group': 'shinken_group'
+        'nagios_group': 'shinken_group',
+        'modulesdir': 'modules_dir',
     }
 
     read_config_silent = 0
