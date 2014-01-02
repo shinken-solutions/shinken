@@ -1,0 +1,86 @@
+{
+"name":"windows",
+
+"description":"Standard windows checks, like CPU, RAM and disk space. Checks are done by WMI.",
+
+"path": "os/",
+
+"macros":{
+	 "_DOMAIN": {"type":"string",
+                      "description": "Windows Domain of the server"
+                      },
+
+         "_DOMAINUSERSHORT": {"type":"string",
+                                "description": "Short name (without the domain) of the user to query the server. Should have rights on the WMI tables for reading."
+                             },
+         "_DOMAINUSER": {"type":"string",
+                              "description": "Full name of the user to query. Is by default DOMAIN\\USERSHORT"
+                             },
+         "_DOMAINPASSWORD": {"type":"string",
+                                  "description": "Password for the user that will launch the query"
+                             },
+         "_WINDOWS_SHARE_WARN": {"type":"percent",
+                              "description": "Warning level for the share disk space"
+                             },
+         "_WINDOWS_SHARE_CRIT": {"type":"percent",
+                                "description": "Critical level for the share disk space"
+                             },
+         "_EXCLUDED_SERVICES": {"type":"string",
+                                "description": "Regex for services to be excluded from check auto services"
+                             },
+         "_WINDOWS_DISK_WARN": {"type":"percent",
+                             "description":"Level for disk space"
+                             },
+         "_WINDOWS_DISK_CRIT": {"type":"percent",
+                             "description":"Level for disk space"
+                             },
+         "_WINDOWS_EVENT_LOG_WARN": {"type":"string",
+                             "description":"Level for event log detection"
+                             },
+         "_WINDOWS_EVENT_LOG_CRIT": {"type":"string",
+                             "description":"Level for event log detection"
+                             },
+         "_WINDOWS_REBOOT_WARN": {"type":"string",
+                             "description":"Uptime of the host"
+                             },
+         "_WINDOWS_REBOOT_CRIT": {"type":"string",
+                             "description":"Uptime of the host"
+                             },
+         "_WINDOWS_MEM_WARN": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_WINDOWS_MEM_CRIT": {"type":"percent",
+                             "description":"Level for ram usage"
+                             },
+         "_WINDOWS_ALL_CPU_WARN": {"type":"percent",
+                             "description":"Level for overall cpu usage"
+                             },
+         "_WINDOWS_ALL_CPU_CRIT": {"type":"percent",
+                             "description":"Level for overall cpu usage"
+                             },
+         "_WINDOWS_CPU_WARN": {"type":"percent",
+                             "description":"Level for each cpu usage"
+                             },
+         "_WINDOWS_CPU_CRIT": {"type":"percent",
+                             "description":"Level for each cpu usage"
+                             },
+         "_WINDOWS_LOAD_WARN": {"type":"string",
+                             "description":"Level for load"
+                             },
+         "_WINDOWS_LOAD_CRIT": {"type":"string",
+                             "description":"Level for load"
+                             },
+         "_WINDOWS_EXCLUDED_AUTO_SERVICES": {"type":"string",
+                             "description":"Regex to match Services to be excluded from check"
+                             },
+         "_WINDOWS_AUTO_SERVICES_WARN": {"type":"string",
+                             "description":"Level for auto-services not running"
+                             },
+         "_WINDOWS_AUTO_SERVICES_CRIT": {"type":"string",
+                             "description":"Level for auto-services not running"
+                             },
+         "_WINDOWS_BIG_PROCESSES_WARN": {"type":"percent",
+                             "description":"Level for Big processes"
+                             }
+          }
+}

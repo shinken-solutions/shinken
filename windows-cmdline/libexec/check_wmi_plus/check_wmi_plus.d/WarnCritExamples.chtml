@@ -1,0 +1,107 @@
+# This is not a std html or any other kind of file
+# It is used to define some command examples
+# Run check wmi plus with --iexamples=2 to see the output
+# The output is HTML format suitable for use with Drupal
+# You must provide -H, -u and -p on the command line
+# The base command then becomes
+# check_wmi_plus.pl -H HOST -u USER -p PASSWORD
+#
+# The file is read one line at a time
+# Lines starting with:
+# !A are arguments to the check wmi plus base command
+# !T are a title and are made bold
+#
+# other lines are assumed to be HTML that we just display as is
+# lines starting with # are ignored
+#
+# define some colours - we need them for display, perf and trigger
+!Define:display:blue
+!Define:perf:green
+!Define:trigger:red
+#
+The checks shown on this page are generated using the --iexample=2 parameter.
+A valid -H HOSTNAME -u USER and -p PASSWORD must also be passed on the command line.
+The examples are run against a test machine (which is not very busy) running Windows Server 2008 R2, IIS v7, SQL Express 2008 and Exchange 2010.
+
+<h2>The Theory</h2>
+Check WMI Plus follows the standard Nagios Plugin warning/critical range defintions for checking values. Read the --help output for details.
+The generalised Nagios format for ranges is <code>[@]start:end</code>.
+Check WMI Plus adds the ability to check against many different values at the same time on the command line. This makes the generalised format for ranges <code>FIELD=[@]start:end</code>.
+
+Check WMI Plus also adds the ability to specify "multipliers" to the numbers that define the range. Multipliers such as m (for Mega) and g (for Giga) can be used. The complete list is shown in --help.
+
+The range format generates warnings/criticals if the value is outside the range defined by start:end. If an @ is specified, the warning/critical is generated if the value is inside the range.
+
+<h2>Lets Start Easy</h2>
+Some of the following commands need at least 2 WMI data samples. If the command output shows <code>Collecting first WMI sample because the previous state data file (/tmp/cwpss_somefilename.state) contained no data. Results will be shown the next time the plugin runs.</code> then you need to run the command a second time to see the output.
+
+The plugin output is colour coded as follows:
+<font color=blue>Plugin display output</font>
+<font color=red>Warning/Critical trigger information</font>
+<font color=green>Performance Data</font>
+
+!TBasic SQL Server Service Check with no Criteria
+This checks just lists the services and their state. Some are OK and some have problems.
+!A-m checkservice -a sql
+
+Checkservice defines a "good" service as one that is running and a "bad" service and one that is not running.
+
+!TLets Add Some Warning Criteria
+If you take a look at the --help output for checkservice you can see that the only Valid Warning/Critical Fields are:
+_NumBad  (Default),  _NumGood,  _NumExcluded, _Total.
+
+So, if we want to warn if there is any service that is bad then we would use the following:
+!A-m checkservice -a sql -w 0
+<code>-w 0</code> is a short form of the full range specification 0:0 which defines a range from 0 to 0. If the number of "bad" services are outside this range then we get a warning state. So, if we find even 1 "bad" service we will get a warning.
+
+Since we have not specified _NumBad, _NumGood etc the default of _NumBad is used. So the warning criteria of <code>-w 0</code> says that the plugin should go to warning state if it finds more than zero services in a "bad" state.
+
+Now if we want to warn if we find more than zero "good" services we would have to tell the warning criteria that it should apply to the _NumGood value like this:
+!A-m checkservice -a sql -w _NumGood=0
+
+Given the above states, if we wanted to warn if there were less than 4 "good" services we have use a slightly different form of the range definition. We want to define a range that is from 4 to infinity, so that if we are outside this we get a warning. <code>4:</code> defines a range like this.
+!A-m checkservice -a sql -w _NumGood=4:
+
+If we wanted to warn when we found less than 2 "good" services OR more than 4 "good" services we need to define a range of 2 to 4. This is done like <code>2:4</code>. The command is:
+!A-m checkservice -a sql -w _NumGood=2:4
+
+If we just wanted to warn if we find more than 10 services matching "sql" then we need to use the _Total field:
+!A-m checkservice -a sql -w _Total=10
+
+<h2>Warning If Inside the Range</h2>
+So far we have specified ranges and warned if we go outside these ranges. Sometimes we need to warn when inside a range. For example, if we only want to warn if there is exactly 1 "bad" service (so less then 1 is ok and more than 1 is ok) then we have to specify a range of 1 to 1 and warn if we are inside this range. To do this we have to invert the range specification using the @.
+!A-m checkservice -a sql -w @1:1
+
+<h2>Multiple Warning Criteria</h2>
+You can specify multiple criteria at the same time. For example, if we wanted to go to a warning state if there was more than 1 "bad" service (<code>-w 0</code>), less than 4 "good" services (<code>-w _NumGood=4:</code>) or more than 5 total services (<code>-w _Total=5</code>) we just add them all to the command line at the same time:
+!A-m checkservice -a sql -w 0 -w _NumGood=4: -w _Total=5
+
+When there are multiple criteria specified, if any one of them is triggered, the plugin will exit with the approriate warning/critical state.
+
+The result of that last command output leads us to the next section -
+
+<h2>What Triggered my Warning?</h2>
+If the check has been defined properly, then it will show which field and which range triggered the warning.
+!A-m checkservice -a sql -w 0 -w _NumGood=4: -w _Total=5
+Notice how the plugin output includes the red text: <font color=red>[Triggered by FIELD~VALUE]</font>
+This lists all the warning criteria that were triggered.
+
+This becomes more important when there are multiple fields of data in the output and/or multiple warning/critical criteria.
+
+<h2>Multipliers</h2>
+Checkservices is not the best example to use here (since the numbers are so low), but we will do it anyway, so that we keep the example checks consistently using checkservice and "sql".
+
+Lets say we wanted to check if we had more than 1000 "bad" services. We could use <code>-w 1000</code> or we could use the "k" multiplier <code>-w 1k</code>. In order to ensure that "k" means 1000 we use the command line parameter <code>--bytefactor=1000</code>. 
+!A-m checkservice -a sql -w 1k --bytefactor=1000
+
+If we wanted "k" to mean 1024 then we use the command line parameter <code>--bytefactor=1024</code> or leave it out since that is the default setting.
+
+This one generates if warning if there are less than 1024 "good" services:
+!A-m checkservice -a sql -w 1k:
+
+<h2>What About Critical?</h2>
+So far we have only generated warning states. That's because we have only used <code>-w</code>. If you want to specify critical criteria use <code>-c</code>. If you have both <code>-w</code> and <code>-c</code> on the same command line and if the critical criteria and the warning criteria are both triggered the plugin will exit with a critical state.
+
+For example, if we wanted to go to a critical state if there was more than 1 "bad" service (<code>-c 0</code>), but only a warning state if there was less than 4 "good" services (<code>-w _NumGood=4:</code>) or more than 5 total services (<code>-w _Total=5</code>) we do:
+!A-m checkservice -a sql -c 0 -w _NumGood=4: -w _Total=5
+In this case only the critical triggers are listed.

@@ -158,6 +158,16 @@ class __Action(object):
                     self.perf_data += ' ' + elts[1].strip().replace('___PROTECT_PIPE___', '|')
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
+        
+        if len(self.output) > 0:
+            logger.debug("Output : %s" % self.output)
+        if len(self.perf_data) > 0:
+            logger.debug("- perf_data : %s" % self.perf_data)
+        # if len(self.long_output) > 0:
+            # logger.debug("Long output : %s" % self.long_output)
+        # safe_print("Output : ", self.output)
+        # safe_print("- perf_data : ", self.perf_data)
+        # safe_print("- long_output : ", self.long_output)
 
 
     def check_finished(self, max_plugins_output_length):
@@ -293,6 +303,7 @@ if os.name != 'nt':
                     return
 
 
+            logger.debug("Launching : %s" % cmd)
             #safe_print("Launching", cmd)
             #safe_print("With env", self.local_env)
 
@@ -359,6 +370,10 @@ else:
                     self.execution_time = time.time() - self.check_time
                     return
 
+            logger.debug("Launching : %s" % cmd)
+            # safe_print("Launching : ", cmd)
+            # safe_print("With env : ", self.local_env)
+            
             try:
                 self.process = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
