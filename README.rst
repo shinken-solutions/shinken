@@ -37,14 +37,16 @@ Mandatory Requirements
 `shinken` requires
 
 * `Python`__ 2.6 or higher (2.7 will get higher performances)
+* `pycurl`__ Python package for Shinken daemon communications
 * `setuptools`__ or `distribute` Python package for installation (see below)
 * `pymongo`__ Python Package >= 2.1 for the Shinken WebUI
-* `pycurl`__ Python package for Shinken Skonf configuration pack management
+
 
 __ http://www.python.org/download/
+__ http://pycurl.sourceforge.net/
 __ http://pypi.python.org/pypi/setuptools/
 __ http://pypi.python.org/pypi/pymongo/
-__ http://pycurl.sourceforge.net/
+
 
 
 Conditional Requirements

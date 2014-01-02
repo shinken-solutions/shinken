@@ -125,20 +125,6 @@ RECEIVERDEBUGFILE="$LOG/receiver-debug.log"
 
 
 
-### SKONF PART ###
-# location of the skonf daemon configuration
-SKONFCFG="$ETC/skonf.cfg"
-
-# The command to launch
-SKONFDAEMON=$BIN/shinken-skonf
-
-# The SKONF PID
-SKONFPID="$RUN/skonfd.pid"
-
-SKONFDEBUGFILE="$LOG/skonf-debug.log"
-
-
-
 # nicelevel to run shinken daemon with
 NICENESS=5
 

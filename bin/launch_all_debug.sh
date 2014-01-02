@@ -36,8 +36,6 @@ unset http_proxy
 unset https_proxy
 
 
-# Currently skonf is not stable, disabling it
-#"$DIR"/launch_skonf_debug.sh
 "$DIR"/launch_scheduler_debug.sh
 "$DIR"/launch_poller_debug.sh
 "$DIR"/launch_reactionner_debug.sh
