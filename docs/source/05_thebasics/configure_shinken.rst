@@ -72,11 +72,12 @@ So here we have a scheduler:
     * pidfile: pid file of the daemon (so we can kill it :) ). By default /usr/local/shinken/var/schedulerd.pid for a scheduler.
     * port: TCP port to listen to. By default:
 
-       - scheduler: 7768
-       - poller: 7771
-       - reactionner: 7769
-       - broker: 7772
-       - arbiter: 7770 (the arbiter configuration will be seen later)
+       * scheduler: 7768
+       * poller: 7771
+       * reactionner: 7769
+       * broker: 7772
+       * arbiter: 7770 (the arbiter configuration will be seen later)
+
     * host: IP interface to listen on. The default 0.0.0.0 means all interfaces
     * user: user used by the daemon to run. By default shinken
     * group: group of the user. By default shinken.
