@@ -59,7 +59,6 @@ class Property(object):
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
                  override=False, managed=True, split_on_coma=True, merging='uniq'):
-                 override=False, managed=True, split_on_coma=True):
 
         """
         `default`: default value to be used if this property is not set.
