@@ -490,8 +490,7 @@ var_root = os.path.dirname(default_paths['var'])
 main_config_files = ('shinken.cfg',)
 
 
-additionnal_config_files = (,
-                            )
+additionnal_config_files = ()
 
 config_objects_file = (
                         'discovery_runs.cfg',
