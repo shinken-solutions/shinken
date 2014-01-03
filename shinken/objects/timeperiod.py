@@ -432,10 +432,9 @@ class Timeperiod(Item):
         for dr in self.dateranges:
             b &= dr.is_correct()
 
-        # Even one invalid is non correct
+        # Warn about non correct entries
         for e in self.invalid_entries:
-            b = False
-            logger.error("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
+            logger.warning("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
         return b
 
     def __str__(self):

@@ -58,6 +58,7 @@ class Property(object):
                  fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
+                 override=False, managed=True, split_on_coma=True, merging='uniq'):
                  override=False, managed=True, split_on_coma=True):
 
         """
@@ -99,6 +100,9 @@ class Property(object):
 
         managed: property that is managed in Nagios but not in Shinken
 
+        merging: for merging properties, should we take only one or we can
+                     link with ,
+
         """
 
         self.default = default
@@ -117,6 +121,7 @@ class Property(object):
         self.override = override
         self.managed = managed
         self.unused = False
+        self.merging = merging
         self.split_on_coma = split_on_coma
 
 

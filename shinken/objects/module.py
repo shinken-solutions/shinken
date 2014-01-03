@@ -76,6 +76,7 @@ class Modules(Items):
                     logger.error(err)
                     s.configuration_errors.append(err)
             s.modules = new_modules
+        
 
     # We look for contacts property in contacts and
     def explode(self):

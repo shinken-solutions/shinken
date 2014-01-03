@@ -70,14 +70,14 @@ class Service(SchedulingItem):
     properties = SchedulingItem.properties.copy()
     properties.update({
         'host_name':              StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'hostgroup_name':         StringProp(default='', fill_brok=['full_status']),
+        'hostgroup_name':         StringProp(default='', fill_brok=['full_status'], merging='join'),
         'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'display_name':           StringProp(default='', fill_brok=['full_status']),
-        'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
+        'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names, merging='join'),
         'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
         'check_command':          StringProp(fill_brok=['full_status']),
         'initial_state':          CharProp(default='o', fill_brok=['full_status']),
-        'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
+        'max_check_attempts':     IntegerProp(default='1',fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
         'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
@@ -100,9 +100,9 @@ class Service(SchedulingItem):
         'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
         'notifications_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
-        'contact_groups':         StringProp(default='', fill_brok=['full_status']),
-        'stalking_options':       ListProp(default='', fill_brok=['full_status']),
+        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
+        'contact_groups':         StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'stalking_options':       ListProp(default='', fill_brok=['full_status'], merging='join'),
         'notes':                  StringProp(default='', fill_brok=['full_status']),
         'notes_url':              StringProp(default='', fill_brok=['full_status']),
         'action_url':             StringProp(default='', fill_brok=['full_status']),
@@ -115,13 +115,13 @@ class Service(SchedulingItem):
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
         'reactionner_tag':         StringProp(default='None'),
-        'resultmodulations':       StringProp(default=''),
-        'business_impact_modulations':    StringProp(default=''),
-        'escalations':             StringProp(default='', fill_brok=['full_status']),
+        'resultmodulations':       StringProp(default='', merging='join'),
+        'business_impact_modulations':    StringProp(default='', merging='join'),
+        'escalations':             StringProp(default='', fill_brok=['full_status'], merging='join'),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
-        'labels':                  ListProp(default='', fill_brok=['full_status']),
+        'labels':                  ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -135,7 +135,7 @@ class Service(SchedulingItem):
         'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
 
         # Easy Service dep definition
-        'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
+        'service_dependencies':   ListProp(default='', merging='join'), # TODO: find a way to brok it?
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
@@ -149,14 +149,14 @@ class Service(SchedulingItem):
         'trigger_name':    ListProp(default=''),
 
         # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status']),
+        'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # Our check ways. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
-        'macromodulations':       ListProp(default=''),
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'macromodulations':       ListProp(default='', merging='join'),
 
         # Custom views
-        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
@@ -375,7 +375,9 @@ class Service(SchedulingItem):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
     def get_full_name(self):
-        return "%s/%s" % (self.host.host_name, self.service_description)
+        if self.host and hasattr(self.host, 'host_name') and hasattr(self, 'service_description'):
+            return "%s/%s" % (self.host.host_name, self.service_description)
+        return 'UNKNOWN-SERVICE'
 
     # Get our realm, so in fact our host one
     def get_realm(self):

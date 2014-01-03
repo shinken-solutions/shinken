@@ -801,9 +801,8 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.error("[items] %s.%s is duplicated from %s" %\
+                logger.warning("[items] %s.%s is duplicated from %s" %\
                     (i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
-                r = False
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -950,7 +949,7 @@ class Items(object):
                         new_resultmodulations.append(rm)
                     else:
                         err = "the result modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
-                        i.configuration_errors.append(err)
+                        i.configuration_warnings.append(err)
                         continue
                 i.resultmodulations = new_resultmodulations
 
@@ -1099,6 +1098,25 @@ class Items(object):
             # Get the list, but first make elements uniq
             i.macromodulations = new_macromodulations
 
+
+    # Linkify with modules
+    def linkify_s_by_plug(self, modules):
+        for s in self:
+            new_modules = []
+            for plug_name in s.modules:
+                plug_name = plug_name.strip()
+                # don't tread void names
+                if plug_name == '':
+                    continue
+
+                plug = modules.find_by_name(plug_name)
+                print plug
+                if plug is not None:
+                    new_modules.append(plug)
+                else:
+                    err = "Error: the module %s is unknown for %s" % (plug_name, s.get_name())
+                    s.configuration_errors.append(err)
+            s.modules = new_modules
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
