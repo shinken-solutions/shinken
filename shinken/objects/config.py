@@ -818,6 +818,10 @@ class Config(Item):
         # satellites
         self.realms.prepare_for_satellites_conf()
 
+    # Some elements are maybe set as wrong after a is_correct, so clean them 
+    # if possible
+    def clean(self):
+        self.services.clean()
 
     # In the scheduler we need to relink the commandCall with
     # the real commands

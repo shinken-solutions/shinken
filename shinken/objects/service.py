@@ -457,8 +457,8 @@ class Service(SchedulingItem):
             logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
-            logger.info("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
-            state = False
+            logger.warning("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
+            # do not set tis a a true error, only we will delete this after
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
@@ -1112,8 +1112,9 @@ class Services(Items):
     def linkify_s_by_hst(self, hosts):
         for s in self:
             # If we do not have an host_name, we set it as
-            # a template element to delete. (like Nagios
+            # a template element to delete. (like Nagios)
             if not hasattr(s, 'host_name'):
+                s.host = None
                 continue
             try:
                 hst_name = s.host_name
@@ -1124,8 +1125,8 @@ class Services(Items):
                 if s.host is not None:
                     hst.add_service_link(s)
                 else:  # Ok, the host do not exists!
-                    err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
-                    s.configuration_errors.append(err)
+                    err = "Warning: the service '%s' got an invalid host_name '%s'" % (self.get_name(), hst_name)
+                    s.configuration_warnings.append(err)
                     continue
             except AttributeError, exp:
                 pass  # Will be catch at the is_correct moment
@@ -1193,6 +1194,16 @@ class Services(Items):
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
+
+
+    # For services the main clean is about service with bad hosts
+    def clean(self):
+        to_del = []
+        for s in self:
+            if not s.host:
+                to_del.append(s.id)
+        for sid in to_del:
+            del self.items[sid]
 
     # Add in our queue a service create from another. Special case:
     # is a template: so hname is a name of template, so need to get all

@@ -419,6 +419,9 @@ class Arbiter(Daemon):
         # Correct conf?
         self.conf.is_correct()
 
+        # Maybe some elements where not wrong, so we must clean if possible
+        self.conf.clean()
+
         # If the conf is not correct, we must get out now
         # if not self.conf.conf_is_correct:
         #    sys.exit("Configuration is incorrect, sorry, I bail out")

@@ -160,6 +160,7 @@ class ShinkenTest(unittest.TestCase):
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
             return
+        self.conf.clean()
 
         self.confs = self.conf.cut_into_parts()
         self.conf.prepare_for_sending()
