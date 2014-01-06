@@ -68,7 +68,7 @@ class TestConfig(ShinkenTest):
         # Now try to delete a required property
         max_check_attempts = hst.max_check_attempts
         del hst.max_check_attempts
-        self.assert_(hst.is_correct() == False)
+        self.assert_(hst.is_correct() == True)
         hst.max_check_attempts = max_check_attempts
 
         ###

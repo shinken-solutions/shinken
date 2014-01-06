@@ -473,7 +473,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
 
     without_default = [
         'host_name', 'alias', 'address',
-        'max_check_attempts', 'check_period', 'notification_period']
+        'check_period', 'notification_period']
 
     properties = dict([
         ('imported_from', 'unknown'),
@@ -485,6 +485,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('check_command', '_internal_host_up'),
         ('initial_state', 'u'),
         ('check_interval', '0'),
+        ('max_check_attempts', '1'),
         ('retry_interval', '0'),
         ('active_checks_enabled', '1'),
         ('passive_checks_enabled', '1'),
@@ -746,13 +747,14 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
 
     without_default = [
         'host_name', 'service_description',
-        'check_command', 'max_check_attempts', 'check_interval',
+        'check_command', 'check_interval',
         'retry_interval', 'check_period', 'notification_period']
 
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
         ('name', ''),
+        ('max_check_attempts', '1'),
         ('hostgroup_name', ''),
         ('display_name', ''),
         ('servicegroups', ''),
