@@ -163,7 +163,10 @@ class WSGIREFBackend(object):
 
 
     def get_sockets(self):
-        return [self.srv.socket]
+        if self.srv.socket:
+            return [self.srv.socket]
+        else:
+            return []
 
 
     def get_socks_activity(self, socks, timeout):
@@ -184,7 +187,7 @@ class WSGIREFBackend(object):
                 s.close()
             except:
                 pass
-
+            self.srv.socket = None
 
     # Manually manage the number of threads
     def run(self):
