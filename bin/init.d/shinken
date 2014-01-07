@@ -65,6 +65,7 @@ export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
 export LC_ALL=en_US.UTF8
 export PYTHONIOENCODING=utf8
+export PYTHONUNBUFFERED="0"
 
 # We try to find the LAST possible Python VERSION
 pythonver() {

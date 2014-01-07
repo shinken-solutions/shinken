@@ -189,6 +189,7 @@ class WSGIREFBackend(object):
                 pass
             self.srv.socket = None
 
+
     # Manually manage the number of threads
     def run(self):
         # Ok create the thread
