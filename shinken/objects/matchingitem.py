@@ -59,9 +59,15 @@ class MatchingItem(Item):
         values = value.split(',')
         for m in matchings:
             for v in values:
-                #print "Try to match", m, v
-                if re.search(m, v):
-                    return True
+                print "Try to match", m, v
+                # Maybe m is a list, if so should check one values
+                if isinstance(m, list):
+                    for _m in m:
+                        if re.search(_m, v):
+                            return True
+                else:
+                    if re.search(m, v):
+                        return True
         return False
 
     # Look if we match all discovery data or not
