@@ -34,6 +34,8 @@ import ConfigParser
 import json
 import threading
 import inspect
+import traceback
+import cStringIO
 
 # Try to see if we are in an android device or not
 is_android = True
@@ -611,8 +613,8 @@ class Daemon(object):
     # If the directory do not exist, we must exit!
     def find_modules_path(self):
         if not hasattr(self, 'modules_dir') or not self.modules_dir:
-            logger.error("Your configuration is missing the path to the modules (modules_dir). Please configure it")
-            raise Exception("Your configuration is missing the path to the modules (modules_dir). Please configure it")
+            logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
+            self.modules_dir = '/var/lib/shinken/modules'
         self.modules_dir = os.path.abspath(self.modules_dir)
         logger.info("Modules directory: %s" % (self.modules_dir))
         if not os.path.exists(self.modules_dir):
@@ -790,9 +792,18 @@ class Daemon(object):
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish
         print "GO FOR IT"
-        self.http_daemon.run()
-        
-
+        try:
+            self.http_daemon.run()
+        except Exception, exp:
+            logger.error('The HTTP daemon failed with the error %s, exiting' % str(exp))
+            output = cStringIO.StringIO()
+            traceback.print_exc(file=output)
+            logger.error("Back trace of this error: %s" % (output.getvalue()))
+            output.close()
+            self.do_stop()
+            # Hard mode exit from a thread
+            os._exit(2)
+            
 
     # Wait up to timeout to handle the pyro daemon requests.
     # If suppl_socks is given it also looks for activity on that list of fd.

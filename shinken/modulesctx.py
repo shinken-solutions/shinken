@@ -47,8 +47,13 @@ class ModulesContext(object):
         if not mod_dir in sys.path:
             sys.path.append(mod_dir)
         mod_path = os.path.join(self.modules_dir, name, 'module.py')
+        if not os.path.exists(mod_path):
+            mod_path = os.path.join(self.modules_dir, name, 'module.pyc')
         try:
-            r = imp.load_source(name, mod_path)
+            if mod_path.endswith('.py'):
+                r = imp.load_source(name, mod_path)
+            else:
+                r = imp.load_compiled(name, mod_path)
         except:
             logger.warning('The module %s cannot be founded or load' % mod_path)
             raise
