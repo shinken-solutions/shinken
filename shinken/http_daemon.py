@@ -297,7 +297,10 @@ class HTTPDaemon(object):
                 # for them after
                 if defaults:
                     default_args = zip(argspec.args[-len(argspec.defaults):],argspec.defaults)
-                    self.registered_fun_defaults[fname] = default_args
+                    _d = {}
+                    for (argname, defavalue) in default_args:
+                        _d[argname] = defavalue
+                    self.registered_fun_defaults[fname] = _d
                 # remove useless self in args, because we alredy got a bonded method f
                 if 'self' in args:
                     args.remove('self')
