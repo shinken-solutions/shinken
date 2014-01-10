@@ -45,7 +45,11 @@ def read_package_json(fd):
     buf = fd.read()
     fd.close()
     buf = buf.decode('utf8', 'ignore')
-    package_json = json.loads(buf)
+    try:
+        package_json = json.loads(buf)
+    except ValueError, exp:
+        logger.error("Bad package.json file : %s" % exp)
+        sys.exit(2)
     if not package_json:
         logger.error("Bad package.json file")
         sys.exit(2)
