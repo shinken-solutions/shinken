@@ -240,6 +240,7 @@ class HTTPDaemon(object):
                 return
 
             self.registered_fun = []
+            self.registered_fun_defaults = {}
 
             protocol = 'http'
             if use_ssl:
@@ -292,6 +293,11 @@ class HTTPDaemon(object):
                 varargs = argspec.varargs
                 keywords = argspec.keywords
                 defaults = argspec.defaults
+                # If we got some defauts, save arg=value so we can lookup
+                # for them after
+                if defaults:
+                    default_args = zip(argspec.args[-len(argspec.defaults):],argspec.defaults)
+                    self.registered_fun_defaults[fname] = default_args
                 # remove useless self in args, because we alredy got a bonded method f
                 if 'self' in args:
                     args.remove('self')
@@ -319,7 +325,11 @@ class HTTPDaemon(object):
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:
-                                raise Exception('Missing argument %s' % aname)
+                                # Maybe we got a default value?
+                                default_args = self.registered_fun_defaults.get(fname, {})
+                                if not aname in default_args:
+                                    raise Exception('Missing argument %s' % aname)
+                                v = default_args[aname]
                             d[aname] = v
                         if need_lock:
                             logger.debug("HTTP: calling lock for %s" % fname)
