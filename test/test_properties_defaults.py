@@ -101,7 +101,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('prefix', '/usr/local/shinken/'),
         ('workdir', '/var/run/shinken/'),
         ('config_base_dir', ''),
-        ('modulesdir', '/var/lib/shinken/modules'),
+        ('modules_dir', '/var/lib/shinken/modules'),
         ('use_local_log', '1'),
         ('log_level', 'WARNING'),
         ('local_log', 'arbiterd.log'),
@@ -473,7 +473,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
 
     without_default = [
         'host_name', 'alias', 'address',
-        'max_check_attempts', 'check_period', 'notification_period']
+        'check_period', 'notification_period']
 
     properties = dict([
         ('imported_from', 'unknown'),
@@ -485,6 +485,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('check_command', '_internal_host_up'),
         ('initial_state', 'u'),
         ('check_interval', '0'),
+        ('max_check_attempts', '1'),
         ('retry_interval', '0'),
         ('active_checks_enabled', '1'),
         ('passive_checks_enabled', '1'),
@@ -538,6 +539,8 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
+        ('business_rule_host_notification_options', ''),
+        ('business_rule_service_notification_options', ''),
         ])
 
     def setUp(self):
@@ -744,13 +747,14 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
 
     without_default = [
         'host_name', 'service_description',
-        'check_command', 'max_check_attempts', 'check_interval',
+        'check_command', 'check_interval',
         'retry_interval', 'check_period', 'notification_period']
 
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
         ('name', ''),
+        ('max_check_attempts', '1'),
         ('hostgroup_name', ''),
         ('display_name', ''),
         ('servicegroups', ''),
@@ -808,6 +812,8 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
+        ('business_rule_host_notification_options', ''),
+        ('business_rule_service_notification_options', ''),
         ])
 
     def setUp(self):

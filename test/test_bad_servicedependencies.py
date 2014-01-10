@@ -1,10 +1,11 @@
-#!/bin/sh
-#
-# Copyright (C) 2009-2012:
+#!/usr/bin/env python
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+#    Sebastien Coavoux, s.coavoux@free.fr
 #
 # This file is part of Shinken.
 #
@@ -21,24 +22,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+#
+# This file is used to test reading and processing of config files
+#
 
-DIR="$(cd $(dirname "$0"); pwd)"
-echo "$DIR"
-
-# Prepare the launch by cleaning var/log directories
-. $DIR/preparedev
-
-cd "$DIR/.."
-
-export LANG=us_US.UTF-8
-# Protect against proxy variable for dev
-unset http_proxy
-unset https_proxy
+from shinken_test import *
 
 
-"$DIR"/launch_scheduler_debug.sh
-"$DIR"/launch_poller_debug.sh
-"$DIR"/launch_reactionner_debug.sh
-"$DIR"/launch_broker_debug.sh
-"$DIR"/launch_receiver_debug.sh
-"$DIR"/launch_arbiter_debug.sh
+class TestBadServiceDependencies(ShinkenTest):
+    def setUp(self):
+        self.setup_with_file('etc/nagios_bad_servicedependencies.cfg')
+
+    def test_bad_conf(self):
+        #
+        # Config is not correct because of a wrong inexisting service in dependency
+        # in the host configuration
+        #
+        self.assert_(not self.conf.conf_is_correct)
+
+
+if __name__ == '__main__':
+    unittest.main()

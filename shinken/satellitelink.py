@@ -476,19 +476,3 @@ class SatelliteLinks(Items):
                 err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
 
-    def linkify_s_by_plug(self, modules):
-        for s in self:
-            new_modules = []
-            for plug_name in s.modules:
-                plug_name = plug_name.strip()
-                # don't tread void names
-                if plug_name == '':
-                    continue
-
-                plug = modules.find_by_name(plug_name)
-                if plug is not None:
-                    new_modules.append(plug)
-                else:
-                    err = "Error: the module %s is unknown for %s" % (plug_name, s.get_name())
-                    s.configuration_errors.append(err)
-            s.modules = new_modules

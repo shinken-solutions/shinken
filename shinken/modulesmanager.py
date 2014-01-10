@@ -100,8 +100,14 @@ class ModulesManager(object):
                 mod_dir  =  os.path.dirname(mod_file)
                 # We add this dir to sys.path so the module can load local files too
                 sys.path.append(mod_dir)
-                # important, equivalent to import fname from module.py
-                m = imp.load_source(fname, mod_file)
+                if not os.path.exists(mod_file):
+                    mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.pyc'))
+                m = None
+                if mod_file.endswith('.py'):
+                    # important, equivalent to import fname from module.py
+                    m = imp.load_source(fname, mod_file)
+                else:
+                    m = imp.load_compiled(fname, mod_file)
                 m_dir = os.path.abspath(os.path.dirname(m.__file__))
                 
                 # Look if it's a valid module

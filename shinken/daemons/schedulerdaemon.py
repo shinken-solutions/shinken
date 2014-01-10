@@ -45,14 +45,16 @@ class IChecks(Interface):
 They connect here and see if they are still OK with our running_id, if not, they must drop their checks """
 
     # poller or reactionner is asking us our running_id
-    def get_running_id(self):
-        return self.running_id
+    #def get_running_id(self):
+    #    return self.running_id
 
     # poller or reactionner ask us actions
     def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'], \
                        reactionner_tags=['None'], worker_name='none', \
                        module_types=['fork']):
         #print "We ask us checks"
+        do_checks = (do_checks == 'True')
+        do_actions = (do_actions == 'True')
         res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags, reactionner_tags, worker_name, module_types)
         #print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
@@ -60,7 +62,7 @@ They connect here and see if they are still OK with our running_id, if not, they
         return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
         #return zlib.compress(cPickle.dumps(res), 2)
     get_checks.encode = 'raw'
-    
+
 
     # poller or reactionner are putting us results
     def put_results(self, results):
@@ -98,7 +100,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
         return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
         #return zlib.compress(cPickle.dumps(res), 2)
     get_broks.encode = 'raw'
-    
+
 
     # A broker is a new one, if we do not have
     # a full broks, we clean our broks, and
@@ -178,7 +180,7 @@ class Shinken(BaseSatellite):
         self.pollers = {}
         self.reactionners = {}
         self.brokers = {}
-        
+
 
     def do_stop(self):
         if self.http_daemon:
@@ -204,7 +206,7 @@ class Shinken(BaseSatellite):
         # Now all checks and actions
         for c in self.sched.checks.values():
             # Already launch checks should not be touch
-            if c.status == 'scheduled':
+            if c.status == 'scheduled' and c.t_to_go is not None:
                 t_to_go = c.t_to_go
                 ref = c.ref
                 new_t = max(0, t_to_go + difference)

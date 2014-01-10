@@ -68,7 +68,7 @@ class TestService(ShinkenTest):
         # Now try to delete a required property
         max_check_attempts = svc.max_check_attempts
         del svc.max_check_attempts
-        self.assert_(svc.is_correct() == False)
+        self.assert_(svc.is_correct() == True)
         svc.max_check_attempts = max_check_attempts
 
         ###

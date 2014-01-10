@@ -57,9 +57,6 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.assert_(svc_cor.business_rule.get_state() == 2)
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
 
     def test_bprule_smart_notifications_ack(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
@@ -79,8 +76,6 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.assert_(svc_cor.business_rule.get_state() == 2)
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
 
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_02;srv2;2;1;1;lausser;blablub" % (now)
@@ -91,8 +86,6 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.scheduler_loop(1, [[svc_cor, None, None]])
 
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is True)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
 
     def test_bprule_smart_notifications_ack_downtime(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
@@ -113,9 +106,6 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.assert_(svc_cor.business_rule.get_state() == 2)
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
 
         duration = 600
         now = time.time()
@@ -128,9 +118,6 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.assert_(svc2.scheduled_downtime_depth > 0)
 
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
 
         svc_cor.business_rule_downtime_as_ack = True
 
@@ -138,9 +125,18 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.scheduler_loop(1, [[svc_cor, None, None]])
 
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is True)
-        self.assert_(svc_cor.notification_is_blocked_by_item('ACKNOWLEDGEMENT') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('DOWNTIME') is False)
-        self.assert_(svc_cor.notification_is_blocked_by_item('RECOVERY') is False)
+
+    def test_bprule_child_notification_options(self):
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_child_notif")
+        svc_cor.act_depend_of = []
+        self.assert_(svc_cor.got_business_rule is True)
+        self.assert_(svc_cor.business_rule is not None)
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        hst2 = self.sched.hosts.find_by_name("test_host_02")
+
+        self.assert_(svc1.notification_options == ['w', 'u', 'c', 'r', 's'])
+        self.assert_(hst2.notification_options == ['d', 'u', 'r', 's'])
 
 if __name__ == '__main__':
     unittest.main()

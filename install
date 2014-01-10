@@ -722,7 +722,7 @@ function relocate(){
     # set some directives
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER shinken_user=$SKUSER group=$SKGROUP shinken_group=$SKGROUP"
-    for fic in $(ls -1 $ETC/daemons/*.ini $ETC/skonf.cfg)
+    for fic in $(ls -1 $ETC/daemons/*.ini)
     do
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $ETC/daemons
@@ -751,13 +751,6 @@ function relocate(){
     sed -i -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" $TARGET/bin/init.d/shinken
     # relocate skonf.cfg
     cd $ETC
-    if [ $USEPROXY -eq 1 ]
-    then
-        sed -i "s#http_proxy=.*$#htt_proxy="$http_proxy"#g" skonf.cfg
-    fi
-    sed -i "s#/etc/shinken#"$ETC"#g" skonf.cfg
-    sed -i "s#/tmp#"$TMP"#g" skonf.cfg
-    sed -i "s#/var/lib/shinken/share#"$TARGET"/share#g" skonf.cfg
 
 
     # relocate she bang python in every python files
@@ -3378,7 +3371,6 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                 broker
                                 reactionner
                                 receiver
-                                skonf
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins

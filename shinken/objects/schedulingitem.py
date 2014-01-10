@@ -838,7 +838,8 @@ class SchedulingItem(Item):
             #print "Case 2 (OK following a NON-OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
-                self.add_attempt()
+                if not c.is_dependent():
+                    self.add_attempt()
                 self.raise_alert_log_entry()
                 # Eventhandler gets OK;SOFT;++attempt, no notification needed
                 self.get_event_handlers()
@@ -920,7 +921,8 @@ class SchedulingItem(Item):
         elif c.exit_status != 0 and self.last_state != OK_UP:
             #print "Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" % (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
-                self.add_attempt()
+                if not c.is_dependent():
+                    self.add_attempt()
                 if self.is_max_attempts():
                    # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
@@ -1118,7 +1120,7 @@ class SchedulingItem(Item):
             if es.get_name() not in n.already_start_escalations:
                 r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
                 # If we got a real result (time base escalation), we add it
-                if r is not None and r < res:
+                if r is not None and now < r < res:
                     res = r
 
         # And we take the minimum of this result. Can be standard or escalation asked
@@ -1275,12 +1277,31 @@ class SchedulingItem(Item):
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
+
+        # Dependency check, we have to create a new check that will be launched only once (now)
+        # Otherwise it will delay the next real check. this can lead to an infinite SOFT state.
         if not force and (self.in_checking and ref_check is not None):
-            now = time.time()
+
             c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
-            c_in_progress.t_to_go = now  # No, I want a check right NOW
-            c_in_progress.depend_on_me.append(ref_check)
-            return c_in_progress.id
+
+            # c_in_progress has almost everything we need but we cant copy.deepcopy() it
+            # we need another c.id
+            command_line = c_in_progress.command
+            timeout = c_in_progress.timeout
+            poller_tag = c_in_progress.poller_tag
+            env = c_in_progress.env
+            module_type = c_in_progress.module_type
+
+            c = Check('scheduled', command_line, self, t, ref_check,
+                      timeout=timeout,
+                      poller_tag=poller_tag,
+                      env=env,
+                      module_type=module_type,
+                      dependency_check=True)
+
+            self.actions.append(c)
+            #print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
+            return c.id
 
         if force or (not self.is_no_check_dependent()):
 
@@ -1580,6 +1601,13 @@ class SchedulingItem(Item):
                 #print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
+                # Enforces child hosts/services notification options if told to
+                # do so (business_rule_(host|service)_notification_options)
+                # set.
+                if e.my_type == "host" and self.business_rule_host_notification_options:
+                    e.notification_options = self.business_rule_host_notification_options
+                if e.my_type == "service" and self.business_rule_service_notification_options:
+                    e.notification_options = self.business_rule_service_notification_options
 
 
     def rebuild_ref(self):

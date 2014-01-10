@@ -184,9 +184,11 @@ def to_char(val):
     return val[0]
 
 
-def to_split(val):
+def to_split(val, split_on_coma=True):
     if isinstance(val, list):
         return val
+    if not split_on_coma:
+        return [val]
     val = val.split(',')
     if val == ['']:
         val = []
@@ -672,6 +674,8 @@ def filter_none(name):
 def filter_host_by_name(name):
 
     def inner_filter(host):
+        if host is None:
+            return False
         return host.host_name == name
 
     return inner_filter
@@ -681,6 +685,8 @@ def filter_host_by_regex(regex):
     host_re = re.compile(regex)
 
     def inner_filter(host):
+        if host is None:
+            return False
         return host_re.match(host.host_name) is not None
 
     return inner_filter
@@ -689,6 +695,8 @@ def filter_host_by_regex(regex):
 def filter_host_by_group(group):
 
     def inner_filter(host):
+        if host is None:
+            return False
         return group in [g.hostgroup_name for g in host.hostgroups]
 
     return inner_filter
@@ -697,6 +705,8 @@ def filter_host_by_group(group):
 def filter_service_by_name(name):
 
     def inner_filter(service):
+        if service is None:
+            return False
         return service.service_description == name
 
     return inner_filter
@@ -706,6 +716,8 @@ def filter_service_by_regex_name(regex):
     host_re = re.compile(regex)
 
     def inner_filter(service):
+        if service is None:
+            return False
         return host_re.match(service.service_description) is not None
 
     return inner_filter
@@ -714,6 +726,8 @@ def filter_service_by_regex_name(regex):
 def filter_service_by_host_name(host_name):
 
     def inner_filter(service):
+        if service is None or service.host is None:
+            return False
         return service.host.host_name == host_name
 
     return inner_filter
@@ -723,6 +737,8 @@ def filter_service_by_regex_host_name(regex):
     host_re = re.compile(regex)
 
     def inner_filter(service):
+        if service is None or service.host is None:
+            return False
         return host_re.match(service.host.host_name) is not None
 
     return inner_filter
@@ -731,6 +747,8 @@ def filter_service_by_regex_host_name(regex):
 def filter_service_by_hostgroup_name(group):
 
     def inner_filter(service):
+        if service is None or service.host is None:
+            return False
         return group in [g.hostgroup_name for g in service.host.hostgroups]
 
     return inner_filter
@@ -739,6 +757,8 @@ def filter_service_by_hostgroup_name(group):
 def filter_service_by_servicegroup_name(group):
 
     def inner_filter(service):
+        if service is None:
+            return False
         return group in [g.servicegroup_name for g in service.servicegroups]
 
     return inner_filter
@@ -747,6 +767,8 @@ def filter_service_by_servicegroup_name(group):
 def filter_host_by_bp_rule_label(label):
 
     def inner_filter(host):
+        if host is None:
+            return False
         return label in host.labels
 
     return inner_filter
@@ -755,6 +777,8 @@ def filter_host_by_bp_rule_label(label):
 def filter_service_by_host_bp_rule_label(label):
 
     def inner_filter(service):
+        if service is None or service.host is None:
+            return False
         return label in service.host.labels
 
     return inner_filter
@@ -763,6 +787,8 @@ def filter_service_by_host_bp_rule_label(label):
 def filter_service_by_bp_rule_label(label):
 
     def inner_filter(service):
+        if service is None:
+            return False
         return label in service.labels
 
     return inner_filter

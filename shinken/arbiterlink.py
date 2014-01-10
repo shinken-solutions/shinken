@@ -45,7 +45,7 @@ class ArbiterLink(SatelliteLink):
         return self.arbiter_name
 
     def get_config(self):
-        return self.con.get_config()
+        return self.con.get('get_config')
 
     # Check is required when prop are set:
     # contacts OR contactgroups is need
@@ -113,18 +113,19 @@ class ArbiterLink(SatelliteLink):
         if self.con is None:
             self.create_connection()
         try:
-            r = self.con.get_all_states()
+            r = self.con.get('get_all_states')
             return r
         except HTTPExceptions, exp:
             self.con = None
             return None
 
 
-    def get_objects_properties(self, table, *properties):
+    def get_objects_properties(self, table, properties=[]):
         if self.con is None:
             self.create_connection()
         try:
-            r = self.con.get_objects_properties(table, *properties)
+            print properties
+            r = self.con.get('get_objects_properties', {'table' : table, 'properties' : properties})
             return r
         except HTTPExceptions, exp:
             self.con = None

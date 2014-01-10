@@ -490,9 +490,7 @@ var_root = os.path.dirname(default_paths['var'])
 main_config_files = ('shinken.cfg',)
 
 
-additionnal_config_files = (
-                            'skonf.cfg',
-                            )
+additionnal_config_files = ()
 
 config_objects_file = (
                         'discovery_runs.cfg',
@@ -576,7 +574,6 @@ data_files = [
          'bin/init.d/shinken-poller',
          'bin/init.d/shinken-reactionner',
          'bin/init.d/shinken-scheduler',
-         'bin/init.d/shinken-skonf',
          ]
         )
     ]

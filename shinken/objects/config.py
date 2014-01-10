@@ -105,7 +105,7 @@ class Config(Item):
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default='/var/run/shinken/'),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
-        'modulesdir':               StringProp(default='/var/lib/shinken/modules'),
+        'modules_dir':               StringProp(default='/var/lib/shinken/modules'),
         'use_local_log':            BoolProp(default='1'),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
@@ -349,10 +349,22 @@ class Config(Item):
     # so from Nagios2 format, to Nagios3 ones
     old_properties = {
         'nagios_user':  'shinken_user',
-        'nagios_group': 'shinken_group'
+        'nagios_group': 'shinken_group',
+        'modulesdir': 'modules_dir',
     }
 
     read_config_silent = 0
+
+    early_created_types = ['arbiter', 'module']
+
+    configuration_types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
+                           'contact', 'notificationway', 'checkmodulation', 'macromodulation', 'host', 'service', 'servicegroup',
+                           'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
+                           'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
+                           'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
+                           'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
+                           'hostextinfo', 'serviceextinfo']
+
 
     def __init__(self):
         self.params = {}
@@ -510,14 +522,8 @@ class Config(Item):
 
     def read_config_buf(self, buf):
         params = []
-        types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
-                 'contact', 'notificationway', 'checkmodulation', 'macromodulation', 'host', 'service', 'servicegroup',
-                 'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
-                 'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
-                 'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
-                 'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
-                 'hostextinfo', 'serviceextinfo']
         objectscfg = {}
+        types = self.__class__.configuration_types
         for t in types:
             objectscfg[t] = []
 
@@ -528,11 +534,14 @@ class Config(Item):
         continuation_line = False
         tmp_line = ''
         lines = buf.split('\n')
+        line_nb = 0 # Keep the line number for the file path
         for line in lines:
             if line.startswith("# IMPORTEDFROM="):
                 filefrom = line.split('=')[1]
+                line_nb = 0 # reset the line number too
                 continue
 
+            line_nb += 1
             # Remove comments
             line = split_semicolon(line)[0].strip()
 
@@ -573,7 +582,7 @@ class Config(Item):
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
-                tmp.append("imported_from " + filefrom)
+                tmp.append("imported_from " + filefrom+':%d'%line_nb)
                 # Get new type
                 elts = re.split('\s', line)
                 # Maybe there was space before and after the type
@@ -628,13 +637,14 @@ class Config(Item):
         echo_obj = {'command_name': '_echo', 'command_line': '_echo'}
         raw_objects['command'].append(echo_obj)
 
+
     # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects):
         """ Create real 'object' from dicts of prop/value """
         types_creations = self.__class__.types_creations
 
         # some types are already created in this time
-        early_created_types = ['arbiter', 'module']
+        early_created_types = self.__class__.early_created_types
 
         # Before really create the objects, we add
         # ghost ones like the bp_rule for correlation
@@ -644,6 +654,7 @@ class Config(Item):
             if t not in early_created_types:
                 self.create_objects_for_type(raw_objects, t)
 
+    
     def create_objects_for_type(self, raw_objects, type):
         types_creations = self.__class__.types_creations
         t = type
@@ -665,6 +676,7 @@ class Config(Item):
         # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
 
+    
     # Here arbiter and modules objects should be prepare and link
     # before all others types
     def early_arbiter_linking(self):
@@ -806,6 +818,10 @@ class Config(Item):
         # satellites
         self.realms.prepare_for_satellites_conf()
 
+    # Some elements are maybe set as wrong after a is_correct, so clean them 
+    # if possible
+    def clean(self):
+        self.services.clean()
 
     # In the scheduler we need to relink the commandCall with
     # the real commands
@@ -1532,6 +1548,7 @@ class Config(Item):
 
         self.conf_is_correct = r
 
+
     # We've got strings (like 1) but we want python elements, like True
     def pythonize(self):
         # call item pythonize for parameters
@@ -1744,7 +1761,7 @@ class Config(Item):
                                 % (r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "The realm %s have hosts but no scheduler!" % r.get_name()
+                err = "The realm %s has hosts but no scheduler!" % r.get_name()
                 self.add_error(err)
                 r.packs = []  # Dumb pack
                 continue

@@ -70,14 +70,14 @@ class Service(SchedulingItem):
     properties = SchedulingItem.properties.copy()
     properties.update({
         'host_name':              StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'hostgroup_name':         StringProp(default='', fill_brok=['full_status']),
+        'hostgroup_name':         StringProp(default='', fill_brok=['full_status'], merging='join'),
         'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'display_name':           StringProp(default='', fill_brok=['full_status']),
-        'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
+        'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names, merging='join'),
         'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
         'check_command':          StringProp(fill_brok=['full_status']),
         'initial_state':          CharProp(default='o', fill_brok=['full_status']),
-        'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
+        'max_check_attempts':     IntegerProp(default='1',fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
         'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
@@ -100,9 +100,9 @@ class Service(SchedulingItem):
         'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
         'notifications_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
-        'contact_groups':         StringProp(default='', fill_brok=['full_status']),
-        'stalking_options':       ListProp(default='', fill_brok=['full_status']),
+        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
+        'contact_groups':         StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'stalking_options':       ListProp(default='', fill_brok=['full_status'], merging='join'),
         'notes':                  StringProp(default='', fill_brok=['full_status']),
         'notes_url':              StringProp(default='', fill_brok=['full_status']),
         'action_url':             StringProp(default='', fill_brok=['full_status']),
@@ -115,13 +115,13 @@ class Service(SchedulingItem):
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
         'reactionner_tag':         StringProp(default='None'),
-        'resultmodulations':       StringProp(default=''),
-        'business_impact_modulations':    StringProp(default=''),
-        'escalations':             StringProp(default='', fill_brok=['full_status']),
+        'resultmodulations':       StringProp(default='', merging='join'),
+        'business_impact_modulations':    StringProp(default='', merging='join'),
+        'escalations':             StringProp(default='', fill_brok=['full_status'], merging='join'),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
-        'labels':                  ListProp(default='', fill_brok=['full_status']),
+        'labels':                  ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -130,9 +130,12 @@ class Service(SchedulingItem):
         'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        # Enforces child nodes notification options
+        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
+        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
 
         # Easy Service dep definition
-        'service_dependencies':   ListProp(default=''), # TODO: find a way to brok it?
+        'service_dependencies':   ListProp(default='', merging='join'), # TODO: find a way to brok it?
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
@@ -146,14 +149,14 @@ class Service(SchedulingItem):
         'trigger_name':    ListProp(default=''),
 
         # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status']),
+        'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # Our check ways. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status']),
-        'macromodulations':       ListProp(default=''),
+        'checkmodulations':       ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'macromodulations':       ListProp(default='', merging='join'),
 
         # Custom views
-        'custom_views'     :    ListProp(default='', fill_brok=['full_status']),
+        'custom_views'     :    ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
@@ -372,7 +375,9 @@ class Service(SchedulingItem):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
     def get_full_name(self):
-        return "%s/%s" % (self.host.host_name, self.service_description)
+        if self.host and hasattr(self.host, 'host_name') and hasattr(self, 'service_description'):
+            return "%s/%s" % (self.host.host_name, self.service_description)
+        return 'UNKNOWN-SERVICE'
 
     # Get our realm, so in fact our host one
     def get_realm(self):
@@ -452,8 +457,8 @@ class Service(SchedulingItem):
             logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
-            logger.info("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
-            state = False
+            logger.warning("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
+            # do not set tis a a true error, only we will delete this after
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
@@ -1107,8 +1112,9 @@ class Services(Items):
     def linkify_s_by_hst(self, hosts):
         for s in self:
             # If we do not have an host_name, we set it as
-            # a template element to delete. (like Nagios
+            # a template element to delete. (like Nagios)
             if not hasattr(s, 'host_name'):
+                s.host = None
                 continue
             try:
                 hst_name = s.host_name
@@ -1119,8 +1125,8 @@ class Services(Items):
                 if s.host is not None:
                     hst.add_service_link(s)
                 else:  # Ok, the host do not exists!
-                    err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
-                    s.configuration_errors.append(err)
+                    err = "Warning: the service '%s' got an invalid host_name '%s'" % (self.get_name(), hst_name)
+                    s.configuration_warnings.append(err)
                     continue
             except AttributeError, exp:
                 pass  # Will be catch at the is_correct moment
@@ -1188,6 +1194,16 @@ class Services(Items):
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
+
+
+    # For services the main clean is about service with bad hosts
+    def clean(self):
+        to_del = []
+        for s in self:
+            if not s.host:
+                to_del.append(s.id)
+        for sid in to_del:
+            del self.items[sid]
 
     # Add in our queue a service create from another. Special case:
     # is a template: so hname is a name of template, so need to get all

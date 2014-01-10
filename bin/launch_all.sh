@@ -33,7 +33,6 @@ cd "$DIR"/..
 
 export LANG=us_US.UTF-8
 
-"$DIR"/launch_skonf.sh
 "$DIR"/launch_scheduler.sh
 "$DIR"/launch_poller.sh
 "$DIR"/launch_reactionner.sh

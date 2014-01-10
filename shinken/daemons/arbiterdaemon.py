@@ -127,9 +127,9 @@ class IForArbiter(Interface):
 
 
     # Try to give some properties of our objects
-    def get_objects_properties(self, table, *properties):
+    def get_objects_properties(self, table, properties=[]):
         logger.debug('ASK:: table= %s, properties= %s' % (str(table), str(properties)))
-        objs = getattr(self.app.conf, table, None)
+        objs = getattr(self.conf, table, None)
         logger.debug("OBJS:: %s" % str(objs))
         if not objs:
             return ''
@@ -140,7 +140,7 @@ class IForArbiter(Interface):
                 v = getattr(obj, prop, '')
                 l.append(v)
             res.append(l)
-        return res
+        return "OKIIIII"
 
 
 # Main Arbiter Class
@@ -172,6 +172,7 @@ class Arbiter(Daemon):
 
         self.interface = IForArbiter(self)
         self.conf = Config()
+
 
 
     # Use for adding things like broks
@@ -284,7 +285,7 @@ class Arbiter(Daemon):
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.me.modules]))
 
-        self.modulesdir = getattr(self.conf, 'modulesdir', '')
+        self.modules_dir = getattr(self.conf, 'modules_dir', '')
 
         # Ok it's time to load the module manager now!
         self.load_modules_manager()
@@ -417,6 +418,9 @@ class Arbiter(Daemon):
 
         # Correct conf?
         self.conf.is_correct()
+
+        # Maybe some elements where not wrong, so we must clean if possible
+        self.conf.clean()
 
         # If the conf is not correct, we must get out now
         # if not self.conf.conf_is_correct:

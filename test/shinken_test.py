@@ -49,12 +49,12 @@ from shinken.daemons.arbiterdaemon import Arbiter
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
 
-global modulesdir
-modulesdir = "modules"
+global modules_dir
+modules_dir = "modules"
 
-def define_modulesdir(val):
-    global modulesdir
-    modulesdir = val
+def define_modules_dir(val):
+    global modules_dir
+    modules_dir = val
 
 class __DUMMY:
     def add(self, obj):
@@ -160,6 +160,7 @@ class ShinkenTest(unittest.TestCase):
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
             return
+        self.conf.clean()
 
         self.confs = self.conf.cut_into_parts()
         self.conf.prepare_for_sending()
@@ -170,7 +171,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched = Scheduler(scheddaemon)
 
         scheddaemon.sched = self.sched
-        scheddaemon.modulesdir = modulesdir
+        scheddaemon.modules_dir = modules_dir
         scheddaemon.load_modules_manager()
         # Remember to clean the logs we just created before launching tests
         self.clear_logs()

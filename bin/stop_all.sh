@@ -31,4 +31,3 @@ DIR="$(cd $(dirname "$0"); pwd)"
 "$DIR"/stop_receiver.sh
 "$DIR"/stop_scheduler.sh
 "$DIR"/stop_arbiter.sh
-"$DIR"/stop_skonf.sh

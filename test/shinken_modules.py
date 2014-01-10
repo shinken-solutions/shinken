@@ -4,8 +4,8 @@
 #
 from  shinken_test import *
 
-#define_modulesdir("../modules")
-modulesctx.set_modulesdir(modulesdir)
+#define_modules_dir("../modules")
+modulesctx.set_modulesdir(modules_dir)
 
 # Special Livestatus module opening since the module rename
 #from shinken.modules.livestatus import module as livestatus_broker
@@ -80,7 +80,7 @@ class ShinkenModulesTest(ShinkenTest):
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
         self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modulesdir, [])
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modules_dir, [])
         self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
         # We can now output some previouly silented debug ouput
         self.livestatus_broker.do_load_modules()

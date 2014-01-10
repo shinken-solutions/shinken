@@ -188,7 +188,7 @@ class Log:
         # We create the brok and load the log message
         # DEBUG level logs are logged by the daemon locally
         # and must not be forwarded to other satellites, or risk overloading them.
-        if level != logging.DEBUG:
+        if level != logging.DEBUG and obj and hasattr(obj, 'add'):
             b = Brok('log', {'log': s})
             obj.add(b)
 

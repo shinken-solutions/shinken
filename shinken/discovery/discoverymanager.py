@@ -55,7 +55,7 @@ from shinken.modulesmanager import ModulesManager
 
 def get_uuid(self):
     if uuid:
-        return uuid.uuid4().hex
+        return uuid.uuid1().hex
     # Ok for old python like 2.4, we will lie here :)
     return int(random.random()*sys.maxint)
 
@@ -82,7 +82,7 @@ class DiscoveredHost(object):
         'HOSTNAME':          'name',
         }
 
-    def __init__(self, name, rules, runners, merge=False):
+    def __init__(self, name, rules, runners, merge=False, first_level_only=False):
         self.name = name
         self.data = {}
         self.rules = rules
@@ -95,6 +95,7 @@ class DiscoveredHost(object):
         self.in_progress_runners = []
         self.properties = {}
         self.customs = {}
+        self.first_level_only = first_level_only
 
     # In final phase, we keep only _ properties and
     # rule based one
@@ -177,6 +178,10 @@ class DiscoveredHost(object):
 
     def get_to_run(self):
         self.in_progress_runners = []
+        
+        if self.first_level_only:
+            return
+
         for r in self.runners:
             # If we already launched it, we don't want it :)
             if r in self.launched_runners:
@@ -301,7 +306,7 @@ class DiscoveredHost(object):
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', merge=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', merge=False, conf=None, first_level_only=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -313,36 +318,41 @@ class DiscoveryManager:
         self.log.load_obj(self)
         self.merge= merge
         self.config_files = [path]
-        self.conf = Config()
-
         # For specific backend, to override the classic file/db behavior
         self.backend = backend
         self.modules_path = modules_path
+        self.first_level_only = first_level_only
 
-        buf = self.conf.read_config(self.config_files)
+        if not conf:
+            self.conf = Config()
+
+            
+            buf = self.conf.read_config(self.config_files)
         
-        # Add macros on the end of the buf so they will
-        # overwrite the resource.cfg ones
-        for (m, v) in macros:
-            buf += '\n$%s$=%s\n' % (m, v)
+            # Add macros on the end of the buf so they will
+            # overwrite the resource.cfg ones
+            for (m, v) in macros:
+                buf += '\n$%s$=%s\n' % (m, v)
 
-        raw_objects = self.conf.read_config_buf(buf)
-        self.conf.create_objects_for_type(raw_objects, 'arbiter')
-        self.conf.create_objects_for_type(raw_objects, 'module')
-        self.conf.early_arbiter_linking()
-        self.conf.create_objects(raw_objects)
-        self.conf.linkify_templates()
-        self.conf.apply_inheritance()
-        self.conf.explode()
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
-        self.conf.apply_implicit_inheritance()
-        self.conf.fill_default()
-        self.conf.remove_templates()
-        self.conf.pythonize()
-        self.conf.linkify()
-        self.conf.apply_dependencies()
-        self.conf.is_correct()
+            raw_objects = self.conf.read_config_buf(buf)
+            self.conf.create_objects_for_type(raw_objects, 'arbiter')
+            self.conf.create_objects_for_type(raw_objects, 'module')
+            self.conf.early_arbiter_linking()
+            self.conf.create_objects(raw_objects)
+            self.conf.linkify_templates()
+            self.conf.apply_inheritance()
+            self.conf.explode()
+            self.conf.create_reversed_list()
+            self.conf.remove_twins()
+            self.conf.apply_implicit_inheritance()
+            self.conf.fill_default()
+            self.conf.remove_templates()
+            self.conf.pythonize()
+            self.conf.linkify()
+            self.conf.apply_dependencies()
+            self.conf.is_correct()
+        else:
+            self.conf = conf
 
         self.discoveryrules = self.conf.discoveryrules
         self.discoveryruns = self.conf.discoveryruns
@@ -389,7 +399,7 @@ class DiscoveryManager:
 
     # We try to init the backend if we got one
     def init_backend(self):
-        if not self.backend:
+        if not self.backend or not isinstance(self.backend, basestring):
             return
 
         print "Doing backend init"
@@ -454,7 +464,7 @@ class DiscoveryManager:
             
             # Register the name
             if not name in self.disco_data:
-                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, merge=self.merge)
+                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, merge=self.merge, first_level_only=self.first_level_only)
 
             # Now get key,values
             if not '=' in data:
@@ -499,7 +509,7 @@ class DiscoveryManager:
         #If we match the name, ok
         for r in self.runners:
             r_name = r.strip()
-            #            print "Look", r_name, name
+            #print "Look", r_name, name
             if r_name == name:
                 return True
 
@@ -526,6 +536,7 @@ class DiscoveryManager:
     def wait_for_runners_ends(self):
         all_ok = False
         while not all_ok:
+            '''
             all_ok = True
             for r in self.allowed_runners():
                 if not r.is_finished():
@@ -535,8 +546,23 @@ class DiscoveryManager:
                 if not b:
                     #print r.get_name(), "is not finished"
                     all_ok = False
+            '''
+            all_ok = self.is_all_ok()
             time.sleep(0.1)
 
+
+    def is_all_ok(self):
+        all_ok = True
+        for r in self.allowed_runners():
+            if not r.is_finished():
+                #print "Check finished of", r.get_name()
+                r.check_finished()
+            b = r.is_finished()
+            if not b:
+                #print r.get_name(), "is not finished"
+                all_ok = False
+        return all_ok
+        
 
     def get_runners_outputs(self):
         for r in self.allowed_runners():
@@ -558,10 +584,17 @@ class DiscoveryManager:
         # Store host to del in a separate array to remove them after look over items
         items_to_del = []
         still_duplicate_items = True
+        managed_element =True
         while still_duplicate_items:
+            # If we didn't work in the last loop, bail out
+            if not managed_element:
+                still_duplicate_items = False
+            print "LOOP"
+            managed_element = False
             for name in self.disco_data:
                 if name in items_to_del:
                     continue
+                managed_element = True
                 print('Search same host to merge.')
                 dha = self.disco_data[name]
                 # Searching same host and update host macros

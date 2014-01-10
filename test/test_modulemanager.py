@@ -36,7 +36,7 @@ class TestModuleManager(ShinkenTest):
     # Try to see if the module manager can manage modules
     def test_modulemanager(self):
         mod = Module({'module_name': 'LiveStatus', 'module_type': 'livestatus'})
-        self.modulemanager = ModulesManager('broker', modulesdir, [])
+        self.modulemanager = ModulesManager('broker', modules_dir, [])
         self.modulemanager.set_modules([mod])
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus
