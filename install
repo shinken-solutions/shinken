@@ -2539,9 +2539,10 @@ function install_nagios-plugins(){
 
     cd $TMP
     cecho " > Getting nagios-plugins archive" green
-    rm nagios-plugins
+    rm -Rf nagios-plugins
     git clone https://github.com/nagios-plugins/nagios-plugins.git >> ${LOGFILE} 2>&1
     cd nagios-plugins
+    sudo apt-get install autoconf
     ./tools/setup
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
