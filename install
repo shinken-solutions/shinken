@@ -2539,6 +2539,7 @@ function install_nagios-plugins(){
 
     cd $TMP
     cecho " > Getting nagios-plugins archive" green
+    rm nagios-plugins
     git clone https://github.com/nagios-plugins/nagios-plugins.git >> ${LOGFILE} 2>&1
     cd nagios-plugins
     ./tools/setup
