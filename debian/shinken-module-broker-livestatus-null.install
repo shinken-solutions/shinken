@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/broker-livestatus-null.cfg etc/shinken/shinken-specific/
 shinken/modules/logstore_null.py /usr/lib/python2.7/dist-packages/shinken/modules

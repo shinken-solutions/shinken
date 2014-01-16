@@ -181,6 +181,18 @@ Description: Shinken MongoDB storage module for WebUI broker
  main goal of Shinken is to allow users to have a fully flexible architecture
  for their monitoring system that can easily scale to large environments.
 
+Package: shinken-module-broker-webui-graphite
+Architecture: any
+Depends: shinken-module-broker-webui (= ${binary:Version}), ${misc:Depends}
+Conflicts: shinken-core
+Recommends:  shinen-module-broker-graphite
+Description: Shinken Graphite module for WebUI broker
+ This module will show graph from Graphite in the WebUI.
+ .
+ Shinken is a new, Nagios compatible monitoring tool, written in Python. The
+ main goal of Shinken is to allow users to have a fully flexible architecture
+ for their monitoring system that can easily scale to large environments.
+
 # ARBITER MODULES
 Package: shinken-module-arbiter-ws
 Architecture: any

@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/arbiter-collectd.cfg etc/shinken/shinken-specific/
 shinken/modules/collectd_arbiter.py /usr/lib/python2.7/dist-packages/shinken/modules

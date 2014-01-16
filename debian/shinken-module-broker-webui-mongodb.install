@@ -1,1 +1,2 @@
+debian/etc/shinken-specific/broker-webui-mongodb.cfg etc/shinken/shinken-specific/
 shinken/modules/mongodb_generic.py /usr/lib/python2.7/dist-packages/shinken/modules
