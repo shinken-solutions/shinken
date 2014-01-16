@@ -465,7 +465,7 @@ class DependencyNodeFactory(object):
                 node.sons.append(obj)
             else:
                 if running is False:
-                    node.configuration_errors.append(error)
+                    node.configuration_warnings.append(error)
                 else:
                     # As business rules are re-evaluated at run time on
                     # each scheduling loop, if the rule becomes invalid
