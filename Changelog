@@ -2,6 +2,33 @@
 Shinken ChangeLog
 #######################
 
+2.0   - XX/01/2014
+------------------
+	CORE ENHANCEMENT
+	Enh : Replace Pyro layer with HTTP communication layer
+        Enh : Business rules (parsing level, output)
+        Add : Shinken command line interface (cli) to install module and packs
+	Enh : Test coverage : Tests have now report per file and a global percentage of code coverage is available
+	Enh : Split configuration files into directory for daemons 	
+	Add : service_check_timeout : customize exit status
+
+	CORE FIXES
+	Fix : adjust_worker_by_load was wrong, worker was not created again
+        Fix : c.t_to_go is  None in scheduler
+	Fix : Parsing (Catch bad service_dependencies, timeperiod definitions)
+	Fix : Hosts over-checked when services are critical
+        Fix : Prevent from returning next time notif in the past.
+	Fix : allow the "__ANTI-VIRG__" substring in the configuration files
+
+	MODULES ENHANCEMENT
+        Del : Move modules to their own repository! They are now in https://github.com/shinken-monitoring
+
+	MODULES FIXES
+	Bunch of fixes on the most used modules (livestatus, graphite, ws arbiter, ) and test cases added
+
+	PACKS ENHANCEMENT
+	Del : Move packs to their own repository! They are now in https://github.com/shinken-monitoring
+
 
 1.4   - 27/05/2013
 ------------------
