@@ -1,6 +1,8 @@
---- graphite_broker.py	2013-12-27 13:50:38.246686881 -0500
-+++ graphite_broker.py.new	2014-01-16 10:19:53.939550709 -0500
-@@ -44,7 +44,7 @@
+diff --git a/shinken/modules/graphite_broker.py b/shinken/modules/graphite_broker.py
+index 1bc303b..b2ddccc 100644
+--- a/shinken/modules/graphite_broker.py
++++ b/shinken/modules/graphite_broker.py
+@@ -44,7 +44,7 @@ properties = {
      'daemons': ['broker'],
      'type': 'graphite_perfdata',
      'external': False,
@@ -9,7 +11,7 @@
  
  
  # Called by the plugin manager to get a broker
-@@ -74,30 +74,34 @@
+@@ -74,30 +74,34 @@ class Graphite_broker(BaseModule):
          self.multival = re.compile(r'_(\d+)$')
  
          # optional "sub-folder" in graphite to hold the data of a specific host
@@ -53,7 +55,7 @@
              try:
                  self.init()
                  self.con.sendall(p)
-@@ -111,10 +115,10 @@
+@@ -111,10 +115,10 @@ class Graphite_broker(BaseModule):
          metrics = PerfDatas(perf_data)
  
          for e in metrics:
@@ -68,7 +70,7 @@
  
              name = self.illegal_char.sub('_', e.name)
              name = self.multival.sub(r'.\1', name)
-@@ -128,10 +132,10 @@
+@@ -128,10 +132,10 @@ class Graphite_broker(BaseModule):
              if name_value[name] == '':
                  continue
  
@@ -83,7 +85,7 @@
              for key, value in name_value.items():
                  res.append((key, value))
          return res
-@@ -174,10 +178,11 @@
+@@ -174,10 +178,11 @@ class Graphite_broker(BaseModule):
  
          check_time = int(data['last_chk'])
  
@@ -99,7 +101,7 @@
  
          if self.graphite_data_source:
              path = '.'.join((hname, self.graphite_data_source, desc))
-@@ -187,27 +192,24 @@
+@@ -187,27 +192,24 @@ class Graphite_broker(BaseModule):
          if self.use_pickle:
              # Buffer the performance data lines
              for (metric, value) in couples:
@@ -137,7 +139,7 @@
  
  
      # A host check result brok has just arrived, we UPDATE data info with this
-@@ -229,10 +231,11 @@
+@@ -229,10 +231,11 @@ class Graphite_broker(BaseModule):
  
          check_time = int(data['last_chk'])
  
@@ -153,7 +155,7 @@
  
          if self.graphite_data_source:
              path = '.'.join((hname, self.graphite_data_source))
-@@ -242,27 +245,24 @@
+@@ -242,27 +245,24 @@ class Graphite_broker(BaseModule):
          if self.use_pickle:
              # Buffer the performance data lines
              for (metric, value) in couples:
@@ -192,7 +194,7 @@
  
      def hook_tick(self, brok):
          """Each second the broker calls the hook_tick function
-@@ -277,19 +277,18 @@
+@@ -277,19 +277,18 @@ class Graphite_broker(BaseModule):
                  self.buffer = []
                  self.ticks = 0
                  return
