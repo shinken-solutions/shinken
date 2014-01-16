@@ -1,9 +1,11 @@
 shinken (1.4-2) unstable; urgency=low
 
-  * Fix #729700
-  * Fix #729702
+  * Shinken-common now breaks old Shinken-core. Closes: #729702 
+  * Add new package shinken-module-broker-webui-graphite. Closes: #730765
+  * Change config files to respet Debian policy. Closes: #729700
+  * Package cleaning. Thanks to Mathieu Parent.
 
- -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Sun, 17 Nov 2013 14:35:12 -0500
+ -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Thu, 16 Jan 2014 11:35:12 -0500
 
 shinken (1.4-1) unstable; urgency=low
 
