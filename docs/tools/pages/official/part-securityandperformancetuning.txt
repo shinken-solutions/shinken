@@ -1,0 +1,20 @@
+| [[:::official:advancedtopics-businessrules|Prev]] |  | [[:::official:securityandperformancetuning-security|Next]] |
+| Business rules | [[:::official:start|Home]] | Chapter 57. Security Considerations |
+
+====== Part VII. Security and Performance Tuning ======
+
+**Table of Contents**
+
+  * [[:::official:securityandperformancetuning-security|57. Security Considerations]]
+    * [[:::official:securityandperformancetuning-security#introduction|Introduction]]
+    * [[:::official:securityandperformancetuning-security#best_practices|Best Practices]]
+  * [[:::official:securityandperformancetuning-tuning|59. Tuning Shinken For Maximum Performance]]
+    * [[:::official:securityandperformancetuning-tuning#introduction|Introduction]]
+    * [[:::official:securityandperformancetuning-tuning#optimization_tips:|Optimization Tips:]]
+  * [[:::official:securityandperformancetuning-largeinstalltweaks|60. Scaling a Shinken Installation]]
+    * [[:::official:securityandperformancetuning-largeinstalltweaks#scalability guide|Scalability design guide]]
+  * [[:::official:securityandperformancetuning-statistics|62. Performance statistics]]
+    * [[:::official:securityandperformancetuning-statistics#introduction|Introduction]]
+
+| [[:::official:advancedtopics-objecttricks|Prev]] |  | [[:::official:securityandperformancetuning-security|Next]] |
+| Chapter 56. Time-Saving Tricks For Object Definitions | [[:::official:start|Home]] | Chapter 57. Security Considerations |

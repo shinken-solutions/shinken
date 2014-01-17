@@ -1,0 +1,37 @@
+==== Introduction ====
+
+Welcome to the global discussion page !
+
+You can also suggest modifications, improvements or discuss the contents or layout of a page.
+
+For technical support, bug reports, discussions for complex issues and feature requests please consult the [[::official:How to contribute]] pages for links to all user and developer resources.
+
+
+Try to keep this page as clear as possible please :) \\
+Few Rules: 
+   * When you want to discuss a page that is not currently discussed, don't forget to put a link to   this  page at the top. For example: 
+ <note>This page is being discussed [[discussion|here]], modification may occur in a little time. Feel free to help us !</note>
+
+   * When you modify this page, don't forget to modify the last update time. It's easier to see activity :)
+
+
+Thank you for the time you spend on the project and your help :)
+
+
+<note tip>**LAST UPDATE : 24/07/2012 14:10 UTC ** </note>    
+==== shinken_10min_start ====
+
+**Suggestion: Perhaps the following text maybe useful for Ubuntu or Debian systems in proxy environments.**
+
+2012-07-23 MathieuMD: New page created: [[proxy_environment|Proxy Environment Configuration]]
+
+2012-07-25 rforlot: New page created: [[Multi-layer-discovery|Multi layer discovery]]
+
+==== Dev Corner ====
+
+I've added a new page to gather minimum versions of packages and modules for the upcoming 1.2 version.
+
+http://www.shinken-monitoring.org/wiki/dev_corner/prerequisites_1_2
+
+There is a lot to complete and todo, for example fill in the version of course and the usage for which part. Then of course the sorting
+in the sections etc. But I am just too fresh in this project to know this.

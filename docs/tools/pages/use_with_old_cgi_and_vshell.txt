@@ -1,0 +1,33 @@
+=== For the Old CGI & VShell ===
+
+The Old CGI and VShell uses the old flat file export. Shinken can export to this file, but beware: this method is very very slooooow!
+
+<note warning>You should migrate to a Livestatus enabled web interface.</note>
+
+=== Declare the status_dat module ===
+
+Export all status into a flat file in the old Nagios format. It's for small/medium environment because it's very slow to parse. It can be used by the Nagios CGI. It also exports the objects.cache file for this interface.
+
+Edit your /etc/shinken/shinken-specific.cfg file:
+
+<code>
+define module{
+       module_name              Status-Dat
+       module_type              status_dat
+       status_file              /var/lib/shinken/status.data
+       object_cache_file        /var/lib/shinken/objects.cache
+       status_update_interval   15 ; update status.dat every 15s
+}
+</code>
+
+=== Enable it ===
+
+Edit your /etc/shinken/shinken-specific.cfg file and find the object Broker:
+
+<code>
+ define broker{
+       broker_name      broker-1
+ [...]
+       modules          Simple-log,Status-Dat
+ }
+</code>

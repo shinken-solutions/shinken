@@ -1,0 +1,187 @@
+
+====== 10 Minute Shinken Installation Guide ======
+
+
+==== Summary ====
+
+By following this tutorial, in 10 minutes you will have the core monitoring system for your network.
+
+The very first step is to verify that your server meets the [[shinken installation requirements|requirements]], the installation script will try to meet all requirements automatically.
+ 
+You can get familiar with the [[the_shinken_architecture|Shinken Architecture]] now, or after the installation. This will explain the software components and how they fit together.
+
+
+  * Installation : [[shinken_10min_start#GNU/Linux & Unix installation|GNU/Linux & Unix]]
+  * Installation : [[shinken_10min_start#Windows installation|Windows]]
+  * Post-Installation : [[shinken_10min_start#Post installation| Common]]
+
+Ready? Let's go!
+
+==== GNU/Linux & Unix Installation ====
+
+=== Method 1: Installation Script ===
+<note warning>Do not mix installation methods! If you wish to change method, use the uninstaller from the chosen method THEN install using the alternate method.</note>
+
+The ''install'' script is located at the root of the Shinken sources. It creates the user and group, installs all dependencies and then installs Shinken. It is compatible with Debian, Ubuntu, Centos/RedHat 5.x and 6.x. The only requirement is an internet connection for the server on which you want to install Shinken (Are you [[proxy_environment|behind a proxy]]?)
+
+== Basic automated installation ==
+You can get the sources and launch the install script with just this command :
+
+  curl -L http://install.shinken-monitoring.org | /bin/bash
+
+You can then jump to the "[[shinken_10min_start#Start Shinken|Start Shinken]]" section and continue from there.
+
+If instead want to make it manually, go in the next step :)
+
+== Installation using the sources ==
+
+Download stable [[http://shinken-monitoring.org/pub/shinken-1.4.tar.gz|Shinken v1.4 tarball]] archive (or get the latest [[https://github.com/naparuba/shinken/tarball/master|git snapshot]]) and extract it somewhere:
+<code>cd ~
+wget http://www.shinken-monitoring.org/pub/shinken-1.4.tar.gz
+tar -xvzf shinken-1.4.tar.gz
+</code>
+
+By default the installation path is ''/usr/local/shinken'', but it can be specified in the configuration file (see [[https://github.com/naparuba/shinken/blob/master/install.d/README|install.d/README]]).
+
+== Run a basic installation ==
+//You need to have lsb-release package installed.//
+<code>cd ~/shinken-1.4
+./install -i</code>
+
+Done! Shinken is installed and you can edit its configuration files in ''/usr/local/shinken/etc'' (by default).
+
+Init.d scripts are also copied, so you just have to enable them at boot time (with ''chkconfig'' or ''update-rc.d'').
+
+== Start Shinken ==
+To start Shinken:
+  /etc/init.d/shinken start
+
+But wait! The installation script can do much more for you, such as installing plugins, addons, upgrading and removing an installation. See the [[https://github.com/naparuba/shinken/blob/master/install.d/README|install.d/README]] file or [[offcial:install_script|full install script doc]] to know how you can get the best out of it.
+
+== Run a full installation ==
+
+To list the plugins and addons available:
+  ./install -h
+
+A common and fully featured installation is:
+
+<code>
+./install -i &&\
+./install -p nagios-plugins &&\
+./install -p check_mem &&\
+./install -p manubulon &&\
+./install -a multisite &&\
+./install -a pnp4nagios &&\
+./install -a nagvis &&\
+./install -a mongodb
+</code>
+
+This will automatically install:
+  * Shinken
+  * Nagios plugins
+  * Manubulon SNMP plugins
+  * Multisite
+  * PNP4Nagios
+  * Nagvis
+  * MongoDB  # This is used for the SkonfUI beta and WebUI
+<note tip>
+If you encounter problems installing Multisite, it may be because the latest stable version on Check_MK's website has changed. Simply change the MK version in ''install.d/shinken.conf'' to the latest stable version: <code>export MKVER="1.2.0p3"</code>
+</note>
+
+For more information regarding the install script. See the [[offcial:install_script|full install script doc]]
+
+== Update ==
+
+See [[::official:update|update Shinken]].
+
+
+=== Method 2: On Fedora with RPM ===
+<note warning>Shinken is an official RPM</note>
+
+== First install Python Pyro ==
+<code>yum install python-pyro</code>
+
+== Then install Shinken ==
+
+<code>yum install shinken  shinken-poller\
+shinken-scheduler shinken-arbiter \
+shinken-reactionner shinken-broker shinken-receiver
+</code>
+
+== Enable Shinken services ==
+<code>for i in arbiter poller reactionner scheduler broker; do
+systemctl enable shinken-$i.service;
+done</code>
+
+== Start Shinken services ==
+<code>for i in arbiter poller reactionner scheduler broker; do
+systemctl start shinken-$i.service;
+done</code>
+
+== Stop Shinken services ==
+<code>for i in arbiter poller reactionner scheduler broker; do
+systemctl stop shinken-$i.service;
+done</code>
+
+Easy is not it?
+==== Windows Installation ====
+
+=== Method 1: Packaged .EXE Installer ===
+
+== Download the Executable installer ==
+
+Download the[[ http://www.veosoft.net/index.php/en/component/phocadownload/category/1-binary-packages?download=6:shinken-1-4 | executable installer for Shinken 1.4]]. 
+
+Thanks to J-F BUTKIEWICZ for preparing the installation package.
+
+== Read the installation instructions ==
+
+Installation instructions at http://www.veosoft.net/index.php/en/tutorials/shinken-tutorials/shinken-1-2-4-installation-on-windows-2008-r2
+
+== Run the installer ==
+
+What? You don't want to read them? No problem.
+
+Simply launch the .exe and click Next until the installation has run its course. :-)
+
+The executable installer creates service and copies the necessary files into C:/Program Files (x86)/Shinken by default, but you can change that target folder as you want.
+
+== CHECK_WMI_PLUS configuration ==
+
+By default, check_wmi_plus.pl use an user/password to access the windows WMI functions. But locally (shinken host managed itself on windows), this cannot be done. So the local template always works even if a wrong user/password is set. In the commands file, just set local to user and localhost to the computer. 
+
+But now, how to configure shinken to manage others windows hosts using wmi. Shinken team provides a set of commands in the windows template. We will see how to set the user/password to work properly. But there is an "extra" function to use the poller's service to push its credential to check_wmi_plus.
+This kind of configuration and globaly the use of check_wmi_plus under windows is described in this [[Configure_check_wmi_plus_onwindows|link]].
+==== Post installation ====
+
+=== Where is the configuration? ===
+
+The configuration is where you put the ''etc'' directory. Usually it's ''/etc/shinken'', ''/usr/local/shinken/etc'' or ''C:/Program Files/Shinken''.
+  * ''nagios.cfg'' is meant to be fully compatible with Nagios;
+  * ''shinken-specific.cfg'' contains all Shinken specific objects (ie. daemons, realms, etc.).
+
+=== Do I need to change my Nagios configuration? ===
+
+No, there is no need to change your existing Nagios configuration.
+You can use an existing Nagios configuration as-is, as long as you have installed the plugins expected by the configuration.
+
+Once you are comfortable with Shinken you can start to use its unique and powerful features.
+
+=== What do I need to do next ===
+
+The next logical steps for a new user are as listed in the [[::start|Getting Started]] page: 
+  - Setup the web interface:
+    * Use the [[use_with_webui|default WebUI]] (Note: it's the mandatory interface on Windows)
+    * Or set-up a [[use_shinken_with|third-party web interface]] and addons.
+  - Did you read the [[the_shinken_architecture|Shinken Architecture]] presentation?
+  - Complete the [[configure_shinken|Shinken basic installation]]
+  - Start adding devices to monitor, such as:
+    * [[monitoring_a_network_service|Public services]] (HTTP, SMTP, IMAP, SSH, etc.)
+    * [[monitoring_a_linux|GNU/Linux]] clients
+    * [[monitoring_a_windows|Windows]] clients
+    * [[monitoring_a_router_or_switch|Routers]]
+    * [[monitoring_a_printer|Printers]]
+
+=== Getting Help ===
+
+New and experienced users sometimes need to find documentation, troubleshooting tips, a place to chat, etc. The [[::official:how_to_contribute#Shinken resources for users|Shinken community provides many resources to help you]]. You can discuss installation documentation changes in the Shinken forums or in the [[discussion#shinken_10min_start|wiki discussion page]].

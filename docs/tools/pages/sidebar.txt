@@ -1,0 +1,12 @@
+===== Shinken Documentation =====
+  * [[start| Getting started]]
+  * [[::official:start| Official documentation]]
+  * [[::packs:start | Packs documentation]]
+  * [[::official:How to contribute]]
+  * [[::official:How to contribute| Getting help!]]
+  * [[::the_project_vision| Project vision]]
+  * [[::discussion | Global Discussion Page]]
+
+| {{ :green_dot.16x16.png?16 }}                 | Beginner |
+| {{ :orange_dot.16x16.png?16 }}                | Medium      |
+| {{ :red_dot.16x16.png?16 }}                 | Advanced  |

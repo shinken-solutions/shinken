@@ -1,0 +1,9 @@
+SEP 1 
+
+Title : Same host service macro access.
+
+Short version : allow a service macro to look **easily** to another service of the same host.
+
+Long version : it can be useful for a service in it's check_command to access to another service data on the same host. An example can be with Trending : a trend service should access to another service perfdata.
+
+Proposal : add the '.' host as a valid hostname in a macro. Means "my host".

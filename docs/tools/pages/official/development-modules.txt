@@ -1,0 +1,12 @@
+
+| [[:::official:development-pluginapi|Prev]] | [[:::official:part-development|Up]] | [[:::official:development-hackingcode|Next]] |
+| Chapter 67. Nagios/Shinken Plugin API | [[:::official:start|Home]] | Chapter 69. Hacking Shinken Code |
+
+===== Chapter 68. Developing Shinken Daemon Modules =====
+
+How to develop daemon modules...
+
+Coming shortly.
+
+| [[:::official:development-pluginapi|Prev]] | [[:::official:part-development|Up]] | [[:::official:development-hackingcode|Next]] |
+| Chapter 67. Nagios/Shinken Plugin API | [[:::official:start|Home]] | Chapter 69. Hacking Shinken Code |

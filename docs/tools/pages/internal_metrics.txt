@@ -1,0 +1,32 @@
+
+Extracted/translated from a naparuba post on monitoring-fr.org : he explained the meaning of Shinken performance metrics found in debug logs
+
+metric : Load\\
+logfile : ''scheduler-debug.log''\\
+sample line : ''[1358929012] Debug :   Load: (sleep) 0.94 (average: 0.84) -> 16%''\\
+
+In Naparuba own words “we really don’t care about Load” :-) This metric will only be useful to diagnose issues raised by other metrics, but Load on its own can’t be used. There’s a special LinuxMag issue describing Shinken’s internals (August 2012) where details can be found on this metric.
+
+metric : Latency\\
+logfile : ''scheduler-debug.log''\\
+sample line : ''[1358928992] Debug :   Latency (avg/min/max): 3869.27/0.37/114780.89''\\
+
+Latency is THE main metric to watch for. It’s not possible to have latency less than 1.5/2 seconds, by design. Values above 10 seconds mean severe issues : either load is excessive, or checks are not handled by the poller (this happens with wrong poller_tag values) (FIXME : does it pass initial configuration check ?)
+
+metric : Check average\\
+logfile : ''scheduler-debug.log''\\
+sample line : ''[1358929016] Debug :   Check average = 23 checks/s''\\
+
+This metric is a simple activity indicator, with no performance meaning. This value could almost be computed from the configuration files. When you come across high latency, this value is much less than your hardware is able to offer.
+
+metric : Wait ratio\\
+logfile : ''poller-debug.log''\\
+sample line : ''[1358373795] Debug :   Wait ratio: 2.053959''\\
+
+It’s a fairly hidden metric, but a determining factor in the global load spreading algorithm. When wait ratio is < 2, everything is fine, it means this poller is able to process everything you feed it with. In this case, the poller does not trigger penalty in order not to choke on checks. (In practice, poller always get penalties, but as long as it is less than 2, it’s fine) 
+
+metric : Broker queue size\\
+logfile : ''broker-debug.log''\\
+sample line : ''[1355680305] Debug :   [broker-1] Begin Loop: managing old broks (729)''\\
+
+Broks waiting to be processed are stored in the broker queue, and peaks at startup/reload time are common. When broks pile up, bad things happen, it means broker is not able to cope up with the flow of events.

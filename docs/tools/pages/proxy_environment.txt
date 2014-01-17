@@ -1,0 +1,84 @@
+==== Proxy Environment Configuration ====
+
+<note>Raw notes! Your help to make these instructions more useful would be appreciated!</note>
+
+==== Debian/Ubuntu ====
+
+=== Method 1 ===
+
+Configure the system **apt** with information on the proxy server. This can be done by adding the following configuration file ''/etc/apt/apt.conf''.
+
+<file>
+Acquire::http::Proxy “http://[[user][:pass]@]host[:port]/”;
+Acquire::https::Proxy “https://[[user][:pass]@]host[:port]/”;
+Acquire::ftp::Proxy “ftp://[[user][:pass]@]host[:port]/”;
+</file>
+
+For more information, see the manual of **apt.conf (5)**.
+
+=== Method 2 ===
+
+Configure the system environment with information regarding the proxy server. This can be done by adding the following settings to the file ''/etc/environment''.
+
+<file>
+...
+...
+http_proxy=http://[[user][:pass]@]host[:port]/
+https_proxy=https://[[user][:pass]@]host[:port]/
+ftp_proxy=ftp://[[user][:pass]@]host[:port]/
+no_proxy=”127.0.0.0/8,localhost[,[ip|cdir|host]]”
+...
+...
+</file>
+
+This will have effect throughout the operating system, not only in the **apt** system.
+
+If you choose this alternative, and precise use of sudo, please note that this last, for security reasons, executes in an environment where there are a very small number of variables such as //TERM//, //PATH//, //HOME//, //SHELL//, //LOGNAME//, //USER// and //USERNAME// by default. To preserve the content in ''/etc/environment'' environment run **sudo** with the option **-i** followed by the command to run, preferably indicating its absolute path; In short: ''**sudo -i <absolute-path>/command**''. For more information, see the manual of **sudo (8)**.
+
+=== Method 3 ===
+
+Indicate the server proxy on the command line in the following way
+
+<file bash>
+$ sudo http_proxy=http://[[user][:pass]@]host[:port]/ apt-get update
+</file>
+
+<file bash>
+$ sudo https_proxy=https://[[user][:pass]@]host[:port]/ apt-get update
+</file>
+
+<file bash>
+$ sudo ftp_proxy=ftp://[[user][:pass]@]host[:port]/ apt-get update
+</file>
+
+depending on the connection to your proxy server protocol ---which will be consistent with the Protocol in connection with his repository of packages---. For more information, see the manual of **bash (1)**.
+
+<note>Note that these alternatives **are not mutually exclusive**; in fact, it is advisable to **use the first two simultaneously**.</note>
+
+==== RedHat/Fedora ====
+
+For **yum** package manager, edit /etc/yum.conf and insert a line like
+<file>
+  * proxy=http://your.proxy.server:port
+</file>
+
+For **wget** also edit /etc/wgetrc. These values override environment variables
+<file>
+  * ftp_proxy = ftp://your.proxy.server:port/
+  * http_proxy = http://your.proxy.server:port/
+  * https_proxy = https://your.proxy.server:port/
+</file>
+
+
+For general use, declare **environment variables** for http/https
+<file>
+  * export http_proxy=http://your.proxy.server:port/
+  * export https_proxy=$http_proxy
+</file>
+
+And for cloning from **github**
+<file>
+  * git config --global http.proxy http://your.proxy.server:port/
+</file>
+
+If using auth proxy, syntax like "http://login:password@proxy:port/" would work, but it is not very good idea to have these passwords into plain text files...
