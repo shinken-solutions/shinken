@@ -29,3 +29,9 @@ Thumbs.db
 ._.*
 
 *pack_distribution.dat
+
+# Documentation #
+#################
+docs/build
+docs/tools/media/
+docs/tools/pages/
