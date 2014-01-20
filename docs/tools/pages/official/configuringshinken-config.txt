@@ -1,0 +1,36 @@
+| [[:::official:part-configuringshinken|Prev]] | [[:::official:part-configuringshinken|Up]] | [[:::official:configuringshinken-configmain|Next]] |
+| Part III. Configuring Shinken | [[:::official:start|Home]] | Chapter 15. Main Configuration File Options |
+
+===== Chapter 14. Configuration Overview =====
+===== Introduction =====
+
+There are several different configuration files that you're going to need to create or edit before you start monitoring anything. Be patient! Configuring Shinken can take quite a while, especially if you're first-time user. Once you figure out how things work, it'll all be well worth your time. :-)
+
+Sample configuration files are installed in the "/usr/local/shinken/etc/" directory when you follow the [[:::official:gettingstarted-quickstart|Quickstart installation guide]].
+
+===== Main Configuration File =====
+
+Main Shinken configuration files are separate in two part :
+  * Nagios compatible part (nagios.cfg)
+  * Shinken specific part (shinken-specific.cfg)
+
+Documentation for the main configuration file can be found [[:::official:configuringshinken-configmain|Main Configuration File Options]].
+
+===== Resource File(s) =====
+
+{{:official:images:configoverview-shinken.png|}}
+
+Resource files can be used to store user-defined macros. The main point of having resource files is to use them to store sensitive configuration information (like passwords), without making them available to the CGIs.
+
+You can specify one or more optional resource files by using the [[:::official:configuringshinken-configmain#configuringshinken-configmain-resource_file|resource_file]] directive in your main configuration file.
+
+===== Object Definition Files =====
+
+Object definition files are used to define hosts, services, hostgroups, contacts, contactgroups, commands, etc. This is where you define all the things you want monitor and how you want to monitor them.
+
+You can specify one or more object definition files by using the [[:::official:configuringshinken-configmain#configuringshinken-configmain-cfg_file|cfg_file]] and/or [[:::official:configuringshinken-configmain#configuringshinken-configmain-cfg_dir|cfg_dir]] directives in your main configuration file.
+
+An introduction to object definitions, and how they relate to each other, can be found [[:::official:configuringshinken-configobject|here]].
+
+| [[:::official:part-configuringshinken|Prev]] | [[:::official:part-configuringshinken|Up]] | [[:::official:configuringshinken-configmain|Next]] |
+| Part III. Configuring Shinken | [[:::official:start|Home]] | Chapter 15. Main Configuration File Options |

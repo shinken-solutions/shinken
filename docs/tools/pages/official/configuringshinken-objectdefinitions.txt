@@ -1,0 +1,64 @@
+| [[:::official:configuringshinken-configobject|Prev]] | [[:::official:part-configuringshinken|Up]] | [[:::official:configuringshinken-customobjectvars|Next]] |
+| Chapter 16. Object Configuration Overview | [[:::official:start|Home]] | Chapter 18. Custom Object Variables |
+
+===== Chapter 17. Object Definitions =====
+===== Introduction =====
+
+One of the features of Shinken' object configuration format is that you can create object definitions that inherit properties from other object definitions. An explanation of how object inheritance works can be found [[:::official:advancedtopics-objectinheritance|here]]. I strongly suggest that you familiarize yourself with object inheritance once you read over the documentation presented below, as it will make the job of creating and maintaining object definitions much easier than it otherwise would be. Also, read up on the [[:::official:advancedtopics-objecttricks|object tricks]] that offer shortcuts for otherwise tedious configuration tasks.
+
+When creating and/or editing configuration files, keep the following in mind:
+
+  - Lines that start with a '"#"' character are taken to be comments and are not processed
+  - Directive names are case-sensitive
+
+===== Sample Configuration Files =====
+
+Sample object configuration files are installed in the "/etc/shinken/" directory when you follow the [[:::official:gettingstarted-quickstart|quickstart installation guide]].
+
+===== Object Types =====
+
+  * [[:::official:configuringshinken/configobjects/host|Host]]
+  * [[:::official:configuringshinken/configobjects/hostgroup|Host Group]]
+  * [[:::official:configuringshinken/configobjects/service|Service]]
+  * [[:::official:configuringshinken/configobjects/servicegroup|Service Group]]
+  * [[:::official:configuringshinken/configobjects/contact|Contact]]
+  * [[:::official:configuringshinken/configobjects/contactgroup|Contact Group]]
+  * [[:::official:configuringshinken/configobjects/timeperiod|Time Period]]
+  * [[:::official:configuringshinken/configobjects/command|Command]]
+  * [[:::official:configuringshinken/configobjects/servicedependency|Service Dependency]]
+  * [[:::official:configuringshinken/configobjects/serviceescalation|Service Escalation]]
+  * [[:::official:configuringshinken/configobjects/hostdependency|Host Dependency]]
+  * [[:::official:configuringshinken/configobjects/hostescalation|Host Escalation]]
+  * [[:::official:configuringshinken/configobjects/hostextinfo|Extended Host Information]]
+  * [[:::official:configuringshinken/configobjects/serviceextinfo|Extended Service Information]]
+  * [[:::official:configuringshinken/configobjects/realm|Realm]]
+  * [[:::official:configuringshinken/configobjects/arbiter|Arbiter]]
+  * [[:::official:configuringshinken/configobjects/scheduler|Scheduler]]
+  * [[:::official:configuringshinken/configobjects/poller|Poller]]
+  * [[:::official:configuringshinken/configobjects/reactionner|Reactionner]]
+  * [[:::official:configuringshinken/configobjects/broker|Broker]]
+
+
+
+| [[:::official:configuringshinken-configobject|Prev]] | [[:::official:part-configuringshinken|Up]] | [[:::official:configuringshinken-customobjectvars|Next]] |
+| Chapter 16. Object Configuration Overview | [[:::official:start|Home]] | Chapter 18. Custom Object Variables |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

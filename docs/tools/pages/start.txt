@@ -1,0 +1,79 @@
+====== Welcome to the Shinken Documentation Wiki ======
+
+----
+
+You will find tutorials, how-to's and all the information required to install, configure and work with Shinken. You can edit this wiki, simply [[http://www.shinken-monitoring.org/wiki/start?do=register|create an account]] and [[http://www.shinken-monitoring.org/wiki/start?do=login|login]].
+<note>Registered user have only read acces, to be in the user group ask on #shinken IRC freenode (Seb-Solon) or in the devel-list to be granted access</note>
+
+=== Getting started with Shinken ===
+| {{ :green_dot.16x16.png?16 }} | **[[shinken 10min start | Installing and starting Shinken in 10 minutes]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[The Shinken architecture | Presenting the Shinken Architecture]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[Use shinken with | Setting up a Shinken web UI (WebUI, Thruk, MK Multisite, NagVis or PNP)]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[Configure shinken| Setting up a basic Shinken configuration]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[::shinken.io:start| Use Shinken.io to get packages]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[redhat_thruk_pnp4nagios_howto| Shinken on RedHat 6 with Thruk and PNP4Nagios HOWTO ]]**  |
+
+=== Getting data in Shinken ===
+
+| {{ :green_dot.16x16.png?16 }} | ** [[::packs:start | Using Monitoring packs]]** |
+| {{ :green_dot.16x16.png?16 }} | ** [[http://community.shinken-monitoring.org/main | Monitoring packs community exchange]]**  |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup passive checks | Using passive data acquisition modules: NSCA, TSCA, WebService...]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup active module checks |Using active data acquisition modules: NRPE and SNMP]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[Use the discovery with shinken | Setting up discovery for automated provisioning]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[Shinken plugins | Using check plugins for data acquisition]]** |
+
+=== Getting data out of Shinken ===
+| {{ :green_dot.16x16.png?16 }} | **[[Setup notification ways | Setting up notification methods]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[Setup notification escalations| Setting up notification escalation]]**  |
+| {{ :green_dot.16x16.png?16 }} | **[[sms_with_android | Sending SMS messages(and reception for ack) to one (or more) Android phones(s)]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[sms_with_gateway | Sending SMS messages by gateway ]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[the_broker_modules#Core modules| Centralizing Shinken logs]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[the_broker_modules#Core modules| Exporting data to Syslog]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[export_data_to_splunk_for_reporting| Exporting data for reporting (Splunk, Logstash, etc)]] ** (coming soon)|
+| {{ :green_dot.16x16.png?16 }} | **[[the_broker_modules#Livestatus API Module - Thruk, Nagvis and Multisite Web frontends| Enabling the Livestatus API]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[the_broker_modules#Network Based Modules - Graphite graphing| Exporting performance data to Graphite]]** |
+| {{ :green_dot.16x16.png?16 }} | **[[the_broker_modules#SQL Based Modules - PNP4Nagios Graphing| Exporting performance data to PNP]]** |
+
+=== Getting more from Shinken ===
+| {{ :green_dot.16x16.png?16 }} | **[[Setup dependencies in shinken | Setting up network and application dependencies]]**  |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup distributed shinken| Setting up distributed checks (LAN)]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup high availability shinken| Setting up high availability ]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup DMZ monitoring | Setting up DMZ monitoring]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[ip_tag_module| Adding tags on hosts based on their IP range]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup mix windows and linux polling | Mixed windows AND Linux for checks and notifications/event handlers ]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup business rules in shinken | Setting up Business rules]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Root problems and impacts | Defining on business impacts and root problem isolation]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[setup_advanced_dependencies_in_shinken | Setting up advanced dependencies]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Setup macro modulations | Setting up Macros Modulations]]** |
+
+=== Shinken for large installations ===
+
+| {{ :orange_dot.16x16.png?16 }} | **[[scaling_Shinken | Scaling Shinken for large installations ]]** |
+
+=== Shinken internals ===
+
+| {{ :orange_dot.16x16.png?16 }} | **[[How dispatching works | Shinkens' architecture data flows explained]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[livestatus shinken | Shinkens' livestatus API]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[About the high availability | What happens when a Shinken daemon crashes]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Advanced features | Shinkens' distributed architecture explained]]** |
+| {{ :orange_dot.16x16.png?16 }} | **[[Internal metrics | Shinkens' internal / performance metrics]]** |
+
+
+=== Advanced topics ===
+| {{ :red_dot.16x16.png?16 }} | **[[Setup distributed shinken with realm| Setting up  distributed checks for slow WANs and different customers with Realms]]** |
+| {{ :red_dot.16x16.png?16 }} | **[[VMWare arbiter module | Setting up automatic links between ESX hosts and VMs with Vmotion support ]]** |
+| {{ :red_dot.16x16.png?16 }} | **[[GPLI import module | Integrating GLPI and Shinken]]** |
+| {{ :red_dot.16x16.png?16 }} | **[[Landscape import module | Integrating Landscape (Ubuntu) and Shinken]]** |
+| {{ :red_dot.16x16.png?16 }} | **[[Amazon EC2 import module | Integrating Amazon EC2 and Shinken]]** |
+| {{ :red_dot.16x16.png?16 }} | **[[Use the discovery with shinken advanced | Setting up Shinken discovery rules]]**  |
+| {{ :red_dot.16x16.png?16 }} | **[[::official:start|Digging in to the official documentation for additional information]]**  |
+| {{ :red_dot.16x16.png?16 }} | **[[Retention file troubleshooting]]**  |
+
+
+
+
+
+=== Contributing to the project ===
+You want to help the project? We are happy to welcome you!
+
+| {{ :green_dot.16x16.png?16 }} | [[::official:how to contribute| Learn more about the project and the many ways you can help make it an even bigger success.]]|

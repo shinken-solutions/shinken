@@ -1,0 +1,62 @@
+| [[:::official:gettingstarted-quickstart-gnulinux|Prev]] | [[:::official:part-gettingstarted|Up]] | [[:::official:ch07|Next]] |
+| Chapter 5. Ubuntu Quickstart | [[:::official:start|Home]] | Chapter 7. Upgrading Shinken |
+
+===== Chapter 6. Windows Quickstart =====
+
+=== Abstract ===
+
+This guide is intended to provide you with simple instructions on how to install Shinken on windows and have it monitoring your local machine inside of 10 minutes. No advanced installation options are discussed here - just the basics that will work for 95% of users who want to get started.
+
+These instructions were written based on a standard Windows (tested on 2k3, 2k8, XP and Seven).
+
+=== Automated installation ===
+
+Installation should be done using the [[::shinken_10min_start| Shinken 10 minute installation]]
+  * Installs Shinken
+  * Installs common checks scripts
+  * Installs core related optional modules
+  * Uses an **installation script** that will fetch all dependancies
+  * Internet access required
+
+Read on to find out how to install Shinken manually.
+
+=== Batch file manual installation process ===
+
+Get the https://github.com/naparuba/shinken/zipball/1.2 file to c:\shinken
+
+During portions of the installation you will need to have administrator privileges to your server.
+Make sure you have installed the following packages on your Windows installation before continuing.
+
+  * [[http://www.python.org/download/|Python 2.7 for Windows]]
+  * [[http://pypi.python.org/pypi/setuptools/#windows|easy_install]]
+    * add easy_install to your windows PATH as per setup tools instructions in link above
+    * easy_install pip
+  * [[http://pypi.python.org/pypi/Pyro4/|Pyro 4 library Windows]]
+    * pip pyro4=4.14
+  * [[http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD|Windows server 2003 Resource Kit]]
+  * [[http://sourceforge.net/projects/pywin32/files/pywin32/|PyWin32]]
+
+Take the files instsrv.exe and srvany.exe from the directory of the resource kit (typically "c:\program files\Windows Resource Kits\Tools") and put them in the directory "c:\shinken\windows" (it should already exist by decompressing the archive, or you are a directory level to deep).
+
+To install all services, launch the installation batch file:
+  c:\shinken\windows\install-all.bat
+
+Launch services.msc to see your brand new services (Shinken-*).
+
+
+=== You're Done ===
+
+Congratulations! You sucessfully installed Shinken. Your journey into monitoring is just beginning. You'll no doubt want to monitor more than just your local machine, so check out the following docs...
+
+  * [[:::official:gettingstarted-monitoring-windows|Monitoring Windows machines]]
+  * [[:::official:gettingstarted-monitoring-linux|Monitoring Linux/Unix machines]]
+  * [[:::official:gettingstarted-monitoring-netware|Monitoring Netware servers]]
+  * [[:::official:gettingstarted-monitoring-routers|Monitoring routers/switches]]
+  * [[:::official:gettingstarted-monitoring-publicservices|Monitoring publicly available services ("HTTP", "FTP", "SSH", etc.)]]
+
+You can also follow the instructions on setting up the new monitoring template based method of monitoring your systems.
+  
+Follow it in the [[::start| Getting Started]] section of the Wiki.
+
+| [[:::official:gettingstarted-quickstart-gnulinux|Prev]] | [[:::official:part-gettingstarted|Up]] | [[:::official:ch07|Next]] |
+| Chapter 5. Ubuntu Quickstart | [[:::official:start|Home]] | Chapter 7. Upgrading Shinken |

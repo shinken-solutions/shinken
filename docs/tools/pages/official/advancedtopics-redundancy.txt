@@ -1,0 +1,10 @@
+| [[:::official:advancedtopics-distributed|Prev]] | [[:::official:part-advancedtopics|Up]] | [[:::official:advancedtopics-flapping|Next]] |
+| Chapter 39. Distributed Monitoring | [[:::official:start|Home]] | Chapter 41. Detection and Handling of State Flapping |
+
+===== Chapter 40. Redundant and Failover Network Monitoring =====
+===== Introduction =====
+
+**This topic is managed in the distributed section because it's a part of the Shinken architecture.**
+
+| [[:::official:advancedtopics-distributed|Prev]] | [[:::official:part-advancedtopics|Up]] | [[:::official:advancedtopics-flapping|Next]] |
+| Chapter 39. Distributed Monitoring | [[:::official:start|Home]] | Chapter 41. Detection and Handling of State Flapping |

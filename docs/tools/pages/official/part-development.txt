@@ -1,0 +1,28 @@
+| [[:::official:shinkenaddons-addons|Prev]] |  | [[:::official:development-pluginapi|Next]] |
+| Chapter 66. Nagios/Shinken Addons | [[:::official:start|Home]] | Chapter 67. Nagios/Shinken Plugin API |
+
+====== Part X. Development ======
+
+**Table of Contents**
+
+  * [[:::official:development-pluginapi|67. Nagios Plugin API]]
+    * [[:::official:development-pluginapi#other_resources|Other Resources]]
+    * [[:::official:development-pluginapi#plugin_overview|Plugin Overview]]
+    * [[:::official:development-pluginapi#return_code|Return Code]]
+    * [[:::official:development-pluginapi#plugin_output_spec|Plugin Output Spec]]
+    * [[:::official:development-pluginapi#plugin_output_examples|Plugin Output Examples]]
+    * [[:::official:development-pluginapi#plugin_output_length_restrictions|Plugin Output Length Restrictions]]
+    * [[:::official:development-pluginapi#examples|Examples]]
+  * [[:::official:development-epnplugins|68. Developing Plugins For Use With Embedded Perl]]
+    * [[:::official:development-epnplugins#introduction|Introduction]]
+    * [[:::official:development-epnplugins#target_audience|Target Audience]]
+    * [[:::official:development-epnplugins#things_you_should_do_when_developing_a_perl_plugin_(epn_or_not)|Things you should do when developing a Perl Plugin (ePN or not)]]
+    * [[:::official:development-epnplugins#things_you_must_do_to_develop_a_perl_plugin_for_epn|Things you must do to develop a Perl plugin for ePN]]
+  * [[:::official:development-hackingcode|69. Hacking Shinken Code]]
+    * [[:::official:development-hackingcode#goal_of_code_hacking_(developement)|Goal of code hacking (developement)]]
+    * [[:::official:development-hackingcode#how_is_organized_then_shinken's_code|How is organized then Shinken's code]]
+    * [[:::official:development-hackingcode#the_datadriven_programing_in_shinken_code|The Datadriven programing in Shinken code]]
+    * [[:::official:development-hackingcode#example_of_code_hackingadd_a_parameter_for_the_flapping_history|Example of code hacking : add a parameter for the flapping history]]
+
+| [[:::official:shinkenaddons-addons|Prev]] |  | [[:::official:development-pluginapi|Next]] |
+| Chapter 66. Nagios/Shinken Addons | [[:::official:start|Home]] | Chapter 67. Nagios/Shinken Plugin API |

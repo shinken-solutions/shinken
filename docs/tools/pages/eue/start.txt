@@ -1,0 +1,35 @@
+====== End User Experience Monitoring ======
+
+<note important>
+Caution : this functionnality is currently not available in the master version of shinken. 
+It is in really early alpha stage and not intented to be used in production. 
+</note>
+
+===== What is End User Experience Monitoring ? =====
+
+===== How does it work ? =====
+
+===== Install the eue stack in shinken =====
+
+===== Test the installation =====
+
+===== Supported platform and browsers =====
+
+==== Platforms : ====
+
+  * Currently only GNU/Linux (currently Centos and RedHat >= 6.0) is supported
+  * We are planning to implement eue support on Windows and MacOS platforms.
+
+==== Browsers : ====
+
+  * Firefox
+  * Chrome
+  * PhantomJS (headless webkit browser)
+  * Safari (planned on mac OSX)
+  * Internet Explorer (planned on Windows)
+
+
+
+
+
+
