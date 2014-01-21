@@ -472,7 +472,66 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
 
+    def test_svc_in_dt_and_crit_and_notif_interval_0(self):
+        self.print_header()
+        # retry_interval 2
+        # critical notification
+        # run loop -> another notification
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.notification_interval = 0
+        host.notification_options = 'c'
+        svc.notification_options = 'c'
 
+        svc.checks_in_progress = []
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
+        self.assert_(svc.current_notification_number == 0)
+        #--------------------------------------------------------------
+        # service reaches hard;2
+        # a notification must have been created
+        # notification number must be 1
+        #--------------------------------------------------------------
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT'))
+        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;CRITICAL;SOFT'))
+        self.assert_(self.log_match(3, 'SERVICE ALERT.*;CRITICAL;HARD'))
+        self.assert_(self.log_match(4, 'SERVICE EVENT HANDLER.*;CRITICAL;HARD'))
+        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assert_(svc.current_notification_number == 1)
+        self.clear_logs()
+        self.clear_actions()
+        #--------------------------------------------------------------
+        # reset host/service state
+        #--------------------------------------------------------------
+        #self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
+        #self.assert_(svc.current_notification_number == 0)
+        duration = 2
+        now = time.time()
+        # fixed downtime valid for the next 5 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        #--------------------------------------------------------------
+        # service reaches hard;2
+        # no notificatio
+        #--------------------------------------------------------------
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.assert_(self.any_log_match('SERVICE DOWNTIME ALERT.*;STARTED'))
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        # To get out of the DT.
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=2)
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assert_(svc.current_notification_number == 1)
+        self.show_and_clear_logs()
+        self.show_and_clear_actions()
 
 if __name__ == '__main__':
     unittest.main()
