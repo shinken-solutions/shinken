@@ -1222,6 +1222,10 @@ class SchedulingItem(Item):
                 contacts = self.contacts
 
         for contact in contacts:
+            # We do not want to notify again a contact with notification interval == 0 that has been already
+            # notified. Can happen when a service exit a dowtime and still in crit/warn (and not ack)
+            if n.type == "PROBLEM" and self.notification_interval == 0 and contact in self.notified_contacts:
+                continue
             # Get the property name for notif commands, like
             # service_notification_commands for service
             notif_commands = contact.get_notification_commands(cls.my_type)
