@@ -153,7 +153,7 @@ class WSGIREFBackend(object):
     def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
         self.daemon_thread_pool_size = daemon_thread_pool_size
         try:
-            self.srv = bottle.run(host=host, port=port, server=WSGIREFAdapter, quiet=False, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
+            self.srv = bottle.run(host=host, port=port, server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
         except socket.error, exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
             raise PortNotFree(msg)
