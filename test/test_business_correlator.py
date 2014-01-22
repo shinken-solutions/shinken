@@ -29,7 +29,7 @@ from shinken_test import *
 class TestBusinesscorrel(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator.cfg')
+        self.setup_with_file('etc/shinken_business_correlator.cfg')
 
     # We will try a simple bd1 OR db2
     def test_simple_or_business_correlator(self):
@@ -1509,7 +1509,7 @@ class TestConfigBroken(ShinkenTest):
     """A class with a broken configuration, where business rules reference unknown hosts/services"""
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_broken.cfg')
+        self.setup_with_file('etc/shinken_business_correlator_broken.cfg')
 
     def test_conf_is_correct(self):
         #

@@ -83,7 +83,7 @@ test_modulemanager.py
 test_module_memcache_retention.py
 test_module_merlin_sqlite.py
 test_module_mongodb_retention.py
-test_module_nagios_retention.py
+test_module_shinken_retention.py
 test_module_named_pipe_arbiter.py
 test_module_on_module.py
 test_module_passwd_ui.py

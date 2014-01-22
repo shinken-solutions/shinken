@@ -28,7 +28,7 @@ from shinken_test import *
 class TestSchedCleanQueues(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_clean_sched_queues.cfg')
+        self.setup_with_file('etc/shinken_clean_sched_queues.cfg')
 
     # Try to generate a bunch of external commands
     # and see if they are drop like it should

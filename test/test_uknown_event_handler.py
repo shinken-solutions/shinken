@@ -28,7 +28,7 @@ from shinken_test import *
 class TestUnknownEventHandler(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_uknown_event_handler.cfg')
+        self.setup_with_file('etc/shinken_uknown_event_handler.cfg')
 
     def test_dummy(self):
         self.assert_(not self.conf.conf_is_correct)

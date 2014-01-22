@@ -28,7 +28,7 @@ from shinken_test import *
 class TestHostDepWithMultipleNames(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_hostdep_with_multiple_names.cfg')
+        self.setup_with_file('etc/shinken_hostdep_with_multiple_names.cfg')
 
     def test_DepWithMultipleNames(self):
         for n in ['svn1', 'svn2', 'svn3', 'svn4', 'nas1', 'nas2', 'nas3']:

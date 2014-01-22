@@ -31,7 +31,7 @@ class TestConfigWithSymlinks(ShinkenTest):
     def setUp(self):
         if os.name == 'nt':
             return
-        self.setup_with_file('etc/nagios_conf_in_symlinks.cfg')
+        self.setup_with_file('etc/shinken_conf_in_symlinks.cfg')
 
     def test_symlinks(self):
         if os.name == 'nt':

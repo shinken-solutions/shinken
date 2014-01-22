@@ -28,7 +28,7 @@ from shinken_test import *
 class TestNotifMacros(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_notif_macros.cfg')
+        self.setup_with_file('etc/shinken_notif_macros.cfg')
 
     def test_notif_macro(self):
         #

@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_commands_perfdata.cfg')
+        self.setup_with_file('etc/shinken_commands_perfdata.cfg')
 
     def test_service_perfdata_command(self):
         self.print_header()

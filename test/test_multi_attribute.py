@@ -29,7 +29,7 @@ from shinken_test import unittest, ShinkenTest
 class TestMultiVuledAttributes(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_multi_attribute.cfg')
+        self.setup_with_file('etc/shinken_multi_attribute.cfg')
 
     def test_multi_valued_attributes(self):
         hst1 = self.sched.hosts.find_by_name("test_host_01")
@@ -53,7 +53,7 @@ class TestMultiVuledAttributes(ShinkenTest):
 class TestConfigBroken(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_multi_attribute_broken.cfg')
+        self.setup_with_file('etc/shinken_multi_attribute_broken.cfg')
 
     def test_multi_valued_attribute_errors(self):
         self.assert_(not self.conf.conf_is_correct)

@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_generators.cfg')
+        self.setup_with_file('etc/shinken_service_generators.cfg')
 
     def test_service_generators(self):
 

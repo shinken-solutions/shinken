@@ -28,7 +28,7 @@ from shinken_test import *
 class TestFlapping(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_flapping.cfg')
+        self.setup_with_file('etc/shinken_flapping.cfg')
 
     def test_flapping(self):
         #

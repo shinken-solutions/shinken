@@ -32,7 +32,7 @@ class TestMacroResolver(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_macroresolver.cfg')
+        self.setup_with_file('etc/shinken_macroresolver.cfg')
                 
 
     def get_mr(self):

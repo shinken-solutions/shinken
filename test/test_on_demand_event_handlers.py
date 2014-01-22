@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_on_demand_event_handlers.cfg')
+        self.setup_with_file('etc/shinken_on_demand_event_handlers.cfg')
 
     def test_on_demand_eh(self):
         self.print_header()

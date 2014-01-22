@@ -28,7 +28,7 @@ from shinken_test import *
 class TestNoEventHandlerDuringDowntime(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_no_event_handler_during_downtime.cfg')
+        self.setup_with_file('etc/shinken_no_event_handler_during_downtime.cfg')
 
     def test_no_event_handler_during_downtime(self):
 

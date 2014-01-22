@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestNullInheritance(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_nullinheritance.cfg')
+        self.setup_with_file('etc/shinken_nullinheritance.cfg')
 
     # We search to see if null as value really delete the inheritance
     # of a property

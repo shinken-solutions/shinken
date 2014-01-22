@@ -28,7 +28,7 @@ from shinken_test import *
 class TestNoHostTemplate(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_no_host_template.cfg')
+        self.setup_with_file('etc/shinken_no_host_template.cfg')
 
     def test_host_without_a_template(self):
         #

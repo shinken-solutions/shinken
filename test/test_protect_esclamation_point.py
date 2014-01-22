@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestProtectEscalmationPoint(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_protect_esclamation_point.cfg')
+        self.setup_with_file('etc/shinken_protect_esclamation_point.cfg')
 
     def test_dummy(self):
         #

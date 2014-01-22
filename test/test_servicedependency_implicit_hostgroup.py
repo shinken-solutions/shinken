@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestServiceDepAndGroups(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_servicedependency_implicit_hostgroup.cfg')
+        self.setup_with_file('etc/shinken_servicedependency_implicit_hostgroup.cfg')
 
     def test_implicithostgroups(self):
         #

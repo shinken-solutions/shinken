@@ -32,7 +32,7 @@ from shinken.misc.regenerator import Regenerator
 
 class TestRegenerator(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_regenerator.cfg')
+        self.setup_with_file('etc/shinken_regenerator.cfg')
 
     def look_for_same_values(self):
         # Look at Regenerator values

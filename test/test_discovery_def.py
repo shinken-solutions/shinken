@@ -28,7 +28,7 @@ from shinken_test import *
 class TestDiscoveryConf(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_discovery_def.cfg')
+        self.setup_with_file('etc/shinken_discovery_def.cfg')
 
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')

@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_host_without_cmd.cfg')
+        self.setup_with_file('etc/shinken_host_without_cmd.cfg')
 
     def test_host_is_pending(self):
         self.print_header()

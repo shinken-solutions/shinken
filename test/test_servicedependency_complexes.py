@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_servicedependency_complexes.cfg')
+        self.setup_with_file('etc/shinken_servicedependency_complexes.cfg')
 
     def test_dummy(self):
         #

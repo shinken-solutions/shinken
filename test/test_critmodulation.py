@@ -28,7 +28,7 @@ from shinken_test import *
 class TestCritMod(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_critmodulation.cfg')
+        self.setup_with_file('etc/shinken_critmodulation.cfg')
 
     def test_critmodulation_def(self):
         #

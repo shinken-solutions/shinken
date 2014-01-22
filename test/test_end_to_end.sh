@@ -501,9 +501,9 @@ echo "All launch of LB daemons is OK"
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/shinken.log
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/shinken.log
 string_in_file "\[broker-Master-1\] Connection OK to the scheduler scheduler-Master-1" $VAR/shinken.log
-string_in_file "\[broker-Master-2\] Connection OK to the scheduler scheduler-Master-1" $VAR/nagios2.log
+string_in_file "\[broker-Master-2\] Connection OK to the scheduler scheduler-Master-1" $VAR/shinken2.log
 string_in_file "initial Broks for broker broker-Master-1" $VAR/shinken.log
-string_in_file "initial Broks for broker broker-Master-2" $VAR/nagios2.log
+string_in_file "initial Broks for broker broker-Master-2" $VAR/shinken2.log
 string_in_file "OK, no more reactionner sent need" $VAR/shinken.log
 string_in_file "OK, no more poller sent need" $VAR/shinken.log
 string_in_file "OK, no more broker sent need" $VAR/shinken.log

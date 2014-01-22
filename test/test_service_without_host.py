@@ -28,7 +28,7 @@ from shinken_test import *
 class Testservice_without_host(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_without_host.cfg')
+        self.setup_with_file('etc/shinken_service_without_host.cfg')
 
     def test_service_without_host_do_not_break(self):
         self.assert_(self.conf.conf_is_correct)

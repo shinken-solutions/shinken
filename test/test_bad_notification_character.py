@@ -29,7 +29,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_bad_notification_character.cfg')
+        self.setup_with_file('etc/shinken_bad_notification_character.cfg')
 
     def test_dummy(self):
         #

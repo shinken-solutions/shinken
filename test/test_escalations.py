@@ -29,7 +29,7 @@ time_hacker.set_real_time()
 class TestEscalations(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_escalations.cfg')
+        self.setup_with_file('etc/shinken_escalations.cfg')
 
     def test_simple_escalation(self):
         self.print_header()

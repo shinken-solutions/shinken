@@ -29,7 +29,7 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
-    #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+    #    self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def test_simple_host_link(self):
         now = int(time.time())

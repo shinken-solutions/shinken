@@ -30,7 +30,7 @@ time_hacker.set_real_time()
 
 class TestStrangeCaracterInCommands(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_strange_characters_commands.cfg')
+        self.setup_with_file('etc/shinken_strange_characters_commands.cfg')
 
     # Try to call check dummy with very strange caracters and co, see if it run or
     # failed badly

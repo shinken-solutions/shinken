@@ -30,7 +30,7 @@ class TestDisableActiveChecks(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
-    #    self.setup_with_file('etc/nagios_disable_active_checks.cfg')
+    #    self.setup_with_file('etc/shinken_disable_active_checks.cfg')
 
 
     # We try to disable the actie checks and see if it's really done

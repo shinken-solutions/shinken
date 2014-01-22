@@ -28,7 +28,7 @@ from shinken_test import *
 class TestHostGroupWithSpace(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_hostgroup_with_space.cfg')
+        self.setup_with_file('etc/shinken_hostgroup_with_space.cfg')
 
 
     def test_hostgroup_with_space(self):

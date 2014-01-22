@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestServiceWithPrintName(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_with_print_as_name.cfg')
+        self.setup_with_file('etc/shinken_service_with_print_as_name.cfg')
 
     def test_service_with_print_as_name(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "print")

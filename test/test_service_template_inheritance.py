@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_template_inheritance.cfg')
+        self.setup_with_file('etc/shinken_service_template_inheritance.cfg')
 
     def test_action_url(self):
         # base-service-prod,no-graph

@@ -28,7 +28,7 @@ from shinken_test import *
 class TestModuleOnModule(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_module_on_module.cfg')
+        self.setup_with_file('etc/shinken_module_on_module.cfg')
 
     def test_module_on_module(self):
         #

@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestProblemImpact(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_problem_impact.cfg')
+        self.setup_with_file('etc/shinken_problem_impact.cfg')
 
     def test_problems_impacts(self):
         self.print_header()

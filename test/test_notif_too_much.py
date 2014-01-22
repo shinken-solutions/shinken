@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestNotifTooMuch(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_notif_too_much.cfg')
+        self.setup_with_file('etc/shinken_notif_too_much.cfg')
 
     # The goal of this test is to check if we manage this case:
     # 2 notif ways on one contact. One notif ways should activate, not the other

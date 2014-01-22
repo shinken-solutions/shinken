@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestObjectsAndNotifWays(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_objects_and_notifways.cfg')
+        self.setup_with_file('etc/shinken_objects_and_notifways.cfg')
 
     # We got strange "objects" for some contacts property when we are using notif ways
     # and asking for  broks. Search why

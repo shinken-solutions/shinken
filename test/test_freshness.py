@@ -28,7 +28,7 @@ from shinken_test import *
 class TestFreshness(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_freshness.cfg')
+        self.setup_with_file('etc/shinken_freshness.cfg')
 
     # Check if the check_freshnes is doing it's job
     def test_check_freshness(self):

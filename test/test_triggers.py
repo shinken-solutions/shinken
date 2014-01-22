@@ -28,7 +28,7 @@ from shinken.objects.trigger import Trigger
 
 class TestTriggers(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_triggers.cfg')
+        self.setup_with_file('etc/shinken_triggers.cfg')
 
     # Try to catch the perf_datas of self
     def test_function_perf(self):

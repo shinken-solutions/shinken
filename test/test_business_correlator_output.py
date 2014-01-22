@@ -29,7 +29,7 @@ from shinken_test import unittest, ShinkenTest
 class TestBusinesscorrelOutput(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_output.cfg')
+        self.setup_with_file('etc/shinken_business_correlator_output.cfg')
 
     def test_service_shorten_status(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "empty_bp_rule_output")

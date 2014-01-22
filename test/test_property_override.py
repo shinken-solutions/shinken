@@ -29,7 +29,7 @@ from shinken_test import unittest, ShinkenTest
 class TestPropertyOverride(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_property_override.cfg')
+        self.setup_with_file('etc/shinken_property_override.cfg')
 
     def test_service_property_override(self):
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc")
@@ -85,7 +85,7 @@ class TestPropertyOverride(ShinkenTest):
 class TestConfigBroken(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_property_override_broken.cfg')
+        self.setup_with_file('etc/shinken_property_override_broken.cfg')
 
     def test_service_property_override_errors(self):
         self.assert_(not self.conf.conf_is_correct)

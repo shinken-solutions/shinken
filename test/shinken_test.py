@@ -114,7 +114,7 @@ class Pluginconf(object):
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
         # i am arbiter-like

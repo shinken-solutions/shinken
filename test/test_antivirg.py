@@ -7,7 +7,7 @@ class TestConfig(ShinkenTest):
 
     def setUp(self):
         # load the configuration from file
-        self.setup_with_file('etc/nagios_antivirg.cfg')
+        self.setup_with_file('etc/shinken_antivirg.cfg')
 
     def test_hostname_antivirg(self):
         """Check that it is allowed to have a host with the "__ANTI-VIRG__" substring in its hostname"""

@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_obsess.cfg')
+        self.setup_with_file('etc/shinken_obsess.cfg')
 
     def test_ocsp(self):
         self.print_header()
@@ -122,7 +122,7 @@ class TestConfig(ShinkenTest):
         self.assert_(host.obsess_over_host)
         self.assert_(not router.obsess_over_host)
         # the router does not obsess (host definition)
-        # but it's class does (nagios.cfg)
+        # but it's class does (shinken.cfg)
         self.assert_(router.__class__.obsess_over)
 
 

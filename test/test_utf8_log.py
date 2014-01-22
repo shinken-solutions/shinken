@@ -31,7 +31,7 @@ from shinken.log import logger
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     # Try to raise an utf8 log message
     def test_utf8log(self):

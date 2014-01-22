@@ -30,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_not_hostname.cfg')
+        self.setup_with_file('etc/shinken_not_hostname.cfg')
 
     def test_not_hostname_in_service(self):
         # The service is apply with a host_group on "test_host_0","test_host_1"

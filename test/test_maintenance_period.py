@@ -31,7 +31,7 @@ from shinken.objects.timeperiod import Timeperiod
 class TestMaintPeriod(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_maintenance_period.cfg')
+        self.setup_with_file('etc/shinken_maintenance_period.cfg')
 
     def test_check_defined_maintenance_period(self):
         a_24_7 = self.sched.timeperiods.find_by_name("24x7")

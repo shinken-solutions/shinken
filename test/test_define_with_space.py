@@ -28,7 +28,7 @@ from shinken_test import *
 class TestDefineWithSpaces(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_define_with_space.cfg')
+        self.setup_with_file('etc/shinken_define_with_space.cfg')
 
     # We got a problem with define    host for example, the type read was "" and not host
     def testdefine_with_spaces(self):

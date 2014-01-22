@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_timeperiod_inheritance.cfg')
+        self.setup_with_file('etc/shinken_timeperiod_inheritance.cfg')
 
     def test_dummy(self):
         #

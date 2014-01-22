@@ -28,7 +28,7 @@ from shinken_test import *
 class TestComplexHostgroups(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_complex_hostgroups.cfg')
+        self.setup_with_file('etc/shinken_complex_hostgroups.cfg')
 
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

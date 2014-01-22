@@ -28,7 +28,7 @@ from shinken_test import *
 class TestLinkifyTemplate(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_linkify_template.cfg')
+        self.setup_with_file('etc/shinken_linkify_template.cfg')
 
     def test_linkify_template(self):
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

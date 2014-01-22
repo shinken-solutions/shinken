@@ -28,7 +28,7 @@ from shinken_test import *
 class TestNoHostCheck(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_not_execute_host_check.cfg')
+        self.setup_with_file('etc/shinken_not_execute_host_check.cfg')
 
     # We must look taht host checks are disable, and services ones are running
     def test_no_host_check(self):

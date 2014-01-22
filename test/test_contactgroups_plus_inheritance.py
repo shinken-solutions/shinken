@@ -29,7 +29,7 @@ from shinken_test import *
 class TestPlusInInheritance(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_contactgroups_plus_inheritance.cfg')
+        self.setup_with_file('etc/shinken_contactgroups_plus_inheritance.cfg')
 
     def _dump(self, h):
         print "Dumping host", h.get_name()

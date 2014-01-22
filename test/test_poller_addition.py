@@ -115,7 +115,7 @@ class BadBroker(BrokerLink):
 
 class TestPollerAddition(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_dispatcher.cfg')
+        self.setup_with_file('etc/shinken_dispatcher.cfg')
 
     def test_simple_dispatch_and_addition(self):
         print "The dispatcher", self.dispatcher

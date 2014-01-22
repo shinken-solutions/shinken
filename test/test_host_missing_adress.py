@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_host_missing_adress.cfg')
+        self.setup_with_file('etc/shinken_host_missing_adress.cfg')
 
     def test_host_missing_adress(self):
         # The router got no adress. It should be set with the

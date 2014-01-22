@@ -116,7 +116,7 @@ class BadBroker(BrokerLink):
 class TestDispatcher(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_dispatcher.cfg')
+        self.setup_with_file('etc/shinken_dispatcher.cfg')
 
     def test_simple_dispatch(self):
         for r in self.conf.realms:
@@ -317,7 +317,7 @@ class TestDispatcher(ShinkenTest):
 class TestDispatcherMultiBroker(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
+        self.setup_with_file('etc/shinken_dispatcher_multibrokers.cfg')
 
     def test_simple_dispatch(self):
         print "The dispatcher", self.dispatcher

@@ -33,7 +33,7 @@ PROFILE_BP_RULE_RE_PROCESSING = False
 class TestBusinesscorrelExpand(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_expand_expression.cfg')
+        self.setup_with_file('etc/shinken_business_correlator_expand_expression.cfg')
 
     def test_hostgroup_expansion_bprule_simple_host_srv(self):
         for name in ("bprule_00", "bprule_01", "bprule_02", "bprule_03", "bprule_04", "bprule_05", "bprule_06"):
@@ -418,7 +418,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
 class TestConfigBroken(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_expand_expression_broken.cfg')
+        self.setup_with_file('etc/shinken_business_correlator_expand_expression_broken.cfg')
 
     def test_hostgroup_expansion_errors(self):
         self.assert_(not self.conf.conf_is_correct)

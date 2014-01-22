@@ -30,7 +30,7 @@ class TestTPStateLog(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
-    #    self.setup_with_file('etc/nagios_timeperiods_state_logs.cfg')
+    #    self.setup_with_file('etc/shinken_timeperiods_state_logs.cfg')
 
 
     # A timeperiod state change should raise a log, and only when change.

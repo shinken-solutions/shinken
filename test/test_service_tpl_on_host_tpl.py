@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestSrvTplOnHostTpl(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_tpl_on_host_tpl.cfg')
+        self.setup_with_file('etc/shinken_service_tpl_on_host_tpl.cfg')
 
     # Look is a service template apply on a host one will
     # make hosts that inherit from it got such service

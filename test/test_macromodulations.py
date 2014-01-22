@@ -28,7 +28,7 @@ from shinken_test import *
 class TestMacroModulations(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_macromodulations.cfg')
+        self.setup_with_file('etc/shinken_macromodulations.cfg')
 
     def test_dummy(self):
         #

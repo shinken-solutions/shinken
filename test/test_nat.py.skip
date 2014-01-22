@@ -39,7 +39,7 @@ import subprocess
 SVC_CMD = "cd /hostlab && ./bin/shinken-#svc# -d -r -c ./test/etc/netkit/basic/#svc#d.ini\n"
 
 launchers = {
-    'arbiter': "cd /hostlab/var && ../bin/shinken-#svc# -r -c ../etc/nagios.cfg -c ../test/etc/netkit/#conf#/shinken-specific.cfg 2>&1 > ./arbiter.debug&\n",
+    'arbiter': "cd /hostlab/var && ../bin/shinken-#svc# -r -c ../etc/shinken.cfg -c ../test/etc/netkit/#conf#/shinken-specific.cfg 2>&1 > ./arbiter.debug&\n",
     'broker': SVC_CMD,
     'poller': SVC_CMD,
     'reactionner': SVC_CMD,

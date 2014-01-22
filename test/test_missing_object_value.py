@@ -28,7 +28,7 @@ from shinken_test import *
 class TestMissingObjectValue(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_missing_object_value.cfg')
+        self.setup_with_file('etc/shinken_missing_object_value.cfg')
 
     def test_missing_object_value(self):
         #

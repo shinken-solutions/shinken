@@ -28,7 +28,7 @@ from shinken_test import *
 class TestWarnAboutNoBrokerInRealm(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_no_broker_in_realm_warning.cfg')
+        self.setup_with_file('etc/shinken_no_broker_in_realm_warning.cfg')
 
     def test_no_broker_in_realm_warning(self):
         dist = self.conf.realms.find_by_name("Distant")

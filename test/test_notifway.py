@@ -29,7 +29,7 @@ from shinken_test import unittest, ShinkenTest
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_notif_way.cfg')
+        self.setup_with_file('etc/shinken_notif_way.cfg')
 
     def test_contact_def(self):
         #

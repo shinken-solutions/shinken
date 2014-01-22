@@ -57,7 +57,7 @@ test_reactionner_tag_get_notif.py
 test_orphaned.py
 #test_module_pickle_retention_broker.py
 #test_module_pickle_retention_arbiter.py
-#test_module_nagios_retention.py
+#test_module_shinken_retention.py
 test_discovery_def.py
 test_hostgroup_no_host.py
 test_nocontacts.py

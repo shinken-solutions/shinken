@@ -28,7 +28,7 @@ from shinken_test import *
 class TestNestedHostgroups(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_nested_hostgroups.cfg')
+        self.setup_with_file('etc/shinken_nested_hostgroups.cfg')
 
     # We got the service "NestedService" apply in High level
     # group. And this one got a sub group, low one. each got ONE

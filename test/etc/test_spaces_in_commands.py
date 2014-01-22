@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_spaces_in_commands.cfg')
+        self.setup_with_file('etc/shinken_spaces_in_commands.cfg')
 
     def test_dummy(self):
         #

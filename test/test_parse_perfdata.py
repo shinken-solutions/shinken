@@ -30,7 +30,7 @@ class TestParsePerfdata(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
-    #    self.setup_with_file('etc/nagios_parse_perfdata.cfg')
+    #    self.setup_with_file('etc/shinken_parse_perfdata.cfg')
 
     def test_parsing_perfdata(self):
         s = 'ramused=1009MB;;;0;1982 swapused=540MB;;;0;3827 memused=1550MB;2973;3964;0;5810'

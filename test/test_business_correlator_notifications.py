@@ -29,7 +29,7 @@ from shinken_test import unittest, ShinkenTest
 class TestBusinesscorrelNotifications(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_notifications.cfg')
+        self.setup_with_file('etc/shinken_business_correlator_notifications.cfg')
 
     def test_bprule_standard_notifications(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_default")

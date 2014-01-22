@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestReactionnerTagGetNotifs(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_reactionner_tag_get_notif.cfg')
+        self.setup_with_file('etc/shinken_reactionner_tag_get_notif.cfg')
 
     # For a service, we generate a notification and a event handler.
     # Each one got a specific reactionner_tag that we will look for.

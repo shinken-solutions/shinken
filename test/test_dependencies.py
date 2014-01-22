@@ -29,7 +29,7 @@ sys.setcheckinterval(10000)
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_dependencies.cfg')
+        self.setup_with_file('etc/shinken_dependencies.cfg')
 
     def test_service_dependencies(self):
         self.print_header()

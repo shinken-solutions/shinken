@@ -27,10 +27,10 @@ from shinken_test import *
 
 class TestPackHashMemory(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_pack_hash_memory.cfg')
+        self.setup_with_file('etc/shinken_pack_hash_memory.cfg')
 
     def setUp2(self):
-        self.setup_with_file('etc/nagios_pack_hash_memory2.cfg')
+        self.setup_with_file('etc/shinken_pack_hash_memory2.cfg')
 
     def test_pack_hash_memory(self):
         packs = {0: set(), 1: set()}

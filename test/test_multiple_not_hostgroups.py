@@ -28,7 +28,7 @@ from shinken_test import *
 class TestMultipleNotHG(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_multiple_not_hostgroups.cfg')
+        self.setup_with_file('etc/shinken_multiple_not_hostgroups.cfg')
 
     def test_dummy(self):
 

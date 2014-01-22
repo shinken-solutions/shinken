@@ -28,7 +28,7 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_bad_contact_call.cfg')
+        self.setup_with_file('etc/shinken_bad_contact_call.cfg')
 
     def test_bad_contact_call(self):
         # The service got a unknow contact. It should raise an error

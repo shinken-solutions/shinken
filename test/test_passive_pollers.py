@@ -115,7 +115,7 @@ class BadBroker(BrokerLink):
 
 class TestPassivePoller(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_passive_pollers.cfg')
+        self.setup_with_file('etc/shinken_passive_pollers.cfg')
 
     def test_simple_passive_pollers(self):
         print "The dispatcher", self.dispatcher

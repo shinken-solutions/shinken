@@ -28,7 +28,7 @@ from shinken_test import *
 class TestBadEscaOnGroups(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_bad_escalation_on_groups.cfg')
+        self.setup_with_file('etc/shinken_bad_escalation_on_groups.cfg')
 
     def test_escalation_inheritance(self):
         #

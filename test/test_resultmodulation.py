@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_resultmodulation.cfg')
+        self.setup_with_file('etc/shinken_resultmodulation.cfg')
 
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

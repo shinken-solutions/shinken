@@ -28,7 +28,7 @@ from shinken_test import *
 class TestInheritanceAndPlus(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_inheritance_and_plus.cfg')
+        self.setup_with_file('etc/shinken_inheritance_and_plus.cfg')
 
     def test_inheritance_and_plus(self):
         #

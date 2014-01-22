@@ -27,7 +27,7 @@ from shinken_test import *
 
 class Testservice_withhost_exclude(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_withhost_exclude.cfg')
+        self.setup_with_file('etc/shinken_service_withhost_exclude.cfg')
 
     def test_service_withhost_exclude(self):
         #

@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestStarInGroups(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_star_in_hostgroups.cfg')
+        self.setup_with_file('etc/shinken_star_in_hostgroups.cfg')
 
     # If we reach a good start, we are ok :)
     # the bug was that an * hostgroup expand get all host_name != ''

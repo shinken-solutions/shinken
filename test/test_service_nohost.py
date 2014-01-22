@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestServiceNoHost(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_service_nohost.cfg')
+        self.setup_with_file('etc/shinken_service_nohost.cfg')
 
     def test_service_with_no_host(self):
         # Be sure than the conf is valid (a service is void, but it's not a crime)
