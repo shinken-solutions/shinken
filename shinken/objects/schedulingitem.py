@@ -34,6 +34,7 @@ import re
 import random
 import time
 import traceback
+import copy
 from datetime import datetime
 
 from item import Item
@@ -875,7 +876,7 @@ class SchedulingItem(Item):
             # it is smarter to log error before notification)
             self.raise_alert_log_entry()
             self.check_for_flexible_downtime()
-            self.remove_in_progress_notifications()
+            #[volatile - I want every notification] #####self.remove_in_progress_notifications()
             if not no_action:
                 self.create_notifications('PROBLEM')
             # Ok, event handlers here too
@@ -1190,7 +1191,7 @@ class SchedulingItem(Item):
             # downtime/flap/etc do not change the notification number
             next_notif_nb = self.current_notification_number
 
-        n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
+        n = Notification(type, 'scheduled', 'VOID', None, copy.copy(self), None, t, \
             timeout=cls.notification_timeout, \
             notif_nb=next_notif_nb)
 
@@ -1272,7 +1273,7 @@ class SchedulingItem(Item):
         self.update_in_checking()
 
         # the check is being forced, so we just replace next_chk time by now
-        if force and self.in_checking:
+        if force and self.in_checking and not getattr(self, 'is_volatile', False):
             now = time.time()
             c_in_progress = self.checks_in_progress[0]
             c_in_progress.t_to_go = now
