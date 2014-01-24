@@ -32,7 +32,6 @@ Replaces: shinken-arbiter, shinken-broker, shinken-discovery,
  shinken-scheduler, shinken-core
 Depends: ${python:Depends}, pyro | python2-pyro4, ${misc:Depends}, adduser
 Recommends: nagios-plugins-basic, bsd-mailx | mailx,
- shinken-common (= ${binary:Version}), ${misc:Depends},
  shinken-module-broker-webui (= ${binary:Version}),
  shinken-module-broker-webui-cfgpassword (= ${binary:Version}),
  shinken-module-broker-webui-sqlitedb (= ${binary:Version}),
