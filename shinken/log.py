@@ -69,6 +69,9 @@ class Log:
     def __init__(self):
         self._level = logging.NOTSET
         self.display_time = True
+        self.display_level = True
+        self.log_colors = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}
+
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -108,6 +111,8 @@ class Log:
     def set_display_time(self, b):
         self.display_time = b
 
+    def set_display_level(self, b):
+        self.display_level = b
 
     def debug(self, msg, *args, **kwargs):
         self._log(logging.DEBUG, msg, *args, **kwargs)
@@ -139,6 +144,9 @@ class Log:
         # ignore messages when message level is lower than Log level
         if level < self._level:
             return
+
+        # display the level only if we ask locally and globaly
+        display_level = display_level & self.display_level
 
         # We format the log in UTF-8
         if isinstance(message, str):
@@ -172,7 +180,7 @@ class Log:
         if print_it and len(s) > 1:            
             # Take a color so we can print if it's a TTY
             if is_tty():
-                color = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}.get(level, None)
+                color = self.log_colors.get(level, None)
             else:
                 color = None
             

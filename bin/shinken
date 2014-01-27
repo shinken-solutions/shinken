@@ -59,8 +59,12 @@ from shinken.log import logger, cprint
 from shinken.objects.config import Config
 
 
-logger.set_level(logger.DEBUG)
+logger.set_level(logger.WARNING)
 logger.set_display_time(False)
+logger.set_display_level(False)
+logger.log_colors[logger.DEBUG] = 'cyan'
+logger.log_colors[logger.INFO] = 'magenta'
+
 
 CONFIG = {}
 
@@ -148,8 +152,8 @@ class CLICommander(object):
 
         # Main list of keywords for the first parameter
         self.keywords = {}
-
         if not 'paths' in self.config or not 'cli' in self.config.get('paths',[]):
+            logger.error('Cannot load cli commands, missing paths or cli entry in the config')
             return
 
         self.init_done = True
@@ -217,7 +221,7 @@ class CLICommander(object):
                 continue
             # More cleassic command
             args = shlex.split(line.encode('utf8', 'ignore'))
-            print "WANT TO CALL WITH ARGS", args
+            logger.debug("WANT TO CALL WITH ARGS %s" % args)
             self.one_loop(args)
 
 
@@ -233,7 +237,7 @@ class CLICommander(object):
             logger.error('CLI loading not done: missing configuration data. Please run --init')
             return
 
-        print "ARGS", command_args
+        logger.debug("ARGS: %s" % command_args)
         keyword = command_args.pop(0)
         mod = self.keywords.get(keyword, None)
         if mod is None:
@@ -266,7 +270,7 @@ class CLICommander(object):
 
         cmd_opts, cmd_args = command_parser.parse_args(command_args)
         f = mod.get('f', None)
-        print "CALLING", f, "WITH", cmd_args, "and", cmd_opts, type(cmd_opts), dir(cmd_opts)
+        logger.debug("CALLING" + str(f) + "WITH" + str(cmd_args) + "and" + str(cmd_opts) + str(type(cmd_opts)) + str(dir(cmd_opts)))
         f(*cmd_args,**cmd_opts.__dict__)
 
 
@@ -317,7 +321,16 @@ if __name__ == '__main__':
                       dest="do_list", help=("List available commands"))
     parser.add_option('--init', action='store_true',
                       dest="do_init", help=("Initialize/refill your ~/.shinken.ini file"))
+    parser.add_option('-D', action='store_true',
+                      dest="do_debug", help=("Enable the debug mode"))
+    parser.add_option('-v', action='store_true',
+                      dest="do_verbose", help=("Be more verbose"))
 
+    if '-v' in sys.argv:
+        logger.set_level(logger.INFO)
+
+    if '-D' in sys.argv:
+        logger.set_level(logger.DEBUG)
 
     cfg = None
     if not os.path.exists(DEFAULT_CFG):
@@ -370,11 +383,11 @@ if __name__ == '__main__':
         for (k,m) in CLI.keywords.iteritems():
             cprint('%s ' %  k , 'green', end='')
             cprint(': %s' %  m['description'])
-        sys.exit(2)
+        sys.exit(0)
 
 
     if opts.do_init:
-        new_cfg = ConfigParserWithComments()#.RawConfigParser()
+        new_cfg = ConfigParserWithComments()
         modify = False
         if not cfg:
             cfg = ConfigParser.ConfigParser()

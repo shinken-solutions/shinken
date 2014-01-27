@@ -67,7 +67,7 @@ def create_archive(to_pack):
     logger.debug("Preparing to pack the directory %s" % to_pack)
     package_json_p = os.path.join(to_pack, 'package.json')
     if not os.path.exists(package_json_p):
-        print "Error : Missing file", package_json_p
+        logger.error("Error : Missing file %s" % package_json_p)
         sys.exit(2)
     package_json = read_package_json(open(package_json_p))
 
@@ -136,7 +136,7 @@ def publish_archive(archive):
 
 
 def do_publish(to_pack='.'):
-    print "WILL CALL PUBLISH.py with", to_pack
+    logger.debug("WILL CALL PUBLISH.py with %s" % to_pack)
     archive = create_archive(to_pack)
     publish_archive(archive)
 
@@ -181,7 +181,7 @@ def search(look_at):
 
 def print_search_matches(matches):
     if len(matches) == 0:
-        print "Sorry, no match found in shinken.io"
+        logger.warning("No match founded in shinken.io")
         return
     for p in matches:
         name = p['name']
@@ -195,10 +195,8 @@ def print_search_matches(matches):
 
 
 def do_search(*look_at):
-    print "CALL SEARCH WITH ARGS", look_at
+    logger.debug("CALL SEARCH WITH ARGS %s" % look_at)
     matches = search(look_at)
-
-    #print "DEBUG: FOUNDED", matches
     print_search_matches(matches)
 
 
@@ -221,7 +219,8 @@ def _copytree(src, dst, symlinks=False, ignore=None):
 
 
 def grab_package(pname):
-    print "Trying to grab package", pname
+    cprint('Grabbing : ' , end='')
+    cprint('%s' %  pname, 'green')
 
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
@@ -247,7 +246,7 @@ def grab_package(pname):
         sys.exit(2)
     else:
         ret = response.getvalue()
-        print "GOT A RETURN OF", len(ret)
+        logger.debug("CURL result len : %d " % len(ret))
         return ret
 
 
@@ -262,7 +261,7 @@ def grab_local(d):
 
     package_json_p = os.path.join(to_pack, 'package.json')
     if not os.path.exists(package_json_p):
-        print "Error : Missing file", package_json_p
+        logger.error("Error : Missing file %s" % package_json_p)
         sys.exit(2)
     package_json = read_package_json(open(package_json_p))
 
@@ -297,28 +296,28 @@ def grab_local(d):
 
 
 def install_package(pname, raw):
-    print "We must install the package", pname, "of size", len(raw)
+    logger.debug("Installing the package %s (size:%d)" % (pname, len(raw)))
     tmpdir = os.path.join(tempfile.gettempdir(), pname)
-    print "WIll unpack the package into", tmpdir
+    logger.debug("Unpacking the package into %s" % tmpdir)
 
     if os.path.exists(tmpdir):
-        print "removing previous tmp dir"
+        logger.debug("Removing previous tmp dir %s" % tmpdir)
         shutil.rmtree(tmpdir)
-    print "Creating temporary dir", tmpdir
+    logger.debug("Creating temporary dir %s" % tmpdir)
     os.mkdir(tmpdir)
 
     # open a file with the content
     f = StringIO(raw)
     tar_file = tarfile.open(fileobj=f, mode="r")
-    print "tar file contents:"
+    logger.debug("Tar file contents:")
     for i in tar_file.getmembers():
         path = i.name
         if path == '.':
             continue
         if not path.startswith('./') or '..' in path:
-            print "SECURITY: the path %s seems dangerous!" % path
+            logger.error("SECURITY: the path %s seems dangerous!" % path)
             return
-        print "PATH:%s" % path
+        logger.debug("\t%s" % path)
     # Extract all in the tmpdir
     tar_file.extractall(tmpdir)
     tar_file.close()
@@ -326,10 +325,10 @@ def install_package(pname, raw):
 
     package_json_p = os.path.join(tmpdir, 'package.json')
     if not os.path.exists(package_json_p):
-        print "Error : bad archive : Missing file", package_json_p
+        logger.error("Error : bad archive : Missing file %s" % package_json_p)
         return None
     package_json = read_package_json(open(package_json_p))
-    print "WILL Install package with", package_json
+    logger.debug("Package.json content %s " % package_json)
 
     modules_dir = CONFIG['paths']['modules']
     share_dir   = CONFIG['paths']['share']
@@ -343,9 +342,7 @@ def install_package(pname, raw):
 
     p_share  = os.path.join(tmpdir, 'share')
 
-    print "TMPDIR", tmpdir
-    print "MODULES DIR", modules_dir
-    print "PNAME", pname
+    logger.debug("TMPDIR:%s modules_dir:%s pname:%s" %(tmpdir, modules_dir, pname))
     # Now install the package from $TMP$/module/* to $MODULES$/pname/*
     p_module = os.path.join(tmpdir, 'module')
     if os.path.exists(p_module):
@@ -388,9 +385,12 @@ def install_package(pname, raw):
         logger.info("Merging the test package data into your test directory")
         # We don't use shutils because it NEED etc_dir to be non existant...
         # Come one guys..... cp is not as terrible as this...
-        print "COPY", p_tests, test_dir
+        logger.debug("COPYING %s into %s" % (p_tests, test_dir))
         _copytree(p_tests, test_dir)
         logger.info("Copy done in the test directory %s" % test_dir)
+
+    cprint('OK ', 'green', end='')
+    cprint('%s' % pname)
 
 
 
