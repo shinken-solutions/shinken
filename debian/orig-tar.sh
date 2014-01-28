@@ -3,6 +3,10 @@
 # shinken_1.4.orig.tar.gz
 set -e
 
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+exit
+
 MAJOR_VERSION=1.4
 
 SHINKEN_URL=https://github.com/naparuba/shinken
@@ -19,6 +23,10 @@ wget https://jquery-jsonp.googlecode.com/files/jquery.jsonp-2.2.1.js -O $SHINKEN
 wget http://mobile-web-development-with-phonegap.eclipselabs.org.codespot.com/svn-history/r163/trunk/com.mds.apg/resources/jqm/jquery.mobile/jquery.mobile-1.1.0.js -O $SHINKEN_TARGET/shinken/webui/htdocs/js/jquery.mobile-1.1.0.js
 wget https://raw.github.com/joequery/Stupid-Table-Plugin/master/stupidtable.js -O $SHINKEN_TARGET/shinken/webui/htdocs/js/stupidtable.js
 wget http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/jquery-ui.js -O $SHINKEN_TARGET/shinken/webui/htdocs/js/jquery-ui-1.8.17.custom.js
+wget https://raw2.github.com/fgnass/spin.js/85275f5fe82ba816b80f1155a96f08884cf98fbb/dist/spin.jsa -O $SHINKEN_TARGET/shinken/webui/htdocs/js
+# Delete useless files and plugins
+rm -rf $SHINKEN_TARGET/shinken/webui/plugins/eue
+rm -f $SHINKEN_TARGET/doc/architecture.*
 
 # Prepare source
 tar czfv shinken_${MAJOR_VERSION}.orig.tar.gz $SHINKEN_TARGET

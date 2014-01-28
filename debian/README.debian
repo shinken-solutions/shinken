@@ -1,0 +1,25 @@
+shinken for Debian
+------------------
+
+
+USAGE
+
+  The "shinken" meta-package installs all mandatory packages to have the 
+  "shinken" WebUI available at "http://localhost:7767".
+  After install you can use it with the following credentials :
+  * Username: admin
+  * Password: admin
+
+CONFIGURATION
+
+  The package installs a default configuration in "/etc/shinken/".
+  You can find modules configuration in "/etc/shinken/shinken-specific/".
+  You can change admin password and add user in "/etc/shinken/contacts.cfg".
+
+  If you use the "shinken" meta-package or the "shinken-module-broker-webui" 
+  package, please change the 'auth_secret' option in 
+  "/etc/shinken/shinken-specific/broker-webui.cfg".
+
+
+ -- Thibault Cohen <thibault.cohen@debian.org>  Tue, 28 Jan 2014 18:30:59 -0500
+

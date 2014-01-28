@@ -1,6 +1,0 @@
-Template: shinken/instructions
-Type: note
-_Description: To access to Shinken
- * Address: http://127.0.0.1:7767
- * Username: admin
- * Password: admin
