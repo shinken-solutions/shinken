@@ -125,6 +125,7 @@ class CLICommander(object):
             'values'  : [('etc', '/etc/shinken'), ('lib','/var/lib/shinken'),
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
                          ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
+                         ('doc', '%(lib)s/doc'),
                          ]}
                     ,
                     'shinken.io':{

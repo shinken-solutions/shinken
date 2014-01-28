@@ -21,5 +21,5 @@ Getting Started
     gettingstarted-monitoring-printers
     gettingstarted-monitoring-routers
     gettingstarted-monitoring-publicservices
-
+    shinken_plugins
 

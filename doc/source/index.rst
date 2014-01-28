@@ -26,7 +26,7 @@ Contents:
     13_how_to_monitor/index
     14_how_to_contribute/index
     15_development/index
-    89_modules/index
+    89_packages/index
     99_references/index
 
 
