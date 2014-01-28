@@ -333,8 +333,9 @@ def install_package(pname, raw):
     share_dir   = CONFIG['paths']['share']
     packs_dir   = CONFIG['paths']['packs']
     etc_dir     = CONFIG['paths']['etc']
+    doc_dir     = CONFIG['paths']['doc']
     test_dir   = CONFIG['paths'].get('test', '/__DONOTEXISTS__')
-    for d in (modules_dir, share_dir, packs_dir):
+    for d in (modules_dir, share_dir, packs_dir, doc_dir):
         if not os.path.exists(d):
             logger.error("The installation directory %s is missing!" % d)
             return
@@ -354,6 +355,22 @@ def install_package(pname, raw):
         # shutil will do the create dir
         shutil.copytree(p_module, mod_dest)
         logger.info("Copy done in the module directory %s" % mod_dest)
+
+
+    p_doc  = os.path.join(tmpdir, 'doc')
+    logger.debug("TMPDIR:%s doc_dir:%s pname:%s" %(tmpdir, doc_dir, pname))
+    # Now install the package from $TMP$/doc/* to $MODULES$/doc/source/89_packages/pname/*
+    if os.path.exists(p_doc):
+        logger.info("Installing the doc package data")
+        doc_dest = os.path.join(doc_dir, 'source', '89_packages', pname)
+        if os.path.exists(doc_dest):
+            logger.info("Removing previous doc install at %s" % doc_dest)
+
+            shutil.rmtree(doc_dest)
+        # shutil will do the create dir
+        shutil.copytree(p_doc, doc_dest)
+        logger.info("Copy done in the doc directory %s" % doc_dest)
+
 
     # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
     p_pack = os.path.join(tmpdir, 'pack')
