@@ -38,7 +38,6 @@ CONFIG = None
 
 
 
-
 ############# ********************        PUBLISH           ****************###########
 
 def read_package_json(fd):

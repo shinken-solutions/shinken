@@ -597,6 +597,12 @@ if not is_update:
         _path, _file = os.path.split(p)
         data_files.append( (os.path.join(var_root, _path), [p]))
 
+    # Also add doc files to the var directory
+    for p in gen_data_files('doc'):
+        _path, _file = os.path.split(p)
+        data_files.append( (os.path.join(var_root, _path), [p]))
+
+
     # Also add cli files to the var directory
     for p in gen_data_files('cli'):
         _path, _file = os.path.split(p)

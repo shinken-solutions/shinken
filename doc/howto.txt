@@ -1,0 +1,4 @@
+# First generate the reference docs in automatic way
+sphinx-apidoc -f -o source/99_references/ ../shinken/
+# Then build the whole html tree
+sphinx-build -b html -d build/doctrees source/ build/html/
