@@ -1,5 +1,6 @@
 Source: shinken
 Maintainer: Thibault Cohen <thibault.cohen@savoirfairelinux.com>
+Uploaders: Stéphane kanschine <carxwol@hexecho.net>
 Section: net
 Priority: extra
 Vcs-Git: git://anonscm.debian.org/collab-maint/shinken.git
