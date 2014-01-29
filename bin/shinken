@@ -178,7 +178,8 @@ class CLICommander(object):
                     m_keywords = v.get('keywords', [])
                     for k in m_keywords:
                         e = {'f':f, 'args' : v.get('args', []),
-                             'description':v.get('description', '')}
+                             'description':v.get('description', ''),
+                             'came_from':dname}
                         # Finally save it
                         self.keywords[k] = e
 
@@ -381,9 +382,18 @@ if __name__ == '__main__':
     # Maybe he/she just want to list our commands?
     if opts.do_list:
         print "Available commands:"
-        for (k,m) in CLI.keywords.iteritems():
-            cprint('%s ' %  k , 'green', end='')
-            cprint(': %s' %  m['description'])
+        all_from = {}
+        for (k, m) in CLI.keywords.iteritems():
+            came_from = m['came_from']
+            if came_from not in all_from:
+                all_from[came_from] = [(k,m)]
+            else:
+                all_from[came_from].append((k,m))
+        for (mod_name, d) in all_from.iteritems():
+            print '%s:' % mod_name
+            for (k,m) in d:
+                cprint('\t%s ' %  k , 'green', end='')
+                cprint(': %s' %  m['description'])
         sys.exit(0)
 
 
