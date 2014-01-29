@@ -73,6 +73,7 @@ Edit ''/etc/thruk/thruk_local.conf'' and declare the Shinken peer:
 
 ::
 
+    enable_shinken_features = 1
     <Component Thruk::Backend>
         <peer>
             name   = External Shinken
@@ -80,6 +81,13 @@ Edit ''/etc/thruk/thruk_local.conf'' and declare the Shinken peer:
             <options>
                 peer    = 127.0.0.01:50000
             </options>
+            # Uncomment the following lines if you want to configure shinken through Thruk
+            #<configtool>
+            #    core_type      = shinken
+            #    core_conf      = /etc/shinken/shinken.cfg
+            #    obj_check_cmd  = service shinken check
+            #    obj_reload_cmd = service shinken restart
+            #</configtool>
         </peer>
     </Component>
 
