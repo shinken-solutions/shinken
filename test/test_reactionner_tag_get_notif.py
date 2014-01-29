@@ -77,6 +77,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_eventhandler.pl'))
 
+
     # Same that upper, but with modules types
     def test_good_checks_get_only_tags_with_specific_tags_andmodule_types(self):
         now = int(time.time())

@@ -67,8 +67,9 @@ daemons_config = {
     Arbiter:    ["etc/core/shinken.cfg"]
 }
 
+import random
 
-HIGH_PORT = 65488
+HIGH_PORT = random.randint(30000,65000)
 run = 0   # We will open some ports but not close them (yes it's not good) and
 # so we will open a range from a high port
 
@@ -104,22 +105,22 @@ class template_Daemon_Bad_Start():
         print "Testing bad pidfile ..."
         d = self.get_daemon()
         d.workdir = tempfile.mkdtemp()
-        d.pidfile = os.path.join(d.workdir, "daemon.pid")
-        f = open(d.pidfile, "w")
-        f.close()
-        os.chmod(d.pidfile, 0)
+        d.pidfile = os.path.join('/DONOTEXISTS', "daemon.pid")
+        #f = open(d.pidfile, "w")
+        #f.close()
+        #os.chmod(d.pidfile, 0)
         self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start)
-        os.unlink(d.pidfile)
+        #os.unlink(d.pidfile)
         os.rmdir(d.workdir)
 
     def test_bad_workdir(self):
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         d = self.get_daemon()
-        d.workdir = tempfile.mkdtemp()
-        os.chmod(d.workdir, 0)
+        d.workdir = '/DONOTEXISTS'
+        #os.chmod(d.workdir, 0)
         self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start)
         d.do_stop()
-        os.rmdir(d.workdir)
+        #os.rmdir(d.workdir)
 
     def test_port_not_free(self):
         print("Testing port not free ... mypid=%d" % (os.getpid()))
