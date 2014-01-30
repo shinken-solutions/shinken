@@ -526,6 +526,9 @@ do_cmd_on() {
 ############################
 ## Main:
 
+if [ "$CMD" = 'force-reload' ]; then
+    CMD=restart
+fi
 case "$CMD" in
     start|stop|restart|status)
         do_cmd_on "$CMD" "$SUBMODULES"
