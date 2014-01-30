@@ -122,7 +122,7 @@ SUBMODULES=""
 
 usage() {
     cat << END
-Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+Usage: $SCRIPTNAME [ -d ] {start|stop|status|restart|reload|force-reload|check} $_usage_mods_
 
  -d  start requested module(s) in debug mode, only useful with start|restart
 
