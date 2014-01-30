@@ -28,6 +28,7 @@ Thumbs.db
 *.pid
 ._.*
 *~
+\#*#
 
 *pack_distribution.dat
 
