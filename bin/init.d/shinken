@@ -37,8 +37,8 @@
 #     - receiver    : manage all passive data
 ### END INIT INFO
 
-# Deadlink :(
-# http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+# Reference:
+# http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
 
 
 NAME="shinken"
