@@ -188,12 +188,6 @@ else
     done
 fi
 
-# Now look if some required variables are pre defined:
-if ! test "$SHINKENCFG"
-then
-    SHINKENCFG="$ETC/shinken.cfg"
-fi
-
 # If var or run dir is missing, create them and chown them
 [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
 [ ! -d $RUN ] && mkdir -p $RUN && chown $SHINKENUSER:$SHINKENGROUP $RUN
