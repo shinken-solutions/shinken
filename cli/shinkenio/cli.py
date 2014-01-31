@@ -182,8 +182,19 @@ def print_search_matches(matches):
     if len(matches) == 0:
         logger.warning("No match founded in shinken.io")
         return
+    # We will sort and uniq results (maybe we got a all search
+    # so we will have both pack&modules, but some are both
+    ps = {}
+    names = [p['name'] for p in matches]
+    names = list(set(names))
+    names.sort()
+    
     for p in matches:
         name = p['name']
+        ps[name] = p
+    
+    for name in names:
+        p = ps[name]
         user_id = p['user_id']
         keywords = p['keywords']
         description = p['description']
@@ -195,16 +206,14 @@ def print_search_matches(matches):
 
 def do_search(*look_at):
     # test for  generic search 
-    if  look_at == ('all',) or  len(look_at) !=  1 :
+    if  look_at == ('all',):
         matches = []
-        matches += [{u'keywords': [], u'user_id': u'', u'name': u'#'*10, u'description': u' Pack List '+'#'*10}]
         look_at = ('pack',)
         matches += search(look_at)
-        matches += [({u'keywords': [], u'user_id': u'', u'name': u'#'*10, u'description': u' Module List '+'#'*10})]
         look_at = ('module',)
         matches += search(look_at)
     else:
-        logger.debug("CALL SEARCH WITH ARGS %s" % look_at)
+        logger.debug("CALL SEARCH WITH ARGS %s" % str(look_at))
         matches = search(look_at)
     if matches == [] : print ('you are unlucky, use "shinken search all" for a complete list ')
     print_search_matches(matches)
