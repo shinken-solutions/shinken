@@ -19,8 +19,65 @@
 # Reference:
 # http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
 
+curpath=$(cd $(dirname "$0") && pwd)
 
 NAME="shinken"
+
+### =========================================================================
+### Path defined at install time ...
+#   $ETC$ is where we put all configuration files
+#   $VAR$ is where we put some variables files (replaced by $RUN$ and $LOG$ for now)
+#   $SCRIPTS_BIN$ is where the launch scripts will be send
+#   $RUN$ is where we put pid files
+#   $LOG$ is where we put log files
+ETC='$ETC$'
+VAR='$VAR$'
+BIN='$SCRIPTS_BIN$'
+RUN='$RUN$'
+LOG='$LOG$'
+
+# ... or guessed
+test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
+test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
+test "$BIN" || BIN=$(cd $curpath/.. && pwd)
+
+### =========================================================================
+### General config
+# location of the shinken configuration file
+SHINKENCFG="$ETC/shinken.cfg"
+# We got 2 configs because tools like Centreon don't generate all
+# configuration (only the shinken.cfg part)
+if [ -f "$ETC/shinken-specific.cfg" ]; then
+    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+fi
+
+# nicelevel to run shinken daemon with
+NICENESS=5
+
+# user/group for the var/run rights
+SHINKENUSER=shinken
+SHINKENGROUP=shinken
+HOME=`grep ^$SHINKENUSER: /etc/passwd | cut -d: -f 6`
+
+### =========================================================================
+### Daemons config
+for daemon in arbiter scheduler poller reactionner broker receiver skonf; do
+    DAEMON=$(echo "$daemon" | tr [:lower:] [:upper:])
+    if [ "$daemon" != 'arbiter' ]; then
+        # location of the daemon configuration
+        eval ${DAEMON}CFG="$ETC/daemons/${daemon}d.ini"
+    fi
+    # The command to launch
+    eval ${DAEMON}DAEMON=$BIN/shinken-${daemon}
+    # The PID file
+    eval ${DAEMON}PID="$RUN/${daemon}d.pid"
+    eval ${DAEMON}DEBUGFILE="$LOG/${daemon}-debug.log"
+done
+# Arbiter override
+if [ -r $SHINKENCFG ] ; then
+    tmppid=`grep 'lock_file=' $SHINKENCFG | grep -v '#' | tail -n 1 | awk -F '=' '{print $2}'`
+    ARBITERPID=${tmppid-$RUN/arbiterd.pid}
+fi
 
 AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 
@@ -32,13 +89,6 @@ else
     SCRIPTNAME=$SHINKEN_MODULE_FILE
 fi
 
-curpath=$(cd $(dirname "$0") && pwd)
-#echo curpath is $curpath filename is $(basename "$0")
-
-## Default paths:
-test "$BIN" || BIN=$(cd $curpath/.. && pwd)
-test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
-test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
@@ -151,13 +201,6 @@ fi
 # Now place us in our var directory so even our arbiter will be
 # happy for opening its pid and cmd files
 cd $VAR
-
-#echo BIN=$BIN
-#echo VAR=$VAR
-#echo ETC=$ETC
-
-#set -xv
-
 
 echo_success() {
    log_end_msg 0 $*
