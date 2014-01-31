@@ -208,6 +208,7 @@ class build_config(Command):
         if not is_update:
             # The default file must have good values for the directories:
             # etc, var and where to push scripts that launch the app.
+            self.generate_shinken_file("bin/init.d/shinken.in", os.path.join(self.build_base, "bin/init.d/shinken"))
             self.generate_shinken_file("bin/default/shinken.in", os.path.join(self.build_base, "bin/default/shinken"))
             self.update_configfiles()
             self.copy_objects_file()
@@ -495,7 +496,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     data_files = [
         (
             os.path.join('/etc', 'init.d'),
-            ['bin/init.d/shinken',
+            [
              'bin/init.d/shinken-arbiter',
              'bin/init.d/shinken-broker',
              'bin/init.d/shinken-receiver',
@@ -593,6 +594,10 @@ if not is_update:
     data_files.append(
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken']
+         ))
+    data_files.append(
+        (os.path.join(etc_root, 'init.d',),
+         ['build/bin/init.d/shinken']
          ))
 
     for (dname, dfile) in daemon_ini_files:
