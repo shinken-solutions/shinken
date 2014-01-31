@@ -194,9 +194,22 @@ def print_search_matches(matches):
 
 
 def do_search(*look_at):
-    logger.debug("CALL SEARCH WITH ARGS %s" % look_at)
-    matches = search(look_at)
+    # test for  generic search 
+    if  look_at == ('all',) or  len(look_at) !=  1 :
+        matches = []
+        matches += [{u'keywords': [], u'user_id': u'', u'name': u'#'*10, u'description': u' Pack List '+'#'*10}]
+        look_at = ('pack',)
+        matches += search(look_at)
+        matches += [({u'keywords': [], u'user_id': u'', u'name': u'#'*10, u'description': u' Module List '+'#'*10})]
+        look_at = ('module',)
+        matches += search(look_at)
+    else:
+        logger.debug("CALL SEARCH WITH ARGS %s" % look_at)
+        matches = search(look_at)
+    if matches == [] : print ('you are unlucky, use "shinken search all" for a complete list ')
     print_search_matches(matches)
+
+
 
 
 
