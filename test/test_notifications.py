@@ -282,8 +282,6 @@ class TestNotif(ShinkenTest):
         #-----------------------------------------------------------------
         # relax with a successful check
         # there is 1 action, the eventhandler.
-        # there is a second action: the master recover notification
-        # but it becomes a zombie very soon, because it has no effect
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
@@ -292,9 +290,10 @@ class TestNotif(ShinkenTest):
         self.show_actions()
         self.assert_(len(svc.notifications_in_progress) == 0)
         self.assert_(len(svc.notified_contacts) == 0)
-        self.assert_(self.count_actions() == 2)
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
+
 
     def test_host_in_downtime_or_down_service_critical(self):
         self.print_header()

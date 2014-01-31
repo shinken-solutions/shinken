@@ -224,6 +224,7 @@ class ShinkenTest(unittest.TestCase):
         check.status = 'waitconsume'
         self.sched.waiting_results.append(check)
 
+
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61, verbose=True):
         for ref in reflist:
             (obj, exit_status, output) = ref
@@ -236,9 +237,11 @@ class ShinkenTest(unittest.TestCase):
                 obj.update_in_checking()
                 self.fake_check(obj, exit_status, output)
             self.sched.manage_internal_checks()
+
             self.sched.consume_results()
             self.sched.get_new_actions()
             self.sched.get_new_broks()
+            self.sched.scatter_master_notifications()
             self.worker_loop(verbose)
             for ref in reflist:
                 (obj, exit_status, output) = ref
@@ -247,6 +250,7 @@ class ShinkenTest(unittest.TestCase):
             #time.sleep(ref.retry_interval * 60 + 1)
             if do_sleep:
                 time.sleep(sleep_time)
+
 
     def worker_loop(self, verbose=True):
         self.sched.delete_zombie_checks()
@@ -268,6 +272,7 @@ class ShinkenTest(unittest.TestCase):
             self.show_actions()
         #print "------------ worker loop end ----------------"
 
+
     def show_logs(self):
         print "--- logs <<<----------------------------------"
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
@@ -275,6 +280,7 @@ class ShinkenTest(unittest.TestCase):
                 brok.prepare()
                 print "LOG:", brok.data['log']
         print "--- logs >>>----------------------------------"
+
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
@@ -289,19 +295,24 @@ class ShinkenTest(unittest.TestCase):
                 print "EVENTHANDLER:", a
         print "--- actions >>>----------------------------------"
 
+
     def show_and_clear_logs(self):
         self.show_logs()
         self.clear_logs()
+
 
     def show_and_clear_actions(self):
         self.show_actions()
         self.clear_actions()
 
+
     def count_logs(self):
         return len([b for b in self.sched.broks.values() if b.type == 'log'])
 
+
     def count_actions(self):
         return len(self.sched.actions.values())
+
 
     def clear_logs(self):
         id_to_del = []
@@ -311,8 +322,10 @@ class ShinkenTest(unittest.TestCase):
         for id in id_to_del:
             del self.sched.broks[id]
 
+
     def clear_actions(self):
         self.sched.actions = {}
+
 
     def log_match(self, index, pattern):
         # log messages are counted 1...n, so index=1 for the first message

@@ -37,7 +37,7 @@ except ImportError:
     import imp, os
     # For security reasons, try not to load `shinken` from parent
     # directory when running as root.
-    if not hasattr(os, 'getuid') or os.getuid() != 0:
+    if True or not hasattr(os, 'getuid') or os.getuid() != 0:
         imp.load_module('shinken', *imp.find_module('shinken',
             [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
     else:

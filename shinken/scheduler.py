@@ -72,30 +72,31 @@ class Scheduler:
             2: ('consume_results', self.consume_results, 1), # incorporate checks and dependencies
             3: ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
             4: ('get_new_broks', self.get_new_broks, 1), # and broks
-            5: ('delete_zombie_checks', self.delete_zombie_checks, 1),
-            6: ('delete_zombie_actions', self.delete_zombie_actions, 1),
+            5: ('scatter_master_notifications', self.scatter_master_notifications, 1),
+            6: ('delete_zombie_checks', self.delete_zombie_checks, 1),
+            7: ('delete_zombie_actions', self.delete_zombie_actions, 1),
             # 3: (self.delete_unwanted_notifications, 1),
-            7: ('check_freshness', self.check_freshness, 10),
-            8: ('clean_caches', self.clean_caches, 1),
-            9: ('update_retention_file', self.update_retention_file, 3600),
-            10: ('check_orphaned', self.check_orphaned, 60),
+            8: ('check_freshness', self.check_freshness, 10),
+            9: ('clean_caches', self.clean_caches, 1),
+            10: ('update_retention_file', self.update_retention_file, 3600),
+            11: ('check_orphaned', self.check_orphaned, 60),
             # For NagVis like tools: update our status every 10s
-            11: ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
+            12: ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             # Check for system time change. And AFTER get new checks
             # so they are changed too.
-            12: ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
+            13: ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
-            13: ('manage_internal_checks', self.manage_internal_checks, 1),
+            14: ('manage_internal_checks', self.manage_internal_checks, 1),
             # clean some times possible overridden Queues, to do not explode in memory usage
             # every 1/4 of hour
-            14: ('clean_queues', self.clean_queues, 1),
+            15: ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
-            15: ('update_business_values', self.update_business_values, 60),
+            16: ('update_business_values', self.update_business_values, 60),
             # Reset the topology change flag if need
-            16: ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
-            17: ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
-            18: ('send_broks_to_modules', self.send_broks_to_modules, 1),
-            19: ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
+            17: ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
+            18: ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
+            19: ('send_broks_to_modules', self.send_broks_to_modules, 1),
+            20: ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
         }
 
         # stats part
@@ -514,6 +515,60 @@ class Scheduler:
                     #print "The elements", i.get_name(), "change it's business_impact value from", was, "to", new
                     self.get_and_register_status_brok(i)
 
+
+    # Each second we search for master notification that are scatterisable and we do the job
+    # we take the sons and we put them into our actions queue
+    def scatter_master_notifications(self):
+            now = time.time()
+            for a in self.actions.values():
+                # We only want notifications
+                if a.is_a != 'notification':
+                    continue
+                if a.status == 'scheduled' and a.is_launchable(now):
+                    if not a.contact:
+                        # This is a "master" notification created by create_notifications.
+                        # It wont sent itself because it has no contact.
+                        # We use it to create "child" notifications (for the contacts and
+                        # notification_commands) which are executed in the reactionner.
+                        item = a.ref
+                        childnotifications = []
+                        if not item.notification_is_blocked_by_item(a.type, now):
+                            # If it is possible to send notifications of this type at the current time, then create
+                            # a single notification for each contact of this item.
+                            childnotifications = item.scatter_notification(a)
+                            for c in childnotifications:
+                                c.status = 'scheduled'
+                                self.add(c)  # this will send a brok
+
+                        # If we have notification_interval then schedule the next notification (problems only)
+                        if a.type == 'PROBLEM':
+                            # Update the ref notif number after raise the one of the notification
+                            if len(childnotifications) != 0:
+                                # notif_nb of the master notification was already current_notification_number+1.
+                                # If notifications were sent, then host/service-counter will also be incremented
+                                item.current_notification_number = a.notif_nb
+
+                            if item.notification_interval != 0 and a.t_to_go is not None:
+                                # We must continue to send notifications.
+                                # Just leave it in the actions list and set it to "scheduled" and it will be found again later
+                                # Ask the service/host to compute the next notif time. It can be just
+                                # a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                # or maybe before because we have an escalation that need to raise up before
+                                a.t_to_go = item.get_next_notification_time(a)
+
+                                a.notif_nb = item.current_notification_number + 1
+                                a.status = 'scheduled'
+                            else:
+                                # Wipe out this master notification. One problem notification is enough.
+                                item.remove_in_progress_notification(a)
+                                self.actions[a.id].status = 'zombie'
+
+                        else:
+                            # Wipe out this master notification. We don't repeat recover/downtime/flap/etc...
+                            item.remove_in_progress_notification(a)
+                            self.actions[a.id].status = 'zombie'
+
+
     # Called by poller to get checks
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
@@ -545,71 +600,30 @@ class Scheduler:
         # If reactionner want to notify too
         if do_actions:
             for a in self.actions.values():
-                # if do_action, call the reactionner, and so reactionner_tags by default is ['None']
-                # by default reactionner_tag is 'None' and reactionner_tags is ['None'] too
-                # So if not the good one, loop for next :)
-                if not a.reactionner_tag in reactionner_tags:
-                    continue
+                is_master = (a.is_a == 'notification' and not a.contact)
 
-                # same for module_type
-                if not a.module_type in module_types:
-                    continue
+                if not is_master:
+                    # if do_action, call the reactionner, and so reactionner_tags by default is ['None']
+                    # by default reactionner_tag is 'None' and reactionner_tags is ['None'] too
+                    # So if not the good one, loop for next :)
+                    if not a.reactionner_tag in reactionner_tags:
+                        continue
+
+                    # same for module_type
+                    if not a.module_type in module_types:
+                        continue
 
                 # And now look for can launch or not :)
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
                     a.worker = worker_name
-                    if a.is_a == 'notification' and not a.contact:
-                        # This is a "master" notification created by create_notifications.
-                        # It wont sent itself because it has no contact.
-                        # We use it to create "child" notifications (for the contacts and
-                        # notification_commands) which are executed in the reactionner.
-                        item = a.ref
-                        childnotifications = []
-
-                        if not item.notification_is_blocked_by_item(a.type, now):
-                            # If it is possible to send notifications of this type at the current time, then create
-                            # a single notification for each contact of this item.
-                            childnotifications = item.scatter_notification(a)
-                            for c in childnotifications:
-                                c.status = 'inpoller'
-                                self.add(c)  # this will send a brok
-                                new_c = c.copy_shell()
-                                res.append(new_c)
-
-                        # If we have notification_interval then schedule the next notification (problems only)
-                        if a.type == 'PROBLEM':
-                            # Update the ref notif number after raise the one of the notification
-                            if len(childnotifications) != 0:
-                                # notif_nb of the master notification was already current_notification_number+1.
-                                # If notifications were sent, then host/service-counter will also be incremented
-                                item.current_notification_number = a.notif_nb
-
-                            if item.notification_interval != 0 and a.t_to_go is not None:
-                                # We must continue to send notifications.
-                                # Just leave it in the actions list and set it to "scheduled" and it will be found again later
-                                # Ask the service/host to compute the next notif time. It can be just
-                                # a.t_to_go + item.notification_interval * item.__class__.interval_length
-                                # or maybe before because we have an escalation that need to raise up before
-                                a.t_to_go = item.get_next_notification_time(a)
-
-                                a.notif_nb = item.current_notification_number + 1
-                                a.status = 'scheduled'
-                            else:
-                                # Wipe out this master notification. One problem notification is enough.
-                                item.remove_in_progress_notification(a)
-                                self.actions[a.id].status = 'zombie'
-
-                        else:
-                            # Wipe out this master notification. We don't repeat recover/downtime/flap/etc...
-                            item.remove_in_progress_notification(a)
-                            self.actions[a.id].status = 'zombie'
-                    else:
+                    if not is_master:
                         # This is for child notifications and eventhandlers
                         new_a = a.copy_shell()
                         res.append(new_a)
         return res
-
+    
+    
     # Called by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':

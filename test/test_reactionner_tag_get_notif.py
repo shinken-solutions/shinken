@@ -48,20 +48,34 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         print "Go bad now"
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
 
+        to_del = []
         for a in self.sched.actions.values():
+            print "\n\nA?", a, "\nZZZ%sZZZ" % a.command
             # Set them go NOW
             a.t_to_go = now
             # In fact they are already launched, so we-reenabled them :)
+            print "AHAH?", a.status, a.__class__.my_type
+            if a.__class__.my_type == 'notification' and (a.status == 'zombie' or a.status == ' scheduled'):
+                to_del.append(a.id)
+
             a.status = 'scheduled'
             # And look for good tagging
             if a.command.startswith('plugins/notifier.pl'):
-                print a.__dict__
-                print a.reactionner_tag
+                print 'TAG:%s' % a.reactionner_tag
                 self.assert_(a.reactionner_tag == 'runonwindows')
+            if a.command.startswith('plugins/sms.pl'):
+                print 'TAG:%s' % a.reactionner_tag
+                self.assert_(a.reactionner_tag == 'sms')
             if a.command.startswith('plugins/test_eventhandler.pl'):
-                print a.__dict__
-                print a.reactionner_tag
+                print 'TAG: %s' % a.reactionner_tag
                 self.assert_(a.reactionner_tag == 'eventtag')
+
+        print "\n\n"
+        for _i in to_del:
+            print "DELETING", self.sched.actions[_i]
+            del self.sched.actions[_i]
+
+        print "NOW ACTION!"*20,'\n\n'
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
@@ -70,6 +84,16 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         for c in taggued_runonwindows_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/notifier.pl'))
+
+
+        # Ok the tags are defined as it should, now try to get them as a reactionner :)
+        # Now get only tag ones
+        taggued_sms_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['sms'])
+        self.assert_(len(taggued_sms_checks) > 0)
+        for c in taggued_sms_checks:
+            # Should be the host one only
+            self.assert_(c.command.startswith('plugins/sms.pl'))
+
 
         taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'])
         self.assert_(len(taggued_eventtag_checks) > 0)

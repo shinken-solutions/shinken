@@ -108,4 +108,6 @@ To Jean-Claude Computing for his patch about syslog module collisions too
 To Robin Gloster for his bug fix about bad wmi ini dir
 To Samuel Milette-Lacombe for his patch about core configuration export on broker
 To Mathieu Parent for his patch about Thruk doc
+To Aina Rakotoson for her bug report about reactionner_tag logic fail, and her patch to fix about it
+
 
