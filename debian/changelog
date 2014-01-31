@@ -3,6 +3,7 @@ shinken (1.4-3) unstable; urgency=low
   * Delete useless debconf files. Closes: #736395
   * Delete sourceless flash file. Closes: #736789
   * Add source for sourceless file. Closes: #736784
+  * Fix mongodb dependencies. Closes: #732556
   * Add a new uploader
 
  -- Thibault Cohen <thibault.cohen@savoirfairelinux.com>  Tue, 28 Jan 2014 18:30:59 -0500
