@@ -14,7 +14,6 @@ override_dh_clean:
 	rm -rf ./build
 	rm -rf ./Shinken.egg-info
 	dh_clean
-	debconf-updatepo
 
 override_dh_install:
 	# INSTALL
