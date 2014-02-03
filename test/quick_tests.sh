@@ -150,6 +150,7 @@ launch_and_assert test_business_correlator_expand_expression.py
 launch_and_assert test_business_correlator_output.py
 launch_and_assert test_business_correlator_notifications.py
 launch_and_assert test_bad_servicedependencies.py
+launch_and_assert test_missing_cariarereturn.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.

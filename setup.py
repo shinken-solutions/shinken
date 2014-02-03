@@ -278,7 +278,7 @@ pidfile=%s/%sd.pid
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/libexec",
+                                    "/var/lib/shinken/libexec",
                                     self.plugins_path)
 
         # And update the shinken.cfg file for all /usr/local/shinken/var
@@ -304,7 +304,7 @@ local_log=%s/arbiterd.log
             outname = os.path.join(self.build_dir, name)
 
             update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/var", self.var_path)
+                                    "/var/lib/shinken", self.var_path)
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
@@ -597,23 +597,22 @@ if not is_update:
         _path, _file = os.path.split(p)
         data_files.append( (os.path.join(var_root, _path), [p]))
 
-    # Also add doc files to the var directory
-    for p in gen_data_files('doc'):
-        _path, _file = os.path.split(p)
-        data_files.append( (os.path.join(var_root, _path), [p]))
+# Always overrides doc and cli even for update
+for p in gen_data_files('doc'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
 
 
-    # Also add cli files to the var directory
-    for p in gen_data_files('cli'):
-        _path, _file = os.path.split(p)
-        data_files.append( (os.path.join(var_root, _path), [p]))
+# Also add cli files to the var directory
+for p in gen_data_files('cli'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
 
 
 
 # compute scripts
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
-print "All package _data"
 if __name__ == "__main__":
 
     setup(

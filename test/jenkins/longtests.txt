@@ -123,6 +123,7 @@ test_antivirg.py
 test_business_correlator_expand_expression.py
 test_multi_attribute.py
 test_property_override.py
+test_missing_cariarereturn.py
 
 
 # takes long
