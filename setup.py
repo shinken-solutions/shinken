@@ -493,35 +493,31 @@ main_config_files = ('shinken.cfg',)
 additionnal_config_files = ()
 
 config_objects_file = (
-                        'discovery_runs.cfg',
+                        'discovery/discovery_runs.cfg',
                         'templates.cfg',
                         'dependencies.cfg',
-                        'timeperiods.cfg',
                         'time_templates.cfg',
-                        'contacts.cfg',
-                        'discovery_rules.cfg',
+                        'discovery/discovery_rules.cfg',
                         'hosts/localhost.cfg',
                         'services/services.cfg',
-                        'contactgroups.cfg',
                         'escalations.cfg',
-                        'commands.cfg',
-                        'discovery.cfg',
+                        'discovery/discovery.cfg',
                         'servicegroups.cfg',
-                        'hostgroups.cfg',
                         'certs/server.pem',
                         'certs/client.pem',
                         'certs/ca.pem',
 )
 
 
-#print "SRV PACK FILES", srv_pack_files
 config_objects_file_extended = list(config_objects_file)
 
 
 all_etc_files = []
 # Do not put daemons in this list, because it will override other modification
 for p in ['packs', 'arbiters', 'brokers', 'modules',
-          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers']:
+          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers',
+          'timeperiods', 'contacts', 'contactgroups', 'commands',
+          'hostgroups']:
     # Get all files in this dir
     _files = gen_data_files('etc/%s' % p)
     # We must remove the etc from the paths
@@ -551,7 +547,7 @@ daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
                     ('scheduler', 'daemons/schedulerd.ini'),
                     )
 
-resource_cfg_files = ('resource.cfg',)
+resource_cfg_files = ()
 
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
 #the package_data of setup(), but from a point of view of the
