@@ -39,7 +39,7 @@ from copy import copy
 
 from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp
+from shinken.property import StringProp, ListProp, BoolProp, IntegerProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -55,7 +55,7 @@ class Item(object):
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
         'name':                     StringProp(default=''),
-
+        'definition_order':         IntegerProp(default='100'),
         # TODO: find why we can't uncomment this line below.
         #'register':                 BoolProp(default='1'),
     }
@@ -678,6 +678,7 @@ class Items(object):
         for i in self:
             i.compute_hash()
 
+
     # We create the reversed list so search will be faster
     # We also create a twins list with id of twins (not the original
     # just the others, higher twins)
@@ -692,6 +693,7 @@ class Items(object):
                     self.reversed_list[name] = id
                 else:
                     self.twins.append(id)
+
 
     def find_id_by_name(self, name):
         if hasattr(self, 'reversed_list'):
@@ -708,12 +710,14 @@ class Items(object):
                         return i.id
             return None
 
+
     def find_by_name(self, name):
         id = self.find_id_by_name(name)
         if id is not None:
             return self.items[id]
         else:
             return None
+
 
     # Search items using a list of filter callbacks. Each callback is passed
     # the item instances and should return a boolean value indicating if it
@@ -731,11 +735,13 @@ class Items(object):
                 items.append(i)
         return items
 
+
     # prepare_for_conf_sending to flatten some properties
     def prepare_for_sending(self):
         for i in self:
             i.prepare_for_conf_sending()
 
+    
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):

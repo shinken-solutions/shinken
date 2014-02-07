@@ -35,7 +35,7 @@ from item import Items
 from schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
-from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names, to_name_if_possible
+from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names, to_name_if_possible, strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -1175,17 +1175,26 @@ class Hosts(Items):
     # a template that use it
     def find_hosts_that_use_template(self, tpl_name):
         res = set()
+        tpl_name = tpl_name.strip()
 
         # First find the template
         tpl = None
         for h in self:
             # Look for template with the good name
-            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name.strip():
+            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name:
                 tpl = h
 
-        # If we find none, we return nothing (easy case:) )
+        # If we find none, we sould manually lookup all hosts to find this 'tag'
         if tpl is None:
-            return []
+            for h in self:
+                if not hasattr(h, 'host_name') or h.is_tpl():
+                    continue
+                # Manually lookup for the templates defines in use
+                tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
+                if tpl_name in tnames:
+                    res.add(h.host_name)
+                
+            return list(res)
 
         # Ok, we find the tpl. We should find its father template too
         for t in self.templates.values():

@@ -244,6 +244,7 @@ class TestCommand(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('poller_tag', 'None'),
         ('reactionner_tag', 'None'),
@@ -266,6 +267,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('unknown_members', []),
         ('id', 0),
@@ -290,6 +292,7 @@ class TestContact(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('alias', 'none'),
         ('contactgroups', ''),
@@ -325,6 +328,7 @@ class TestDiscoveryrule(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('creation_type', 'service'),
         ('discoveryrule_order', '0'),
@@ -344,6 +348,7 @@ class TestDiscoveryrun(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ])
 
@@ -361,6 +366,7 @@ class TestEscalation(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('notification_interval', '-1'),
         ('escalation_period', ''),
@@ -381,6 +387,7 @@ class TestHostdependency(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('dependent_hostgroup_name', ''),
         ('hostgroup_name', ''),
@@ -408,6 +415,7 @@ class TestHostescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('notification_interval', '30'),
         ('escalation_period', ''),
@@ -428,6 +436,7 @@ class TestHostextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('notes', ''),
         ('notes_url', ''),
@@ -453,6 +462,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('unknown_members', []),
         ('id', 0),
@@ -478,6 +488,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('display_name', ''),
         ('parents', ''),
@@ -557,6 +568,7 @@ class TestModule(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('modules', ''),
         ])
@@ -579,6 +591,7 @@ class TestNotificationway(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('host_notifications_enabled', '1'),
         ('service_notifications_enabled', '1'),
@@ -599,6 +612,7 @@ class TestPack(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ])
 
@@ -616,6 +630,7 @@ class TestRealm(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('unknown_members', []),
         ('id', 0),
@@ -639,6 +654,7 @@ class TestResultmodulation(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('exit_codes_match', ''),
         ('exit_code_modulation', None),
@@ -659,6 +675,7 @@ class TestServicedependency(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('dependent_hostgroup_name', ''),
         ('hostgroup_name', ''),
@@ -687,6 +704,7 @@ class TestServiceescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('notification_interval', '30'),
         ('escalation_period', ''),
@@ -707,6 +725,7 @@ class TestServiceextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('notes', ''),
         ('notes_url', ''),
@@ -728,6 +747,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('unknown_members', []),
         ('id', 0),
@@ -753,6 +773,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('max_check_attempts', '1'),
         ('hostgroup_name', ''),
@@ -830,9 +851,11 @@ class TestTimeperiod(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('alias', ''),
         ('use', ''),
+        ('definition_order', '100'),
         ('register', '1'),
         ('dateranges', []),
         ('exclude', []),
@@ -853,6 +876,7 @@ class TestTrigger(PropertiesTester, ShinkenTest, unittest.TestCase):
     properties = dict([
         ('imported_from', 'unknown'),
         ('use', ''),
+        ('definition_order', '100'),
         ('name', ''),
         ('code_src', ''),
         ])
