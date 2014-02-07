@@ -381,6 +381,8 @@ class Service(SchedulingItem):
 
     # Get our realm, so in fact our host one
     def get_realm(self):
+        if self.host is None:
+            return None
         return self.host.get_realm()
 
     def get_hostgroups(self):
