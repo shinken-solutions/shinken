@@ -2,36 +2,59 @@
 Shinken ChangeLog
 #######################
 
-2.0-BETA1   - XX/XX/2014
+2.0-RC   - 2014/02/10
 -----------------------
 	CORE ENHANCEMENT
-	Enh : Replace Pyro layer with HTTP communication layer
-        Enh : Business rules (parsing level, output)
-        Add : Shinken command line interface (cli) to install module and packs
-	Enh : Test coverage : Tests have now report per file and a global percentage of code coverage is available
-	Enh : Split configuration files into directory for daemons 	
+	Enh : Replace Pyro layer with HTTP(s) communication layer, still the same ports of course
+        Enh : (huge) Business rules enhancement (parsing level, output and tag/group linking) (thanks to Christophe Simon)
+        Add : Shinken command line interface (cli) to install packages (module and packs) and serve doc
+	Enh : Split configuration files into directory for daemons and objects
 	Add : service_check_timeout : customize exit status
-	Enh : Ensure LSB path for Arbiter
-	Del : N4g105 references from test dir
+	Enh : Ensure LSB path for daemons and default paths
+	Del : Nagios(r) references from test dir
+	Enh : Test coverage : Tests have now report per file and a global percentage of code coverage is available
+	Enh : installation is now possible with "pip install shinken"
+	Del : remove the python 2.4/2.5 compatibility. Now shinken need >= 2.6
+	Add : definition_order parameter for objects order twins remove, only active for services
+	Enh : remove lot of useless configuration file samples
+	Enh : do not bail out at startup is an host service is not having a valid host, just raise a warning now
+	Add : big doc grok from wiki into rst files into /doc. Thanks guys for this! comoile with sphinx
+	Add : (from Christophe Simon) Added bp_rule child notification opts management
+	Add : (from Christophe Simon) service_overrides attributes to hosts
+	Add : (from Jean-charles Delon) manage duplicate_foreach and event_handler
+	Add : (from Christophe Simon) Added reversed (negative) xof business rules
+	Add : (from Christophe Simon) percentage support to Xof: business rules
+	Add : (from Jan Ulferts) enable_environment_macros and disable_environment_macros to commands
+	
+
 
 	CORE FIXES
 	Fix : adjust_worker_by_load was wrong, worker was not created again
-	Fix : c.t_to_go is  None in scheduler
-	Fix : Parsing (Catch bad service_dependencies, timeperiod definitions)
-	Fix : Hosts over-checked when services are critical
-	Fix : Prevent from returning next time notif in the past.
+	Fix : crash 'c.t_to_go is  None' in scheduler when time change
+	Fix : Arbiter parsing (Catch bad service_dependencies, timeperiod definitions)
+	Fix : Hosts over-checked when services are critical (don't respect retry_interval)
+	Fix : Prevent from returning next time notif in the past (don't over notify).
 	Fix : allow the "__ANTI-VIRG__" substring in the configuration files
 	Fix : do not send notification after a downtime to a contact that has been notified if notification_interval = 0
+	Fix : (reported by : Aina Rakotoson) notification logic failed when reactionners with different reactionner_tags
+	Fix : issue with some discovery rules with mutli-keys
+	Fix : set the python daemons into unbeffered stdout mode by default, centos guys will love it.
+	Fix : some fix on the contact-notifway inheritance
+	Fix : (openglx) bin/nagios : forces -v argument to be used as config file
+	Fix : (from Christophe Simon) impacts/problems retention loaded services
+	Fix : (reported by:fitzdsl) a spare that got a bad configuration can crash when try to send a configuration it do not have in master failback
+	
 
 	MODULES ENHANCEMENT
 	Del : Move modules to their own repository! They are now in https://github.com/shinken-monitoring
 
 	MODULES FIXES
-	Bunch of fixes on the most used modules (livestatus, graphite, ws arbiter, ) and test cases added
+	Enh: Bunch of fixes on the most used modules (livestatus, graphite, ws arbiter, ) and test cases added, look at each modules for details
 
 	PACKS ENHANCEMENT
 	Del : Move packs to their own repository! They are now in https://github.com/shinken-monitoring
-
+	
+	
 
 1.4   - 27/05/2013
 ------------------
@@ -42,7 +65,7 @@ Shinken ChangeLog
 	Add : macro_modulations objects, to dynamically change the macro based on the timeperiod. Can be useful as check_modulations, but easier to use, so maybe they will simply replace them	Use persistent cookies by defaut
 	Add : (nerocide) now KEY are expand on the service_dependencies	property.
 	Add : first version of user/system time catch for checks.
-	Add : check_modulations objects.	
+	Add : check_modulations objects.
 	
 	CORE FIXES
 	Fix : (reported by:Georges Racinet) lot of SSL errors with Pyro3. Fix #839
