@@ -266,9 +266,15 @@ class TestDowntime(ShinkenTest):
         self.show_logs()
         self.show_actions()
         print "*****************************************************************************************************************************************************************Log matching:", self.get_log_match("STARTED*")
+        self.show_actions()
         self.assert_(self.count_logs() == 2)    # start downt, notif downt
-        #sys.exit(1)
-        self.assert_(self.count_actions() == 2)  # notif" down
+        print self.count_actions() # notif" down is removed, so only donwtime
+        self.assert_(self.count_actions() == 1)
+        self.scheduler_loop(1, [], do_sleep=False)
+        self.show_logs()
+        self.show_actions()
+        
+        self.assert_(self.count_logs() == 2)    # start downt, notif downt
         self.clear_logs()
         self.clear_actions()
         #----------------------------------------------------------------
@@ -311,13 +317,13 @@ class TestDowntime(ShinkenTest):
         # the host comes UP again
         # check log messages, (no) notifications and eventhandlers
         # a (recovery) notification was created, but has been blocked.
-        # we see it in the actions as a zombie
+        # should be a zombie, but was deteleted
         #----------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)    # hard3ok, evtok
-        self.assert_(self.count_actions() == 2)  # evtok, notif"
+        self.assert_(self.count_actions() == 1)  # evtok, notif"
         self.clear_logs()
         self.clear_actions()
 

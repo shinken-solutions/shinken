@@ -80,8 +80,9 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.sched.get_new_actions()
+        #self.worker_loop()
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.show_and_clear_logs()
@@ -111,7 +112,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)  # alert, eventhndlr
-        self.assert_(self.count_actions() == 2)  # evt, master notif
+        self.assert_(self.count_actions() == 1)  # evt zombie
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -167,7 +168,8 @@ class TestAcks(ShinkenTest):
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.worker_loop()
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
@@ -183,8 +185,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        
+        self.scheduler_loop(1, [], do_sleep=False)
+        #elf.sched.get_new_actions()
+        #self.worker_loop()
         self.show_logs()
         self.show_actions()
         # the contact notification was sent immediately (t_to_go)
@@ -211,11 +215,14 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notif
-        self.assert_(self.count_actions() == 3)  # evt, master notif, notif
+        self.show_actions()
+        print self.count_actions()
+        self.assert_(self.count_actions() == 2)  # evt, recovery notif zombie
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
+
 
     def test_ack_nonsticky_changing_service(self):
         # acknowledge is not sticky
@@ -270,7 +277,8 @@ class TestAcks(ShinkenTest):
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;1;lausser;blablub" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.worker_loop()
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
@@ -305,11 +313,14 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
+
+        self.show_actions()
+        self.assert_(self.count_actions() == 2)  # evt, one notif zombie left
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
+        
 
     def test_ack_sticky_changing_service(self):
         # acknowledge is sticky
@@ -363,8 +374,9 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=True)
+        #self.sched.get_new_actions()
+        #self.worker_loop()
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
@@ -398,7 +410,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
+        self.assert_(self.count_actions() == 2)  # evt, master notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.assert_(len(svc.comments) == 0)
@@ -458,8 +470,9 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_HOST_PROBLEM;test_host_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.sched.get_new_actions()
+        #self.worker_loop()
         self.assert_(host.problem_has_been_acknowledged)
         self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(DOWN\)'))
         self.show_and_clear_logs()
@@ -493,12 +506,16 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)  # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 2)  # evt, master notif, contact notif
+        self.show_actions()
+        
+        print self.count_actions()
+        self.assert_(self.count_actions() == 1)  # evt, no more notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
+        
     def test_ack_hard_host(self):
         self.print_header()
         now = time.time()
@@ -549,7 +566,8 @@ class TestAcks(ShinkenTest):
         cmd = "[%lu] ACKNOWLEDGE_HOST_PROBLEM;test_host_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.worker_loop()
         self.assert_(host.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(DOWN\)'))
         self.scheduler_loop(2, [[host, 2, 'DOWN']], do_sleep=True)
@@ -566,7 +584,8 @@ class TestAcks(ShinkenTest):
         cmd = "[%lu] REMOVE_HOST_ACKNOWLEDGEMENT;test_host_0" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.worker_loop()
         # the contact notification was sent immediately (t_to_go)
         self.assert_(not host.problem_has_been_acknowledged)
         self.scheduler_loop(2, [[host, 2, 'DOWN']], do_sleep=True)
@@ -589,11 +608,14 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
+        print self.count_actions()
+        self.show_actions()
+        self.assert_(self.count_actions() == 2)  # evt,  recovery notif zombie
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
+        
 
     def test_unack_removes_comments(self):
         # critical
@@ -651,19 +673,18 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;lausser;blablub1" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=True)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;lausser;blablub2" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=True)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;lausser;blablub3" % now
         self.sched.run_external_command(cmd)
-        self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=True)
+
         self.assert_(svc.problem_has_been_acknowledged)
+        self.show_logs()
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.assert_(self.log_match(2, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
@@ -685,7 +706,8 @@ class TestAcks(ShinkenTest):
         cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
-        self.worker_loop()
+        self.scheduler_loop(1, [], do_sleep=False)
+        #self.worker_loop()
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(len(svc.comments) == 2)
         self.assert_(svc.comments[0].comment == 'blablub1')
