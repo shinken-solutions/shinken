@@ -199,6 +199,7 @@ class build_config(Command):
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
 
+
     def run(self):
         if not self.dry_run:
             self.mkpath(self.build_dir)
@@ -207,6 +208,7 @@ class build_config(Command):
             self.generate_default_shinken_file()
             self.update_configfiles()
             self.copy_objects_file()
+
 
     def generate_default_shinken_file(self):
         # The default file must have good values for the directories:
@@ -603,8 +605,13 @@ if not is_update:
         _path, _file = os.path.split(p)
         data_files.append( (os.path.join(var_root, _path), [p]))
 
-# Always overrides doc and cli even for update
+# Always overrides doc, inventory and cli even for update
 for p in gen_data_files('doc'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
+
+# Always overrides doc and cli even for update
+for p in gen_data_files('inventory'):
     _path, _file = os.path.split(p)
     data_files.append( (os.path.join(var_root, _path), [p]))
 
