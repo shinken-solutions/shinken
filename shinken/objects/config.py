@@ -1541,14 +1541,14 @@ class Config(Item):
             for e in l:
                 if e.got_business_rule:
                     e_ro = e.get_realm()
-                    # Sommething was wrong in the conf, will be raised elsewhere
+                    # Something was wrong in the conf, will be raised elsewhere
                     if not e_ro:
                         continue
                     e_r = e_ro.realm_name
                     for elt in e.business_rule.list_all_elements():
-                        r = elt.get_realm()
-                        # Sommething was wrong in the conf, will be raised elsewhere
-                        if not r:
+                        r_o = elt.get_realm()
+                        # Something was wrong in the conf, will be raised elsewhere
+                        if not r_o:
                             continue
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
