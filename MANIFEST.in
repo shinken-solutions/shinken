@@ -10,6 +10,6 @@ recursive-include doc *.html *.png *.txt *.css *.jpg *.xml *.tpl *.gif *.js
 global-exclude .git *.pyc *.pyo
 global-exclude .debug .pid .exe *~
 include var/void_for_git
-include MANIFEST.in FROM_NAGIOS_TO_SHINKEN Changelog
+include MANIFEST.in Changelog
 include COPYING THANKS README README.rst
 exclude doc/dvi etc.orig/ etc/bench/ test/my/

@@ -34,7 +34,6 @@ if python_version < (2, 6):
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
-from setuptools import setup, find_packages
 from glob import glob
 import os
 import itertools
@@ -49,16 +48,27 @@ except ImportError:
 DEFAULT_OWNER = 'shinken'
 DEFAULT_GROUP = 'shinken'
 
-from distutils import log
-from distutils.core import Command
-from distutils.command.build import build as _build
-from distutils.command.install import install as _install
+from setuptools import find_packages
+
+from setuptools import setup
+# For pip, use strong setuptools
+if 'pip' in sys.argv or '--single-version-externally-managed' in sys.argv:
+    from setuptools.command.install import install as _install
+# for local, use distutils?
+else:
+    from distutils.command.install import install as _install
+
 from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
+from distutils import log
+from distutils.core import Command
+from distutils.command.build import build as _build
+
+
 # We try to see if we are in a full install or an update process
 is_update = False
-if 'update' in sys.argv:
+if 'update' in sys.argv or '--upgrade' in sys.argv:
     print "Shinken Lib Updating process only"
     sys.argv.remove('update')
     sys.argv.insert(1, 'install')
@@ -537,7 +547,7 @@ for p in ['packs', 'arbiters', 'brokers', 'modules',
 #config_objects_file_extended.extend(srv_pack_files)
 # Setup ins waiting for a tuple....
 config_objects_file = tuple(config_objects_file_extended)
-print config_objects_file
+
 
 # daemon configs
 daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
@@ -610,7 +620,6 @@ for p in gen_data_files('cli'):
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
 if __name__ == "__main__":
-
     setup(
         cmdclass={
             'build': build,
@@ -620,11 +629,11 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="2.0-BETA1",
+        version="2.0-BETA13",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
-        long_description=read('README'),
+        long_description=read('README.rst'),
         author="Gabes Jean",
         author_email="naparuba@gmail.com",
         license="GNU Affero General Public License",
