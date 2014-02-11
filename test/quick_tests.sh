@@ -38,6 +38,15 @@ function launch_and_assert {
     fi
 }
 
+for ii in `ls -1 test_*py`; do launch_and_assert $ii; done
+# And create the coverage file
+coverage xml --omit=/usr/lib
+
+echo "All quick unit tests passed :)"
+echo "But please launch a test.sh pass too for long tests too!"
+
+exit 0
+
 # Launching only quick tests for quick regression check
 launch_and_assert test_logging.py
 launch_and_assert test_properties_defaults.py
@@ -165,8 +174,3 @@ launch_and_assert test_bad_start.py
 
 
 
-# And create the coverage file
-coverage xml --omit=/usr/lib
-
-echo "All quick unit tests passed :)"
-echo "But please launch a test.sh pass too for long tests too!"
