@@ -45,7 +45,13 @@ curdir=$(dirname "$0")
 export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
 
-"$curdir/shinken" $@ "$SHORTNAME"
-
-exit $?
-
+case "$1" in
+    start|stop|reload|restart|force-reload|status|check|checkconfig)
+        "$curdir/shinken" $@ "$SHORTNAME"
+        exit $?
+        ;;
+    *)
+        echo "Usage: /etc/init.d/$NAME [-d] {start|stop|reload|restart|force-reload|status|check}"
+        exit 1
+        ;;
+esac
