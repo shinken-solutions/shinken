@@ -23,8 +23,8 @@
 # Author: Gabes Jean <naparuba@gmail.com>
 #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
 
-
-NAME="shinken-poller"
+SHORTNAME=poller
+NAME="shinken-$SHORTNAME"
 
 curdir=$(dirname "$0")
 
@@ -34,6 +34,6 @@ if [ -f /lib/lsb/init-functions ]; then
 . /lib/lsb/init-functions
 fi
 
-"$curdir/shinken" $@ poller
+"$curdir/shinken" $@ "$SHORTNAME"
 
 exit $?
