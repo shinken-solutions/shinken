@@ -44,13 +44,13 @@
 # Author: Gabes Jean <naparuba@gmail.com>
 #         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
 
-
-NAME="shinken-scheduler"
+SHORTNAME=scheduler
+NAME="shinken-$SHORTNAME"
 
 curdir=$(dirname "$0")
 
 export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
-"$curdir/shinken" $@ scheduler
+"$curdir/shinken" $@ "$SHORTNAME"
 
 exit $?
