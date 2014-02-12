@@ -23,6 +23,10 @@ curdir=$(dirname "$0")
 
 export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
+if [ -f /lib/lsb/init-functions ]; then
+. /lib/lsb/init-functions
+fi
+
 "$curdir/shinken" $@ arbiter
 
 exit $?

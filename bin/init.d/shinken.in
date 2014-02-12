@@ -213,7 +213,9 @@ echo_failure() {
 # Source function library.
 [ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
 
-[ -f /lib/lsb/init-functions ] && . /lib/lsb/init-functions
+if [ -f /lib/lsb/init-functions ]; then
+. /lib/lsb/init-functions
+fi
 
 
 
