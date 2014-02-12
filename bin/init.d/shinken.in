@@ -16,6 +16,12 @@
 #     - receiver    : manage all passive data
 ### END INIT INFO
 
+### Chkconfig Header
+# Shinken        Starts Shinken daemons
+#
+# chkconfig: 345 99 01
+# description: Start Shinken daemons
+
 # Reference:
 # http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
 
