@@ -460,7 +460,7 @@ class Config(Item):
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
-                        res.write('\n')
+                        res.write(os.linesep)
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
@@ -494,6 +494,8 @@ class Config(Item):
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
                                     res.write(fd.read().decode('utf8', 'replace'))
+                                    # Be sure to separate files data
+                                    res.write(os.linesep)
                                     fd.close()
                                 except IOError, exp:
                                     logger.error("Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
@@ -517,7 +519,7 @@ class Config(Item):
         config = res.getvalue()
         res.close()
         return config
-        return res
+
 #        self.read_config_buf(res)
 
     def read_config_buf(self, buf):
@@ -1538,8 +1540,16 @@ class Config(Item):
         for l in [self.services, self.hosts]:
             for e in l:
                 if e.got_business_rule:
-                    e_r = e.get_realm().realm_name
+                    e_ro = e.get_realm()
+                    # Something was wrong in the conf, will be raised elsewhere
+                    if not e_ro:
+                        continue
+                    e_r = e_ro.realm_name
                     for elt in e.business_rule.list_all_elements():
+                        r_o = elt.get_realm()
+                        # Something was wrong in the conf, will be raised elsewhere
+                        if not r_o:
+                            continue
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
                             logger.error("Business_rule '%s' got hosts from another realm: %s" % (e.get_full_name(), elt_r))

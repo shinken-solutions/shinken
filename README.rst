@@ -120,7 +120,7 @@ Debug logs will be based on the log directory (/var/log/shinken)
 
 
 I switched from Nagios, do I need to change my existing Nagios configuration?
-=====================================================
+=============================================================================
 
 No, there is no need to change the existing configuration - unless
 you want to add some new hosts and services. Once you are comfortable

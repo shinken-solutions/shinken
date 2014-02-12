@@ -34,7 +34,6 @@ if python_version < (2, 6):
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
-from setuptools import setup, find_packages
 from glob import glob
 import os
 import itertools
@@ -49,16 +48,27 @@ except ImportError:
 DEFAULT_OWNER = 'shinken'
 DEFAULT_GROUP = 'shinken'
 
-from distutils import log
-from distutils.core import Command
-from distutils.command.build import build as _build
-from distutils.command.install import install as _install
+from setuptools import find_packages
+
+from setuptools import setup
+# For pip, use strong setuptools
+if 'pip' in sys.argv or '--single-version-externally-managed' in sys.argv:
+    from setuptools.command.install import install as _install
+# for local, use distutils?
+else:
+    from distutils.command.install import install as _install
+
 from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
+from distutils import log
+from distutils.core import Command
+from distutils.command.build import build as _build
+
+
 # We try to see if we are in a full install or an update process
 is_update = False
-if 'update' in sys.argv:
+if 'update' in sys.argv or '--upgrade' in sys.argv:
     print "Shinken Lib Updating process only"
     sys.argv.remove('update')
     sys.argv.insert(1, 'install')
@@ -189,6 +199,7 @@ class build_config(Command):
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
 
+
     def run(self):
         if not self.dry_run:
             self.mkpath(self.build_dir)
@@ -197,6 +208,7 @@ class build_config(Command):
             self.generate_default_shinken_file()
             self.update_configfiles()
             self.copy_objects_file()
+
 
     def generate_default_shinken_file(self):
         # The default file must have good values for the directories:
@@ -278,7 +290,7 @@ pidfile=%s/%sd.pid
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/libexec",
+                                    "/var/lib/shinken/libexec",
                                     self.plugins_path)
 
         # And update the shinken.cfg file for all /usr/local/shinken/var
@@ -304,7 +316,7 @@ local_log=%s/arbiterd.log
             outname = os.path.join(self.build_dir, name)
 
             update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/var", self.var_path)
+                                    "/var/lib/shinken", self.var_path)
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
@@ -493,35 +505,31 @@ main_config_files = ('shinken.cfg',)
 additionnal_config_files = ()
 
 config_objects_file = (
-                        'discovery_runs.cfg',
+                        'discovery/discovery_runs.cfg',
                         'templates.cfg',
                         'dependencies.cfg',
-                        'timeperiods.cfg',
                         'time_templates.cfg',
-                        'contacts.cfg',
-                        'discovery_rules.cfg',
+                        'discovery/discovery_rules.cfg',
                         'hosts/localhost.cfg',
                         'services/services.cfg',
-                        'contactgroups.cfg',
                         'escalations.cfg',
-                        'commands.cfg',
-                        'discovery.cfg',
+                        'discovery/discovery.cfg',
                         'servicegroups.cfg',
-                        'hostgroups.cfg',
                         'certs/server.pem',
                         'certs/client.pem',
                         'certs/ca.pem',
 )
 
 
-#print "SRV PACK FILES", srv_pack_files
 config_objects_file_extended = list(config_objects_file)
 
 
 all_etc_files = []
 # Do not put daemons in this list, because it will override other modification
 for p in ['packs', 'arbiters', 'brokers', 'modules',
-          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers']:
+          'pollers', 'reactionners', 'realms', 'receivers', 'schedulers',
+          'timeperiods', 'contacts', 'contactgroups', 'commands',
+          'hostgroups']:
     # Get all files in this dir
     _files = gen_data_files('etc/%s' % p)
     # We must remove the etc from the paths
@@ -541,7 +549,7 @@ for p in ['packs', 'arbiters', 'brokers', 'modules',
 #config_objects_file_extended.extend(srv_pack_files)
 # Setup ins waiting for a tuple....
 config_objects_file = tuple(config_objects_file_extended)
-print config_objects_file
+
 
 # daemon configs
 daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
@@ -551,7 +559,7 @@ daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
                     ('scheduler', 'daemons/schedulerd.ini'),
                     )
 
-resource_cfg_files = ('resource.cfg',)
+resource_cfg_files = ()
 
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
 #the package_data of setup(), but from a point of view of the
@@ -597,25 +605,28 @@ if not is_update:
         _path, _file = os.path.split(p)
         data_files.append( (os.path.join(var_root, _path), [p]))
 
-    # Also add doc files to the var directory
-    for p in gen_data_files('doc'):
-        _path, _file = os.path.split(p)
-        data_files.append( (os.path.join(var_root, _path), [p]))
+# Always overrides doc, inventory and cli even for update
+for p in gen_data_files('doc'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
+
+# Always overrides doc and cli even for update
+for p in gen_data_files('inventory'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
 
 
-    # Also add cli files to the var directory
-    for p in gen_data_files('cli'):
-        _path, _file = os.path.split(p)
-        data_files.append( (os.path.join(var_root, _path), [p]))
+# Also add cli files to the var directory
+for p in gen_data_files('cli'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
 
 
 
 # compute scripts
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
-print "All package _data"
 if __name__ == "__main__":
-
     setup(
         cmdclass={
             'build': build,
@@ -625,11 +636,11 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="2.0-BETA1",
+        version="2.0-RC",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
-        long_description=read('README'),
+        long_description=read('README.rst'),
         author="Gabes Jean",
         author_email="naparuba@gmail.com",
         license="GNU Affero General Public License",

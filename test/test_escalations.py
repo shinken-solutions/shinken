@@ -539,9 +539,12 @@ class TestEscalations(ShinkenTest):
         # We check that we really raise the notif number too
         self.assert_(svc.current_notification_number > cnn)
         cnn = svc.current_notification_number
-
+        
         # Ok we should have one notification
         next_notifications = svc.notifications_in_progress.values()
+        print "LEN", len(next_notifications)
+        for n in next_notifications:
+            print n
         self.assert_(len(next_notifications) == 1)
         n = next_notifications.pop()
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations

@@ -381,6 +381,8 @@ class Service(SchedulingItem):
 
     # Get our realm, so in fact our host one
     def get_realm(self):
+        if self.host is None:
+            return None
         return self.host.get_realm()
 
     def get_hostgroups(self):
@@ -448,7 +450,7 @@ class Service(SchedulingItem):
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
                         logger.info("%s: %s" % (self.get_name(), bperror))
                     state = False
@@ -979,7 +981,13 @@ class Services(Items):
     def create_reversed_list(self):
         self.reversed_list = {}
         self.twins = []
-        for s in self:
+        
+        # Get a sorted list of all services, by definition_order
+        all_services = [s for s in self]
+        all_services.sort(key=lambda s:int(getattr(s, 'definition_order', '100')))
+        
+        # Now we sort them, we will have definition_order sorted like we want
+        for s in all_services:
             if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                 s_desc = getattr(s, 'service_description')
                 s_host_name = getattr(s, 'host_name')
@@ -988,6 +996,7 @@ class Services(Items):
                     self.reversed_list[key] = s.id
                 else:
                     self.twins.append(s.id)
+        
         # For service, the reversed_list is not used for
         # search, so we del it
         del self.reversed_list

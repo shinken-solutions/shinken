@@ -50,6 +50,8 @@ def serve(port):
         logger.error(exp)
 
 def do_serve(port='8080'):
+    if port is None:
+        port = '8080'
     logger.debug("WILL CALL serve with %s" % port)
     serve(port)
 

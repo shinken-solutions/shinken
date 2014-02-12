@@ -125,7 +125,7 @@ class CLICommander(object):
             'values'  : [('etc', '/etc/shinken'), ('lib','/var/lib/shinken'),
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
                          ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
-                         ('doc', '%(lib)s/doc'),
+                         ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
                          ]}
                     ,
                     'shinken.io':{
@@ -321,8 +321,10 @@ if __name__ == '__main__':
                       dest="api_key", help=("Your API key for uploading the package to the Shinken.io website. If you don't have one, please go to your account page"))
     parser.add_option('-l', '--list', action='store_true',
                       dest="do_list", help=("List available commands"))
+    parser.add_option('-c', '--config', dest="iniconfig", default=DEFAULT_CFG,
+                      help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('--init', action='store_true',
-                      dest="do_init", help=("Initialize/refill your ~/.shinken.ini file"))
+                      dest="do_init", help=("Initialize/refill your shinken.ini file"))
     parser.add_option('-D', action='store_true',
                       dest="do_debug", help=("Enable the debug mode"))
     parser.add_option('-v', action='store_true',
@@ -334,12 +336,15 @@ if __name__ == '__main__':
     if '-D' in sys.argv:
         logger.set_level(logger.DEBUG)
 
+    # Global command parsing
+    opts, args = parser.parse_args()
+
     cfg = None
-    if not os.path.exists(DEFAULT_CFG):
+    if not os.path.exists(opts.iniconfig):
         logger.debug('Missing configuration file!')
     else:
         cfg = ConfigParser.ConfigParser()
-        cfg.read(DEFAULT_CFG)
+        cfg.read(opts.iniconfig)
         for section in cfg.sections():
             if not section in CONFIG:
                 CONFIG[section] = {}
@@ -371,9 +376,6 @@ if __name__ == '__main__':
     # We will remove specific commands from the sys.argv list and keep
     # them for parsing them after
     command_args = hack_sys_argv()
-
-    # Global command parsing
-    opts, args = parser.parse_args()
 
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
@@ -426,8 +428,8 @@ if __name__ == '__main__':
                     modify = True
                 #print new_cfg.items(s)
         if modify:
-            print "Saving the new configuration file", DEFAULT_CFG
-            with open(DEFAULT_CFG, 'wb') as configfile:
+            print "Saving the new configuration file", opts.iniconfig
+            with open(opts.iniconfig, 'wb') as configfile:
                 new_cfg.write(configfile)
         sys.exit(0)
 

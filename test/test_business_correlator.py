@@ -1511,6 +1511,7 @@ class TestConfigBroken(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_business_correlator_broken.cfg')
 
+
     def test_conf_is_correct(self):
         #
         # Business rules use services which don't exist. We want
