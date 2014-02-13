@@ -42,7 +42,7 @@ Pyro remote Object Library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Shinken uses Pyro extensively to create its cloud-like architecture.:ref:`You can learn more about Pyro <//pypi.python.org/pypi/Pyro4>` if you wish to develop new features that need to use inter-process communications.
+Shinken uses Pyro extensively to create its cloud-like architecture. :ref:`You can learn more about Pyro <http://pypi.python.org/pypi/Pyro4>` if you wish to develop new features that need to use inter-process communications.
 
 
 
@@ -96,7 +96,7 @@ Technical debt must be paid
 
 Coding in Shinken should be fun and rewarding.
 
-"Technical debt": all little hacks here and there. __There comes a time, technical debt must be paid__. We can have new features very quickly, if authors do not have to bypass numerous hack. We must take some time before each release to pay all technical debt we can. __The less we've got, the easier it is to service and extend the code__.
+"Technical debt": all little hacks here and there. __There comes a time, technical debt must be paid\__. We can have new features very quickly, if authors do not have to bypass numerous hack. We must take some time before each release to pay all technical debt we can. __The less we've got, the easier it is to service and extend the code\__.
 
 It's the same for the core architecture. A solid and stable architecture allows developers to build on it and add value. A good example is being able to add a parameter with only a single line :)
 
@@ -111,6 +111,7 @@ Where does the fun happen
 ` GitHub offers great facilities to fork, test, commit, review and comment anything related to Shinken`_. 
 
 You can also follow the project progress in real time.
+
 .. _ GitHub offers great facilities to fork, test, commit, review and comment anything related to Shinken: https://github.com/naparuba/shinken 
 .. _ Python docstring guide: http://www.python.org/dev/peps/pep-0257/ 
 .. _ PEP8 - Python Style guide: http://www.python.org/dev/peps/pep-0008/ 

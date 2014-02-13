@@ -12,16 +12,15 @@ PNP4Nagios
 
 
 
-.. image:: /_static/images/pnp.png?640x480
+.. image:: /_static/images/pnp.png
    :scale: 90 %
 
 
-  * Homepage: http://docs.pnp4nagios.org/pnp-0.6/start
-  * Screenshots: http://docs.pnp4nagios.org/pnp-0.6/gallery/start
-  * Description: "PNP is an addon to Nagios which analyzes performance data provided by plugins and stores them automatically into RRD-databases (Round Robin Databases, see `RRD Tool`_)."
-  * License: GPL v2
-
-  * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,9.0.html
+* Homepage: http://docs.pnp4nagios.org/pnp-0.6/start
+* Screenshots: http://docs.pnp4nagios.org/pnp-0.6/gallery/start
+* Description: "PNP is an addon to Nagios which analyzes performance data provided by plugins and stores them automatically into RRD-databases (Round Robin Databases, see `RRD Tool`_)."
+* License: GPL v2
+* Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,9.0.html
 
 
 .. _use_with_pnp#install_pnp4nagios_automatically:

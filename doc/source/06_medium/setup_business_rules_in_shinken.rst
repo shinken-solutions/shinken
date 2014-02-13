@@ -259,4 +259,5 @@ Let's look at some classic setups, for MAX elements.
   * ON/OFF setup: MAXof: <=> MAX,MAX,MAXof:
   * Warning as soon as problem, and critical if all criticals: MAX,1,MAXof:
   * Worse state: MAX,1,1
+
 .. _ticket: https://github.com/naparuba/shinken/issues/509

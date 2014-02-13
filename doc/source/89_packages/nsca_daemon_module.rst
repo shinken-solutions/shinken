@@ -12,11 +12,7 @@ The NSCA daemon module is used to receive send_nsca packets and submit them to t
 
 In your shinken-specific.cfg file, just add (or uncomment):
 
-  
-::
 
-  
-  
 ::
 
   #You can send check result to Shinken using NSCA
@@ -31,9 +27,6 @@ In your shinken-specific.cfg file, just add (or uncomment):
   }
   
   define receiver{
-  
-::
-
        receiver_name    receiver-1
        address          localhost
        port             7773

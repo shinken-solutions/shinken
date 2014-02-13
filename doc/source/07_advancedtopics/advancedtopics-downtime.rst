@@ -19,7 +19,7 @@ Introduction
 .. image:: /_static/images///official/images/downtime.png
    :scale: 90 %
 
- Shinken allows you to schedule periods of planned downtime for hosts and service that you're monitoring. This is useful in the event that you actually know you're going to be taking a server down for an upgrade, etc.
+Shinken allows you to schedule periods of planned downtime for hosts and service that you're monitoring. This is useful in the event that you actually know you're going to be taking a server down for an upgrade, etc.
 
 
 

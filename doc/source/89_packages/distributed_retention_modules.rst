@@ -180,4 +180,5 @@ Example:
        }
   
 Step 3: Restart the Arbiter, and your Scheduler will now save its state between restarts. :)
+
 .. _forums.monitoring-fr.org/index.php?topic=5205.0: http://forums.monitoring-fr.org/index.php?topic=5205.0

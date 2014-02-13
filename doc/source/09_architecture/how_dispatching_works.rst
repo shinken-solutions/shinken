@@ -32,8 +32,8 @@ Configuration changes on running systems
 
 
 Once the configuration is being dispatched to a Shinken process by the Arbiter, this causes the process (ex. Scheduler) to stop and reload its configuration. Thus for small configurations, the monitoring gap, where no monitoring is being done, is of an inconsequential duration. However, as the number of services rises above 10K and as the complexity of the configuration grows, the monitoring gap will become noticeable to the order of minutes. This gap will impact the type of SLA the monitoring solution can meet.
-.. important::  
-   The 1.2 release is mandatory for anyone using more than 10K services as it includes improvements addressing this issue.
+
+.. important::  The 1.2 release is mandatory for anyone using more than 10K services as it includes improvements addressing this issue.
 
 
 

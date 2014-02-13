@@ -125,4 +125,5 @@ genDevConfig Plugins - Compatibility status with SnmpBooster
    [InProgress] Denotes a specification that is under development
    
    [Done] Denotes a specification that is implemented
+
 .. _genDevConfig: https://github.com/xkilian/genDevConfig

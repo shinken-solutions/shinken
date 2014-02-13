@@ -12,16 +12,15 @@ NagVis
 
 
 
-.. image:: /_static/images/nagivs.jpg?640x480
+.. image:: /_static/images/nagivs.jpg
    :scale: 90 %
 
 
-  * Homepage: http://www.nagvis.org/
-  * Screenshots: http://www.nagvis.org/screenshots
-  * Description: "NagVis is a visualization addon for the well known network managment system Nagios."
-  * License: GPL v2
-
-  * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,11.0.html
+* Homepage: http://www.nagvis.org/
+* Screenshots: http://www.nagvis.org/screenshots
+* Description: "NagVis is a visualization addon for the well known network managment system Nagios."
+* License: GPL v2
+* Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,11.0.html
 
 
 Using Shinken with NagVis 
