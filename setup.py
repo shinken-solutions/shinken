@@ -529,7 +529,7 @@ all_etc_files = []
 for p in ['packs', 'arbiters', 'brokers', 'modules',
           'pollers', 'reactionners', 'realms', 'receivers', 'schedulers',
           'timeperiods', 'contacts', 'contactgroups', 'commands',
-          'hostgroups']:
+          'hostgroups', 'templates', 'notificationways', 'resource.d']:
     # Get all files in this dir
     _files = gen_data_files('etc/%s' % p)
     # We must remove the etc from the paths
