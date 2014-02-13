@@ -43,16 +43,12 @@ Steps
 
 There are some steps you'll need to follow in order to monitor a new database machine. They are:
   
-::
-
-  
-
 - Install dependencies
-  - Install check plugins
-  - Setup the oracle user account
-  - Creating an alias definition for Oracle databases
-  - Update your server host definition for oracle monitoring
-  - Restart the Shinken daemon
+- Install check plugins
+- Setup the oracle user account
+- Creating an alias definition for Oracle databases
+- Update your server host definition for oracle monitoring
+- Restart the Shinken daemon
 
 
 
@@ -441,4 +437,5 @@ Restarting Shinken
 You're done with modifying the Shiknen configuration, so you'll need to :ref:`verify your configuration files <runningshinken-verifyconfig>` and :ref:`restart Shinken <runningshinken-startstop>`.
 
 If the verification process produces any errors messages, fix your configuration file before continuing. Make sure that you don't (re)start Shinken until the verification process completes without any errors!
+
 .. _labs.consol.de/lang/en/nagios/check_oracle_health/: http://labs.consol.de/lang/en/nagios/check_oracle_health/

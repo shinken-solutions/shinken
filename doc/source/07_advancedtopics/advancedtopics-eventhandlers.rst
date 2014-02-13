@@ -19,7 +19,7 @@ Introduction
 .. image:: /_static/images///official/images/eventhandlers.png
    :scale: 90 %
 
- Event handlers are optional system commands (scripts or executables) that are run whenever a host or service state change occurs.
+Event handlers are optional system commands (scripts or executables) that are run whenever a host or service state change occurs.
 
 An obvious use for event handlers is the ability for Shinken to proactively fix problems before anyone is notified. Some other uses for event handlers include:
 

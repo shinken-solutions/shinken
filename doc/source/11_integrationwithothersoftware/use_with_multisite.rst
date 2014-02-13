@@ -12,16 +12,15 @@ Check_MK Multisite
 
 
 
-.. image:: /_static/images/multisite.png?640x480
+.. image:: /_static/images/multisite.png
    :scale: 90 %
 
 
-  * Homepage: http://mathias-kettner.de/check_mk.html
-  * Screenshots: http://mathias-kettner.de/check_mk_multisite_screenshots.html
-  * Description: "A new general purpose Nagios-plugin for retrieving data."
-  * License: GPL v2
-
-  * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,10.0.html
+* Homepage: http://mathias-kettner.de/check_mk.html
+* Screenshots: http://mathias-kettner.de/check_mk_multisite_screenshots.html
+* Description: "A new general purpose Nagios-plugin for retrieving data."
+* License: GPL v2
+* Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,10.0.html
 
 
 Using Shinken with Multisite 
@@ -66,24 +65,25 @@ Check_MK install quick guide
   - Restart Apache.
 
 ''/etc/check_mk/multisite.mk'':
-  
+
 ::
 
-  sites = {
-  
-::
+    sites = {
+      "munich": {
+          "alias": "Munich"
+      },
+      "Shinken": {
+         "alias":          "Shinken",
+         "socket":         "tcp:127.0.0.1:50000",
+         "url_prefix":     "http://shinken.fqdn/",
+       },
+    }
 
-  "munich": {
-      "alias": "Munich"
-  },
-  "Shinken": {
-     "alias":          "Shinken",
-     "socket":         "tcp:127.0.0.1:50000",
-     "url_prefix":     "http://shinken.fqdn/",
-   },
-}
+
 .. note::  Replace "shinken.fqdn" with the complete URI to reach Shinken host from browser (not 127.0.0.1!). Used by PNP4Nagios's mouse-over images.
 
 If you plan to use Multisite only as web UI no more configuration is needed. Also you can disable WATO (Web Administration TOol) by including the line **wato_enabled = False** in ''multisite.mk''.
+
+
 .. _instructions at MK website: http://mathias-kettner.de/checkmk_multisite_setup.html
 .. _instructions: http://mathias-kettner.de/checkmk_getting_started.html

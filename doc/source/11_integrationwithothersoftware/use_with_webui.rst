@@ -12,21 +12,18 @@ Shinken WebUI
 
 
 Shinken includes a self sufficient Web User Interface, which includes its own web server (No need to setup Apache or Microsoft IIS)
-
 Shinken WebUI is started at the same time Shinken itself does, and is configured using the main Shinken configuration file by setting a few basic parameters.
 
 
-
-.. image:: /_static/images/problems.png?640x480
+.. image:: /_static/images/problems.png
    :scale: 90 %
 
 
-  * Homepage: http://www.shinken-monitoring.org/
-  * Screenshots: http://www.shinken-monitoring.org/screenshots/
-  * Description: "Shinken WebUI is the default visualization interface. It's designed to be simple and focus on root problems analysis and business impacts."
-  * License: AGPL v3
-
-  * Shinken forum: http://www.shinken-monitoring.org/forum/
+* Homepage: http://www.shinken-monitoring.org/
+* Screenshots: http://www.shinken-monitoring.org/screenshots/
+* Description: "Shinken WebUI is the default visualization interface. It's designed to be simple and focus on root problems analysis and business impacts."
+* License: AGPL v3
+* Shinken forum: http://www.shinken-monitoring.org/forum/
 
 
 
@@ -36,13 +33,9 @@ Set up the WebUI module
 
 Enable the **webui** module in ''shinken-specific.cfg'' configuration file that is on the server where your **Arbiter** is installed. 
 
-  
 ::
 
   define module{
-  
-::
-
         module_name      WebUI
         module_type      webui
   
@@ -76,7 +69,7 @@ Enable the **webui** module in ''shinken-specific.cfg'' configuration file that 
         #   GRAPHITE_UI: Use graphs from Graphite
         #
         #   Mongodb: Necessary for enabling user preferences in WebUI
-}
+  }
 
 .. important::  Have you changed the **auth_secret** parameter already? No? Do it now!
 
@@ -102,14 +95,9 @@ Shinken contact - cfg_password_webui
 
 The simpliest is to use the users added as Shinken contacts.
 
-  
 ::
 
-  
   define module{
-  
-::
-
        module_name Cfg_password
        module_type cfg_password_webui
   }
@@ -123,14 +111,8 @@ Apache htpasswd - passwd_webui
 
 This module uses an Apache passwd file (htpasswd) as authentification backend. All it needs is the full path of the file (from a legacy Nagios CGI installation, for example).
 
-  
 ::
-
-  
   define module{
-  
-::
-
        module_name      Apache_passwd
        module_type      passwd_webui
   
@@ -153,14 +135,9 @@ Active Directory / OpenLDAP - ad_webui
 
 This module allows to lookup passwords into both Active Directory or OpenLDAP entries.
 
-  
 ::
 
-  
   define module {
-  
-::
-
     module_name ActiveDir_UI
     module_type ad_webui
     ldap_uri ldaps://adserver
@@ -218,19 +195,15 @@ PNP graphs
 
 You can ask for a PNP integration with a **pnp_webui** module. Here is its definition:
 
-  
 ::
 
-  # Use PNP graphs in the WebUI
-  define module{
-  
-::
-
-  module_name    PNP_UI
-  module_type    pnp_webui
-  uri            http://YOURSERVERNAME/pnp4nagios/       ; put the real PNP uri here. YOURSERVERNAME must be changed
-                                              ; to the hostname of the PNP server
-  }
+    # Use PNP graphs in the WebUI
+    define module{
+        module_name    PNP_UI
+        module_type    pnp_webui
+        uri            http://YOURSERVERNAME/pnp4nagios/       ; put the real PNP uri here. YOURSERVERNAME must be changed
+                                                               ; to the hostname of the PNP server
+    }
 
 
 Shinken will automatically replace YOURSERVERNAME with the broker hostname at runtime to try and make it work for you, but you MUST change it to the appropriate value.
@@ -243,18 +216,14 @@ Graphite graphs
 
 You can ask for Graphite graphs with the **graphite_ui** definition.
 
-  
 ::
 
-  define module{
-  
-::
-
-  module_name    GRAPHITE_UI
-  module_type    graphite_webui
-  uri            http://YOURSERVERNAME/ ; put the real GRAPHITE uri here. YOURSERVERNAME must be changed
-                                          ; to the hostname of the GRAPHITE server
-  }
+    define module{
+        module_name    GRAPHITE_UI
+        module_type    graphite_webui
+        uri            http://YOURSERVERNAME/ ; put the real GRAPHITE uri here. YOURSERVERNAME must be changed
+                                              ; to the hostname of the GRAPHITE server
+    }
 
 
 Shinken will automatically replace YOURSERVERNAME with the broker hostname at runtime to try and make it work for you, but you MUST change it to the appropriate value.

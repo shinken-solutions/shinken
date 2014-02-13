@@ -79,5 +79,6 @@ And add it in your Arbiter object as a module.
 Restart your Arbiter and it's done :)
 
 .. tip::  Your "tags" will be applied as templates for your hosts.
+
 .. _landscape-api: https://launchpad.net/~landscape/+archive/landscape-api
 .. _Landscape: http://www.ubuntu.com/business/landscape

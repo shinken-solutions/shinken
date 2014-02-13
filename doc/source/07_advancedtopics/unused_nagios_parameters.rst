@@ -106,7 +106,7 @@ Example: retained_host_attribute_mask=0
 
 This is an advanced feature. You'll need to read the Nagios source code to use this option effectively.
 
-These options determine which host or service attributes are NOT retained across program restarts. The values for these options are a bitwise AND of values specified by the “MODATTR_" definitions in the "include/common.h" source code file. By default, all host and service attributes are retained.
+These options determine which host or service attributes are NOT retained across program restarts. The values for these options are a bitwise AND of values specified by the "MODATTR\_" definitions in the "include/common.h" source code file. By default, all host and service attributes are retained.
 
 
 
@@ -128,7 +128,7 @@ Example: retained_process_host_attribute_mask=0
 
 This is an advanced feature. You'll need to read the Nagios source code to use this option effectively.
 
-These options determine which process attributes are NOT retained across program restarts. There are two masks because there are often separate host and service process attributes that can be changed. For example, host checks can be disabled at the program level, while service checks are still enabled. The values for these options are a bitwise AND of values specified by the “MODATTR_" definitions in the "include/common.h" source code file. By default, all process attributes are retained.
+These options determine which process attributes are NOT retained across program restarts. There are two masks because there are often separate host and service process attributes that can be changed. For example, host checks can be disabled at the program level, while service checks are still enabled. The values for these options are a bitwise AND of values specified by the "MODATTR\_" definitions in the "include/common.h" source code file. By default, all process attributes are retained.
 
 
 
@@ -150,7 +150,7 @@ Example: retained_contact_host_attribute_mask=0i
 
 This is an advanced feature. You'll need to read the Nagios source code to use this option effectively.
 
-These options determine which contact attributes are NOT retained across program restarts. There are two masks because there are often separate host and service contact attributes that can be changed. The values for these options are a bitwise AND of values specified by the “MODATTR_" definitions in the "include/common.h" source code file. By default, all process attributes are retained.
+These options determine which contact attributes are NOT retained across program restarts. There are two masks because there are often separate host and service contact attributes that can be changed. The values for these options are a bitwise AND of values specified by the "MODATTR\_" definitions in the "include/common.h" source code file. By default, all process attributes are retained.
 
 
 

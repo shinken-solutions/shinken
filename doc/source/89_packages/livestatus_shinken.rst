@@ -28,7 +28,7 @@ Originally developed for Nagios, MK Livetstatus, was re-implemented in Python fo
 
 
 
-.. image:: /_static/images//livestatus_-_network_communications.png?600
+.. image:: /_static/images/livestatus_-_network_communications.png
    :scale: 90 %
 
 
@@ -124,5 +124,6 @@ How to enable Livestatus
 
 
 Very simple, jump to the :ref:`Shinken Broker configuration <the_broker_modules>` section to enable it.
+
 .. _Shinken mapping.py methods: https://github.com/shinken-monitoring/mod-livestatus/blob/master/module/mapping.py
 .. _MK Livestatus reference methods and query language definition: http://mathias-kettner.de/checkmk_livestatus.html

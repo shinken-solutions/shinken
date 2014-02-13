@@ -120,7 +120,7 @@ Open the services.msc (or the server manager, and then the services part)
 
 
 
-.. image:: /_static/images//services-std.jpg?500
+.. image:: /_static/images/services-std.jpg
    :scale: 90 %
 
 
@@ -129,7 +129,7 @@ double-click on the Shinken poller service
 
 
 
-.. image:: /_static/images///poller1.jpg?500
+.. image:: /_static/images/poller1.jpg
    :scale: 90 %
 
 
@@ -138,7 +138,7 @@ go to the log On tab
 
 
 
-.. image:: /_static/images///poller2.jpg?500
+.. image:: /_static/images/poller2.jpg
    :scale: 90 %
 
 
@@ -147,7 +147,7 @@ check the “This account" radio button and set the Shinken user account (the sa
 
 
 
-.. image:: /_static/images///poller3.jpg?500
+.. image:: /_static/images/poller3.jpg
    :scale: 90 %
 
 
@@ -160,7 +160,7 @@ Restart the services (manually or using the bin\start_allservices.cmd)
 
 
 
-.. image:: /_static/images///services-ext.jpg?500
+.. image:: /_static/images/services-ext.jpg
    :scale: 90 %
 
 

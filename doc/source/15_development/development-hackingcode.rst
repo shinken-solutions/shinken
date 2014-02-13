@@ -45,8 +45,8 @@ The Shinken code is in the shinken directory. All important source files are :
 
   * bin/shinken-* : source files of daemons
   * shinken/objects/item.py : base class for nearly all important objects like hosts, services and contacts.
-  * shinken/*link.py : class used by Arbiter to connect to daemons.
-  * shinken/modules/*/*py : modules for daemons (like the Broker).
+  * shinken/\*link.py : class used by Arbiter to connect to daemons.
+  * shinken/modules/\*/\*py : modules for daemons (like the Broker).
   * shinken/objects/schedulingitem.py : base class for host/service that defines all the algorithms for scheduling.
 
 
@@ -93,6 +93,7 @@ Module configuration and startup is controlled in the shinken-specific.cfg
 
 A shinken module class must have an _init_, init and documentation.
 A shinken module can use the following functions:
+
   * managed_broks: A specific function that will dynamically build calls for functions for specific brok.types if the functions exist.
   * manage_NAME-OF-BROK-TYPE_broks: The function that will process a specific type of brok
 

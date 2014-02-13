@@ -63,7 +63,7 @@ Architecture diagram with all daemons illustrated
 
 
 
-.. image:: /_static/images///official/images/shinken-architecture.png?900
+.. image:: /_static/images///official/images/shinken-architecture.png
    :scale: 90 %
 
 

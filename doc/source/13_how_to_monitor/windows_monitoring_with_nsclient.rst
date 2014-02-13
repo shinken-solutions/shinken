@@ -86,12 +86,14 @@ Before you can begin monitoring private services and attributes of Windows machi
 
 
 
-  - Edit the "NSC.INI file" (located in the "C:\NSClient++" directory) and make the following changes:
+- Edit the "NSC.INI file" (located in the "C:\NSClient++" directory) and make the following changes:
+
     * Uncomment all the modules listed in the [modules] section, except for "CheckWMI.dll" and "RemoteConfiguration.dll"
     * Optionally require a password for clients by changing the "password" option in the [Settings] section.
     * Uncomment the "allowed_hosts" option in the [Settings] section. Add the IP address of the Shinken server (or you pollers serbers for a multi-host setup) to this line, or leave it blank to allow all hosts to connect.
     * Make sure the "port" option in the [NSClient] section is uncommented and set to '12489' (the default port).
-  - Start the NSClient++ service with the following command:
+
+- Start the NSClient++ service with the following command:
 
   
 ::

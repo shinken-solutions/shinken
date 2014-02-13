@@ -107,5 +107,6 @@ The configuration generated will look as below :
    }
   
 Here with a stopped t1.micro instance with no name. You can put your how "use" parameter by adding a EC2 tag "use" on your VM. It will be output on the host configuration so you can setup the monitoring as you want.
+
 .. _libcloud: http://libcloud.apache.org/index.html
 .. _AWS: https://console.aws.amazon.com
