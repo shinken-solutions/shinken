@@ -80,7 +80,7 @@ def create_archive(to_pack):
     def tar_exclude_filter(f):
         # if the file start with .git, we bail out
         # Also ending with ~ (Thanks emacs...)
-        if f.startswith('./.git'):
+        if f.startswith('./.git') or f.startswith('.git'):
             return True
         if f.endswith('~'):
             return True
