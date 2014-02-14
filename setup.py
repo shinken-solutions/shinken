@@ -209,7 +209,6 @@ class build_config(Command):
             # The default file must have good values for the directories:
             # etc, var and where to push scripts that launch the app.
             self.generate_shinken_file("bin/init.d/shinken.in", os.path.join(self.build_base, "bin/init.d/shinken"))
-            self.generate_shinken_file("bin/default/shinken.in", os.path.join(self.build_base, "bin/default/shinken"))
             self.update_configfiles()
             self.copy_objects_file()
 
@@ -591,10 +590,6 @@ package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 # If not update, we install configuration files too
 if not is_update:
 
-    data_files.append(
-        (os.path.join(etc_root, 'default',),
-         ['build/bin/default/shinken']
-         ))
     data_files.append(
         (os.path.join(etc_root, 'init.d',),
          ['build/bin/init.d/shinken']

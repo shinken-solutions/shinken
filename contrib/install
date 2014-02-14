@@ -743,16 +743,6 @@ function relocate(){
     #    cecho " > Processing $fic" green;
     #    setdirectives "$directives" $fic $TARGET
     #done
-    # relocate default file
-    cd $TARGET/bin/default
-    sed -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' \
-        -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' \
-        -e 's#ETC\=\(.*\)$#ETC='$ETC'#g' \
-        -e 's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' \
-        -e 's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' \
-        $TARGET/bin/default/shinken.in \
-        > $TARGET/bin/default/shinken
-    rm $TARGET/bin/default/shinken.in
     # relocate init file
     sed -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" \
         $TARGET/bin/init.d/shinken.in
