@@ -87,7 +87,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is True)
 
-    def test_bprule_smart_notifications_ack_downtime(self):
+    def test_bprule_smart_notifications_svc_ack_downtime(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
@@ -116,6 +116,46 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
         self.scheduler_loop(1, [[svc_cor, None, None]])
         self.assert_(svc2.scheduled_downtime_depth > 0)
+
+        self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
+
+        svc_cor.business_rule_downtime_as_ack = True
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+
+        self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is True)
+
+    def test_bprule_smart_notifications_hst_ack_downtime(self):
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
+        svc_cor.act_depend_of = []
+        self.assert_(svc_cor.got_business_rule is True)
+        self.assert_(svc_cor.business_rule is not None)
+        self.assert_(svc_cor.business_rule_smart_notifications is True)
+        self.assert_(svc_cor.business_rule_downtime_as_ack is False)
+
+        dummy = self.sched.hosts.find_by_name("dummy")
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
+        hst2 = self.sched.hosts.find_by_name("test_host_02")
+
+        self.scheduler_loop(2, [
+            [dummy, 0, 'UP dummy'],
+            [svc1, 0, 'OK test_host_01/srv1'],
+            [svc2, 2, 'CRITICAL test_host_02/srv2']], do_sleep=True)
+
+        self.assert_(svc_cor.business_rule.get_state() == 2)
+        self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
+
+        duration = 600
+        now = time.time()
+        # fixed downtime valid for the next 10 minutes
+        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_02;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assert_(hst2.scheduled_downtime_depth > 0)
 
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
 
