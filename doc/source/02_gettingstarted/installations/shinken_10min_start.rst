@@ -31,169 +31,65 @@ Ready? Let's go!
 
 .. _shinken_10min_start#GNU/Linux & Unix installation:
 
+.. warning::  Do not mix installation methods! If you wish to change method, use the uninstaller from the chosen method THEN install using the alternate method.
+
+
 GNU/Linux & Unix Installation 
 ------------------------------
 
 
 
-Method 1: Installation Script 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Method 1: Packages 
+~~~~~~~~~~~~~~~~~~~
 
-.. warning::  Do not mix installation methods! If you wish to change method, use the uninstaller from the chosen method THEN install using the alternate method.
-
-The ``install`` script is located at the root of the Shinken sources. It creates the user and group, installs all dependencies and then installs Shinken. It is compatible with Debian, Ubuntu, Centos/RedHat 5.x and 6.x. The only requirement is an internet connection for the server on which you want to install Shinken.
-
+For now the 2.0 packages are not available, but the community is working hard for it! This should always be the first way to install Shinken. Packages are simple, easy to update and clean.
+Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS (basically  *.deb* and  *.rpm*)
 
 
-Basic automated installation 
-*****************************
+Method 2: Pip / Setup.py
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can get the sources and launch the install script with just this command :
+Shinken 2.0 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.0-RC
+You can donwload the tarball and execute the setup.py or just use the pip command to install it automatically.
 
 
 ::
 
-  curl -L http://install.shinken-monitoring.org | /bin/bash
-  
-You can then jump to the ":ref:`Start Shinken <shinken_10min_start#Start Shinken>`" section and continue from there.
-
-If instead want to make it manually, go in the next step :)
+  pip install shinken
 
 
 
-Installation using the sources 
-*******************************
+Method 3: Installation from sources 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Download stable `Shinken v1.4 tarball`_ archive (or get the latest `git snapshot`_) and extract it somewhere:
+Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot`_) and extract it somewhere:
 
 ::
 
   cd ~
-  wget http://www.shinken-monitoring.org/pub/shinken-1.4.tar.gz
-  tar -xvzf shinken-1.4.tar.gz
+  wget http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
+  tar -xvzf shinken-2.0.tar.gz
 
 
-By default the installation path is ``/usr/local/shinken``, but it can be specified in the configuration file (see `install.d/README`_).
+Shinken 2.0 introduces LSB path. If you want to stick to one directory installation you can of course. 
+Default paths are the following :
 
-
-
-Run a basic installation 
-*************************
-
-*You need to have lsb-release package installed.*
-
-::
-
-  cd ~/shinken-1.4
-  ./install -i
-
-Done! Shinken is installed and you can edit its configuration files in ``/usr/local/shinken/etc`` (by default).
-
-Init.d scripts are also copied, so you just have to enable them at boot time (with ``chkconfig`` or ``update-rc.d``).
-
-
-
-.. _shinken_10min_start#Start Shinken:
-
-Start Shinken 
-**************
-
-To start Shinken:
-
-::
-
-  /etc/init.d/shinken start
-  
-But wait! The installation script can do much more for you, such as installing plugins, addons, upgrading and removing an installation. See the `install.d/README`_ file or :ref:`full install script doc <install_script>` to know how you can get the best out of it.
-
-
-
-Run a full installation 
-************************
-
-
-To list the plugins and addons available:
-
-::
-
-  ./install -h
-  
-A common and fully featured installation is:
-
-
-::
-
-  ./install -i &&\
-  ./install -p nagios-plugins &&\
-  ./install -p check_mem &&\
-  ./install -p manubulon &&\
-  ./install -a multisite &&\
-  ./install -a pnp4nagios &&\
-  ./install -a nagvis &&\
-  ./install -a mongodb
-
-
-This will automatically install:
-  * Shinken
-  * Nagios plugins
-  * Manubulon SNMP plugins
-  * Multisite
-  * PNP4Nagios
-  * Nagvis
-  * MongoDB  # This is used for the SkonfUI beta and WebUI
-
-.. tip::  
-     If you encounter problems installing Multisite, it may be because the latest stable version on Check_MK's website has changed. Simply change the MK version in ``install.d/shinken.conf`` to the latest stable version: ``export MKVER="1.2.0p3"``
-     
-  
-For more information regarding the install script. See the :ref:`full install script doc <install_script>`
-  
-
-
-Update 
-*******
-
-  
-See :ref:`update Shinken <update>`.
-  
-  
-
-
-Method 2: On Fedora with RPM 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::  Shinken is an official RPM
-  
-
-
-First install Python Pyro 
-**************************
-
-::
-
-    yum install python-pyro
+ * **/etc/shinken** for configuration files
+ * **/var/lib/shinken** for shinken modules, retention files...
+ * **/var/log/shinken** for log files
+ * **/var/run/shinken** for pid files
 
 
 
 
-Then install Shinken 
-*********************
+Shinken Configuration
+~~~~~~~~~~~~~~~~~~~~~~
 
+Enable Shinken
+***************
 
-
-::
-
-  yum install shinken  shinken-poller\
-  shinken-scheduler shinken-arbiter \
-  shinken-reactionner shinken-broker shinken-receiver
-
-
-
-
-Enable Shinken services 
-************************
-
+If you did not use the packages, you will have to manually add Shinken init script and enable them at boot. Depending on you Linux distribution (actually it's realted to the init mechanism : upstart, systemd, sysv ..) you may exec one of the following:
 
 ::
 
@@ -202,31 +98,41 @@ Enable Shinken services
   done
 
 
-
-Start Shinken services 
-***********************
-
-
 ::
-
+  
   for i in arbiter poller reactionner scheduler broker; do
-  systemctl start shinken-$i.service;
+  chkconfig shinken-$i on
   done
 
 
 
-Stop Shinken services 
-**********************
+.. _shinken_10min_start#Start Shinken:
 
+Start Shinken 
+**************
+
+Depending on your OS you can start Shinken with one of the following:
 
 ::
 
-  for i in arbiter poller reactionner scheduler broker; do
-  systemctl stop shinken-$i.service;
-  done
+  /etc/init.d/shinken start
+  service shinken start
+  systemctl start shinken  
 
-Easy is not it?
+If you did not enable shinken but still want to launch shinken you have to do it manually:
 
+::
+
+   ./bin/shinken-scheduler -c /etc/shinken/daemons/schedulerd.ini -d
+   ./bin/shinken-poller -c /etc/shinken/daemons/pollerd.ini -d
+   ./bin/shinken-broker -c /etc/shinken/daemons/brokerd.ini -d
+   ./bin/shinken-reactionner -c /etc/shinken/daemons/reactionnerd.ini -d
+   ./bin/shinken-arbiter -c /etc/shinken/shinken.cfg -d
+
+
+
+
+.. _shinken_10min_start#Windows installation:
 
 Windows Installation 
 ---------------------
@@ -234,17 +140,17 @@ Windows Installation
 
 
 
-Method 1: Packaged .EXE Installer 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Packaged .EXE Installer 
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+.. note:: For now the 2.0 exe installer is not available. We hope to get it soon
 
 
 Download the Executable installer 
 **********************************
 
 
-Download the `executable installer for Shinken 1.4`_.
+Download the `executable installer for Shinken 2.0`_.
 
 Thanks to J-F BUTKIEWICZ for preparing the installation package.
 
@@ -279,6 +185,10 @@ By default, check_wmi_plus.pl use an user/password to access the windows WMI fun
 But now, how to configure shinken to manage others windows hosts using wmi. Shinken team provides a set of commands in the windows template. We will see how to set the user/password to work properly. But there is an "extra" function to use the poller's service to push its credential to check_wmi_plus.
 This kind of configuration and globaly the use of check_wmi_plus under windows is described in this :ref:`link <Configure_check_wmi_plus_onwindows>`.
 
+
+
+
+.. _shinken_10min_start#Post installation:
 
 Post installation 
 ------------------
@@ -339,6 +249,6 @@ New and experienced users sometimes need to find documentation, troubleshooting 
 
 
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
-.. _Shinken v1.4 tarball: http://shinken-monitoring.org/pub/shinken-1.4.tar.gz
+.. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
 .. _install.d/README: https://github.com/naparuba/shinken/blob/master/install.d/README
-.. _executable installer for Shinken 1.4: http://www.veosoft.net/index.php/en/component/phocadownload/category/1-binary-packages?download=6:shinken-1-4
+.. _executable installer for Shinken 2.0: http://www.veosoft.net/index.php/en/component/phocadownload/category/1-binary-packages?download=6:shinken-2-0
