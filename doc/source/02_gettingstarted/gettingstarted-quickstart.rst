@@ -18,16 +18,12 @@ Guides
 =======
 
 
-Installation guides are currently available for the following OSs :
+Installation guides are currently available :
 
-  * :ref:`10 Minute installation Guide for GNU/Linux and Windows <shinken_10min_start>`
-  * :ref:`Shinken installation requirements <shinken_installation_requirements>`
-  * :ref:`Shinken 1.2 installation requirements <prerequisites_1_2>`
-  * :ref:`Shinken installation script <install_script>`
-  * :ref:`GNU/Linux Quickstart <gettingstarted-quickstart-gnulinux>`
-  * :ref:`Windows Quickstart <gettingstarted-quickstart-windows>`
-  * :ref:`Nokia N900 <gettingstarted-quickstart-nokia>`
-  * :ref:`Shinken/Thruk/PNP4Nagios on Red Hat <redhat_thruk_pnp4nagios_howto>`
+  * :ref:`Shinken Installation <shinken_installation>`
+  * :ref:`Shinken Environment Setup <shinken_env_setup>`
+  * :ref:`What's next? <shinken_first_steps>`
+
 
 
 
