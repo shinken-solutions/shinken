@@ -13,12 +13,8 @@ Installations
 .. toctree::
 
 
-    shinken_installation_requirements
-    prerequisites_1_2
-    shinken_10min_start
+    shinken_installation
+    shinken_env_setup
+    shinken_first_steps
+    redhat_thruk_pnp4nagios_howto
     install_script
-    alternatives_installs
-    redhat_thruk_pnp4nagios_howto.rst
-    gettingstarted-quickstart-gnulinux
-    gettingstarted-quickstart-windows
-    gettingstarted-quickstart-nokia
