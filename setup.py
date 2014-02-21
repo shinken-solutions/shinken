@@ -25,6 +25,7 @@
 
 # Shinken requires Python 2.6, but does not support Python 3.x yet.
 import sys
+import re
 try:
     python_version = sys.version_info
 except:
@@ -273,15 +274,14 @@ class build_config(Command):
             log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
-            append_file_with(inname, outname, """
-#Overriding default values
-user=%s
-group=%s
-workdir=%s
-logdir=%s
-pidfile=%s/%sd.pid
-""" % (self.owner, self.group, self.var_path, self.log_path, self.run_path, dname))
-            
+            update_file_with_string(inname, outname,
+                                    ["user=\w+", "group=\w+", "workdir=.+", "logdir=.+", "pidfile=.+"],
+                                    ["user=%s" % self.owner,
+                                     "group=%s" % self.group,
+                                     "workdir=%s" % self.var_path,
+                                     "logdir=%s" % self.log_path,
+                                     "pidfile=%s/%sd.pid" % (self.run_path, dname)])
+
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -290,8 +290,8 @@ pidfile=%s/%sd.pid
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "/var/lib/shinken/libexec",
-                                    self.plugins_path)
+                                    ["/var/lib/shinken/libexec"],
+                                    [self.plugins_path])
 
         # And update the shinken.cfg file for all /usr/local/shinken/var
         # value with good one
@@ -301,14 +301,14 @@ pidfile=%s/%sd.pid
             log.info('updating path in %s', outname)
 
             ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
-            append_file_with(inname, outname, """
-shinken_user=%s
-shinken_group=%s
-workdir=%s
-lock_file=%s/arbiterd.pid
-local_log=%s/arbiterd.log
-""" % (self.owner, self.group, self.var_path, self.run_path, self.log_path)
-            )
+            update_file_with_string(inname, outname,
+                                    ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+", "local_log=.+"],
+                                    ["shinken_user=%s" % self.owner,
+                                     "shinken_group=%s" % self.group,
+                                     "workdir=%s" % self.var_path,
+                                     "lock_file=%s/arbiterd.pid" % self.run_path,
+                                     "local_log=%s/arbiterd.log" % self.log_path])
+
 
         # UPDATE others cfg files too
         for name in additionnal_config_files:
@@ -316,12 +316,12 @@ local_log=%s/arbiterd.log
             outname = os.path.join(self.build_dir, name)
 
             update_file_with_string(inname, outname,
-                                    "/var/lib/shinken", self.var_path)
+                                    ["/var/lib/shinken"], [self.var_path])
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
-                                    "shinken.log",
-                                    "%s/shinken.log" % self.log_path)
+                                    ["shinken.log"],
+                                    ["%s/shinken.log" % self.log_path])
 
 
 class install_config(Command):
@@ -458,11 +458,12 @@ def gen_data_files(*dirs):
     return results
 
 
-def update_file_with_string(infilename, outfilename, match, new_string):
+def update_file_with_string(infilename, outfilename, matches, new_strings):
     f = open(infilename)
     buf = f.read()
     f.close()
-    buf = buf.replace(match, new_string)
+    for match, new_string in zip(matches, new_strings):
+        buf = re.sub(match, new_string, buf)
     f = open(outfilename, "w")
     f.write(buf)
     f.close()
