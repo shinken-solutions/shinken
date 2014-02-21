@@ -301,6 +301,7 @@ class Arbiter(Daemon):
         # Now we ask for configuration modules if they
         # got items for us
         for inst in self.modules_manager.instances:
+            #TODO : clean
             if 'configuration' in inst.phases:
                 try:
                     r = inst.get_objects()
@@ -467,7 +468,7 @@ class Arbiter(Daemon):
         self.group = self.conf.shinken_group
         self.daemon_enabled = self.conf.daemon_enabled
         self.daemon_thread_pool_size = self.conf.daemon_thread_pool_size
-        self.http_backend = self.conf.http_backend
+        self.http_backend = getattr(self.conf, 'http_backend', 'auto')
 
         # If the user sets a workdir, lets use it. If not, use the
         # pidfile directory

@@ -395,18 +395,18 @@ class Dispatcher:
                         if not is_sent:
                             logger.warning('[%s] configuration dispatching error for scheduler %s' % (r.get_name(), sched.get_name()))
                             continue
-
+                        
                         logger.info('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
-
+                        
                         sched.conf = conf
                         sched.push_flavor = conf.push_flavor
                         sched.need_conf = False
                         conf.is_assigned = True
                         conf.assigned_to = sched
-
+                        
                         # We update all data for this scheduler
                         sched.managed_confs = {conf.id: conf.push_flavor}
-
+                        
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
                         for kind in ('reactionner', 'poller', 'broker', 'receiver'):

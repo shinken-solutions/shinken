@@ -151,6 +151,7 @@ class Worker:
         except IOError, exp:
             return
 
+
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
@@ -165,6 +166,7 @@ class Worker:
                     # We should die as soon as we return all checks
                     logger.error("[%d] I am dying Too many open files %s ... " % (self.id, chk))
                     self.i_am_dying = True
+
 
     # Check the status of checks
     # if done, return message finished :)

@@ -351,7 +351,7 @@ class Shinken(BaseSatellite):
         self.ichecks = IChecks(self.sched)
         self.http_daemon.register(self.ichecks)
         logger.debug("The Scheduler Interface uri is: %s" % self.uri)
-
+        
         # Same for Broks
         if self.ibroks is not None:
             logger.debug("Deconnecting previous Broks Interface")
@@ -376,15 +376,15 @@ class Shinken(BaseSatellite):
         # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
         m.init(self.conf)
-
+        
         #self.conf.dump()
         #self.conf.quick_debug()
-
+        
         # Now create the external commander
         # it's a applyer: it role is not to dispatch commands,
         # but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
-
+        
         # Scheduler need to know about external command to
         # activate it if necessary
         self.sched.load_external_command(e)
