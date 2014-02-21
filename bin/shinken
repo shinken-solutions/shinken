@@ -322,24 +322,35 @@ if __name__ == '__main__':
     parser.add_option('-l', '--list', action='store_true',
                       dest="do_list", help=("List available commands"))
     parser.add_option('--init', action='store_true',
-                      dest="do_init", help=("Initialize/refill your ~/.shinken.ini file"))
+                      dest="do_init", help=("Initialize/refill your shinken.ini file (default to %s)" % DEFAULT_CFG))
     parser.add_option('-D', action='store_true',
                       dest="do_debug", help=("Enable the debug mode"))
+    parser.add_option('-c', '--config', dest="iniconfig", default=DEFAULT_CFG,
+                      help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('-v', action='store_true',
                       dest="do_verbose", help=("Be more verbose"))
 
-    if '-v' in sys.argv:
+    
+    # First parsing, for purely internal parameters, but disable 
+    # errors, because we only want to see the -D -v things
+    old_error = parser.error
+    parser.error = lambda x:1
+    opts, args = parser.parse_args()
+    # reenable the errors for later use
+    parser.error = old_error
+
+    if opts.do_verbose:
         logger.set_level(logger.INFO)
 
-    if '-D' in sys.argv:
+    if opts.do_debug:
         logger.set_level(logger.DEBUG)
 
     cfg = None
-    if not os.path.exists(DEFAULT_CFG):
+    if not os.path.exists(opts.iniconfig):
         logger.debug('Missing configuration file!')
     else:
         cfg = ConfigParser.ConfigParser()
-        cfg.read(DEFAULT_CFG)
+        cfg.read(opts.iniconfig)
         for section in cfg.sections():
             if not section in CONFIG:
                 CONFIG[section] = {}
@@ -372,7 +383,7 @@ if __name__ == '__main__':
     # them for parsing them after
     command_args = hack_sys_argv()
 
-    # Global command parsing
+    # Global command parsing, with the error enabled this time
     opts, args = parser.parse_args()
 
     # If the user explicitely set the proxy, take it!
@@ -426,8 +437,8 @@ if __name__ == '__main__':
                     modify = True
                 #print new_cfg.items(s)
         if modify:
-            print "Saving the new configuration file", DEFAULT_CFG
-            with open(DEFAULT_CFG, 'wb') as configfile:
+            print "Saving the new configuration file", opts.iniconfig
+            with open(opts.iniconfig, 'wb') as configfile:
                 new_cfg.write(configfile)
         sys.exit(0)
 
