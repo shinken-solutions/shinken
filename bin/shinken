@@ -325,8 +325,6 @@ if __name__ == '__main__':
                       help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('--init', action='store_true',
                       dest="do_init", help=("Initialize/refill your shinken.ini file"))
-    parser.add_option('--local', action='store_true',
-                      dest="do_local", help=("Use to install from local source"))
     parser.add_option('-D', action='store_true',
                       dest="do_debug", help=("Enable the debug mode"))
     parser.add_option('-v', action='store_true',
