@@ -8,13 +8,11 @@ Where is the configuration?
 ----------------------------
 
 
-The configuration is where you put the ``etc`` directory. Usually it's ``/etc/shinken``, ``/usr/local/shinken/etc`` or ``C:/Program Files/Shinken``.
-  * ``nagios.cfg`` is meant to be fully compatible with Nagios;
-  * ``shinken-specific.cfg`` contains all Shinken specific objects (ie. daemons, realms, etc.).
+The configuration is where you put the ``etc`` directory. Usually it's ``/etc/shinken`` or ``C:/Program Files/Shinken``.
+  * ``shinken.cfg`` is meant to be main configuration file that will call all others
 
 
-
-Do I need to change my Nagios configuration?
+I migrate from Nagios, do I need to change my Nagios configuration?
 ---------------------------------------------
 
 
@@ -31,11 +29,6 @@ What do I need to do next
 
 The next logical steps for a new user are as listed in the :ref:`Getting Started <start>` page:
 
-* Setup the web interface:
-
-  * Use the :ref:`default WebUI <use_with_webui>` (Note: it's the mandatory interface on Windows)
-  * Or set-up a :ref:`third-party web interface <use_shinken_with>` and addons.
-
 * Did you read the :ref:`Shinken Architecture <the_shinken_architecture>` presentation?
 * Complete the :ref:`Shinken basic installation <configure_shinken>`
 * Start adding devices to monitor, such as:
@@ -45,6 +38,11 @@ The next logical steps for a new user are as listed in the :ref:`Getting Started
   * :ref:`Windows <monitoring_a_windows>` clients
   * :ref:`Routers <monitoring_a_router_or_switch>`
   * :ref:`Printers <monitoring_a_printer>`
+
+* Setup the web interface:
+
+  * Use the :ref:`default WebUI <use_with_webui>`
+  * Or set-up a :ref:`third-party web interface <use_shinken_with>` and addons.
 
 
 

@@ -4,7 +4,7 @@
 
 
 =====================================
-10 Minute Shinken Installation Guide 
+10 Minutes Shinken Installation Guide 
 =====================================
 
 
@@ -33,7 +33,7 @@ Ready? Let's go!
 Requirements
 -------------
 
- * Python 2.6
+ * Python >= 2.6
  * Pycurl
 
 
@@ -46,15 +46,7 @@ GNU/Linux & Unix Installation
 ------------------------------
 
 
-
-Method 1: Packages 
-~~~~~~~~~~~~~~~~~~~
-
-For now the 2.0 packages are not available, but the community is working hard for it! This should always be the first way to install Shinken. Packages are simple, easy to update and clean.
-Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS (basically  *.deb* and  *.rpm*)
-
-
-Method 2: Pip / Setup.py
+Method 1: Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Shinken 2.0 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.0-RC
@@ -63,7 +55,18 @@ You can donwload the tarball and execute the setup.py or just use the pip comman
 
 ::
 
+  apt-get install python-pip python-pycurl
+  adduser shinken
   pip install shinken
+
+
+
+
+Method 2: Packages 
+~~~~~~~~~~~~~~~~~~~
+
+For now the 2.0 packages are not available, but the community is working hard for it! Packages are simple, easy to update and clean.
+Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS soon (basically  *.deb* and  *.rpm*)
 
 
 
@@ -75,9 +78,11 @@ Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot
 
 ::
 
-  cd ~
+  adduser shinken
   wget http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
   tar -xvzf shinken-2.0.tar.gz
+  cd shinken-2.0
+  python setup.py install
 
 
 Shinken 2.0 introduces LSB path. If you want to stick to one directory installation you can of course. 
@@ -96,40 +101,9 @@ Windows Installation
 
 
 
-
-Packaged .EXE Installer 
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. note:: For now the 2.0 exe installer is not available. We hope to get it soon
-
-
 Download the Executable installer 
 **********************************
 
-
-Download the `executable installer for Shinken 2.0`_.
-
-Thanks to J-F BUTKIEWICZ for preparing the installation package.
-
-
-
-Read the installation instructions 
-***********************************
-
-
-Installation instructions at http://www.veosoft.net/index.php/en/tutorials/shinken-tutorials/shinken-1-2-4-installation-on-windows-2008-r2
-
-
-
-Run the installer 
-******************
-
-
-What? You don't want to read them? No problem.
-
-Simply launch the .exe and click Next until the installation has run its course. :-)
-
-The executable installer creates service and copies the necessary files into C:/Program Files (x86)/Shinken by default, but you can change that target folder as you want.
 
 
 
@@ -150,4 +124,4 @@ This kind of configuration and globaly the use of check_wmi_plus under windows i
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
 .. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
 .. _install.d/README: https://github.com/naparuba/shinken/blob/master/install.d/README
-.. _executable installer for Shinken 2.0: http://www.veosoft.net/index.php/en/component/phocadownload/category/1-binary-packages?download=6:shinken-2-0
+

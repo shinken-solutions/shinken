@@ -17,29 +17,24 @@ Systemd
 This enable Shinken service on a systemd base OS. Note that a Shinken service can be used to start all service.
 ::
 
-  for i in arbiter poller reactionner scheduler broker; do
-  systemctl enable shinken-$i.service;
+  for i in arbiter poller reactionner scheduler broker receiver; do
+  systemctl enable shinken.service;
   done
-
 
 RedHat / CentOS
 ****************
 This enable Shinken service on a RedHat/CentOS. Note that a Shinken service can be used to start all service.
 ::
 
-  for i in arbiter poller reactionner scheduler broker; do
-  chkconfig shinken-$i on
-  done
+  chkconfig shinken on
 
 
 Debian / Ubuntu
 ****************
-This enable Shinken service on a Debian/Ubuntu. Note that a Shinken service can be used to start all service.
+This enable Shinken service on a Debian/Ubuntu.
 ::
 
-  for i in arbiter poller reactionner scheduler broker; do
-  update-rc.d shinken-$i defaults
-  done
+  update-rc.d shinken defaults
 
 
 Start Shinken
@@ -86,4 +81,5 @@ To manually launch Shinken do the following :
    ./bin/shinken-broker -c /etc/shinken/daemons/brokerd.ini -d
    ./bin/shinken-reactionner -c /etc/shinken/daemons/reactionnerd.ini -d
    ./bin/shinken-arbiter -c /etc/shinken/shinken.cfg -d
+   ./bin/shinken-receiver -c /etc/shinken/daemons/receiverd.ini -d
 
