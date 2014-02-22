@@ -622,6 +622,11 @@ for p in gen_data_files('cli'):
     _path, _file = os.path.split(p)
     data_files.append( (os.path.join(var_root, _path), [p]))
 
+# Now all the libexec things
+for p in gen_data_files('libexec'):
+    _path, _file = os.path.split(p)
+    data_files.append( (os.path.join(var_root, _path), [p]))
+
 
 
 # compute scripts

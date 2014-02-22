@@ -21,11 +21,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-
-Warning: THIS IS A PREVIEW, and ugly code that looks as a script.
-
-"""
 
 import optparse
 import sys
@@ -126,6 +121,7 @@ class CLICommander(object):
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
                          ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
                          ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
+                         ('libexec', '%(lib)/libexec'),
                          ]}
                     ,
                     'shinken.io':{
@@ -135,7 +131,7 @@ class CLICommander(object):
 ''',
             'values'  : [('proxy',''),('api_key','')]}
                     }
-
+    
 
     def __init__(self, config):
         self.keywords = {}
