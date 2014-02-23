@@ -485,7 +485,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
                      'libexec': "/usr/lib/shinken/plugins",
                      }
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-    default_paths = {'var': "/var/lib/shinken",
+    default_paths = {'var': "/usr/local/var/shinken",
                      'etc': "/usr/local/etc/shinken",
                      'run': "/var/run/shinken",
                      'log': "/var/log/shinken",
