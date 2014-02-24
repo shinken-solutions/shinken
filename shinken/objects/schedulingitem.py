@@ -1547,11 +1547,15 @@ class SchedulingItem(Item):
                     acknowledged += 1
                 # Only check problems under downtime if we are
                 # explicitely told to do so.
-                elif self.business_rule_downtime_as_ack is True and \
-                        s.scheduled_downtime_depth > 0:
-                    # Problem is under downtime, and downtimes should be
-                    # traeted as acknowledgements
-                    acknowledged += 1
+                elif self.business_rule_downtime_as_ack is True:
+                    if s.scheduled_downtime_depth > 0:
+                        # Problem is under downtime, and downtimes should be
+                        # traeted as acknowledgements
+                        acknowledged += 1
+                    elif hasattr(s, "host") and s.host.scheduled_downtime_depth > 0:
+                        # Host is under downtime, and downtimes should be
+                        # traeted as acknowledgements
+                        acknowledged += 1
         if acknowledged == len(self.source_problems):
             return True
         else:
