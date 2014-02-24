@@ -27,6 +27,7 @@ import time
 import shlex
 import sys
 import subprocess
+import signal
 
 # Try to read in non-blocking mode, from now this only from now on
 # Unix systems
@@ -327,7 +328,7 @@ if os.name != 'nt':
             # We kill a process group because we launched them with
             # preexec_fn=os.setsid and so we can launch a whole kill
             # tree instead of just the first one
-            os.killpg(self.process.pid, 9)
+            os.killpg(self.process.pid, signal.SIGKILL)
             # Try to force close the descriptors, because python seems to have problems with them
             for fd in [self.process.stdout, self.process.stderr]:
                 try:

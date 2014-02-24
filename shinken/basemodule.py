@@ -189,11 +189,11 @@ class BaseModule(object):
             self.process.terminate()
         else:
             # Ok, let him 1 second before really KILL IT
-            os.kill(self.process.pid, 15)
+            os.kill(self.process.pid, signal.SIGTERM)
             time.sleep(1)
             # You do not let me another choice guy...
             if self.process.is_alive():
-                os.kill(self.process.pid, 9)
+                os.kill(self.process.pid, signal.SIGKILL)
 
 
     def stop_process(self):

@@ -397,7 +397,7 @@ class Daemon(object):
 
         self.debug_output.append("Replacing previous instance %d" % pid)
         try:
-            os.kill(pid, 3)
+            os.kill(pid, signal.SIGQUIT)
         except os.error as err:
             if err.errno != errno.ESRCH:
                 raise
@@ -744,9 +744,9 @@ class Daemon(object):
 
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
-        if sig == 10:  # if USR1, ask a memory dump
+        if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
-        elif sig == 12: # if USR2, ask objects dump
+        elif sig == signal.SIGUSR2: # if USR2, ask objects dump
             self.need_objects_dump = True
         else:  # Ok, really ask us to die :)
             self.interrupted = True
