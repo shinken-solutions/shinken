@@ -14,9 +14,9 @@ Description
 ============
 
 
-The Arbiter object is a way to defined Arbiter daemons that will manage all the configuration and all the architecture of shinken like distributed monitoring and high availability. It reads the configuration, cuts it into parts (N schedulers = N parts), and then send them to all others elements. It manages the high availability part : if an element dies, it re-routes the configuration managed by this falling element to a spare one. Its other role is to receive input from users (like external commands of shinken.cmd) and send them to other elements. There can be only one active arbiter in the architecture.
+The Arbiter object is a way to define Arbiter daemons that will manage the configuration and all different architecture components of shinken (like distributed monitoring and high availability). It reads the configuration, cuts it into parts (N schedulers = N parts), and then sends them to all others elements. It manages the high availability part : if an element dies, it re-routes the configuration managed by this falling element to a spare one. Its other role is to receive input from users (like external commands of shinken.cmd) and send them to other elements. There can be only one active arbiter in the architecture.
 
-The Arbiter definition is optionnal. If no arbiter is defined, Shinken will "create" one for the user. There will be no high availability for the Arbiter (no spare), and will use the default port in the server where the deamon is launched.
+The Arbiter definition is optional. If no arbiter is defined, Shinken will "create" one for the user. There will be no high availability for the Arbiter (no spare), and it will use the default port on the server where the daemon is launched.
 
 
 
@@ -75,23 +75,23 @@ Variable Descriptions
 
    arbiter_name
   
-This variable is used to identify the *short name* of the arbiter which the data is associated with.
+This variable is used to identify the *short name* of the arbiter with which the data will be associated with.
 
    address
   
-This directive is used to define the adress from where the main arbier can reach this arbiter (that can be itself). This can be a DNS name or a IP adress.
+This directive is used to define the address from where the main arbiter can reach this arbiter (that can be itself). This can be a DNS name or an IP adress.
 
    host_name
   
-This variable is used by the arbiters daemons to define with 'arbiter' object they are : all theses daemons in differents servers use the same configuration, so the only difference is the serveur name. This value must be equal to the name of the server (like with the hostname command). If none is defined, the arbiter daemon will put the name of the server where it's launched, but this will not be tolerated with more than one arbiter (because each daemons will think it's the master).
+This variable is used by the arbiters daemons to define which 'arbiter' object they are : all theses daemons on different servers use the same configuration, so the only difference is their server name. This value must be equal to the name of the server (like with the hostname command). If none is defined, the arbiter daemon will put the name of the server where it's launched, but this will not be tolerated with more than one arbiter (because each daemons will think it's the master).
 
    port
   
-This directive is used to define the TCP port used bu the daemon. The default value is *7770*.
+This directive is used to define the TCP port used by the daemon. The default value is *7770*.
 
    spare
   
-This variable is used to define if the daemon matching this arbiter definition is a spare one of not. The default value is *0* (master).
+This variable is used to define if the daemon matching this arbiter definition is a spare one or not. The default value is *0* (master/non-spare).
 
    modules
   
@@ -107,7 +107,7 @@ Data send timeout. When sending data to another process. 120 seconds by default.
 
    max_check_attempts
   
-If ping fails N or more, then the node is dead. 3 attempts by default.
+If ping fails N or more, then the node is considered dead. 3 attempts by default.
 
    check_interval
   
