@@ -496,8 +496,8 @@ else:
 
 required_pkgs = ['pycurl']
 
-etc_root = os.path.dirname(default_paths['etc'])
-var_root = os.path.dirname(default_paths['var'])
+etc_root = default_paths['etc']
+var_root = default_paths['var']
 
 # nagios/shinken global config
 main_config_files = ('shinken.cfg',)
@@ -562,30 +562,26 @@ daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
 
 resource_cfg_files = ()
 
-# Ok, for the webui files it's a bit tricky. we need to add all of them in
-#the package_data of setup(), but from a point of view of the
-# module shinken, so the directory shinken... but without movingfrom pwd!
-# so: sorry for the replace, really... I HATE SETUP()!
-full_path_webui_files = gen_data_files('shinken/webui')
-webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
-
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
-package_data.extend(webui_files)
 
 #By default we add all init.d scripts and some dummy files
-data_files = [
-    (
-        os.path.join('/etc', 'init.d'),
-        ['bin/init.d/shinken',
-         'bin/init.d/shinken-arbiter',
-         'bin/init.d/shinken-broker',
-         'bin/init.d/shinken-receiver',
-         'bin/init.d/shinken-poller',
-         'bin/init.d/shinken-reactionner',
-         'bin/init.d/shinken-scheduler',
-         ]
-        )
-    ]
+# not add it for BSD system
+if 'bsd' in sys.platform or 'dragonfly' in sys.platform:
+    data_files = []
+else:
+    data_files = [
+        (
+            os.path.join('/etc', 'init.d'),
+            ['bin/init.d/shinken',
+             'bin/init.d/shinken-arbiter',
+             'bin/init.d/shinken-broker',
+             'bin/init.d/shinken-receiver',
+             'bin/init.d/shinken-poller',
+             'bin/init.d/shinken-reactionner',
+             'bin/init.d/shinken-scheduler',
+             ]
+            )
+        ]
 
 
 # If not update, we install configuration files too
@@ -626,7 +622,6 @@ for p in gen_data_files('cli'):
 for p in gen_data_files('libexec'):
     _path, _file = os.path.split(p)
     data_files.append( (os.path.join(var_root, _path), [p]))
-
 
 
 # compute scripts
