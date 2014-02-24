@@ -477,6 +477,7 @@ if 'win' in sys.platform:
                      'run':      "c:\\shinken\\var",
                      'libexec':  "c:\\shinken\\libexec",
                      }
+    data_files = []
 elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
@@ -484,6 +485,19 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
                      'log': "/var/log/shinken",
                      'libexec': "/usr/lib/shinken/plugins",
                      }
+    data_files = [
+        (
+            os.path.join('/etc', 'init.d'),
+            ['bin/init.d/shinken',
+             'bin/init.d/shinken-arbiter',
+             'bin/init.d/shinken-broker',
+             'bin/init.d/shinken-receiver',
+             'bin/init.d/shinken-poller',
+             'bin/init.d/shinken-reactionner',
+             'bin/init.d/shinken-scheduler',
+             ]
+            )
+        ]
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {'var': "/usr/local/var/shinken",
                      'etc': "/usr/local/etc/shinken",
@@ -491,8 +505,10 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
                      'log': "/var/log/shinken",
                      'libexec': "/usr/local/libexec/shinken",
                      }
+    data_files = []
 else:
     raise "Unsupported platform, sorry"
+    data_files = []
 
 required_pkgs = ['pycurl']
 
@@ -563,26 +579,6 @@ daemon_ini_files = (('broker', 'daemons/brokerd.ini'),
 resource_cfg_files = ()
 
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
-
-#By default we add all init.d scripts and some dummy files
-# not add it for BSD system
-if 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-    data_files = []
-else:
-    data_files = [
-        (
-            os.path.join('/etc', 'init.d'),
-            ['bin/init.d/shinken',
-             'bin/init.d/shinken-arbiter',
-             'bin/init.d/shinken-broker',
-             'bin/init.d/shinken-receiver',
-             'bin/init.d/shinken-poller',
-             'bin/init.d/shinken-reactionner',
-             'bin/init.d/shinken-scheduler',
-             ]
-            )
-        ]
-
 
 # If not update, we install configuration files too
 if not is_update:
