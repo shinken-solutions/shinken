@@ -268,9 +268,12 @@ class build_config(Command):
         # Open a /etc/*d.ini file and change the ../var occurence with a
         # good value from the configuration file
 
+        if not os.path.exists(os.path.join(self.build_dir, 'daemons')):
+            os.makedirs(os.path.join(self.build_dir, 'daemons'))
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
-            outname = os.path.join(self.build_dir, '%sd.ini' % dname)
+            #outname = os.path.join(self.build_dir, '%sd.ini' % dname)
+            outname = os.path.join(self.build_dir, name)
             log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
