@@ -270,7 +270,7 @@ class build_config(Command):
 
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
-            outname = os.path.join(self.build_dir, name)
+            outname = os.path.join(self.build_dir, dname)
             log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
