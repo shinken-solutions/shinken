@@ -106,8 +106,8 @@ def publish_archive(archive):
     # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
+    c.setopt(c.CONNECTTIMEOUT, 30)
+    c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, "http://shinken.io/push")
@@ -152,8 +152,8 @@ def search(look_at):
     # Ok we will push the file with a 10s timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
+    c.setopt(c.CONNECTTIMEOUT, 30)
+    c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
 
@@ -303,11 +303,11 @@ def grab_package(pname):
     proxy = CONFIG['shinken.io']['proxy']
     api_key = CONFIG['shinken.io']['api_key']
 
-    # Ok we will push the file with a 10s timeout
+    # Ok we will push the file with a 5m timeout
     c = pycurl.Curl()
     c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
+    c.setopt(c.CONNECTTIMEOUT, 30)
+    c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
 
