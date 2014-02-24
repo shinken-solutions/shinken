@@ -42,11 +42,11 @@ if is_tty():
         from shinken.misc.termcolor import cprint
     except (SyntaxError, ImportError), exp:
         # Outch can't import a cprint, do a simple print
-        def cprint(s, color):
+        def cprint(s, color='', end=''):
             print s
 # Ok it's a daemon mode, if so, just print
 else:
-    def cprint(s, color):
+    def cprint(s, color='', end=''):
         print s
 
 

@@ -109,5 +109,5 @@ To Robin Gloster for his bug fix about bad wmi ini dir
 To Samuel Milette-Lacombe for his patch about core configuration export on broker
 To Mathieu Parent for his patch about Thruk doc
 To Aina Rakotoson for his bug report about reactionner_tag logic fail, and his patch to fix about it
-
+To jylenhofgfi for his bug report about shinken cli problems and | grep
 
