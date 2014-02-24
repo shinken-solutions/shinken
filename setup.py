@@ -270,7 +270,7 @@ class build_config(Command):
 
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
-            outname = os.path.join(self.build_dir, dname)
+            outname = os.path.join(self.build_dir, '%sd.ini' % dname)
             log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
@@ -633,7 +633,7 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="2.0-RC2",
+        version="2.0-RC7",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
