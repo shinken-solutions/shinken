@@ -125,8 +125,8 @@ class install(_install):
                 'change group for etc/*, var, run and log folders (default: %s)' % DEFAULT_GROUP
             )
         ),
+        ('exclude-doc',  None, "do not install source documentation files"),
     ]
-
 
     def initialize_options(self):
         _install.initialize_options(self)
@@ -137,6 +137,7 @@ class install(_install):
         self.plugins_path = None
         self.owner = None
         self.group = None
+        self.exclude_doc = None
 
 
     def finalize_options(self):
@@ -155,7 +156,21 @@ class install(_install):
             self.owner = DEFAULT_OWNER
         if self.group is None:
             self.group = DEFAULT_GROUP
-
+        if self.exclude_doc is 1:
+            # self.distribution.data_files is list of tuples,
+            # each tuple is a (directory name, [list of files]).
+            # we remove here all files that start with 'doc/'
+            for data_tuple in self.distribution.data_files:
+                data_file_list = data_tuple[1]
+                for data_file in data_file_list:
+                    if data_file.startswith('doc/'):
+                        print "removing doc file {0}".format(data_file)
+                        data_file_list.remove(data_file)
+            # finally cleanup list of data files to remove empty dirs
+            self.distribution.data_files = [(data_dir, data_files) \
+                                               for data_dir, data_files \
+                                               in self.distribution.data_files \
+                                               if len(data_files) != 0 ]
 
 class build_config(Command):
     description = "build the shinken config files"
