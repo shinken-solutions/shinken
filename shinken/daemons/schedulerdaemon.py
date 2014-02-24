@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import signal
 import time
 import traceback
 import cPickle
@@ -257,9 +258,9 @@ class Shinken(BaseSatellite):
     def manage_signal(self, sig, frame):
         logger.warning("Received a SIGNAL %s" % sig)
         # If we got USR1, just dump memory
-        if sig == 10:
+        if sig == signal.SIGUSR1:
             self.sched.need_dump_memory = True
-        elif sig == 12: #usr2, dump objects
+        elif sig == signal.SIGUSR2: #usr2, dump objects
             self.sched.need_objects_dump = True
         else:  # if not, die :)
             self.sched.die()

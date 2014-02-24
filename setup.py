@@ -270,7 +270,7 @@ class build_config(Command):
 
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
-            outname = os.path.join(self.build_dir, name)
+            outname = os.path.join(self.build_dir, dname)
             log.info('Updating path in %s->%s: to "%s"' % (inname, outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
@@ -485,7 +485,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
                      'libexec': "/usr/lib/shinken/plugins",
                      }
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-    default_paths = {'var': "/var/lib/shinken",
+    default_paths = {'var': "/usr/local/var/shinken",
                      'etc': "/usr/local/etc/shinken",
                      'run': "/var/run/shinken",
                      'log': "/var/log/shinken",

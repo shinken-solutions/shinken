@@ -362,8 +362,8 @@ class Daemon(object):
                 self.fpid = open(p, 'r+')
             else:  # If it doesn't exist too, we create it as void
                 self.fpid = open(p, 'w+')
-        except Exception, e:
-            raise InvalidPidFile(e)
+        except Exception as err:
+            raise InvalidPidFile(err)
 
 
     # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
@@ -378,31 +378,28 @@ class Daemon(object):
         # First open the pid file in open mode
         self.__open_pidfile()
         try:
-            pid = int(self.fpid.read())
-        except:
-            logger.info("Stale pidfile exists at %s (no or invalid or unreadable content). Reusing it." % self.pidfile)
+            pid = int(self.fpid.readline().strip(' \r\n'))
+        except Exception as err:
+            logger.info("Stale pidfile exists at %s (%s). Reusing it." % (err, self.pidfile))
             return
 
         try:
             os.kill(pid, 0)
-        except OverflowError, e:
-            ## pid is too long for "kill": so bad content:
-            logger.error("Stale pidfile exists: pid=%d is too long" % (pid))
+        except Exception as err: # consider any exception as a stale pidfile.
+            # this includes :
+            #  * PermissionError when a process with same pid exists but is executed by another user.
+            #  * ProcessLookupError: [Errno 3] No such process.
+            logger.info("Stale pidfile exists (%s), Reusing it." % err)
             return
-        except os.error, e:
-            if e.errno == errno.ESRCH:
-                logger.info("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
-                return
-            raise
 
         if not self.do_replace:
-            raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
+            raise SystemExit("valid pidfile exists (pid=%s) and not forced to replace. Exiting." % pid)
 
         self.debug_output.append("Replacing previous instance %d" % pid)
         try:
-            os.kill(pid, 3)
-        except os.error, e:
-            if e.errno != errno.ESRCH:
+            os.kill(pid, signal.SIGQUIT)
+        except os.error as err:
+            if err.errno != errno.ESRCH:
                 raise
 
         self.fpid.close()
@@ -747,9 +744,9 @@ class Daemon(object):
 
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
-        if sig == 10:  # if USR1, ask a memory dump
+        if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
-        elif sig == 12: # if USR2, ask objects dump
+        elif sig == signal.SIGUSR2: # if USR2, ask objects dump
             self.need_objects_dump = True
         else:  # Ok, really ask us to die :)
             self.interrupted = True
