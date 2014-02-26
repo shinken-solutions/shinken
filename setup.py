@@ -286,7 +286,8 @@ class build_config(Command):
                                      "workdir=%s" % self.var_path,
                                      "logdir=%s" % self.log_path,
                                      "pidfile=%s/%sd.pid" % (self.run_path, dname)])
-
+            # force the user setting as it's not set by default
+            append_file_with(outname, outname, "user=%s\ngroup=%s\n" % (self.owner,self.group))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -596,6 +597,12 @@ if not is_update:
     data_files.append(
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken']
+         ))
+
+    for (dname, dfile) in daemon_ini_files:
+        data_files.append(
+        (os.path.join(default_paths['etc'], 'demons',),
+         ['build/etc/'+dfile]
          ))
     
     # Also add modules to the var directory
