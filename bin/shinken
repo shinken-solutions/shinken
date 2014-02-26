@@ -121,7 +121,7 @@ class CLICommander(object):
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
                          ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
                          ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
-                         ('libexec', '%(lib)/libexec'),
+                         ('libexec', '%(lib)s/libexec'),
                          ]}
                     ,
                     'shinken.io':{
