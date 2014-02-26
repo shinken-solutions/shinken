@@ -374,6 +374,9 @@ def grab_local(d):
 
 def install_package(pname, raw):
     logger.debug("Installing the package %s (size:%d)" % (pname, len(raw)))
+    if len(raw) == 0:
+        logger.error('The package %s cannot be found' % pname)
+        return
     tmpdir = os.path.join(tempfile.gettempdir(), pname)
     logger.debug("Unpacking the package into %s" % tmpdir)
 
