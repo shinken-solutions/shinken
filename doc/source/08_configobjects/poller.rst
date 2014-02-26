@@ -64,7 +64,7 @@ Example Definition:
                min_workers         0   ; Starts with N processes (0 = 1 per CPU)
                max_workers         0   ; No more than N processes (0 = 1 per CPU)
                processes_by_worker 256 ; Each worker manages N checks
-               polling_interval    1   ; Get jobs from schedulers each 1 minute
+               polling_interval    1   ; Get jobs from schedulers each N seconds
   	  }
   
 
