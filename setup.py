@@ -240,6 +240,7 @@ class build_config(Command):
             f.write(buf)
             f.close()
 
+
     def copy_objects_file(self):
         for name in config_objects_file:
             inname = os.path.join('etc', name)
@@ -260,6 +261,7 @@ class build_config(Command):
                         dirname = change_root(self.root, dirname)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
+
 
     def update_configfiles(self):
         # Here, even with --root we should change the file with good values
@@ -398,11 +400,14 @@ class install_config(Command):
             self.recursive_chown(self.run_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.log_path, uid, gid, self.owner, self.group)
 
+
     def get_inputs (self):
         return self.distribution.configs or []
 
+
     def get_outputs(self):
         return self.outfiles or []
+
 
     def recursive_chown(self, path, uid, gid, owner, group):
         log.info("Changing owner of %s to %s:%s", path, owner, group)
@@ -413,6 +418,7 @@ class install_config(Command):
                 path = os.path.join(dirname, path)
                 os.chown(path, uid, gid)
 
+
     @staticmethod
     def get_uid(user_name):
         try:
@@ -421,6 +427,7 @@ class install_config(Command):
             raise DistutilsOptionError("The user %s is unknown. "
                                        "Maybe you should create this user"
                                        % user_name)
+
 
     @staticmethod
     def get_gid(group_name):
