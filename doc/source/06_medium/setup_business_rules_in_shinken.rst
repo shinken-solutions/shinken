@@ -239,10 +239,9 @@ A    B    C    D  E
 Warn Crit Crit Ok Ok
 ==== ==== ==== == ==
 
-   Rules and overall states:
-  
+Rules and overall states:
 
-* 2of:  --> Ok
+  * 2of:  --> Ok
   * 2,4,4of: --> Ok
   * 4,1,1of: --> Critical
   * 4,1,2of: --> Critical
