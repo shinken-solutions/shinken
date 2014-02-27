@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_arbiter
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_arbiter"
+rcvar="shinken_arbiter_enable"
+
+shinken_arbiter_configfile="%%PREFIX%%/etc/shinken/shinken.cfg"
+command="%%PREFIX%%/bin/shinken-arbiter"
+command_interpreter="%%PREFIX%%/bin/python2.7"
+command_args="-d -c ${shinken_arbiter_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/arbiterd.pid"
+
+restart_precmd="shinken_checkconfig"
+configtest_cmd="shinken_checkconfig"
+
+required_files="${shinken_arbiter_configfile}"
+extra_commands="configtest"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_arbiter_enable}" ] && shinken_arbiter_enable="NO"
+
+shinken_checkconfig() {
+	echo -n "Performing sanity check on shinken configuration: "
+	${command} -v -c ${shinken_arbiter_configfile} >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo "FAILED"
+		return 1
+	else
+		echo "OK"
+	fi
+}
+
+run_rc_command "$1"

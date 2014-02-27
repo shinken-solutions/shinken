@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_receiver
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_receiver"
+rcvar="shinken_receiver_enable"
+
+shinken_receiver_configfile="/usr/local/etc/shinken/daemons/receiverd.ini"
+command="/usr/local/bin/shinken-receiver"
+command_interpreter="/usr/local/bin/python2.7"
+command_args="-d -c ${shinken_receiver_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/receiverd.pid"
+
+required_files="${shinken_receiver_configfile}"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_receiver_enable}" ] && shinken_receiver_enable="NO"
+
+run_rc_command "$1"

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_reactionner
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_reactionner"
+rcvar="shinken_reactionner_enable"
+
+shinken_reactionner_configfile="/usr/local/etc/shinken/daemons/reactionnerd.ini"
+command="/usr/local/bin/shinken-reactionner"
+command_interpreter="/usr/local/bin/python2.7"
+command_args="-d -c ${shinken_reactionner_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/reactionnerd.pid"
+
+required_files="${shinken_reactionner_configfile}"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_reactionner_enable}" ] && shinken_reactionner_enable="NO"
+
+run_rc_command "$1"
