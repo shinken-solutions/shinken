@@ -119,7 +119,11 @@ def publish_archive(archive):
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
     c.setopt(c.VERBOSE, 1)
-    c.perform()
+    try:
+        c.perform()
+    except pycurl.error, exp:
+        logger.error("There was a critical error : %s" % exp)
+        return
     r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
     if r != 200:
@@ -162,7 +166,12 @@ def search(look_at):
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
     #c.setopt(c.VERBOSE, 1)
-    c.perform()
+    try:
+        c.perform()
+    except pycurl.error, exp:
+        logger.error("There was a critical error : %s" % exp)
+        return
+
     r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
     if r != 200:
@@ -315,7 +324,12 @@ def grab_package(pname):
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
     #c.setopt(c.VERBOSE, 1)
-    c.perform()
+    try:
+        c.perform()
+    except pycurl.error, exp:
+        logger.error("There was a critical error : %s" % exp)
+        return ''
+
     r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
     if r != 200:
