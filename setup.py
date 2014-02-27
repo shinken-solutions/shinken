@@ -602,7 +602,7 @@ if not is_update:
 
     for (dname, dfile) in daemon_ini_files:
         data_files.append(
-        (os.path.join(default_paths['etc'], 'demons',),
+        (os.path.join(default_paths['etc'], 'daemons',),
          ['build/etc/'+dfile]
          ))
     
