@@ -139,10 +139,9 @@ setup(
 
 if not '/var/lib/shinken/' in default_paths['var']:
     for file in daemonsini:
-        with open(file, "a") as inifile:
-            inifile.write("modules_dir=" + default_paths['var'])
+        if not 'modules_dir=' in open(file).read():
+            with open(file, "a") as inifile:
+                inifile.write("modules_dir=" + default_paths['var'])
     
     
-
-
 print "Shinken setup done"
