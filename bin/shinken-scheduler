@@ -107,7 +107,7 @@ from shinken.bin import VERSION
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog " + VERSION)
 parser.add_option('-c', '--config',
-                  dest="config_file", metavar="CONFIG-FILE",
+                  dest="config_file", metavar="INI-CONFIG-FILE",
                   help='Config file')
 parser.add_option('-d', '--daemon', action='store_true',
                   dest="is_daemon",
