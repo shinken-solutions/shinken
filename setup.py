@@ -248,9 +248,6 @@ class build_config(Command):
             log.info('Copying data files in: %s out: %s' % (inname, outname))
             append_file_with(inname, outname, "")
         # Creating some needed directories
-        discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
-        if not os.path.exists(discovery_dir):
-            os.makedirs(discovery_dir)
         for dirname in [self.var_path, self.run_path, self.log_path]:
             if self.build_base:
                 if not is_install:
@@ -534,15 +531,12 @@ main_config_files = ('shinken.cfg',)
 additionnal_config_files = ()
 
 config_objects_file = (
-                        'discovery/discovery_runs.cfg',
                         'templates.cfg',
                         'dependencies.cfg',
                         'time_templates.cfg',
-                        'discovery/discovery_rules.cfg',
                         'hosts/localhost.cfg',
                         'services/services.cfg',
                         'escalations.cfg',
-                        'discovery/discovery.cfg',
                         'servicegroups.cfg',
                         'certs/server.pem',
                         'certs/client.pem',
