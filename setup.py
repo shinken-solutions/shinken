@@ -57,7 +57,18 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
                      'log':     "/var/log/shinken",
                      'libexec': "/usr/local/libexec/shinken/plugins",
                      }
-    data_files = []
+    data_files = [
+        (
+            '/usr/local/etc/rc.d',
+            ['bin/rc.d/shinken_arbiter',
+             'bin/rc.d/shinken_broker',
+             'bin/rc.d/shinken_receiver',
+             'bin/rc.d/shinken_poller',
+             'bin/rc.d/shinken_reactionner',
+             'bin/rc.d/shinken_scheduler',
+             ]
+            )
+        ]
 else:
     raise "Unsupported platform, sorry"
     data_files = []
