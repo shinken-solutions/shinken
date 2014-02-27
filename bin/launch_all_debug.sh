@@ -30,7 +30,7 @@ echo "$DIR"
 
 cd "$DIR/.."
 
-export LANG=us_US.UTF-8
+export LANG=C
 # Protect against proxy variable for dev
 unset http_proxy
 unset https_proxy

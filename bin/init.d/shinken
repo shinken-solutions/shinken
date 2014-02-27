@@ -62,7 +62,7 @@ test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
 test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
-export LANG=en_US.UTF8
+export LANG=C
 export LC_ALL=en_US.UTF8
 export PYTHONIOENCODING=utf8
 export PYTHONUNBUFFERED="0"
