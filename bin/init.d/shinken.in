@@ -1,32 +1,11 @@
 #!/bin/sh
 
-# Copyright (C) 2009-2011:
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
-#
-# This file is part of Shinken.
-#
-# Shinken is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Shinken is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
 ### BEGIN INIT INFO
 # Provides:          shinken
-# Required-Start:    $local_fs
-# Required-Stop:     $local_fs
-# Default-Start:     2 3 4 5
-# Default-Stop:      S 0 1 6
+# Required-Start:    $network $remote_fs
+# Required-Stop:     $network $remote_fs
+# Default-Start:
+# Default-Stop:
 # Short-Description: Shinken monitoring daemon
 # Description:       Shinken is a monitoring tool composed of many separated modules:
 #     - arbiter     : the main one : control everything else.
@@ -37,11 +16,74 @@
 #     - receiver    : manage all passive data
 ### END INIT INFO
 
-# Deadlink :(
-# http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+### Chkconfig Header
+# Shinken        Starts Shinken daemons
+#
+# chkconfig: - 99 01
+# description: Start Shinken daemons
 
+# Reference:
+# http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+
+curpath=$(cd $(dirname "$0") && pwd)
 
 NAME="shinken"
+
+### =========================================================================
+### Path defined at install time ...
+#   $ETC$ is where we put all configuration files
+#   $VAR$ is where we put some variables files (replaced by $RUN$ and $LOG$ for now)
+#   $SCRIPTS_BIN$ is where the launch scripts will be send
+#   $RUN$ is where we put pid files
+#   $LOG$ is where we put log files
+ETC='$ETC$'
+VAR='$VAR$'
+BIN='$SCRIPTS_BIN$'
+RUN='$RUN$'
+LOG='$LOG$'
+
+# ... or guessed
+test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
+test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
+test "$BIN" || BIN=$(cd $curpath/.. && pwd)
+
+### =========================================================================
+### General config
+# location of the shinken configuration file
+SHINKENCFG="$ETC/shinken.cfg"
+# We got 2 configs because tools like Centreon don't generate all
+# configuration (only the shinken.cfg part)
+if [ -f "$ETC/shinken-specific.cfg" ]; then
+    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+fi
+
+# nicelevel to run shinken daemon with
+NICENESS=5
+
+# user/group for the var/run rights
+SHINKENUSER=shinken
+SHINKENGROUP=shinken
+HOME=`grep ^$SHINKENUSER: /etc/passwd | cut -d: -f 6`
+
+### =========================================================================
+### Daemons config
+for daemon in arbiter scheduler poller reactionner broker receiver skonf; do
+    DAEMON=$(echo "$daemon" | tr [:lower:] [:upper:])
+    if [ "$daemon" != 'arbiter' ]; then
+        # location of the daemon configuration
+        eval ${DAEMON}CFG="$ETC/daemons/${daemon}d.ini"
+    fi
+    # The command to launch
+    eval ${DAEMON}DAEMON=$BIN/shinken-${daemon}
+    # The PID file
+    eval ${DAEMON}PID="$RUN/${daemon}d.pid"
+    eval ${DAEMON}DEBUGFILE="$LOG/${daemon}-debug.log"
+done
+# Arbiter override
+if [ -r $SHINKENCFG ] ; then
+    tmppid=`grep 'lock_file=' $SHINKENCFG | grep -v '#' | tail -n 1 | awk -F '=' '{print $2}'`
+    ARBITERPID=${tmppid-$RUN/arbiterd.pid}
+fi
 
 AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 
@@ -53,13 +95,6 @@ else
     SCRIPTNAME=$SHINKEN_MODULE_FILE
 fi
 
-curpath=$(cd $(dirname "$0") && pwd)
-#echo curpath is $curpath filename is $(basename "$0")
-
-## Default paths:
-test "$BIN" || BIN=$(cd $curpath/.. && pwd)
-test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
-test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
@@ -122,7 +157,7 @@ SUBMODULES=""
 
 usage() {
     cat << END
-Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+Usage: $SCRIPTNAME [ -d ] {start|stop|status|restart|reload|force-reload|check} $_usage_mods_
 
  -d  start requested module(s) in debug mode, only useful with start|restart
 
@@ -159,12 +194,6 @@ else
     done
 fi
 
-# Now look if some required variables are pre defined:
-if ! test "$SHINKENCFG"
-then
-    SHINKENCFG="$ETC/shinken.cfg"
-fi
-
 # If var or run dir is missing, create them and chown them
 [ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
 [ ! -d $RUN ] && mkdir -p $RUN && chown $SHINKENUSER:$SHINKENGROUP $RUN
@@ -172,13 +201,6 @@ fi
 # Now place us in our var directory so even our arbiter will be
 # happy for opening its pid and cmd files
 cd $VAR
-
-#echo BIN=$BIN
-#echo VAR=$VAR
-#echo ETC=$ETC
-
-#set -xv
-
 
 echo_success() {
    log_end_msg 0 $*
@@ -197,7 +219,9 @@ echo_failure() {
 # Source function library.
 [ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
 
-[ -f /lib/lsb/init-functions ] && . /lib/lsb/init-functions
+if [ -f /lib/lsb/init-functions ]; then
+. /lib/lsb/init-functions
+fi
 
 
 
@@ -322,7 +346,7 @@ do_stop() {
     }
     if [ ! -z "$pid" ]; then
         kill "$pid"
-        sleep 0.5
+        sleep 1
         ## TODO: instead of 'sleep 1': wait up to when pid file is removed (with timeout)?
         for i in 1 2 3
         do
@@ -526,6 +550,9 @@ do_cmd_on() {
 ############################
 ## Main:
 
+if [ "$CMD" = 'force-reload' ]; then
+    CMD=restart
+fi
 case "$CMD" in
     start|stop|restart|status)
         do_cmd_on "$CMD" "$SUBMODULES"

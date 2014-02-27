@@ -206,17 +206,13 @@ class build_config(Command):
             self.mkpath(self.build_dir)
         # We generate the conf files only for a full install
         if not is_update:
-            self.generate_default_shinken_file()
+            # The default file must have good values for the directories:
+            # etc, var and where to push scripts that launch the app.
+            self.generate_shinken_file("bin/init.d/shinken.in", os.path.join(self.build_base, "bin/init.d/shinken"))
             self.update_configfiles()
             self.copy_objects_file()
 
-
-    def generate_default_shinken_file(self):
-        # The default file must have good values for the directories:
-        # etc, var and where to push scripts that launch the app.
-        templatefile = "bin/default/shinken.in"
-        outfile = os.path.join(self.build_base, "bin/default/shinken")
-
+    def generate_shinken_file(self, templatefile, outfile):
         log.info('generating %s from %s', outfile, templatefile)
         if not self.dry_run:
             self.mkpath(os.path.dirname(outfile))
@@ -499,7 +495,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     data_files = [
         (
             os.path.join('/etc', 'init.d'),
-            ['bin/init.d/shinken',
+            [
              'bin/init.d/shinken-arbiter',
              'bin/init.d/shinken-broker',
              'bin/init.d/shinken-receiver',
@@ -596,8 +592,8 @@ package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 if not is_update:
 
     data_files.append(
-        (os.path.join(etc_root, 'default',),
-         ['build/bin/default/shinken']
+        (os.path.join(etc_root, 'init.d',),
+         ['build/bin/init.d/shinken']
          ))
 
     for (dname, dfile) in daemon_ini_files:
