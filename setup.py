@@ -1,6 +1,8 @@
 import os
 import sys
 import re
+import pwd
+import grp
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -11,6 +13,18 @@ from setuptools import setup
 from setuptools import find_packages
 from itertools import chain
 from glob import glob
+
+try:
+    python_version = sys.version_info
+except:
+    python_version = (1, 5)
+if python_version < (2, 6):
+    sys.exit("Shinken require as a minimum Python 2.6.x, sorry")
+elif python_version >= (3,):
+    sys.exit("Shinken is not yet compatible with Python3k, sorry")
+
+user = 'shinken'
+group = 'shinken'
 
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
@@ -142,6 +156,11 @@ if not '/var/lib/shinken/' in default_paths['var']:
         if not 'modules_dir=' in open(file).read():
             with open(file, "a") as inifile:
                 inifile.write("modules_dir=" + default_paths['var'])
-    
+
+paths = (default_paths['run'], default_paths['log'])
+uid = pwd.getpwnam(user).pw_uid
+gid = grp.getgrnam(group).gr_gid
+for path in paths:
+    os.chown(path, uid, gid)    
     
 print "Shinken setup done"
