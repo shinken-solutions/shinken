@@ -9,6 +9,7 @@ except ImportError:
     # don't expect to have this on windows :)
     pwd = grp = None
 import fileinput
+import stat
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -131,6 +132,23 @@ def get_gid(group_name):
         return None
 
 
+# Do a chmod -R +x
+def _chmodplusx(d):
+    if not os.path.exists(d):
+        return
+    if os.path.isdir(d):
+        for item in os.listdir(d):
+            p = os.path.join(d, item)
+            if os.path.isdir(p):
+                _chmodplusx(p)
+            else:
+                st = os.stat(p)
+                os.chmod(p, st.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+    else:
+        st = os.stat(d)
+        os.chmod(d, st.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+
+
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog ")
 parser.add_option('--root',
@@ -170,6 +188,11 @@ root = opts.proot or ''
 # We try to see if we are in a full install or an update process
 is_update = False
 if 'update' in args or opts.upgrade:
+    print "Shinken Lib Updating process only"
+    if 'update' in args:
+        sys.argv.remove('update')
+        sys.argv.insert(1, 'install')
+    
     print "Shinken Lib Updating process only"
     is_update = True
 
@@ -340,7 +363,7 @@ scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 required_pkgs = ['pycurl']
 setup(
     name="Shinken",
-    version="2.0-RC10",
+    version="2.0-RC11",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
@@ -389,6 +412,10 @@ if pwd and not root and is_install :
         for s in scripts:
             bs = os.path.basename(s)
             recursive_chown(os.path.join(install_scripts, bs), uid, gid, user, group)
+        _chmodplusx(default_paths['libexec'])
 
+    # If not exists, won't raise an error there
+    for d in ['scheduler', 'broker', 'receiver', 'reactionner', 'poller', 'arbiter']:
+        _chmodplusx('/etc/init.d/shinken-'+d)
     
 print "Shinken setup done"
