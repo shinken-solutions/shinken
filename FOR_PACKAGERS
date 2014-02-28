@@ -7,9 +7,9 @@ I try to make the setup.py useful to you. It will install the shinken
 library to the classic python way (in site-package).
 
 === Requirements ===
-You will need Python >=2.4 (for 2.4 and 2.5 you will need the multiprocessing package from http://pypi.python.org/pypi/multiprocessing/ too)
+You will need Python >=2.6
 
-You will need the pyro lib too. It must already have a package. If not, take it from pypi (easy_install)
+You will need the pycurl lib too. It must already have a package. If not, take it from pypi (easy_install)
 
 
 
@@ -58,13 +58,16 @@ The `setup.py` installs some `init.d` scripts, let's use them::
 
 === Create the Package ===
 
+****** IN ORDER TO USER THE --ROOT FORTHE BUILDROOT, YOU MUST USE THE SETUPPACKAGE.PY isntead of the setup..py *******
+
+
 You can change the place you want to put etc and var in the file setup_parameters.cfg. You can also change
 the owner of theses dir (and ALL files in them) in this file.
 
 But WARNING (bis): if you set a --root (example =/tmp/something) it will not update the owner of the /etc and /var directory (calling with a --root is for having all files to create a package, so you don't need changing owners).
 
 Example when you call:
-python setup.py install --root=/tmp/something --record=INSTALLED_FILES --install-scripts=/usr/bin
+python setuppackages.py install --root=/tmp/something --record=INSTALLED_FILES --install-scripts=/usr/bin
 (no trailing / for install_scripts)
 You get all files to package in the file INSTALLED_FILES (and only the /tmp/moncul is changed, so it's ok for your system ;)).
 
