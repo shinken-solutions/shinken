@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 import re
@@ -32,8 +33,6 @@ if python_version < (2, 6):
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
-user = 'shinken'
-group = 'shinken'
 
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
@@ -57,8 +56,8 @@ def generate_default_shinken_file():
     print('generating %s from %s', outfile, templatefile)
 
     mkpath(os.path.dirname(outfile))
-
-    bin_path = '/usr/local/bin/'
+    
+    bin_path = install_scripts
     #if self.root:
     #    bin_path = bin_path.replace(self.root.rstrip(os.path.sep), '')
 
@@ -135,21 +134,40 @@ def get_gid(group_name):
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog ")
 parser.add_option('--root',
-                  dest="root", metavar="ROOT",
+                  dest="proot", metavar="ROOT",
                   help='Root dir to install, usefull only for packagers')
 parser.add_option('--upgrade', '--update',
                   dest="upgrade", action='store_true',
                   help='Only upgrade')
+parser.add_option('--owner',
+                  dest="owner", metavar="OWNER",
+                  help='User to install with, default shinken')
+parser.add_option('--group',
+                  dest="group", metavar="GROUP",
+                  help='Group to install with, default shinken')
+parser.add_option('--install-scripts',
+                  dest="install_scripts",
+                  help='Path to install the shinken-* scripts')
+parser.add_option('--skip-build',
+                  dest="skip_build", action='store_true',
+                  help='skipping build')
+parser.add_option('-O', type="int",
+                  dest="optimize",
+                  help='skipping build')
+
+
 
 old_error = parser.error
-parser.error = lambda x:1
+def _error (msg):
+    print 'Parser error', msg
+parser.error = _error
 opts, args = parser.parse_args()
 # reenable the errors for later use
 parser.error = old_error
 
 print "ARGS", args
-root = opts.root or ''
-
+root = opts.proot or ''
+print "FUCK", root, opts
 
 # We try to see if we are in a full install or an update process
 is_update = False
@@ -162,6 +180,28 @@ is_install = False
 if 'install' in args:
     is_install = True
 
+
+install_scripts = opts.install_scripts or '/usr/local/bin/'
+
+if root:
+    install_scripts = os.path.join(root, install_scripts[1:])
+user = opts.owner or 'shinken'
+group = opts.group or 'shinken'
+
+
+# setup() will warn about unknown parameter we already managed
+# to delte them
+deleting_args = ['--owner', '--group', '--skip-build']
+to_del = []
+for a in deleting_args:
+    if a in sys.argv:
+        idx = sys.argv.index(a)
+        to_del.append(idx)
+        to_del.append(idx + 1)
+to_del.sort()
+to_del.reverse()
+for idx in to_del:
+    sys.argv.pop(idx)
 
 
 # Define files
@@ -180,7 +220,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
                      'etc':     "/etc/shinken",
                      'run':     "/var/run/shinken",
                      'log':     "/var/log/shinken",
-                     'libexec': "/usr/lib/shinken/plugins",
+                     'libexec': "/var/lib/shinken/libexec",
                      }
     data_files = [
         (
@@ -225,6 +265,15 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
 else:
     raise "Unsupported platform, sorry"
     data_files = []
+
+print "ROOT", root
+# Change paths if need
+if root:
+    for (k,v) in default_paths.iteritems():
+        default_paths[k] = os.path.join(root, v[1:])
+
+print default_paths
+
 
 if not is_update:
     ## get all files + under-files in etc/ except daemons folder
@@ -293,8 +342,10 @@ data_files.append( (default_paths['log'], []) )
 # compute scripts
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
+
+print"SETUP"
 setup(
-     name="Shinken",
+    name="Shinken",
     version="2.0-RC8",
     packages=find_packages(),
     package_data={'': package_data},
@@ -318,7 +369,7 @@ setup(
         'Topic :: System :: Networking :: Monitoring',
     ],
     scripts=scripts,
-    data_files = data_files
+    data_files = data_files,
 )
 
 
@@ -335,7 +386,7 @@ if pwd and not root and is_install :
             recursive_chown(p, uid, gid, user, group)
         for s in scripts:
             bs = os.path.basename(s)
-            recursive_chown(os.path.join('/usr/local/bin/', bs), uid, gid, user, group)
+            recursive_chown(os.path.join(install_scripts, bs), uid, gid, user, group)
 
     
 print "Shinken setup done"
