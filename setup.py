@@ -259,12 +259,15 @@ if os.name != 'nt' and not is_update:
         
         ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
         update_file_with_string(inname, outname,
-                                ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+", "local_log=.+"],
+                                ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+", "local_log=.+", "modules_dir=.+", "pack_distribution_file=.+"],
                                 ["shinken_user=%s" % user,
                                  "shinken_group=%s" % group,
                                  "workdir=%s" % default_paths['var'],
                                  "lock_file=%s/arbiterd.pid" % default_paths['run'],
-                                 "local_log=%s/arbiterd.log" % default_paths['log']])
+                                 "local_log=%s/arbiterd.log" % default_paths['log'],
+                                "modules_dir=%s" % os.path.join(default_paths['var'], 'modules'),
+                                "pack_distribution_file=%s" % os.path.join(default_paths['var'], 'pack_distribution.dat')],
+                                )
         data_files.append( (default_paths['etc'], [outname]) )
 
 
@@ -324,14 +327,15 @@ if pwd and not root and is_install :
     # assume a posix system
     uid = get_uid(user)
     gid = get_gid(group)
-    if uid and gid:
+
+    if uid is not None and gid is not None:
         # recursivly changing permissions for etc/shinken and var/lib/shinken
         for c in ['etc', 'run', 'log', 'var', 'libexec']:
             p = default_paths[c]
             recursive_chown(p, uid, gid, user, group)
-    for s in scripts:
-        bs = os.path.basename(s)
-        recursive_chown(os.path.join('/usr/local/bin/', bs), uid, gid, user, group)
+        for s in scripts:
+            bs = os.path.basename(s)
+            recursive_chown(os.path.join('/usr/local/bin/', bs), uid, gid, user, group)
 
     
 print "Shinken setup done"
