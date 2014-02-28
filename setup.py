@@ -165,9 +165,7 @@ opts, args = parser.parse_args()
 # reenable the errors for later use
 parser.error = old_error
 
-print "ARGS", args
 root = opts.proot or ''
-print "FUCK", root, opts
 
 # We try to see if we are in a full install or an update process
 is_update = False
@@ -266,14 +264,10 @@ else:
     raise "Unsupported platform, sorry"
     data_files = []
 
-print "ROOT", root
 # Change paths if need
 if root:
     for (k,v) in default_paths.iteritems():
         default_paths[k] = os.path.join(root, v[1:])
-
-print default_paths
-
 
 if not is_update:
     ## get all files + under-files in etc/ except daemons folder
@@ -343,7 +337,7 @@ data_files.append( (default_paths['log'], []) )
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
 
-print"SETUP"
+required_pkgs = ['pycurl']
 setup(
     name="Shinken",
     version="2.0-RC10",
@@ -368,6 +362,14 @@ setup(
         'Topic :: System :: Monitoring',
         'Topic :: System :: Networking :: Monitoring',
     ],
+    install_requires=[
+        required_pkgs
+        ],
+
+    extras_require={
+        'setproctitle': ['setproctitle']
+        },
+
     scripts=scripts,
     data_files = data_files,
 )
