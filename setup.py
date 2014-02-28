@@ -3,6 +3,7 @@ import sys
 import re
 import pwd
 import grp
+import fileinput
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -162,6 +163,10 @@ if not '/var/lib/shinken/' in default_paths['var']:
         if not "\ngroup=" in open(file).read():
             with open(file, "a") as inifile:
                 inifile.write("group=" + group + "\n")
+    for line in fileinput.input(os.path.join(default_paths['etc'], 'shinken.cfg'), inplace = 1):
+        print line.replace("modules_dir=/var/lib/shinken/modules", "modules_dir=" + default_paths['var'] + "/modules"),
+    for line in fileinput.input(os.path.join(default_paths['etc'], 'shinken.cfg'), inplace = 1):
+        print line.replace("pack_distribution_file=/var/lib/shinken/", "pack_distribution_file=" + default_paths['var'] + "/"),
 
 paths = (default_paths['run'], default_paths['log'])
 uid = pwd.getpwnam(user).pw_uid
