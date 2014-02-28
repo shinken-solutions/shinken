@@ -268,7 +268,7 @@ Escalations based on time short time
 
 It's also interesting to see that with escalation based on time, if the notification interval is longer than the next escalation time, it's this last value that will be taken into account.
 
-Let take an example where your service got :
+Let take an example where your service got:
   
 ::
 
@@ -276,21 +276,25 @@ Let take an example where your service got :
        notification_interval     1440
        escalations    ToLevel2,ToLevel3
   }
-Then with the escalations objects :
+  
+Then with the escalations objects:
   
 ::
 
-  define escalation{
-    first_notification_time    60
-    last_notification_time     120
-    contact_groups    level2
+  define escalation {
+      escalation_name            ToLevel2
+      first_notification_time    60
+      last_notification_time     120
+      contact_groups             level2
   }
   
-    define escalation{
-    first_notification_time    120
-    last_notification_time     0
-    contact_groups    level3
+  define escalation {
+      escalation_name            ToLevel3
+      first_notification_time    120
+      last_notification_time     0
+      contact_groups             level3
   }
+  
 Here let say you have a problem HARD on the service at t=0. It will notify the level1. The next notification should be at t=1440 minutes, so tomorrow. It's ok for classic services (too much notification is DANGEROUS!) but not for escalated ones.
 
 Here, at t=60 minutes, the escalation will raise, you will notify the level2 contact group, and then at t=120 minutes you will notify the level3, and here one a day until they solve it!
@@ -299,8 +303,8 @@ So you can put large notification_interval and still have quick escalations time
 
 
 
-Time Period Restrictions 
-=========================
+Time Period Restrictions
+========================
 
 
 Under normal circumstances, escalations can be used at any time that a notification could normally be sent out for the host or service. This "notification time window" is determined by the "notification_period" directive in the :ref:`host <configuringshinken/configobjects/host>` or :ref:`service <configuringshinken/configobjects/service>` definition.
@@ -311,8 +315,8 @@ Escalated notifications are still subject to the normal time restrictions impose
 
 
 
-State Restrictions 
-===================
+State Restrictions
+==================
 
 
 If you would like to restrict the escalation definition so that it is only used when the host or service is in a particular state, you can use the "escalation_options" directive in the host or service escalation definition. If you do not use the "escalation_options" directive, the escalation can be used when the host or service is in any state.
