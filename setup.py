@@ -307,7 +307,6 @@ setup(
 )
 
 
-
 # if root is set, it's for pacakge, so NO chown
 if pwd and not root:
     # assume a posix system
@@ -321,7 +320,6 @@ if pwd and not root:
     for s in scripts:
         bs = os.path.basename(s)
         recursive_chown(os.path.join('/usr/local/bin/', bs), uid, gid, user, group)
-
 
     
 print "Shinken setup done"
