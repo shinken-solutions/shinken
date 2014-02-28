@@ -161,16 +161,18 @@ if not '/var/lib/shinken/' in default_paths['var']:
         if not 'modules_dir=' in open(file).read():
             with open(file, "a") as inifile:
                 inifile.write("modules_dir=" + default_paths['var'] + "/modules\n")
-        if not "\nuser=" in open(file).read():
-            with open(file, "a") as inifile:
-                inifile.write("user=" + user + "\n")
-        if not "\ngroup=" in open(file).read():
-            with open(file, "a") as inifile:
-                inifile.write("group=" + group + "\n")
     for line in fileinput.input(os.path.join(default_paths['etc'], 'shinken.cfg'), inplace = 1):
         print line.replace("modules_dir=/var/lib/shinken/modules", "modules_dir=" + default_paths['var'] + "/modules"),
     for line in fileinput.input(os.path.join(default_paths['etc'], 'shinken.cfg'), inplace = 1):
         print line.replace("pack_distribution_file=/var/lib/shinken/", "pack_distribution_file=" + default_paths['var'] + "/"),
+
+for file in daemonsini:
+    if not "\nuser=" in open(file).read():
+        with open(file, "a") as inifile:
+            inifile.write("user=" + user + "\n")
+    if not "\ngroup=" in open(file).read():
+        with open(file, "a") as inifile:
+            inifile.write("group=" + group + "\n")
 
 paths = (default_paths['run'], default_paths['log'])
 uid = pwd.getpwnam(user).pw_uid
