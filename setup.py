@@ -346,7 +346,7 @@ scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 print"SETUP"
 setup(
     name="Shinken",
-    version="2.0-RC8",
+    version="2.0-RC10",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
