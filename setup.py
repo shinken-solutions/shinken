@@ -64,6 +64,10 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
              ]
             )
         ]
+    data_files.append(
+        (os.path.join(etc_root, 'default',),
+         ['build/bin/default/shinken']
+         ))
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {'var':     "/usr/local/libexec/shinken",
                      'share':   "/usr/local/share/shinken",
