@@ -298,6 +298,7 @@ if os.name != 'nt':
             #safe_print("With env", self.local_env)
 
             # Now: GO for launch!
+            logger.debug("Launching: %s" % (self.command.encode('utf8', 'ignore')))
 
             # The preexec_fn=os.setsid is set to give sons a same
             # process group. See
