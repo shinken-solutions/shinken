@@ -155,7 +155,7 @@ if not '/var/lib/shinken/' in default_paths['var']:
     for file in daemonsini:
         if not 'modules_dir=' in open(file).read():
             with open(file, "a") as inifile:
-                inifile.write("modules_dir=" + default_paths['var'])
+                inifile.write("modules_dir=" + default_paths['var'] + "/modules")
 
 paths = (default_paths['run'], default_paths['log'])
 uid = pwd.getpwnam(user).pw_uid
