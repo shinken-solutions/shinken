@@ -65,7 +65,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
             )
         ]
     data_files.append(
-        (os.path.join(etc_root, 'default',),
+        (os.path.join(default_paths['etc'], 'default'),
          ['build/bin/default/shinken']
          ))
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
