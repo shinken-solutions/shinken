@@ -141,8 +141,12 @@ parser.add_option('--upgrade', '--update',
                   dest="upgrade", action='store_true',
                   help='Only upgrade')
 
-
+old_error = parser.error
+parser.error = lambda x:1
 opts, args = parser.parse_args()
+# reenable the errors for later use
+parser.error = old_error
+
 print "ARGS", args
 root = opts.root or ''
 
@@ -152,6 +156,11 @@ is_update = False
 if 'update' in args or opts.upgrade:
     print "Shinken Lib Updating process only"
     is_update = True
+
+
+is_install = False
+if 'install' in args:
+    is_install = True
 
 
 
@@ -187,7 +196,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
             )
         ]
 
-    if not is_update:
+    if is_install:
         generate_default_shinken_file()
         data_files.append(
             (os.path.join('/etc', 'default',),
@@ -222,6 +231,8 @@ if not is_update:
     daemonsini = []
     for path, subdirs, files in os.walk('etc'):
         for name in files:
+            if name == 'shinken.cfg':
+                continue
             if 'daemons' in path:
                 daemonsini.append(os.path.join(path, name))
             else:
@@ -236,8 +247,8 @@ if os.name != 'nt' and not is_update:
         append_file_with(inifile, outname, "modules_dir=%s\nuser=%s\ngroup=%s\n" % (
                 os.path.join(default_paths['var'], 'modules'),
                 user, group))
-        data_files.append( (os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)),
-                                [os.path.join(path, name)]) )
+        data_files.append( (os.path.join(default_paths['etc'], 'daemons'),
+                            [outname]) )
 
     # And update the shinken.cfg file for all /usr/local/shinken/var
     # value with good one
@@ -254,6 +265,7 @@ if os.name != 'nt' and not is_update:
                                  "workdir=%s" % default_paths['var'],
                                  "lock_file=%s/arbiterd.pid" % default_paths['run'],
                                  "local_log=%s/arbiterd.log" % default_paths['log']])
+        data_files.append( (default_paths['etc'], [outname]) )
 
 
 # Modules, doc, inventory and cli are always installed
@@ -308,7 +320,7 @@ setup(
 
 
 # if root is set, it's for pacakge, so NO chown
-if pwd and not root:
+if pwd and not root and is_install :
     # assume a posix system
     uid = get_uid(user)
     gid = get_gid(group)
