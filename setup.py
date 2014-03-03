@@ -59,8 +59,6 @@ def generate_default_shinken_file():
     mkpath(os.path.dirname(outfile))
     
     bin_path = default_paths['bin']
-    #if self.root:
-    #    bin_path = bin_path.replace(self.root.rstrip(os.path.sep), '')
 
     # Read the template file
     f = open(templatefile)
@@ -393,7 +391,7 @@ data_files.append( (default_paths['log'], []) )
 required_pkgs = ['pycurl']
 setup(
     name="Shinken",
-    version="2.0-RC13",
+    version="2.0-RC15",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
@@ -446,6 +444,7 @@ if pwd and not root and is_install :
         _chmodplusx(default_paths['libexec'])
 
     # If not exists, won't raise an error there
+    _chmodplusx('/etc/init.d/shinken')
     for d in ['scheduler', 'broker', 'receiver', 'reactionner', 'poller', 'arbiter']:
         _chmodplusx('/etc/init.d/shinken-'+d)
     
