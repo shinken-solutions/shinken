@@ -165,7 +165,12 @@ parser.add_option('--skip-build',
 parser.add_option('-O', type="int",
                   dest="optimize",
                   help='skipping build')
-
+parser.add_option('--record',
+                  dest="record",
+                  help='File to save writing files. Used by pip install only')
+parser.add_option('--single-version-externally-managed',
+                  dest="single_version", action='store_true',
+                  help='I really dont know, this option is for pip only')
 
 
 old_error = parser.error
@@ -388,10 +393,10 @@ data_files.append( (default_paths['log'], []) )
 # default/shinken file with the bin path before run the setup phase, and it's not so
 # easy to do in a clean and easy way
         
-required_pkgs = ['pycurl']
+required_pkgs = []
 setup(
     name="Shinken",
-    version="2.0-RC15",
+    version="2.0-RC16",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
