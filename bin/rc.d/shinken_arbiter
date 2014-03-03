@@ -13,7 +13,7 @@ rcvar="shinken_arbiter_enable"
 
 shinken_arbiter_configfile="/usr/local/etc/shinken/shinken.cfg"
 command="/usr/local/bin/shinken-arbiter"
-command_interpreter="/usr/local//bin/python2.7"
+command_interpreter="/usr/local/bin/python2.7"
 command_args="-d -c ${shinken_arbiter_configfile} > /dev/null 2>&1"
 pidfile="/var/run/shinken/arbiterd.pid"
 

@@ -58,7 +58,7 @@ def generate_default_shinken_file():
 
     mkpath(os.path.dirname(outfile))
     
-    bin_path = install_scripts
+    bin_path = default_paths['bin']
     #if self.root:
     #    bin_path = bin_path.replace(self.root.rstrip(os.path.sep), '')
 
@@ -116,9 +116,6 @@ def get_uid(user_name):
     try:
         return pwd.getpwnam(user_name)[2]
     except KeyError, exp:
-        print("The user %s is unknown. "
-              "Maybe you should create this user"
-              % user_name)
         return None
     
 
@@ -126,15 +123,13 @@ def get_gid(group_name):
     try:
         return grp.getgrnam(group_name)[2]
     except KeyError, exp:
-        print ("The group %s is unknown. "
-               "Maybe you should create this group"
-               % group_name)
         return None
 
 
 # Do a chmod -R +x
 def _chmodplusx(d):
     if not os.path.exists(d):
+        print "warn: _chmodplusx missing dir", d
         return
     if os.path.isdir(d):
         for item in os.listdir(d):
@@ -202,47 +197,70 @@ if 'install' in args:
     is_install = True
 
 
-install_scripts = opts.install_scripts or '/usr/local/bin/'
+install_scripts = opts.install_scripts or ''
 
-if root:
-    install_scripts = os.path.join(root, install_scripts[1:])
 user = opts.owner or 'shinken'
 group = opts.group or 'shinken'
 
+# Maybe the user is unknown, but we are in a "classic" install, if so, bail out
+if is_install and not root and not is_update and pwd and not opts.skip_build:
+    uid = get_uid(user)
+    gid = get_gid(group)
+
+    if uid is None or gid is None:
+        print "Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user,group, user)
+        sys.exit(2)
+    
+    
 
 # setup() will warn about unknown parameter we already managed
 # to delte them
 deleting_args = ['--owner', '--group', '--skip-build']
+
 to_del = []
 for a in deleting_args:
-    if a in sys.argv:
-        idx = sys.argv.index(a)
-        to_del.append(idx)
-        to_del.append(idx + 1)
+    for av in sys.argv:
+        if av.startswith(a):
+            idx = sys.argv.index(av)
+            print "AV,", av, "IDX", idx
+            to_del.append(idx)
+            # We can have --owner=shinken or --owner shinken, if so del also the
+            # next one
+            if '=' not in av:
+                to_del.append(idx + 1)
+
 to_del.sort()
 to_del.reverse()
 for idx in to_del:
     sys.argv.pop(idx)
 
 
+
+# compute scripts
+scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
+
 # Define files
 if 'win' in sys.platform:
-    default_paths = {'var':      "c:\\shinken\\var",
-                     'share':    "c:\\shinken\\var\\share",
-                     'etc':      "c:\\shinken\\etc",
-                     'log':      "c:\\shinken\\var",
-                     'run':      "c:\\shinken\\var",
-                     'libexec':  "c:\\shinken\\libexec",
-                     }
+    default_paths = {
+        'bin':      install_scripts or "c:\\shinken\\bin",
+        'var':      "c:\\shinken\\var",
+        'share':    "c:\\shinken\\var\\share",
+        'etc':      "c:\\shinken\\etc",
+        'log':      "c:\\shinken\\var",
+        'run':      "c:\\shinken\\var",
+        'libexec':  "c:\\shinken\\libexec",
+        }
     data_files = []
 elif 'linux' in sys.platform or 'sunos5' in sys.platform:
-    default_paths = {'var':     "/var/lib/shinken/",
-                     'share':   "/var/lib/shinken/share",
-                     'etc':     "/etc/shinken",
-                     'run':     "/var/run/shinken",
-                     'log':     "/var/log/shinken",
-                     'libexec': "/var/lib/shinken/libexec",
-                     }
+    default_paths = {
+        'bin':     install_scripts or "/usr/sbin/",
+        'var':     "/var/lib/shinken/",
+        'share':   "/var/lib/shinken/share",
+        'etc':     "/etc/shinken",
+        'run':     "/var/run/shinken",
+        'log':     "/var/log/shinken",
+        'libexec': "/var/lib/shinken/libexec",
+        }
     data_files = [
         (
             os.path.join('/etc', 'init.d'),
@@ -258,18 +276,20 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
         ]
 
     if is_install:
-        generate_default_shinken_file()
+        # warning: The default file will be generated a bit later
         data_files.append(
             (os.path.join('/etc', 'default',),
              ['build/bin/default/shinken']
              ))
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-    default_paths = {'var':     "/usr/local/libexec/shinken",
-                     'share':   "/usr/local/share/shinken",
-                     'etc':     "/usr/local/etc/shinken",
-                     'run':     "/var/run/shinken",
-                     'log':     "/var/log/shinken",
-                     'libexec': "/usr/local/libexec/shinken/plugins",
+    default_paths = {
+        'bin':     install_scripts or "/usr/local/bin",
+        'var':     "/usr/local/libexec/shinken",
+        'share':   "/usr/local/share/shinken",
+        'etc':     "/usr/local/etc/shinken",
+        'run':     "/var/run/shinken",
+        'log':     "/var/log/shinken",
+        'libexec': "/usr/local/libexec/shinken/plugins",
                      }
     data_files = [
         (
@@ -291,6 +311,14 @@ else:
 if root:
     for (k,v) in default_paths.iteritems():
         default_paths[k] = os.path.join(root, v[1:])
+
+
+# Beware to install scripts in the bin dir
+data_files.append( (default_paths['bin'], scripts) )
+# Only some platform are managed by the init.d scripts
+if is_install and ('linux' in sys.platform or 'sunos5' in sys.platform):
+    generate_default_shinken_file()
+
 
 if not is_update:
     ## get all files + under-files in etc/ except daemons folder
@@ -337,6 +365,7 @@ if os.name != 'nt' and not is_update:
         data_files.append( (default_paths['etc'], [outname]) )
 
 
+
 # Modules, doc, inventory and cli are always installed
 paths = ('modules', 'doc', 'inventory', 'cli')
 for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
@@ -356,14 +385,15 @@ for path, subdirs, files in os.walk('libexec'):
 data_files.append( (default_paths['run'], []) )
 data_files.append( (default_paths['log'], []) )
 
-# compute scripts
-scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
-
+# Note: we do not add the "scripts" entry in the setup phase becase we need to generate the 
+# default/shinken file with the bin path before run the setup phase, and it's not so
+# easy to do in a clean and easy way
+        
 required_pkgs = ['pycurl']
 setup(
     name="Shinken",
-    version="2.0-RC11",
+    version="2.0-RC13",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
@@ -393,7 +423,6 @@ setup(
         'setproctitle': ['setproctitle']
         },
 
-    scripts=scripts,
     data_files = data_files,
 )
 
@@ -409,9 +438,11 @@ if pwd and not root and is_install :
         for c in ['etc', 'run', 'log', 'var', 'libexec']:
             p = default_paths[c]
             recursive_chown(p, uid, gid, user, group)
+        # Also cahnge the rights of the shinken- scripts
         for s in scripts:
             bs = os.path.basename(s)
-            recursive_chown(os.path.join(install_scripts, bs), uid, gid, user, group)
+            recursive_chown(os.path.join(default_paths['bin'], bs), uid, gid, user, group)
+            _chmodplusx( os.path.join(default_paths['bin'], bs) )
         _chmodplusx(default_paths['libexec'])
 
     # If not exists, won't raise an error there
