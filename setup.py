@@ -458,7 +458,7 @@ if pwd and not root and is_install :
 try:
     import pycurl
 except ImportError:
-    print "Warning: missing python-pycurl lib, you shoud instal if before launch the shinken daemons"
+    print "Warning: missing python-pycurl lib, you should install it before launch the shinken daemons"
 
 try:
     import cherrypy
