@@ -327,6 +327,8 @@ if not is_update:
     ## get all files + under-files in etc/ except daemons folder
     daemonsini = []
     for path, subdirs, files in os.walk('etc'):
+        if len(files) == 0:
+            data_files.append( (os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)), []) )
         for name in files:
             if name == 'shinken.cfg':
                 continue
@@ -396,10 +398,10 @@ data_files.append( (default_paths['log'], []) )
 required_pkgs = []
 setup(
     name="Shinken",
-    version="2.0-RC16",
+    version="2.0-RC2",
     packages=find_packages(),
     package_data={'': package_data},
-    description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
+    description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
     long_description=read('README.rst'),
     author="Gabes Jean",
     author_email="naparuba@gmail.com",
@@ -452,5 +454,15 @@ if pwd and not root and is_install :
     _chmodplusx('/etc/init.d/shinken')
     for d in ['scheduler', 'broker', 'receiver', 'reactionner', 'poller', 'arbiter']:
         _chmodplusx('/etc/init.d/shinken-'+d)
-    
+
+try:
+    import pycurl
+except ImportError:
+    print "Warning: missing python-pycurl lib, you shoud instal if before launch the shinken daemons"
+
+try:
+    import cherrypy
+except ImportError:
+    print "Notice: for better performances for the daemons communication, you should install the python-cherrypy3 lib"
+
 print "Shinken setup done"
