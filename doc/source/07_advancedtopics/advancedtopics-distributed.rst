@@ -71,7 +71,7 @@ Shinken Daemon roles
     * **Reactionner**: The reactionner daemon issues notifications and launches event_handlers. This centralizes communication channels with external systems in order to simplify SMTP authorizations or RSS feed sources (only one for all hosts/services). There can be many reactionners for load-balancing and spare roles
       * Module for external communications: AndroidSMS
 
-    * **Broker**: The broker daemon exports and manages data from schedulers.  The management can is done exclusively with modules. Multiple :ref:`Broker modules <the broker modules >` can be enabled simultaneously.
+    * **Broker**: The broker daemon exports and manages data from schedulers.  The management can is done exclusively with modules. Multiple :ref:`Broker modules <the_broker_modules>` can be enabled simultaneously.
 
       * Module for centralizing Shinken logs: Simple-log (flat file)
       * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, couchdb 
@@ -94,7 +94,7 @@ This architecture is fully flexible and scalable: the daemons that require more 
 
 
 
-
+.. _advancedtopics-distributed#the_smart_and_automatic_load_balancing:
 
 The smart and automatic load balancing 
 =======================================
@@ -169,6 +169,7 @@ The configurations sending to satellites
 When all configurations are created, the Arbiter sends them to the N active Schedulers. A Scheduler can start processing checks once it has received and loaded it's configuration without having to wait for all schedulers to be ready(v1.2). For larger configurations, having more than one Scheduler, even on a single server is highly recommended, as they will load their configurations(new or updated) faster. The Arbiter also creates configurations for satellites (pollers, reactionners and brokers) with links to Schedulers so they know where to get jobs to do. After sending the configurations, the Arbiter begins to watch for orders from the users and is responsible for monitoring the availability of the satellites. 
 
 
+.. _advancedtopics-distributed#the_high_availability:
 
 The high availability 
 ======================
@@ -211,6 +212,8 @@ The administrator needs to send orders to the schedulers (like a new status for 
 For each command, Shinken knows if it is global or not. If global, it just sends orders to all schedulers. For specific ones instead it searches which scheduler manages the element referred by the command (host/service) and sends the order to this scheduler. When the order is received by schedulers they just need to apply them.
 
 
+
+.. _advancedtopics-distributed#poller_tag:
 
 Different types of Pollers: poller_tag 
 =======================================
@@ -265,7 +268,7 @@ The reactionners can be tagged with multiple reactionner_tags. If they are tagge
 Like for the poller case, it's mainly useful for DMZ/LAN or GNU/Linux/Windows cases.
 
 
-
+.. _advancedtopics-distributed#realms:
 
 Advanced architectures: Realms 
 ===============================
@@ -304,9 +307,11 @@ Realms are not poller_tags!
 ----------------------------
 
 
-Make sure to undestand when to use realms and when to use poller_tags. 
+Make sure to undestand when to use realms and when to use poller_tags.
+
   * **realms are used to segregate schedulers**
   * **poller_tags are used to segregate pollers**
+
 For some cases poller_tag functionality could also be done using Realms. The question you need to ask yourself: Is a poller_tag "enough", or do you need to fully segregate a the scheduler level and use Realms. In realms, schedulers do not communicate with schedulers from other Realms. 
 
 If you just need a poller in a DMZ network, use poller_tag. 
