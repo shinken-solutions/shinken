@@ -16,11 +16,13 @@ Summary
 Shinken"s architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on the Python Pyro remote objects library. Which makes building a highly available or distributed monitoring architectures quite easy.
 
   * Shinken gets data IN
+
     * passively
     * actively
     * Networked API
 
   * Shinken acts on the data
+
     * Correlation
     * Event suppression
     * Event handlers
@@ -28,6 +30,7 @@ Shinken"s architecture has been designed according to the Unix Way: one tool, on
     * Runtime interaction
 
   * Shinken gets data OUT
+
     * Networked API
     * Notifications
     * Logging
@@ -35,6 +38,7 @@ Shinken"s architecture has been designed according to the Unix Way: one tool, on
     * Metrics databases
 
   * Shinken manages configurations
+
     * Discovery manager SkonfUI
     * Multi-level discovery engine
     * Configuration Packs (commands, config templates, graph templates, etc.)
@@ -46,7 +50,7 @@ Shinken innovative features
 ============================
 
 
-Learn more about the :ref:`innovative features of Shinken <shinken innovative features >`.
+Learn more about the :ref:`innovative features of Shinken <shinken_innovative_features>`.
 
 
 
@@ -76,7 +80,8 @@ Shinken Daemon roles
 
 
 
-    * **:ref:`Arbiter <arbiter>`**: The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons. Additionally, it manages the high availability features: if a particular daemon dies, it re-routes the configuration managed by this failed daemon to the configured spare. Finally, it can receive input from users (such as external commands from nagios.cmd) or passive check results and routes them to the appropriate daemon. Passive check results are forwarded to the Scheduler responsible for the check. There can only be one active arbiter with other arbiters acting as hot standby spares in the architecture.
+    * :ref:`Arbiter <arbiter>`: The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons. Additionally, it manages the high availability features: if a particular daemon dies, it re-routes the configuration managed by this failed daemon to the configured spare. Finally, it can receive input from users (such as external commands from nagios.cmd) or passive check results and routes them to the appropriate daemon. Passive check results are forwarded to the Scheduler responsible for the check. There can only be one active arbiter with other arbiters acting as hot standby spares in the architecture.
+
       * Modules for data collection: :ref:`NSCA <nsca_daemon_module>`, :ref:`TSCA <tsca_daemon_module>`, :ref:`Ws_arbiter <ws_daemon_module>` (web service)
       * Modules for configuration data storage: MongoDB
       * Modules for status retention: PickleRententionArbiter
@@ -84,20 +89,24 @@ Shinken Daemon roles
       * Modules for configuration modification: :ref:`vmware autolinking <vmware_arbiter_module>`, :ref:`IP_Tag <ip_tag_module>`,  and other task specific modules
 
 
-    * **:ref:`Scheduler <scheduler>`**: The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively. The scheduler daemon is also responsible for processing the check result queue, analyzing the results, doing correlation and following up actions accordingly (if a service is down, ask for a host check). It does not launch checks or notifications. It just keeps a queue of pending checks and notifications for other daemons of the architecture (like pollers or reactionners). This permits distributing load equally across many pollers. There can be many schedulers for load-balancing or hot standby roles. :ref:`Status persistence is achieved using a retention module <distributed_retention_modules>`.
+    * :ref:`Scheduler <scheduler>`: The scheduler daemon manages the dispatching of checks and actions to the poller and reactionner daemons respectively. The scheduler daemon is also responsible for processing the check result queue, analyzing the results, doing correlation and following up actions accordingly (if a service is down, ask for a host check). It does not launch checks or notifications. It just keeps a queue of pending checks and notifications for other daemons of the architecture (like pollers or reactionners). This permits distributing load equally across many pollers. There can be many schedulers for load-balancing or hot standby roles. :ref:`Status persistence is achieved using a retention module <distributed_retention_modules>`.
+
       * Modules for status retention: pickle, nagios, memcache, redis and MongoDB are available.
 
 
-    * **:ref:`Poller <poller>`**: The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers. Pollers can be tagged for specialized checks (ex. Windows versus Unix, customer A versus customer B, DMZ) There can be many pollers for load-balancing or hot standby spare roles.
+    * :ref:`Poller <poller>`: The poller daemon launches check plugins as requested by schedulers. When the check is finished it returns the result to the schedulers. Pollers can be tagged for specialized checks (ex. Windows versus Unix, customer A versus customer B, DMZ) There can be many pollers for load-balancing or hot standby spare roles.
+
       * Module for data acquisition: :ref:`NRPE Module <setup_nrpe_booster_module>`
       * Module for data acquisition: CommandFile (Used for check_mk integration which depends on the nagios.cmd named pipe )
       * Module for data acquisition: :ref:`SnmpBooster <setup_snmp_booster_module>` (NEW)
 
 
-    * **:ref:`Reactionner <reactionner>`**: The reactionner daemon issues notifications and launches event_handlers. This centralizes communication channels with external systems in order to simplify SMTP authorizations or RSS feed sources (only one for all hosts/services). There can be many reactionners for load-balancing and spare roles
+    * :ref:`Reactionner <reactionner>`: The reactionner daemon issues notifications and launches event_handlers. This centralizes communication channels with external systems in order to simplify SMTP authorizations or RSS feed sources (only one for all hosts/services). There can be many reactionners for load-balancing and spare roles
+
       * Module for external communications: :ref:`AndroidSMS <sms_with_android>`
 
-    * **:ref:`Broker <broker>`**: The broker daemon exports and manages data from schedulers.  The broker uses modules exclusively to get the job done. The main method of interacting with Shinken is through the Livestatus API. Learn how to :ref:`configure the Broker modules <the broker modules >`.
+    * :ref:`Broker <broker>`: The broker daemon exports and manages data from schedulers.  The broker uses modules exclusively to get the job done. The main method of interacting with Shinken is through the Livestatus API. Learn how to :ref:`configure the Broker modules <the_broker_modules>`.
+
       * Modules for the Livestatus API - live state, status retention and history:  SQLite (default), MongoDB (experimental)
       * Module for centralizing Shinken logs: Simple-log (flat file)
       * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, <del>couchdb</del> 
@@ -107,9 +116,10 @@ Shinken Daemon roles
 
 
     * **Receiver** (optional): The receiver daemon receives passive check data and serves as a distributed command buffer. There can be many receivers for load-balancing and hot standby spare roles. The receiver can also use modules to accept data from different protocols. Anyone serious about using passive check results should use a receiver to ensure that check data does not go through the Arbiter (which may be busy doing administrative tasks) and is forwarded directly to the appropriate Scheduler daemon(s).
+
       * Module for passive data collection: :ref:`NSCA <nsca_daemon_module>`, :ref:`TSCA <tsca_daemon_module>`, :ref:`Ws_arbiter (web service) <ws_daemon_module>`
 
-.. tip::  The various daemons can be run on a single server for small deployments or split on different hardware for larger deployments as performance or availability requirements dictate. For larger deployments, running multiple Schedulers is recommended, even if they are on the same server. Consult :ref:`planning a large scale Shinken deployment <scaling_Shinken >` for more information.
+.. tip::  The various daemons can be run on a single server for small deployments or split on different hardware for larger deployments as performance or availability requirements dictate. For larger deployments, running multiple Schedulers is recommended, even if they are on the same server. Consult :ref:`planning a large scale Shinken deployment <scaling_Shinken>` for more information.
 
 
 
@@ -118,12 +128,13 @@ Learn more about the Shinken Distributed Architecture
 
 
 The Shinken distributed architecture, more features explained.
-  * :ref:`Smart and automatic load balancing <advancedtopics-distributed#The smart and automatic load balancing >`
-  * :ref:`High availability <advancedtopics-distributed#The high availability >`
-  * :ref:`Specialized Pollers < poller_tag >`
-  * :ref:`Advanced architectures: Realms < Realms >`
 
-If you are just starting out, you can continue on with the next tutorial, which will help you :ref:`configure a web front-end <use shinken with >`.
+  * :ref:`Smart and automatic load balancing <advancedtopics-distributed#the_smart_and_automatic_load_balancing>`
+  * :ref:`High availability <advancedtopics-distributed#the_high_availability>`
+  * :ref:`Specialized Pollers <advancedtopics-distributed#poller_tag>`
+  * :ref:`Advanced architectures: Realms <advancedtopics-distributed#realms>`
+
+If you are just starting out, you can continue on with the next tutorial, which will help you :ref:`Configure a web front-end <use_shinken_with>`.
 
 
 
@@ -131,7 +142,7 @@ Planning a large scale Shinken deployment
 ==========================================
 
 
-If you wish to plan a large scale installation of Shinken, you can consult the :ref:`Scaling Shinken <scaling_Shinken >` reference.
+If you wish to plan a large scale installation of Shinken, you can consult the :ref:`Scaling Shinken <scaling_shinken>` reference.
 
 This is essential to avoid making time consuming mistakes and aggravation.
 
