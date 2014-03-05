@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_scheduler
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_scheduler"
+rcvar="shinken_scheduler_enable"
+
+shinken_scheduler_configfile="/usr/local/etc/shinken/daemons/schedulerd.ini"
+command="/usr/local/bin/shinken-scheduler"
+command_interpreter="/usr/local/bin/python2.7"
+command_args="-d -c ${shinken_scheduler_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/schedulerd.pid"
+
+required_files="${shinken_scheduler_configfile}"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_scheduler_enable}" ] && shinken_scheduler_enable="NO"
+
+run_rc_command "$1"

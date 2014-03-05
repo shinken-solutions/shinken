@@ -226,7 +226,7 @@ Each of the three variables are optional :
   * The _GRAPHITE_POST variable can be set per host/service to specify the more information concerning the variable being stored that graphite can use to determine the retention rule to use for the variable.
   * The SOURCE variable can be set in shinken-specific.cfg for the WebUI module and the Graphite broker.
 
-Metric names are converted from Shinken's format to a more restrictive Graphite naming. Unsupported characters are converted to "_" underscore. So do not be surprised to see that some names differ in the WebUI or directly in Graphite. Permitted characters in Graphite are "A-Za-z_.", the hyphen character is permitted from Shinken, though only future versions of Graphite will support it.
+Metric names are converted from Shinken's format to a more restrictive Graphite naming. Unsupported characters are converted to "_" underscore. So do not be surprised to see that some names differ in the WebUI or directly in Graphite. Permitted characters in Graphite are "A-Za-z\_.", the hyphen character is permitted from Shinken, though only future versions of Graphite will support it.
 
 Performance data transfer method can be set to pickle, which is a binary format that can send data more efficiently than raw ascii.
 

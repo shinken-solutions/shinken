@@ -213,7 +213,7 @@ Macros as Environment Variables
 
 Most macros are made available as environment variables for easy reference by scripts or commands that are executed by Shinken. For purposes of security and sanity, :ref:`$USERn$ <thebasics-macrolist#thebasics-macrolist-user>` and "on-demand" host and service macros are not made available as environment variables.
 
-Environment variables that contain standard macros are named the same as their corresponding macro names (listed :ref:`here <thebasics-macrolist>`), with "NAGIOS_" prepended to their names. For example, the :ref:`$HOSTNAME$ <thebasics-macrolist#thebasics-macrolist-hostname>` macro would be available as an environment variable named "NAGIOS_HOSTNAME".
+Environment variables that contain standard macros are named the same as their corresponding macro names (listed :ref:`here <thebasics-macrolist>`), with "NAGIOS\_" prepended to their names. For example, the :ref:`$HOSTNAME$ <thebasics-macrolist#thebasics-macrolist-hostname>` macro would be available as an environment variable named "NAGIOS_HOSTNAME".
 
 
 
@@ -222,4 +222,3 @@ Available Macros
 
 
 A list of all the macros that are available in Shinken, as well as a chart of when they can be used, can be found :ref:`here <thebasics-macrolist>`.
-

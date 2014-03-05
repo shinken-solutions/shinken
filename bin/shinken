@@ -21,11 +21,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-
-Warning: THIS IS A PREVIEW, and ugly code that looks as a script.
-
-"""
 
 import optparse
 import sys
@@ -126,6 +121,7 @@ class CLICommander(object):
                          ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
                          ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
                          ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
+                         ('libexec', '%(lib)s/libexec'),
                          ]}
                     ,
                     'shinken.io':{
@@ -135,7 +131,7 @@ class CLICommander(object):
 ''',
             'values'  : [('proxy',''),('api_key','')]}
                     }
-
+    
 
     def __init__(self, config):
         self.keywords = {}
@@ -321,23 +317,29 @@ if __name__ == '__main__':
                       dest="api_key", help=("Your API key for uploading the package to the Shinken.io website. If you don't have one, please go to your account page"))
     parser.add_option('-l', '--list', action='store_true',
                       dest="do_list", help=("List available commands"))
-    parser.add_option('-c', '--config', dest="iniconfig", default=DEFAULT_CFG,
-                      help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('--init', action='store_true',
-                      dest="do_init", help=("Initialize/refill your shinken.ini file"))
+                      dest="do_init", help=("Initialize/refill your shinken.ini file (default to %s)" % DEFAULT_CFG))
     parser.add_option('-D', action='store_true',
                       dest="do_debug", help=("Enable the debug mode"))
+    parser.add_option('-c', '--config', dest="iniconfig", default=DEFAULT_CFG,
+                      help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('-v', action='store_true',
                       dest="do_verbose", help=("Be more verbose"))
 
-    if '-v' in sys.argv:
+    
+    # First parsing, for purely internal parameters, but disable 
+    # errors, because we only want to see the -D -v things
+    old_error = parser.error
+    parser.error = lambda x:1
+    opts, args = parser.parse_args()
+    # reenable the errors for later use
+    parser.error = old_error
+
+    if opts.do_verbose:
         logger.set_level(logger.INFO)
 
-    if '-D' in sys.argv:
+    if opts.do_debug:
         logger.set_level(logger.DEBUG)
-
-    # Global command parsing
-    opts, args = parser.parse_args()
 
     cfg = None
     if not os.path.exists(opts.iniconfig):
@@ -376,6 +378,9 @@ if __name__ == '__main__':
     # We will remove specific commands from the sys.argv list and keep
     # them for parsing them after
     command_args = hack_sys_argv()
+
+    # Global command parsing, with the error enabled this time
+    opts, args = parser.parse_args()
 
     # If the user explicitely set the proxy, take it!
     if opts.proxy:

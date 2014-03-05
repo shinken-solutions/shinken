@@ -317,28 +317,18 @@ Here is an example configuration of the config.ini file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-  
 ::
 
   [DATASOURCE]
-  
-::
-
     OidmyOidDefinition = .1.3.6.1.45.0
     [myOidDefinition] ; Use the same name as the myOidDeiniftion, but omit the leading "Oid"
         ds_type = DERIVE
         ds_calc = 8,*  ; RPN expression : Oid, 8, *  Which means Oid * 8 = ds_calc
         ds_oid = $OidmyOidDefinition
   [DSTEMPLATE]
-  
-::
-
     [myCiscoRouter]
         ds = myOidDefinition
   [TRIGGER]
-  
-::
-
     [trigger1]
         warning = RPN expression
         critical = RPN expression
@@ -346,11 +336,10 @@ Here is an example configuration of the config.ini file
         warning = RPN expression
         critical = RPN expression
   [TRIGGERGROUP]
-  
-::
-
     [CiscoRouterTriggers]
         triggers = trigger1, trigger2
+
+
 .. _python-memcached: http://pypi.python.org/pypi/python-memcached/
 .. _PySNMP 4.2.1+ (Python module and its dependencies): http://pysnmp.sourceforge.net/download.html
 .. _github.com/titilambert/shinken/tree/snmp_booster/shinken/modules: https://github.com/titilambert/shinken/tree/snmp_booster/shinken/modules

@@ -1,15 +1,17 @@
 recursive-include shinken *.*
 recursive-include shinken/webui *.*
-recursive-include etc *.cfg *.ini *.pem
+recursive-include etc *.*
 recursive-include windows .bat .reg
 recursive-include bin *.* *-* shinken
 recursive-include libexec *.*
 recursive-include modules *.*
+recursive-include doc *.*
+recursive-include cli *.*
+recursive-include share *.*
+recursive-include inventory *.*
 include test *.py *.txt
-recursive-include doc *.html *.png *.txt *.css *.jpg *.xml *.tpl *.gif *.js
 global-exclude .git *.pyc *.pyo
 global-exclude .debug .pid .exe *~
 include var/void_for_git
 include MANIFEST.in Changelog
 include COPYING THANKS README README.rst
-exclude doc/dvi etc.orig/ etc/bench/ test/my/

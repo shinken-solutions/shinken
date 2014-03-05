@@ -145,7 +145,8 @@ When filing a new bug, please remember to include:
 *	Steps to reproduce the problem, with actual vs. expected results
 *	Shinken version (or if you're pulling directly from the Git repo, your current commit SHA - use git rev-parse HEAD)
 *	OS version
-*	If the problem happens with specific code, link to test files (gist.github.com is a great place to upload code).
+*	If the problem happens with specific code, link to test files (`gist.github.com`__  is a great place to upload code).
 *	Screenshots are very helpful if you're seeing an error message or a UI display problem. (Just drag an image into the issue description field to include it).
 
-__ http://github.com/naparuba/shinken/issues/
+__ https://github.com/naparuba/shinken/issues/
+__ https://gist.github.com/

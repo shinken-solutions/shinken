@@ -29,7 +29,7 @@ How Does Freshness Checking Work?
 .. image:: /_static/images///official/images/freshness.png
    :scale: 90 %
 
- Shinken periodically checks the freshness of the results for all hosts services that have freshness checking enabled.
+Shinken periodically checks the freshness of the results for all hosts services that have freshness checking enabled.
 
   * A freshness threshold is calculated for each host or service.
   * For each host/service, the age of its last check result is compared with the freshness threshold.

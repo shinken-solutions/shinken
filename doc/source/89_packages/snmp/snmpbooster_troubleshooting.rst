@@ -88,10 +88,12 @@ The Arbiter daemon can output initial configuration, loading of host keys and in
 The Scheduler daemon can output scheduling and alert related messages.
 The Poller daemon can output messages related to instance mapping, acquisition timeouts, invalid community strings, cache failures and more. These are available in the Web interface, as they are placed in the check results for the service.
 
-You can simply do a "grep SnmpBooster *" in your shinken/var directory to see the latest messages related to the SnmpBooster module. You can also sort messages by timestamp to make it easy to find where and when errors occurred.
+You can simply do a "grep SnmpBooster \*" in your shinken/var directory to see the latest messages related to the SnmpBooster module. You can also sort messages by timestamp to make it easy to find where and when errors occurred.
 
-cd shinken/var
-grep SnmpBooster *
+::
+
+  cd shinken/var
+  grep SnmpBooster *
 
 
 
@@ -112,7 +114,7 @@ Common errors returned by SnmpBooster in the log file
 
 Errors should be fairly explicit and mean what they say, though there can be exceptions. Lets try to clear some of them.
 
-__Arbiter log errors__
+__Arbiter log errors\__
 
 Missing ds_oid : This means that a variable in your OID definitions is missing, or your DATASOURCE is not named correctly or your ds_oid variable is missing. There is a typo in your ds_oid variable (ex. ds-oid, or ds_oid = $OidNameIncorrectFFFRA.%(instance)s).
 
@@ -120,11 +122,11 @@ Datasource not defined : Your DSTEMPLATE uses a DATASOURCE that doesn't exist ch
 
 Missing ds_type : The DATASOURCE always needs to have a ds_type definition, GAUGE, COUNTER, DERIVE, TEXT, TIMETICK, DERIVE64, COUNTER64.
 
-__Poller log errors__
+__Poller log errors\__
 
 Problems with calculations, repeated polling, hosts not responding, etc.
 
-__Memcached errors__
+__Memcached errors\__
 
 memcachedb and memcached do not use the same default port. Configure the correct memcachedb port to match what is declared in your SnmpBooster module under shinken-specific.cfg.
 

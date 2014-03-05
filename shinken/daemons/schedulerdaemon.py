@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import signal
 import time
 import traceback
 import cPickle
@@ -37,6 +38,7 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
+import shinken.objects.config
 
 # Interface for Workers
 
@@ -257,9 +259,9 @@ class Shinken(BaseSatellite):
     def manage_signal(self, sig, frame):
         logger.warning("Received a SIGNAL %s" % sig)
         # If we got USR1, just dump memory
-        if sig == 10:
+        if sig == signal.SIGUSR1:
             self.sched.need_dump_memory = True
-        elif sig == 12: #usr2, dump objects
+        elif sig == signal.SIGUSR2: #usr2, dump objects
             self.sched.need_objects_dump = True
         else:  # if not, die :)
             self.sched.die()
@@ -351,7 +353,7 @@ class Shinken(BaseSatellite):
         self.ichecks = IChecks(self.sched)
         self.http_daemon.register(self.ichecks)
         logger.debug("The Scheduler Interface uri is: %s" % self.uri)
-
+        
         # Same for Broks
         if self.ibroks is not None:
             logger.debug("Deconnecting previous Broks Interface")
@@ -376,15 +378,15 @@ class Shinken(BaseSatellite):
         # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
         m.init(self.conf)
-
+        
         #self.conf.dump()
         #self.conf.quick_debug()
-
+        
         # Now create the external commander
         # it's a applyer: it role is not to dispatch commands,
         # but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
-
+        
         # Scheduler need to know about external command to
         # activate it if necessary
         self.sched.load_external_command(e)

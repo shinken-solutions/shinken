@@ -118,6 +118,7 @@ Then you can :
 That's all :)
 
 .. note::  currently the integration process is a script on the shinken.io website, so you need to ask naparuba@gmail.com to launch it before he take time to put it on a cron :) ).
+
 .. _shinken.io/~: http://shinken.io/~
 .. _github.com/shinken-monitoring/mod-ip-tag: https://github.com/shinken-monitoring/mod-ip-tag
 .. _shinken.io: http://shinken.io

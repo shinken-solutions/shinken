@@ -29,7 +29,8 @@ import re
 
 from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import (BoolProp, IntegerProp, FloatProp,
+                              CharProp, StringProp, ListProp)
 from shinken.log import logger
 
 objs = {'hosts': [], 'services': []}
@@ -37,6 +38,8 @@ trigger_functions = {}
 
 
 class declared(object):
+    """ Decorator to add function in trigger environnement
+    """
     def __init__(self, f):
         self.f = f
         global functions
@@ -50,45 +53,62 @@ class declared(object):
 
 @declared
 def up(obj, output):
+    """ Set a host in UP state
+    """
     set_value(obj, output, None, 0)
 
 
 @declared
 def down(obj, output):
+    """ Set a host in DOWN state
+    """
     set_value(obj, output, None, 1)
 
 
 @declared
 def ok(obj, output):
+    """ Set a service in OK state
+    """
     set_value(obj, output, None, 0)
 
 
 @declared
 def warning(obj, output):
+    """ Set a service in WARNING state
+    """
     set_value(obj, output, None, 1)
 
 
 @declared
 def critical(obj, output):
+    """ Set a service in CRITICAL state
+    """
     set_value(obj, output, None, 2)
 
 
 @declared
 def unknown(obj, output):
+    """ Set a service in UNKNOWN state
+    """
     set_value(obj, output, None, 3)
 
 
 @declared
 def set_value(obj_ref, output=None, perfdata=None, return_code=None):
+    """ Set output, state and perfdata to a service or host
+    """
     obj = get_object(obj_ref)
     if not obj:
         return
     output = output or obj.output
     perfdata = perfdata or obj.perf_data
     if return_code is None:
-      return_code = obj.state_id
+        return_code = obj.state_id
 
-    logger.debug("[trigger] Setting %s %s %s for object %s" % (output, perfdata, return_code, obj.get_full_name()))
+    logger.debug("[trigger] Setting %s %s %s for object %s" % (output,
+                                                               perfdata,
+                                                               return_code,
+                                                               obj.get_full_name()))
 
     if perfdata:
         output = output + ' | ' + perfdata
@@ -114,6 +134,8 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
 
 @declared
 def perf(obj_ref, metric_name):
+    """ Get perf data from a service
+    """
     obj = get_object(obj_ref)
     p = PerfDatas(obj.perf_data)
     if metric_name in p:
@@ -125,6 +147,8 @@ def perf(obj_ref, metric_name):
 
 @declared
 def get_custom(obj_ref, cname, default=None):
+    """ Get custom varialbe from a service or a host
+    """
     obj = get_objects(obj_ref)
     if not obj:
         return default
@@ -136,6 +160,9 @@ def get_custom(obj_ref, cname, default=None):
 
 @declared
 def perfs(objs_ref, metric_name):
+    """ TODO: check this description
+        Get perfdatas from multiple services/hosts
+    """
     objs = get_objects(objs_ref)
     r = []
     for o in objs:
@@ -145,7 +172,19 @@ def perfs(objs_ref, metric_name):
 
 
 @declared
+def allperfs(obj_ref):
+    """ Get all perfdatas from a service or a host
+    """
+    obj = get_object(obj_ref)
+    p = PerfDatas(obj.perf_data)
+    logger.debug("[trigger] I get all perfdatas")
+    return dict([(metric_name, p[metric_name].value) for metric_name in p])
+
+
+@declared
 def get_object(ref):
+    """ Retrive object (service/host) from name
+    """
     # Maybe it's already a real object, if so, return it :)
     if not isinstance(ref, basestring):
         return ref
@@ -161,6 +200,9 @@ def get_object(ref):
 
 @declared
 def get_objects(ref):
+    """ TODO: check this description
+        Retrive objects (service/host) from names
+    """
     # Maybe it's already a real object, if so, return it :)
     if not isinstance(ref, basestring):
         return ref

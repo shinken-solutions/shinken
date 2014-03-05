@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_broker
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_broker"
+rcvar="shinken_broker_enable"
+
+shinken_broker_configfile="/usr/local/etc/shinken/daemons/brokerd.ini"
+command="/usr/local/bin/shinken-broker"
+command_interpreter="/usr/local/bin/python2.7"
+command_args="-d -c ${shinken_broker_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/brokerd.pid"
+
+required_files="${shinken_broker_configfile}"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_broker_enable}" ] && shinken_broker_enable="NO"
+
+run_rc_command "$1"

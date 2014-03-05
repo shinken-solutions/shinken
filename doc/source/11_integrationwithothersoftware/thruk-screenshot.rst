@@ -10,6 +10,6 @@ Thruk is a web interface to get feedback about shinken status. You can also send
 
 
 
-.. image:: /_static/images//shinken_with_thruk.png?500
+.. image:: /_static/images/shinken_with_thruk.png
    :scale: 90 %
 

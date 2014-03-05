@@ -3,10 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+===================================
 Welcome to Shinken's documentation!
 ===================================
-
-Contents:
 
 .. toctree::
     :maxdepth: 2
@@ -27,14 +26,18 @@ Contents:
     14_how_to_contribute/index
     15_development/index
     89_packages/index
-    99_references/index
 
+.. only:: html
 
+    .. toctree::
+        :maxdepth: 2
 
-Indices and tables
-==================
+        99_references/index
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    Indices and tables
+    ==================
+
+    * :ref:`genindex`
+    * :ref:`modindex`
+    * :ref:`search`
 

@@ -161,8 +161,9 @@ The integration server is at http://shinken-monitoring.de:8080/
 It use the following tests:
 
 * test/jenkins/runtests[.bat]
-   it takes the arguments: "file with a list of test_-scripts" [NO]COVERAGE
-[NO]PYLINT
+
+   it takes the arguments: "file with a list of test\_-scripts" [NO]COVERAGE [NO]PYLINT
+
 * test/test_end_to_end.sh
 
 
@@ -188,7 +189,7 @@ The Hudson automated test jobs are:
   * runs 4 times per day
   * runtests test/jenkins/longtests.txt NOCOVERAGE NOPYLINT
   * linux-python-2.4,linux-python-2.6,linux-python-2.7,windows-python-2.7
-  * executes _all_ test_-scripts we have, so it takes a long time
+  * executes _all_ test\_-scripts we have, so it takes a long time
 
  * Shinken-End-to-End
   * runs after each successful Shinken-Multiplatform

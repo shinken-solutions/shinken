@@ -27,6 +27,9 @@ class Mock(object):
     def __call__(self, *args, **kwargs):
         return Mock()
 
+    def version_info(self):
+        return [0,0]
+
     @classmethod
     def __getattr__(cls, name):
         if name in ('__file__', '__path__'):
@@ -43,6 +46,7 @@ MOCK_MODULES = ['MySQLdb',
                 'cx_Oracle',
                 'log',
                 'pymongo',
+                'pycurl',
                 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

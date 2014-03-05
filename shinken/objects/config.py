@@ -420,7 +420,7 @@ class Config(Item):
     def read_config(self, files):
         # just a first pass to get the cfg_file and all files in a buf
         res = StringIO()
-
+        
         for file in files:
             # We add a \n (or \r\n) to be sure config files are separated
             # if the previous does not finish with a line return
@@ -609,7 +609,7 @@ class Config(Item):
         self.load_params(params)
         # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
-
+        
         for type in objectscfg:
             objects[type] = []
             for items in objectscfg[type]:

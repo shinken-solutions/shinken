@@ -22,7 +22,7 @@ Introduction
 .. image:: /_static/images///official/images/objects-timeperiods.png
    :scale: 90 %
 
- :ref:`Timeperiod <configuringshinken/configobjects/timeperiod>` definitions allow you to control when various aspects of the monitoring and alerting logic can operate. For instance, you can restrict:
+:ref:`Timeperiod <configuringshinken/configobjects/timeperiod>` definitions allow you to control when various aspects of the monitoring and alerting logic can operate. For instance, you can restrict:
 
   * When regularly scheduled host and service checks can be performed
   * When notifications can be sent out

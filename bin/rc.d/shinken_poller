@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE: shinken_poller
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="shinken_poller"
+rcvar="shinken_poller_enable"
+
+shinken_poller_configfile="/usr/local/etc/shinken/daemons/pollerd.ini"
+command="/usr/local/bin/shinken-poller"
+command_interpreter="/usr/local/bin/python2.7"
+command_args="-d -c ${shinken_poller_configfile} > /dev/null 2>&1"
+pidfile="/var/run/shinken/pollerd.pid"
+
+required_files="${shinken_poller_configfile}"
+
+load_rc_config "${name}"
+
+[ -z "${shinken_poller_enable}" ] && shinken_poller_enable="NO"
+
+run_rc_command "$1"

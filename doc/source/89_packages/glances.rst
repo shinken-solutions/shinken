@@ -7,7 +7,7 @@ Monitoring Linux System with Glances and checkglances.py
 =========================================================
 
 
-`Glances`_ is a fantastic multiplatform system monitoring tool writen by `Nicolargo`_. Glances can run on (Linux, Windows, MacOS ...). There is a growing `ecosystem`_ around Glances and of course a Nagios/Shinken plugin : `checkglances.py`_. 
+`Glances <https://github.com/nicolargo/glances>` is a fantastic multiplatform system monitoring tool writen by `Nicolargo`_. Glances can run on (Linux, Windows, MacOS ...). There is a growing `ecosystem`_ around Glances and of course a Nagios/Shinken plugin : `checkglances.py`_. 
 
 
 
@@ -107,7 +107,6 @@ Here is a list of the macros
   
 Note the _FS and _IFACES macros. They leverage the ability to duplicate service for a given list of things to be monitored. Here you see that / and /home partitions will be monitored. If you want to modify this then just add your own in a new template that will inherit the glances template.
 
-.. _Glances: https://github.com/nicolargo/glances
 .. _Nicolargo: http://blog.nicolargo.com/
 .. _checkglances.py: https://github.com/nicolargo/checkglances
 .. _here: https://github.com/david-guenault/shinken-packs/tree/master/pack-glances/share/init/centos

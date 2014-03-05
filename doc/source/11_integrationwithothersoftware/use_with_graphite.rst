@@ -167,10 +167,11 @@ Enjoy it
 
 
 Restart shinken-arbiter and you are done.
-  
+
 ::
 
   /etc/init.d/shinken-arbiter restart</code>
+
 .. _Installing Graphite version 0.9.8: http://agiletesting.blogspot.ca/2011/04/installing-and-configuring-graphite.html
 .. _Chef recipe for the above demonstration: https://github.com/manasg/chef-graphite
 .. _Graphite: http://graphite.readthedocs.org/en/0.9.10/index.html
