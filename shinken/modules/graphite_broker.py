@@ -44,7 +44,7 @@ properties = {
     'daemons': ['broker'],
     'type': 'graphite_perfdata',
     'external': False,
-    }
+}
 
 
 # Called by the plugin manager to get a broker
@@ -74,30 +74,34 @@ class Graphite_broker(BaseModule):
         self.multival = re.compile(r'_(\d+)$')
 
         # optional "sub-folder" in graphite to hold the data of a specific host
-        self.graphite_data_source = self.illegal_char.sub('_',
-                                   getattr(modconf, 'graphite_data_source', ''))
+        self.graphite_data_source = \
+            self.illegal_char.sub('_', getattr(modconf, 'graphite_data_source', ''))
 
 
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        logger.info("[Graphite broker] I init the %s server connection to %s:%d" % (self.get_name(), str(self.host), self.port))
+        logger.info("[Graphite broker] I init the %s server connection to %s:%d" %
+                    (self.get_name(), str(self.host), self.port))
         try:
             self.con = socket()
             self.con.connect((self.host, self.port))
         except IOError, err:
-                logger.error("[Graphite broker] Graphite Carbon instance network socket! IOError:%s" % str(err))
+                logger.error("[Graphite broker] Graphite Carbon instance network socket!"
+                             " IOError:%s" % str(err))
                 raise
-        logger.info("[Graphite broker] Connection successful to  %s:%d" % (str(self.host), self.port))
+        logger.info("[Graphite broker] Connection successful to  %s:%d"
+                    % (str(self.host), self.port))
 
-    # Sending data to Carbon. In case of failure, try to reconnect and send again. If carbon instance is down
-    # Data are buffered.
+    # Sending data to Carbon. In case of failure, try to reconnect and send again.
+    # If carbon instance is down, data are buffered.
     def send_packet(self, p):
         try:
             self.con.sendall(p)
-        except IOError, err:
-            logger.error("[Graphite broker] Failed sending data to the Graphite Carbon instance ! Trying to reconnect ... ")
+        except IOError:
+            logger.error("[Graphite broker] Failed sending data to the Graphite Carbon instance !"
+                         " Trying to reconnect ... ")
             try:
                 self.init()
                 self.con.sendall(p)
@@ -175,7 +179,8 @@ class Graphite_broker(BaseModule):
         check_time = int(data['last_chk'])
 
         try:
-            logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+            logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s"
+                         % (hname, desc, check_time, str(perf_data)))
         except UnicodeEncodeError:
             pass
 
@@ -187,18 +192,14 @@ class Graphite_broker(BaseModule):
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
-                if value:
-                    self.buffer.append(("%s.%s" % (path, metric),
-                                       ("%d" % check_time,
-                                        "%s" % str(value))))
+                self.buffer.append(("%s.%s" % (path, metric),
+                                   ("%d" % check_time, "%s" % str(value))))
 
         else:
             lines = []
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                if value:
-                    lines.append("%s.%s %s %d" % (path, metric,
-                                                  str(value), check_time))
+                lines.append("%s.%s %s %d" % (path, metric, str(value), check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
             try:
                 logger.debug("[Graphite broker] Launching: %s" % packet)
@@ -206,8 +207,9 @@ class Graphite_broker(BaseModule):
                 pass
             try:
                 self.send_packet(packet)
-            except IOError, err:
-                logger.error("[Graphite broker] Failed sending to the Graphite Carbon. Data are lost")
+            except IOError:
+                logger.error("[Graphite broker] Failed sending to the Graphite Carbon."
+                             " Data are lost")
 
 
     # A host check result brok has just arrived, we UPDATE data info with this
@@ -230,7 +232,8 @@ class Graphite_broker(BaseModule):
         check_time = int(data['last_chk'])
 
         try:
-            logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+            logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s"
+                         % (hname, check_time, str(perf_data)))
         except UnicodeEncodeError:
             pass
 
@@ -260,9 +263,10 @@ class Graphite_broker(BaseModule):
                 pass
             try:
                 self.send_packet(packet)
-            except IOError, err:
-                logger.error("[Graphite broker] Failed sending to the Graphite Carbon. Data are lost")
-             
+            except IOError:
+                logger.error("[Graphite broker] Failed sending to the Graphite Carbon."
+                             " Data are lost")
+
 
     def hook_tick(self, brok):
         """Each second the broker calls the hook_tick function
@@ -277,19 +281,18 @@ class Graphite_broker(BaseModule):
                 self.buffer = []
                 self.ticks = 0
                 return
-           
+
             # Format the data
             payload = cPickle.dumps(self.buffer)
             header = struct.pack("!L", len(payload))
             packet = header + payload
 
             try:
-	        self.send_packet(packet)
+                self.send_packet(packet)
                 # Flush the buffer after a successful send to Graphite
                 self.buffer = []
                 self.ticks = 0
-            except IOError, err:
+            except IOError:
                 self.ticks += 1
-                logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s" % ( self.ticks , self.tick_limit ))
-            
-
+                logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s"
+                             % (self.ticks, self.tick_limits))

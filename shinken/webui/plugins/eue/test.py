@@ -5,6 +5,7 @@ records = []
 con = Connection('localhost')
 db = con.shinken
 if not db:
+    app = None # app is not otherwise
     message = "Error : Unable to connect to mongo database"
     return {'app': app, 'eue_data': {}, 'message': message }
 
