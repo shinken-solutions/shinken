@@ -38,6 +38,7 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
+import shinken.objects.config
 
 # Interface for Workers
 

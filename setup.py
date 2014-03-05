@@ -256,7 +256,7 @@ if 'win' in sys.platform:
     data_files = []
 elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {
-        'bin':     install_scripts or "/usr/sbin/",
+        'bin':     install_scripts or "/usr/bin/",
         'var':     "/var/lib/shinken/",
         'share':   "/var/lib/shinken/share",
         'etc':     "/etc/shinken",
