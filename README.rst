@@ -4,7 +4,7 @@ Presentation of the Shinken project
 
 Welcome to the Shinken project.
 
-Shinken is a modern, Nagios compatible monitoring fremawork, written in
+Shinken is a modern, Nagios compatible monitoring framework, written in
 Python. Its main goal is to give users a flexible architecture for
 their monitoring system that is designed to scale to large environments.
 
