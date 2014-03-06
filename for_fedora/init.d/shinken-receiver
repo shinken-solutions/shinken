@@ -29,7 +29,7 @@
 . /etc/rc.d/init.d/functions
 
 
-daemon_args="-d -c /etc/shinken/receiverd.ini"             # Arguments to run the daemon with
+daemon_args="-d -c /etc/shinken/daemons/receiverd.ini"             # Arguments to run the daemon with
 pidfile=/var/run/shinken/receiverd.pid
 
 user=nagios

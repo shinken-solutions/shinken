@@ -30,7 +30,7 @@
 . /etc/rc.d/init.d/functions
 
 
-daemon_args="-d -c /etc/shinken/schedulerd.ini"             # Arguments to run the daemon with
+daemon_args="-d -c /etc/shinken/daemons/schedulerd.ini"             # Arguments to run the daemon with
 pidfile=/var/run/shinken/schedulerd.pid
 
 user=nagios
