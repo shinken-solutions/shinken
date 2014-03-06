@@ -40,7 +40,7 @@
 exec="/usr/sbin/shinken-broker"
 prog=$(basename $exec)
 
-opts="-d -c /etc/shinken/brokerd.ini"             # Arguments to run the daemon with
+opts="-d -c /etc/shinken/daemons/brokerd.ini"             # Arguments to run the daemon with
 
 pidfile=/var/run/shinken/brokerd.pid
 piddir=/var/run/shinken
