@@ -20,7 +20,6 @@ Introduction
 Private services, in contrast, cannot be monitored with Shinken without an intermediary agent of some kind. Examples of private services associated with hosts are things like CPU load, memory usage, disk usage, current user count, process information, etc. These private services or attributes of hosts are not usually exposed to external clients. This situation requires that an intermediary monitoring agent be installed on any host that you need to monitor such information on. More information on monitoring private services on different types of hosts can be found in the documentation on:
 
   * :ref:`Monitoring Windows machines <gettingstarted-monitoring-windows>`
-  * :ref:`Monitoring Netware servers <gettingstarted-monitoring-netware>`
   * :ref:`Monitoring Linux/Unix machines <gettingstarted-monitoring-linux>`
 
 Occasionally you will find that information on private services and applications can be monitored with "SNMP". The "SNMP" agent allows you to remotely monitor otherwise private (and inaccessible) information about the host. For more information about monitoring services using "SNMP", check out the documentation on :ref:`Monitoring routers/switches <gettingstarted-monitoring-routers>`.

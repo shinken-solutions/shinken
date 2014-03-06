@@ -12,7 +12,7 @@
 
 
 Summary 
---------
+========
 
 
 By following this tutorial, in 10 minutes you will have the core monitoring system for your network.
@@ -31,7 +31,7 @@ Ready? Let's go!
 .. _shinken_installation#requirements:
 
 Requirements
--------------
+=============
 
  * Python >= 2.6
  * Pycurl
@@ -43,11 +43,11 @@ Requirements
 
 
 GNU/Linux & Unix Installation 
-------------------------------
+==============================
 
 
 Method 1: Pip
-~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------
 
 Shinken 2.0 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.0-RC
 You can donwload the tarball and execute the setup.py or just use the pip command to install it automatically.
@@ -63,7 +63,7 @@ You can donwload the tarball and execute the setup.py or just use the pip comman
 
 
 Method 2: Packages 
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 For now the 2.0 packages are not available, but the community is working hard for it! Packages are simple, easy to update and clean.
 Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS soon (basically  *.deb* and  *.rpm*)
@@ -71,7 +71,7 @@ Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS soon (basical
 
 
 Method 3: Installation from sources 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 
 Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot`_) and extract it somewhere:
@@ -97,18 +97,18 @@ Default paths are the following :
 .. _shinken_installation#Windows installation:
 
 Windows Installation 
----------------------
+=====================
 
 
 
 Download the Executable installer 
-**********************************
+----------------------------------
 
 
 
 
 CHECK_WMI_PLUS configuration 
-*****************************
+-----------------------------
 
 
 By default, check_wmi_plus.pl use an user/password to access the windows WMI functions. But locally (shinken host managed itself on windows), this cannot be done. So the local template always works even if a wrong user/password is set. In the commands file, just set local to user and localhost to the computer. 

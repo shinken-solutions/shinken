@@ -13,7 +13,7 @@ The configuration is where you put the ``etc`` directory. Usually it's ``/etc/sh
 
 
 I migrate from Nagios, do I need to change my Nagios configuration?
----------------------------------------------
+--------------------------------------------------------------------
 
 
 No, there is no need to change your existing Nagios configuration.
