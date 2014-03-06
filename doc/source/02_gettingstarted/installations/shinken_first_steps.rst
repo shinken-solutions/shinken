@@ -27,7 +27,7 @@ What do I need to do next
 --------------------------
 
 
-The next logical steps for a new user are as listed in the :ref:`Getting Started <start>` page:
+The next logical steps for a new user are as listed in the :ref:`Getting Started <gettingstarted-index>` pages:
 
 * Did you read the :ref:`Shinken Architecture <the_shinken_architecture>` presentation?
 * Complete the :ref:`Shinken basic installation <configure_shinken>`

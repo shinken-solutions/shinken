@@ -16,7 +16,7 @@ Introduction
 -------------
 
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 
 
 
@@ -51,7 +51,7 @@ To make your life a bit easier, a few configuration tasks have already been done
   * Some **check_dhcp** commands definition has been added to the "commands.cfg" file.
   * An DHCP host template (called "dhcp") has already been created in the "templates.cfg" file.
 
-The above-mentioned config files can be found in the ///etc/shinken/packs/network/services/dhcp* directory (or *c:\shinken\etc\packs\network\services\dhcp// under windows). You can modify the definitions in these and other definitions to suit your needs better if you'd like. However, I'd recommend waiting until you're more familiar with configuring Shinken before doing so. For the time being, just follow the directions outlined below and you'll be monitoring your DHCP boxes in no time.
+The above-mentioned config files can be found in the //etc/shinken/packs/network/services/dhcp directory (or c:\\shinken\\etc\\packs\\network\\services\\dhcp under windows). You can modify the definitions in these and other definitions to suit your needs better if you'd like. However, I'd recommend waiting until you're more familiar with configuring Shinken before doing so. For the time being, just follow the directions outlined below and you'll be monitoring your DHCP boxes in no time.
 
 .. tip::  We are supposing here that the DHCP server you want to monitor is named srv-lin-1 and is a linux. Please change the above lines and commands with the real name of your server of course.
 
@@ -71,7 +71,6 @@ The check_dhcp must be run under the root account to send a dhcp call on the net
 
 
 
-
 Declare your host as an dhcp server 
 ------------------------------------
 
@@ -82,17 +81,9 @@ Under Linux:
   
 ::
 
-  
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/srv-lin-1.cfg
   
 Or Windows:
-  
-::
-
-  
   
 ::
 
@@ -102,20 +93,15 @@ And add:
   
 ::
 
-  
-  
-::
-
   define host{
       use             dhcp,linux
       host_name       srv-lin-1
       address         srv-lin-1.mydomain.com
   }
-  
-  
 
 
-Restarting Shinken 
+
+Restarting Shinken
 -------------------
 
 

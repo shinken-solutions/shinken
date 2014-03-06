@@ -55,7 +55,7 @@ In a nutshell:
 
   ./configure --with-nagios-user=shinken --with-nagios-group=shinken
   make all
-make fullinstall
+  make fullinstall
 
 Don't forget to make PNP4Nagios' npcd daemon to start at boot, and launch it:
   
@@ -63,7 +63,7 @@ Don't forget to make PNP4Nagios' npcd daemon to start at boot, and launch it:
 
   chkconfig --add npcd # On RedHat-like
   update-rc.d npcd defaults # On Debian-like
-/etc/init.d/npcd start
+  /etc/init.d/npcd start
 
 
 
@@ -77,13 +77,10 @@ The module **npcdmod** is in charge to export performance data from Shinken to P
 ::
 
   define module{
-  
-::
-
        module_name       NPCDMOD
        module_type       npcdmod
        config_file       <PATH_TO_NPCD.CFG>
-}
+  }
 
 Don't forget to replace "<PATH_TO_NPCD.CFG>" with your own value; By default something like ''/usr/local/pnp4nagios/etc/npcd.cfg''.
 
@@ -99,16 +96,11 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **Broker** to add
 ::
 
   define broker{
-  
-::
+      broker_name      broker-1
+      [...]
+      modules          Simple-log,NPCDMOD
+  }
 
-       broker_name      broker-1
-  [...]
-  
-::
-
-       modules          Simple-log,NPCDMOD
-}
 
 Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **WebUI** to add above defined "PNP_UI" to its **modules** line:
 
@@ -116,16 +108,11 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **WebUI** to add 
 ::
 
   define broker{
-  
-::
-
        module_name      WebUI
-  [...]
-  
-::
-
+       [...]
        modules          Apache_passwd,ActiveDir_UI,Cfg_password,PNP_UI
-}
+  }
+
 
 Then restart broker :
   
@@ -166,37 +153,19 @@ If you want the link and the graph for all hosts and services, you could set the
 ::
 
   define host{
-  
-::
-
         name                            generic-host
-  [...]
-  
-::
-
+        [...]
         process_perf_data               1
-  [...]
-  
-::
-
+        [...]
         #action_url                     http://<PNP4NAGIOS_HOST>/pnp4nagios/graph?host=$HOSTNAME$
         # If not an absolute URI, it must be relative to /cgi-bin/thruk/, not /thruk/!
         action_url                      ../../pnp4nagios/graph?host=$HOSTNAME$
-  [...]
+        [...]
   define service{
-  
-::
-
         name                            generic-service
-  [...]
-  
-::
-
+        [...]
         process_perf_data               1
-  [...]
-  
-::
-
+        [...]
         #action_url                      http://<PNP4NAGIOS_HOST>/pnp4nagios/graph?host=$HOSTNAME$&srv=$SERVICEDESC$
         # If not an absolute URI, it must be relative to /cgi-bin/thruk/, not /thruk/!
         action_url                      ../../pnp4nagios/graph?host=$HOSTNAME$&srv=$SERVICEDESC$

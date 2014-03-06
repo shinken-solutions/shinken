@@ -18,11 +18,13 @@ The load balancing feature is very easy to obtain with Shinken. If I say that th
 In fact the load is present in 2 major places:
   * pollers: they launch checks, they use a lot of resources
   * schedulers: they schedule, potentially lots of checks
+
 For both, a limit of 150000 checks/5min is a reasonable goal on an average server(4 cores@3Ghz). But remember that is can be multiplied as much as you wish, just by adding another server.
 
 There are 2 cases:
   * checks that ask for a lot of performance (perl or shell scripts for example)
   * a lot of scheduling (> 150000 checks in 5 minutes).
+
 In the first case, you need to add more pollers. In the second, you need to add more schedulers. In this last case, you should also add more pollers (more launch need more pollers) but that's not compulsory.
 
 But I already ear you asking "How to add new satellites?". That's very simple: You start by installing the application on a new server (don't forget the sinken user + application files). Let say that this new server is called server-2 and has the IP 192.168.0.2 (remember that the "master" is called server-1 with 192.168.0.1 as IP). 
@@ -230,6 +232,7 @@ A realm is:
  * at least a poller
  * can have a reactionner
  * can have a broker
+
 In a realm, all realm pollers will take all realm schedulers jobs.
 
 .. important::  Very important: there is only ONE arbiter (and a spare of couse) for ALL realms. The arbiter manages all realms and all that is inside.

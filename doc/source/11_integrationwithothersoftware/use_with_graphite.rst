@@ -51,16 +51,15 @@ Configure graphite module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   
-  <code>define module{
-  
 ::
 
-    module_name     Graphite-Perfdata
-    module_type     graphite_perfdata
-    host            localhost
-    port            2003
-    templates_path  /usr/local/shinken/share/templates/graphite/
-}
+  define module{
+      module_name     Graphite-Perfdata
+      module_type     graphite_perfdata
+      host            localhost
+      port            2003
+      templates_path  /usr/local/shinken/share/templates/graphite/
+  }
 
 Additional list of options for the :ref:`Graphite export module and more in-depth documentation <the_broker_modules#network_based_modules_-_graphite_graphing>`.
 
@@ -76,23 +75,14 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the **Broker** object, and a
 ::
 
   define broker{
-  
-::
-
        broker_name      broker-1
-  [...]
-  
-::
-
+      [...]
        modules          Livestatus,Simple-log,WebUI,Graphite-Perfdata
-}
-
+  }
 
 
 Use it 
 ~~~~~~~
-
-
 
 
 With Shinken UI 
@@ -105,27 +95,21 @@ If you used a graphite_data_source in the Graphite-Perfdata section, make sure t
 ::
 
   define module {
-  
-::
-
-  module_name GRAPHITE_UI
-  uri http://monitoring.mysite.com/graphite/
-  graphite_data_source shinken
-  ...
-}
+      module_name GRAPHITE_UI
+      uri http://monitoring.mysite.com/graphite/
+      graphite_data_source shinken
+      ...
+  }
 
 Then find the WebUI object, and add GRAPHITE_UI to its modules (you'll want to replace PNP_UI):
   
 ::
 
   define module {
-  
-::
-
-  module_name WebUI
-  modules Apache_passwd, ActiveDir_UI, Cfg_password, GRAPHITE_UI, Mongodb
-  ...
-}
+      module_name WebUI
+      modules Apache_passwd, ActiveDir_UI, Cfg_password, GRAPHITE_UI, Mongodb
+      ...
+  }
 
 Restart Shinken to take the changes into account.
 

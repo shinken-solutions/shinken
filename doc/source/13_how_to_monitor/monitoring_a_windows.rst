@@ -27,7 +27,7 @@ Introduction
 
 Publicly available services that are provided by Windows machines ("HTTP", "FTP", "POP3", etc.) can be monitored by following the documentation on :ref:`Monitoring publicly available services (HTTP, FTP, SSH, etc.) <monitoring_a_network_service>`.
 
-The instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that was installed if you followed the quickstart.
+The instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that was installed if you followed the quickstart.
 
 
 

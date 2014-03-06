@@ -65,6 +65,7 @@ In NagVis configuration file ''/etc/nagvis/nagvis.ini.php'':
   [backend_live_1]
   backendtype="mklivestatus"
   htmlcgi="/nagios/cgi-bin"
-socket="tcp:localhost:50000"
+  socket="tcp:localhost:50000"
+
 
 .. important::  If you are using a non local broker (or a distributed Shinken architecture with multiple brokers) you should change **localhost** to the **IP/Servername/FQDN of your broker**!

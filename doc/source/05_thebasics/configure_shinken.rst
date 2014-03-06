@@ -12,7 +12,7 @@ Default Shinken configuration
 ------------------------------
 
 
-If you followed the :ref:`10 Minute Shinken Installation Guide <shinken_10min_start>` tutorial you were able to install and launch Shinken.
+If you followed the :ref:`10 Minute Shinken Installation Guide <shinken_installation>` tutorial you were able to install and launch Shinken.
 
 The default configuration deployed with the Shinken sources contains:
   * one arbiter
@@ -135,7 +135,7 @@ Some daemons have special parameters:
 For the arbiter:
   * host_name: hostname of the server where the arbiter is installed. It's mandatory for a high availability environment (2 arbiters or more).
 For pollers:
-  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this`.
+  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this <advancedtopics-distributed#poller_tag>`.
 
 
 
@@ -285,6 +285,6 @@ What next
 ----------
 
 
-You are ready to continue to the next section, :ref:`get DATA IN Shinken <#Getting data in Shinken>`.
+You are ready to continue to the next section, :ref:`get DATA IN Shinken <thebasics-plugins>`.
 
 If you feel in the mood for testing even more shinken features, now would be the time to look at :ref:`advanced_features <advanced_features>` to play with distributed and high availability architectures!

@@ -30,11 +30,13 @@ Ubuntu:
 ::
 
   sudo apt-get install nmap
+
 RedHat/Centos:
   
 ::
 
   yum install nmap
+
 Windows: Not available at this time.
 
 You need to setup the nmap targets in the file /usr/local/shinken/etc/resource.cfg:
@@ -43,6 +45,7 @@ For nmap:
 ::
 
   $NMAPTARGETS$=localhost www.google.fr 192.168.0.1-254
+
 This will scan the localhost, one of the numerous Google server and your LAN. Change it to your own LAN values of course!
 
 .. tip::  This value can be changed without modifying this file with the -m discovery script argument
@@ -85,6 +88,7 @@ If you are lazy and do not want to edit the resource file, you can set macros wi
 ::
 
   sudo shinken-discovery -o /etc/shinken/objects/discovery -r nmap -m "NMAPTARGETS=192.168.0.1-254 localhost 192.168.0.1-254"
+
 You can set several macros, just put them on the same -m argument, separated by a comma (,).
 
 .. tip::  The scan can take quite a few minutes if you are scanning a large network, you can go have a coffee. The scan timeout is set to 60 minutes.
