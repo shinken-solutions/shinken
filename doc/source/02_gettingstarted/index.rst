@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _gettingstarted-index:
 
 Getting Started
 ===============

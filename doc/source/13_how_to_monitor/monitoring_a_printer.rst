@@ -35,7 +35,7 @@ Introduction
 -------------
 
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 
 
 
@@ -93,17 +93,9 @@ Under Linux:
   
 ::
 
-  
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/printer-1.cfg
   
 Or Windows:
-  
-::
-
-  
   
 ::
 
@@ -111,10 +103,6 @@ Or Windows:
   
   
 You need to add a new :ref:`host <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-host>` definition for the Linux machine that you're going to monitor. Just copy/paste the above definition Change the "host_name", and "address" fields to appropriate values for this machine.
-  
-::
-
-  
   
 ::
 
@@ -138,6 +126,7 @@ What is checked with a printer template ?
 
 At this point, you configure your host to be checked with a printer template. What does it means? It means that you got some checks already configured for you:
   * printer check each 5 minutes: check with a ping that the printer is UP
+
 .. note::  TODO: fill what is checked with HPJD
 
 

@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _about-index:
 
 About 
 =====

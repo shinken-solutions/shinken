@@ -23,7 +23,7 @@ Introduction
 -------------
 
 
-These instructions assume that you have installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
+These instructions assume that you have installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
 
 
 
@@ -124,17 +124,9 @@ Under Linux:
   
 ::
 
-  
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/switch-1.cfg
   
 Or Windows:
-  
-::
-
-  
   
 ::
 
@@ -145,10 +137,6 @@ You need to add a new :ref:`host <configuringshinken-objectdefinitions#configuri
 
 
 
-  
-::
-
-  
   
 ::
 
@@ -165,10 +153,6 @@ You need to add a new :ref:`host <configuringshinken-objectdefinitions#configuri
   * the address is ... the network address of your switch :)
 
 If you are using a specific SNMP community for this host, you can configure it in the SNMPCOMUNITY host macro like this:
-  
-::
-
-  
   
 ::
 
@@ -207,10 +191,6 @@ Not all devices are managed by check_nwc_health. To know if yours is, just launc
 
 If it's ok, you can add the "cisco" template for your hosts (even if it's not a cisco device, we are working on getting more templates configuration).
 
-  
-::
-
-  
   
 ::
 

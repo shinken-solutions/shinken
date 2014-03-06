@@ -24,7 +24,7 @@ Introduction
 
 Publicly available services that are provided by Linux devices (like "HTTP", "FTP", "POP3", etc.) can be monitored easily by following the documentation on Monitoring :ref:`publicly available services (HTTP, FTP, SSH, etc.) <network_service>`.
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
 
 
 
@@ -132,10 +132,6 @@ To see if the keys are working, just launch from your Shinken server. Change the
   
 ::
 
-  
-  
-::
-
    check_snmp -H srv-lin-1 -o .1.3.6.1.2.1.1.3.0  -C public
   
 It should give you the uptime of the srv-lin-1 server.
@@ -162,17 +158,9 @@ Under Linux:
   
 ::
 
-  
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/srv-lin-1.cfg
   
 Or Windows:
-  
-::
-
-  
   
 ::
 
@@ -181,10 +169,6 @@ Or Windows:
   
 You need to add a new :ref:`host <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-host>` definition for the Linux device that you're going to monitor. Just copy/paste the above definition Change the "host_name", and "address" fields to appropriate values for this device.
 
-  
-::
-
-  
   
 ::
 
@@ -204,10 +188,6 @@ If you are using a specific SNMP community for this host, you can configure it i
   
 ::
 
-  
-  
-::
-
   define host{
       use             linux
       host_name       srv-lin-1
@@ -217,10 +197,6 @@ If you are using a specific SNMP community for this host, you can configure it i
   
   
 To enable disk checking for the host, configure the :ref:`filesystem macro <multi-layer-discovery#macros_mode>`:
-  
-::
-
-  
   
 ::
 

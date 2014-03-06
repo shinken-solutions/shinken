@@ -45,6 +45,7 @@ It's quite easy, all you need is to enable the parameter
 ::
 
   enable_problem_impacts_states_change=1
+
 See the page :ref:`configuringshinken-configmain-advanced` <configuringshinken-configmain-advanced> for more information about it.
 
 

@@ -14,6 +14,7 @@ The load balancing feature is very easy to obtain with Shinken. If I say that th
 If you use the distributed architecture for load balancing, know that load is typically present in 2 processes:
   * pollers: they launch checks, they use a lot of CPU resources
   * schedulers: they schedule, potentially lots of checks
+
 For both, a limit of 150000 checks/5min is a reasonable goal on an average server(4 cores\@3Ghz). Scaling can be achieved horizontally by simply adding more servers and declaring them as pollers or schedulers.
 
 .. tip::  The scheduler is NOT a multi-threaded process, so even if you add cores to your server, it won't change it's performances.

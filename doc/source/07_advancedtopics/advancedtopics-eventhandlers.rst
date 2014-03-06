@@ -118,6 +118,7 @@ Ideally you should evaluate the types of event handlers you will be implementing
 
 
 .. _advancedtopics-eventhandlers#Service Event Handler Example:
+
 Service Event Handler Example 
 ==============================
 

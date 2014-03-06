@@ -9,8 +9,8 @@ FAQ - Shinken troubleshooting
 
 
 
-FAQ Summary =
-=============
+FAQ Summary
+============
 
 
 Shinken users, developers, administrators possess a body of knowledge that usually provides a quick path to problem resolutions. The Frequently Asked Questions questions are compiled from user questions and issues developers may run into.
@@ -18,7 +18,7 @@ Shinken users, developers, administrators possess a body of knowledge that usual
 Have you consulted at all the :ref:`resources available for users and developers <how_to_contribute>`.
 
 **__Before posting a question to the forum:__**
-   * Read the through the  :ref:`Getting Started tutorials <>`
+   * Read the through the  :ref:`Getting Started tutorials <gettingstarted-index>`
    * Search the documentation wiki
    * Use this FAQ
    * Bonus: Update this FAQ if you found the answer and think it would benefit someone else
@@ -31,20 +31,20 @@ Frequently asked questions
 ---------------------------
 
 
-  - :ref:`How to set my daemons in debug mode to review the logs? <troubleshooting_shinken#Review the daemon logs>`
-  - :ref:`I am getting an OSError read-only filesystem <troubleshooting_shinken#OSError read-only filesystem error>`
-  - :ref:`I am getting an OSError [Errno 24] Too many open files <troubleshooting_shinken#OSError too many files open>`
-  - :ref:`Notification emails have generic-host instead of host_name <troubleshooting_shinken#Notification emails have generic-host instead of host_name>`
-  - :ref:`Thruk/Multisite reporting doesn't work using Shinken 1.2 <troubleshooting_shinken#Reporting does not work with Shinken 1.2>`
-  - :ref:`Pyro MemoryError during configuration distribution by the Arbiter to other daemons(satellites) <troubleshooting_shinken#How to identify the source of a Pyro MemoryError>`
+  - :ref:`How to set my daemons in debug mode to review the logs? <Review the daemon logs>`
+  - :ref:`I am getting an OSError read-only filesystem OSError read-only filesystem error>`
+  - :ref:`I am getting an OSError [Errno 24] Too many open files <OSError too many files open>`
+  - :ref:`Notification emails have generic-host instead of host_name <Notification emails have generic-host instead of host_name>`
+  - :ref:`Thruk/Multisite reporting doesn't work using Shinken 1.2 <Reporting does not work with Shinken 1.2>`
+  - :ref:`Pyro MemoryError during configuration distribution by the Arbiter to other daemons(satellites) <How to identify the source of a Pyro MemoryError>`
 
 
 
-General Shinken troubleshooting steps to resolve common issue =
+General Shinken troubleshooting steps to resolve common issue
 ---------------------------------------------------------------
 
-  - Have you mixed installation methods! :ref:`Cleanup and install using a single method <shinken_10min_start>`.
-  - Have you installed the :ref:`check scripts and addon software <shinken_10min_start>`
+  - Have you mixed installation methods! :ref:`Cleanup and install using a single method <shinken_installation>`.
+  - Have you installed the :ref:`check scripts and addon software <shinken_installation>`
   - Is Shinken even running?
   - Have you checked the :ref:`Shinken pre-requisites <prerequisites_1_2>`?
   - Have you :ref:`configured the WebUI module <use_with_webui>` in your shinken-specific.cfg file
@@ -191,12 +191,12 @@ Possible causes
 
 1) Shinken Arbiter is not preparing the configuration correctly sending overlarge objects
 2) there is a hardware problem that causes the error, for instance a faulty memory
-chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on
-the failing device
+   chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on
+   the failing device
 3) a software package installed on the failing sattelite has become corrupted. Re-install all software related to Pyro, possibly the whole OS.
 4) or perhaps, and probably very unlikely, that the network infrastructure
-(cables/router/etc) experience a fault and deliver corrupt packets to the failing
-sattelite, whereas the other sattelites get good data.. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
+   (cables/router/etc) experience a fault and deliver corrupt packets to the failing
+   sattelite, whereas the other sattelites get good data.. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
 
 
 Other than that, here are some general thoughts. A MemoryError means:
