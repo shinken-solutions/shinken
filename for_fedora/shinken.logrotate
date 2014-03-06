@@ -1,9 +1,7 @@
 /var/log/shinken/archives/*.log {
-    compress
     daily
     missingok
     rotate 52
-    compress
     notifempty
     create 640 nagios nagios
     sharedscripts
