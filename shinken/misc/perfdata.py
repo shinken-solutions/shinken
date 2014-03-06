@@ -27,7 +27,7 @@ import re
 from shinken.util import to_best_int_float
 
 perfdata_split_pattern = re.compile('([^=]+=\S+)')
-metric_pattern = re.compile('^([^=]+)=([\d\.\-]+)([\w\/%]*);?([\d\.\-:~@]+)?;?([\d\.\-:~@]+)?;?([\d\.\-]+)?;?([\d\.\-]+)?;?\s*')
+metric_pattern = re.compile('^([^=]+)=([\d\.\-eE]+)([\w\/%]*);?([\d\.\-eE:~@]+)?;?([\d\.\-eE:~@]+)?;?([\d\.\-eE]+)?;?([\d\.\-eE]+)?;?\s*')
 
 
 # If we can return an int or a float, or None
