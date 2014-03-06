@@ -1,7 +1,7 @@
 .. _shinken_plugins:
 
 
-
+=======================
 Nagios/Shinken Plugins 
 =======================
 
