@@ -18,7 +18,7 @@ Introduction
 
 Private services, in contrast, cannot be monitored with Shinken without an intermediary agent of some kind. Examples of private services associated with hosts are things like CPU load, memory usage, disk usage, current user count, process information, etc.
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
 
 
 
@@ -42,10 +42,6 @@ Before you can monitor a service, you first need to define a :ref:`host <configu
 
 For this example, lets say you want to monitor a variety of services on a remote windows host. Let's call that host *srv-win-1*. The host definition can be placed in its own file. Here's what the host definition for *remotehost* might look like if you followed the windows monitoring tutorial:
 
-  
-::
-
-  
   
 ::
 
@@ -78,10 +74,6 @@ So you host definition will now look like:
   
 ::
 
-  
-  
-::
-
   define host{
       use           windows,http
       host_name     srv-win-1
@@ -109,10 +101,6 @@ So you host definition will now look like:
   
 ::
 
-  
-  
-::
-
   define host{
       use           windows,https
       host_name     srv-win-1
@@ -123,10 +111,6 @@ So you host definition will now look like:
 .. note::  TODO: write some custom macros for other page check or timeout
 
 You can check Http AND Https in the same time, all you need is to use the two templates in the same time:
-  
-::
-
-  
   
 ::
 
@@ -148,10 +132,6 @@ When you need to monitor "FTP" servers, you can use the **check_ftp** plugin. Li
   
 ::
 
-  
-  
-::
-
   define host{
       use           windows,ftp
       host_name     srv-win-1
@@ -167,10 +147,7 @@ Monitoring SSH
 
 
   When you need to monitor "SSH" servers, you can use the **check_ssh** plugin.
-::
 
-  
-  
 ::
 
   define host{
@@ -195,10 +172,6 @@ The **check_smtp** plugin can be using for monitoring your email servers. You ca
   
 ::
 
-  
-  
-::
-
   define host{
       use           windows,smtp
       host_name     srv-win-1
@@ -215,10 +188,6 @@ Monitoring POP3
 
 
 The **check_pop** plugin can be using for monitoring the "POP3" service on your email servers. Use the *pop3* template for your host to get automatically a Pop3 service.
-  
-::
-
-  
   
 ::
 
@@ -242,10 +211,6 @@ The **check_imap** plugin can be using for monitoring "IMAP4" service on your em
   
 ::
 
-  
-  
-::
-
   define host{
       use           windows,imap
       host_name     srv-win-1
@@ -257,10 +222,6 @@ This service definition will monitor the "IMAP4" service and generate alerts if 
 
 To get smtp, pop3 and imap service checks, you can just link all theses templates to your host:
 
-  
-::
-
-  
   
 ::
 

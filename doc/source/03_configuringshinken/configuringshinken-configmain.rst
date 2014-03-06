@@ -205,6 +205,7 @@ Defined in nagios.cfg file.
 
 Format:
    resource_file=<file_name>
+
 Example:
 
 ::
@@ -432,6 +433,7 @@ This option determines whether or not Shinken will retain state information for 
 .. note::  Idea to approve : Mark it as Unused : `Related topic`_. A Shinken module replace it.
 
 
+.. _configuringshinken-configmain#configuringshinken-configmain-state_retention_file:
 
 State Retention File 
 ~~~~~~~~~~~~~~~~~~~~~

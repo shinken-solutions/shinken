@@ -132,10 +132,11 @@ Before you can begin monitoring private services and attributes of Windows machi
 ..
 
   7. Edit the "NSC.INI file" (located in the "C:\NSClient++" directory) and make the following changes:
-    * Uncomment all the modules listed in the [modules] section, except for "CheckWMI.dll" and "RemoteConfiguration.dll"
-    * Optionally require a password for clients by changing the "password" option in the [Settings] section.
-    * Uncomment the "allowed_hosts" option in the [Settings] section. Add the IP address of the Nagios server to this line, or leave it blank to allow all hosts to connect.
-    * Make sure the "port" option in the [NSClient] section is uncommented and set to '12489' (the default port).
+     * Uncomment all the modules listed in the [modules] section, except for "CheckWMI.dll" and "RemoteConfiguration.dll"
+     * Optionally require a password for clients by changing the "password" option in the [Settings] section.
+     * Uncomment the "allowed_hosts" option in the [Settings] section. Add the IP address of the Nagios server to this line, or leave it blank to allow all hosts to connect.
+     * Make sure the "port" option in the [NSClient] section is uncommented and set to '12489' (the default port).
+
   8. Start the NSClient++ service with the following command:
 
 ::

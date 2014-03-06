@@ -112,6 +112,7 @@ Apache htpasswd - passwd_webui
 This module uses an Apache passwd file (htpasswd) as authentification backend. All it needs is the full path of the file (from a legacy Nagios CGI installation, for example).
 
 ::
+
   define module{
        module_name      Apache_passwd
        module_type      passwd_webui

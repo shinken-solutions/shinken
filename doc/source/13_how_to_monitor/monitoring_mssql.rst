@@ -23,7 +23,7 @@ Introduction
 -------------
 
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken 10min start >`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 
 
 
@@ -99,10 +99,6 @@ To see if the connection is ok, just launch:
   
 ::
 
-  
-  
-::
-
    /var/lib/nagios/plugins/check_mssql_health --hostname srv-win-1 --username shinken --password shinkenpassword --mode connection-time
   
 It should not return errors.
@@ -119,17 +115,9 @@ Under Linux:
   
 ::
 
-  
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/srv-win-1.cfg
   
 Or Windows:
-  
-::
-
-  
   
 ::
 
@@ -138,10 +126,6 @@ Or Windows:
   
 You need to add the mysql template in the use line. It's better to follow the more precise template to the less one, like here mssql first, and then windows.
 
-  
-::
-
-  
   
 ::
 

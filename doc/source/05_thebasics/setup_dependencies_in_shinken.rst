@@ -52,7 +52,7 @@ In order for Shinken to be able to distinguish between DOWN and UNREACHABLE stat
 
 
 
-Now that you know what the parent/child relationships look like for hosts that are being monitored, how do you configure Shinken to reflect them? The parents directive in your :ref:`host definitions <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-host>` allows you to do this. Here's what the (abbreviated) host definitions with parent/child relationships would look like for this example:
+Now that you know what the parent/child relationships look like for hosts that are being monitored, how do you configure Shinken to reflect them? The parents directive in your :ref:`host definitions <configuringshinken/configobjects/host>` allows you to do this. Here's what the (abbreviated) host definitions with parent/child relationships would look like for this example:
 
   
   
