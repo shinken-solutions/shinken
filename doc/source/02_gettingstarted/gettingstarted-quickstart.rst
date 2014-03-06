@@ -36,7 +36,6 @@ Once you get Shinken installed and running properly, you'll no doubt want to sta
 
   * :ref:`Monitoring Windows machines <gettingstarted-monitoring-windows>`
   * :ref:`Monitoring GNU/Linux or other Unix machines <gettingstarted-monitoring-linux>`
-  * :ref:`Monitoring Netware servers <gettingstarted-monitoring-netware>`
   * :ref:`Monitoring routers/switches <gettingstarted-monitoring-routers>`
   * :ref:`Monitoring network printers <gettingstarted-monitoring-printers>`
   * :ref:`Monitoring publicly available services ("HTTP", "FTP", "SSH", etc.) <gettingstarted-monitoring-publicservices>`

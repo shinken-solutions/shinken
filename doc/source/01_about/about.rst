@@ -44,7 +44,7 @@ System Requirements
 ====================
 
 
-The :ref:`requirement for running Shinken <shinken_installation_requirements>` are the Python interpreter and the pycurl python lib.
+The :ref:`requirement for running Shinken <shinken_installation#requirements>` are the Python interpreter and the pycurl python lib.
 
 
 

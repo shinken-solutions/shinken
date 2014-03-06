@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _how_to_monitor:
 
 How to monitor ...
 ==================
