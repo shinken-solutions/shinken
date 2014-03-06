@@ -119,5 +119,18 @@ class TestParsePerfdata(ShinkenTest):
         self.assert_(m.min == 0)
         self.assert_(m.max == 100)
 
+        s = "time_offset-192.168.0.1=-7.22636468709e-05s;1;2;0;;"
+        p = PerfDatas(s)
+        m = p['time_offset-192.168.0.1']
+        self.assert_(m.name == 'time_offset-192.168.0.1')
+        self.assert_(m.value == -7.22636468709e-05)
+        self.assert_(m.uom == 's')
+        self.assert_(m.warning == 1)
+        self.assert_(m.critical == 2)
+        self.assert_(m.min == 0)
+        self.assert_(m.max is None)
+
+
 if __name__ == '__main__':
     unittest.main()
+
