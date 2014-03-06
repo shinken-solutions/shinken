@@ -2,6 +2,41 @@
 Shinken ChangeLog
 #######################
 
+1.4.2 - 06/03/2014
+------------------
+	CORE ENHANCEMENT (backport)
+	Add : Triggers functions for perfdata
+	Add : RST doc
+
+	CORE FIXES (backport)
+	Fix : Perfdata Parsing
+	Fix : Arbiter parsing (Catch bad service_dependencies, timeperiod definitions)
+	Fix : crash 'c.t_to_go is  None' in scheduler when time change
+	Fix : adjust_worker_by_load was wrong, worker was not created again
+	Fix : Hosts over-checked when services are critical (don't respect retry_interval)
+	Fix : Prevent from returning next time notif in the past (don't over notify).
+
+	MODULE ENHANCEMENT (backport)
+	Add : Option to group collect plugin instances in one service
+	Add : RST doc
+
+	MODULES FIXES (backport)
+	Fix : Graphite module skipping 0 values
+
+
+
+1.4.1 - 02/01/2014
+------------------
+
+	CORE FIXES
+	Fix : Protocol Error exception not defined
+	Fix : Close FD on action timeout
+	Fix : Plugins path in install script
+
+	MODULES FIXES
+	Fix : Webui (layout)
+	Fix : Aws-Import-Arbiter error
+																				
 
 1.4   - 27/05/2013
 ------------------
