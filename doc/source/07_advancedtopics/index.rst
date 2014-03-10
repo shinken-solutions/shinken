@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _advancedtopics/index:
 
 Advanced Topics
 ===============
@@ -12,40 +13,40 @@ Advanced Topics
 
 .. toctree::
 
-    advancedtopics-extcommands
-    advancedtopics-eventhandlers
-    advancedtopics-volatileservices
-    advancedtopics-freshness
-    advancedtopics-distributed
-    advancedtopics-redundancy
-    advancedtopics-flapping
-    advancedtopics-escalations
-    advancedtopics-oncallrotation
-    advancedtopics-clusters
-    advancedtopics-dependencies
-    advancedtopics-stalking
-    advancedtopics-perfdata
-    advancedtopics-downtime
-    advancedtopics-adaptative
-    advancedtopics-dependencychecks
-    advancedtopics-cachedchecks
-    advancedtopics-passivestatetranslation
-    advancedtopics-checkscheduling
-    advancedtopics-objectinheritance
-    advancedtopics-objecttricks
-    advancedtopics-businessrules
-    advancedtopics-migratingfromnagios
+    extcommands
+    eventhandlers
+    volatileservices
+    freshness
+    distributed
+    redundancy
+    flapping
+    escalations
+    oncallrotation
+    clusters
+    dependencies
+    stalking
+    perfdata
+    downtime
+    adaptative
+    dependencychecks
+    cachedchecks
+    passivestatetranslation
+    checkscheduling
+    objectinheritance
+    objecttricks
+    businessrules
+    migratingfromnagios
     multi-layer-discovery
-    multiple_urls
-    rule_agregation
-    scaling_shinken
-    setup_advanced_dependencies_in_shinken
-    setup_distributed_shinken
-    setup_distributed_shinken_with_realm
-    setup_macro_modulations
-    sms_with_android
-    sms_with_gateway
+    multiple-urls
+    rule-agregation
+    scaling-shinken
+    advanced-dependencies
+    distributed-shinken
+    distributed-with-realm
+    macro-modulations
+    sms-with-android
+    sms-with-gateway
     triggers
-    unused_nagios_parameters
-    use_the_discovery_with_shinken_advanced
-    use_the_discovery_with_shinken
+    unused-nagios-parameters
+    discovery-with-shinken-advanced
+    discovery-with-shinken

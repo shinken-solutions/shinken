@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _configuringshinken/index:
 
 Configuring Shinken
 ===================
@@ -12,9 +13,9 @@ Configuring Shinken
 
 .. toctree::
     
-    configuringshinken-config
-    configuringshinken-configmain
-    configuringshinken-configobject
-    configuringshinken-objectdefinitions
-    configuringshinken-customobjectvars
-    configuringshinken-configmain-advanced
+    config
+    configmain
+    configobject
+    objectdefinitions
+    customobjectvars
+    configmain-advanced

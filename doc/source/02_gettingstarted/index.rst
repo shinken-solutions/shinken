@@ -2,7 +2,7 @@
 
     \newpage
 
-.. _gettingstarted-index:
+.. _gettingstarted/index:
 
 Getting Started
 ===============
@@ -13,14 +13,14 @@ Getting Started
 
 .. toctree::
 
-    gettingstarted-beginners
-    gettingstarted-quickstart
+    beginners
+    quickstart
     installations/index
-    ch07
-    gettingstarted-monitoring-windows
-    gettingstarted-monitoring-linux
-    gettingstarted-monitoring-printers
-    gettingstarted-monitoring-routers
-    gettingstarted-monitoring-publicservices
-    shinken_plugins
+    upgrading-shinken
+    monitoring-windows
+    monitoring-linux
+    monitoring-printers
+    monitoring-routers
+    monitoring-publicservices
+    shinken-plugins
 

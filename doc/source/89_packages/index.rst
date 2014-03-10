@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _packages/index:
 
 Shinken modules
 ===============
@@ -15,7 +16,5 @@ This part must be splitted and sent in all module repositories
 .. toctree::
    :glob:
       
-   index
    *
-   */index
-   
+   */index   

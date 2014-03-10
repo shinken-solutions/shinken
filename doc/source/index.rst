@@ -22,8 +22,8 @@ Welcome to Shinken's documentation!
     10_troubleshooting/index
     11_integrationwithothersoftware/index
     12_securityandperformancetuning/index
-    13_how_to_monitor/index
-    14_how_to_contribute/index
+    13_how-to-monitor/index
+    14_how-to-contribute/index
     15_development/index
     89_packages/index
 

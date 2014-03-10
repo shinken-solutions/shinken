@@ -1,7 +1,8 @@
 .. raw:: LaTeX
 
     \newpage
-
+	
+.. _packages/webui/index:
 
 WebUI module
 ============
@@ -14,6 +15,6 @@ This part must be splitted and sent in all module repositories
 
 .. toctree::
 
-    webui_devel
-    webui_search
-    webui_ssl_certificates
+    webui-devel
+    webui-search
+    webui-ssl-certificates

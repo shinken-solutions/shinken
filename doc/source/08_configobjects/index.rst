@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _config/index:
 
 Config
 ======

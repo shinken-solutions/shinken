@@ -1,4 +1,4 @@
-.. _triggers:
+.. _advancedtopics/triggers:
 
 ========
 Triggers
@@ -15,7 +15,6 @@ It's defined like:
 Here is an example that will raise a critical check if the CPU is too loaded:
 
 
-
 Simple rule 
 ************
 
@@ -27,8 +26,6 @@ Simple rule
    matching_rule   perf(self, 'cpu') >= 95
    hit_action      critical(self, 'Cpu is too loaded')
   }
-
-
 
 
 Rule with an OR 
@@ -44,8 +41,6 @@ Another one that will look if at least one CPU is too loaded (> 90% load) or the
    matching_rule   max([perf(self, 'cpu*')]) > 90 | avg([perf(self, 'cpu*')]) > 60
    hit_action      critical(self, 'Cpu is too loaded')
   }
-
-
 
 
 Advanced correlation: active/passive cluster check 
@@ -75,8 +70,6 @@ And if you want you can define a degraded one you can define another trigger for
    matching_rule   service(self.customs['master']).state == 'CRITICAL' & service(self.customs['slave']).state == 'OK'
    hit_action      warning(self, 'Cluster runs on slave!')
   }
-
-
 
 
 Statefull rules 
@@ -109,8 +102,6 @@ And a aggregated one will raise the alert if need:
   }
 
 
-
-
 Compute KPI 
 ************
 
@@ -127,9 +118,6 @@ Let take an example, You got a cluster of N webservers. Each is returning in a c
    matching_rule   True;total_connections=sum(perfs('web-srv*/Http', 'active_connections'))
    hit_action      set_perfdata(self, 'total_connections=%d' % total_connections)
   }
-
-
-
 
 
 Define and use triggers 

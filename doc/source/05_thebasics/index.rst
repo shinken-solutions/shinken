@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _thebasics/index:
 
 The Basics
 ==========
@@ -12,19 +13,19 @@ The Basics
 
 .. toctree::
 
-    configure_shinken
-    thebasics-plugins
-    thebasics-macros
-    thebasics-macrolist
-    thebasics-hostchecks
-    thebasics-servicechecks
-    thebasics-activechecks
-    thebasics-passivechecks
-    thebasics-statetypes
-    thebasics-timeperiods
-    thebasics-networkreachability
-    thebasics-notifications
-    setup_active_module_checks
-    setup_dependencies_in_shinken
+    configure-shinken
+    plugins
+    macros
+    macrolist
+    hostchecks
+    servicechecks
+    activechecks
+    passivechecks
+    statetypes
+    timeperiods
+    networkreachability
+    notifications
+    active-module-checks
+    dependencies-in-shinken
     update
 

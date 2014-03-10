@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _development/index:
 
 Development
 ===========
@@ -12,9 +13,9 @@ Development
 
 .. toctree::
 
-   programming_rules
-   test_driven_development
-   development-pluginapi
-   development-modules
-   development-hackingcode
-   development-references
+   programming-rules
+   test-driven-development
+   pluginapi
+   modules
+   hackingcode
+   documentation

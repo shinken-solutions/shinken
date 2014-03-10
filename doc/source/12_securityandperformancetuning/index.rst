@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _securityandperformancetuning/index:
 
 Security and Performance Tuning
 ===============================
@@ -12,7 +13,8 @@ Security and Performance Tuning
 
 .. toctree::
 
-    securityandperformancetuning-security
-    securityandperformancetuning-tuning
-    securityandperformancetuning-largeinstalltweaks
-    securityandperformancetuning-statistics
+    security
+    tuning
+    largeinstalltweaks
+    statistics
+    mrtggraphs

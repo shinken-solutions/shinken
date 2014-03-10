@@ -1,7 +1,8 @@
 .. raw:: LaTeX
 
     \newpage
-
+	
+.. _architecture/index:
 
 Shinken Architecture
 ====================
@@ -12,9 +13,8 @@ Shinken Architecture
 
 .. toctree::
     
-    about_the_high_availability
-    advanced_features
-    how_dispatching_works
-    part-problemsandimpacts
-    root_problems_and_impacts
-    the_shinken_architecture
+    about-the-high-availability
+    advanced-features
+    how-dispatching-works
+    problems-and-impacts
+    the-shinken-architecture
