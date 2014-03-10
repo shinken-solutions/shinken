@@ -375,7 +375,12 @@ do_stop() {
 #
 do_check() {
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
-    "$BIN/shinken-arbiter" -v -c "$ETC/shinken.cfg" $DEBUGCMD 2>&1
+    if ! test "$SHINKENSPECIFICCFG"
+    then
+       "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" $DEBUGCMD 2>&1
+    else
+       "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1
+    fi
     return $?
 }
 
