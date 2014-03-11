@@ -17,4 +17,3 @@ Installations
     shinken_env_setup
     shinken_first_steps
     redhat_thruk_pnp4nagios_howto
-    install_script
