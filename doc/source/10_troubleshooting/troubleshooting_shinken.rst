@@ -36,7 +36,6 @@ Frequently asked questions
   - :ref:`I am getting an OSError [Errno 24] Too many open files <OSError too many files open>`
   - :ref:`Notification emails have generic-host instead of host_name <Notification emails have generic-host instead of host_name>`
   - :ref:`Thruk/Multisite reporting doesn't work using Shinken 1.2 <Reporting does not work with Shinken 1.2>`
-  - :ref:`Pyro MemoryError during configuration distribution by the Arbiter to other daemons(satellites) <How to identify the source of a Pyro MemoryError>`
 
 
 
@@ -54,11 +53,9 @@ General Shinken troubleshooting steps to resolve common issue
   - Have you reviewed your :ref:`configuration syntax <configuringshinken-config>` (keywords and values)
   - Is what you are trying to use installed? Are its dependancies installed! Does it even work.
   - Is what you are trying to use :ref:`a supported version <shinken_installation_requirements>`?
-  - Are you using the same Python Pyro module version on all your hosts running a Shinken daemon (You have to!)
   - Are you using the same Python version on all your hosts running a Shinken daemon (You have to!)
   - Have you installed Shinken with the SAME prefix (ex: /usr/local) on all your hosts running a Shinken daemon (You have to!)
   - Have you enabled debugging logs on your daemon(s)
-  - How to identify the source of a Pyro MemoryError
   - Problem with Livestatus, did it start, is it listening on the exppected TCP port, have you enabled and configured the module in shinken-specific.cfg.
   - Have you installed the check scripts as the shinken user and not as root
   - Have you executed/tested your command as the shinken user
@@ -166,59 +163,4 @@ Why does Shinken use both host_alias and host_name. Flexibility and historicaly 
 
 
 
-
-Reporting does not work with Shinken 1.2 
------------------------------------------
-
-
-Set your Scheduler log level to INFO by editing shinken/etc/scheduler.ini.
-
-Upgrade to Shinken 1.2.1, which fixes a MongoDB pattern matching error.
-
-
-
-How to identify the source of a Pyro MemoryError 
--------------------------------------------------
-
-
-Are the satellites identical in every respect? 
-All the others work just fine?
-What is the memory usage of the scheduler after sending the configuration data for each scheduler?
-Do you use multiple realms?
-Does the memory use increase for each Scheduler?
-
-Possible causes
-
-1) Shinken Arbiter is not preparing the configuration correctly sending overlarge objects
-2) there is a hardware problem that causes the error, for instance a faulty memory
-   chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on
-   the failing device
-3) a software package installed on the failing sattelite has become corrupted. Re-install all software related to Pyro, possibly the whole OS.
-4) or perhaps, and probably very unlikely, that the network infrastructure
-   (cables/router/etc) experience a fault and deliver corrupt packets to the failing
-   sattelite, whereas the other sattelites get good data.. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
-
-
-Other than that, here are some general thoughts. A MemoryError means:
-"Raised when an operation runs out of memory but the situation may still be rescued
-(by deleting some objects). The associated value is a string indicating what kind of
-(internal) operation ran out of memory. Note that because of the underlying memory
-management architecture (C"s malloc() function), the interpreter may not always be
-able to completely recover from this situation; it nevertheless raises an exception so
-that a stack traceback can be printed, in case a run-away program was the cause. "
-
-5) Check on the server the actual memory usage of the Scheduler daemon.
-Another possible reason for malloc() to fail can also be memory fragmentation, which
-means that there's enough free RAM but just not a free chunk somewhere in between that
-is large enough to hold the required new allocation size. No idea if this could be the
-case in your situation, and I have no idea on how to debug for this.
-
-It is not entirely clear to me where exactly the memoryerror occurs: is it indeed
-raised on the sattelite device, and received and logged on the server? Or is the
-server throwing it by itself?
-
-6) Other avenues of investigation
-Try running the python interpreter with warnings on (-Wall).
-Try using the HMAC key feature of Pyro to validate the network packets.
-Try using Pyro's multiplex server instead of the threadpool server.
 
