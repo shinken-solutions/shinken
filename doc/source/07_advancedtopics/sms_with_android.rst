@@ -31,22 +31,12 @@ Install Python on your phone
   * click the menu button again, then add and select "Python 2.6". Then click to install.
 
 
-Install the Pyro lib on your phone 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Go to http://pypi.python.org/pypi/Pyro4/ and download the same Pyro that you are using in Shinken.
-
-  * Connect your phone to a computer, and open the sdcard disk.
-  * Untar the Pyro4 tar ball, and copy the Pyro4 library directory (the one IN the Pyro4-10 directory, NOT the 4.10 directory itself) and copy/paste it in SDCARD/com.googlecode.pythonforandroid\extras\python directory. Be sure the file SDCARD\com.googlecode.pythonforandroid\extras\python\Pyro\__init__.py exists, or you put the wrong directory here.
-  * Don't close your sdcard explorer
-
-
 
 Install Shinken on your phone 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-  * Like for Pyro, copy your shinken library directory in SDCARD\com.googlecode.pythonforandroid\extras\python\. If you do not have the SDCARD\com.googlecode.pythonforandroid\extras\python\shinken\__ini__.py file, you put the bad directory.
+  * Connect your phone to a computer, and open the sdcard disk.
+  * Copy your shinken library directory in SDCARD\com.googlecode.pythonforandroid\extras\python\. If you do not have the SDCARD\com.googlecode.pythonforandroid\extras\python\shinken\__ini__.py file, you put the bad directory.
   * Copy the bin/shinken-reactionner file in SDCARD\sl4a\scripts direcotry and rename it shinken-reactionner.py (so add the .py extension)
 
 

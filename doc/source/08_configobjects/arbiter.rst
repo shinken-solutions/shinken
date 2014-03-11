@@ -99,7 +99,7 @@ This variable is used to define all modules that the arbtier daemon matching thi
 
    timeout
   
-This variable defines how much time the arbiter will block waiting for the response of a inter-process ping (Pyro). 3 seconds by default. This operation will become non blocking when Python 2.4 and 2.5 is dropped in Shinken 1.4.
+This variable defines how much time the arbiter will block waiting for the response of a inter-process ping . 3 seconds by default. This operation will become non blocking when Python 2.4 and 2.5 is dropped in Shinken 1.4.
 
    data_timeout
   
