@@ -521,10 +521,17 @@ do_checkconfig_() { do_check_ "$1" ; }
 do_cmd_on() {
     action=$1
     mods=$2
+
+    local return_value
+    return_value=0
+
     for mod in $mods
     do
-        do_${action}_ "$mod"
+        # If at least one action fails, the return value is 1.
+        do_${action}_ "$mod" || return_value=1
     done
+
+    return $return_value
 }
 
 
