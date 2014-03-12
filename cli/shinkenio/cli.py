@@ -528,6 +528,13 @@ def install_package(pname, raw):
     cont.write(json.dumps(package_content))
     cont.close()
     
+    # We now clean (rm) the tmpdir we don't need any more
+    try:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        # cannot remove? not a crime
+    except OSError:
+        pass
+
     # THE END, output all is OK :D
     cprint('OK ', 'green', end='')
     cprint('%s' % pname)
