@@ -148,6 +148,27 @@ class IForArbiter(IArb):
 
 
 
+
+class Injector(Interface):
+    """ Interface for injections:
+    """
+    
+    # A broker ask us broks
+    def inject(self, bincode):
+        
+        # first we need to get a real code object
+        import marshal
+        print "GOING TO LOAD CODE"
+        try:
+            print bincode
+        except :
+            pass
+        code = marshal.loads(bincode)
+        exec code in dict(locals())
+        print "END"
+
+
+
 # The main app class
 class Shinken(BaseSatellite):
 
@@ -415,6 +436,13 @@ class Shinken(BaseSatellite):
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             self.http_daemon.register(self.interface)
+
+            # Add injector
+            print "INJECTOR"
+            self.inject = Injector(self.sched)
+            self.http_daemon.register(self.inject)
+
+
             self.http_daemon.unregister(self.interface)
             self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s" % self.uri)
