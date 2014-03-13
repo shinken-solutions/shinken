@@ -746,6 +746,8 @@ class SchedulingItem(Item):
 
         # Now get data from check
         self.execution_time = c.execution_time
+        self.u_time = c.u_time
+        self.s_time = c.s_time
         self.last_chk = int(c.check_time)
 
         # Get output and forgot bad UTF8 values for simple str ones

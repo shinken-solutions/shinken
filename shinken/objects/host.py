@@ -223,6 +223,8 @@ class Host(SchedulingItem):
         'last_problem_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_problem_id':   IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'execution_time':       FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'u_time':               FloatProp(default=0.0),
+        's_time':               FloatProp(default=0.0),
         'last_notification':    FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'current_notification_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),

@@ -338,11 +338,13 @@ class HTTPDaemon(object):
                             logger.debug("HTTP: calling lock for %s" % fname)
                             lock.acquire()
 
-                        ret = f(**d)
-
-                        # Ok now we can release the lock
-                        if need_lock:
-                            lock.release()
+                        try:
+                            ret = f(**d)
+                        # Always call the lock release if need
+                        finally:
+                            # Ok now we can release the lock
+                            if need_lock:
+                                lock.release()
 
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
