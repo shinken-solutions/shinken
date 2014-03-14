@@ -204,7 +204,7 @@ class SchedulingItem(Item):
                                 # And a new check
                                 return self.launch_check(now)
                             else:
-                                logger.warning("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
+                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
         return None
 
 
@@ -1319,7 +1319,7 @@ class SchedulingItem(Item):
         if force or (not self.is_no_check_dependent()):
             # Fred : passive only checked host dependency
             if dependent and self.my_type == 'host' and self.passive_checks_enabled and not self.active_checks_enabled:
-                logger.warning("Host check is for an host that is only passively checked (%s), do not launch the check !" % (self.host_name))
+                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !" % (self.host_name))
                 return None
             
             # By default we will use our default check_command
