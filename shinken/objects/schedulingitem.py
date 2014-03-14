@@ -196,10 +196,15 @@ class SchedulingItem(Item):
             if cls.global_check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
-                        # Raise a log
-                        self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
-                        # And a new check
-                        return self.launch_check(now)
+                        # Fred: Do not raise a check for passive only checked hosts when not in check period ...
+                        if self.passive_checks_enabled and not self.active_checks_enabled:
+                            if self.check_period is None or self.check_period.is_time_valid(now):
+                                # Raise a log
+                                self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
+                                # And a new check
+                                return self.launch_check(now)
+                            else:
+                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
         return None
 
 
@@ -474,7 +479,9 @@ class SchedulingItem(Item):
                 # if the update is 'fresh', do not raise dep,
                 # cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
-                    i = dep.launch_check(now, ref_check)
+                    # Fred : passive only checked host dependency ...
+                    i = dep.launch_check(now, ref_check, dependent=True)
+                    # i = dep.launch_check(now, ref_check)
                     if i is not None:
                         checks.append(i)
 #                else:
@@ -671,7 +678,7 @@ class SchedulingItem(Item):
 
 
     # UNKNOWN during a HARD state are not so important, and they should
-    # ot raise notif about it
+    # not raise notif about it
     def update_hard_unknown_phase_state(self):
         self.was_in_hard_unknown_reach_phase = self.in_hard_unknown_reach_phase
 
@@ -926,7 +933,7 @@ class SchedulingItem(Item):
                 if not c.is_dependent():
                     self.add_attempt()
                 if self.is_max_attempts():
-                   # Ok here is when we just go to the hard state
+                    # Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
@@ -1266,7 +1273,9 @@ class SchedulingItem(Item):
 
     # return a check to check the host/service
     # and return id of the check
-    def launch_check(self, t, ref_check=None, force=False):
+    # Fred : passive only checked host dependency
+    def launch_check(self, t, ref_check=None, force=False, dependent=False):
+    # def launch_check(self, t, ref_check=None, force=False):
         c = None
         cls = self.__class__
 
@@ -1310,7 +1319,11 @@ class SchedulingItem(Item):
             return c.id
 
         if force or (not self.is_no_check_dependent()):
-
+            # Fred : passive only checked host dependency
+            if dependent and self.my_type == 'host' and self.passive_checks_enabled and not self.active_checks_enabled:
+                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !" % (self.host_name))
+                return None
+            
             # By default we will use our default check_command
             check_command = self.check_command
             # But if a checkway is available, use this one instead.

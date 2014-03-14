@@ -33,6 +33,7 @@ from shinken.comment import Comment
 from shinken.commandcall import CommandCall
 from shinken.log import logger, console_logger
 from shinken.pollerlink import PollerLink
+from shinken.eventhandler import EventHandler
 
 MODATTR_NONE = 0
 MODATTR_NOTIFICATIONS_ENABLED = 1
@@ -192,7 +193,7 @@ class ExternalCommandManager:
         'READ_STATE_INFORMATION': {'global': True, 'args': []},
         'REMOVE_HOST_ACKNOWLEDGEMENT': {'global': False, 'args': ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT': {'global': False, 'args': ['service']},
-        'RESTART_PROGRAM': {'global': True, 'args': []},
+        'RESTART_PROGRAM': {'global': True, 'internal': True, 'args': []},
         'SAVE_STATE_INFORMATION': {'global': True, 'args': []},
         'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
@@ -1374,7 +1375,28 @@ class ExternalCommandManager:
 
     # RESTART_PROGRAM
     def RESTART_PROGRAM(self):
-        pass
+        restart_cmd = self.commands.find_by_name('restart_shinken')
+        if not restart_cmd:
+            console_logger.error("Cannot restart Shinken : missing command named 'restart_shinken'. Please add one")
+            return
+        restart_cmd_line = restart_cmd.command_line
+        
+        # Ok get an event handler command that will run in 15min max
+        e = EventHandler(restart_cmd_line, timeout=900)
+        # Ok now run it
+        e.execute()
+        # And wait for the command to finish
+        while not e.status in ('done', 'timeout'):
+            e.check_finished(64000)
+        if e.status == 'timeout' or e.exit_status != 0:
+            console_logger.error("Cannot restart Shinken : the 'restart_shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
+            return
+        # Ok here the command succeed, we can now wait our death
+        console_logger.info("%s\%s" % (e.output, e.long_output))
+        console_logger.info("RESTART command launched. Waiting for the new daemon to kill us")
+        
+        
+        
 
     # SAVE_STATE_INFORMATION
     def SAVE_STATE_INFORMATION(self):
