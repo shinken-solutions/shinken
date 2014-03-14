@@ -148,24 +148,22 @@ class IForArbiter(IArb):
 
 
 
-
+'''
 class Injector(Interface):
-    """ Interface for injections:
-    """
-    
     # A broker ask us broks
     def inject(self, bincode):
         
         # first we need to get a real code object
         import marshal
-        print "GOING TO LOAD CODE"
-        try:
-            print bincode
-        except :
-            pass
+        print "Calling Inject mode"
         code = marshal.loads(bincode)
-        exec code in dict(locals())
-        print "END"
+        result = None
+        exec code
+        try:
+            return result
+        except NameError, exp:
+            return None
+'''
 
 
 
@@ -437,11 +435,8 @@ class Shinken(BaseSatellite):
             self.load_modules_manager()
             self.http_daemon.register(self.interface)
 
-            # Add injector
-            print "INJECTOR"
-            self.inject = Injector(self.sched)
-            self.http_daemon.register(self.inject)
-
+            #self.inject = Injector(self.sched)
+            #self.http_daemon.register(self.inject)
 
             self.http_daemon.unregister(self.interface)
             self.uri = self.http_daemon.uri
