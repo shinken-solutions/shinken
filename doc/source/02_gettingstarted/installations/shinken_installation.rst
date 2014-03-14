@@ -79,9 +79,9 @@ Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot
 ::
 
   adduser shinken
-  wget http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
-  tar -xvzf shinken-2.0.tar.gz
-  cd shinken-2.0
+  wget http://www.shinken-monitoring.org/pub/shinken-2.0-RC.tar.gz
+  tar -xvzf shinken-2.0-RC.tar.gz
+  cd shinken-2.0-RC
   python setup.py install
 
 
