@@ -40,7 +40,7 @@ Plugin Return Code Service State Host State
 3                  UNKNOWN       DOWN/UNREACHABLE       
 ================== ============= =======================
 
-If the :ref:`use_aggressive_host_checking <advancedtopics/unused-nagios-parameters#use_aggressive_host_checking>` option is enabled, return codes of 1 will result in a host state of DOWN or UNREACHABLE. Otherwise return codes of 1 will result in a host state of UP. The process by which Nagios determines whether or not a host is DOWN or UNREACHABLE is discussed :ref:`here <thebasics/networkreachability>`.
+If the :ref:`use_aggressive_host_checking <advanced/unused-nagios-parameters#use_aggressive_host_checking>` option is enabled, return codes of 1 will result in a host state of DOWN or UNREACHABLE. Otherwise return codes of 1 will result in a host state of UP. The process by which Nagios determines whether or not a host is DOWN or UNREACHABLE is discussed :ref:`here <thebasics/networkreachability>`.
 
 
 Plugin Output Spec 

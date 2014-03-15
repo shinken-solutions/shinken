@@ -87,7 +87,7 @@ What did you just do? You told Shinken to look to the "/etc/shinken/objects/prin
 Configuring Shinken 
 ====================
 
-You'll need to create some :ref:`object definitions <configuringshinken/objectdefinitions>` in order to monitor a new printer.
+You'll need to create some :ref:`object definitions <configuration/objectdefinitions>` in order to monitor a new printer.
 
 Open the "printer.cfg" file for editing.
 

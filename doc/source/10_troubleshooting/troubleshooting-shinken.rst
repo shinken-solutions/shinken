@@ -10,7 +10,7 @@ FAQ Summary
 
 Shinken users, developers, administrators possess a body of knowledge that usually provides a quick path to problem resolutions. The Frequently Asked Questions questions are compiled from user questions and issues developers may run into.
 
-Have you consulted at all the :ref:`resources available for users and developers <how-to-contribute/index>`.
+Have you consulted at all the :ref:`resources available for users and developers <contributing/index>`.
 
 **__Before posting a question to the forum:__**
 
@@ -40,11 +40,11 @@ General Shinken troubleshooting steps to resolve common issue
   * Have you installed the :ref:`check scripts and addon software <gettingstarted/installations/shinken-installation>`
   * Is Shinken even running?
   * Have you checked the :ref:`Shinken pre-requisites <gettingstarted/installations/shinken-installation#requirements>`?
-  * Have you :ref:`configured the WebUI module <integrationwithothersoftware/webui>` in your shinken-specific.cfg file
-  * Have you :ref:`completed the Shinken basic configuration <configuringshinken/index>` and :ref:`Shinken WebUI configuration <integrationwithothersoftware\webui>`
+  * Have you :ref:`configured the WebUI module <integration/webui>` in your shinken-specific.cfg file
+  * Have you :ref:`completed the Shinken basic configuration <configuration/index>` and :ref:`Shinken WebUI configuration <integrationwithothersoftware\webui>`
   * Have you reviewed your Shinken centralized (:ref:`Simple-log broker module <the_broker_modules>`) logs for errors
   * Have you reviewed your :ref:`Shinken daemon specific logs <troubleshooting/troubleshooting-shinken#Review the daemon logs>` for errors or tracebacks (what the system was doing just before a crash)
-  * Have you reviewed your :ref:`configuration syntax <configuringshinken/config>` (keywords and values)
+  * Have you reviewed your :ref:`configuration syntax <configuration/config>` (keywords and values)
   * Is what you are trying to use installed? Are its dependancies installed! Does it even work.
   * Is what you are trying to use :ref:`a supported version <gettingstarted/installations/shinken-installation#requirements>`?
   * Are you using the same Python Pyro module version on all your hosts running a Shinken daemon (You have to!)
@@ -165,18 +165,18 @@ Does the memory use increase for each Scheduler?
 
 Possible causes
 
-  # Shinken Arbiter is not preparing the configuration correctly sending overlarge objects
-  # There is a hardware problem that causes the error, for instance a faulty memory chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on the failing device
-  # A software package installed on the failing sattelite has become corrupted. Re-install all software related to Pyro, possibly the whole OS.
-  # Or perhaps, and probably very unlikely, that the network infrastructure (cables/router/etc) experience a fault and deliver corrupt packets to the failing sattelite, whereas the other sattelites get good data. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
+  * Shinken Arbiter is not preparing the configuration correctly sending overlarge objects
+  * There is a hardware problem that causes the error, for instance a faulty memory chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on the failing device
+  * A software package installed on the failing sattelite has become corrupted. Re-install all software related to Pyro, possibly the whole OS.
+  * Or perhaps, and probably very unlikely, that the network infrastructure (cables/router/etc) experience a fault and deliver corrupt packets to the failing sattelite, whereas the other sattelites get good data. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
     
     Other than that, here are some general thoughts. A MemoryError means: "Raised when an operation runs out of memory but the situation may still be rescued (by deleting some objects). The associated value is a string indicating what kind of (internal) operation ran out of memory. Note that because of the underlying memory management architecture (C"s malloc() function), the interpreter may not always be
     able to completely recover from this situation; it nevertheless raises an exception so that a stack traceback can be printed, in case a run-away program was the cause.
-  # Check on the server the actual memory usage of the Scheduler daemon.
+  * Check on the server the actual memory usage of the Scheduler daemon.
     Another possible reason for malloc() to fail can also be memory fragmentation, which means that there's enough free RAM but just not a free chunk somewhere in between that is large enough to hold the required new allocation size. No idea if this could be the case in your situation, and I have no idea on how to debug for this.    
     
     It is not entirely clear to me where exactly the memoryerror occurs: is it indeed raised on the sattelite device, and received and logged on the server? Or is the server throwing it by itself?
-  # Other avenues of investigation
+  * Other avenues of investigation
       
       * Try running the python interpreter with warnings on (-Wall).
       * Try using the HMAC key feature of Pyro to validate the network packets.

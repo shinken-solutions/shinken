@@ -12,14 +12,14 @@ SnmpBooster Download Install and Configure
   * :ref:`What is the SnmpBooster module <SnmpBooster_how_it_works>`
   * :ref:`Install and configure the SNMP acquisition module. <packages/snmp/setup>` [You are here]
   * :ref:`Reference - SnmpBooster troubleshooting <snmpbooster_troubleshooting>`
-  * :ref:`Reference - SnmpBooster design specification <snmpbooster_design_specification>`
+  * :ref:`Reference - SnmpBooster design specification <packages/snmp/design-specification>`
   * :ref:`Reference - SnmpBooster configuration dictionnary <snmpbooster_dictionary>`
 
 
 Downloads 
 ==========
 
-The SnmpBooster module and genDevConfig are currently in public beta prior to integration within Shinken. You can consult the design specification to see the :ref:`current development status <packages/snmp/snmpbooster-design-specification >`.
+The SnmpBooster module and genDevConfig are currently in public beta prior to integration within Shinken. You can consult the design specification to see the :ref:`current development status <packages/snmp/design-specification >`.
   
   * `github.com/xkilian/genDevConfig`_
   * `github.com/titilambert/shinken/tree/snmp_booster/shinken/modules`_  (snmp_booster branch)

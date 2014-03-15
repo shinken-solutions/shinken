@@ -8,7 +8,7 @@ Host Dependency Definition
 Description 
 ============
 
-Host dependencies are an advanced feature of Shinken that allow you to suppress notifications for hosts based on the status of one or more other hosts. Host dependencies are optional and are mainly targeted at advanced users who have complicated monitoring setups. More information on how host dependencies work (read this!) can be found :ref:`here <advancedtopics/dependencies>`.
+Host dependencies are an advanced feature of Shinken that allow you to suppress notifications for hosts based on the status of one or more other hosts. Host dependencies are optional and are mainly targeted at advanced users who have complicated monitoring setups. More information on how host dependencies work (read this!) can be found :ref:`here <advanced/dependencies>`.
 
 
 Definition Format 

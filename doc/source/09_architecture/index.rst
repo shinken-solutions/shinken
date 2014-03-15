@@ -12,9 +12,10 @@ Shinken Architecture
     \newpage
 
 .. toctree::
-    
-    about-the-high-availability
-    advanced-features
-    how-dispatching-works
-    problems-and-impacts
-    the-shinken-architecture
+   :maxdepth: 2
+   
+   about-the-high-availability
+   advanced-features
+   how-dispatching-works
+   problems-and-impacts
+   the-shinken-architecture

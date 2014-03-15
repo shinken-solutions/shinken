@@ -170,7 +170,7 @@ It takes the parameters:
 Network Based Modules - Graphite graphing 
 ==========================================
 
-Graphite is a graphing and data analysis tool. It is composed of a web frontend (graphite-web), fixed size databases (whisper) and data redistribution/munging daemon. (carbon) The first step is :ref:`having Graphite installed somewhere <integrationwithothersoftware/graphite>`, if you do not have Graphite installed, please do this and come back later.
+Graphite is a graphing and data analysis tool. It is composed of a web frontend (graphite-web), fixed size databases (whisper) and data redistribution/munging daemon. (carbon) The first step is :ref:`having Graphite installed somewhere <integration/graphite>`, if you do not have Graphite installed, please do this and come back later.
 
 Pre-requisite : Shinken 1.2.2+ is recommended for the best experience with Graphite.
 
@@ -226,7 +226,7 @@ Here is an example:
 SQL Based Modules - PNP4Nagios Graphing 
 ========================================
 
-PNP4Nagios is a graphing tool that has a web interface for RRDTool based databases. Shinken can export performance data to an npcd database which will feed the RRD files (fixed sized round robin databases). You can :ref:`learn how to install PNP4Nagios <integrationwithothersoftware/pnp>` if you haven't done it already.
+PNP4Nagios is a graphing tool that has a web interface for RRDTool based databases. Shinken can export performance data to an npcd database which will feed the RRD files (fixed sized round robin databases). You can :ref:`learn how to install PNP4Nagios <integration/pnp>` if you haven't done it already.
 
 
 npcdmod: export perfdatas to a PNP interface 

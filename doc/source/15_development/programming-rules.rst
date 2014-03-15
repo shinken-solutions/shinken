@@ -31,12 +31,6 @@ Reference book
 The Art of Readable Code, is a great book that provides a fast read and an immense value in improving the readability and maintainability of code.
 
 
-Pyro remote Object Library 
-===========================
-
-Shinken uses Pyro extensively to create its cloud-like architecture. :ref:`You can learn more about Pyro <http://pypi.python.org/pypi/Pyro4>` if you wish to develop new features that need to use inter-process communications.
-
-
 .. _development/programming-rules#python_docstring_guide:
 
 The python docstring guide 

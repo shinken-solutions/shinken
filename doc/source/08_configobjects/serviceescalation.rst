@@ -8,7 +8,7 @@ Service Escalation Definition
 Description 
 ============
 
-Service escalations are completely optional and are used to escalate notifications for a particular service. More information on how notification escalations work can be found :ref:`here <advancedtopics/escalations>`.
+Service escalations are completely optional and are used to escalate notifications for a particular service. More information on how notification escalations work can be found :ref:`here <advanced/escalations>`.
 
 
 Definition Format 

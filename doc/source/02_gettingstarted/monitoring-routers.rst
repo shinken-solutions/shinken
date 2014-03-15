@@ -85,7 +85,7 @@ What did you just do? You told Shinken to look to the "/etc/shinken/objects/swit
 Configuring Shinken 
 ====================
 
-You'll need to create some :ref:`object definitions <configuringshinken/objectdefinitions>` in order to monitor a new router/switch.
+You'll need to create some :ref:`object definitions <configuration/objectdefinitions>` in order to monitor a new router/switch.
 
 Open the "switch.cfg" file for editing.
 

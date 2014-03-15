@@ -23,10 +23,10 @@ What do I need to do next
 The next logical steps for a new user are as listed in the :ref:`Getting Started <gettingstarted/index>` pages:
 
 * Did you read the :ref:`Shinken Architecture <architecture/the-shinken-architecture>` presentation?
-* Complete the :ref:`Shinken basic installation <configuringshinken/index>`
+* Complete the :ref:`Shinken basic installation <configuration/index>`
 * Start adding devices to monitor, such as:
 
-  * :ref:`Public services <how-to-monitor/network-service>` (HTTP, SMTP, IMAP, SSH, etc.)
+  * :ref:`Public services <monitoring/network-service>` (HTTP, SMTP, IMAP, SSH, etc.)
   * :ref:`GNU/Linux <gettingstarted/monitoring-linux>` clients
   * :ref:`Windows <gettingstarted/monitoring-windows>` clients
   * :ref:`Routers <gettingstarted/monitoring-routers>`
@@ -34,11 +34,11 @@ The next logical steps for a new user are as listed in the :ref:`Getting Started
 
 * Setup the web interface:
 
-  * Use the :ref:`default WebUI <integrationwithothersoftware/webui>`
-  * Or set-up a :ref:`third-party web interface <integrationwithothersoftware/index>` and addons.
+  * Use the :ref:`default WebUI <integration/webui>`
+  * Or set-up a :ref:`third-party web interface <integration/index>` and addons.
 
 
 Getting Help
 -------------
 
-New and experienced users sometimes need to find documentation, troubleshooting tips, a place to chat, etc. The :ref:`Shinken community provides many resources to help you <how-to-contribute/index#Shinken resources for users>`. You can discuss installation documentation changes in the Shinken forums.
+New and experienced users sometimes need to find documentation, troubleshooting tips, a place to chat, etc. The :ref:`Shinken community provides many resources to help you <contributing/index#Shinken resources for users>`. You can discuss installation documentation changes in the Shinken forums.

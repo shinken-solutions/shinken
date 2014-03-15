@@ -35,7 +35,7 @@ I'll walk you through monitoring some basic services that you'll probably use so
 Creating A Host Definition 
 ===========================
 
-Before you can monitor a service, you first need to define a :ref:`host <configobjects/host>` that is associated with the service. You can place host definitions in any object configuration file specified by a :ref:`cfg_file <configuringshinken/configmain#cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuringshinken/configmain#cfg_dir>` directive. If you have already created a host definition, you can skip this step.
+Before you can monitor a service, you first need to define a :ref:`host <configobjects/host>` that is associated with the service. You can place host definitions in any object configuration file specified by a :ref:`cfg_file <configuration/configmain#cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuration/configmain#cfg_dir>` directive. If you have already created a host definition, you can skip this step.
 
 For this example, lets say you want to monitor a variety of services on a remote host. Let's call that host *remotehost*. The host definition can be placed in its own file or added to an already exiting object configuration file. Here's what the host definition for *remotehost* might look like:
 
@@ -55,7 +55,7 @@ Now that a definition has been added for the host that will be monitored, we can
 Creating Service Definitions 
 =============================
 
-For each service you want to monitor, you need to define a :ref:`service <configobjects/service>` in Shinken that is associated with the host definition you just created. You can place service definitions in any object configuration file specified by a :ref:`cfg_file <configuringshinken/configmain#cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuringshinken/configmain#cfg_dir>` directive.
+For each service you want to monitor, you need to define a :ref:`service <configobjects/service>` in Shinken that is associated with the host definition you just created. You can place service definitions in any object configuration file specified by a :ref:`cfg_file <configuration/configmain#cfg_file>` directive or placed in a directory specified by a :ref:`cfg_dir <configuration/configmain#cfg_dir>` directive.
 
 Some example service definitions for monitoring common public service ("HTTP", "FTP", etc) are given below.
 

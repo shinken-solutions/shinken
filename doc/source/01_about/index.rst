@@ -12,6 +12,7 @@ About
     \newpage
 
 .. toctree::
+   :maxdepth: 2
 
    about
    whatsnew

@@ -32,4 +32,4 @@ Once you get Shinken installed and running properly, you'll no doubt want to sta
 
 Also, you can check the next documentations:
 
-  * :ref:`How to monitor <how-to-monitor/index>`
+  * :ref:`How to monitor <monitoring/index>`

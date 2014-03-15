@@ -16,7 +16,7 @@ This part must be splitted and sent in all module repositories
 .. toctree::
 
     setup-snmp-booster-module
-    snmpbooster-design-specification
+    design-specification
     snmpbooster-dictionary
     snmpbooster-how-it-works
     snmpbooster-troubleshooting

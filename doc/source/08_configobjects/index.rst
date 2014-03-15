@@ -12,25 +12,27 @@ Config
     \newpage
 
 .. toctree::
-    
-    host
-    hostgroup
-    service
-    servicegroup
-    contact
-    contactgroup
-    timeperiod
-    command
-    servicedependency
-    serviceescalation
-    hostdependency
-    hostescalation
-    hostextinfo
-    serviceextinfo
-    notificationway
-    realm
-    arbiter
-    scheduler
-    poller
-    reactionner
-    broker
+   :maxdepth: 1
+   
+   host
+   hostgroup
+   service
+   servicegroup
+   contact
+   contactgroup
+   timeperiod
+   command
+   servicedependency
+   serviceescalation
+   hostdependency
+   hostescalation
+   hostextinfo
+   serviceextinfo
+   notificationway
+   realm
+   arbiter
+   scheduler
+   poller
+   reactionner
+   broker
+

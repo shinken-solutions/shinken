@@ -15,6 +15,7 @@ This part must be splitted and sent in all module repositories
 
 .. toctree::
    :glob:
+   :maxdepth: 2
       
    *
    */index   

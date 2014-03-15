@@ -144,7 +144,7 @@ This macro definition will return something that looks like this:
 Custom Variable Macros 
 =======================
 
-Any :ref:`custom object variables <configuringshinken/customobjectvars>` that you define in host, service, or contact definitions are also available as macros. Custom variable macros are named as follows:
+Any :ref:`custom object variables <configuration/customobjectvars>` that you define in host, service, or contact definitions are also available as macros. Custom variable macros are named as follows:
 
   * "$_HOSTvarname$"
   * "$_SERVICEvarname$"
@@ -161,13 +161,13 @@ Take the following host definition with a custom variable called ""_MACADDRESS""
     ...
   }
 
-The "_MACADDRESS" custom variable would be available in a macro called "$_HOSTMACADDRESS$". More information on custom object variables and how they can be used in macros can be found :ref:`here <configuringshinken/customobjectvars>`.
+The "_MACADDRESS" custom variable would be available in a macro called "$_HOSTMACADDRESS$". More information on custom object variables and how they can be used in macros can be found :ref:`here <configuration/customobjectvars>`.
 
 
 Macro Cleansing 
 ================
 
-Some macros are stripped of potentially dangerous shell metacharacters before being substituted into commands to be executed. Which characters are stripped from the macros depends on the setting of the :ref:`illegal_macro_output_chars <configuringshinken/configmain#illegal_macro_output_chars>` directive. The following macros are stripped of potentially dangerous characters:
+Some macros are stripped of potentially dangerous shell metacharacters before being substituted into commands to be executed. Which characters are stripped from the macros depends on the setting of the :ref:`illegal_macro_output_chars <configuration/configmain#illegal_macro_output_chars>` directive. The following macros are stripped of potentially dangerous characters:
 
   * :ref:`$HOSTOUTPUT$ <$HOSTOUTPUT$>`
   * :ref:`$LONGHOSTOUTPUT$ <$LONGHOSTOUTPUT$>`

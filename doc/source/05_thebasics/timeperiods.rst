@@ -68,19 +68,19 @@ By specifying a timeperiod in the "notification_period" directive of a host or s
 
 You can also use timeperiods to control when notifications can be sent out to individual contacts. By using the "service_notification_period" and "host_notification_period" directives in :ref:`contact definitions <configobjects/contact>`, you're able to essentially define an “on call" period for each contact. Contacts will only receive host and service notifications during the times you specify in the notification period directives.
 
-Examples of how to create timeperiod definitions for use for on-call rotations can be found :ref:`here <advancedtopics/oncallrotation>`.
+Examples of how to create timeperiod definitions for use for on-call rotations can be found :ref:`here <advanced/oncallrotation>`.
 
 
 How Time Periods Work With Notification Escalations 
 ====================================================
 
-Service and host :ref:`Notification Escalations <advancedtopics/escalations>` have an optional escalation_period directive that allows you to specify a timeperiod when the escalation is valid and can be used. If you do not use the "escalation_period" directive in an escalation definition, the escalation is considered valid at all times. If you specify a timeperiod in the "escalation_period" directive, Shinken will only use the escalation definition during times that are valid in the timeperiod definition.
+Service and host :ref:`Notification Escalations <advanced/escalations>` have an optional escalation_period directive that allows you to specify a timeperiod when the escalation is valid and can be used. If you do not use the "escalation_period" directive in an escalation definition, the escalation is considered valid at all times. If you specify a timeperiod in the "escalation_period" directive, Shinken will only use the escalation definition during times that are valid in the timeperiod definition.
 
 
 How Time Periods Work With Dependencies 
 ========================================
 
-:ref:`Host and Service Dependencies <advancedtopics/dependencies>` have an optional "dependency_period" directive that allows you to specify a timeperiod when the dependendies are valid and can be used. If you do not use the "dependency_period" directive in a dependency definition, the dependency can be used at any time. If you specify a timeperiod in the "dependency_period" directive, Shinken will only use the dependency definition during times that are valid in the timeperiod definition.
+:ref:`Host and Service Dependencies <advanced/dependencies>` have an optional "dependency_period" directive that allows you to specify a timeperiod when the dependendies are valid and can be used. If you do not use the "dependency_period" directive in a dependency definition, the dependency can be used at any time. If you specify a timeperiod in the "dependency_period" directive, Shinken will only use the dependency definition during times that are valid in the timeperiod definition.
 
 
 .. _1: http://www.shinken-monitoring.org/forum/index.php/topic,377.0.html

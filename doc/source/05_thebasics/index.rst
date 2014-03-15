@@ -12,20 +12,21 @@ The Basics
     \newpage
 
 .. toctree::
+   :maxdepth: 2
 
-    configure-shinken
-    plugins
-    macros
-    macrolist
-    hostchecks
-    servicechecks
-    activechecks
-    passivechecks
-    statetypes
-    timeperiods
-    networkreachability
-    notifications
-    active-module-checks
-    dependencies-in-shinken
-    update
+   configure-shinken
+   plugins
+   macros
+   macrolist
+   hostchecks
+   servicechecks
+   activechecks
+   passivechecks
+   statetypes
+   timeperiods
+   networkreachability
+   notifications
+   active-module-checks
+   dependencies-in-shinken
+   update
 

@@ -8,7 +8,7 @@ Host Group Definition
 Description 
 ============
 
-A host group definition is used to group one or more hosts together for simplifying configuration with :ref:`object tricks <advancedtopics/objecttricks>` or display purposes in the CGIs .
+A host group definition is used to group one or more hosts together for simplifying configuration with :ref:`object tricks <advanced/objecttricks>` or display purposes in the CGIs .
 
 
 Definition Format 

@@ -1,4 +1,5 @@
 .. _webui_devel:
+.. _packages/webui/webui-devel:
 
 ===============================
 WebUI integration with Shinken

@@ -128,7 +128,7 @@ hostgroups
   This directive is used to identify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the host belongs to. Multiple hostgroups should be separated by commas. This directive may be used as an alternative to (or in addition to) using the *members* directive in :ref:`hostgroup <configobjects/hostgroup>` definitions.
 
 check_command
-  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuringshinken/configmain-advanced#host_check_timeout>` option.
+  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuration/configmain-advanced#host_check_timeout>` option.
 
 initial_state
   By default Shinken will assume that all hosts are in UP states when in starts. You can override the initial state for a host by using this directive. Valid options are: **o** = UP, **d** = DOWN, and **u** = UNREACHABLE.
@@ -140,10 +140,10 @@ max_check_attempts
   
 
 check_interval
-  This directive is used to define the number of “time units" between regularly scheduled checks of the host. Unless you've changed the :ref:`interval_length <configuringshinken/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advancedtopics/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" between regularly scheduled checks of the host. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
 
 retry_interval
-  This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuringshinken/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advancedtopics/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advanced/checkscheduling>` documentation.
 
 active_checks_enabled 
   This directive is used to determine whether or not active checks (either regularly scheduled or on-demand) of this host are enabled. Values: 0 = disable active host checks, 1 = enable active host checks.
@@ -155,40 +155,40 @@ check_period
   This directive is used to specify the short name of the :ref:`time period <configobjects/timeperiod>` during which active checks of this host can be made.
 
 obsess_over_host 
-  This directive determines whether or not checks for the host will be “obsessed" over using the :ref:`ochp_command <configuringshinken/configmain-advanced#ochp_command>`.
+  This directive determines whether or not checks for the host will be “obsessed" over using the :ref:`ochp_command <configuration/configmain-advanced#ochp_command>`.
 
-check_freshness :ref:`* <configuringshinken/objectdefinitions#retention_notes>`
-  This directive is used to determine whether or not :ref:`freshness checks <advancedtopics/freshness>` are enabled for this host. Values: 0 = disable freshness checks, 1 = enable freshness checks.
+check_freshness :ref:`* <configuration/objectdefinitions#retention_notes>`
+  This directive is used to determine whether or not :ref:`freshness checks <advanced/freshness>` are enabled for this host. Values: 0 = disable freshness checks, 1 = enable freshness checks.
 
 freshness_threshold
   This directive is used to specify the freshness threshold (in seconds) for this host. If you set this directive to a value of 0, Shinken will determine a freshness threshold to use automatically.
 
 event_handler
-  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be run whenever a change in the state of the host is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advancedtopics/eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuringshinken/configmain-advanced#event_handler_timeout>` option.
+  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be run whenever a change in the state of the host is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advanced/eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuration/configmain-advanced#event_handler_timeout>` option.
 
 event_handler_enabled 
   This directive is used to determine whether or not the event handler for this host is enabled. Values: 0 = disable host event handler, 1 = enable host event handler.
 
 low_flap_threshold
-  This directive is used to specify the low state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advancedtopics/flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`low_host_flap_threshold <configuringshinken/configmain-advanced#low_host_flap_threshold>` directive will be used.
+  This directive is used to specify the low state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advanced/flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`low_host_flap_threshold <configuration/configmain-advanced#low_host_flap_threshold>` directive will be used.
 
 high_flap_threshold
-  This directive is used to specify the high state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advancedtopics/flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`high_host_flap_threshold <configuringshinken/configmain-advanced#high_host_flap_threshold>` directive will be used.
+  This directive is used to specify the high state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advanced/flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`high_host_flap_threshold <configuration/configmain-advanced#high_host_flap_threshold>` directive will be used.
 
 flap_detection_enabled 
-  This directive is used to determine whether or not flap detection is enabled for this host. More information on flap detection can be found :ref:`here <advancedtopics/flapping>`. Values: 0 = disable host flap detection, 1 = enable host flap detection.
+  This directive is used to determine whether or not flap detection is enabled for this host. More information on flap detection can be found :ref:`here <advanced/flapping>`. Values: 0 = disable host flap detection, 1 = enable host flap detection.
 
 flap_detection_options
-  This directive is used to determine what host states the :ref:`flap detection logic <advancedtopics/flapping>` will use for this host. Valid options are a combination of one or more of the following: **o** = UP states, **d** = DOWN states, **u** = UNREACHABLE states.
+  This directive is used to determine what host states the :ref:`flap detection logic <advanced/flapping>` will use for this host. Valid options are a combination of one or more of the following: **o** = UP states, **d** = DOWN states, **u** = UNREACHABLE states.
 
 process_perf_data 
   This directive is used to determine whether or not the processing of performance data is enabled for this host. Values: 0 = disable performance data processing, 1 = enable performance data processing.
 
 retain_status_information
-  This directive is used to determine whether or not status-related information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuringshinken/configmain#retain_state_information>` directive. Value: 0 = disable status information retention, 1 = enable status information retention.
+  This directive is used to determine whether or not status-related information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value: 0 = disable status information retention, 1 = enable status information retention.
 
 retain_nonstatus_information
-  This directive is used to determine whether or not non-status information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuringshinken/configmain#retain_state_information>` directive. Value: 0 = disable non-status information retention, 1 = enable non-status information retention.
+  This directive is used to determine whether or not non-status information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value: 0 = disable non-status information retention, 1 = enable non-status information retention.
 
 contacts
   This is a list of the *short names* of the :ref:`contacts <configobjects/contact>` that should be notified whenever there are problems (or recoveries) with this host. Multiple contacts should be separated by commas. Useful if you want notifications to go to just a few people and don't want to configure :ref:`contact groups <configobjects/contactgroup>`. You must specify at least one contact or contact group in each host definition.
@@ -197,16 +197,16 @@ contact_groups
   This is a list of the *short names* of the :ref:`contact groups <configobjects/contactgroup>` that should be notified whenever there are problems (or recoveries) with this host. Multiple contact groups should be separated by commas. You must specify at least one contact or contact group in each host definition.
 
 notification_interval
-  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* down or unreachable. Unless you've changed the :ref:`interval_length <configuringshinken/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this host - only one problem notification will be sent out.
+  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* down or unreachable. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this host - only one problem notification will be sent out.
 
 first_notification_delay
-  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this host enters a non-UP state. Unless you've changed the :ref:`interval_length <configuringshinken/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
+  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this host enters a non-UP state. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
 
 notification_period
   This directive is used to specify the short name of the :ref:`time period <configobjects/timeperiod>` during which notifications of events for this host can be sent out to contacts. If a host goes down, becomes unreachable, or recoveries during a time which is not covered by the time period, no notifications will be sent out.
 
 notification_options
-  This directive is used to determine when notifications for the host should be sent out. Valid options are a combination of one or more of the following: **d** = send notifications on a DOWN state, **u** = send notifications on an UNREACHABLE state, **r** = send notifications on recoveries (OK state), **f** = send notifications when the host starts and stops :ref:`flapping <advancedtopics/flapping>`, and **s** = send notifications when :ref:`scheduled downtime <advancedtopics/downtime>` starts and ends. If you specify **n** (none) as an option, no host notifications will be sent out. If you do not specify any notification options, Shinken will assume that you want notifications to be sent out for all possible states.
+  This directive is used to determine when notifications for the host should be sent out. Valid options are a combination of one or more of the following: **d** = send notifications on a DOWN state, **u** = send notifications on an UNREACHABLE state, **r** = send notifications on recoveries (OK state), **f** = send notifications when the host starts and stops :ref:`flapping <advanced/flapping>`, and **s** = send notifications when :ref:`scheduled downtime <advanced/downtime>` starts and ends. If you specify **n** (none) as an option, no host notifications will be sent out. If you do not specify any notification options, Shinken will assume that you want notifications to be sent out for all possible states.
   
   If you specify **d,r** in this field, notifications will only be sent out when the host goes DOWN and when it recovers from a DOWN state.
   
@@ -215,7 +215,7 @@ notifications_enabled
   This directive is used to determine whether or not notifications for this host are enabled. Values: 0 = disable host notifications, 1 = enable host notifications.
 
 stalking_options
-  This directive determines which host states "stalking" is enabled for. Valid options are a combination of one or more of the following: **o** = stalk on UP states, **d** = stalk on DOWN states, and **u** = stalk on UNREACHABLE states. More information on state stalking can be found :ref:`here <advancedtopics/stalking>`.
+  This directive determines which host states "stalking" is enabled for. Valid options are a combination of one or more of the following: **o** = stalk on UP states, **d** = stalk on DOWN states, and **u** = stalk on UNREACHABLE states. More information on state stalking can be found :ref:`here <advanced/stalking>`.
 
 notes
   This directive is used to define an optional string of notes pertaining to the host. If you specify a note here, you will see the it in the extended information CGI (when you are viewing information about the specified host).
@@ -225,7 +225,7 @@ notes_url
 
 action_url
   This directive is used to define one or more optional URL that can be used to provide more actions to be performed on the host. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing host information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. */cgi-bin/shinken/*).
-:ref:`Configure multiple action_urls. <advancedtopics/multiple-urls>`
+  :ref:`Configure multiple action_urls. <advanced/multiple-urls>`
 
 icon_image
   This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this host. This image will be displayed in the various places in the CGIs. The image will look best if it is 40x40 pixels in size. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").

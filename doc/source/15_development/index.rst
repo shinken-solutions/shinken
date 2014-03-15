@@ -12,6 +12,7 @@ Development
     \newpage
 
 .. toctree::
+   :maxdepth: 2
 
    programming-rules
    test-driven-development

@@ -4,7 +4,7 @@
 Verifying Your Configuration 
 =============================
 
-Every time you modify your :ref:`Configuration Overview <configuringshinken/config>`, you should run a sanity check on them. It is important to do this before you (re)start Shinken, as Shinken will shut down if your configuration contains errors.
+Every time you modify your :ref:`Configuration Overview <configuration/config>`, you should run a sanity check on them. It is important to do this before you (re)start Shinken, as Shinken will shut down if your configuration contains errors.
 
 
 How to verify the configuration 

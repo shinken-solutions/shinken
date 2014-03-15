@@ -127,7 +127,7 @@ Some daemons have special parameters:
 For the arbiter:
   * host_name: hostname of the server where the arbiter is installed. It's mandatory for a high availability environment (2 arbiters or more).
 For pollers:
-  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this <advancedtopics/distributed#poller_tag>`.
+  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this <advanced/distributed#poller_tag>`.
 
 
 Module objects 

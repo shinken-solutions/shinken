@@ -13,7 +13,7 @@ Introduction
 
 I've had a lot of questions as to exactly how notifications work. This will attempt to explain exactly when and how host and service notifications are sent out, as well as who receives them.
 
-Notification escalations are explained :ref:`here <advancedtopics/escalations>`.
+Notification escalations are explained :ref:`here <advanced/escalations>`.
 
 
 When Do Notifications Occur? 
@@ -42,15 +42,15 @@ Just because there is a need to send out a host or service notification doesn't 
 Program-Wide Filter: 
 =====================
 
-The first filter that notifications must pass is a test of whether or not notifications are enabled on a program-wide basis. This is initially determined by the :ref:`"enable_notifications" <configuringshinken/configmain#enable_notifications>` directive in the main config file, but may be changed during runtime from the web interface. If notifications are disabled on a program-wide basis, no host or service notifications can be sent out - period. If they are enabled on a program-wide basis, there are still other tests that must be passed...
+The first filter that notifications must pass is a test of whether or not notifications are enabled on a program-wide basis. This is initially determined by the :ref:`"enable_notifications" <configuration/configmain#enable_notifications>` directive in the main config file, but may be changed during runtime from the web interface. If notifications are disabled on a program-wide basis, no host or service notifications can be sent out - period. If they are enabled on a program-wide basis, there are still other tests that must be passed...
 
 
 Service and Host Filters: 
 ==========================
 
-The first filter for host or service notifications is a check to see if the host or service is in a period of :ref:`scheduled downtime <advancedtopics/downtime>`. It it is in a scheduled downtime, no one gets notified. If it isn't in a period of downtime, it gets passed on to the next filter. As a side note, notifications for services are suppressed if the host they're associated with is in a period of scheduled downtime.
+The first filter for host or service notifications is a check to see if the host or service is in a period of :ref:`scheduled downtime <advanced/downtime>`. It it is in a scheduled downtime, no one gets notified. If it isn't in a period of downtime, it gets passed on to the next filter. As a side note, notifications for services are suppressed if the host they're associated with is in a period of scheduled downtime.
 
-The second filter for host or service notification is a check to see if the host or service is :ref:`flapping <advancedtopics/flapping>` (if you enabled flap detection). If the service or host is currently flapping, no one gets notified. Otherwise it gets passed to the next filter.
+The second filter for host or service notification is a check to see if the host or service is :ref:`flapping <advanced/flapping>` (if you enabled flap detection). If the service or host is currently flapping, no one gets notified. Otherwise it gets passed to the next filter.
 
 The third host or service filter that must be passed is the host- or service-specific notification options. Each service definition contains options that determine whether or not notifications can be sent out for warning states, critical states, and recoveries. Similiarly, each host definition contains options that determine whether or not notifications can be sent out when the host goes down, becomes unreachable, or recovers. If the host or service notification does not pass these options, no one gets notified. If it does pass these options, the notification gets passed to the next filter...
 
@@ -80,7 +80,7 @@ The last filter that must be passed for each contact is the time period test. Ea
 Notification Methods 
 =====================
 
-You can have Shinken notify you of problems and recoveries pretty much anyway you want: pager, cellphone, email, instant message, audio alert, electric shocker, etc. How notifications are sent depends on the :ref:`notification commands <configobjects/command>` that are defined in your :ref:`object definition files <configuringshinken/config>`.
+You can have Shinken notify you of problems and recoveries pretty much anyway you want: pager, cellphone, email, instant message, audio alert, electric shocker, etc. How notifications are sent depends on the :ref:`notification commands <configobjects/command>` that are defined in your :ref:`object definition files <configuration/config>`.
 
 If you install Shinken according to the :ref:`quickstart guide <gettingstarted/quickstart>`, it should be configured to send email notifications. You can see the email notification commands that are used by viewing the contents of the following file: "/usr/local/shinken/etc/objects/commands.cfg".
 
@@ -98,12 +98,12 @@ Value             Description
 PROBLEM           A service or host has just entered (or is still in) a problem state. If this is a service notification, it means the service is either in a WARNING, UNKNOWN or CRITICAL state. If this is a host notification, it means the host is in a DOWN or UNREACHABLE state.
 RECOVERY          A service or host recovery has occurred. If this is a service notification, it means the service has just returned to an OK state. If it is a host notification, it means the host has just returned to an UP state.                                                
 ACKNOWLEDGEMENT   This notification is an acknowledgement notification for a host or service problem. Acknowledgement notifications are initiated via the web interface by contacts for the particular host or service.                                                               
-FLAPPINGSTART     The host or service has just started :ref:`flapping <advancedtopics/flapping>`.                                                                                                                                                                                     
-FLAPPINGSTOP      The host or service has just stopped :ref:`flapping <advancedtopics/flapping>`.                                                                                                                                                                                     
-FLAPPINGDISABLED  The host or service has just stopped :ref:`flapping <advancedtopics/flapping>` because flap detection was disabled..                                                                                                                                                
-DOWNTIMESTART     The host or service has just entered a period of :ref:`scheduled downtime <advancedtopics/downtime>`. Future notifications will be supressed.                                                                                                                       
-DOWNTIMESTOP      The host or service has just exited from a period of :ref:`scheduled downtime <advancedtopics/downtime>`. Notifications about problems can now resume.                                                                                                              
-DOWNTIMECANCELLED The period of :ref:`scheduled downtime <advancedtopics/downtime>` for the host or service was just cancelled. Notifications about problems can now resume.                                                                                                          
+FLAPPINGSTART     The host or service has just started :ref:`flapping <advanced/flapping>`.                                                                                                                                                                                     
+FLAPPINGSTOP      The host or service has just stopped :ref:`flapping <advanced/flapping>`.                                                                                                                                                                                     
+FLAPPINGDISABLED  The host or service has just stopped :ref:`flapping <advanced/flapping>` because flap detection was disabled..                                                                                                                                                
+DOWNTIMESTART     The host or service has just entered a period of :ref:`scheduled downtime <advanced/downtime>`. Future notifications will be supressed.                                                                                                                       
+DOWNTIMESTOP      The host or service has just exited from a period of :ref:`scheduled downtime <advanced/downtime>`. Notifications about problems can now resume.                                                                                                              
+DOWNTIMECANCELLED The period of :ref:`scheduled downtime <advanced/downtime>` for the host or service was just cancelled. Notifications about problems can now resume.                                                                                                          
 ================= ====================================================================================================================================================================================================================================================================
 
 

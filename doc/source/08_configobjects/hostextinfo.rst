@@ -38,6 +38,7 @@ Example Definition
 ===================
 
 ::
+  
   define hostextinfo{
       host_name          netware1
       notes              This is the primary Netware file server

@@ -12,18 +12,18 @@ Welcome to Shinken's documentation!
 
     01_about/index
     02_gettingstarted/index
-    03_configuringshinken/index
+    03_configuration/index
     04_runningshinken/index
     05_thebasics/index
     06_medium/index
-    07_advancedtopics/index
+    07_advanced/index
     08_configobjects/index
     09_architecture/index
     10_troubleshooting/index
-    11_integrationwithothersoftware/index
-    12_securityandperformancetuning/index
-    13_how-to-monitor/index
-    14_how-to-contribute/index
+    11_integration/index
+    12_tuning/index
+    13_monitoring/index
+    14_contributing/index
     15_development/index
     89_packages/index
 

@@ -17,7 +17,7 @@ What Are Plugins?
 
 Plugins are compiled executables or scripts (Perl scripts, shell scripts, etc.) that can be run from a command line to check the status of a host or service. Shinken uses the results from plugins to determine the current status of hosts and services on your network and obtain performance data about the monitored service.
 
-Shinken will execute a plugin whenever there is a need to check the status of a service or host. The plugin does something (notice the very general term) to perform the check and then simply returns the results to Shinken. It will process the results that it receives from the plugin and take any necessary actions (running :ref:`event handlers <advancedtopics/eventhandlers>`, sending out :ref:`notifications <thebasics/notifications>`, etc).
+Shinken will execute a plugin whenever there is a need to check the status of a service or host. The plugin does something (notice the very general term) to perform the check and then simply returns the results to Shinken. It will process the results that it receives from the plugin and take any necessary actions (running :ref:`event handlers <advanced/eventhandlers>`, sending out :ref:`notifications <thebasics/notifications>`, etc).
 
 
 Shinken integrated data acquisition modules 
@@ -68,7 +68,7 @@ Obtaining Plugins
 
 Shinken also organizes monitoring configuration packages. These are pre-built for fast no nonsense deployments. They include the check command definitions, service templates, host templates, discovery rules and integration hooks to the Community web site. The integration with the community web site permits for deployment and updates of monitoring packs.
 
-Get started with :ref:`Shinken Monitoring Packages "Packs" <how-to-contribute/create-and-push-packs>` today.
+Get started with :ref:`Shinken Monitoring Packages "Packs" <contributing/create-and-push-packs>` today.
 
 The plugins themselves are not distributed with Shinken, but you can download the official Nagios plugins and many additional plugins created and maintained by Nagios users from the following locations:
 

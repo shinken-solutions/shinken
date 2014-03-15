@@ -126,15 +126,15 @@ This triggers bounces, so you can auto-trash these mails:
 Thruk 
 ======
 
-Follow :ref:`use_with_thruk <integrationwithothersoftware/thruk-usage>`:
+Follow :ref:`use_with_thruk <integration/thruk-usage>`:
   * Installation from RPM (http://www.thruk.org/download.html):
 
 ::
 
   rpm -ivh http://www.thruk.org/files/pkg/v1.76-3/rhel6/x86_64/thruk-1.76-3.rhel6.x86_64.rpm
 
-* :ref:`SELinux configuration <integrationwithothersoftware/thruk-usage#install_thruk>` (or disable it with ``setenforce Permissive``)
-* :ref:`Using Shinken with Thruk <integrationwithothersoftware/thruk-usage#using_shinken_with_thruk>`
+* :ref:`SELinux configuration <integration/thruk-usage#install_thruk>` (or disable it with ``setenforce Permissive``)
+* :ref:`Using Shinken with Thruk <integration/thruk-usage#using_shinken_with_thruk>`
 
 Thruk is available at: http://YOUR_SHINKEN_IP/thruk/
 
@@ -142,15 +142,15 @@ Thruk is available at: http://YOUR_SHINKEN_IP/thruk/
 PNP4Nagios 
 ===========
 
-Follow :ref:`integrationwithothersoftware/pnp <integrationwithothersoftware/pnp>`:
+Follow :ref:`integrationwithothersoftware/pnp <integration/pnp>`:
   * Go to the Shinken sources and set the installation path in ``/opt/shinken-dl/shinken-1.4/install.d/shinken.conf``:
 
 ::
   
   PNPPREFIX=/opt/pnp4nagios
 
-* :ref:`Install PNP4Nagios automatically <integrationwithothersoftware/pnp#install_pnp4nagios_automatically>`
-* :ref:`Using Shinken with PNP4Nagios <integrationwithothersoftware/pnp#using_shinken_with_pnp4nagios>`
+* :ref:`Install PNP4Nagios automatically <integration/pnp#install_pnp4nagios_automatically>`
+* :ref:`Using Shinken with PNP4Nagios <integration/pnp#using_shinken_with_pnp4nagios>`
 
 PNP4Nagios is now linked from Thruk though ``action_url``, and more generally available at http://YOUR_SHINKEN_IP/pnp4nagios/
 
@@ -260,7 +260,7 @@ Extra: Graphite
 If you're interested in Graphite, you can start from this basis:
 
   * :ref:`network_based_modules_-_graphite_graphing <the_broker_modules#network_based_modules___graphite_graphing>`
-  * :ref:`use_with_graphite <integrationwithothersoftware/graphite>`
+  * :ref:`use_with_graphite <integration/graphite>`
 
 Additional configuration:
 

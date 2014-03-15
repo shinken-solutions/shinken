@@ -6,7 +6,7 @@
 
 There's more than one way to start, stop, and restart Shinken. Here are some of the more common ones...
 
-Always make sure you :ref:`Verifying Your Configuration <runningshinken/verifyconfig>` before you (re)start Shinken.
+Always make sure you :ref:`verify your configuration <runningshinken/verifyconfig>` before you (re)start Shinken.
 
 
 Starting Shinken 

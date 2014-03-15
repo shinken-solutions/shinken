@@ -30,7 +30,7 @@ Configuration Reference
 
 :ref:`The basics of enabling passive check results in the Shinken configuration <thebasics/passivechecks>`
 
-:ref:`State handling for passive check results <advancedtopics/passivestatetranslation>`
+:ref:`State handling for passive check results <advanced/passivestatetranslation>`
 
 
 Passive acquisition protocols 
@@ -80,7 +80,7 @@ SNMP Traps
 
 Net-SNMP's snmptrapd and SNMP trap translator are typically used to receive, process, and trigger an alerts. Once an alert has been identified an execution is launched of send_nsca, or other method to send result data to a Shinken Receiver daemon. There is no actual Shinken receiver module to receive SNMP traps, but the point is to get the data sent to the Shinken Receiver daemon.
 
-:ref:`Learn more about SNMP trap handling. <integrationwithothersoftware/snmptrap>`
+:ref:`Learn more about SNMP trap handling. <integration/snmptrap>`
 
 The snmptt documentation has a good writeup on integrating with Nagios, which also applies to Shinken.
 

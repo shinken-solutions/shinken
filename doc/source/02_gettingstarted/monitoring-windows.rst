@@ -133,7 +133,7 @@ Before you can begin monitoring private services and attributes of Windows machi
 Configuring Shinken 
 ====================
 
-Now it's time to define some :ref:`object definitions <configuringshinken/objectdefinitions>` in your Shinken configuration files in order to monitor the new Windows machine.
+Now it's time to define some :ref:`object definitions <configuration/objectdefinitions>` in your Shinken configuration files in order to monitor the new Windows machine.
 
 Open the "windows.cfg" file for editing.
 

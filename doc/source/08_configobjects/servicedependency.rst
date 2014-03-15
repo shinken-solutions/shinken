@@ -8,7 +8,7 @@ Service Dependency Definition
 Description 
 ============
 
-Service dependencies are an advanced feature of Shinken that allow you to suppress notifications and active checks of services based on the status of one or more other services. Service dependencies are optional and are mainly targeted at advanced users who have complicated monitoring setups. More information on how service dependencies work (read this!) can be found :ref:`here <advancedtopics/dependencies>`.
+Service dependencies are an advanced feature of Shinken that allow you to suppress notifications and active checks of services based on the status of one or more other services. Service dependencies are optional and are mainly targeted at advanced users who have complicated monitoring setups. More information on how service dependencies work (read this!) can be found :ref:`here <advanced/dependencies>`.
 
 
 Definition Format 
@@ -51,7 +51,7 @@ Directive Descriptions
 =======================
 
 dependent_host_name
-  This directive is used to identify the *short name(s)* of the :ref:`host(s) <configobjects/host>` that the *dependent* service “runs" on or is associated with. Multiple hosts should be separated by commas. Leaving this directive blank can be used to create :ref:`“same host" dependencies <advancedtopics/objecttricks#same_host_dependencies>`.
+  This directive is used to identify the *short name(s)* of the :ref:`host(s) <configobjects/host>` that the *dependent* service “runs" on or is associated with. Multiple hosts should be separated by commas. Leaving this directive blank can be used to create :ref:`“same host" dependencies <advanced/objecttricks#same_host_dependencies>`.
 
 dependent_hostgroup
   This directive is used to specify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the *dependent* service "runs" on or is associated with. Multiple hostgroups should be separated by commas. The "dependent_hostgroup" may be used instead of, or in addition to, the "dependent_host" directive.

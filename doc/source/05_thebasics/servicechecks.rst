@@ -17,21 +17,21 @@ When Are Service Checks Performed?
 Services are checked by the Shinken daemon:
 
   * At regular intervals, as defined by the "check_interval" and "retry_interval" options in your :ref:`service definitions <configobjects/service>`.
-  * On-demand as needed for :ref:`predictive service dependency checks <advancedtopics/dependencychecks>`.
+  * On-demand as needed for :ref:`predictive service dependency checks <advanced/dependencychecks>`.
 
-On-demand checks are performed as part of the :ref:`predictive service dependency check <advancedtopics/dependencychecks>` logic. These checks help ensure that the dependency logic is as accurate as possible. If you don't make use of :ref:`service dependencies <configobjects/servicedependency>`, Shinken won't perform any on-demand service checks.
+On-demand checks are performed as part of the :ref:`predictive service dependency check <advanced/dependencychecks>` logic. These checks help ensure that the dependency logic is as accurate as possible. If you don't make use of :ref:`service dependencies <configobjects/servicedependency>`, Shinken won't perform any on-demand service checks.
 
 
 Cached Service Checks 
 ======================
 
-The performance of on-demand service checks can be significantly improved by implementing the use of cached checks, which allow Shinken to forgo executing a service check if it determines a relatively recent check result will do instead. Cached checks will only provide a performance increase if you are making use of :ref:`service dependencies <configobjects/servicedependency>`. More information on cached checks can be found :ref:`here <advancedtopics/cachedchecks>`.
+The performance of on-demand service checks can be significantly improved by implementing the use of cached checks, which allow Shinken to forgo executing a service check if it determines a relatively recent check result will do instead. Cached checks will only provide a performance increase if you are making use of :ref:`service dependencies <configobjects/servicedependency>`. More information on cached checks can be found :ref:`here <advanced/cachedchecks>`.
 
 
 Dependencies and Checks 
 ========================
 
-You can define :ref:`service execution dependencies <configobjects/servicedependency>` that prevent Shinken from checking the status of a service depending on the state of one or more other services. More information on dependencies can be found :ref:`here <advancedtopics/dependencies>`.
+You can define :ref:`service execution dependencies <configobjects/servicedependency>` that prevent Shinken from checking the status of a service depending on the state of one or more other services. More information on dependencies can be found :ref:`here <advanced/dependencies>`.
 
 
 Parallelization of Service Checks 
@@ -60,7 +60,7 @@ Service checks are performed by :ref:`plugins <thebasics/plugins>`, which can re
 Services State Changes 
 =======================
 
-When Shinken checks the status of services, it will be able to detect when a service changes between OK, WARNING, UNKNOWN, and CRITICAL states and take appropriate action. These state changes result in different :ref:`state types <thebasics/statetypes>` (HARD or SOFT), which can trigger :ref:`event handlers <advancedtopics/eventhandlers>` to be run and :ref:`notifications <thebasics/notifications>` to be sent out. Service state changes can also trigger on-demand :ref:`host checks <thebasics/hostchecks>`. Detecting and dealing with state changes is what Shinken is all about.
+When Shinken checks the status of services, it will be able to detect when a service changes between OK, WARNING, UNKNOWN, and CRITICAL states and take appropriate action. These state changes result in different :ref:`state types <thebasics/statetypes>` (HARD or SOFT), which can trigger :ref:`event handlers <advanced/eventhandlers>` to be run and :ref:`notifications <thebasics/notifications>` to be sent out. Service state changes can also trigger on-demand :ref:`host checks <thebasics/hostchecks>`. Detecting and dealing with state changes is what Shinken is all about.
 
-When services change state too frequently they are considered to be “flapping". Shinken can detect when services start flapping, and can suppress notifications until flapping stops and the service's state stabilizes. More information on the flap detection logic can be found :ref:`here <advancedtopics/flapping>`.
+When services change state too frequently they are considered to be “flapping". Shinken can detect when services start flapping, and can suppress notifications until flapping stops and the service's state stabilizes. More information on the flap detection logic can be found :ref:`here <advanced/flapping>`.
 

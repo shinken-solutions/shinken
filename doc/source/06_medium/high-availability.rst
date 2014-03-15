@@ -5,11 +5,11 @@ Shinken High Availability
 ==========================
 
 
-Shinken makes it easy to have a high availability architecture. Just as easily as the load balancing feature at :ref:`distributed shinken <advancedtopics/distributed-shinken>`
+Shinken makes it easy to have a high availability architecture. Just as easily as the load balancing feature at :ref:`distributed shinken <advanced/distributed-shinken>`
 
 Shinken is business friendly when it comes to meeting availability requirements.
 
-You learned how to add new poller satellites in the :ref:`distributed shinken <advancedtopics/distributed-shinken>`. For the HA the process is the same **You just need to add new satellites in the same way, then define them as "spares".**
+You learned how to add new poller satellites in the :ref:`distributed shinken <advanced/distributed-shinken>`. For the HA the process is the same **You just need to add new satellites in the same way, then define them as "spares".**
 
 You can (should) do the same for all the satellites for a complete HA architecture.
 

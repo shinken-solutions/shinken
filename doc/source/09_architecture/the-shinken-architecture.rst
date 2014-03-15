@@ -49,7 +49,7 @@ Learn more about the :ref:`innovative features of Shinken <about/shinken-innovat
 Shinken data acquisition for monitoring 
 ========================================
 
-Shinken needs plugins to actually gather data. There exists `**thousands** of plugins for every conceivable application`_. Shinken packages the configurations necessary to use common plugins in :ref:`Packs <how-to-contribute/create-and-push-packs>`. Plugins themselves need to be installed by the administrator of the monitoring solution(Shinken will install some common ones for you). This is a great strength and flexibility of Shinken, but also an administrative responsibility to download and install the necessary plugins.
+Shinken needs plugins to actually gather data. There exists `**thousands** of plugins for every conceivable application`_. Shinken packages the configurations necessary to use common plugins in :ref:`Packs <contributing/create-and-push-packs>`. Plugins themselves need to be installed by the administrator of the monitoring solution(Shinken will install some common ones for you). This is a great strength and flexibility of Shinken, but also an administrative responsibility to download and install the necessary plugins.
 
 
 Architecture diagram with all daemons illustrated 
@@ -85,7 +85,7 @@ Shinken Daemon roles
 
     * :ref:`Reactionner <configobjects/reactionner>`: The reactionner daemon issues notifications and launches event_handlers. This centralizes communication channels with external systems in order to simplify SMTP authorizations or RSS feed sources (only one for all hosts/services). There can be many reactionners for load-balancing and spare roles
 
-      * Module for external communications: :ref:`AndroidSMS <advancedtopics/sms-with-android>`
+      * Module for external communications: :ref:`AndroidSMS <advanced/sms-with-android>`
 
     * :ref:`Broker <configobjects/broker>`: The broker daemon exports and manages data from schedulers.  The broker uses modules exclusively to get the job done. The main method of interacting with Shinken is through the Livestatus API. Learn how to :ref:`configure the Broker modules <packages/the-broker-modules>`.
 
@@ -101,7 +101,7 @@ Shinken Daemon roles
 
       * Module for passive data collection: :ref:`NSCA <nsca_daemon_module>`, :ref:`TSCA <tsca_daemon_module>`, :ref:`Ws_arbiter (web service) <ws_daemon_module>`
 
-.. tip::  The various daemons can be run on a single server for small deployments or split on different hardware for larger deployments as performance or availability requirements dictate. For larger deployments, running multiple Schedulers is recommended, even if they are on the same server. Consult :ref:`planning a large scale Shinken deployment <advancedtopics/scaling-shinken>` for more information.
+.. tip::  The various daemons can be run on a single server for small deployments or split on different hardware for larger deployments as performance or availability requirements dictate. For larger deployments, running multiple Schedulers is recommended, even if they are on the same server. Consult :ref:`planning a large scale Shinken deployment <advanced/scaling-shinken>` for more information.
 
 
 Learn more about the Shinken Distributed Architecture 
@@ -109,18 +109,18 @@ Learn more about the Shinken Distributed Architecture
 
 The Shinken distributed architecture, more features explained.
 
-  * :ref:`Smart and automatic load balancing <advancedtopics/distributed#the_smart_and_automatic_load_balancing>`
-  * :ref:`High availability <advancedtopics/distributed#the_high_availability>`
-  * :ref:`Specialized Pollers <advancedtopics/distributed#poller_tag>`
-  * :ref:`Advanced architectures: Realms <advancedtopics/distributed#realms>`
+  * :ref:`Smart and automatic load balancing <advanced/distributed#the_smart_and_automatic_load_balancing>`
+  * :ref:`High availability <advanced/distributed#the_high_availability>`
+  * :ref:`Specialized Pollers <advanced/distributed#poller_tag>`
+  * :ref:`Advanced architectures: Realms <advanced/distributed#realms>`
 
-If you are just starting out, you can continue on with the next tutorial, which will help you :ref:`Configure a web front-end <integrationwithothersoftware/index>`.
+If you are just starting out, you can continue on with the next tutorial, which will help you :ref:`Configure a web front-end <integration/index>`.
 
 
 Planning a large scale Shinken deployment 
 ==========================================
 
-If you wish to plan a large scale installation of Shinken, you can consult the :ref:`Scaling Shinken <advancedtopics/scaling-shinken>` reference.
+If you wish to plan a large scale installation of Shinken, you can consult the :ref:`Scaling Shinken <advanced/scaling-shinken>` reference.
 
 This is essential to avoid making time consuming mistakes and aggravation.
 

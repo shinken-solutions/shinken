@@ -39,7 +39,7 @@ The command definitions are identical to the check_nrpe calls.
 Notes on community Packs 
 =========================
 
-Community provided :ref:`monitoring packs <how-to-contribute/create-and-push-packs>` may use the integrated acquisition modules.
+Community provided :ref:`monitoring packs <contributing/create-and-push-packs>` may use the integrated acquisition modules.
 
 Community provided plugins are complimentary to the integrated acquisition modules.
 

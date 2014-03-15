@@ -211,4 +211,4 @@ The dependency logic is done in parallel to the network one. If one logic say it
 Advanced dependencies 
 ----------------------
 
-For timeperiod limited dependencies or for specific states activation (like for critical states but not warning), please consult the :ref:`advanced dependencies <advancedtopics/advanced-dependencies>` documentation.
+For timeperiod limited dependencies or for specific states activation (like for critical states but not warning), please consult the :ref:`advanced dependencies <advanced/advanced-dependencies>` documentation.

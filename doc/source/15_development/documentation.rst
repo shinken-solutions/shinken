@@ -21,6 +21,9 @@ Contribute by...
   * Split the configuration parameters that are unused from the unimplemented ones
   * Remove the nagios and nagios-specific references (such as unused parameters) from the various pages
   * Clean up the gettingstarted / installations section
+  * Fix the internal links on the "troubleshooting/troubleshooting-shinken" page
+  * Check if the "/usr/local/shinken/" path is still relevant and fix example commands
+  * Dedicate a basic page on how to use the shinken.io packs
   * Shorten the directory names in the source directory for shorter links
   * Find or create the correct targets for:
     
@@ -31,7 +34,7 @@ Contribute by...
     
     * the "internal_metrics" links, or create the page based on http://www.shinken-monitoring.org/wiki/internal_metrics
     * the original "thebasics/cgis" links spread accross the documentation
-	
+  
   
 
 Directory structure

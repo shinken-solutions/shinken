@@ -8,7 +8,7 @@ Service Group Definition
 Description 
 ============
 
-A service group definition is used to group one or more services together for simplifying configuration with :ref:`object tricks <advancedtopics/objecttricks>` or display purposes in the :ref:`CGIs <thebasics/cgis>`.
+A service group definition is used to group one or more services together for simplifying configuration with :ref:`object tricks <advanced/objecttricks>` or display purposes in the :ref:`CGIs <thebasics/cgis>`.
 
 
 Definition Format 

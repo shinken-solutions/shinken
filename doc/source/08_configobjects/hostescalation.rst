@@ -8,7 +8,7 @@ Host Escalation Definition
 Description 
 ============
 
-Host escalations are completely optional and are used to escalate notifications for a particular host. More information on how notification escalations work can be found :ref:`here <advancedtopics/escalations>`.
+Host escalations are completely optional and are used to escalate notifications for a particular host. More information on how notification escalations work can be found :ref:`here <advanced/escalations>`.
 
 
 Definition Format 
