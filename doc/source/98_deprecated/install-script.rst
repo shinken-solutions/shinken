@@ -1,4 +1,5 @@
-.. _gettingstarted/installations/install-script:
+.. _install_script:
+
 
 
 Review of script's option and parameters
@@ -60,6 +61,7 @@ Here are the options for the install script :
 
 Review of variable used in the script
 =====================================
+
 
 The following variables can bet set before running the script in order to modify its behavior.
 

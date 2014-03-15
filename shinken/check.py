@@ -127,6 +127,9 @@ class Check(Action):
         self.check_time = c.check_time
         self.execution_time = c.execution_time
         self.perf_data = c.perf_data
+        self.u_time = c.u_time
+        self.s_time = c.s_time
+
 
     def is_launchable(self, t):
         return t > self.t_to_go
