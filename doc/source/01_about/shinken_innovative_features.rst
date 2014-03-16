@@ -15,15 +15,18 @@ Summary
   * Shinken is 100% python, from its API, frontend, back-end, discovery engine and high performance poller modules
 
   * Scalability
+  
     * Shinken has a powerful scheduler for supervising tens of thousands of devices v1.2
     * Shinken can supervise multiple independent environments/customers
     * Shinken uses MongoDB to provide a distributed and highly scalable back-end for storing historical event data (experimental)
 
   * Graphical and statistical analysis
+  
     * Shinken provides integration with the modern time series database, Graphite
     * Shinken provides triggers against performance or event data in the core and in external checks (experimental) v1.2
 
   * Correlation
+  
     * Shinken differentiates the business impact of a critical alert on a toaster versus the web store
     * Shinken supports efficient correlation between parent-child relationship and business process rules
 
