@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _troubleshooting/index:
 
 Troubleshooting
 ===============
@@ -12,4 +13,4 @@ Troubleshooting
 
 .. toctree::
     
-    troubleshooting_shinken
+    troubleshooting-shinken

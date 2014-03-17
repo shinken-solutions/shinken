@@ -2,7 +2,7 @@
 
     \newpage
 
-.. _about-index:
+.. _about/index:
 
 About 
 =====
@@ -12,9 +12,10 @@ About
     \newpage
 
 .. toctree::
+   :maxdepth: 2
 
    about
-   about-whatsnew
-   shinken_innovative_features
-   the_project_vision
-   features_and_release_cycle
+   whatsnew
+   shinken-innovative-features
+   the-project-vision
+   features-and-release-cycle

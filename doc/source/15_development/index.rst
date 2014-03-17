@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _development/index:
 
 Development
 ===========
@@ -11,10 +12,11 @@ Development
     \newpage
 
 .. toctree::
+   :maxdepth: 2
 
-   programming_rules
-   test_driven_development
-   development-pluginapi
-   development-modules
-   development-hackingcode
-   development-references
+   programming-rules
+   test-driven-development
+   pluginapi
+   modules
+   hackingcode
+   documentation

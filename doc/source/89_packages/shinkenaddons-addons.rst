@@ -1,30 +1,32 @@
 .. _shinkenaddons-addons:
-
-
-.. _shinkenaddons-addons#shinkenaddons-addons-nrpe:
-
+.. _shinkenaddons-addons#shinkenaddons_addons_nrpe:
 
 ===================
  Extending Shinken 
 ===================
 
 
-
 Introduction 
 =============
-
 
 There are a lot of “Modules" and "Addons" that are available for Shinken. Shinken can be extended by using different types of methods.
 
   * Web interfaces from various open-source vendors can be used (Based on Livestatus API)
   * Shinken itself can be extended using modules that are embedded into the various daemon processes 
-  ** (Arbiter, Poller, Receiver, Broker, Scheduler, Reactionner)
+
+    * Arbiter
+    * Poller
+    * Receiver
+    * Broker
+    * Scheduler
+    * Reactionner
+
   * External software can provide functional enhancements for reporting, management or usability aspects
 
 Shinken itself provides methods to extend the base functionality:
 
   * :ref:`Broker modules <the_broker_modules>` provide external access to runtime data from Shinken
-  * Poller modules such as :ref:`NRPE <setup_nrpe_booster_module>` and the :ref:`SNMP <setup_snmp_booster_module>`
+  * Poller modules such as :ref:`NRPE <packages/setup-nrpe-booster-module>` and the :ref:`SNMP <packages/snmp/setup>`
   * Receiver modules like :ref:`NSCA <nsca_daemon_module>` provide acquisition methods for Shinken
   * Arbiter modules permit manipulating the configuration
   * The webUI that permits embedding web interface elements

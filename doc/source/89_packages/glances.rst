@@ -1,7 +1,5 @@
 .. _glances:
 
-
-
 =========================================================
 Monitoring Linux System with Glances and checkglances.py 
 =========================================================
@@ -10,13 +8,11 @@ Monitoring Linux System with Glances and checkglances.py
 `Glances <https://github.com/nicolargo/glances>` is a fantastic multiplatform system monitoring tool writen by `Nicolargo`_. Glances can run on (Linux, Windows, MacOS ...). There is a growing `ecosystem`_ around Glances and of course a Nagios/Shinken plugin : `checkglances.py`_. 
 
 
-
 How does it work 
 =================
 
 
 Glances can run in server mode. It provide a XML-RPC server (over http) and allow to retrieve system information throuh a restful API. The only thing to do is to install and start Glances as server on the monitored host, then install checkglances.py on the shinken server and finaly install the glances pack. 
-
 
 
 Install glances 
@@ -32,13 +28,11 @@ easy_install glances
 There is a debian startup script in the glances repository. And another one for centos `here`_.
 
 
-
 Install checkglances.py 
 ========================
 
 
 Just follow the documentation for the checkglances.py prerequisites and put it in your nagios plugins folder. 
-
 
 
 Install the glances pack 
@@ -70,8 +64,6 @@ Finaly restart the shinken arbiter
 
   
   service shinken-arbiter restart
-
-
 
 
 What will be monitored ? 
