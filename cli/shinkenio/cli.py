@@ -441,7 +441,15 @@ def install_package(pname, raw):
             logger.error("The installation directory %s is missing!" % d)
             return
 
+    # Now install the package from $TMP$/share/* to $SHARE$/*
     p_share  = os.path.join(tmpdir, 'share')
+    logger.debug("TMPDIR:%s aahre_dir:%s pname:%s" %(tmpdir, share_dir, pname))
+    if os.path.exists(p_share):
+        logger.info("Installing the share package data")
+        # shutil will do the create dir
+        _copytree(p_share, share_dir)
+        logger.info("Copy done in the share directory %s" % share_dir)
+
 
     logger.debug("TMPDIR:%s modules_dir:%s pname:%s" %(tmpdir, modules_dir, pname))
     # Now install the package from $TMP$/module/* to $MODULES$/pname/*

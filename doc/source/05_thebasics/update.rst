@@ -1,10 +1,8 @@
-.. _update:
+.. _thebasics/update:
 
-
-
+===============
 Update Shinken 
----------------
-
+===============
 
   - grab the latest shinken archive and extract its content
   - cd into the resulting folder

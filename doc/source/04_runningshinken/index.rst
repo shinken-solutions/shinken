@@ -2,6 +2,7 @@
 
     \newpage
 
+.. _runningshinken/index:
 
 Running Shinken
 ===============
@@ -12,6 +13,6 @@ Running Shinken
 
 .. toctree::
 
-    runningshinken-verifyconfig
-    runningshinken-startstop
+    verifyconfig
+    startstop
 
