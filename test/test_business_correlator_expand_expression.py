@@ -57,7 +57,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_simple_xof_host_srv(self):
-        for name in ("bprule_10", "bprule_11", "bprule_12", "bprule_13", "bprule_14", "bprule_15", "bprule_16"):
+        for name in ("bprule_10", "bprule_11", "bprule_12", "bprule_13", "bprule_14", "bprule_15", "bprule_16", "bprule_17"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)
@@ -161,7 +161,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_xof_hosts(self):
-        for name in ("bprule_50", "bprule_51", "bprule_52", "bprule_53"):
+        for name in ("bprule_50", "bprule_51", "bprule_52", "bprule_53", "bprule_54"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
             self.assert_(svc_cor.business_rule is not None)

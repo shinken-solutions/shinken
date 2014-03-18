@@ -702,6 +702,17 @@ def filter_host_by_group(group):
     return inner_filter
 
 
+def filter_host_by_template(tpl):
+
+    def inner_filter(host):
+        if host is None:
+            return False
+        return tpl in [t.strip() for t in host.use]
+
+    return inner_filter
+
+
+
 def filter_service_by_name(name):
 
     def inner_filter(service):
@@ -750,6 +761,17 @@ def filter_service_by_hostgroup_name(group):
         if service is None or service.host is None:
             return False
         return group in [g.hostgroup_name for g in service.host.hostgroups]
+
+    return inner_filter
+
+
+def filter_service_by_host_template_name(tpl):
+
+    def inner_filter(service):
+        if service is None or service.host is None:
+            return False
+        return tpl in [t.strip() for t in service.host.use]
+        
 
     return inner_filter
 
