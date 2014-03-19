@@ -1,94 +1,100 @@
 .. _configobjects/service:
 
 ===================
-Service Definition 
+Service Definition
 ===================
 
 
-Description 
+Description
 ============
 
 A service definition is used to identify a “service" that runs on a host. The term “service" is used very loosely. It can mean an actual service that runs on the host (POP, "SMTP", "HTTP", etc.) or some other type of metric associated with the host (response to a ping, number of logged in users, free disk space, etc.). The different arguments to a service definition are outlined below.
 
 
-Definition Format 
+Definition Format
 ==================
 
 Bold directives are required, while the others are optional.
 
-============================ ======================================
-define service{                                                    
-**host_name**                ***host_name***                       
-hostgroup_name               *hostgroup_name*                      
-**service_description**      ***service_description***             
-display_name                 *display_name*                        
-servicegroups                servicegroup_names                    
-is_volatile                  [0/1]                                 
-**check_command**            ***command_name***                    
-initial_state                [o,w,u,c]                             
-**max_check_attempts**       **#**                                 
-**check_interval**           **#**                                 
-**retry_interval**           **#**                                 
-active_checks_enabled        [0/1]                                 
-passive_checks_enabled       [0/1]                                 
-**check_period**             ***timeperiod_name***                 
-obsess_over_service          [0/1]                                 
-check_freshness              [0/1]                                 
-freshness_threshold          #                                     
-event_handler                *command_name*                        
-event_handler_enabled        [0/1]                                 
-low_flap_threshold           #                                     
-high_flap_threshold          #                                     
-flap_detection_enabled       [0/1]                                 
-flap_detection_options       [o,w,c,u]                             
-process_perf_data            [0/1]                                 
-retain_status_information    [0/1]                                 
-retain_nonstatus_information [0/1]                                 
-**notification_interval**    **#**                                 
-first_notification_delay     #                                     
-**notification_period**      ***timeperiod_name***                 
-notification_options         [w,u,c,r,f,s]                         
-notifications_enabled        [0/1]                                 
-**contacts**                 ***contacts***                        
-**contact_groups**           ***contact_groups***                  
-stalking_options             [o,w,u,c]                             
-notes                        *note_string*                         
-notes_url                    *url*                                 
-action_url                   *url*                                 
-icon_image                   *image_file*                          
-icon_image_alt               *alt_string*                          
-poller_tag                   *poller_tag*                          
-service_dependencies         *host,service_description*            
-business_impact              [0/1/2/3/4/5]                         
-icon_set                     [database/disk/network_service/server]
-maintenance_period           *timeperiod_name*                     
-}                                                                  
-============================ ======================================
+========================================== ======================================
+define service{
+**host_name**                              ***host_name***
+hostgroup_name                             *hostgroup_name*
+**service_description**                    ***service_description***
+display_name                               *display_name*
+servicegroups                              servicegroup_names
+is_volatile                                [0/1]
+**check_command**                          ***command_name***
+initial_state                              [o,w,u,c]
+**max_check_attempts**                     **#**
+**check_interval**                         **#**
+**retry_interval**                         **#**
+active_checks_enabled                      [0/1]
+passive_checks_enabled                     [0/1]
+**check_period**                           ***timeperiod_name***
+obsess_over_service                        [0/1]
+check_freshness                            [0/1]
+freshness_threshold                        #
+event_handler                              *command_name*
+event_handler_enabled                      [0/1]
+low_flap_threshold                         #
+high_flap_threshold                        #
+flap_detection_enabled                     [0/1]
+flap_detection_options                     [o,w,c,u]
+process_perf_data                          [0/1]
+retain_status_information                  [0/1]
+retain_nonstatus_information               [0/1]
+**notification_interval**                  **#**
+first_notification_delay                   #
+**notification_period**                    ***timeperiod_name***
+notification_options                       [w,u,c,r,f,s]
+notifications_enabled                      [0/1]
+**contacts**                               ***contacts***
+**contact_groups**                         ***contact_groups***
+stalking_options                           [o,w,u,c]
+notes                                      *note_string*
+notes_url                                  *url*
+action_url                                 *url*
+icon_image                                 *image_file*
+icon_image_alt                             *alt_string*
+poller_tag                                 *poller_tag*
+service_dependencies                       *host,service_description*
+business_impact                            [0/1/2/3/4/5]
+icon_set                                   [database/disk/network_service/server]
+maintenance_period                         *timeperiod_name*
+labels                                     *labels*
+business_rule_output_template              *template*
+business_rule_smart_notifications          [0/1]
+business_rule_downtime_as_ack              [0/1]
+business_rule_host_notification_options    [d,u,r,f,s]
+business_rule_service_notification_options [w,u,c,r,f,s]
+}
+========================================== ======================================
 
 
-Example Definition 
+Example Definition
 ===================
 
 ::
 
   define service{
-      host_name               linux-server
-      service_description     check-disk-sda1
-      check_command           check-disk!/dev/sda1
-      max_check_attempts      5
-      check_interval          5
-      retry_interval          3
-      check_period            24x7
-      notification_interval   30
-      notification_period     24x7
-      notification_options    w,c,r
-      contact_groups          linux-admins
-      poller_tag              DMZ
-      icon_set                server
-  }
+         host_name               linux-server
+         service_description     check-disk-sda1
+         check_command           check-disk!/dev/sda1
+         max_check_attempts      5
+         check_interval          5
+         retry_interval          3
+         check_period            24x7
+         notification_interval   30
+         notification_period     24x7
+         notification_options    w,c,r
+         contact_groups          linux-admins
+         poller_tag              DMZ
+         icon_set                server
+         }
 
 
-Directive Descriptions: 
+Directive Descriptions:
 ========================
 
 host_name
@@ -96,22 +102,22 @@ host_name
 
 hostgroup_name
   This directive is used to specify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the service "runs" on or is associated with. Multiple hostgroups should be separated by commas. The hostgroup_name may be used instead of, or in addition to, the host_name directive.
-  
+
   This is possibleto define "complex" hostgroup expression with the folowing operators :
-  
+
     * & : it's use to make an AND betweens groups
     * | : it's use to make an OR betweens groups
     * ! : it's use to make a NOT of a group or expression
     * , : it's use to make a OR, like the | sign.
     * ( and ) : they are use like in all math expressions.
-  
-  For example the above definition is valid 
-  
+
+  For example the above definition is valid
+
   ::
-    
+
     hostgroup_name=(linux|windows)&!qualification,routers
-    
-  
+
+
   This service wil be apply on hosts that are in the routers group or (in linux or windows and not in qualification group).
 
 service_description
@@ -119,7 +125,7 @@ service_description
 
 display_name
   This directive is used to define an alternate name that should be displayed in the web interface for this service. If not specified, this defaults to the value you specify for the *service_description* directive.
-  
+
   The current CGIs do not use this option, although future versions of the web interface will.
 
 servicegroups
@@ -131,24 +137,24 @@ is_volatile
 check_command
   This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that Shinken will run in order to check the status of the service. The maximum amount of time that the service check command can run is controlled by the :ref:`service_check_timeout <configuration/configmain-advanced#service_check_timeout>` option.
   There is also a command with the reserved name "bp_rule". It is defined internally and has a special meaning. Unlike other commands it mustn't be registered in a command definition. It's purpose is not to execute a plugin but to represent a logical operation on the statuses of other services. It is possible to define logical relationships with the following operators :
-  
+
     * & : it's use to make an AND betweens statuses
     * | : it's use to make an OR betweens statuses
     * ! : it's use to make a NOT of a status or expression
     * , : it's use to make a OR, like the | sign.
     * ( and ) : they are used like in all math expressions
-  
-  For example the following definition of a business process rule is valid 
-  
+
+  For example the following definition of a business process rule is valid
+
   ::
-    
+
     bp_rule!(websrv1,apache | websrv2,apache) & dbsrv1,oracle
-  
+
   If at least one of the apaches on servers websrv1 and websrv2 is OK and if the oracle database on dbsrv1 is OK then the rule and thus the service is OK
 
 initial_state
   By default Shinken will assume that all services are in OK states when in starts. You can override the initial state for a service by using this directive. Valid options are:
-  
+
     * **o** = OK
     * **w** = WARNING
     * **u** = UNKNOWN
@@ -165,13 +171,13 @@ retry_interval
 
 active_checks_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not active checks of this service are enabled. Values:
-  
+
     * 0 = disable active service checks
     * 1 = enable active service checks.
 
 passive_checks_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not passive checks of this service are enabled. Values:
-  
+
     * 0 = disable passive service checks
     * 1 = enable passive service checks.
 
@@ -183,7 +189,7 @@ obsess_over_service :ref:`* <configuration/objectdefinitions#retention_notes>`
 
 check_freshness :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not :ref:`freshness checks <advanced/freshness>` are enabled for this service. Values:
-  
+
     * 0 = disable freshness checks
     * 1 = enable freshness checks
 
@@ -195,7 +201,7 @@ event_handler
 
 event_handler_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not the event handler for this service is enabled. Values:
-  
+
     * 0 = disable service event handler
     * 1 = enable service event handler.
 
@@ -207,33 +213,33 @@ high_flap_threshold
 
 flap_detection_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not flap detection is enabled for this service. More information on flap detection can be found :ref:`here <advanced/flapping>`. Values:
-  
+
     * 0 = disable service flap detection
     * 1 = enable service flap detection.
 
   flap_detection_options
   This directive is used to determine what service states the :ref:`flap detection logic <advanced/flapping>` will use for this service. Valid options are a combination of one or more of the following :
-  
+
     * **o** = OK states
     * **w** = WARNING states
     * **c** = CRITICAL states
     * **u** = UNKNOWN states.
-  
+
 process_perf_data :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not the processing of performance data is enabled for this service. Values:
-  
+
     * 0 = disable performance data processing
     * 1 = enable performance data processing
 
 retain_status_information
   This directive is used to determine whether or not status-related information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value:
-  
+
     * 0 = disable status information retention
     * 1 = enable status information retention.
 
 retain_nonstatus_information
   This directive is used to determine whether or not non-status information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value:
-  
+
     * 0 = disable non-status information retention
     * 1 = enable non-status information retention
 
@@ -248,7 +254,7 @@ notification_period
 
 notification_options
   This directive is used to determine when notifications for the service should be sent out. Valid options are a combination of one or more of the following:
-  
+
     * **w** = send notifications on a WARNING state
     * **u** = send notifications on an UNKNOWN state
     * **c** = send notifications on a CRITICAL state
@@ -256,12 +262,12 @@ notification_options
     * **f** = send notifications when the service starts and stops :ref:`flapping <advanced/flapping>`
     * **s** = send notifications when :ref:`scheduled downtime <advanced/downtime>` starts and ends
     * **n** (none) as an option, no service notifications will be sent out. If you do not specify any notification options, Shinken will assume that you want notifications to be sent out for all possible states
-  
+
   If you specify **w,r** in this field, notifications will only be sent out when the service goes into a WARNING state and when it recovers from a WARNING state.
 
 notifications_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not notifications for this service are enabled. Values:
-  
+
     * 0 = disable service notifications
     * 1 = enable service notifications.
 
@@ -273,12 +279,12 @@ contact_groups
 
 stalking_options
   This directive determines which service states "stalking" is enabled for. Valid options are a combination of one or more of the following :
-  
+
     * o = stalk on OK states
     * w = stalk on WARNING states
     * u = stalk on UNKNOWN states
     * c = stalk on CRITICAL states
-  
+
 More information on state stalking can be found :ref:`here <advanced/stalking>`.
 
 notes
@@ -298,17 +304,17 @@ icon_image_alt
 
 poller_tag
   This variable is used to define the poller_tag of checks from this service. All of theses checks will be taken by pollers that have this value in their poller_tags parameter.
-  
+
   By default there is no poller_tag, so all untaggued pollers can take it.
 
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
-  
+
   ::
-  
+
     service_dependencies    hostA,service_descriptionA,hostB,service_descriptionB
     service_dependencies    ,service_descriptionA,,service_descriptionB,hostC,service_descriptionC
-  
+
   By default this value is void so there is no linked dependencies. This is typically used to make a service dependant on an agent software, like an NRPE check dependant on the availability of the NRPE agent.
 
 business_impact
@@ -320,5 +326,22 @@ icon_set
 maintenance_period
   Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
 
-  
+labels
+  This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` to identify groups of services.
+
+business_rule_output_template
+  Classic service check output is managed by the underlying plugin (the check output is the plugin stdout). For :ref:`business rules <medium/business-rules>`, as there's no real plugin behind, the output may be controlled by a template string defined in business_rule_output_template directive.
+
+business_rule_smart_notifications
+  This variable may be used to activate smart notifications on :ref:`business rules <medium/business-rules>`. This allows to stop sending notification if all underlying problems have been acknowledged.
+
+business_rule_smart_notifications
+  By default, downtimes are not taken into account by :ref:`business rules <medium/business-rules>` smart notifications processing. This variable allows to extend smart notifications to underlying hosts or service checks under downtime (they are treated as if they were acknowledged).
+
+business_rule_host_notification_options
+  This option allows to enforce :ref:`business rules <medium/business-rules>` underlying hosts notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+business_rule_service_notification_options
+  This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
