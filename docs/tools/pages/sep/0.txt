@@ -1,5 +1,0 @@
-**S**hinken **E**nhancement **P**roposition
-
-N°0 : SEP
-
-A SEP is a place of exchange about a specific topic for an enhancement, a lit like PEP for Python.

@@ -1,0 +1,61 @@
+.TH shinken-discovery 8 "December 29, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-discovery - Shinken discovery command
+.SH SYNOPSIS
+.PP
+shinken-discovery [-w] [-c \f[I]CONFIGFILE\f[]] [-o
+\f[I]OUTPUT_PATH\f[]] [-r \f[I]RUNNER\f[][,\f[I]RUNNER,\&...]]
+[-m\f[]MACRO* [\f[I]MACRO\f[] \&...]]
+.SH DESCRIPTION
+.PP
+Shinken discovery command
+.PP
+There are two discovery modules included: * Standard network discovery
+which uses the nmap tool * VMware discovery which uses the
+\f[I]check_esx3.pl\f[] script and a vcenter installation.
+.PP
+It is best to do the whole discovery in one pass because one module can
+use data from the other.
+.SH OPTIONS
+.TP
+.B -- version
+Show the version and exit
+.RS
+.RE
+.TP
+.B -c \f[I]CONFIGFILE\f[], --cfg-input \f[I]CONFIGGILE\f[]
+Discovery configuration file
+.RS
+.RE
+.TP
+.B -o \f[I]OUTPUT_PATH\f[], --dir-output \f[I]OUTPUT_PATH\f[]
+Directory output for results
+.RS
+.RE
+.TP
+.B -w, --overright
+Allow overwriting existing files (disabled by default)
+.RS
+.RE
+.TP
+.B -r \f[I]RUNNERS\f[]
+Comma-separated list of discovery runner modules to use
+.RS
+.RE
+.TP
+.B -m \f[I]MACROS\f[]
+List of macros to pass to discovery runner modules.
+Must be the last argument.
+Ex: NMAPTARGETS=192.168.0.0/24
+.RS
+.RE
+.TP
+.B -h, --help
+Print detailed help screen.
+.RS
+.RE
+.SH AUTHORS
+David Hannequin.
+Arthur Gautier.
+Michael Leinartas.

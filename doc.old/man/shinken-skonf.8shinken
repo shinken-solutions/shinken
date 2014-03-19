@@ -1,0 +1,15 @@
+.TH shinken-skonf 8 "November 15, 2012" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-skonf - Shinken daemon configuration tool 
+.SH SYNOPSIS
+.PP
+shinken-skonf
+.SH DESCRIPTION
+.PP
+Shinken skonf
+.PP
+Shinken Daemon tool  
+.SH AUTHORS
+David Hannequin.
+Michael Leinartas.

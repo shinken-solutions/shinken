@@ -1,6 +1,0 @@
-~~NOTOC~~
-==== Help the Shinken project ====
-
-How can I help?
-
-This page has moved to : [[::official:how_to_contribute| How to contribute ]]

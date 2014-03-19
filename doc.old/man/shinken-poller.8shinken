@@ -1,0 +1,48 @@
+.TH shinken-poller 8 "December 29, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-poller - Shinken poller daemon
+.SH SYNOPSIS
+.PP
+shinken-poller [-dr] [-c \f[I]CONFIGFILE\f[]] [\[em]debugfile
+\f[I]DEBUGFILE\f[]]
+.SH DESCRIPTION
+.PP
+The shinken-poller daemon is in charge of launching plugins as requested
+by schedulers.
+When the check is finished it returns the result to the schedulers.
+.SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
+.TP
+.B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
+Config file
+.RS
+.RE
+.TP
+.B -d, --daemon
+Run in daemon mode.
+.RS
+.RE
+.TP
+.B -r, --replace
+Replace previous running poller.
+.RS
+.RE
+.TP
+.B -h, --help
+Print detailed help screen.
+.RS
+.RE
+.TP
+.B --debugfile \f[I]DEBUGFILE\f[]
+Enable debug logging to \f[I]DEBUGFILE\f[]
+.RS
+.RE
+.SH AUTHORS
+Arthur Gautier.
+David Hannequin
+Michael Leinartas.
