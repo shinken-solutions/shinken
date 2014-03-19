@@ -1,107 +1,114 @@
 .. _configobjects/host:
 
 ================
-Host Definition 
+Host Definition
 ================
 
 
-Description 
+Description
 ============
 
 A host definition is used to define a physical server, workstation, device, etc. that resides on your network.
 
 
-Definition Format 
+Definition Format
 ==================
 
 Bold directives are required, while the others are optional.
 
 
-============================ ======================================
-define host{                                                       
-**host_name**                ***host_name***                       
-**alias**                    ***alias***                           
-display_name                 *display_name*                        
-**address**                  ***address***                         
-parents                      *host_names*                          
-hostgroups                   *hostgroup_names*                     
-check_command                *command_name*                        
-initial_state                [o,d,u]                               
-**max_check_attempts**       **#**                                 
-check_interval               #                                     
-retry_interval               #                                     
-active_checks_enabled        [0/1]                                 
-passive_checks_enabled       [0/1]                                 
-**check_period**             ***timeperiod_name***                 
-obsess_over_host             [0/1]                                 
-check_freshness              [0/1]                                 
-freshness_threshold          #                                     
-event_handler                *command_name*                        
-event_handler_enabled        [0/1]                                 
-low_flap_threshold           #                                     
-high_flap_threshold          #                                     
-flap_detection_enabled       [0/1]                                 
-flap_detection_options       [o,d,u]                               
-process_perf_data            [0/1]                                 
-retain_status_information    [0/1]                                 
-retain_nonstatus_information [0/1]                                 
-**contacts**                 ***contacts***                        
-**contact_groups**           ***contact_groups***                  
-**notification_interval**    **#**                                 
-first_notification_delay     #                                     
-**notification_period**      ***timeperiod_name***                 
-notification_options         [d,u,r,f,s]                           
-notifications_enabled        [0/1]                                 
-stalking_options             [o,d,u]                               
-notes                        *note_string*                         
-notes_url                    *url*                                 
-action_url                   *url*                                 
-icon_image                   *image_file*                          
-icon_image_alt               *alt_string*                          
-vrml_image                   *image_file*                          
-statusmap_image              *image_file*                          
-2d_coords                    *x_coord,y_coord*                     
-3d_coords                    *x_coord,y_coord,z_coord*             
-realm                        *realm*                               
-poller_tag                   *poller_tag*                          
-business_impact              [0/1/2/3/4/5]                         
-resultmodulations            *resultmodulations*                   
-escalations                  *escalations names*                   
-business_impact_modulations  *business_impact_modulations names*   
-icon_set                     [database/disk/network_service/server]
-maintenance_period           *timeperiod_name*                     
-}                                                                  
-============================ ======================================
+========================================== ======================================
+define host{
+**host_name**                              ***host_name***
+**alias**                                  ***alias***
+display_name                               *display_name*
+**address**                                ***address***
+parents                                    *host_names*
+hostgroups                                 *hostgroup_names*
+check_command                              *command_name*
+initial_state                              [o,d,u]
+**max_check_attempts**                     **#**
+check_interval                             #
+retry_interval                             #
+active_checks_enabled                      [0/1]
+passive_checks_enabled                     [0/1]
+**check_period**                           ***timeperiod_name***
+obsess_over_host                           [0/1]
+check_freshness                            [0/1]
+freshness_threshold                        #
+event_handler                              *command_name*
+event_handler_enabled                      [0/1]
+low_flap_threshold                         #
+high_flap_threshold                        #
+flap_detection_enabled                     [0/1]
+flap_detection_options                     [o,d,u]
+process_perf_data                          [0/1]
+retain_status_information                  [0/1]
+retain_nonstatus_information               [0/1]
+**contacts**                               ***contacts***
+**contact_groups**                         ***contact_groups***
+**notification_interval**                  **#**
+first_notification_delay                   #
+**notification_period**                    ***timeperiod_name***
+notification_options                       [d,u,r,f,s]
+notifications_enabled                      [0/1]
+stalking_options                           [o,d,u]
+notes                                      *note_string*
+notes_url                                  *url*
+action_url                                 *url*
+icon_image                                 *image_file*
+icon_image_alt                             *alt_string*
+vrml_image                                 *image_file*
+statusmap_image                            *image_file*
+2d_coords                                  *x_coord,y_coord*
+3d_coords                                  *x_coord,y_coord,z_coord*
+realm                                      *realm*
+poller_tag                                 *poller_tag*
+business_impact                            [0/1/2/3/4/5]
+resultmodulations                          *resultmodulations*
+escalations                                *escalations names*
+business_impact_modulations                *business_impact_modulations names*
+icon_set                                   [database/disk/network_service/server]
+maintenance_period                         *timeperiod_name*
+service_overrides                          *service_description,directive value*
+labels                                     *labels*
+business_rule_output_template              *template*
+business_rule_smart_notifications          [0/1]
+business_rule_downtime_as_ack              [0/1]
+business_rule_host_notification_options    [d,u,r,f,s]
+business_rule_service_notification_options [w,u,c,r,f,s]
+}
+========================================== ======================================
 
 
-Example Definition 
+Example Definition
 ===================
 
 ::
 
   define host{
-      host_name                      bogus-router
-      alias                          Bogus Router #1
-      address                        192.168.1.254
-      parents                        server-backbone
-      check_command                  check-host-alive
-      check_interval                 5
-      retry_interval                 1
-      max_check_attempts             5
-      check_period                   24x7
-      process_perf_data              0
-      retain_nonstatus_information   0
-      contact_groups                 router-admins
-      notification_interval          30
-      notification_period            24x7
-      notification_options           d,u,r
-      realm                          Europe
-      poller_tag                     DMZ
-      icon_set                       server
-  }
+         host_name                      bogus-router
+         alias                          Bogus Router #1
+         address                        192.168.1.254
+         parents                        server-backbone
+         check_command                  check-host-alive
+         check_interval                 5
+         retry_interval                 1
+         max_check_attempts             5
+         check_period                   24x7
+         process_perf_data              0
+         retain_nonstatus_information   0
+         contact_groups                 router-admins
+         notification_interval          30
+         notification_period            24x7
+         notification_options           d,u,r
+         realm                          Europe
+         poller_tag                     DMZ
+         icon_set                       server
+         }
 
 
-Directive Descriptions 
+Directive Descriptions
 =======================
 
 host_name
@@ -112,11 +119,11 @@ alias
 
 address
   This directive is used to define the address of the host. Normally, this is an IP address, although it could really be anything you want (so long as it can be used to check the status of the host). You can use a FQDN to identify the host instead of an IP address, but if "DNS" services are not available this could cause problems. When used properly, the $HOSTADDRESS$ :ref:`macro <thebasics/macros>` will contain this address.
-  
+
   If you do not specify an address directive in a host definition, the name of the host will be used as its address.
-  
+
   A word of caution about doing this, however - if "DNS" fails, most of your service checks will fail because the plugins will be unable to resolve the host name.
-  
+
 
 display_name
   This directive is used to define an alternate name that should be displayed in the web interface for this host. If not specified, this defaults to the value you specify for the *host_name* directive.
@@ -135,9 +142,9 @@ initial_state
 
 max_check_attempts
   This directive is used to define the number of times that Shinken will retry the host check command if it returns any state other than an OK state. Setting this value to 1 will cause Shinken to generate an alert without retrying the host check again.
-  
+
   If you do not want to check the status of the host, you must still set this to a minimum value of 1. To bypass the host check, just leave the "check_command" option blank.
-  
+
 
 check_interval
   This directive is used to define the number of “time units" between regularly scheduled checks of the host. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
@@ -145,16 +152,16 @@ check_interval
 retry_interval
   This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advanced/checkscheduling>` documentation.
 
-active_checks_enabled 
+active_checks_enabled
   This directive is used to determine whether or not active checks (either regularly scheduled or on-demand) of this host are enabled. Values: 0 = disable active host checks, 1 = enable active host checks.
 
-passive_checks_enabled 
+passive_checks_enabled
   This directive is used to determine whether or not passive checks are enabled for this host. Values: 0 = disable passive host checks, 1 = enable passive host checks.
 
 check_period
   This directive is used to specify the short name of the :ref:`time period <configobjects/timeperiod>` during which active checks of this host can be made.
 
-obsess_over_host 
+obsess_over_host
   This directive determines whether or not checks for the host will be “obsessed" over using the :ref:`ochp_command <configuration/configmain-advanced#ochp_command>`.
 
 check_freshness :ref:`* <configuration/objectdefinitions#retention_notes>`
@@ -166,7 +173,7 @@ freshness_threshold
 event_handler
   This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be run whenever a change in the state of the host is detected (i.e. whenever it goes down or recovers). Read the documentation on :ref:`event handlers <advanced/eventhandlers>` for a more detailed explanation of how to write scripts for handling events. The maximum amount of time that the event handler command can run is controlled by the :ref:`event_handler_timeout <configuration/configmain-advanced#event_handler_timeout>` option.
 
-event_handler_enabled 
+event_handler_enabled
   This directive is used to determine whether or not the event handler for this host is enabled. Values: 0 = disable host event handler, 1 = enable host event handler.
 
 low_flap_threshold
@@ -175,13 +182,13 @@ low_flap_threshold
 high_flap_threshold
   This directive is used to specify the high state change threshold used in flap detection for this host. More information on flap detection can be found :ref:`here <advanced/flapping>`. If you set this directive to a value of 0, the program-wide value specified by the :ref:`high_host_flap_threshold <configuration/configmain-advanced#high_host_flap_threshold>` directive will be used.
 
-flap_detection_enabled 
+flap_detection_enabled
   This directive is used to determine whether or not flap detection is enabled for this host. More information on flap detection can be found :ref:`here <advanced/flapping>`. Values: 0 = disable host flap detection, 1 = enable host flap detection.
 
 flap_detection_options
   This directive is used to determine what host states the :ref:`flap detection logic <advanced/flapping>` will use for this host. Valid options are a combination of one or more of the following: **o** = UP states, **d** = DOWN states, **u** = UNREACHABLE states.
 
-process_perf_data 
+process_perf_data
   This directive is used to determine whether or not the processing of performance data is enabled for this host. Values: 0 = disable performance data processing, 1 = enable performance data processing.
 
 retain_status_information
@@ -207,11 +214,11 @@ notification_period
 
 notification_options
   This directive is used to determine when notifications for the host should be sent out. Valid options are a combination of one or more of the following: **d** = send notifications on a DOWN state, **u** = send notifications on an UNREACHABLE state, **r** = send notifications on recoveries (OK state), **f** = send notifications when the host starts and stops :ref:`flapping <advanced/flapping>`, and **s** = send notifications when :ref:`scheduled downtime <advanced/downtime>` starts and ends. If you specify **n** (none) as an option, no host notifications will be sent out. If you do not specify any notification options, Shinken will assume that you want notifications to be sent out for all possible states.
-  
-  If you specify **d,r** in this field, notifications will only be sent out when the host goes DOWN and when it recovers from a DOWN state.
-  
 
-notifications_enabled 
+  If you specify **d,r** in this field, notifications will only be sent out when the host goes DOWN and when it recovers from a DOWN state.
+
+
+notifications_enabled
   This directive is used to determine whether or not notifications for this host are enabled. Values: 0 = disable host notifications, 1 = enable host notifications.
 
 stalking_options
@@ -241,9 +248,9 @@ statusmap_image
 
 2d_coords
   This variable is used to define coordinates to use when drawing the host in the statusmap CGI. Coordinates should be given in positive integers, as they correspond to physical pixels in the generated image. The origin for drawing (0,0) is in the upper left hand corner of the image and extends in the positive x direction (to the right) along the top of the image and in the positive y direction (down) along the left hand side of the image. For reference, the size of the icons drawn is usually about 40x40 pixels (text takes a little extra space). The coordinates you specify here are for the upper left hand corner of the host icon that is drawn.
-  
+
   Don't worry about what the maximum x and y coordinates that you can use are. The CGI will automatically calculate the maximum dimensions of the image it creates based on the largest x and y coordinates you specify.
-  
+
 
 3d_coords
   This variable is used to define coordinates to use when drawing the host in the statuswrl CGI. Coordinates can be positive or negative real numbers. The origin for drawing is (0.0,0.0,0.0). For reference, the size of the host cubes drawn is 0.5 units on each side (text takes a little more space). The coordinates you specify here are used as the center of the host cube.
@@ -253,14 +260,14 @@ realm
 
 poller_tag
   This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter.
-  
+
   By default the pollerag value is 'None', so all untagged pollers can take it because None is set by default for them.
-  
+
 
 business_impact
   This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
 
-resultmodulations 
+resultmodulations
   This variable is used to link with resultmodulations  objects. It will allow such modulation to apply, like change a warning in critical for this host.
 
 escalations
@@ -275,6 +282,26 @@ icon_set
 maintenance_period
   Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
 
+service_overrides
+  This variable may be used to override services directives for a specific host. This is especially useful when services are inherited (for instance from packs), because it allows to have an host attached service set one of its directives a specific value. For example, on a set of web servers, **HTTP** service (inherited from **http** pack) on *production* servers should have notifications enabled **24x7**, and *staging* server should only notify during **workhours**. To do so, staging server should be set the following directive: **service_overrides HTTP,notification_period workhours**. Several overrides may be specified, each override should be written on a single line. *Caution*, *service_overrides* may be inherited (through the **use** directive), but specifying an override on a host overloads all values inherited from parent hosts, it does not append it (as of any single valued attribute). See :ref:`inheritance description<advancedtopics-objectinheritance>` for more details.
+
+labels
+  This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` grouping expressions.
+
+business_rule_output_template
+  Classic host check output is managed by the underlying plugin (the check output is the plugin stdout). For :ref:`business rules <medium/business-rules>`, as there's no real plugin behind, the output may be controlled by a template string defined in ``business_rule_output_template directive``.
+
+business_rule_smart_notifications
+  This variable may be used to activate smart notifications on :ref:`business rules <medium/business-rules>`. This allows to stop sending notification if all underlying problems have been acknowledged.
+
+business_rule_smart_notifications
+  By default, downtimes are not taken into account by :ref:`business rules <medium/business-rules>` smart notifications processing. This variable allows to extend smart notifications to underlying hosts or service checks under downtime (they are treated as if they were acknowledged).
+
+business_rule_host_notification_options
+  This option allows to enforce :ref:`business rules <medium/business-rules>` underlying hosts notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+business_rule_service_notification_options
+  This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/
