@@ -2,7 +2,11 @@
 
     \newpage
 
+<<<<<<< HEAD
+.. _gettingstarted-index:
+=======
 .. _gettingstarted/index:
+>>>>>>> upstream/master
 
 Getting Started
 ===============

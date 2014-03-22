@@ -54,6 +54,11 @@ Configure graphite module
       port            2003
       templates_path  /usr/local/shinken/share/templates/graphite/
   }
+<<<<<<< HEAD:doc/source/11_integrationwithothersoftware/use_with_graphite.rst
+
+Additional list of options for the :ref:`Graphite export module and more in-depth documentation <the_broker_modules#network_based_modules_-_graphite_graphing>`.
+=======
+>>>>>>> upstream/master:doc/source/11_integration/graphite.rst
 
 Additional list of options for the :ref:`Graphite export module and more in-depth documentation <the_broker_modules#network_based_modules___graphite_graphing>`.
 
@@ -74,7 +79,12 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the **Broker** object, and a
 
 
 Use it 
+<<<<<<< HEAD:doc/source/11_integrationwithothersoftware/use_with_graphite.rst
+~~~~~~~
+
+=======
 -------
+>>>>>>> upstream/master:doc/source/11_integration/graphite.rst
 
 With Shinken UI 
 ~~~~~~~~~~~~~~~~

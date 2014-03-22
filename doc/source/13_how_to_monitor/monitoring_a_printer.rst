@@ -1,11 +1,17 @@
-.. _monitoring/printer:
+.. _monitoring_a_printer:
 
-===================
-Monitoring Printers
-===================
+
+
+Monitoring a printer
+====================
+
+
+
 
 .. image:: /_static/images///official/images/printer.png
    :scale: 90 %
+
+
 
 **Abstract**
 
@@ -24,41 +30,45 @@ The **check_hpjd** plugin (which is part of the standard Nagios/Shinken plugins 
   * and more...
 
 
+
 Introduction 
-<<<<<<< HEAD:doc/source/13_how_to_monitor/printer.rst
 -------------
 
 
 These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
-=======
-=============
->>>>>>> upstream/master:doc/source/13_monitoring/printer.rst
 
-These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 
 
 Overview 
-=========
+---------
+
+
+
 
 .. image:: /_static/images//official/images/monitoring-printers-shinken.png
    :scale: 90 %
+
+
 
 Monitoring the status of a networked printer is pretty simple. JetDirect-enabled printers usually have "SNMP" enabled, which allows Shinken to monitor their status using the **check_hpjd** plugin.
 
 The **check_hpjd** plugin will only get compiled and installed if you have the net-snmp and net-snmp-utils packages installed on your system. Make sure the plugin exists in "/var/lib/nagios/" before you continue. If it doesn't, install net-snmp and net-snmp-utils and recompile/reinstall the Nagios plugins.
 
 
+
 Steps 
-======
+------
+
 
 There are some steps you'll need to follow in order to monitor a new printer machine. They are:
 
-  * Create new host definition for monitoring this machine
-  * Restart the Shinken daemon
+  - Create new host definition for monitoring this machine
+  - Restart the Shinken daemon
+
 
 
 What's Already Done For You 
-============================
+----------------------------
 
 To make your life a bit easier, a few configuration tasks have already been done for you:
 
@@ -70,10 +80,12 @@ The above-mentioned config files can be found in the ///etc/shinken/// directory
 .. tip::  We are supposing here that the printer machine you want to monitor is named printer-1. Please change the above lines and commands with the real name of your printer of course.
 
 
-Declare your new printer in Shinken 
-====================================
 
-Now it's time to define some :ref:`object definitions <configuration/objectdefinitions>` in your Shinken configuration files in order to monitor the new Linux machine.
+Declare your new printer in Shinken 
+------------------------------------
+
+
+Now it's time to define some :ref:`object definitions <configuringshinken-objectdefinitions>` in your Shinken configuration files in order to monitor the new Linux machine.
 
 You can add the new **host** definition in an existing configuration file, but it's a good idea to have one file by host, it will be easier to manage in the future. So create a file with the name of your server.
 
@@ -90,7 +102,7 @@ Or Windows:
   c:\ wordpad   c:\shinken\etc\hosts\printer-1.cfg
   
   
-You need to add a new :ref:`host <configobjects/host>` definition for the Linux machine that you're going to monitor. Just copy/paste the above definition Change the "host_name", and "address" fields to appropriate values for this machine.
+You need to add a new :ref:`host <configuringshinken-objectdefinitions#configuringshinken-objectdefinitions-host>` definition for the Linux machine that you're going to monitor. Just copy/paste the above definition Change the "host_name", and "address" fields to appropriate values for this machine.
   
 ::
 
@@ -100,25 +112,29 @@ You need to add a new :ref:`host <configobjects/host>` definition for the Linux 
       address         192.160.0.1
   }
   
+  
 
-  * The use printer is the "template" line. It mean that this host will **inherits** properties from the printer template.
+* The use printer is the "template" line. It mean that this host will **inherits** properties from the printer template.
   * the host_name is the object name of your host. It must be **unique**.
-  * the address is the network address of your printer. It can be a FQDN or an IP.
+  * the address is ... the network address of your printer. It can be a FQDN or an IP. :)
 
 
-What is checked with a printer template? 
------------------------------------------
+
+What is checked with a printer template ? 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 At this point, you configure your host to be checked with a printer template. What does it means? It means that you got some checks already configured for you:
-
   * printer check each 5 minutes: check with a ping that the printer is UP
 
 .. note::  TODO: fill what is checked with HPJD
 
 
-Restarting Shinken 
-===================
 
-You're done with modifying the Shinken configuration, so you will need to :ref:`verify your configuration files <runningshinken/verifyconfig>` and :ref:`restart Shinken <runningshinken/startstop>`.
+Restarting Shinken 
+-------------------
+
+
+You're done with modifying the Shinken configuration, so you will need to :ref:`verify your configuration files <runningshinken-verifyconfig>` and :ref:`restart Shinken <runningshinken-startstop>`.
 
 If the verification process produces any errors messages, fix your configuration file before continuing. Make sure that you don't (re)start Shinken until the verification process completes without any errors!

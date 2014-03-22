@@ -191,7 +191,11 @@ Example:
   host_perfdata_file_processing_interval=0
   service_perfdata_file_processing_interval=0
   
+<<<<<<< HEAD:doc/source/03_configuringshinken/configuringshinken-configmain-advanced.rst
+This option allows you to specify the interval (in seconds) at which the :ref:`host performance data file <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_file>` (or the service one) is processed using the :ref:`host performance data file processing command <configuringshinken-configmain#configuringshinken-configmain-host_perfdata_command>`. A value of 0 indicates that the performance data file should not be processed at regular intervals.
+=======
 This option allows you to specify the interval (in seconds) at which the :ref:`host performance data file <configuration/configmain-advanced#host_perfdata_file>` (or the service one) is processed using the :ref:`host performance data file processing command <configuration/configmain-advanced#host_perfdata_command>`. A value of 0 indicates that the performance data file should not be processed at regular intervals.
+>>>>>>> upstream/master:doc/source/03_configuration/configmain-advanced.rst
 
 
 .. _configuration/configmain-advanced#host_perfdata_file_processing_command:

@@ -71,8 +71,14 @@ spare
 modules
   This variable is used to define all modules that the arbtier daemon matching this definition will load.
 
+<<<<<<< HEAD
+   timeout
+  
+This variable defines how much time the arbiter will block waiting for the response of a inter-process ping . 3 seconds by default. This operation will become non blocking when Python 2.4 and 2.5 is dropped in Shinken 1.4.
+=======
 timeout
   This variable defines how much time the arbiter will block waiting for the response of a inter-process ping (Pyro). 3 seconds by default. This operation will become non blocking when Python 2.4 and 2.5 is dropped in Shinken 1.4.
+>>>>>>> upstream/master
 
 data_timeout
   Data send timeout. When sending data to another process. 120 seconds by default.

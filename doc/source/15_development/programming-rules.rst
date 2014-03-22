@@ -31,7 +31,11 @@ Reference book
 The Art of Readable Code, is a great book that provides a fast read and an immense value in improving the readability and maintainability of code.
 
 
+<<<<<<< HEAD:doc/source/15_development/programming_rules.rst
+
+=======
 .. _development/programming-rules#python_docstring_guide:
+>>>>>>> upstream/master:doc/source/15_development/programming-rules.rst
 
 The python docstring guide 
 ===========================

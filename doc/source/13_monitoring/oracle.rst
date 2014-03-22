@@ -17,7 +17,14 @@ This document describes how you can monitor an Oracle database server such as:
 
 
 Introduction 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/oracle.rst
+-------------
+
+
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
+=======
 =============
+>>>>>>> upstream/master:doc/source/13_monitoring/oracle.rst
 
 These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 

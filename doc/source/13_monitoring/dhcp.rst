@@ -11,7 +11,14 @@ This document describes how you can monitor a DHCP service.
 
 
 Introduction 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/dhcp.rst
+-------------
+
+
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
+=======
 =============
+>>>>>>> upstream/master:doc/source/13_monitoring/dhcp.rst
 
 These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you follow the quickstart.
 
@@ -58,6 +65,10 @@ The check_dhcp must be run under the root account to send a dhcp call on the net
   chmod u+s /usr/lib/nagios/plugins/check_dhcp
 
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/dhcp.rst
+
+=======
+>>>>>>> upstream/master:doc/source/13_monitoring/dhcp.rst
 Declare your host as an dhcp server 
 ====================================
 
@@ -69,24 +80,38 @@ Under Linux:
 
   linux:~ # vi /etc/shinken/hosts/srv-lin-1.cfg
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/dhcp.rst
+=======
 
 Or Windows:
   
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/dhcp.rst
   c:\ wordpad   c:\shinken\etc\hosts\srv-lin-1.cfg
 
 
 And add:
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/dhcp.rst
+=======
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/dhcp.rst
   define host{
       use             dhcp,linux
       host_name       srv-lin-1
       address         srv-lin-1.mydomain.com
   }
+<<<<<<< HEAD:doc/source/13_how_to_monitor/dhcp.rst
 
+
+
+Restarting Shinken
+-------------------
+=======
+
+>>>>>>> upstream/master:doc/source/13_monitoring/dhcp.rst
 
 Restarting Shinken
 ===================

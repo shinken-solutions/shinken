@@ -418,7 +418,11 @@ This option determines whether or not Shinken will retain state information for 
 .. note::  Idea to approve : Mark it as Unused : `Related topic`_. A Shinken module replace it.
 
 
+<<<<<<< HEAD:doc/source/03_configuringshinken/configuringshinken-configmain.rst
+.. _configuringshinken-configmain#configuringshinken-configmain-state_retention_file:
+=======
 .. _configuration/configmain#state_retention_file:
+>>>>>>> upstream/master:doc/source/03_configuration/configmain.rst
 
 State Retention File 
 ---------------------

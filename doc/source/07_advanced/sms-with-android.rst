@@ -26,6 +26,8 @@ Install Python on your phone
 
 
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/sms_with_android.rst
+=======
 Go to http://pypi.python.org/pypi/Pyro4/ and download the same Pyro that you are using in Shinken.
 
   * Connect your phone to a computer, and open the sdcard disk.
@@ -33,6 +35,7 @@ Go to http://pypi.python.org/pypi/Pyro4/ and download the same Pyro that you are
   * Don't close your sdcard explorer
 
 
+>>>>>>> upstream/master:doc/source/07_advanced/sms-with-android.rst
 Install Shinken on your phone 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -8,7 +8,12 @@ Setting up a basic Shinken Configuration
 Default Shinken configuration 
 ==============================
 
+<<<<<<< HEAD:doc/source/05_thebasics/configure_shinken.rst
+
+If you followed the :ref:`10 Minute Shinken Installation Guide <shinken_installation>` tutorial you were able to install and launch Shinken.
+=======
 If you followed the :ref:`10 Minute Shinken Installation Guide <gettingstarted/installations/shinken-installation>` tutorial you were able to install and launch Shinken.
+>>>>>>> upstream/master:doc/source/05_thebasics/configure-shinken.rst
 
 The default configuration deployed with the Shinken sources contains:
 
@@ -127,7 +132,11 @@ Some daemons have special parameters:
 For the arbiter:
   * host_name: hostname of the server where the arbiter is installed. It's mandatory for a high availability environment (2 arbiters or more).
 For pollers:
+<<<<<<< HEAD:doc/source/05_thebasics/configure_shinken.rst
+  * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this <advancedtopics-distributed#poller_tag>`.
+=======
   * poller_tags: "tags" that the poller manages. :ref:`See advanced features for this <advanced/distributed#poller_tag>`.
+>>>>>>> upstream/master:doc/source/05_thebasics/configure-shinken.rst
 
 
 Module objects 
@@ -271,6 +280,14 @@ Now, you've got the same thing you had when you launched bin/launch_all.sh scrip
 What's next 
 ============
 
+<<<<<<< HEAD:doc/source/05_thebasics/configure_shinken.rst
+What next 
+----------
+
+
+You are ready to continue to the next section, :ref:`get DATA IN Shinken <thebasics-plugins>`.
+=======
 You are ready to continue to the next section, :ref:`get DATA IN Shinken <thebasics/plugins>`.
+>>>>>>> upstream/master:doc/source/05_thebasics/configure-shinken.rst
 
 If you feel in the mood for testing even more shinken features, now would be the time to look at :ref:`advanced_features <architecture/advanced-features>` to play with distributed and high availability architectures!

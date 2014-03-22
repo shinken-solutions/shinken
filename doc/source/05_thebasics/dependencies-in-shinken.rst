@@ -42,7 +42,12 @@ In order for Shinken to be able to distinguish between DOWN and UNREACHABLE stat
    :scale: 90 %
 
 
+<<<<<<< HEAD:doc/source/05_thebasics/setup_dependencies_in_shinken.rst
+
+Now that you know what the parent/child relationships look like for hosts that are being monitored, how do you configure Shinken to reflect them? The parents directive in your :ref:`host definitions <configuringshinken/configobjects/host>` allows you to do this. Here's what the (abbreviated) host definitions with parent/child relationships would look like for this example:
+=======
 Now that you know what the parent/child relationships look like for hosts that are being monitored, how do you configure Shinken to reflect them? The parents directive in your :ref:`host definitions <configobjects/host>` allows you to do this. Here's what the (abbreviated) host definitions with parent/child relationships would look like for this example:
+>>>>>>> upstream/master:doc/source/05_thebasics/dependencies-in-shinken.rst
 
   
   

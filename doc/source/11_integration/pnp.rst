@@ -59,6 +59,10 @@ Don't forget to make PNP4Nagios' npcd daemon to start at boot, and launch it:
   chkconfig --add npcd # On RedHat-like
   update-rc.d npcd defaults # On Debian-like
   /etc/init.d/npcd start
+<<<<<<< HEAD:doc/source/11_integrationwithothersoftware/use_with_pnp.rst
+
+=======
+>>>>>>> upstream/master:doc/source/11_integration/pnp.rst
 
 
 Configure npcdmod 

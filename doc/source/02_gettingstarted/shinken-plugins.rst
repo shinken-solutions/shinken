@@ -1,4 +1,9 @@
+<<<<<<< HEAD:doc/source/02_gettingstarted/shinken_plugins.rst
+.. _shinken_plugins:
+
+=======
 .. _gettingstarted/shinken-plugins:
+>>>>>>> upstream/master:doc/source/02_gettingstarted/shinken-plugins.rst
 
 =======================
 Nagios/Shinken Plugins 

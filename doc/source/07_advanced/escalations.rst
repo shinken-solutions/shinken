@@ -283,15 +283,28 @@ So you can put large notification_interval and still have quick escalations time
 Time Period Restrictions
 ========================
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-escalations.rst
+Time Period Restrictions
+========================
+
+=======
 Under normal circumstances, escalations can be used at any time that a notification could normally be sent out for the host or service. This "notification time window" is determined by the "notification_period" directive in the :ref:`host <configobjects/host>` or :ref:`service <configobjects/service>` definition.
+>>>>>>> upstream/master:doc/source/07_advanced/escalations.rst
 
 You can optionally restrict escalations so that they are only used during specific time periods by using the "escalation_period" directive in the host or service escalation definition. If you use the "escalation_period" directive to specify a :ref:`Time Period Definition <configobjects/timeperiod>` during which the escalation can be used, the escalation will only be used during that time. If you do not specify any "escalation_period" directive, the escalation can be used at any time within the "notification time window" for the host or service.
 
 Escalated notifications are still subject to the normal time restrictions imposed by the "notification_period" directive in a host or service definition, so the timeperiod you specify in an escalation definition should be a subset of that larger "notification time window".
 
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-escalations.rst
+
 State Restrictions
 ==================
+
+=======
+State Restrictions
+==================
+>>>>>>> upstream/master:doc/source/07_advanced/escalations.rst
 
 If you would like to restrict the escalation definition so that it is only used when the host or service is in a particular state, you can use the "escalation_options" directive in the host or service escalation definition. If you do not use the "escalation_options" directive, the escalation can be used when the host or service is in any state.
 

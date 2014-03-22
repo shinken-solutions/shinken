@@ -2,7 +2,11 @@
 
     \newpage
 
+<<<<<<< HEAD
+.. _about-index:
+=======
 .. _about/index:
+>>>>>>> upstream/master
 
 About 
 =====

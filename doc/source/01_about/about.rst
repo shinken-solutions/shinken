@@ -40,7 +40,14 @@ Some of the many features of Shinken include:
 System Requirements 
 ====================
 
+<<<<<<< HEAD
+
+The :ref:`requirement for running Shinken <shinken_installation#requirements>` are the Python interpreter and the pycurl python lib.
+
+
+=======
 The :ref:`requirement for running Shinken <gettingstarted/installations/shinken-installation#requirements>` are the Python interpreter and the pycurl python lib.
+>>>>>>> upstream/master
 
 Licensing 
 ==========

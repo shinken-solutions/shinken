@@ -99,6 +99,11 @@ Ideally you should evaluate the types of event handlers you will be implementing
 
 .. _advanced/eventhandlers#service_event_handler_example:
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-eventhandlers.rst
+.. _advancedtopics-eventhandlers#Service Event Handler Example:
+
+=======
+>>>>>>> upstream/master:doc/source/07_advanced/eventhandlers.rst
 Service Event Handler Example 
 ==============================
 

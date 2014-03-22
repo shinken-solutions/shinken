@@ -21,7 +21,11 @@ This document describes how you can monitor devices running Microsoft Windows us
 Introduction 
 =============
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/windows.rst
+The instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that were installed.
+=======
 Publicly available services that are provided by Windows machines ("HTTP", "FTP", "POP3", etc.) can be monitored by following the documentation on :ref:`Monitoring publicly available services (HTTP, FTP, SSH, etc.) <monitoring/network-service>`.
+>>>>>>> upstream/master:doc/source/13_monitoring/windows.rst
 
 The instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that were installed.
 

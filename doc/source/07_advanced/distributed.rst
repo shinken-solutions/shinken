@@ -20,7 +20,12 @@ The goal in the distributed monitoring environment is to offload the overhead (C
 The global architecture 
 ========================
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-distributed.rst
+
+Shinken"s architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on the a HTTP backend. This makes building a highly available or distributed monitoring architecture quite easy. In contrast, the Nagios daemon does nearly everything: it loads the configuration, schedules and launches checks, and raises notifications. 
+=======
 Shinken's architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on the a HTTP backend. This makes building a highly available or distributed monitoring architecture quite easy. In contrast, the Nagios daemon does nearly everything: it loads the configuration, schedules and launches checks, and raises notifications. 
+>>>>>>> upstream/master:doc/source/07_advanced/distributed.rst
 
 Major innovations of Shinken over Nagios are to :
   * split the different roles into separate daemons
@@ -76,7 +81,12 @@ This architecture is fully flexible and scalable: the daemons that require more 
    :scale: 90 %
 
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-distributed.rst
+
+.. _advancedtopics-distributed#the_smart_and_automatic_load_balancing:
+=======
 .. _advanced/distributed#the_smart_and_automatic_load_balancing:
+>>>>>>> upstream/master:doc/source/07_advanced/distributed.rst
 
 The smart and automatic load balancing 
 =======================================
@@ -143,7 +153,11 @@ The configurations sending to satellites
 When all configurations are created, the Arbiter sends them to the N active Schedulers. A Scheduler can start processing checks once it has received and loaded it's configuration without having to wait for all schedulers to be ready(v1.2). For larger configurations, having more than one Scheduler, even on a single server is highly recommended, as they will load their configurations(new or updated) faster. The Arbiter also creates configurations for satellites (pollers, reactionners and brokers) with links to Schedulers so they know where to get jobs to do. After sending the configurations, the Arbiter begins to watch for orders from the users and is responsible for monitoring the availability of the satellites. 
 
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-distributed.rst
+.. _advancedtopics-distributed#the_high_availability:
+=======
 .. _advanced/distributed#the_high_availability:
+>>>>>>> upstream/master:doc/source/07_advanced/distributed.rst
 
 The high availability 
 ======================
@@ -181,6 +195,8 @@ For each command, Shinken knows if it is global or not. If global, it just sends
 
 
 .. _advanced/distributed#poller_tag:
+
+.. _advancedtopics-distributed#poller_tag:
 
 Different types of Pollers: poller_tag 
 =======================================
@@ -232,7 +248,11 @@ The reactionners can be tagged with multiple reactionner_tags. If they are tagge
 Like for the poller case, it's mainly useful for DMZ/LAN or GNU/Linux/Windows cases.
 
 
+<<<<<<< HEAD:doc/source/07_advancedtopics/advancedtopics-distributed.rst
+.. _advancedtopics-distributed#realms:
+=======
 .. _advanced/distributed#realms:
+>>>>>>> upstream/master:doc/source/07_advanced/distributed.rst
 
 Advanced architectures: Realms 
 ===============================

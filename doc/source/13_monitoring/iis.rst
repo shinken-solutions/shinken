@@ -16,7 +16,14 @@ This document describes how you can monitor a IIS server. This monitoring covers
 
 
 Introduction 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/iis.rst
+-------------
+
+
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that was installed if you followed the quickstart.
+=======
 =============
+>>>>>>> upstream/master:doc/source/13_monitoring/iis.rst
 
 These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that was installed if you followed the quickstart.
 

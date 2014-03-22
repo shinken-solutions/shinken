@@ -10,6 +10,10 @@ The configuration is where you put the ``etc`` directory. Usually it's ``/etc/sh
 
 I migrate from Nagios, do I need to change my Nagios configuration?
 --------------------------------------------------------------------
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_first_steps.rst
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-first-steps.rst
 
 No, there is no need to change your existing Nagios configuration.
 You can use an existing Nagios configuration as-is, as long as you have installed the plugins expected by the configuration.
@@ -22,8 +26,15 @@ What do I need to do next
 
 The next logical steps for a new user are as listed in the :ref:`Getting Started <gettingstarted/index>` pages:
 
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_first_steps.rst
+The next logical steps for a new user are as listed in the :ref:`Getting Started <gettingstarted-index>` pages:
+
+* Did you read the :ref:`Shinken Architecture <the_shinken_architecture>` presentation?
+* Complete the :ref:`Shinken basic installation <configure_shinken>`
+=======
 * Did you read the :ref:`Shinken Architecture <architecture/the-shinken-architecture>` presentation?
 * Complete the :ref:`Shinken basic installation <configuration/index>`
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-first-steps.rst
 * Start adding devices to monitor, such as:
 
   * :ref:`Public services <monitoring/network-service>` (HTTP, SMTP, IMAP, SSH, etc.)

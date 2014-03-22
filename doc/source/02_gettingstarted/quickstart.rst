@@ -24,11 +24,20 @@ Post-Installation Modifications
 
 Once you get Shinken installed and running properly, you'll no doubt want to start monitoring more than just your local machine. Check out the following docs for how to go about monitoring other things:
 
+<<<<<<< HEAD:doc/source/02_gettingstarted/gettingstarted-quickstart.rst
+  * :ref:`Monitoring Windows machines <gettingstarted-monitoring-windows>`
+  * :ref:`Monitoring GNU/Linux or other Unix machines <gettingstarted-monitoring-linux>`
+  * :ref:`Monitoring routers/switches <gettingstarted-monitoring-routers>`
+  * :ref:`Monitoring network printers <gettingstarted-monitoring-printers>`
+  * :ref:`Monitoring publicly available services ("HTTP", "FTP", "SSH", etc.) <gettingstarted-monitoring-publicservices>`
+
+=======
   * :ref:`Monitoring Windows machines <gettingstarted/monitoring-windows>`
   * :ref:`Monitoring GNU/Linux or other Unix machines <gettingstarted/monitoring-linux>`
   * :ref:`Monitoring routers/switches <gettingstarted/monitoring-routers>`
   * :ref:`Monitoring network printers <gettingstarted/monitoring-printers>`
   * :ref:`Monitoring publicly available services ("HTTP", "FTP", "SSH", etc.) <gettingstarted/monitoring-publicservices>`
+>>>>>>> upstream/master:doc/source/02_gettingstarted/quickstart.rst
 
 Also, you can check the next documentations:
 

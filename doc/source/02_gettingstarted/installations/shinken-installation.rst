@@ -7,6 +7,10 @@
 
 Summary 
 ========
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_installation.rst
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-installation.rst
 
 By following this tutorial, in 10 minutes you will have the core monitoring system for your network.
 
@@ -36,6 +40,10 @@ Requirements
 
 GNU/Linux & Unix Installation 
 ==============================
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_installation.rst
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-installation.rst
 
 Method 1: Pip
 --------------
@@ -60,6 +68,10 @@ Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS soon (basical
 
 Method 3: Installation from sources 
 ------------------------------------
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_installation.rst
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-installation.rst
 
 Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot`_) and extract it somewhere:
 
@@ -85,10 +97,20 @@ Default paths are the following :
 
 Windows Installation 
 =====================
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_installation.rst
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-installation.rst
 
 
 Download the Executable installer 
 ----------------------------------
+<<<<<<< HEAD:doc/source/02_gettingstarted/installations/shinken_installation.rst
+
+
+
+=======
+>>>>>>> upstream/master:doc/source/02_gettingstarted/installations/shinken-installation.rst
 
 CHECK_WMI_PLUS configuration 
 -----------------------------

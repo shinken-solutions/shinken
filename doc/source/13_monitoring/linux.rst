@@ -21,7 +21,14 @@ Introduction
 
 Publicly available services that are provided by Linux devices (like "HTTP", "FTP", "POP3", etc.) can be monitored easily by following the documentation on Monitoring :ref:`publicly available services (HTTP, FTP, SSH, etc.) <monitoring/network-service>`.
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+Publicly available services that are provided by Linux devices (like "HTTP", "FTP", "POP3", etc.) can be monitored easily by following the documentation on Monitoring :ref:`publicly available services (HTTP, FTP, SSH, etc.) <network_service>`.
+
+These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <shinken_installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
+
+=======
 These instructions assume that you've installed Shinken according to the :ref:`Installation tutorial <gettingstarted/installations/shinken-installation>`. The sample configuration entries below reference objects that are defined in the sample config files ("commands.cfg", "templates.cfg", etc.) that are installed if you followed the quickstart.
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
 
 
 Overview 
@@ -113,9 +120,15 @@ Test the connection
 
 To see if the keys are working, just launch from your Shinken server. Change the "public" community value with your one:
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+   check_snmp -H srv-lin-1 -o .1.3.6.1.2.1.1.3.0  -C public
+  
+It should give you the uptime of the srv-lin-1 server.
+=======
 ::
 
   check_snmp -H srv-lin-1 -o .1.3.6.1.2.1.1.3.0  -C public
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
 
 
 It should give you the uptime of the srv-lin-1 server.
@@ -137,22 +150,31 @@ You can add the new **host** definition in an existing configuration file, but i
 
 Under Linux:
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+=======
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
   linux:~ # vi /etc/shinken/hosts/srv-lin-1.cfg
 
 
 Or Windows:
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+=======
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
   c:\ wordpad   c:\shinken\etc\hosts\srv-lin-1.cfg
 
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+=======
 You need to add a new :ref:`host <configobjects/host>` definition for the Linux device that you're going to monitor. Just copy/paste the above definition Change the "host_name", and "address" fields to appropriate values for this device.
 
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
   define host{
       use             linux
       host_name       srv-lin-1
@@ -166,8 +188,11 @@ You need to add a new :ref:`host <configobjects/host>` definition for the Linux 
 
 If you are using a specific SNMP community for this host, you can configure it in the SNMPCOMUNITY host macro like this:
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+=======
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
   define host{
       use             linux
       host_name       srv-lin-1
@@ -175,11 +200,14 @@ If you are using a specific SNMP community for this host, you can configure it i
       _SNMPCOMMUNITY  password             
   }
 
+<<<<<<< HEAD:doc/source/13_how_to_monitor/linux.rst
+=======
 
 To enable disk checking for the host, configure the :ref:`filesystem macro <advanced/multi-layer-discovery#macros_mode>`:
 
 ::
 
+>>>>>>> upstream/master:doc/source/13_monitoring/linux.rst
   define host{
       use             linux
       host_name       srv-lin-1
