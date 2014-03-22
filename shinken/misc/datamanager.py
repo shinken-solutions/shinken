@@ -64,6 +64,12 @@ class DataManager(object):
     def get_hostgroup(self, name):
         return self.rg.hostgroups.find_by_name(name)
 
+    def get_servicegroups(self):
+        return self.rg.servicegroups
+
+    def get_servicegroup(self, name):
+        return self.rg.servicegroups.find_by_name(name)
+
     # Get the hostgroups sorted by names, and zero size in the end
     # if selected one, put it in the first place
     def get_hostgroups_sorted(self, selected=''):
