@@ -34,7 +34,7 @@ Monitoring switches and routers can either be easy or more involved - depending 
 
 Switches and routers can be monitored easily by "pinging" them to determine packet loss, RTA, etc. If your switch supports "SNMP", you can monitor port status, etc. with the **check_snmp** plugin and bandwidth (if you're using MRTG) with the **check_mrtgtraf** plugin.
 
-The **check_snmp** plugin will only get compiled and installed if you have the net-snmp and net-snmp-utils packages installed on your system. Make sure the plugin exists in "/usr/local/nagios/libexec" before you continue. If it doesn't, install net-snmp and net-snmp-utils and recompile/reinstall the Nagios plugins.
+The **check_snmp** plugin will only get compiled and installed if you have the net-snmp and net-snmp-utils packages installed on your system. Make sure the plugin exists in the monitoring-plugins directory before you continue. The path to this directory depend on your OS (example : /usr/lib/nagios/plugins). If it doesn't, install net-snmp and net-snmp-utils and recompile/reinstall the Nagios plugins.
 
 
 Steps 

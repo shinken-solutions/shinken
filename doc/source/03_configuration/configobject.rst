@@ -29,7 +29,7 @@ Where Are Objects Defined?
 
 Objects can be defined in one or more configuration files and/or directories that you specify using the :ref:`cfg_file <configuration/configmain#cfg_file>` and/or :ref:`cfg_dir <configuration/configmain#cfg_dir>` directives in the main configuration file.
 
-When you follow the :ref:`Quickstart installation guide <gettingstarted/quickstart>`, several sample object configuration files are placed in "/etc/shinken/objects/". You can use these sample files to see how object inheritance works and learn how to define your own object definitions.
+When you follow the :ref:`Quickstart installation guide <gettingstarted/quickstart>`, several sample object configuration files are placed in "/etc/shinken/". Every object has now is own directory. You can use these sample files to see how object inheritance works and learn how to define your own object definitions.
 
 
 How Are Objects Defined? 

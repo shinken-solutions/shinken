@@ -38,7 +38,7 @@ Overview
 
 Monitoring the status of a networked printer is pretty simple. JetDirect-enabled printers usually have "SNMP" enabled, which allows Nagios to monitor their status using the **check_hpjd** plugin.
 
-The **check_hpjd** plugin will only get compiled and installed if you have the net-snmp and net-snmp-utils packages installed on your system. Make sure the plugin exists in "/usr/local/nagios/libexec" before you continue. If it doesn't, install net-snmp and net-snmp-utils and recompile/reinstall the Nagios plugins.
+The **check_hpjd** plugin will only get compiled and installed if you have the net-snmp and net-snmp-utils packages installed on your system. Make sure the plugin exists in the monitoring-plugins directory before you continue. The path to this directory depend on your OS (example : /usr/lib/nagios/plugins).  If it doesn't, install net-snmp and net-snmp-utils and recompile/reinstall the Nagios plugins.
 
 
 Steps 
