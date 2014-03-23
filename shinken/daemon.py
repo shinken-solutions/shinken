@@ -596,6 +596,11 @@ class Daemon(object):
 
 
     def get_socks_activity(self, socks, timeout):
+        # some os are not managing void socks list, so catch this
+        # and just so a simple sleep instead
+        if socks == []:
+            time.sleep(timeout)
+            return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error, e:
