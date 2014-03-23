@@ -69,6 +69,7 @@ class Regenerator(object):
         # From now we only look for realms names
         self.realms = set()
         self.tags = {}
+        self.services_tags = {}
 
         # And in progress one
         self.inp_hosts = {}
@@ -307,6 +308,12 @@ class Regenerator(object):
             # And link contacts too
             self.linkify_contacts(s, 'contacts')
 
+            # Linkify services tags
+            for t in s.tags:
+                if not t in self.services_tags:
+                    self.services_tags[t] = 0
+                self.services_tags[t] += 1
+
             # We can really declare this host OK now
             self.services[s.id] = s
         self.services.optimize_service_search(self.hosts)
@@ -375,11 +382,6 @@ class Regenerator(object):
         del self.inp_contactgroups[inst_id]
         del self.inp_services[inst_id]
         del self.inp_servicegroups[inst_id]
-
-        # Mem debug phase
-        #from guppy import hpy
-        #hp = hpy()
-        #print hp.heap()
 
 
     # We look for o.prop (CommandCall) and we link the inner
@@ -785,8 +787,6 @@ class Regenerator(object):
         #print "CMD:", c
         self.schedulers[scheduler_name] = sched
         print "scheduler added"
-        #print "MONCUL: Add a new scheduler ", sched
-        #self.number_of_objects += 1
 
 
     def manage_initial_poller_status_brok(self, b):
@@ -800,8 +800,6 @@ class Regenerator(object):
         #print "CMD:", c
         self.pollers[poller_name] = poller
         print "poller added"
-        #print "MONCUL: Add a new scheduler ", sched
-        #self.number_of_objects += 1
 
 
     def manage_initial_reactionner_status_brok(self, b):
@@ -815,8 +813,6 @@ class Regenerator(object):
         #print "CMD:", c
         self.reactionners[reactionner_name] = reac
         print "reactionner added"
-        #print "MONCUL: Add a new scheduler ", sched
-        #self.number_of_objects += 1
 
 
     def manage_initial_broker_status_brok(self, b):
@@ -830,8 +826,6 @@ class Regenerator(object):
         #print "CMD:", c
         self.brokers[broker_name] = broker
         print "broker added"
-        #print "MONCUL: Add a new scheduler ", sched
-        #self.number_of_objects += 1
 
 
     def manage_initial_receiver_status_brok(self, b):
@@ -845,9 +839,6 @@ class Regenerator(object):
         #print "CMD:", c
         self.receivers[receiver_name] = receiver
         print "receiver added"
-
-        #print "MONCUL: Add a new scheduler ", sched
-        #self.number_of_objects += 1
 
 
 

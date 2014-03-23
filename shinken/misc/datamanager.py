@@ -127,14 +127,30 @@ class DataManager(object):
             return r
         return None
 
-    # Get the hostgroups sorted by names, and zero size in the end
-    # if selected one, put it in the first place
+    # Get the hosts tags sorted by names, and zero size in the end
     def get_host_tags_sorted(self):
         r = []
         names = self.rg.tags.keys()
         names.sort()
         for n in names:
             r.append((n, self.rg.tags[n]))
+        return r
+
+    # Get the hosts tagged with a specific tag
+    def get_hosts_tagged_with(self, tag):
+        r = []
+        for h in self.get_hosts():
+            if tag in h.get_host_tags():
+                r.append(h)
+        return r
+
+    # Get the services tags sorted by names, and zero size in the end
+    def get_service_tags_sorted(self):
+        r = []
+        names = self.rg.services_tags.keys()
+        names.sort()
+        for n in names:
+            r.append((n, self.rg.services_tags[n]))
         return r
 
     def get_important_impacts(self):
