@@ -126,6 +126,7 @@ class Host(SchedulingItem):
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
         'service_overrides':    ListProp(default='', merging='duplicate', split_on_coma=False),
+        'service_excludes':     ListProp(default='', merging='duplicate'),
         'labels':               ListProp(default='', fill_brok=['full_status'], merging='join'),
 
         # BUSINESS CORRELATOR PART
@@ -1195,7 +1196,7 @@ class Hosts(Items):
                 tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
                 if tpl_name in tnames:
                     res.add(h.host_name)
-                
+
             return list(res)
 
         # Ok, we find the tpl. We should find its father template too

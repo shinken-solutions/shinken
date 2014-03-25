@@ -592,3 +592,44 @@ Example:
          ...
   }
   ...
+
+
+
+Inheritance exclusions
+=======================
+
+Packs and hostgroups allow de factorize the configuration and greatly reduce the amount of configuration to write to describe infrastructures. The drawback is that it forces hosts to be consistent, as the same configuration is applied to a possibly very large set of machines.
+
+Imagine a web servers cluster. All machines except one should be checked its managenent interface (ILO, iDRAC). In the cluster, there is one virtual server that should be checked the exact same services than the others, except the management interface (as checking it on a virtual server has no meaning). The correponding sevice comes from a pack.
+
+In this situation, there is several ways to manage the situation:
+
+- create in intermadiary template on the pack level to have the management interface check attached to an upper level template
+
+- re define all the services for the specifed host.
+
+- use service overrides to set a dummy command on the corresponding service.
+
+None of these options are satisfying.
+
+There is a last solution that conists of exclude the corresponding service from the specified host. This may be done using the ``service_excludes directive``.
+
+Example:
+
+
+::
+
+  define host {
+         use                     web-fromt
+         host_name               web-back-01
+         ...
+  }
+
+  define host {
+         use                     web-fromt
+         host_name               web-back-02    ; The virtual server
+         service_excludes        Management interface
+         ...
+  }
+  ...
+

@@ -383,6 +383,14 @@ class Arbiter(Daemon):
         # Pythonize values
         self.conf.pythonize()
 
+        # Removes service exceptions based on host configuration
+        count = self.conf.remove_exclusions()
+
+        if count > 0:
+            # We removed excluded services, and so we must recompute the
+            # search lists
+            self.conf.create_reversed_list()
+
         # Linkify objects to each other
         self.conf.linkify()
 
