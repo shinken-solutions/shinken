@@ -543,7 +543,8 @@ class Daemon(object):
             startargs = inspect.getargspec(self.manager.start)
             # startargs[0] will be ['self'] if old multiprocessing lib
             # and ['self', 'initializer', 'initargs'] in newer ones
-            if len(startargs[0]) > 1:
+            # note: windows do not like pickle http_daemon...
+            if if os.name != 'nt' and len(startargs[0]) > 1:
                 self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
             else:
                 self.manager.start()
@@ -595,6 +596,11 @@ class Daemon(object):
 
 
     def get_socks_activity(self, socks, timeout):
+        # some os are not managing void socks list, so catch this
+        # and just so a simple sleep instead
+        if socks == []:
+            time.sleep(timeout)
+            return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error, e:

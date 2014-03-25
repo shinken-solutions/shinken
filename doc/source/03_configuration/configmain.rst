@@ -196,7 +196,8 @@ Example:
 
   resource_file=/etc/shinken/resource.cfg
   
-This is used to specify an optional resource file that can contain "$USERn$" :ref:`Understanding Macros and How They Work <thebasics/macros>` definitions. "$USERn$" macros are useful for storing usernames, passwords, and items commonly used in command definitions (like directory paths). A classical variable used is $USER1$, used to store the plugins path, "/usr/local/nagios/libexec" on a classic installation.
+This is used to specify an optional resource file that can contain "$USERn$" :ref:`Understanding Macros and How They Work <thebasics/macros>` definitions. "$USERn$" macros are useful for storing usernames, passwords, and items commonly used in command definitions (like directory paths).
+A classical variable used is $USER1$, used to store the plugins path, "/usr/lib/nagios/plugins" on a classic installation.
 
 
 .. _configuration/configmain#daemon_user:

@@ -1186,7 +1186,7 @@ class Hosts(Items):
             if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name:
                 tpl = h
 
-        # If we find none, we sould manually lookup all hosts to find this 'tag'
+        # If we find none, we should manually lookup all hosts to find this 'tag'
         if tpl is None:
             for h in self:
                 if not hasattr(h, 'host_name') or h.is_tpl():

@@ -25,6 +25,7 @@ Welcome to Shinken's documentation!
     13_monitoring/index
     14_contributing/index
     15_development/index
+    98_deprecated/index
     89_packages/index
 
 .. only:: html

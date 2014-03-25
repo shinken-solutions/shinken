@@ -18,10 +18,5 @@ Getting Started
    quickstart
    installations/index
    upgrading-shinken
-   monitoring-windows
-   monitoring-linux
-   monitoring-printers
-   monitoring-routers
-   monitoring-publicservices
    shinken-plugins
 

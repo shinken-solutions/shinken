@@ -25,6 +25,7 @@ How to monitor ...
    exchange
    mssql
    mysql
+   routers
    router-or-switch
    oracle
    printer

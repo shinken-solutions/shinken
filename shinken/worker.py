@@ -38,6 +38,7 @@ else:
     from Queue import Queue
     from threading import Thread as Process
 
+import os
 import time
 import sys
 import signal
@@ -83,14 +84,19 @@ class Worker:
         self.i_am_dying = False
         # Keep a trace where the worker is launch from (poller or reactionner?)
         self.loaded_into = loaded_into
-        self.http_daemon = http_daemon
+        if os.name != 'nt':
+            self.http_daemon = http_daemon
+        else: #windows forker do not like pickle http/lock
+            self.http_daemon = None
         
 
     def is_mortal(self):
         return self._mortal
 
+
     def start(self):
         self._process.start()
+
 
     # Kill the background process
     # AND close correctly the queues (input and output)

@@ -83,21 +83,13 @@ Default paths are the following :
 
 .. _gettingstarted/installations/shinken-installation#windows_installation:
 
+
 Windows Installation 
 =====================
 
+For 2.0 the executable installer may not be provided. Consequently, installing Shinken on a Windows may be manual with setup.py
+Step are basically the same as the linux one (Python install etc) but in windows environment it's always a bit tricky.
 
-Download the Executable installer 
-----------------------------------
-
-CHECK_WMI_PLUS configuration 
------------------------------
-
-
-By default, check_wmi_plus.pl use an user/password to access the windows WMI functions. But locally (shinken host managed itself on windows), this cannot be done. So the local template always works even if a wrong user/password is set. In the commands file, just set local to user and localhost to the computer. 
-
-But now, how to configure shinken to manage others windows hosts using wmi. Shinken team provides a set of commands in the windows template. We will see how to set the user/password to work properly. But there is an "extra" function to use the poller's service to push its credential to check_wmi_plus.
-This kind of configuration and globaly the use of check_wmi_plus under windows is described in this :ref:`link <monitoring/configure-check-wmi-plus-onwindows>`.
 
 
 

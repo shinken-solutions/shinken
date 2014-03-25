@@ -30,6 +30,7 @@ Thumbs.db
 *~
 \#*#
 
+*.debug
 *pack_distribution.dat
 test/tmp/*dat
 

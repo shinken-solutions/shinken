@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import re
@@ -16,8 +19,12 @@ import stat
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 
-from setuptools import setup
-from setuptools import find_packages
+try:
+    from setuptools import setup
+    from setuptools import find_packages
+except:
+    sys.exit("Error: missing python-setuptools library")
+    
 from itertools import chain
 import optparse
 import itertools
@@ -217,7 +224,7 @@ if is_install and not root and not is_update and pwd and not opts.skip_build:
     
 
 # setup() will warn about unknown parameter we already managed
-# to delte them
+# to delete them
 deleting_args = ['--owner', '--group', '--skip-build']
 
 to_del = []
@@ -391,7 +398,7 @@ data_files.append( (default_paths['run'], []) )
 data_files.append( (default_paths['log'], []) )
 
 
-# Note: we do not add the "scripts" entry in the setup phase becase we need to generate the 
+# Note: we do not add the "scripts" entry in the setup phase because we need to generate the 
 # default/shinken file with the bin path before run the setup phase, and it's not so
 # easy to do in a clean and easy way
         
@@ -432,7 +439,7 @@ setup(
 )
 
 
-# if root is set, it's for pacakge, so NO chown
+# if root is set, it's for package, so NO chown
 if pwd and not root and is_install :
     # assume a posix system
     uid = get_uid(user)
@@ -443,7 +450,7 @@ if pwd and not root and is_install :
         for c in ['etc', 'run', 'log', 'var', 'libexec']:
             p = default_paths[c]
             recursive_chown(p, uid, gid, user, group)
-        # Also cahnge the rights of the shinken- scripts
+        # Also change the rights of the shinken- scripts
         for s in scripts:
             bs = os.path.basename(s)
             recursive_chown(os.path.join(default_paths['bin'], bs), uid, gid, user, group)
@@ -458,7 +465,7 @@ if pwd and not root and is_install :
 try:
     import pycurl
 except ImportError:
-    print "Warning: missing python-pycurl lib, you should install it before launch the shinken daemons"
+    print "Warning: missing python-pycurl lib, you MUST install it before launch the shinken daemons"
 
 try:
     import cherrypy

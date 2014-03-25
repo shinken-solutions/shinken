@@ -26,13 +26,14 @@
 import re
 from shinken.log import logger
 from shinken.util import filter_any, filter_none
-from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group
+from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group, filter_host_by_template
 from shinken.util import filter_service_by_name
 from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_regex_host_name
 from shinken.util import filter_service_by_host_name
 from shinken.util import filter_service_by_bp_rule_label
 from shinken.util import filter_service_by_hostgroup_name
+from shinken.util import filter_service_by_host_template_name
 from shinken.util import filter_service_by_servicegroup_name
 from shinken.util import filter_host_by_bp_rule_label
 from shinken.util import filter_service_by_host_bp_rule_label
@@ -268,7 +269,7 @@ class DependencyNode(object):
 """ TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
 
-    host_flags = "grl"
+    host_flags = "grlt"
     service_flags = "grl"
 
     def __init__(self, bound_item):
@@ -566,16 +567,18 @@ class DependencyNodeFactory(object):
         if expr == "*":
             return [filter_any]
         match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
+        
         if match is None:
             return [filter_host_by_name(expr)]
         flags, expr = match.groups()
-
         if "g" in flags:
             return [filter_host_by_group(expr)]
         elif "r" in flags:
             return [filter_host_by_regex(expr)]
         elif "l" in flags:
             return [filter_host_by_bp_rule_label(expr)]
+        elif "t" in flags:
+            return [filter_host_by_template(expr)]
         else:
             return [filter_none]
 
@@ -595,6 +598,8 @@ class DependencyNodeFactory(object):
             return [filter_service_by_regex_host_name(expr)]
         elif "l" in flags:
             return [filter_service_by_host_bp_rule_label(expr)]
+        elif "t" in flags:
+            return [filter_service_by_host_template_name(expr)]
         else:
             return [filter_none]
 
