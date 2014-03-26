@@ -133,23 +133,25 @@ class CLICommander(object):
                     }
     
 
-    def __init__(self, config):
+    def __init__(self, config, opts):
         self.keywords = {}
         self.config = config
         self.init_done = False
 
-        #We will now try to load the keywords from the modules
-        self.load_cli_mods()
+        # We will now try to load the keywords from the modules
+        self.load_cli_mods(opts)
 
         self.completion_matches = []
 
 
 
-    def load_cli_mods(self):
-
+    def load_cli_mods(self, opts):
         # Main list of keywords for the first parameter
         self.keywords = {}
         if not 'paths' in self.config or not 'cli' in self.config.get('paths',[]):
+            # We are dign the init, so bail out
+            if opts.do_init:
+                return
             logger.error('Cannot load cli commands, missing paths or cli entry in the config')
             return
 
@@ -353,7 +355,7 @@ if __name__ == '__main__':
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
 
-    CLI = CLICommander(CONFIG)
+    CLI = CLICommander(CONFIG, opts)
 
 
     # We should look on the sys.argv if we find a valid keywords to
