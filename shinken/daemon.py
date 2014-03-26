@@ -599,8 +599,11 @@ class Daemon(object):
         self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
         http_daemon.daemon_inst = self.http_daemon
 
-
+    # Global loop part
     def get_socks_activity(self, socks, timeout):
+        if socks == []:
+            time.sleep(timeout)
+            return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error, e:
