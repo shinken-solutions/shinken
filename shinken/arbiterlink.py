@@ -74,7 +74,7 @@ class ArbiterLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port': self.port, 'address': self.address, 'name': self.arbiter_name}
+        return {'port': self.port, 'address': self.address, 'name': self.arbiter_name, 'use_ssl':self.use_ssl}
 
 
     def do_not_run(self):

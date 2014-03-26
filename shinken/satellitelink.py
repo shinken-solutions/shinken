@@ -95,7 +95,7 @@ class SatelliteLink(Item):
                 - satellitemap attribute of SatelliteLink is the map defined IN THE satellite configuration
                   but for creating connections, we need the have the satellitemap of the Arbiter
         """
-        self.arb_satmap = {'address': self.address, 'port': self.port}
+        self.arb_satmap = {'address': self.address, 'port': self.port, 'use_ssl':self.use_ssl}
         self.arb_satmap.update(satellitemap)
 
 
@@ -409,6 +409,7 @@ class SatelliteLink(Item):
     def give_satellite_cfg(self):
         return {'port': self.port,
                 'address': self.address,
+                'use_ssl':self.use_ssl,
                 'name': self.get_name(),
                 'instance_id': self.id,
                 'active': True,

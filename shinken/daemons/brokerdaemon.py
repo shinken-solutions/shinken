@@ -386,7 +386,10 @@ class Broker(BaseSatellite):
             if s['name'] in g_conf['satellitemap']:
                 s = dict(s)  # make a copy
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = 'http://%s:%s/' % (s['address'], s['port'])
+            proto = 'http'
+            if s['use_ssl']:
+                 proto = 'https'
+            uri = '%s://%s:%s/' % (proto, s['address'], s['port'])
             self.schedulers[sched_id]['uri'] = uri
 
             self.schedulers[sched_id]['broks'] = broks
@@ -412,7 +415,11 @@ class Broker(BaseSatellite):
             if a['name'] in g_conf['satellitemap']:
                 a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
-            uri = 'http://%s:%s/' % (a['address'], a['port'])
+
+            proto = 'http'
+            if a['use_ssl']:
+                 proto = 'https'
+            uri = '%s://%s:%s/' % (proto, a['address'], a['port'])
             self.arbiters[arb_id]['uri'] = uri
 
             self.arbiters[arb_id]['broks'] = broks
@@ -441,7 +448,12 @@ class Broker(BaseSatellite):
             if p['name'] in g_conf['satellitemap']:
                 p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
-            uri = 'http://%s:%s/' % (p['address'], p['port'])
+
+            proto = 'http'
+            if p['use_ssl']:
+                 proto = 'https'
+
+            uri = '%s://%s:%s/' % (proto, p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
 
             self.pollers[pol_id]['broks'] = broks
@@ -472,7 +484,11 @@ class Broker(BaseSatellite):
             if r['name'] in g_conf['satellitemap']:
                 r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
-            uri = 'http://%s:%s/' % (r['address'], r['port'])
+
+            proto = 'http'
+            if r['use_ssl']:
+                 proto = 'https'
+            uri = '%s://%s:%s/' % (proto, r['address'], r['port'])
             self.reactionners[rea_id]['uri'] = uri
 
             self.reactionners[rea_id]['broks'] = broks

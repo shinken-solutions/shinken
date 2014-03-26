@@ -537,6 +537,11 @@ class Daemon(object):
             # a socket of your http server alive
             self.manager = SyncManager()
             def close_http_daemon(daemon):
+                try:
+                    # Be sure to release the lock so there won't be lock in shutdown phase
+                    daemon.lock.release()
+                except Exception, exp:
+                    pass
                 daemon.shutdown()
             # Some multiprocessing lib got problems with start() that cannot take args
             # so we must look at it before
@@ -544,7 +549,7 @@ class Daemon(object):
             # startargs[0] will be ['self'] if old multiprocessing lib
             # and ['self', 'initializer', 'initargs'] in newer ones
             # note: windows do not like pickle http_daemon...
-            if if os.name != 'nt' and len(startargs[0]) > 1:
+            if os.name != 'nt' and len(startargs[0]) > 1:
                 self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
             else:
                 self.manager.start()

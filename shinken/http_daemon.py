@@ -87,6 +87,7 @@ class CherryPyServer(bottle.ServerAdapter):
 class CherryPyBackend(object):
     def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
         self.port = port
+        self.use_ssl = use_ssl
         try:
             self.srv = bottle.run(host=host, port=port, server=CherryPyServer, quiet=False, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
         except socket.error, exp:
@@ -104,6 +105,9 @@ class CherryPyBackend(object):
 
     # We stop our processing, but also try to hard close our socket as cherrypy is not doing it...
     def stop(self):
+        #TODO: find why, but in ssl mode the stop() is locking, so bailout before
+        if self.use_ssl:
+            return
         try:
             self.srv.stop()
         except Exception, exp:
@@ -239,6 +243,8 @@ class HTTPDaemon(object):
             if self.port == 0:
                 return
 
+            self.use_ssl = use_ssl
+            
             self.registered_fun = []
             self.registered_fun_defaults = {}
 
