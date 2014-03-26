@@ -4,24 +4,41 @@
 Update Shinken 
 ===============
 
-  - grab the latest shinken archive and extract its content
-  - cd into the resulting folder
-  - backup shinken configuration plugins and addons and copy the backup id: 
+Whatever the way you used to install the previous version of Shinken, you should use the same to update. Otherwise juste start from scratch a new Shinken install.
+
+As mentioned in the :ref:`installation page <gettingstarted/installations/shinken-installation>`, 1.X and 2.0 have big differences.
+
+.. warning:: Don't forget to backup your shinken configuration before updating!
+
+Update can be done by following (more or less) those steps :
+
+ * Create the new paths for Shinken (if you don't want new paths then you will have to edit Shinken configuration)
 
 ::
 
-  ./install -b</code>
+  mkdir /etc/shinken /var/lib/shinken/ /var/run/shinken /var/log/shinken
+  chown shinken:shinken /etc/shinken /var/lib/shinken/ /var/run/shinken /var/log/shinken
 
 
-.. warning::  Be careful with your add-ons...Actually Shinken's install script does NOT backs up all add-on configuration files...Take a look at saved files (usually at /opt/backup/bck-shinken.YYYYMMDDhhmmss.tar.gz, need uncompress before search) and check what is and what is not saved before remove. Install script can be easyly improved by adding few lines for other folders at functions "backup" and "restore", see NAGVIS or PNP examples
-  - remove shinken (if you installed addons with the installer say no to the question about removing the addons): <code>./install -u
-  - install the new version: 
+* Install Shinken by following the installation instructions
+
+* Copy your previous Shinken configuration to the new path
 
 ::
 
-  ./install -i</code>
-  - restore the backup: <code>./install -r backupid
+  cp -pr /usr/local/shinken/etc/<your_config_dir> /etc/shinken/
 
-.. important::  It's recommended to pull stable version from git. Current master version may be not safe. Please use tagged release. 
-   List (not full) of git tags : 1.0rc1, 1.2rc2
+
+* Copy the modules directory to the new one
+
+::
+
+  cp -pr /usr/local/shinken/shinken/modules /var/lib/shinken/
+
+
+* Edit the Shinken configuration to match you need. Basically you will need to remove the default shinken configuration of daemons and put the previous one. Shinken-specific is now split into several files
+Be carful with the ini ones, you may **merge** them if you modified them. Careful to put the right *cfg_dir* statement in the shinken.cfg.
+
+
+.. important::  Modules directories have changed a lot in Shinken 2.0. If you copy paste the previous one it will work  **BUT** you may have trouble if you use Shinken CLI.
    

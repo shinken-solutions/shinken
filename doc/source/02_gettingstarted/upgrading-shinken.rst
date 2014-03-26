@@ -8,7 +8,7 @@
 Upgrading From Previous Shinken Releases 
 =========================================
 
-See the :ref:`update page for that <thebasics/update>`. Basically it's only about backuping and installing from a later git version.
+See the :ref:`update page for that <thebasics/update>`. Basically it's only about backuping and installing from a later git version (or package).
 
 
 Upgrading From Nagios 3.x 
