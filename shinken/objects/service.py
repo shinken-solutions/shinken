@@ -983,11 +983,11 @@ class Services(Items):
     def create_reversed_list(self):
         self.reversed_list = {}
         self.twins = []
-        
+
         # Get a sorted list of all services, by definition_order
         all_services = [s for s in self]
         all_services.sort(key=lambda s:int(getattr(s, 'definition_order', '100')))
-        
+
         # Now we sort them, we will have definition_order sorted like we want
         for s in all_services:
             if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
@@ -998,7 +998,7 @@ class Services(Items):
                     self.reversed_list[key] = s.id
                 else:
                     self.twins.append(s.id)
-        
+
         # For service, the reversed_list is not used for
         # search, so we del it
         del self.reversed_list
@@ -1035,6 +1035,33 @@ class Services(Items):
             return self.items[id]
         else:
             return None
+
+    # Removes service exceptions based on host configuration
+    def remove_exclusions(self, hosts):
+        # Looks for hosts having service_excludes attribute set
+        have_excludes = [h for h in hosts if h.service_excludes]
+        to_remove = []
+
+        for host in have_excludes:
+            for descr in host.service_excludes:
+                # Deletes excluded service instances
+                sid = None
+                for service in self:
+                    if service.service_description == descr and \
+                       service.host_name == host.host_name:
+                        sid = service.id
+                        break
+
+                if sid is not None:
+                    to_remove.append(service.id)
+                else:
+                    err = "Error: exclusion contains an undefined service: %s" % descr
+                    host.configuration_errors.append(err)
+
+        for sid in to_remove:
+            del self[sid]
+
+        return len(to_remove)
 
     # Make link between elements:
     # service -> host

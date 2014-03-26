@@ -157,6 +157,7 @@ launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_antivirg.py
 launch_and_assert test_multi_attribute.py
 launch_and_assert test_property_override.py
+launch_and_assert test_exclude_services.py
 launch_and_assert test_business_correlator_expand_expression.py
 launch_and_assert test_business_correlator_output.py
 launch_and_assert test_business_correlator_notifications.py

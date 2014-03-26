@@ -1,0 +1,50 @@
+.TH shinken-reactionner 8 "December 29, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-reactionner - Shinken reactionner daemon
+.SH SYNOPSIS
+.PP
+shinken-reactionner [-dr] [-c \f[I]CONFIGFILE\f[]] [\[em]debugfile
+\f[I]DEBUGFILE\f[]]
+.SH DESCRIPTION
+.PP
+Shinken reactionner daemon
+.PP
+The shinken-reactionner is similar to shinken-poller but handles actions
+such as notifications and event-handlers from the schedulers rather than
+checks.
+.SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
+.TP
+.B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
+Config file
+.RS
+.RE
+.TP
+.B -d, --daemon
+Run in daemon mode
+.RS
+.RE
+.TP
+.B -r, --replace
+Replace previous running reactionner
+.RS
+.RE
+.TP
+.B -h, --help
+Print detailed help screen
+.RS
+.RE
+.TP
+.B --debugfile \f[I]DEBUGFILE\f[]
+Enable debug logging to \f[I]DEBUGFILE\f[]
+.RS
+.RE
+.SH AUTHORS
+David Hannequin.
+Arthur Gautier.
+Michael Leinartas.

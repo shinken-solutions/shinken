@@ -420,7 +420,7 @@ class Config(Item):
     def read_config(self, files):
         # just a first pass to get the cfg_file and all files in a buf
         res = StringIO()
-        
+
         for file in files:
             # We add a \n (or \r\n) to be sure config files are separated
             # if the previous does not finish with a line return
@@ -609,7 +609,7 @@ class Config(Item):
         self.load_params(params)
         # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
-        
+
         for type in objectscfg:
             objects[type] = []
             for items in objectscfg[type]:
@@ -656,7 +656,7 @@ class Config(Item):
             if t not in early_created_types:
                 self.create_objects_for_type(raw_objects, t)
 
-    
+
     def create_objects_for_type(self, raw_objects, type):
         types_creations = self.__class__.types_creations
         t = type
@@ -678,7 +678,7 @@ class Config(Item):
         # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
 
-    
+
     # Here arbiter and modules objects should be prepare and link
     # before all others types
     def early_arbiter_linking(self):
@@ -820,7 +820,11 @@ class Config(Item):
         # satellites
         self.realms.prepare_for_satellites_conf()
 
-    # Some elements are maybe set as wrong after a is_correct, so clean them 
+    # Removes service exceptions based on host configuration
+    def remove_exclusions(self):
+        return self.services.remove_exclusions(self.hosts)
+
+    # Some elements are maybe set as wrong after a is_correct, so clean them
     # if possible
     def clean(self):
         self.services.clean()

@@ -546,6 +546,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('macromodulations', ''),
         ('custom_views', ''),
         ('service_overrides', ''),
+        ('service_excludes', ''),
         ('business_rule_output_template', ''),
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
