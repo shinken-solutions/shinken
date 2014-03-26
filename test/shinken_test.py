@@ -150,6 +150,9 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_reversed_list()
         self.conf.override_properties()
         self.conf.pythonize()
+        count = self.conf.remove_exclusions()
+        if count > 0:
+            self.conf.create_reversed_list()
         self.conf.linkify()
         self.conf.apply_dependencies()
         self.conf.explode_global_conf()

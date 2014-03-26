@@ -71,6 +71,7 @@ business_impact_modulations                *business_impact_modulations names*
 icon_set                                   [database/disk/network_service/server]
 maintenance_period                         *timeperiod_name*
 service_overrides                          *service_description,directive value*
+service_excludes                           *service_description,...*
 labels                                     *labels*
 business_rule_output_template              *template*
 business_rule_smart_notifications          [0/1]
@@ -283,7 +284,10 @@ maintenance_period
   Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
 
 service_overrides
-  This variable may be used to override services directives for a specific host. This is especially useful when services are inherited (for instance from packs), because it allows to have an host attached service set one of its directives a specific value. For example, on a set of web servers, **HTTP** service (inherited from **http** pack) on *production* servers should have notifications enabled **24x7**, and *staging* server should only notify during **workhours**. To do so, staging server should be set the following directive: **service_overrides HTTP,notification_period workhours**. Several overrides may be specified, each override should be written on a single line. *Caution*, *service_overrides* may be inherited (through the **use** directive), but specifying an override on a host overloads all values inherited from parent hosts, it does not append it (as of any single valued attribute). See :ref:`inheritance description<advancedtopics-objectinheritance>` for more details.
+  This variable may be used to override services directives for a specific host. This is especially useful when services are inherited (for instance from packs), because it allows to have an host attached service set one of its directives a specific value. For example, on a set of web servers, **HTTP** service (inherited from **http** pack) on *production* servers should have notifications enabled **24x7**, and *staging* server should only notify during **workhours**. To do so, staging server should be set the following directive: **service_overrides HTTP,notification_period workhours**. Several overrides may be specified, each override should be written on a single line. *Caution*, *service_overrides* may be inherited (through the **use** directive), but specifying an override on a host overloads all values inherited from parent hosts, it does not append it (as of any single valued attribute). See :ref:`inheritance description<advanced/objectinheritance>` for more details.
+
+service_excludes
+  This variable may be used to *exclude* a service from a host. It addresses the situations where a set of serices is inherited from a pack or attached from an hostgroup, and an identified host should **NOT** have one (or more, comma separated) services defined. This allows to manage exceptions in the service asignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
 
 labels
   This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` grouping expressions.

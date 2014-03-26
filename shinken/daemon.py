@@ -307,7 +307,7 @@ class Daemon(object):
         self.modules_manager.set_max_queue_size(getattr(self, 'max_queue_size', 0))
         # And make the module manager load the sub-process Queue() manager
         self.modules_manager.load_manager(self.manager)
-        
+
 
 
     def change_to_workdir(self):
@@ -514,7 +514,7 @@ class Daemon(object):
         # Force the debug level if the daemon is said to start with such level
         if self.debug:
             logger.set_level('DEBUG')
-        
+
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
@@ -560,7 +560,7 @@ class Daemon(object):
             # Don't lock the main thread just because of the http thread
             self.http_thread.daemon = True
             self.http_thread.start()
-        
+
 
     # TODO: we do not use pyro anymore, change the function name....
     def setup_pyro_daemon(self):
@@ -683,7 +683,7 @@ class Daemon(object):
         if uid is None or gid is None:
             logger.error("uid or gid is none. Exiting")
             sys.exit(2)
-            
+
         # Maybe the os module got the initgroups function. If so, try to call it.
         # Do this when we are still root
         if hasattr(os, 'initgroups'):
@@ -805,7 +805,7 @@ class Daemon(object):
             self.do_stop()
             # Hard mode exit from a thread
             os._exit(2)
-            
+
 
     # Wait up to timeout to handle the pyro daemon requests.
     # If suppl_socks is given it also looks for activity on that list of fd.
