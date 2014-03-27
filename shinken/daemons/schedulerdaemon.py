@@ -39,6 +39,7 @@ from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 import shinken.objects.config
+from shinken.util import nighty_five_percent
 
 # Interface for Workers
 
@@ -117,6 +118,29 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
             self.app.fill_initial_broks(bname, with_logs=True)
 
 
+class IStats(Interface):
+    """ 
+    Interface for various stats about scheduler activity
+    """
+    def get_raw_stats(self):
+        sched = self.app.sched
+        res = {}
+        res['nb_scheduled'] = len([c for c in sched.checks.values() if c.status == 'scheduled'])
+        res['nb_inpoller']  = len([c for c in sched.checks.values() if c.status == 'inpoller'])
+        res['nb_zombies']   = len([c for c in sched.checks.values() if c.status == 'zombie'])
+        res['nb_notifications'] = len(sched.actions)
+        
+        # Get a overview of the latencies with just
+        # a 95 percentile view, but lso min/max values
+        latencies = [s.latency for s in sched.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        res['latency'] = (0.0,0.0,0.0)
+        if lat_avg:
+            res['latency'] = (lat_avg, lat_min, lat_max)
+        return res
+
+
+
 class IForArbiter(IArb):
     """ Interface for Arbiter. We ask him a for a conf and after that listen for instructions
         from the arbiter. The arbiter is the interface to the administrator, so we must listen
@@ -186,6 +210,7 @@ class Shinken(BaseSatellite):
         BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 
         self.interface = IForArbiter(self)
+        self.istats = IStats(self)
         self.sched = Scheduler(self)
 
         self.ichecks = None
@@ -434,6 +459,7 @@ class Shinken(BaseSatellite):
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             self.http_daemon.register(self.interface)
+            self.http_daemon.register(self.istats)
 
             #self.inject = Injector(self.sched)
             #self.http_daemon.register(self.inject)
