@@ -96,19 +96,20 @@ class IForArbiter(Interface):
 
 
     # Here a function called by check_shinken to get daemons list
-    def get_satellite_list(self, daemon_type):
-        satellite_list = []
-        daemon_name_attr = daemon_type + "_name"
-        daemons = self.app.get_daemons(daemon_type)
-        if daemons:
+    def get_satellite_list(self, daemon_type=''):
+        res = {}
+        for t in ['arbiter', 'scheduler', 'poller', 'reactionner', 'receiver',
+                  'broker']:
+            if daemon_type and daemon_type != t:
+                continue
+            satellite_list = []
+            res[t] = satellite_list
+            daemon_name_attr = t + "_name"
+            daemons = self.app.get_daemons(t)
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr):
                     satellite_list.append(getattr(dae, daemon_name_attr))
-                else:
-                    # If one daemon has no name... ouch!
-                    return None
-            return satellite_list
-        return None
+        return res
 
 
     # Dummy call. We are the master, we manage what we want
