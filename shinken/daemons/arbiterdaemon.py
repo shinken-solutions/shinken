@@ -83,18 +83,6 @@ class IForArbiter(Interface):
     do_not_run.need_lock = False
 
 
-    # Here a function called by check_shinken to get daemon status
-    def get_satellite_status(self, daemon_type, daemon_name):
-        daemon_name_attr = daemon_type + "_name"
-        daemons = self.app.get_daemons(daemon_type)
-        if daemons:
-            for dae in daemons:
-                if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
-                    if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive': dae.alive, 'spare': dae.spare}
-        return None
-
-
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type=''):
         res = {}
@@ -127,7 +115,6 @@ class IForArbiter(Interface):
             res[t] = lst
             for d in getattr(self.app.conf, t+'s'):
                 cls = d.__class__
-                print cls.__dict__
                 e = {}
                 ds = [cls.properties, cls.running_properties]
                 for _d in ds:
