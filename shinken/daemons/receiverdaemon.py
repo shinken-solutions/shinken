@@ -35,9 +35,19 @@ from Queue import Empty
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
-
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.daemon import Daemon, Interface
+
+class IStats(Interface):
+    """ 
+    Interface for various stats about broker activity
+    """
+    def get_raw_stats(self):
+        app = self.app
+        res = {'command_buffer_size': len(app.external_commands)}
+        return res
+
 
 
 # Our main APP class
@@ -78,6 +88,8 @@ class Receiver(Satellite):
         self.host_assoc = {}
         self.direct_routing = False
 
+        self.istats = IStats(self)
+        
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -388,6 +400,8 @@ class Receiver(Satellite):
 
             self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
+
+            self.uri3 = self.http_daemon.register(self.istats)
 
             #  We wait for initial conf
             self.wait_for_initial_conf()
