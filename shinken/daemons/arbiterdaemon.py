@@ -94,6 +94,7 @@ class IForArbiter(Interface):
                         return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
+
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
@@ -115,15 +116,32 @@ class IForArbiter(Interface):
         return {}
     what_i_managed.need_lock = False
 
-
+    
+    # We will try to export all data from our satellites, but only the json-able fields
     def get_all_states(self):
-        res = {'arbiter': self.app.conf.arbiters,
-               'scheduler': self.app.conf.schedulers,
-               'poller': self.app.conf.pollers,
-               'reactionner': self.app.conf.reactionners,
-               'receiver': self.app.conf.receivers,
-               'broker': self.app.conf.brokers}
-        return res
+        res = {}
+        for t in ['arbiter', 'scheduler', 'poller', 'reactionner', 'receiver',
+                  'broker']:
+            lst = []
+            res[t] = lst
+            for d in getattr(self.app.conf, t+'s'):
+                cls = d.__class__
+                print cls.__dict__
+                e = {}
+                ds = [cls.properties, cls.running_properties]
+                for _d in ds:
+                    for prop in _d:
+                        if hasattr(d, prop):
+                            v = getattr(d, prop)
+                            # give a try to a json able object
+                            try:
+                                json.dumps(v)
+                                e[prop] = v
+                            except Exception, exp:
+                                print exp
+                    lst.append(e)
+                        
+        return lst
 
 
     # Try to give some properties of our objects
