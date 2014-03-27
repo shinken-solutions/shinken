@@ -176,6 +176,31 @@ class IBroks(Interface):
         return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
 
 
+class IStats(Interface):
+    """ 
+    Interface for various stats about poller/reactionner activity
+    """
+    def get_raw_stats(self):
+        app = self.app
+        res = {}
+        
+        for sched_id in app.schedulers:
+            sched = app.schedulers[sched_id]
+            lst = []
+            res[sched_id] = lst
+            for mod in app.q_by_mod:
+                # In workers we've got actions send to queue - queue size
+                for (i, q) in app.q_by_mod[mod].items():
+                    lst.append( {'scheduler_name' : sched['name'],
+                                 'module' : mod,
+                                 'queue_number' : i,
+                                 'queue_size' :q.qsize(),
+                                 'return_queue_len' : app.get_returns_queue_len() } )
+        return res
+
+
+
+
 class BaseSatellite(Daemon):
     """Please Add a Docstring to describe the class here"""
 
@@ -187,6 +212,7 @@ class BaseSatellite(Daemon):
 
         # Now we create the interfaces
         self.interface = IForArbiter(self)
+        self.istats = IStats(self)
 
         # Can have a queue of external_commands given by modules
         # will be taken by arbiter to process
@@ -353,7 +379,6 @@ class Satellite(BaseSatellite):
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results':ret})
-                        print "SEND OK"*20, send_ok
 
                 # Not connected or sched is gone
                 except (HTTPExceptions, KeyError), exp:
@@ -812,6 +837,7 @@ class Satellite(BaseSatellite):
         self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
         self.uri3 = self.http_daemon.register(self.brok_interface)#, "Broks")
         self.uri4 = self.http_daemon.register(self.scheduler_interface)#, "Schedulers")
+        self.uri5 = self.http_daemon.register(self.istats)
 
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queue for fork AFTER
