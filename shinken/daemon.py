@@ -36,6 +36,7 @@ import threading
 import inspect
 import traceback
 import cStringIO
+import logging
 
 # Try to see if we are in an android device or not
 is_android = True
@@ -100,28 +101,40 @@ class Interface(object):
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
 
+
     def ping(self):
         return "pong"
     ping.need_lock = False
+
 
     def get_running_id(self):
         return self.running_id
     get_running_id.need_lock = False
 
+
     def put_conf(self, conf):
         self.app.new_conf = conf
     put_conf.method = 'post'
+
 
     def wait_new_conf(self):
         self.app.cur_conf = None
     wait_new_conf.need_lock = False
 
+
     def have_conf(self):
         return self.app.cur_conf is not None
     have_conf.need_lock = False
 
+
     def set_log_level(self, loglevel):
         return logger.set_level(loglevel)
+
+
+    def get_log_level(self):
+        return {logging.NOTSET: 'NOTSET', logging.DEBUG:'DEBUG',
+                logging.INFO: 'INFO', logging.WARNING: 'WARNING',
+                logging.ERROR : 'ERROR', logging.CRITICAL : 'CRITICAL'}.get(logger._level, 'UNKNOWN')
 
 
 # If we are under android, we can't give parameters
