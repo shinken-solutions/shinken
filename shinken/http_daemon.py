@@ -245,7 +245,8 @@ class HTTPDaemon(object):
 
             self.use_ssl = use_ssl
             
-            self.registered_fun = []
+            self.registered_fun = {}
+            self.registered_fun_names = []
             self.registered_fun_defaults = {}
 
             protocol = 'http'
@@ -284,7 +285,7 @@ class HTTPDaemon(object):
 
         def register(self, obj):
             methods = inspect.getmembers(obj, predicate=inspect.ismethod)
-            merge = [fname for (fname, f) in methods if fname in self.registered_fun ]
+            merge = [fname for (fname, f) in methods if fname in self.registered_fun_names ]
             if merge != []:
                 methods_in = [m.__name__ for m in obj.__class__.__dict__.values() if inspect.isfunction(m)]
                 methods = [m for m in methods if m[0] in methods_in]
@@ -311,7 +312,8 @@ class HTTPDaemon(object):
                 if 'self' in args:
                     args.remove('self')
                 print "Registering", fname, args, obj
-                self.registered_fun.append(fname)
+                self.registered_fun_names.append(fname)
+                self.registered_fun[fname] = (f)
                 # WARNING : we MUST do a 2 levels function here, or the f_wrapper
                 # will be uniq and so will link to the last function again
                 # and again
@@ -357,6 +359,10 @@ class HTTPDaemon(object):
                         return j
                     # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
+                    # and the name with - instead of _ if need
+                    fname_dash = fname.replace('_', '-')
+                    if fname_dash != fname:
+                        bottle.route('/'+fname_dash, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
                 register_callback(fname, args, f, obj, self.lock)
 
             # Add a simple / page

@@ -91,10 +91,12 @@ class Log:
         """
         return logging._levelNames[lvlName]
 
+
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
     def get_level(self):
         return logging.getLogger().getEffectiveLevel()
+
 
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value

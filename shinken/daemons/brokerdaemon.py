@@ -46,6 +46,8 @@ class IStats(Interface):
     """ 
     Interface for various stats about broker activity
     """
+    
+    doc = 'Get raw stats from the daemon'
     def get_raw_stats(self):
         app = self.app
         res = {}
@@ -58,6 +60,7 @@ class IStats(Interface):
                 res.append( {'module_name':inst.get_name(), 'queue_size':0})
         
         return res
+    get_raw_stats.doc = doc
 
 
 # Our main APP class

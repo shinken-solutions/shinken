@@ -43,11 +43,15 @@ class IStats(Interface):
     """ 
     Interface for various stats about broker activity
     """
+
+    doc = '''Get raw stats from the daemon:
+  * command_buffer_size: external command buffer size
+'''
     def get_raw_stats(self):
         app = self.app
         res = {'command_buffer_size': len(app.external_commands)}
         return res
-
+    get_raw_stats.doc = doc
 
 
 # Our main APP class

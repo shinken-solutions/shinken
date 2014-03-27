@@ -122,6 +122,14 @@ class IStats(Interface):
     """ 
     Interface for various stats about scheduler activity
     """
+
+    doc = '''Get raw stats from the daemon:
+  * nb_scheduled: number of scheduled checks (to launch in the future)
+  * nb_inpoller: number of check take by the pollers
+  * nb_zombies: number of zombie checks (should be close to zero)
+  * nb_notifications: number of notifications+event handlers
+  * latency: avg,min,max latency for the services (should be <10s)
+'''
     def get_raw_stats(self):
         sched = self.app.sched
         res = {}
@@ -138,6 +146,7 @@ class IStats(Interface):
         if lat_avg:
             res['latency'] = (lat_avg, lat_min, lat_max)
         return res
+    get_raw_stats.doc = doc
 
 
 

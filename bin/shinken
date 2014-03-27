@@ -390,6 +390,8 @@ if __name__ == '__main__':
 
     # Maybe he/she just want to list our commands?
     if opts.do_list:
+        if not CLI.init_done:
+            sys.exit(0)
         print "Available commands:"
         all_from = {}
         for (k, m) in CLI.keywords.iteritems():

@@ -37,6 +37,7 @@ import inspect
 import traceback
 import cStringIO
 import logging
+import inspect
 
 # Try to see if we are in an android device or not
 is_android = True
@@ -72,8 +73,6 @@ try:
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
 except ImportError, exp:  # Like in nt system or Android
-
-
     # temporary workaround:
     def get_cur_user():
         return "shinken"
@@ -81,6 +80,7 @@ except ImportError, exp:  # Like in nt system or Android
 
     def get_cur_group():
         return "shinken"
+
 
 ##########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
@@ -101,40 +101,88 @@ class Interface(object):
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
 
-
+    
+    doc = 'Test the connexion to the daemon. Returns: pong'
     def ping(self):
         return "pong"
     ping.need_lock = False
+    ping.doc = doc
 
 
+    doc = 'Get the current running id of the daemon (scheduler)'
     def get_running_id(self):
         return self.running_id
     get_running_id.need_lock = False
+    get_running_id.doc = doc
 
 
+    doc = 'Send a new configuration to the daemon (internal)'
     def put_conf(self, conf):
         self.app.new_conf = conf
     put_conf.method = 'post'
+    put_conf.doc = doc
 
 
+    doc = 'Ask the daemon to wait a new conf'
     def wait_new_conf(self):
         self.app.cur_conf = None
     wait_new_conf.need_lock = False
+    wait_new_conf.doc = doc
 
 
+    doc = 'Does the daemon got an active configuration'
     def have_conf(self):
         return self.app.cur_conf is not None
     have_conf.need_lock = False
+    have_conf.doc = doc
 
-
+    
+    doc = 'Set the current log level in [NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, UNKNOWN]'
     def set_log_level(self, loglevel):
         return logger.set_level(loglevel)
+    set_log_level.doc = doc
 
 
+    doc = 'Get the current log level in [NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, UNKNOWN]'
     def get_log_level(self):
         return {logging.NOTSET: 'NOTSET', logging.DEBUG:'DEBUG',
                 logging.INFO: 'INFO', logging.WARNING: 'WARNING',
                 logging.ERROR : 'ERROR', logging.CRITICAL : 'CRITICAL'}.get(logger._level, 'UNKNOWN')
+    get_log_level.doc = doc
+
+    doc = 'List the methods available on the daemon'
+    def api(self):
+        return self.app.http_daemon.registered_fun_names
+    api.doc = doc
+
+
+    doc = 'List the api methods and their parameters'
+    def api_full(self):
+        res = {}
+        for (fname, f) in self.app.http_daemon.registered_fun.iteritems():
+            fclean = fname.replace('_', '-')
+            argspec = inspect.getargspec(f)
+            args = [a for a in argspec.args if a != 'self']
+            defaults = self.app.http_daemon.registered_fun_defaults.get(fname, {})
+            e = {}
+            # Get a string about the args and co
+            _s_nondef_args = ', '.join([a for a in args if a not in defaults])
+            _s_def_args = ', '.join( ['%s=%s' % (k,v) for (k,v) in defaults.iteritems()] )
+            _s_args = ''
+            if _s_nondef_args:
+                _s_args +=_s_nondef_args
+            if _s_def_args:
+                _s_args += ', '+_s_def_args
+            e['proto'] = '%s(%s)' % (fclean, _s_args)
+            e['need_lock'] = getattr(f, 'need_lock', True)
+            e['method'] = getattr(f, 'method', 'GET').upper()
+            e['encode'] = getattr(f, 'encode', 'json')
+            doc = getattr(f, 'doc', '')
+            if doc:
+                e['doc'] = doc
+            res[fclean] = e
+        return res
+    api.doc = doc
 
 
 # If we are under android, we can't give parameters
