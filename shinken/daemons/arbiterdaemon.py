@@ -750,7 +750,6 @@ class Arbiter(Daemon):
         timeout = 1.0
 
         while self.must_run and not self.interrupted:
-
             elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
 
             # If FIFO, read external command
