@@ -40,6 +40,24 @@ from shinken.util import sort_by_ids
 from shinken.log import logger
 from shinken.external_command import ExternalCommand
 from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.daemon import Daemon, Interface
+
+class IStats(Interface):
+    """ 
+    Interface for various stats about broker activity
+    """
+    def get_raw_stats(self):
+        app = self.app
+        res = {}
+
+        insts = [inst for inst in app.modules_manager.instances if inst.is_external]
+        for inst in insts:
+            try:
+                res.append( {'module_name':inst.get_name(), 'queue_size':inst.to_q.qsize()})
+            except Exception, exp:
+                res.append( {'module_name':inst.get_name(), 'queue_size':0})
+        
+        return res
 
 
 # Our main APP class
@@ -81,6 +99,8 @@ class Broker(BaseSatellite):
 
         self.timeout = 1.0
 
+        self.istats = IStats(self)
+        
 
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
@@ -680,6 +700,8 @@ class Broker(BaseSatellite):
             
             self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
+
+            self.uri3 = self.http_daemon.register(self.istats)
 
             #  We wait for initial conf
             self.wait_for_initial_conf()
