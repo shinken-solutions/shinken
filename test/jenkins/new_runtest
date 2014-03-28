@@ -134,7 +134,7 @@ function grab_modules {
         # Symlink of config files to etc
         if [ -d "tmp/$module/test/etc" ]; then
             for conf_file in tmp/$module/test/etc/*; do
-               ln -s $conf_file etc/
+               ln -s ../$conf_file etc/
             done
         fi
     done
