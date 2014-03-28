@@ -124,13 +124,19 @@ function generate_all_tests {
 }
 
 
-#Must be in repos/test before launching
+# Must be in repos/test before launching
 function grab_modules {
     GIT_URL="https://github.com/shinken-monitoring"
     for module in $(cat $MODULELIST); do
         git clone $GIT_URL/$module.git tmp/$module
-        $SHINKENCLI install --local tmp/$module
+        $SHINKENCLI install --local tmp/$module > /dev/null
         cp __import_shinken.py shinken_test.py tmp/$module/test
+        # Symlink of config files to etc
+        if [ -d "tmp/$module/test/etc" ]; then
+            for conf_file in tmp/$module/test/etc/*; do
+               ln -s $conf_file etc/
+            done
+        fi
     done
 }
 
@@ -191,6 +197,8 @@ function main {
     test $COVERAGE == "COVERAGE" && rm -f "$RESULTSDIR/htmlcov/*"
     test $COVERAGE == "COVERAGE" && rm -f ".coverage*"
     rm -rf tmp/*
+    # Clean previous symlinks
+    find etc/ -maxdepth 1 -type l -exec rm {} \;
     ln -s /var/lib/shinken/modules tmp/modules
 
     generate_all_tests
