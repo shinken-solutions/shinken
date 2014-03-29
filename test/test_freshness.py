@@ -40,6 +40,7 @@ class TestFreshness(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
 
+        svc.active_checks_enabled = False
         self.assert_(svc.check_freshness == True)
         #--------------------------------------------------------------
         # initialize host/service state
