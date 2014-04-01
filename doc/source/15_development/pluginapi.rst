@@ -1,17 +1,17 @@
 .. _development/pluginapi:
 
 ===================
- Nagios Plugin API 
+ Shinken Plugin API
 ===================
 
 
 Other Resources 
 ================
 
-If you're looking at writing your own plugins for Nagios or Shinken, please make sure to visit these other resources:
+If you're looking at writing your own plugins for Shinken or Nagios, please make sure to visit these other resources:
 
-  * The official `Nagios plugin project website`_
-  * The official ` Nagios plugin development guidelines`_
+  * The official `Monitoring plugins project website`_
+  * The official `Monitoring plugins development guidelines`_
 
 
 Plugin Overview 
@@ -22,15 +22,19 @@ Scripts and executables must do two things (at a minimum) in order to function a
   * Exit with one of several possible return values
   * Return at least one line of text output to "STDOUT"
 
-The inner workings of your plugin are unimportant to Shinken, interface between them is important. Your plugin could check the status of a TCP port, run a database query, check disk free space, or do whatever else it needs to check something. The details will depend on what needs to be checked - that's up to you.
+The inner workings of your plugin are unimportant to Shinken, interface between them is important.
+Your plugin could check the status of a TCP port, run a database query, check disk free space, or do whatever else it needs to check something.
+The details will depend on what needs to be checked - that's up to you.
 
-If you are interested in having a plugin that is performant for use with Shinken, consider making it a Python or python + Ctype plugin that is daemonized by the Shinken poller or receiver daemons. You can look at the existing poller daemons for how to create a module, it is very simple.
+If you are interested in having a plugin that is performant to use with Shinken, consider making it a Python or python + C type plugin that is daemonized by the Shinken poller or receiver daemons.
+You can look at the existing poller daemons for how to create a module, it is very simple.
 
 
 Return Code 
 ============
 
-Shinken determines the status of a host or service by evaluating the return code from plugins. The following tables shows a list of valid return codes, along with their corresponding service or host states.
+Shinken determines the status of a host or service by evaluating the return code from plugins.
+The following tables shows a list of valid return codes, along with their corresponding service or host states.
 
 ================== ============= =======================
 Plugin Return Code Service State Host State             
@@ -50,7 +54,9 @@ At a minimum, plugins should return at least one of text output. Beginning with 
 
 TEXT OUTPUT | OPTIONAL PERFDATALONG TEXT LINE 1LONG TEXT LINE 2...LONG TEXT LINE N | PERFDATA LINE 2PERFDATA LINE 3...PERFDATA LINE N
 
-The performance data (shown in orange) is optional. If a plugin returns performance data in its output, it must separate the performance data from the other text output using a pipe (|) symbol. Additional lines of long text output (shown in blue) are also optional.
+The performance data is optional.
+If a plugin returns performance data in its output, it must separate the performance data from the other text output using a pipe (|) symbol.
+Additional lines of long text output are also optional.
 
 
 Plugin Output Examples 
@@ -114,16 +120,16 @@ Plugin Output Length Restrictions
 
 Nagios will only read the first 4 KB of data that a plugin returns. This is done in order to prevent runaway plugins from dumping megs or gigs of data back to Nagios. This 4 KB output limit is fairly easy to change if you need. Simply edit the value of the MAX_PLUGIN_OUTPUT_LENGTH definition in the include/nagios.h.in file of the source code distribution and recompile Nagios. There's nothing else you need to change!
 
-Shinken behaviour is ... TODO fill in the blanks.
+Shinken behaviour is pretty the same. The parameter can be specified in **shinken.cfg**. The default value is 8K
 
 
 Examples 
 =========
 
-If you're looking for some example plugins to study, I would recommend that you download the official Nagios plugins and look through the code for various C, Perl, and shell script plugins. Information on obtaining the official Nagios plugins can be found :ref:`here <thebasics/plugins>`.
+If you're looking for some example plugins to study, we would recommend that you download the official Monitoring plugins and look through the code for various C, Perl, and shell script plugins. Information on obtaining the official Monitoring plugins can be found :ref:`here <thebasics/plugins>`.
 
-Or go to the Shinken Git hub or look in your installation in shinken/modules and look for the NRPE and NSCA modules for inspiration on create a new poller or receiver  daemon module.
+Otherwise go to the Shinken Github or look in your installation in shinken/modules and look for the NRPE and NSCA modules for inspiration on create a new poller or receiver  daemon module.
 
 
-.. _ Nagios plugin development guidelines: http://nagiosplug.sourceforge.net/developer-guidelines
-.. _Nagios plugin project website: http://sourceforge.net/projects/nagiosplug/
+.. _Monitoring plugins development guidelines: https://www.monitoring-plugins.org/doc/guidelines.html
+.. _Monitoring plugins project website: https://www.monitoring-plugins.org

@@ -1,7 +1,7 @@
 .. _gettingstarted/shinken-plugins:
 
 =======================
-Nagios/Shinken Plugins 
+Monitoring Plugins
 =======================
 
 
@@ -40,15 +40,21 @@ DEPRECATED IMAGE - TODO Replace with the Shinken specific architecture diagram.
 
 Plugins act as an abstraction layer between the monitoring logic present in the Shinken daemon and the actual services and hosts that are being monitored.
 
-The upside of this type of plugin architecture is that you can monitor just about anything you can think of. If you can automate the process of checking something, you can monitor it with Shinken. There are already literally thousands of plugins that have been created in order to monitor basic resources such as processor load, disk usage, ping rates, etc. If you want to monitor something else, take a look at the documentation on :ref:`writing plugins <development/pluginapi>` and roll your own. It's simple!
+The upside of this type of plugin architecture is that you can monitor just about anything you can think of.
+If you can automate the process of checking something, you can monitor it with Shinken.
+There are already literally thousands of plugins that have been created in order to monitor basic resources such as processor load, disk usage, ping rates, etc.
+If you want to monitor something else, take a look at the documentation on :ref:`writing plugins <development/pluginapi>` and roll your own. It's simple!
 
-The downside to this type of plugin architecture is the fact that Shinken has absolutely no idea what it is that you're monitoring. You could be monitoring network traffic statistics, data error rates, room temperate, CPU voltage, fan speed, processor load, disk space, or the ability of your super-fantastic toaster to properly brown your bread in the morning... Shinken doesn't understand the specifics of what's being monitored - it just tracks changes in the state of those resources. Only the plugins themselves know exactly what they're monitoring and how to perform the actual checks.
+The downside to this type of plugin architecture is the fact that Shinken has absolutely no idea about what is monitored.
+You could be monitoring network traffic statistics, data error rates, room temperate, CPU voltage, fan speed, processor load, disk space, or the ability of your super-fantastic toaster to properly brown your bread in the morning...
+Shinken doesn't understand the specifics of what's being monitored - it just tracks changes in the state of those resources.
+Only the plugins know exactly what they're monitoring and how to perform the actual checks.
 
 
 What Plugins Are Available? 
 ============================
 
-There are plugins currently available to monitor many different kinds of devices and services. 
+There are plugins to monitor many different kinds of devices and services.
 
 They use basic monitoring protocols including:
 
@@ -66,13 +72,15 @@ They can monitor pretty much anything:
 Obtaining Plugins 
 ==================
 
-Shinken also organizes monitoring configuration packages. These are pre-built for fast no nonsense deployments. They include the check command definitions, service templates, host templates, discovery rules and integration hooks to the Community web site. The integration with the community web site permits for deployment and updates of monitoring packs.
+Shinken also organizes monitoring configuration packages. These are pre-built for fast no nonsense deployments.
+They include the check command definitions, service templates, host templates, discovery rules and integration hooks to the Community web site.
+The integration with the community web site permits deployment and updates of monitoring packs.
 
 Get started with :ref:`Shinken Monitoring Packages "Packs" <contributing/create-and-push-packs>` today.
 
-The plugins themselves are not distributed with Shinken, but you can download the official Nagios plugins and many additional plugins created and maintained by Nagios users from the following locations:
+The plugins themselves are not distributed with Shinken, but you can download the official Monitoring-plugins and many additional plugins created and maintained by Nagios users from the following locations:
 
-  * Nagios Plugins Project: http://nagiosplug.sourceforge.net/
+  * Monitoring Plugins Project: https://www.monitoring-plugins.org/
   * Nagios Downloads Page: http://www.nagios.org/download/
   * NagiosExchange.org: http://www.nagiosexchange.org/
 
@@ -80,7 +88,8 @@ The plugins themselves are not distributed with Shinken, but you can download th
 How Do I Use Plugin X? 
 =======================
 
-Most plugins will display basic usage information when you execute them using "-h" or "--help" on the command line. For example, if you want to know how the **check_http** plugin works or what options it accepts, you should try executing the following command: 
+Most plugins will display basic usage information when you execute them using "-h" or "--help" on the command line.
+For example, if you want to know how the **check_http** plugin works or what options it accepts, you should try executing the following command:
   
 ::
 
