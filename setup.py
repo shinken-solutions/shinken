@@ -318,9 +318,9 @@ else:
     data_files = []
 
 # Change paths if need
-if root:
-    for (k,v) in default_paths.iteritems():
-        default_paths[k] = os.path.join(root, v[1:])
+#if root:
+#    for (k,v) in default_paths.iteritems():
+#        default_paths[k] = os.path.join(root, v[1:])
 
 
 # Beware to install scripts in the bin dir
