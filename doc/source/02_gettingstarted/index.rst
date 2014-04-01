@@ -18,5 +18,4 @@ Getting Started
    quickstart
    installations/index
    upgrading-shinken
-   shinken-plugins
 
