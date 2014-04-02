@@ -1,127 +1,146 @@
-.. _integration/thruk:
+.. _integration/thruk-usage:
 
-=====
+======================
+Use Shinken with Thruk
+======================
+
 Thruk
-=====
+======
 
-Shinken installation 
-=====================
-
-
-Create a new user shinken:
-
-  
-::
-
-  adduser shinken
-  
-.. important::  Be sure to create a home directory for shinken user. If not, you will not be able to start the shinken arbiter.
-
-Next step retrieve the last version of shinken and uncompress it:
-
-  
-::
-
-  tar xfv shinken-0.5.1.tar.gz
-  
-Get into this directory and install it on your system:
-
-  
-::
-
-  sudo python setup.py install --install-scripts=/usr/bin
-  
-You will get new binaries into /usr/bin (files shinken-...) and some new directory (/etc/shinken, /var/lib/shinken).
-
-Now, to unleash the daemons (ah ah ah!), you can use the script in init.d, or create your own script like:
-
-  
-::
-
-  root@Enclume:/etc/init.d# more shinken.sh 
-  #!/bin/bash
-  cd /etc/init.d
-  
-  for script in shinken-scheduler shinken-poller shinken-reactionner shinken-broker shinken-arbiter 
-  do
-    ./$script $1
-  done
-  
-Start your deamon:
-
-  
-::
-
-  /etc/init.d/shinken.sh start
-  
-Now check that the shinken processes are up and running:
-
-  
-::
-
-  patrice@Enclume:~/tmp/shinken-0.4$ ps -u shinken
-  PID TTY          TIME CMD
-  4358 ?        00:00:09 shinken-schedul
-  4367 ?        00:00:10 shinken-poller
-  4372 ?        00:00:00 shinken-poller
-  4380 ?        00:00:09 shinken-reactio
-  4385 ?        00:00:00 shinken-reactio
-  4949 ?        00:00:13 shinken-broker
-  4989 ?        00:00:00 shinken-poller
-  4990 ?        00:00:00 shinken-poller
-  4993 ?        00:00:00 shinken-poller
-  4996 ?        00:00:18 shinken-broker
-  4997 ?        00:00:00 shinken-broker
-  5001 ?        00:00:00 shinken-reactio
-  5004 ?        00:00:00 shinken-poller
-  5018 ?        00:00:10 shinken-arbiter
-
-
-Configure Thruk 
-================
-
-Get a fresh copy of Thruk (http://www.thruk.org/download.html) then uncompress your version and get into the root directory.
-
-Now, create a new file named **thruk_local.conf**. Bellow, the content of this file:
-
-  
-::
-
-  ~/tmp/Thruk-0.74$ cat thruk_local.conf
-  ######################################
-  # Backend Configuration, enter your backends here
-  <Component Thruk::Backend>
-    <peer>
-        name   = Shinken
-        type   = livestatus
-        <options>
-            peer    = 127.0.0.1:50000
-       </options>
-    </peer>
-  #    <peer>
-  #        name   = External Icinga
-  #        type   = livestatus
-  #        <options>
-  #            peer    = 172.16.0.2:9999
-  #       </options>
-  #    </peer>
-  </Component>
-  
-Now launch the Thruk daemon:
-
-  
-::
-
-  ~/tmp/Thruk-0.74/script$ ./thruk_server.pl
-  You can connect to your server at http://enclume:3000
-  
-.. important::  This article doesn't describe a true Thruk installation with Apache connection. Please refer `Thruk documentation`_ to get a cleaner installation.
-
-Now, run your favorite internet browser with http://localhost:3000 and enjoy your Shinken installation !
-
-
-.. image:: /_static/images//shinken_with_thruk.png
+.. image:: /_static/images/thruk.png
    :scale: 90 %
 
 
-.. _Thruk documentation: http://www.thruk.org/documentation.html
+  * Homepage: http://www.thruk.org/
+  * Screenshots: http://www.thruk.org/images/screenshots/screenshots.html
+  * Description: "Thruk is an independent multibackend monitoring webinterface which currently supports Nagios, Icinga and Shinken as backend using the Livestatus addon. It is designed to be a "dropin" replacement. The target is to cover 100% of the original features plus additional enhancements for large installations."
+  * License: GPL v2
+  * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,7.0.html
+
+  
+  
+.. _integration/thruk-usage#install_thruk:
+
+Install Thruk 
+==============
+
+See `Thruk installation`_ documentation.
+
+Note: if you're using SELinux, also run:
+
+::
+
+  chcon -t httpd_sys_script_exec_t /usr/share/thruk/fcgid_env.sh
+  chcon -t httpd_sys_script_exec_t /usr/share/thruk/script/thruk_fastcgi.pl
+  chcon -R -t httpd_sys_content_rw_t /var/lib/thruk/
+  chcon -R -t httpd_sys_content_rw_t /var/cache/thruk/
+  chcon -R -t httpd_log_t /var/log/thruk/
+  setsebool -P httpd_can_network_connect on
+
+
+.. _integration/thruk-usage#using_shinken_with_thruk:
+
+
+Using Shinken with Thruk 
+========================
+
+Thruk communicates with Shinken through the LiveStatus module. If you used the sample configuration, everything should be ready already. :)
+
+You can review the configuration using the two following steps.
+
+
+Enable Livestatus module 
+-------------------------
+
+See :ref:`enable Livestatus module <enable_livestatus_module>`.
+
+
+Declare Shinken peer in Thruk 
+------------------------------
+
+Edit ''/etc/thruk/thruk_local.conf'' and declare the Shinken peer:
+
+::
+
+    enable_shinken_features = 1
+    <Component Thruk::Backend>
+        <peer>
+            name   = External Shinken
+            type   = livestatus
+            <options>
+                peer    = 127.0.0.01:50000
+            </options>
+            # Uncomment the following lines if you want to configure shinken through Thruk
+            #<configtool>
+            #    core_type      = shinken
+            #    core_conf      = /etc/shinken/shinken.cfg
+            #    obj_check_cmd  = service shinken check
+            #    obj_reload_cmd = service shinken restart
+            #</configtool>
+        </peer>
+    </Component>
+
+Or use the backend wizard which starts automatically upon first installation.
+
+Don't forget to change the 127.0.0.1 with the IP/name of your broker if it is installed on an different host, or if you are using a distributed architecture with multiple brokers!
+
+
+Credit Shinken in the webpages title :-) 
+-----------------------------------------
+
+  Edit ''/etc/thruk/thruk.conf'':
+
+::
+
+  title_prefix = Shinken+Thruk-
+
+
+Configure users 
+----------------
+
+Passwords are stored in ''/etc/thruk/htpasswd'' and may be modified using the ''htpasswd'' command from Apache:
+
+::
+
+  htpasswd /etc/thruk/htpasswd your_login
+
+
+User permissions: modify ''templates.cfg:generic-contact'':
+
+::
+
+      # I couldn't manage to get Thruk-level permissions to work, let's use Shinken admins privileges
+      can_submit_commands             0
+
+and define some users as admins in the Shinken configuration:
+  
+::
+
+  define contact {
+
+    # ...
+
+    use             generic-contact
+    is_admin        1
+
+    # ...
+  }
+
+
+Allow Thruk to modify its configuration file:
+
+::
+
+  chgrp apache /etc/thruk/cgi.cfg
+  chmod g+w /etc/thruk/cgi.cfg
+
+
+Set permissions for your users in Config Tool > User Settings > authorized_for\_...
+
+
+Using PNP4Nagios with Thruk 
+============================
+
+See :ref:`PNP4Nagios <integration/pnp>`.
+
+.. _Thruk installation: http://www.thruk.org/documentation.html#_installation
