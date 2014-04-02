@@ -1,4 +1,4 @@
-.. _gettingstarted/shinken-plugins:
+.. _thebasics/plugins:
 
 =======================
 Monitoring Plugins

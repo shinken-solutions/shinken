@@ -72,7 +72,7 @@ Assume we have a plugin that returns one line of output that looks like this:
 
   DISK OK - free space: / 3326 MB (56%);
   
-If this plugin was used to perform a service check, the entire line of output will be stored in the :ref:`"$SERVICEOUTPUT$" <thebasics/macrolist#serviceoutput>` macro.
+If this plugin was used to perform a service check, the entire line of output will be stored in the :ref:`$SERVICEOUTPUT$ <$SERVICEOUTPUT$>` macro.
 
 **Case 2: One line of output (text and perfdata)**
 
@@ -86,7 +86,7 @@ A plugin can return optional performance data for use by external applications. 
   
   /=2643MB;5948;5958;0;5968
   
-If this plugin was used to perform a service check, the"red"portion of output (left of the pipe separator) will be stored in the :ref:`$SERVICEOUTPUT$ <thebasics/macrolist#serviceoutput>` macro and the"orange"portion of output (right of the pipe separator) will be stored in the :ref:`$SERVICEPERFDATA$ <thebasics/macrolist#serviceperfdata>` macro.
+If this plugin was used to perform a service check, the"red"portion of output (left of the pipe separator) will be stored in the :ref:`$SERVICEOUTPUT$ <$SERVICEOUTPUT$>` macro and the"orange"portion of output (right of the pipe separator) will be stored in the :ref:`$SERVICEPERFDATA$ <thebasics/macrolist#serviceperfdata>` macro.
 
 **Case 3: Multiple lines of output (text and perfdata)**
 
@@ -96,7 +96,7 @@ A plugin optionally return multiple lines of both text output and perfdata, like
 
   DISK OK - free space: / 3326 MB (56%);"|"/=2643MB;5948;5958;0;5968/ 15272 MB (77%);/boot 68 MB (69%);/home 69357 MB (27%);/var/log 819 MB (84%);"|"/boot=68MB;88;93;0;98/home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980
   
-If this plugin was used to perform a service check, the red portion of first line of output (left of the pipe separator) will be stored in the :ref:`$SERVICEOUTPUT$ <thebasics/macrolist#serviceoutput>` macro. The orange portions of the first and subsequent lines are concatenated (with spaces) are stored in the :ref:`$SERVICEPERFDATA$ <thebasics/macrolist#serviceperfdata>` macro. The blue portions of the 2nd _ 5th lines of output will be concatenated (with escaped newlines) and stored in :ref:`$LONGSERVICEOUTPUT$ <thebasics/macrolist#longserviceoutput>` the macro.
+If this plugin was used to perform a service check, the red portion of first line of output (left of the pipe separator) will be stored in the :ref:`$SERVICEOUTPUT$ <$SERVICEOUTPUT$>` macro. The orange portions of the first and subsequent lines are concatenated (with spaces) are stored in the :ref:`$SERVICEPERFDATA$ <thebasics/macrolist#serviceperfdata>` macro. The blue portions of the 2nd _ 5th lines of output will be concatenated (with escaped newlines) and stored in :ref:`$LONGSERVICEOUTPUT$ <thebasics/macrolist#longserviceoutput>` the macro.
 
 The final contents of each macro are listed below:
 
