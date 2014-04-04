@@ -18,7 +18,6 @@ Integration With Other Software
    snmptrap
    tcpwrappers
    thruk
-   thruk-usage
    specific-cgi-parameters
    thruk-screenshot
    use-shinken-with
@@ -29,3 +28,4 @@ Integration With Other Software
    old-cgi-and-vshell
    pnp    
    webui
+
