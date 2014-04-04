@@ -319,6 +319,8 @@ class HTTPDaemon(object):
                 # and again
                 def register_callback(fname, args, f, obj, lock):
                     def f_wrapper():
+                        t0 = time.time()
+                        args_time = aqu_lock_time = calling_time = json_time = 0
                         need_lock = getattr(f, 'need_lock', True)
 
                         # Warning : put the bottle.response set inside the wrapper
@@ -342,10 +344,13 @@ class HTTPDaemon(object):
                                     raise Exception('Missing argument %s' % aname)
                                 v = default_args[aname]
                             d[aname] = v
+                        args_time = time.time() - t0
+
                         if need_lock:
                             logger.debug("HTTP: calling lock for %s" % fname)
                             lock.acquire()
-
+                        aqu_lock_time = time.time() - t0
+                        
                         try:
                             ret = f(**d)
                         # Always call the lock release if need
@@ -353,9 +358,13 @@ class HTTPDaemon(object):
                             # Ok now we can release the lock
                             if need_lock:
                                 lock.release()
-
+                        calling_time = time.time() - t0
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
+                        json_time = time.time() - t0
+                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s]" % (
+                                fname, args_time, aqu_lock_time, calling_time, json_time) )
+                        
                         return j
                     # Ok now really put the route in place
                     bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
