@@ -78,7 +78,7 @@ It's done :)
 Possible values of X in X of: expressions
 ------------------------------------------
 
-    
+
 The ``X of:`` expression may be configured different values depending on the needs. The supported expressions are described below:
 
   * **A positive integer**, which means "*at least X host/servicices should be up*"

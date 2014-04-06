@@ -245,17 +245,17 @@ In some cases you may not want your host, service, or contact definitions to inh
 ::
 
           define host{
-  		         event_handler           my-event-handler-command
-  		         name                    generichosttemplate
-  		         register                0
-  		         }
+                 event_handler           my-event-handler-command
+                 name                    generichosttemplate
+                 register                0
+                 }
 
-  		  define host{
-  		         host_name               bighost1
-  		         address                 192.168.1.3
-  		         event_handler           null
-  		         use                     generichosthosttemplate
-  		         }
+          define host{
+                 host_name               bighost1
+                 address                 192.168.1.3
+                 event_handler           null
+                 use                     generichosthosttemplate
+                 }
 
 In this case, the host *bighost1* will not inherit the value of the "event_handler" variable that is defined in the *generichosttemplate*. The resulting effective definition of *bighost1* is the following:
 
@@ -263,13 +263,13 @@ In this case, the host *bighost1* will not inherit the value of the "event_handl
 ::
 
           define host{
-  		         host_name               bighost1
-  		         address                 192.168.1.3
-  		         }
+                 host_name               bighost1
+                 address                 192.168.1.3
+                 }
 
 
 
-.. __advanced/objectinheritance#add_string:
+.. _advanced/objectinheritance#add_string:
 
 Additive Inheritance of String Values
 ======================================
@@ -300,9 +300,9 @@ In this case, the host *linuxserver1* will append the value of its local "hostgr
 ::
 
   define host{
-  	     host_name              linuxserver1
-  	     hostgroups             all-servers,linux-servers,web-servers
-  	     }
+         host_name              linuxserver1
+         hostgroups             all-servers,linux-servers,web-servers
+         }
 
 .. important::  If you use a field twice using several templates, the value of the field will be the first one found!
    In the example above, fields values in all-servers won't we be replaced. Be careful with overlaping field!
@@ -347,10 +347,10 @@ Confused? Here's an example:
 ::
 
   define host{
-  	     name                    linux-server
-  	     contact_groups          linux-admins
-  	     ...
-  	     }
+         name                    linux-server
+         contact_groups          linux-admins
+         ...
+         }
 
   define hostescalation{
          host_name               linux-server
@@ -426,11 +426,11 @@ In the example above, devweb1 is inheriting variables/values from two sources: g
 
   # Development web serve
   define host{
-  	     host_name               devweb1
-  	     active_checks_enabled   1
-  	     check_interval          10
-  	     notification_options    d,u,r
-  	     ...
+         host_name               devweb1
+         active_checks_enabled   1
+         check_interval          10
+         notification_options    d,u,r
+         ...
          }
 
 
@@ -451,7 +451,7 @@ Consider the following host definition that references three templates:
   define host{
          use        1, 4, 8
          host_name  devweb1
-     	 ...
+         ...
   }
 
 If some of those referenced templates themselves inherit variables/values from one or more other templates, the precendence rules are shown below. Testing, trial, and error will help you better understand exactly how things work in complex inheritance situations like this. :-)

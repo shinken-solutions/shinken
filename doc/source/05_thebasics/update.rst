@@ -36,8 +36,8 @@ Update can be done by following (more or less) those steps :
   cp -pr /usr/local/shinken/shinken/modules /var/lib/shinken/
 
 
-* Edit the Shinken configuration to match you need. Basically you will need to remove the default shinken configuration of daemons and put the previous one. Shinken-specific is now split into several files
-Be carful with the ini ones, you may **merge** them if you modified them. Careful to put the right *cfg_dir* statement in the shinken.cfg.
+* Edit the Shinken configuration to match you need. Basically you will need to remove the default shinken configuration of daemons and put the previous one. Shinken-specific is now split into several files.
+  Be carful with the ini ones, you may **merge** them if you modified them. Careful to put the right *cfg_dir* statement in the shinken.cfg.
 
 
 .. important::  Modules directories have changed a lot in Shinken 2.0. If you copy paste the previous one it will work  **BUT** you may have trouble if you use Shinken CLI.
