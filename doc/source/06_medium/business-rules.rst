@@ -78,16 +78,16 @@ It's done :)
 Possible values of X in X of: expressions
 ------------------------------------------
 
-
+    
 The ``X of:`` expression may be configured different values depending on the needs. The supported expressions are described below:
 
   * **A positive integer**, which means "*at least X host/servicices should be up*"
 
-  * **A positive percentage**, which means "*at least X percents of hosts/services should be up*". This percentage expression may be combined with `Groupping expression expansion`_ to build expressions such as "*95 percents of the web front ends shoud be up*". This way, adding hosts in the web frontend hostgroup is sufficient, and the QoS remains the same.
+  * **A positive percentage**, which means "*at least X percents of hosts/services should be up*". This percentage expression may be combined with Groupping expression expansion to build expressions such as "*95 percents of the web front ends shoud be up*". This way, adding hosts in the web frontend hostgroup is sufficient, and the QoS remains the same.
 
   * **A negative integer**, which means "*at most X host/servicices may be down*"
 
-  * **A negative percentage**, which means "*at most X percents of hosts/services should may be down*". This percentage expression may be combined with `Groupping expression expansion`_ to build expressions such as "*5 percents of the web front ends may be down*". This way, adding hosts in the web frontend hostgroup is sufficient, and the QoS remains the same.
+  * **A negative percentage**, which means "*at most X percents of hosts/services should may be down*". This percentage expression may be combined with Groupping expression expansion to build expressions such as "*5 percents of the web front ends may be down*". This way, adding hosts in the web frontend hostgroup is sufficient, and the QoS remains the same.
 
 Example:
 
