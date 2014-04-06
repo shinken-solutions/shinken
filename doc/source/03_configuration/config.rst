@@ -15,14 +15,16 @@ Once you figure out how things work, it'll all be well worth your time. :-)
 Sample configuration files are installed in the **/etc/shinken/** directory when you follow the :ref:`Quickstart installation guide <gettingstarted/quickstart>`.
 
 
-Main Configuration File 
-========================
+Main Configuration File : shinken.cfg
+=====================================
+
+.. note:: A main configuration file is a file given to the arbiter as parameter from command_line. In Shinken 2.0, there is only shinken.cfg
 
 The 2.0 introduces a new configuration layout. The basic configuration is now split into several small files.
 Don't be afraid, it's actually a better layout for your mind because one file ~ one object definition.
 This helps a lot to understand object concepts and uses in Shinken configuration.
 
-However, one file, among others can be considered as the entry point : **shinken.cfg**
+However, one file, among others can be considered as the entry point : **shinken.cfg**. This is the main configuration file.
 
 This configuration file is pointing to all configuration directories Shinken needs. The **cfg_dir=** statement is actually doing all the job.
 It includes all the configuration files described below.
@@ -33,6 +35,7 @@ Documentation for the main configuration file can be found :ref:`Main Configurat
 
 Daemons Definition Files
 ========================
+
 Files for daemons definition are located in separated directories. For example pollers definitions are in the **pollers** directory.
 Each directory contains one file per existing daemon.
 
@@ -43,7 +46,7 @@ Files for modules definition are located in **/etc/shinken/modules**. Each modul
 As modules are loaded by daemons, modules files are referenced in daemons files. The statement is **module** to specify a module to load.
 
 
-Resource File(s) 
+Resource Files
 =================
 
 .. image:: /_static/images/official/images/configoverview-shinken.png
