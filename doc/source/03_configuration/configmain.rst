@@ -1,8 +1,8 @@
 .. _configuration/configmain:
 
-=================================
- Main Configuration File Options 
-=================================
+==============================================
+ Main Configuration File (shinken.cfg) Options
+==============================================
 
 When creating and/or editing configuration files, keep the following in mind:
 
@@ -10,372 +10,354 @@ When creating and/or editing configuration files, keep the following in mind:
 * Variable names are case-sensitive
 * If you want to configure a process to use a specific module:
 
-  * You must define the module in a **modules_xxx.cfg** file in the **shinken-specific.d** directory
+  * You must define the module in a **xxx.cfg** file in the **modules** directory
   * You must reference it in the **modules** section for that process, e.g. the **broker.cfg** file
 
 
-Config File Location and sample 
-================================
 
-The main configuration files are usually named "nagios.cfg" and "shinken-specific*.cfg". They are located in the "/etc/shinken/" directory.
-Sample main configuration files ("/etc/shinken/nagios.cfg", "/etc/shiken/shinken-specific*.cfg") are installed for you when you follow the :ref:`Quickstart installation guide <gettingstarted/quickstart>`.
+The main configuration file is "shinken.cfg". It is located in the "/etc/shinken/" directory.
+Sample main configuration files are installed for you when you follow the :ref:`Quickstart installation guide <gettingstarted/quickstart>`.
+Below are listed parameters currently used in the file. For other parameters (not mentionned by default) see :ref:`Main Configuration File Advanced <configuration/configmain-advanced>`
 
+Default used options
+=====================
 
-Broker Modules 
-===============
-
-Shinken provides a lot of functionality through its interfaces with external systems. To this end, the broker daemon will load modules. The function of the modules is described in more detail in the :ref:`Broker modules page <packages/the-broker-modules>`.
-
-Broker modules are essential for the web frontends, the metric databases, logging state changes in log management systems.
-
-
-Arbiter, Receiver, Poller, Reactionner Modules 
-===============================================
-
-Shinken daemons can also load modules to influence what they can do and how they interface with external systems.
-
-The sample configuration file provides succinct explanations of each module, the shinken architecture page also links to the different module configuration pages.
-
-
-Path, users and log variables 
-==============================
-
-Below you will find descriptions of each main Shinken configuration file option.
-
-
-.. _configuration/configmain#log_file:
-
-Log File 
----------
-
-Defined in shinken-specific.cfg file.
-
-Format
-
-::
-
-  define broker{
-       modules           <logging modules>
-       [...]
-  }
-
-  
-Example for logging module named "Simple_log"
-
-::
-
-   define module{
-       module_name      Simple-log
-       module_type      simple_log
-       path             /var/lib/shinken/nagios.log
-       archive_path     /var/lib/shinken/archives/
-   }
-
-   
-This variable specifies where Shinken should create its main log file **on the broker server**. If you have :ref:`Log Rotation Method <configuration/configmain#log_rotation_method>` enabled, this file will automatically be rotated every day.
-
-
-.. _configuration/configmain#log_level:
-
-Log Level 
-----------
-
-Defined in nagios.cfg file.
-
-Format
-
-::
-
-  log_level=[DEBUG,INFO,WARNING,ERROR,CRITICAL]
-  
-Example
-
-::
-
-  log_level=WARNING
-  
-  
-This variable specifies which logs will be raised by the arbiter daemon. For others daemons, it can be defined in their local \*d.ini files.
-
-
-.. _configuration/configmain#date_format:
-
-Human format for log timestamp 
--------------------------------
-
-Say if the timespam should be a unixtime (default) or a human read one.
-
-Format
-
-::
-
-  human_timestamp_log=[0/1]
-  
-Example
-
-::
-
-  human_timestamp_log=0
-  
-  
-This directive is used to specify if the timespam before the log entry should be in unixtime (like [1302874960]) which is the default, or a human readable one (like [Fri Apr 15 15:43:19 2011]).
-
-Beware : if you set the human format, some automatic parsing log tools won't work!
-
-
-
+.. _configuration/configmain#cfg_dir:
 .. _configuration/configmain#cfg_file:
 
-Object Configuration File 
---------------------------
-
-Defined in nagios.cfg file.
-
+Cfg dir and Cfg files
+---------------------
 Format :
 
 ::
 
-  cfg_file=<file_name>
-  
-Example
-
-::
-
-  cfg_file=/usr/local/shinken/etc/hosts.cfg
-  cfg_file=/usr/local/shinken/etc/services.cfg
-  cfg_file=/usr/local/shinken/etc/commands.cfg
-  
-This directive is used to specify an :ref:`Object Configuration Overview <configuration/configobject>` containing object definitions that Shinken should use for monitoring. Object configuration files contain definitions for hosts, host groups, contacts, contact groups, services, commands, etc. You can seperate your configuration information into several files and specify multiple "cfg_file=" statements to have each of them processed.
-
-Remark : the *cfg_file* can be a relative path, so it can be relative from the file that is reading. For example if you set "cfg_file=hosts.cfg" in the file "cfg_file=/etc/shinken/nagios.cfg", the file that will be read is "/etc/shinken/hosts.cfg".
-
-
-.. _configuration/configmain#cfg_dir:
-
-Object Configuration Directory 
--------------------------------
-
-Defined in nagios.cfg file.
-
-Format:
-
-::
-
   cfg_dir=<directory_name>
+  cfg_file=<file_name>
 
-Example:
+Those are **statements and not parameters**. The arbiter considers them as order to open other(s) configuration(s) file(s)
+For the cfg_dir one, the arbiter **only** reads files ending with ".cfg".
+The arbiter **does** read recursively directory for files but **does not** consider lines into those files as **statements** anymore.
 
-::
+This means that a cfg_dir or cfg_file is considered as a **parameter** outside of shinken.cfg (or any configuration file directly given to the arbiter as parameter in a command line)
+The arbiter handles main configuration files differently than any other files.
 
-  cfg_dir=/etc/shinken/commands
-  cfg_dir=/etc/shinken/services
-  cfg_dir=/etc/shinken/hosts
-  
-This directive is used to specify a directory which contains :ref:`Object Configuration Overview <configuration/configobject>` that Shinken should use for monitoring. All files in the directory with a .cfg extension are processed as object config files. Additionally, it will recursively process all config files in subdirectories of the directory you specify here. You can separate your configuration files into different directories and specify multiple
-
-::
-
-  cfg_dir=
-  
-statements to have all config files in each directory processed.
+With those 2 statements, all Shinken configuration is defined : daemons, objects, resources.
 
 
-.. _configuration/configmain#resource_file:
 
-Resource File 
---------------
+.. _configuration/configmain#retention_update_interval:
 
-Defined in nagios.cfg file.
+Automatic State Retention Update Interval
+------------------------------------------
 
 Format:
-   resource_file=<file_name>
-
-Example:
 
 ::
 
-  resource_file=/etc/shinken/resource.cfg
-  
-This is used to specify an optional resource file that can contain "$USERn$" :ref:`Understanding Macros and How They Work <thebasics/macros>` definitions. "$USERn$" macros are useful for storing usernames, passwords, and items commonly used in command definitions (like directory paths).
-A classical variable used is $USER1$, used to store the plugins path, "/usr/lib/nagios/plugins" on a classic installation.
+  retention_update_interval=<minutes>
+
+Default:
+
+::
+
+  retention_update_interval=60
+
+This setting determines how often (in minutes) that Shinken **scheduler** will automatically save retention data during normal operation. If you set this value to 0, it will not save retention data at regular intervals, but it will still save retention data before shutting down or restarting. If you have disabled state retention (with the :ref:`State Retention Option <configuration/configmain#retain_state_information>` option), this option has no effect.
 
 
-.. _configuration/configmain#daemon_user:
+.. _configuration/configmain#max_service_check_spread:
 
-Arbiter Daemon User 
+Maximum Host/Service Check Spread
+----------------------------------
+
+Format:
+
+::
+
+  max_service_check_spread=<minutes>
+  max_host_check_spread=<minutes>
+
+Default:
+
+::
+
+  max_service_check_spread=30
+  max_host_check_spread=30
+
+This option determines the maximum number of minutes from when Shinken starts that all hosts/services (that are scheduled to be regularly checked) are checked. This option will ensure that the initial checks of all hosts/services occur within the timeframe you specify. Default value is 30 (minutes).
+
+
+.. _configuration/configmain#host_check_timeout:
+.. _configuration/configmain#service_check_timeout:
+
+Service/Host Check Timeout
+---------------------------
+
+Format:
+
+::
+
+  service_check_timeout=<seconds>
+  host_check_timeout=<seconds>
+
+Default:
+
+::
+
+  service_check_timeout=60
+  host_check_timeout=30
+
+This is the maximum number of seconds that Shinken will allow service/host checks to run. If checks exceed this limit, they are killed and a CRITICAL state is returned. A timeout error will also be logged.
+
+There is often widespread confusion as to what this option really does. It is meant to be used as a last ditch mechanism to kill off plugins which are misbehaving and not exiting in a timely manner. It should be set to something high (like 60 seconds or more), so that each check normally finishes executing within this time limit. If a check runs longer than this limit, Shinken will kill it off thinking it is a runaway processes.
+
+.. _configuration/configmain#timeout_exit_status:
+
+Timeout Exit Status
 --------------------
 
-Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
+Format:
+
+::
+
+   timeout_exit_status=[0,1,2,3]
+
+Default:
+
+::
+
+   timeout_exit_status=2
+
+State set by Shinken in case of timeout.
+
+
+.. _configuration/configmain#flap_history:
+
+Flap History
+-------------
 
 Format:
 
 ::
 
-  user=username
+  flap_history=<int>
 
-Example:
+Default:
 
 ::
 
-  user=shinken
-  
-This is used to set the effective user that the **Arbiter** process (main process) should run as. After initial program startup, Shinken will drop its effective privileges and run as this user.
+  flap_history=20
+
+This option is used to set the history size of states keep by the scheduler to make the flapping calculation. By default, the value is 20 states kept.
+
+The size in memory is for the scheduler daemon : 4Bytes * flap_history * (nb hosts + nb services). For a big environment, it costs 4 * 20 * (1000+10000) - 900Ko. So you can raise it to higher value if you want. To have more information about flapping, you can read :ref:`this <advanced/flapping>`.
 
 
-.. _configuration/configmain#daemon_group:
+.. _configuration/configmain#max_plugins_output_length:
 
-Arbiter Daemon user Group 
+Max Plugins Output Length
 --------------------------
 
-Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
+Format:
+
+::
+
+  max_plugins_output_length=<int>
+
+Default:
+
+::
+
+  max_plugins_output_length=8192
+
+This option is used to set the max size in bytes for the checks plugins output. So if you saw truncated output like for huge disk check when you have a lot of partitions, raise this value.
+
+
+.. _configuration/configmain#enable_problem_impacts_states_change:
+
+Enable problem/impacts states change
+-------------------------------------
 
 Format:
 
 ::
 
-  group=groupname
+  enable_problem_impacts_states_change=<0/1>
 
-Example:
+Default:
 
 ::
 
-  group=shinken
-  
-This is used to set the effective group of the user used to launch the **arbiter** daemon.
+  enable_problem_impacts_states_change=0
+
+This option is used to know if we apply or not the state change when an host or service is impacted by a root problem (like the service's host going down or a host's parent being down too). The state will be changed by UNKNONW for a service and UNREACHABLE for an host until their next schedule check. This state change do not count as a attempt, it's just for console so the users know that theses objects got problems and the previous states are not sure.
 
 
-.. _configuration/configmain#idontcareaboutsecurity:
+.. _configuration/configmain#disable_old_nagios_parameters_whining:
 
-Bypass security checks for the Arbiter daemon 
-----------------------------------------------
-
-Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
+Disable Old Nagios Parameters Whining
+--------------------------------------
 
 Format:
 
 ::
 
-  idontcareaboutsecurity=<0/1>
+  disable_old_nagios_parameters_whining=<0/1>
 
-Example:
+Default:
 
 ::
 
-  idontcareaboutsecurity=0
-  
-This option determines whether or not Shinken will allow the Arbiter daemon to run under the root account. If this option is disabled, Shinken will bailout if the :ref:`nagios_user <configuration/configmain#daemon_user>` or the :ref:`nagios_group <configuration/configmain#daemon_group>` is configured with the root account.
+  disable_old_nagios_parameters_whining=0
 
-The Shinken daemons do not need root right. Without a good reason do not run thems under this account!
-  * 0 = Be a responsible administrator
-  * 1 = Make crazy your security manager
+If 1, disable all notice and warning messages at configuration checking
 
 
-.. _configuration/configmain#enable_notifications:
+.. _configuration/configmain#use_timezone:
 
-Notifications Option 
----------------------
+Timezone Option
+----------------
 
 Format:
 
 ::
 
-  enable_notifications=<0/1>
+  use_timezone=<tz from tz database>
 
-Example:
+Default:
 
 ::
 
-  enable_notifications=1
-  
-This option determines whether or not Shinken will send out :ref:`notifications <thebasics/notifications>`. If this option is disabled, Shinken will not send out notifications for any host or service.
+  use_timezone=''
 
-Values are as follows:
-  * 0 = Disable notifications
-  * 1 = Enable notifications (default)
+This option allows you to override the default timezone that this instance of Shinken runs in. Useful if you have multiple instances of Shinken that need to run from the same server, but have different local times associated with them. If not specified, Shinken will use the system configured timezone.
 
-  
-.. _configuration/configmain#log_rotation_method:
 
-Log Rotation Method (Not fully implemented) 
---------------------------------------------
+
+.. _configuration/configmain#enable_environment_macros:
+
+Environment Macros Option
+--------------------------
 
 Format:
 
 ::
 
-  log_rotation_method=<n/h/d/w/m>
+  enable_environment_macros=<0/1>
 
-Example:
+Default:
 
 ::
 
-  log_rotation_method=d
-  
-This is the rotation method that you would like Shinken to use for your log file on the **broker server**. Values are as follows:
+  enable_environment_macros=1
 
-  * n = None (don't rotate the log - this is the default)
-  * h = Hourly (rotate the log at the top of each hour)
-  * d = Daily (rotate the log at midnight each day)
-  * w = Weekly (rotate the log at midnight on Saturday)
-  * m = Monthly (rotate the log at midnight on the last day of the month)
+This option determines whether or not the Shinken daemon will make all standard :ref:`macros <thebasics/macrolist>` available as environment variables to your check, notification, event hander, etc. commands. In large installations this can be problematic because it takes additional CPU to compute the values of all macros and make them available to the environment. It also cost a increase network communication between schedulers and pollers.
 
-.. tip::  From now, only the d (Daily) parameter is managed. 
+  * 0 = Don't make macros available as environment variables
+  * 1 = Make macros available as environment variables
 
 
-.. _configuration/configmain#check_external_commands:
+.. _configuration/configmain#log_initial_states:
 
-External Command Check Option 
-------------------------------
+Initial States Logging Option (Not implemented)
+------------------------------------------------
 
 Format:
 
 ::
 
-  check_external_commands=<0/1>
+  log_initial_states=<0/1>
 
-Example:
+Default:
 
 ::
 
-  check_external_commands=1
-  
-This option determines whether or not Shinken will check the :ref:`External Command File <configuration/configmain#command_file>` for commands that should be executed with the **arbiter daemon**. More information on external commands can be found :ref:`here <advanced/extcommands>`.
+  log_initial_states=1
 
-  * 0 = Don't check external commands (default)
-  * 1 = Check external commands (default)
+This variable determines whether or not Shinken will force all initial host and service states to be logged, even if they result in an OK state. Initial service and host states are normally only logged when there is a problem on the first check. Enabling this option is useful if you are using an application that scans the log file to determine long-term state statistics for services and hosts.
 
-.. note::  FIX ME : Find the real default value
+  * 0 = Don't log initial states
+  * 1 = Log initial states
 
 
-.. _configuration/configmain#command_file:
+.. _configuration/configmain#no_event_handlers_during_downtimes:
 
-External Command File 
-----------------------
-
-Defined in nagios.cfg file.
+Event Handler during downtimes
+-------------------------------
 
 Format:
 
 ::
 
-  command_file=<file_name>
+  no_event_handlers_during_downtimes=<0/1>
 
-Example:
+Default:
 
 ::
 
-  command_file=/var/lib/shinken/rw/nagios.cmd
-  
-This is the file that Shinken will check for external commands to process with the **arbiter daemon**. The :ref:`command CGI <thebasics/cgis#cmd_cgi>` writes commands to this file. The external command file is implemented as a named pipe (FIFO), which is created when Nagios starts and removed when it shuts down. More information on external commands can be found :ref:`here <advanced/extcommands>`.
+  no_event_handlers_during_downtimes=0
 
-.. todo: where is thebasics/cgis#cmd-cgi (thebasics-cgis#thebasics-cgis-cmd_cgi-)?
+This option determines whether or not Shinken will run :ref:`event handlers <advanced/eventhandlers>` when the host or service is in a scheduled downtime.
 
-.. tip::  This external command file is not managed under Windows system. Please use others way to send commands like the LiveStatus module for example.
+  * 0 = Launch event handlers (Nagios behavior)
+  * 1 = Don't launch event handlers
+
+References:
+
+  * http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg01394.html
+  * https://github.com/naparuba/shinken/commit/9ce28d80857c137e5b915b39bbb8c1baecc821f9
+
+
+.. _configuration/configmain#pack_distribution_file:
+
+Pack Distribution File
+-----------------------
+
+Format:
+
+::
+
+  pack_distribution_file=<filename>
+
+Default:
+
+::
+
+  pack_distribution_file=pack_distribution.dat
+
+A pack distribution file is a local file near the arbiter that will keep host pack id association, and so push same host on the same scheduler if possible between restarts.
+
+
+
+Arbiter daemon part
+====================
+
+The following parameters are common to all daemons.
+
+.. _configuration/configmain#workdir:
+
+Workdir
+-------
+
+Format:
+
+::
+
+  workdir=<directory>
+
+Default :
+
+::
+
+  workdir=/var/run/shinken/
+
+This variable specify the working directory of the daemon.
+In the arbiter case, if the value is empty, the directory name of lock_file parameter. See below
 
 
 .. _configuration/configmain#lock_file:
 
-Arbiter Lock File 
+Arbiter Lock File
 ------------------
 
 Defined in nagios.cfg file.
@@ -395,430 +377,257 @@ Example:
 This option specifies the location of the lock file that Shinken **arbiter daemon** should create when it runs as a daemon (when started with the "-d" command line argument). This file contains the process id (PID) number of the running **arbiter** process.
 
 
-.. _configuration/configmain#retain_state_information:
+.. _configuration/configmain#local_log:
 
-State Retention Option (Not implemented) 
------------------------------------------
-
-Format:
-
-::
-
-  retain_state_information=<0/1>
-
-Example:
-
-::
-
-  retain_state_information=1
-
-This option determines whether or not Shinken will retain state information for hosts and services between program restarts. If you enable this option, you should supply a value for the :ref:`State Retention File <configuration/configmain#state_retention_file>` variable. When enabled, Shinken will save all state information for hosts and service before it shuts down (or restarts) and will read in previously saved state information when it starts up again.
-  * 0 = Don't retain state information
-  * 1 = Retain state information (default)
-
-.. note::  Idea to approve : Mark it as Unused : `Related topic`_. A Shinken module replace it.
-
-
-.. _configuration/configmain#state_retention_file:
-
-State Retention File 
----------------------
-
-Format:  
-
-::
-
-  state_retention_file=<file_name>
-
-Example:  
-
-::
-
-  state_retention_file=/var/lib/shinken/retention.dat
-  
-This is the file that Shinken **scheduler daemons** will use for storing status, downtime, and comment information before they shuts down. When Shinken is restarted it will use the information stored in this file for setting the initial states of services and hosts before it starts monitoring anything. In order to make Shinken retain state information between program restarts, you must enable the :ref:`State Retention Option <configuration/configmain#retain_state_information>` option.
-
-.. important::  The file format is not the same between Shinken and Nagios! The retention.dat generated with Nagios will not load into Shinken.
-
-
-.. _configuration/configmain#retention_update_interval:
-
-Automatic State Retention Update Interval 
-------------------------------------------
+Local Log
+----------
 
 Format:
 
 ::
 
-  retention_update_interval=<minutes>
+  local_log=<filename>
 
-Example:
+Default:
 
 ::
 
-  retention_update_interval=60
-  
-This setting determines how often (in minutes) that Shinken **scheduler** will automatically save retention data during normal operation. If you set this value to 0, it will not save retention data at regular intervals, but it will still save retention data before shutting down or restarting. If you have disabled state retention (with the :ref:`State Retention Option <configuration/configmain#retain_state_information>` option), this option has no effect.
+  local_log=/var/log/shinken/arbiterd.log'
 
 
-Scheduling parameters 
-======================
+This variable specifies the log file for the daemon.
 
-.. _configuration/configmain#execute_service_checks:
 
-Service/Host Check Execution Option 
-------------------------------------
+.. _configuration/configmain#log_level:
+
+Log Level
+----------
 
 Format:
 
 ::
 
-  execute_service_checks=<0/1>
-  execute_host_checks=<0/1>
+  log_level=[DEBUG,INFO,WARNING,ERROR,CRITICAL]
 
-Example:
+Default:
 
 ::
 
-  execute_service_checks=1
-  execute_host_checks=1
-  
-This option determines whether or not Shinken will execute service/host checks. Do not change this option unless you use a old school distributed architecture. And even if you do this, please change your architecture with a cool new one far more efficient.
-
-  * 0 = Don't execute service checks
-  * 1 = Execute service checks (default)
+  log_level=WARNING
 
 
-.. _configuration/configmain#accept_passive_service_checks:
+This variable specifies which logs will be raised by the arbiter daemon. For others daemons, it can be defined in their local \*d.ini files.
 
-Passive Service/Host Check Acceptance Option 
----------------------------------------------
+
+.. _configuration/configmain#shinken_user:
+
+Arbiter Daemon User
+--------------------
+
+Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
 
 Format:
 
 ::
 
-  accept_passive_service_checks=<0/1>
-  accept_passive_host_checks=<0/1>
+  shinken_user=username
 
-Example:
+Default:
 
 ::
 
-  accept_passive_service_checks=1
-  accept_passive_host_checks=1
-  
-This option determines whether or not Shinken will accept :ref:`passive service/host checks <thebasics/passivechecks>`. If this option is disabled, Nagios will not accept any passive service/host checks.
+  shinken_user=<current user>
 
-  * 0 = Don't accept passive service/host checks
-  * 1 = Accept passive service/host checks (default)
+This is used to set the effective user that the **Arbiter** process (main process) should run as.
+After initial program startup, Shinken will drop its effective privileges and run as this user.
 
 
-.. _configuration/configmain#enable_event_handlers:
 
-Event Handler Option 
----------------------
+.. _configuration/configmain#shinken_group:
+
+Arbiter Daemon user Group
+--------------------------
+
+Defined in brokerd.ini, brokerd-windows.ini, pollerd.ini, pollerd-windows.ini, reactionnerd.ini, schedulerd.ini and schedulerd-windows.ini.
 
 Format:
 
 ::
 
-  enable_event_handlers=<0/1>
+  shinken_group=groupname
 
-Example:
+Default:
 
 ::
 
-  enable_event_handlers=1
-  
-This option determines whether or not Shinken will run :ref:`event handlers <advanced/eventhandlers>`.
+  shinken_group=<current group>
 
-  * 0 = Disable event handlers
-  * 1 = Enable event handlers (default)
+This is used to set the effective group of the user used to launch the **arbiter** daemon.
 
 
-.. _configuration/configmain#no_event_handlers_during_downtimes:
+.. _configuration/configmain#modules_dir:
 
-Event Handler during downtimes 
--------------------------------
+Modules directory
+------------------
 
 Format:
 
 ::
 
-  no_event_handlers_during_downtimes=<0/1>
+  modules_dir=<direname>
 
-Example:
-
-::
-
-  no_event_handlers_during_downtimes=1
-  
-This option determines whether or not Shinken will run :ref:`event handlers <advanced/eventhandlers>` when the host or service is in a scheduled downtime.
-
-  * 0 = Disable event handlers (Nagios behavior) (default)
-  * 1 = Enable event handlers
-
-References:
-
-  * http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg01394.html
-  * https://github.com/naparuba/shinken/commit/9ce28d80857c137e5b915b39bbb8c1baecc821f9
-
-
-.. _configuration/configmain#use_syslog:
-
-Syslog Logging Option 
-----------------------
-
-Format:  
+Default:
 
 ::
 
-  use_syslog=<0/1>
-
-Example:  
-
-::
-
-  use_syslog=1
-  
-This variable determines whether messages are logged to the syslog facility on your local host. Values are as follows:
-
-  * 0 = Don't use syslog facility
-  * 1 = Use syslog facility
-
-.. tip::  This is a Unix Os only option.
+  modules_dir=/var/lib/shinken/modules
 
 
-.. _configuration/configmain#log_notifications:
+Path to the modules directory
 
-Notification Logging Option 
-----------------------------
+
+.. _configuration/configmain#daemon_enabled:
+
+Daemon Enabled
+---------------
 
 Format:
 
 ::
 
-  log_notifications=<0/1>
+  daemon_enabled=[0/1]
 
-Example:
+Default:
 
 ::
+  daemon_enabled=1
 
-  log_notifications=1
-  
-This variable determines whether or not notification messages are logged. If you have a lot of contacts or regular service failures your log file will grow (let say some Mo by day for a huge configuration, so it's quite OK for nearly every one to log them). Use this option to keep contact notifications from being logged.
-
-  * 0 = Don't log notifications
-  * 1 = Log notifications
+Set to 0 if you want to make this daemon (arbiter) **NOT** to run
 
 
-.. _configuration/configmain#log_service_retries:
-.. _configuration/configmain#log_host_retries:
+.. _configuration/configmain#use_ssl:
 
-Service/Host Check Retry Logging Option (Not implemented) 
-----------------------------------------------------------
+Use SSL
+-------
 
 Format:
 
 ::
 
-  log_service_retries=<0/1>
-  log_host_retries=<0/1>
+  use_ssl=[0/1]
 
-Example:
+Default:
 
 ::
 
-  log_service_retries=0
-  log_host_retries=0
-  
-This variable determines whether or not service/host check retries are logged. Service check retries occur when a service check results in a non-OK state, but you have configured Shinken to retry the service more than once before responding to the error. Services in this situation are considered to be in "soft" states. Logging service check retries is mostly useful when attempting to debug Shinken or test out service/host :ref:`event handlers <advanced/eventhandlers>`.
+  use_ssl=0
 
-  * 0 = Don't log service/host check retries (default)
-  * 1 = Log service/host check retries
+Use SSl or not. You have to enable it on other daemons too.
 
 
-.. _configuration/configmain#log_event_handlers:
+.. _configuration/configmain#ca_cert:
 
-Event Handler Logging Option 
------------------------------
+Ca Cert
+--------
 
 Format:
 
 ::
 
-  log_event_handlers=<0/1>
+  ca_cert=<filename>
 
-Example:
-
-::
-
-  log_event_handlers=1
-  
-This variable determines whether or not service and host :ref:`event handlers <advanced/eventhandlers>` are logged. Event handlers are optional commands that can be run whenever a service or hosts changes state. Logging event handlers is most useful when debugging Shinken or first trying out your event handler scripts.
-
-  * 0 = Don't log event handlers
-  * 1 = Log event handlers
-
-
-.. _configuration/configmain#log_initial_states:
-
-Initial States Logging Option (Not implemented) 
-------------------------------------------------
-
-Format:  
+Default:
 
 ::
 
-  log_initial_states=<0/1>
+  ca_cert=etc/certs/ca.pem
 
-Example:
+Certification Authority (CA) certificate
 
-::
-
-  log_initial_states=1
-
-This variable determines whether or not Shinken will force all initial host and service states to be logged, even if they result in an OK state. Initial service and host states are normally only logged when there is a problem on the first check. Enabling this option is useful if you are using an application that scans the log file to determine long-term state statistics for services and hosts.
-
-  * 0 = Don't log initial states (default)
-  * 1 = Log initial states
+.. warning::  Put full paths for certs
 
 
-.. _configuration/configmain#log_external_commands:
+.. _configuration/configmain#server_cert:
 
-External Command Logging Option 
---------------------------------
+Server Cert
+------------
 
 Format:
 
 ::
 
-  log_external_commands=<0/1>
+  server_cert=<filename>
 
-Example:
+Default:
 
 ::
 
-  log_external_commands=1
-  
-This variable determines whether or not Shinken will log :ref:`external commands <advanced/extcommands>` that it receives.
+  server_cert=/etc/certs/server.cert
 
-  * 0 = Don't log external commands
-  * 1 = Log external commands (default)
+Server certificate for SSL
+
+.. warning::  Put full paths for certs
 
 
-.. _configuration/configmain#log_passive_checks:
+.. _configuration/configmain#server_key:
 
-Passive Check Logging Option (Not implemented)
------------------------------------------------
+Server Key
+-----------
 
 Format:
 
 ::
 
-  log_passive_checks=<0/1>
+  server_key=<filename>
 
-Example:
+Default:
 
 ::
 
-  log_passive_checks=1
-  
-This variable determines whether or not Shinken will log :ref:`passive host and service checks <thebasics/passivechecks>` that it receives from the :ref:`external command file <configuration/configmain#command_file>`.
+  server_key=/etc/certs/server.key
 
-  * 0 = Don't log passive checks
-  * 1 = Log passive checks (default)
+Server key for SSL
+
+.. warning::  Put full paths for certs
 
 
-.. _configuration/configmain#global_host_event_handler:
-.. _configuration/configmain#global_service_event_handler:
+.. _configuration/configmain#hard_ssl_name_check:
 
-Global Host/Service Event Handler Option (Not implemented) 
------------------------------------------------------------
+Hard SSL Name Check
+--------------------
 
 Format:
 
 ::
 
-  global_host_event_handler=<configobjects/command>
-  global_service_event_handler=<configobjects/command>
+  hard_ssl_name_check=[0/1]
 
-Example:
+
+Default:
 
 ::
 
-  global_host_event_handler=log-host-event-to-db
-  global_service_event_handler=log-service-event-to-db
-  
-This option allows you to specify a host event handler command that is to be run for every host state change. The global event handler is executed immediately prior to the event handler that you have optionally specified in each host definition. The command argument is the short name of a command that you define in your :ref:`Object Configuration Overview <configuration/configobject>`. The maximum amount of time that this command can run is controlled by the :ref:`Event Handler Timeout <configuration/configmain-advanced#event_handler_timeout>` option. More information on event handlers can be found :ref:`here <advanced/eventhandlers>`.
+  hard_ssl_name_check=0
 
-Such commands should not be so useful with the new Shinken distributed architecture. If you use it, look if you can avoid it because such commands will kill your performances.
+Enable SSL name check.
 
 
-.. _configuration/configmain#max_service_check_spread:
+.. _configuration/configmain#http_backend:
 
-Maximum Host/Service Check Spread 
-----------------------------------
+HTTP Backend
+-------------
 
 Format:
 
 ::
 
-  max_service_check_spread=<minutes>
+  http_backend=[auto, cherrypy, swsgiref]
 
-Example:
-
-::
-
-  max_service_check_spread=30
-  
-This option determines the maximum number of minutes from when Shinken starts that all hosts/services (that are scheduled to be regularly checked) are checked. This option will ensure that the initial checks of all hosts/services occur within the timeframe you specify. Default value is 30 (minutes).
-
-
-.. _configuration/configmain#interval_length:
-
-Timing Interval Length 
------------------------
-
-Format:
+Default:
 
 ::
 
-  interval_length=<seconds>
+  http_backend=auto
 
-Example:
-
-::
-
-  interval_length=60
-  
-This is the number of seconds per “unit interval" used for timing in the scheduling queue, re-notifications, etc. "Units intervals" are used in the object configuration file to determine how often to run a service check, how often to re-notify a contact, etc.
-
-The default value for this is set to 60, which means that a "unit value" of 1 in the object configuration file will mean 60 seconds (1 minute). 
-
-.. tip::  Set this option top 1 is not a good thing with Shinken. It's not design to be a hard real time (<5seconds) monitoring system. Nearly no one need such hard real time (maybe only the Nuclear center or a market place like the London Exchange...).
-
-
-Tuning and advanced parameters 
-===============================
-
-Others parameters are useful for advanced features like flapping detection or performance tuning. Please look at the 
-:ref:`configuringshinken-configmain-advanced <configuration/configmain-advanced>` page for them.
-
-
-Old CGI related parameter 
-==========================
-
-If you are using the old CGI from Nagios, please migrate to a new WebUI. For historical perspective you can find information on the :ref:`specific CGI parameters <integration/specific-cgi-parameters>`.
-
-
-Unused parameters 
-==================
-
-The below parameters are inherited from Nagios but are not used in Shinken. You can defined them but if you don't it will be the same :)
-
-They are listed on another page :ref:`unused Nagios parameters <advanced/unused-nagios-parameters>`.
-
-
-.. _Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html
+Specify which http_backend to use. Auto is better. If cherrypy3 is not available, it will fail back to swsgiref
+.. note:: Actually, if you specify something else than cherrypy or auto, it will fall into swsgiref
