@@ -35,7 +35,6 @@ Advanced Topics
    checkscheduling
    objectinheritance
    objecttricks
-   businessrules
    migratingfromnagios
    multi-layer-discovery
    multiple-urls
