@@ -19,9 +19,9 @@ Format:  command_check_interval=<xxx>[s]
 Example: command_check_interval=1       
 ======== ===============================
 
-If you specify a number with an "s" appended to it (i.e. 30s), this is the number of seconds to wait between external command checks. If you leave off the "s", this is the number of “time units" to wait between external command checks. Unless you've changed the :ref:`Timing Interval Length <configuration/configmain#interval_length>` value (as defined below) from the default value of 60, this number will mean minutes.
+If you specify a number with an "s" appended to it (i.e. 30s), this is the number of seconds to wait between external command checks. If you leave off the "s", this is the number of “time units" to wait between external command checks. Unless you've changed the :ref:`Timing Interval Length <configuration/configmain-advanced#interval_length>` value (as defined below) from the default value of 60, this number will mean minutes.
 
-By setting this value to **-1**, Nagios will check for external commands as often as possible. Each time Nagios checks for external commands it will read and process all commands present in the :ref:`External Command File <configuration/configmain#command_file>` before continuing on with its other duties. More information on external commands can be found :ref:`here <advanced/extcommands>`.
+By setting this value to **-1**, Nagios will check for external commands as often as possible. Each time Nagios checks for external commands it will read and process all commands present in the :ref:`External Command File <configuration/configmain-advanced#command_file>` before continuing on with its other duties. More information on external commands can be found :ref:`here <advanced/extcommands>`.
 
 
 External Command Buffer Slots (Not implemented) 
@@ -45,7 +45,7 @@ Format:  use_retained_program_state=<0/1>
 Example: use_retained_program_state=1    
 ======== ================================
 
-This setting determines whether or not Nagios will set various program-wide state variables based on the values saved in the retention file. Some of these program-wide state variables that are normally saved across program restarts if state retention is enabled include the :ref:`Notifications Option <configuration/configmain#enable_notifications>`, :ref:`Flap Detection Option <configuration/configmain-advanced#enable_flap_detection>`, :ref:`Event Handler Option <configuration/configmain#enable_event_handlers>`, :ref:`Service Check Execution Option <configuration/configmain#execute_service_checks>`, and :ref:`Passive Service Check Acceptance Option <configuration/configmain#accept_passive_service_checks>` !!!!!!!!!! options. If you do not have :ref:`State Retention Option <configuration/configmain#retain_state_information>` enabled, this option has no effect.
+This setting determines whether or not Nagios will set various program-wide state variables based on the values saved in the retention file. Some of these program-wide state variables that are normally saved across program restarts if state retention is enabled include the :ref:`Notifications Option <configuration/configmain-advanced#enable_notifications>`, :ref:`Flap Detection Option <configuration/configmain-advanced#enable_flap_detection>`, :ref:`Event Handler Option <configuration/configmain-advanced#enable_event_handlers>`, :ref:`Service Check Execution Option <configuration/configmain-advanced#execute_service_checks>`, and :ref:`Passive Service Check Acceptance Option <configuration/configmain-advanced#accept_passive_service_checks>` !!!!!!!!!! options. If you do not have :ref:`State Retention Option <configuration/configmain-advanced#retain_state_information>` enabled, this option has no effect.
 
   * 0 = Don't use retained program state
   * 1 = Use retained program state (default)

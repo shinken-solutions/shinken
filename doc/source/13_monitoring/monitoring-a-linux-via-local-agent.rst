@@ -8,7 +8,7 @@ Monitoring Linux devices via a Local Agent
 .. note::  **TODO** Documentation needs to be written
 
 See:
-  * :ref:`Chapter 9. Monitoring GNU/Linux &amp; Unix Machines <gettingstarted/monitoring-linux>`
+  * :ref:`Chapter 9. Monitoring GNU/Linux &amp; Unix Machines <monitoring/monitoring-a-linux>`
 
 
 NRPE 

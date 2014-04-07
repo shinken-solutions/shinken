@@ -27,10 +27,10 @@ The next logical steps for a new user are as listed in the :ref:`Getting Started
 * Start adding devices to monitor, such as:
 
   * :ref:`Public services <monitoring/network-service>` (HTTP, SMTP, IMAP, SSH, etc.)
-  * :ref:`GNU/Linux <gettingstarted/monitoring-linux>` clients
-  * :ref:`Windows <gettingstarted/monitoring-windows>` clients
-  * :ref:`Routers <gettingstarted/monitoring-routers>`
-  * :ref:`Printers <gettingstarted/monitoring-printers>`
+  * :ref:`GNU/Linux <monitoring/monitoring-a-linux>` clients
+  * :ref:`Windows <monitoring/windows>` clients
+  * :ref:`Routers <monitoring/monitoring-routers>`
+  * :ref:`Printers <monitoring/printer>`
 
 * Setup the web interface:
 
@@ -41,4 +41,5 @@ The next logical steps for a new user are as listed in the :ref:`Getting Started
 Getting Help
 -------------
 
-New and experienced users sometimes need to find documentation, troubleshooting tips, a place to chat, etc. The :ref:`Shinken community provides many resources to help you <contributing/index#Shinken resources for users>`. You can discuss installation documentation changes in the Shinken forums.
+New and experienced users sometimes need to find documentation, troubleshooting tips, a place to chat, etc.
+The :ref:`Shinken community provides many resources to help you <contributing/index>`. You can discuss installation documentation changes in the Shinken forums.

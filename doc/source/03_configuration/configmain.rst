@@ -62,7 +62,9 @@ Default:
 
   retention_update_interval=60
 
-This setting determines how often (in minutes) that Shinken **scheduler** will automatically save retention data during normal operation. If you set this value to 0, it will not save retention data at regular intervals, but it will still save retention data before shutting down or restarting. If you have disabled state retention (with the :ref:`State Retention Option <configuration/configmain#retain_state_information>` option), this option has no effect.
+This setting determines how often (in minutes) that Shinken **scheduler** will automatically save retention data during normal operation.
+If you set this value to 0, it will not save retention data at regular intervals, but it will still save retention data before shutting down or restarting.
+If you have disabled state retention (with the :ref:`State Retention Option <configuration/configmain-advanced#retain_state_information>` option), this option has no effect.
 
 
 .. _configuration/configmain#max_service_check_spread:

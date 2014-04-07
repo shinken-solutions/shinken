@@ -15,7 +15,7 @@ Introduction
 
 This documentation attempts to explain object inheritance and how it can be used in your :ref:`object definitions <configuration/objectdefinitions>`.
 
-If you are confused about how recursion and inheritance work after reading this, take a look at the sample object config files provided in the Shinken distribution. If that still doesn't help, have a look to the :ref:`shinken resources for help <how_to_contribute>`.
+If you are confused about how recursion and inheritance work after reading this, take a look at the sample object config files provided in the Shinken distribution. If that still doesn't help, have a look to the :ref:`shinken resources for help <contributing/how-to-contribute>`.
 
 
 

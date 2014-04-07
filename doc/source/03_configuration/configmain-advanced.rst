@@ -640,7 +640,7 @@ This option determines the number of seconds Shinken will add to any host or ser
 
 
 
-.. _configuration/configmain-advanced#date_format:
+.. _configuration/configmain-advanced#human_timestamp_log:
 
 Human format for log timestamp
 -------------------------------
@@ -707,7 +707,8 @@ Example:
 
   idontcareaboutsecurity=0
 
-This option determines whether or not Shinken will allow the Arbiter daemon to run under the root account. If this option is disabled, Shinken will bailout if the :ref:`nagios_user <configuration/configmain-advanced#daemon_user>` or the :ref:`nagios_group <configuration/configmain-advanced#daemon_group>` is configured with the root account.
+This option determines whether or not Shinken will allow the Arbiter daemon to run under the root account.
+If this option is disabled, Shinken will bailout if the :ref:`nagios_user <configuration/configmain#shinken_user>` or the :ref:`nagios_group <configuration/configmain#shinken_group>` is configured with the root account.
 
 The Shinken daemons do not need root right. Without a good reason do not run thems under this account!
   * 0 = Be a responsible administrator

@@ -38,7 +38,7 @@ It's quite easy, all you need is to enable the parameter
 
   enable_problem_impacts_states_change=1
 
-See :ref:`enable_problem_impacts_states_change <configuration/configmain-advanced#enable_problem_impacts_states_change>` for more information about it.
+See :ref:`enable_problem_impacts_states_change <configuration/configmain#enable_problem_impacts_states_change>` for more information about it.
 
 
 Dynamic Business Impact 

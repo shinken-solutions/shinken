@@ -42,7 +42,7 @@ Just because there is a need to send out a host or service notification doesn't 
 Program-Wide Filter: 
 =====================
 
-The first filter that notifications must pass is a test of whether or not notifications are enabled on a program-wide basis. This is initially determined by the :ref:`"enable_notifications" <configuration/configmain#enable_notifications>` directive in the main config file, but may be changed during runtime from the web interface. If notifications are disabled on a program-wide basis, no host or service notifications can be sent out - period. If they are enabled on a program-wide basis, there are still other tests that must be passed...
+The first filter that notifications must pass is a test of whether or not notifications are enabled on a program-wide basis. This is initially determined by the :ref:`"enable_notifications" <configuration/configmain-advanced#enable_notifications>` directive in the main config file, but may be changed during runtime from the web interface. If notifications are disabled on a program-wide basis, no host or service notifications can be sent out - period. If they are enabled on a program-wide basis, there are still other tests that must be passed...
 
 
 Service and Host Filters: 

@@ -144,13 +144,13 @@ is_admin
     * 1 = allow contact to see all objects
 
 retain_status_information
-  This directive is used to determine whether or not status-related information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value :
+  This directive is used to determine whether or not status-related information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value :
   
     * 0 = disable status information retention
     * 1 = enable status information retention.
 
 retain_nonstatus_information
-  This directive is used to determine whether or not non-status information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value :
+  This directive is used to determine whether or not non-status information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value :
   
     * 0 = disable non-status information retention
     * 1 = enable non-status information retention

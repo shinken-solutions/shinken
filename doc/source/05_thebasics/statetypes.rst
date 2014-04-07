@@ -37,7 +37,7 @@ The following things occur when hosts or services experience SOFT state changes:
   * The SOFT state is logged.
   * Event handlers are executed to handle the SOFT state.
 
-SOFT states are only logged if you enabled the :ref:`log_service_retries <configuration/configmain#log_service_retries>` or :ref:`log_host_retries <configuration/configmain#log_host_retries>` options in your main configuration file.
+SOFT states are only logged if you enabled the :ref:`log_service_retries <configuration/configmain-advanced#log_service_retries>` or :ref:`log_host_retries <configuration/configmain-advanced#log_host_retries>` options in your main configuration file.
 
 The only important thing that really happens during a soft state is the execution of event handlers. Using event handlers can be particularly useful if you want to try and proactively fix a problem before it turns into a HARD state. The :ref:`$HOSTSTATETYPE$ <$HOSTSTATETYPE$>` or :ref:`$SERVICESTATETYPE$ <$SERVICESTATETYPE$>` macros will have a value of "SOFT" when event handlers are executed, which allows your event handler scripts to know when they should take corrective action. More information on event handlers can be found :ref:`here <advanced/eventhandlers>`.
 

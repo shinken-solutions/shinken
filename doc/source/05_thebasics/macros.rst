@@ -167,7 +167,7 @@ The "_MACADDRESS" custom variable would be available in a macro called "$_HOSTMA
 Macro Cleansing 
 ================
 
-Some macros are stripped of potentially dangerous shell metacharacters before being substituted into commands to be executed. Which characters are stripped from the macros depends on the setting of the :ref:`illegal_macro_output_chars <configuration/configmain#illegal_macro_output_chars>` directive. The following macros are stripped of potentially dangerous characters:
+Some macros are stripped of potentially dangerous shell metacharacters before being substituted into commands to be executed. Which characters are stripped from the macros depends on the setting of the :ref:`illegal_macro_output_chars <configuration/configmain-advanced#illegal_macro_output_chars>` directive. The following macros are stripped of potentially dangerous characters:
 
   * :ref:`$HOSTOUTPUT$ <$HOSTOUTPUT$>`
   * :ref:`$LONGHOSTOUTPUT$ <$LONGHOSTOUTPUT$>`

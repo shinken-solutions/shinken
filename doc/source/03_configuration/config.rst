@@ -55,7 +55,7 @@ Resource Files
 Resource files can be used to store user-defined macros.
 The main point of having resource files is to use them to store sensitive configuration information (like passwords), without making them available to the CGIs.
 
-You can specify one or more optional resource files by using the :ref:`resource_file <configuration/configmain#resource_file>` directive in your main configuration file.
+You can specify one or more optional resource files by using the :ref:`resource_file <configuration/configmain-advanced#resource_file>` directive in your main configuration file.
 
 
 Object Definition Files 

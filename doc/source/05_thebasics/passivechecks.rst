@@ -45,7 +45,7 @@ DEPRECATED IMAGE - TODO REPLACE WITH MOE ACCURATE DEPTICTION
 Here's how passive checks work in more detail...
 
   * An external application checks the status of a host or service.
-  * The external application writes the results of the check to the :ref:`external command named pipe <configuration/configmain#command_file>` (a named pipe is a "memory pipe", so there is no disk IO involved).
+  * The external application writes the results of the check to the :ref:`external command named pipe <configuration/configmain-advanced#command_file>` (a named pipe is a "memory pipe", so there is no disk IO involved).
   * Shinken reads the external command file and places the results of all passive checks into a queue for processing by the appropriate process in the Shinken cloud.
   * Shinken will execute a :ref:`check result reaper event <advanced/unused-nagios-parameters/check_result_reaper_frequency>` each second and scan the check result queue. Each service check result that is found in the queue is processed in the same manner - regardless of whether the check was active or passive. Shinken may send out notifications, log alerts, etc. depending on the check result information.
 
@@ -57,10 +57,10 @@ Enabling Passive Checks
 
 In order to enable passive checks in Shinken, you'll need to do the following:
 
-  * Set :ref:`"accept_passive_service_checks" <configuration/configmain#accept_passive_service_checks>` directive is set to 1 (in nagios.cfg).
+  * Set :ref:`"accept_passive_service_checks" <configuration/configmain-advanced#accept_passive_service_checks>` directive is set to 1 (in nagios.cfg).
   * Set the "passive_checks_enabled" directive in your host and service definitions is set to 1.
 
-If you want to disable processing of passive checks on a global basis, set the :ref:`"accept_passive_service_checks" <configuration/configmain#accept_passive_service_checks>` directive to 0.
+If you want to disable processing of passive checks on a global basis, set the :ref:`"accept_passive_service_checks" <configuration/configmain-advanced#accept_passive_service_checks>` directive to 0.
 
 If you would like to disable passive checks for just a few hosts or services, use the "passive_checks_enabled" directive in the host and/or service definitions to do so.
 

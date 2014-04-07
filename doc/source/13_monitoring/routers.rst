@@ -1,4 +1,4 @@
-.. _gettingstarted/monitoring-routers:
+.. _monitoring/monitoring-routers:
 
 =================================
  Monitoring Routers and Switches 

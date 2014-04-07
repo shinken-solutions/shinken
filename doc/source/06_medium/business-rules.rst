@@ -394,7 +394,7 @@ Macro expansion
 
 It is possible in a business rule expression to include macros, as you would do for normal check command definition. You may for instance define a custom macro on the host or service holding the business rule, and use it in the expression.
 
-Combined with :ref:`macro modulation <setup_macro_modulations>`, this allows to define consolidated services with variable fault tolerance thresholds depending on the timeperiod.
+Combined with :ref:`macro modulation <advanced/macro-modulations>`, this allows to define consolidated services with variable fault tolerance thresholds depending on the timeperiod.
 
 Imagine your web frontend cluster composed of dozens servers serving the web site. If one is failing, this would not impact the service so much. During the day, when the complete team is at work, a single failure should be notified and fixed immediately. But during the night, you may consider that losing let's say up to 5% of the cluster has no impact on the QoS: thus waking up the on-call guy is not useful.
 

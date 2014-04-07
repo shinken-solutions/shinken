@@ -50,7 +50,7 @@ Global host and service event handlers are run for every host or service state c
 
 Event handlers offer functionality similar to notifications (launch some command) but are called each state change, soft or hard. This allows to call handler function and react to problems before Shinken raises a hard state and starts sending out notifications.
 
-You can specify global event handler commands by using the :ref:`global_host_event_handler <configuration/configmain#global_host_event_handler>` and :ref:`global_service_event_handler <configuration/configmain#global_service_event_handler>` options in your main configuration file.
+You can specify global event handler commands by using the :ref:`global_host_event_handler <configuration/configmain-advanced#global_host_event_handler>` and :ref:`global_service_event_handler <configuration/configmain-advanced#global_service_event_handler>` options in your main configuration file.
 
 Individual hosts and services can have their own event handler command that should be run to handle state changes. You can specify an event handler that should be run by using the "event_handler" directive in your :ref:`host <configobjects/host>` and :ref:`service <configobjects/service>` definitions. These host- and service-specific event handlers are executed immediately after the (optional) global host or service event handler is executed.
 
@@ -61,9 +61,9 @@ Individual hosts and services can have their own event handler command that shou
 Enabling Event Handlers 
 ========================
 
-Event handlers can be enabled or disabled on a program-wide basis by using the :ref:`enable_event_handlers <configuration/configmain#enable_event_handlers>` in your main configuration file.
+Event handlers can be enabled or disabled on a program-wide basis by using the :ref:`enable_event_handlers <configuration/configmain-advanced#enable_event_handlers>` in your main configuration file.
 
-Host- and service-specific event handlers can be enabled or disabled by using the "event_handler_enabled" directive in your :ref:`host <configobjects/host>` and :ref:`service <configobjects/service>` definitions. Host- and service-specific event handlers will not be executed if the global :ref:`enable_event_handlers <configuration/configmain#enable_event_handlers>` option is disabled.
+Host- and service-specific event handlers can be enabled or disabled by using the "event_handler_enabled" directive in your :ref:`host <configobjects/host>` and :ref:`service <configobjects/service>` definitions. Host- and service-specific event handlers will not be executed if the global :ref:`enable_event_handlers <configuration/configmain-advanced#enable_event_handlers>` option is disabled.
 
 
 Event Handler Execution Order 

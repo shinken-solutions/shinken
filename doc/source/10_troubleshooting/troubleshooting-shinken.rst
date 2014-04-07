@@ -25,12 +25,12 @@ Doing this will improve the quality of the answers and your own expertise.
 Frequently asked questions 
 ---------------------------
 
-  * :ref:`How to set my daemons in debug mode to review the logs? <Review the daemon logs>`
-  * :ref:`I am getting an OSError read-only filesystem <OSError read-only filesystem error>`
-  * :ref:`I am getting an OSError [Errno 24] Too many open files <OSError too many files open>`
-  * :ref:`Notification emails have generic-host instead of host_name <Notification emails have generic-host instead of host_name>`
-  * :ref:`Thruk/Multisite reporting doesn't work using Shinken 1.2 <Reporting does not work with Shinken 1.2>`
-  * :ref:`Pyro MemoryError during configuration distribution by the Arbiter to other daemons(satellites) <How to identify the source of a Pyro MemoryError>`
+  * :ref:`How to set my daemons in debug mode to review the logs? <troubleshooting/troubleshooting-shinken#FAQ-1>`
+  * :ref:`I am getting an OSError read-only filesystem <troubleshooting/troubleshooting-shinken#FAQ-4>`
+  * :ref:`I am getting an OSError [Errno 24] Too many open files <troubleshooting/troubleshooting-shinken#FAQ-5>`
+  * :ref:`Notification emails have generic-host instead of host_name <troubleshooting/troubleshooting-shinken#FAQ-6>`
+
+
 
 
 General Shinken troubleshooting steps to resolve common issue
@@ -41,9 +41,9 @@ General Shinken troubleshooting steps to resolve common issue
   * Is Shinken even running?
   * Have you checked the :ref:`Shinken pre-requisites <gettingstarted/installations/shinken-installation#requirements>`?
   * Have you :ref:`configured the WebUI module <integration/webui>` in your shinken-specific.cfg file
-  * Have you :ref:`completed the Shinken basic configuration <configuration/index>` and :ref:`Shinken WebUI configuration <integrationwithothersoftware\webui>`
+  * Have you :ref:`completed the Shinken basic configuration <configuration/index>` and :ref:`Shinken WebUI configuration <integration/webui>`
   * Have you reviewed your Shinken centralized (:ref:`Simple-log broker module <the_broker_modules>`) logs for errors
-  * Have you reviewed your :ref:`Shinken daemon specific logs <troubleshooting/troubleshooting-shinken#Review the daemon logs>` for errors or tracebacks (what the system was doing just before a crash)
+  * Have you reviewed your :ref:`Shinken daemon specific logs <troubleshooting/troubleshooting-shinken#FAQ-1>` for errors or tracebacks (what the system was doing just before a crash)
   * Have you reviewed your :ref:`configuration syntax <configuration/config>` (keywords and values)
   * Is what you are trying to use installed? Are its dependancies installed! Does it even work.
   * Is what you are trying to use :ref:`a supported version <gettingstarted/installations/shinken-installation#requirements>`?
@@ -76,7 +76,7 @@ General Shinken troubleshooting steps to resolve common issue
 FAQ Answers
 ===========
 
-.. _troubleshooting/troubleshooting-shinken#review_the_daemon_logs:
+.. _troubleshooting/troubleshooting-shinken#FAQ-1:
 
 Review the daemon logs
 ----------------------
@@ -90,6 +90,8 @@ Default log file location ''local_log=%(workdir)s/schedulerd.log''
 The log file will contain information on the Shinken process and any problems the daemon encounters.
 
 
+.. _troubleshooting/troubleshooting-shinken#FAQ-2:
+
 Changing the log level during runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -97,6 +99,8 @@ shinken-admin is a command line script that can change the logging level of a ru
 
 ''linux-server# ./shinken-admin ...''
 
+
+.. _troubleshooting/troubleshooting-shinken#FAQ-3:
 
 Changing the log level in the configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,6 +112,8 @@ Possible values: DEBUG,INFO,WARNING,ERROR,CRITICAL
 Re-start the Shinken process.
 
 
+.. _troubleshooting/troubleshooting-shinken#FAQ-4:
+
 OSError read-only filesystem error
 ----------------------------------
 
@@ -118,6 +124,8 @@ You poller daemon and reactionner daemons are not starting and you get a traceba
 Execute a 'mount' and verify if /tmp or /tmpfs is set to 'ro' (Read-only).
 As root modify your /etc/fstab to set the filesystem to read-write.
 
+
+.. _troubleshooting/troubleshooting-shinken#FAQ-5:
 
 OSError too many files open
 ---------------------------
@@ -138,6 +146,8 @@ This typically changing a system wide file limit and potentially user specific f
 ulimit -n xxxxx now
 
 
+.. _troubleshooting/troubleshooting-shinken#FAQ-6:
+
 Notification emails have generic-host instead of host_name
 ----------------------------------------------------------
 
@@ -145,40 +155,4 @@ Try defining host_alias, which is often the field used by the notification metho
 
 Why does Shinken use both host_alias and host_name. Flexibility and historicaly as Nagios did it this way.
 
-
-Reporting does not work with Shinken 1.2
-----------------------------------------
-
-Set your Scheduler log level to INFO by editing shinken/etc/scheduler.ini.
-
-Upgrade to Shinken 1.2.1, which fixes a MongoDB pattern matching error.
-
-
-How to identify the source of a Pyro MemoryError
-------------------------------------------------
-
-Are the satellites identical in every respect? 
-All the others work just fine?
-What is the memory usage of the scheduler after sending the configuration data for each scheduler?
-Do you use multiple realms?
-Does the memory use increase for each Scheduler?
-
-Possible causes
-
-  * Shinken Arbiter is not preparing the configuration correctly sending overlarge objects
-  * There is a hardware problem that causes the error, for instance a faulty memory chip or bad harddrive sector. Run a hardware diagnostics check and a memtest (http://www.memtest.org/) on the failing device
-  * A software package installed on the failing sattelite has become corrupted. Re-install all software related to Pyro, possibly the whole OS.
-  * Or perhaps, and probably very unlikely, that the network infrastructure (cables/router/etc) experience a fault and deliver corrupt packets to the failing sattelite, whereas the other sattelites get good data. Do an direct server to server test or end to end test using iPerf to validate the bandwidth and packet loss on the communication path.
-    
-    Other than that, here are some general thoughts. A MemoryError means: "Raised when an operation runs out of memory but the situation may still be rescued (by deleting some objects). The associated value is a string indicating what kind of (internal) operation ran out of memory. Note that because of the underlying memory management architecture (C"s malloc() function), the interpreter may not always be
-    able to completely recover from this situation; it nevertheless raises an exception so that a stack traceback can be printed, in case a run-away program was the cause.
-  * Check on the server the actual memory usage of the Scheduler daemon.
-    Another possible reason for malloc() to fail can also be memory fragmentation, which means that there's enough free RAM but just not a free chunk somewhere in between that is large enough to hold the required new allocation size. No idea if this could be the case in your situation, and I have no idea on how to debug for this.    
-    
-    It is not entirely clear to me where exactly the memoryerror occurs: is it indeed raised on the sattelite device, and received and logged on the server? Or is the server throwing it by itself?
-  * Other avenues of investigation
-      
-      * Try running the python interpreter with warnings on (-Wall).
-      * Try using the HMAC key feature of Pyro to validate the network packets.
-      * Try using Pyro's multiplex server instead of the threadpool server.
 

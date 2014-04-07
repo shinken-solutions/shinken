@@ -40,7 +40,7 @@ The image below shows a chronological history of service states from the most re
    :scale: 90 %
 
 
-The historical service check results are examined to determine where state changes/transitions occur. State changes occur when an archived state is different from the archived state that immediately precedes it chronologically. Since we keep the results of the last 21 service checks in the array, there is a possibility of having at most 20 state changes. The 20 value can be changed in the main configuration file, see :ref:`flap_history <configuration/configmain-advanced#flap_history>`. In this example there are 7 state changes, indicated by blue arrows in the image above.
+The historical service check results are examined to determine where state changes/transitions occur. State changes occur when an archived state is different from the archived state that immediately precedes it chronologically. Since we keep the results of the last 21 service checks in the array, there is a possibility of having at most 20 state changes. The 20 value can be changed in the main configuration file, see :ref:`flap_history <configuration/configmain#flap_history>`. In this example there are 7 state changes, indicated by blue arrows in the image above.
 
 The flap detection logic uses the state changes to determine an overall percent state change for the service. This is a measure of volatility/change for the service. Services that never change state will have a 0% state change value, while services that change state each time they're checked will have 100% state change. Most services will have a percent state change somewhere in between.
 

@@ -8,7 +8,7 @@
 Introduction 
 =============
 
-Shinken can process commands from external applications (including the CGIs and others UIs) and alter various aspects of its monitoring functions based on the commands it receives. External applications can submit commands by writing to the :ref:`command file <configuration/configmain#command_file>`, which is periodically processed by the Nagios daemon.
+Shinken can process commands from external applications (including the CGIs and others UIs) and alter various aspects of its monitoring functions based on the commands it receives. External applications can submit commands by writing to the :ref:`command file <configuration/configmain-advanced#command_file>`, which is periodically processed by the Nagios daemon.
 
 
 Enabling External Commands 
@@ -20,8 +20,8 @@ Enabling External Commands
 
 In order to have Shinken process external commands, make sure you do the following:
 
-  * Enable external command checking with the :ref:`check_external_commands <configuration/configmain#check_external_commands>` option.
-  * Specify the location of the command file with the :ref:`command_file <configuration/configmain#command_file>` option.
+  * Enable external command checking with the :ref:`check_external_commands <configuration/configmain-advanced#check_external_commands>` option.
+  * Specify the location of the command file with the :ref:`command_file <configuration/configmain-advanced#command_file>` option.
   * Setup proper permissions on the directory containing the external command file, as described in the :ref:`quickstart guide <gettingstarted/quickstart>`.
 
 
@@ -40,7 +40,7 @@ External commands can be used to accomplish a variety of things while Shinken is
 Command Format 
 ===============
 
-External commands that are written to the :ref:`command file <configuration/configmain#command_file>` have the following format...
+External commands that are written to the :ref:`command file <configuration/configmain-advanced#command_file>` have the following format...
 
   
 ::

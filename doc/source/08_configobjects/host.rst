@@ -136,7 +136,7 @@ hostgroups
   This directive is used to identify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the host belongs to. Multiple hostgroups should be separated by commas. This directive may be used as an alternative to (or in addition to) using the *members* directive in :ref:`hostgroup <configobjects/hostgroup>` definitions.
 
 check_command
-  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuration/configmain-advanced#host_check_timeout>` option.
+  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuration/configmain#host_check_timeout>` option.
 
 initial_state
   By default Shinken will assume that all hosts are in UP states when in starts. You can override the initial state for a host by using this directive. Valid options are: **o** = UP, **d** = DOWN, and **u** = UNREACHABLE.
@@ -148,10 +148,10 @@ max_check_attempts
 
 
 check_interval
-  This directive is used to define the number of “time units" between regularly scheduled checks of the host. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" between regularly scheduled checks of the host. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
 
 retry_interval
-  This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advanced/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" to wait before scheduling a re-check of the hosts. Hosts are rescheduled at the retry interval when they have changed to a non-UP state. Once the host has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check cheduling <advanced/checkscheduling>` documentation.
 
 active_checks_enabled
   This directive is used to determine whether or not active checks (either regularly scheduled or on-demand) of this host are enabled. Values: 0 = disable active host checks, 1 = enable active host checks.
@@ -193,10 +193,10 @@ process_perf_data
   This directive is used to determine whether or not the processing of performance data is enabled for this host. Values: 0 = disable performance data processing, 1 = enable performance data processing.
 
 retain_status_information
-  This directive is used to determine whether or not status-related information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value: 0 = disable status information retention, 1 = enable status information retention.
+  This directive is used to determine whether or not status-related information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value: 0 = disable status information retention, 1 = enable status information retention.
 
 retain_nonstatus_information
-  This directive is used to determine whether or not non-status information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value: 0 = disable non-status information retention, 1 = enable non-status information retention.
+  This directive is used to determine whether or not non-status information about the host is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value: 0 = disable non-status information retention, 1 = enable non-status information retention.
 
 contacts
   This is a list of the *short names* of the :ref:`contacts <configobjects/contact>` that should be notified whenever there are problems (or recoveries) with this host. Multiple contacts should be separated by commas. Useful if you want notifications to go to just a few people and don't want to configure :ref:`contact groups <configobjects/contactgroup>`. You must specify at least one contact or contact group in each host definition.
@@ -205,10 +205,10 @@ contact_groups
   This is a list of the *short names* of the :ref:`contact groups <configobjects/contactgroup>` that should be notified whenever there are problems (or recoveries) with this host. Multiple contact groups should be separated by commas. You must specify at least one contact or contact group in each host definition.
 
 notification_interval
-  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* down or unreachable. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this host - only one problem notification will be sent out.
+  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* down or unreachable. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this host - only one problem notification will be sent out.
 
 first_notification_delay
-  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this host enters a non-UP state. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
+  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this host enters a non-UP state. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
 
 notification_period
   This directive is used to specify the short name of the :ref:`time period <configobjects/timeperiod>` during which notifications of events for this host can be sent out to contacts. If a host goes down, becomes unreachable, or recoveries during a time which is not covered by the time period, no notifications will be sent out.

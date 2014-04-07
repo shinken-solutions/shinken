@@ -135,7 +135,7 @@ is_volatile
   This directive is used to denote whether the service is "volatile". Services are normally *not* volatile. More information on volatile service and how they differ from normal services can be found :ref:`here <advanced/volatileservices>`. Value: 0 = service is not volatile, 1 = service is volatile.
 
 check_command
-  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that Shinken will run in order to check the status of the service. The maximum amount of time that the service check command can run is controlled by the :ref:`service_check_timeout <configuration/configmain-advanced#service_check_timeout>` option.
+  This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that Shinken will run in order to check the status of the service. The maximum amount of time that the service check command can run is controlled by the :ref:`service_check_timeout <configuration/configmain#service_check_timeout>` option.
   There is also a command with the reserved name "bp_rule". It is defined internally and has a special meaning. Unlike other commands it mustn't be registered in a command definition. It's purpose is not to execute a plugin but to represent a logical operation on the statuses of other services. It is possible to define logical relationships with the following operators :
 
     * & : it's use to make an AND betweens statuses
@@ -164,10 +164,10 @@ max_check_attempts
   This directive is used to define the number of times that Shinken will retry the service check command if it returns any state other than an OK state. Setting this value to 1 will cause Shinken to generate an alert without retrying the service check again.
 
 check_interval
-  This directive is used to define the number of “time units" to wait before scheduling the next “regular" check of the service. “Regular" checks are those that occur when the service is in an OK state or when the service is in a non-OK state, but has already been rechecked **max_check_attempts** number of times. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" to wait before scheduling the next “regular" check of the service. “Regular" checks are those that occur when the service is in an OK state or when the service is in a non-OK state, but has already been rechecked **max_check_attempts** number of times. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
 
 retry_interval
-  This directive is used to define the number of “time units" to wait before scheduling a re-check of the service. Services are rescheduled at the retry interval when they have changed to a non-OK state. Once the service has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
+  This directive is used to define the number of “time units" to wait before scheduling a re-check of the service. Services are rescheduled at the retry interval when they have changed to a non-OK state. Once the service has been retried **max_check_attempts** times without a change in its status, it will revert to being scheduled at its “normal" rate as defined by the **check_interval** value. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
 
 active_checks_enabled :ref:`* <configuration/objectdefinitions#retention_notes>`
   This directive is used to determine whether or not active checks of this service are enabled. Values:
@@ -232,22 +232,22 @@ process_perf_data :ref:`* <configuration/objectdefinitions#retention_notes>`
     * 1 = enable performance data processing
 
 retain_status_information
-  This directive is used to determine whether or not status-related information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value:
+  This directive is used to determine whether or not status-related information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value:
 
     * 0 = disable status information retention
     * 1 = enable status information retention.
 
 retain_nonstatus_information
-  This directive is used to determine whether or not non-status information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain#retain_state_information>` directive. Value:
+  This directive is used to determine whether or not non-status information about the service is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value:
 
     * 0 = disable non-status information retention
     * 1 = enable non-status information retention
 
 notification_interval
-  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* in a non-OK state. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this service - only one problem notification will be sent out.
+  This directive is used to define the number of “time units" to wait before re-notifying a contact that this service is *still* in a non-OK state. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will *not* re-notify contacts about problems for this service - only one problem notification will be sent out.
 
 first_notification_delay
-  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this service enters a non-OK state. Unless you've changed the :ref:`interval_length <configuration/configmain#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
+  This directive is used to define the number of “time units" to wait before sending out the first problem notification when this service enters a non-OK state. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. If you set this value to 0, Shinken will start sending out notifications immediately.
 
 notification_period
   This directive is used to specify the short name of the :ref:`time period <configobjects/timeperiod>` during which notifications of events for this service can be sent out to contacts. No service notifications will be sent out during times which is not covered by the time period.
