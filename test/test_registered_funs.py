@@ -23,8 +23,6 @@
 #
 
 
-import random
-
 import subprocess
 from time import sleep
 
@@ -36,8 +34,8 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.arbiterdaemon import Arbiter
 
 daemons_config = {
-    Shinken:      "etc/core/daemons/schedulerd.ini",
-    Arbiter:    ["etc/core/shinken.cfg"]
+    Shinken:      "etc/test_registered_funs/schedulerd.ini",
+    Arbiter:    ["etc/test_registered_funs/shinken.cfg"]
 }
 
 
@@ -55,7 +53,6 @@ class testRegisteredFunctions(unittest.TestCase):
         d.load_config_file()
 
         d.http_backend = 'wsgiref'
-        d.port = random.randint(30000, 50000)#HIGH_PORT + run  # random high port, I hope no one is using it :)
         d.do_daemon_init_and_start()
         d.load_modules_manager()
         d.http_daemon.register(d.interface)
@@ -65,9 +62,23 @@ class testRegisteredFunctions(unittest.TestCase):
                          'run_external_commands', 'set_log_level', 'wait_new_conf', 'what_i_managed']
         for fun in expected_list:
             assert(fun in reg_list)
-        # One daemon check is enough
+        subprocess.Popen(["../bin/shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
+        # Ok, now the conf
+        d.wait_for_initial_conf()
+        if not d.new_conf:
+            return
+        logger.info("New configuration received")
+        d.setup_new_conf()
+        reg_list = d.http_daemon.registered_fun
+        expected_list = ['get_external_commands', 'get_running_id', 'got_conf', 'have_conf',
+                         'ping', 'push_broks', 'push_host_names', 'put_conf', 'remove_from_conf',
+                         'run_external_commands', 'set_log_level', 'wait_new_conf', 'what_i_managed',
+                         'get_checks', 'put_results', 'fill_initial_broks', 'get_broks']
+        for fun in expected_list:
+            assert(fun in reg_list)
+
         sleep(2)
-        #os.kill(int(file("tmp/arbiterd.pid").read()), 2)
+        os.kill(int(file("tmp/arbiterd.pid").read()), 2)
         d.do_stop()
 
 
