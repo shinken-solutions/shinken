@@ -25,6 +25,7 @@ Shinken ChangeLog
 	Add : (from Christophe Simon) Added reversed (negative) xof business rules
 	Add : (from Christophe Simon) percentage support to Xof: business rules
 	Add : (from Jan Ulferts) enable_environment_macros and disable_environment_macros to commands
+        Add : (from Christophe Simon) service excludes feature
 	
 
 
