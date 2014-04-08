@@ -405,7 +405,7 @@ data_files.append( (default_paths['log'], []) )
 required_pkgs = []
 setup(
     name="Shinken",
-    version="2.0-RC2",
+    version="2.0-RC3",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
