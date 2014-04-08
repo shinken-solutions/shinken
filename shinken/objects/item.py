@@ -1127,6 +1127,10 @@ class Items(object):
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         #print "\n"*10, "looking for expression", expr
+        # Maybe exp is a list, like numerous hostgroups entries in a service, link them
+        if isinstance(expr, list):
+            expr = '|'.join(expr)
+        #print "\n"*10, "looking for expression", expr        
         if look_in=='hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
         else: # templates

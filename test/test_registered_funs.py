@@ -64,7 +64,7 @@ class testRegisteredFunctions(unittest.TestCase):
             assert(fun in reg_list)
         subprocess.Popen(["../bin/shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
         # Ok, now the conf
-        d.wait_for_initial_conf()
+        d.wait_for_initial_conf(timeout=20)
         if not d.new_conf:
             return
         logger.info("New configuration received")
@@ -78,6 +78,8 @@ class testRegisteredFunctions(unittest.TestCase):
             assert(fun in reg_list)
 
         sleep(2)
+        pid = int(file("tmp/arbiterd.pid").read())
+        print ("KILLING %d" % pid)*50
         os.kill(int(file("tmp/arbiterd.pid").read()), 2)
         d.do_stop()
 

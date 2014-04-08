@@ -1111,6 +1111,8 @@ class Hosts(Items):
             if not h.is_tpl() and hasattr(h, 'host_name'):
                 hname = h.host_name
                 if hasattr(h, 'hostgroups'):
+                    if isinstance(h.hostgroups, list):
+                        h.hostgroups = ','.join(h.hostgroups)
                     hgs = h.hostgroups.split(',')
                     for hg in hgs:
                         hostgroups.add_member(hname, hg.strip())
