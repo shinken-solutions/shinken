@@ -596,7 +596,7 @@ class Daemon(object):
         else:
             # The Manager is a sub-process, so we must be sure it won't have
             # a socket of your http server alive
-            self.manager = SyncManager()
+            self.manager = SyncManager(('127.0.0.1',0))
             def close_http_daemon(daemon):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase

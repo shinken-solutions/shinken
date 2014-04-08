@@ -281,11 +281,6 @@ class Worker:
             except:
                 pass
 
-            if self._mortal == True and self._idletime > 2 * self._timeout:
-                logger.warning("[%d] Timeout, Harakiri" % self.id)
-                # The master must be dead and we are lonely, we must die
-                break
-
             # Look if we are dying, and if we finish all current checks
             # if so, we really die, our master poller will launch a new
             # worker because we were too weak to manage our job :(
