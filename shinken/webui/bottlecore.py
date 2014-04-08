@@ -2108,7 +2108,7 @@ server_names = {
     'fapws3': FapwsServer,
     'tornado': TornadoServer,
     'gae': AppEngineServer,
-    'twisted': TwistedServer,
+#    'twisted': TwistedServer,
     'diesel': DieselServer,
     'meinheld': MeinheldServer,
     'gunicorn': GunicornServer,
