@@ -409,7 +409,7 @@ class ExternalCommandManager:
         # Ok we remove the [ ]
         ts = ts[1:-1]
         try:  # is an int or not?
-            self.current_timestamp = int(ts)
+            self.current_timestamp = to_int(ts)
         except ValueError:
             logger.debug("Malformed command '%s'" % command)
             return None
