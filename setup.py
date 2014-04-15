@@ -61,7 +61,7 @@ def generate_default_shinken_file():
     build_base = 'build'
     outfile = os.path.join(build_base, "bin/default/shinken")
 
-    print('generating %s from %s', outfile, templatefile)
+    #print('generating %s from %s', outfile, templatefile)
 
     mkpath(os.path.dirname(outfile))
     
@@ -192,11 +192,29 @@ root = opts.proot or ''
 
 # We try to see if we are in a full install or an update process
 is_update = False
-if 'update' in args or opts.upgrade:
+# Try to import shinekn but not the local one. If avialable, we are in 
+# and upgrade phase, not a classic install
+try:
+    if '.' in sys.path:
+        sys.path.remove('.')
+    if os.path.abspath('.') in sys.path:
+        sys.path.remove(os.path.abspath('.'))
+    import shinken
+    is_update = True
+    print "Previous Shinken lib detected"
+except ImportError:
+    pass
+
+
+if '--update' in args or opts.upgrade or '--upgrade' in args:
     print "Shinken Lib Updating process only"
     if 'update' in args:
         sys.argv.remove('update')
         sys.argv.insert(1, 'install')
+    if '--update' in args:
+        sys.argv.remove('--update')
+    if '--upgrade' in args:
+        sys.argv.remove('--upgrade')
     
     print "Shinken Lib Updating process only"
     is_update = True
@@ -401,11 +419,16 @@ data_files.append( (default_paths['log'], []) )
 # Note: we do not add the "scripts" entry in the setup phase because we need to generate the 
 # default/shinken file with the bin path before run the setup phase, and it's not so
 # easy to do in a clean and easy way
-        
+
+not_allowed_options = ['--upgrade', '--update']
+for o in not_allowed_options:
+    if o in sys.argv:
+        sys.argv.remove(o)
+
 required_pkgs = []
 setup(
     name="Shinken",
-    version="2.0-RC3",
+    version="2.0-RC4",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
@@ -440,7 +463,7 @@ setup(
 
 
 # if root is set, it's for package, so NO chown
-if pwd and not root and is_install :
+if pwd and not root and is_install:
     # assume a posix system
     uid = get_uid(user)
     gid = get_gid(group)
