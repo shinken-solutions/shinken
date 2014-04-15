@@ -129,7 +129,7 @@ class CLICommander(object):
 # proxy: curl style, should look as http://user:password@server:3128
 # api_key: useful for publishing packages or earn XP after each install. Create an account at http://shinken.io and go to http://shinken.io/~
 ''',
-            'values'  : [('proxy',''),('api_key','')]}
+            'values'  : [('proxy',''), ('api_key','')]}
                     }
     
 
@@ -156,7 +156,7 @@ class CLICommander(object):
             return
 
         self.init_done = True
-
+        
         cli_mods_dir = os.path.abspath(self.config['paths']['cli'])
         logger.debug ("WILL LOAD THE CLI DIR %s" %  cli_mods_dir)
         cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
@@ -193,7 +193,7 @@ class CLICommander(object):
         # Use the CLI as completer
         readline.set_completer(self.complete)
 
-
+        # EMACS rules :) / VI sucks
         readline.parse_and_bind('set editing-mode emacs')
         # Try to read and save the history when exiting
         histfile = os.path.join(os.path.expanduser("~"), ".shinken.history")
@@ -315,7 +315,8 @@ class CLICommander(object):
 if __name__ == '__main__':
     parser = optparse.OptionParser(
         '',
-        version="%prog " + VERSION)
+        version="%prog " + VERSION,
+        add_help_option=False)
     parser.add_option('--proxy', dest="proxy",
                       help="""Proxy URI. Like http://user:password@proxy-server:3128""")
     parser.add_option('-A', '--api-key',
@@ -330,8 +331,10 @@ if __name__ == '__main__':
                       help=("Path to your shinken.ini file. Default: %s" % DEFAULT_CFG))
     parser.add_option('-v', action='store_true',
                       dest="do_verbose", help=("Be more verbose"))
+    parser.add_option('-h', '--help', action='store_true',
+                      dest="do_help", help=("Print help"))
 
-    
+
     # First parsing, for purely internal parameters, but disable 
     # errors, because we only want to see the -D -v things
     old_error = parser.error
@@ -339,6 +342,11 @@ if __name__ == '__main__':
     opts, args = parser.parse_args()
     # reenable the errors for later use
     parser.error = old_error
+
+    do_help = opts.do_help
+    if do_help and len(args) == 0:
+        parser.print_help()
+        sys.exit(0)
 
     if opts.do_verbose:
         logger.set_level(logger.INFO)
@@ -359,7 +367,6 @@ if __name__ == '__main__':
                 CONFIG[section][key] = value
 
     CLI = CLICommander(CONFIG, opts)
-
 
     # We should look on the sys.argv if we find a valid keywords to
     # call in one loop or not.
@@ -387,6 +394,23 @@ if __name__ == '__main__':
     # Global command parsing, with the error enabled this time
     opts, args = parser.parse_args()
 
+    if opts.do_help:
+        if len(command_args) == 0:
+            logger.error("Cannot find any help for you")
+            sys.exit(1)
+        a = command_args.pop(0)
+        if a not in CLI.keywords:
+            logger.error("Cannot find any help for %s" % a)
+            sys.exit(1)
+        cprint('%s' %  a, 'green')
+        for arg in CLI.keywords[a]['args']:
+            n = arg.get('name', '')
+            desc = arg.get('description', '')
+            cprint('\t%s' %  n, 'green', end='')
+            cprint(': %s' % desc)
+            
+        sys.exit(0)
+        
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
         CONFIG['shinken.io.proxy'] = opts.proxy
