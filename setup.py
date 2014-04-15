@@ -42,6 +42,8 @@ elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
 
+
+
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
 def read(fname):
@@ -199,12 +201,13 @@ try:
         sys.path.remove('.')
     if os.path.abspath('.') in sys.path:
         sys.path.remove(os.path.abspath('.'))
+    if '' in sys.path:
+        sys.path.remove('')
     import shinken
     is_update = True
-    print "Previous Shinken lib detected"
+    print "Previous Shinken lib detected (%s)" % shinken.__file__
 except ImportError:
     pass
-
 
 if '--update' in args or opts.upgrade or '--upgrade' in args:
     print "Shinken Lib Updating process only"
