@@ -551,13 +551,25 @@ def install_package(pname, raw):
 
 
 
-def do_install(pname, local):
+def do_install(pname, local, download_only):
     raw = ''
     if local:
         pname, raw = grab_local(pname)
 
     if not local:
         raw = grab_package(pname)
+
+    if download_only:
+        tmpf = os.path.join(tempfile.gettempdir(), pname+'.tar.gz')
+        try:
+            f = open(tmpf, 'wb')
+            f.write(raw)
+            f.close()
+            cprint('Download OK: %s' %  tmpf, 'green')
+        except Exception, exp:
+            logger.error("Package save fail: %s" % exp)
+        return
+
     install_package(pname, raw)
 
 
@@ -581,6 +593,7 @@ exports = {
         'args': [
             {'name' : 'pname', 'description':'Package to install'},
             {'name' : '--local', 'description':'Use a local directory instead of the shinken.io version', 'type': 'bool'},
+            {'name' : '--download-only', 'description':'Only download the package', 'type': 'bool'},
             ],
         'description' : 'Grab and install a package from shinken.io'
         },

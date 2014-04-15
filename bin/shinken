@@ -263,6 +263,9 @@ class CLICommander(object):
                 dest = n[1:]
                 if dest.startswith('-'):
                     dest = dest[1:]
+                # And if the parameter is like download-only, map it to
+                # download_only
+                dest = dest.replace('-', '_')
                 if _type == 'bool':
                     command_parser.add_option(n, action='store_true', dest=dest, help=(description))
                 else:
