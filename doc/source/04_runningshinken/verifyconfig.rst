@@ -14,7 +14,7 @@ In order to verify your configuration, run Shinken-arbiter with the "-v" command
 
 ::
 
-  linux:~ # /usr/local/shinken/bin/shinken-arbiter -v -c /usr/local/shinken/etc/nagios.cfg -c /usr/local/shinken/etc/shinken-specific.cfg
+  linux:~ # /usr/bin/shinken-arbiter -v -c /etc/shinken/shinken.cfg
   
 If you've forgotten to enter some critical data or misconfigured things, Shinken will spit out a warning or error message that should point you to the location of the problem. Error messages generally print out the line in the configuration file that seems to be the source of the problem. On errors, Shinken will exit the pre-flight check. If you get any error messages you'll need to go and edit your configuration files to remedy the problem. Warning messages can generally be safely ignored, since they are only recommendations and not requirements.
 

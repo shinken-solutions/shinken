@@ -29,7 +29,7 @@ The schedulers, pollers, reactionners and brokers daemons need to know in which 
 
 .. note::  If you plan on using the default directories, user (shinken) and tcp port you shouldn't have to edit these files.
 
-Each daemon has one configuration file. The default location is /usr/local/shinken/etc/. 
+Each daemon has one configuration file. The default location is /etc/shinken/.
 
 .. important::  Remember that all daemons can be on different servers: the daemons configuration files need to be on the server which is running the daemon, not necessarily on every server
 
@@ -95,7 +95,7 @@ Daemon declaration in the global configuration
 
 Now each daemon knows in which directory to run, and on which tcp port to listen. A daemon is a resource in the Shinken architecture. Such resources must be declared in the global configuration (where the Arbiter is) for them to be utilized.
 
-The global configuration file is:  **/usr/local/shinken/etc/shinken-specific.cfg/**
+The global configuration file is:  **/etc/shinken/shinken.cfg/**
 
 The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
 
@@ -217,15 +217,15 @@ See? That was easy. And don't worry about forgetting one of them: if there is a 
 Removing unused configurations 
 -------------------------------
 
-The sample shinken-specific.cfg file has all possible modules in addition to the basic daemon declarations.
+The sample shinken.cfg file has all possible modules in addition to the basic daemon declarations.
 
-  - Backup your shinken-specific.cfg file.
+  - Backup your shinken.cfg file.
   - Delete all unused modules from your configuration file
   - Ex. If you do not use the openldap module, delete it from the file
 
 This will make any warnings or errors that show up in your log files more pertinent. This is because the modules, if declared will get loadedup even if they are not use in your Modules declaration of your daemons.
 
-If you ever lose your shinken-specific.cfg, you can simply go to the shinken github repository and download the file.
+If you ever lose your shinken.cfg, you can simply go to the shinken github repository and download the file.
 
 
 Launch all daemons 
@@ -249,20 +249,20 @@ So a standard launch of the resources looks like:
 
 ::
 
-  /usr/local/shinken/bin/shinken-scheduler -d -c /usr/local/shinken/etc/schedulerd.ini
-  /usr/local/shinken/bin/shinken-poller -d -c /usr/local/shinken/etc/pollerd.ini
-  /usr/local/shinken/bin/shinken-reactionner -d -c /usr/local/shinken/etc/reactionnerd.ini
-  /usr/local/shinken/bin/shinken-broker -d -c /usr/local/shinken/etc/brokerd.ini
+  /usr/bin/shinken-scheduler -d -c /etc/shinken/schedulerd.ini
+  /usr/bin/shinken-poller -d -c /etc/shinken/pollerd.ini
+  /usr/bin/shinken-reactionner -d -c /etc/shinken/reactionnerd.ini
+  /usr/bin/shinken-broker -d -c /etc/shinken/brokerd.ini
 
 Now we can start the arbiter with the global configuration:
 
 ::
 
   #First we should check the configuration for errors
-  python bin/shinken-arbiter -v -c etc/nagios.cfg -c etc/shinken-specific.cfg
+  python bin/shinken-arbiter -v -c etc/shinken.cfg
   
   #then, we can really launch it
-  python bin/shinken-arbiter -d -c etc/nagios.cfg -c etc/shinken-specific.cfg
+  python bin/shinken-arbiter -d -c etc/shinken.cfg
 
 
 Now, you've got the same thing you had when you launched bin/launch_all.sh script 8-) (but now you know what you're doing)
