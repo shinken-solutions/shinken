@@ -160,7 +160,7 @@ User preferences modules
 The WebUI use mongodb to store all user preferences, dashboards and other information. 
 
 To enable user preferences do the following:
-  - install mongodb using the Shinken installation script: cd /usr/local/shinken ; ./install -a mongodb
+  - install mongodb
   - add "Mongodb" to your WebUI module list as done in the example at the top of this page
 
 
