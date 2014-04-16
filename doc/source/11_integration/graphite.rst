@@ -61,7 +61,7 @@ Additional list of options for the :ref:`Graphite export module and more in-dept
 Enable it 
 ----------
 
-Edit ''/etc/shinken/shinken-specific.cfg'' and find the **Broker** object, and add the graphite module to its **modules** line:
+Edit ''/etc/shinken/brokers/broker-master.cfg'' and find the **Broker** object, and add the graphite module to its **modules** line:
 
   
 ::
@@ -80,7 +80,7 @@ With Shinken UI
 ~~~~~~~~~~~~~~~~
 
 
-Still in ''/etc/shinken/shinken.cfg'', find the GRAPHITE_UI object and configure the URL to your Graphite install.
+Still in ''/etc/shinken/modules/graphite.cfg'', find the GRAPHITE_UI object and configure the URL to your Graphite install.
 If you used a graphite_data_source in the Graphite-Perfdata section, make sure to specify it here as well.
   
 ::

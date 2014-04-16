@@ -66,7 +66,7 @@ Don't forget to replace "<PATH_TO_NPCD.CFG>" with your own value; By default som
 Enable it 
 ==========
 
-Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **Broker** to add above defined "NPCDMOD" to its **modules** line:
+Edit ''/etc/shinken/brokers/broker-master.cfg'' and find the object **Broker** to add above defined "NPCDMOD" to its **modules** line:
 
   
 ::
@@ -78,7 +78,7 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **Broker** to add
   }
 
 
-Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **WebUI** to add above defined "PNP_UI" to its **modules** line:
+Edit ''/etc/shinken/modules/webui.cfg'' and find the object **WebUI** to add above defined "PNP_UI" to its **modules** line:
 
   
 ::

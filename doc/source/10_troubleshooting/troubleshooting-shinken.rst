@@ -40,7 +40,7 @@ General Shinken troubleshooting steps to resolve common issue
   * Have you installed the :ref:`check scripts and addon software <gettingstarted/installations/shinken-installation>`
   * Is Shinken even running?
   * Have you checked the :ref:`Shinken pre-requisites <gettingstarted/installations/shinken-installation#requirements>`?
-  * Have you :ref:`configured the WebUI module <integration/webui>` in your shinken-specific.cfg file
+  * Have you :ref:`configured the WebUI module <integration/webui>` in your brokers/broker-master.cfg file
   * Have you :ref:`completed the Shinken basic configuration <configuration/index>` and :ref:`Shinken WebUI configuration <integration/webui>`
   * Have you reviewed your Shinken centralized (:ref:`Simple-log broker module <the_broker_modules>`) logs for errors
   * Have you reviewed your :ref:`Shinken daemon specific logs <troubleshooting/troubleshooting-shinken#FAQ-1>` for errors or tracebacks (what the system was doing just before a crash)
@@ -52,7 +52,7 @@ General Shinken troubleshooting steps to resolve common issue
   * Have you installed Shinken with the SAME prefix (ex: /usr/local) on all your hosts running a Shinken daemon (You have to!)
   * Have you enabled debugging logs on your daemon(s)
   * How to identify the source of a Pyro MemoryError
-  * Problem with Livestatus, did it start, is it listening on the exppected TCP port, have you enabled and configured the module in shinken-specific.cfg.
+  * Problem with Livestatus, did it start, is it listening on the expected TCP port, have you enabled and configured the module in /etc/shinken/modules/livestatus.cfg.
   * Have you installed the check scripts as the shinken user and not as root
   * Have you executed/tested your command as the shinken user
   * Have you manually generated check results
