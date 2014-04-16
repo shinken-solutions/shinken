@@ -52,7 +52,7 @@ Configure graphite module
       module_type     graphite_perfdata
       host            localhost
       port            2003
-      templates_path  /usr/local/shinken/share/templates/graphite/
+      templates_path  /var/lib/shinken/share/templates/graphite/
   }
 
 Additional list of options for the :ref:`Graphite export module and more in-depth documentation <the_broker_modules#network_based_modules___graphite_graphing>`.
@@ -80,7 +80,7 @@ With Shinken UI
 ~~~~~~~~~~~~~~~~
 
 
-Still in ''/etc/shinken/shinken-specific.cfg'', find the GRAPHITE_UI object and configure the URL to your Graphite install.
+Still in ''/etc/shinken/shinken.cfg'', find the GRAPHITE_UI object and configure the URL to your Graphite install.
 If you used a graphite_data_source in the Graphite-Perfdata section, make sure to specify it here as well.
   
 ::

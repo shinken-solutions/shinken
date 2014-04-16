@@ -37,10 +37,10 @@ Let's see what it looks like:
 
 ::
 
-  $cat etc/schedulerd.ini
+  $cat /etc/shinken/daemons/schedulerd.ini
   
   [daemon]
-  workdir=/usr/local/shinken/var
+  workdir=/var/lib/shinken
   pidfile=%(workdir)s/schedulerd.pid
   port=7768
   host=0.0.0.0
@@ -64,8 +64,8 @@ Let's see what it looks like:
 
 So here we have a scheduler:
 
-    * workdir: working directory of the daemon. By default /usr/local/shinken/var
-    * pidfile: pid file of the daemon (so we can kill it :) ). By default /usr/local/shinken/var/schedulerd.pid for a scheduler.
+    * workdir: working directory of the daemon. By default /var/lib/shinken
+    * pidfile: pid file of the daemon (so we can kill it :) ). By default /var/lib/shinken/schedulerd.pid for a scheduler.
     * port: TCP port to listen to. By default:
 
        * scheduler: 7768
@@ -198,14 +198,14 @@ Here, we have a server named server-1 that has 192.168.0.1 as its IP address:
   define module{
        module_name      Simple-log
        module_type      simple_log
-       path             /usr/local/shinken/var/shinken.log
+       path             /var/lib/shinken/shinken.log
   }
   
   define module{
        module_name              Status-Dat
        module_type              status_dat
-       status_file              /usr/local/shinken/var/status.data
-       object_cache_file        /usr/local/shinken/var/objects.cache
+       status_file              /var/lib/shinken/status.data
+       object_cache_file        /var/lib/shinken/objects.cache
        status_update_interval   15 ; update status.dat every 15s
   }
   

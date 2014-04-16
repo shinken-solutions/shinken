@@ -81,7 +81,7 @@ Let's say that the switch-1 IP is 192.168.0.1.
   
 ::
   
-  /usr/local/shinken/libexec/check_nwc_health --hostname 192.168.0.1 --timeout 60 --community "public" --mode interface-status
+  /var/lib/shinken/libexec/check_nwc_health --hostname 192.168.0.1 --timeout 60 --community "public" --mode interface-status
 
 
 It should give you the state of all interfaces.
@@ -159,7 +159,7 @@ Not all devices are managed by check_nwc_health. To know if yours is, just launc
 
 ::
   
-  /usr/local/shinken/libexec/check_nwc_health --hostname 192.168.0.1 --timeout 60 --community "public" --mode hardware-health
+  /var/lib/shinken/libexec/check_nwc_health --hostname 192.168.0.1 --timeout 60 --community "public" --mode hardware-health
 
 
 If it's ok, you can add the "cisco" template for your hosts (even if it's not a cisco device, we are working on getting more templates configuration).

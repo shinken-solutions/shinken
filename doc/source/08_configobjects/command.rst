@@ -35,7 +35,7 @@ Example Definition
 
   define command{
       command_name   check_pop
-      command_line   /usr/local/shinken/libexec/check_pop -H $HOSTADDRESS$    
+      command_line   /var/lib/shinken/libexec/check_pop -H $HOSTADDRESS$
   }
 
 

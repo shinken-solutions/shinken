@@ -38,7 +38,7 @@ When you use host and service macros in command definitions, they refer to value
   
   define command{
     command_name    check_ping
-    command_line    /usr/local/shinken/libexec/check_ping -H $HOSTADDRESS$ -w 100.0,90% -c 200.0,60%
+    command_line    /var/lib/shinken/libexec/check_ping -H $HOSTADDRESS$ -w 100.0,90% -c 200.0,60%
   }
   
 the expanded/final command line to be executed for the host's check command would look like this:
@@ -46,7 +46,7 @@ the expanded/final command line to be executed for the host's check command woul
   
 ::
 
-  /usr/local/shinken/libexec/check_ping -H 192.168.1.2 -w 100.0,90% -c 200.0,60%
+  /var/lib/shinken/libexec/check_ping -H 192.168.1.2 -w 100.0,90% -c 200.0,60%
   
 Pretty simple, right? The beauty in this is that you can use a single command definition to check an unlimited number of hosts. Each host can be checked with the same command definition because each host's address is automatically substituted in the command line before execution.
 
@@ -73,7 +73,7 @@ In the example above, the service check command has two arguments (which can be 
 
   define command{
     command_name    check_ping
-    command_line    /usr/local/shinken/libexec/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
+    command_line    /var/lib/shinken/libexec/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
   }
   
 the expanded/final command line to be executed for the service's check command would look like this:
@@ -81,7 +81,7 @@ the expanded/final command line to be executed for the service's check command w
   
 ::
 
-  /usr/local/shinken/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%
+  /var/lib/shinken/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%
   
 If you need to pass bang (!) characters in your command arguments, you can do so by escaping them with a backslash (\). If you need to include backslashes in your command arguments, they should also be escaped with a backslash.
 
