@@ -5,7 +5,7 @@ Main advanced configuration
 ===========================
 
 
-Tuning and advanced parameters 
+Tuning and advanced parameters
 ===============================
 
 .. important::  If you do not know how to change the values of theses parameters, don't touch them :)
@@ -98,8 +98,8 @@ Example:
 
 ::
 
-  host_perfdata_file=/usr/local/shinken/var/host-perfdata.dat
-  service_perfdata_file=/usr/local/shinken/var/service-perfdata.dat
+  host_perfdata_file=/var/lib/shinken/host-perfdata.dat
+  service_perfdata_file=/var/lib/shinken/service-perfdata.dat
   
 This option allows you to specify a file to which host/service :ref:`performance data <advanced/perfdata>` will be written after every host check. Data will be written to the performance file as specified by the :ref:`Host Performance Data File Template <configuration/configmain-advanced#host_perfdata_file_template>` option or the service one. Performance data is only written to this file if the :ref:`Performance Data Processing Option <configuration/configmain-advanced#process_performance_data>` option is enabled globally and if the "process_perf_data" directive in the :ref:`host definition <configobjects/host>` is enabled.
 

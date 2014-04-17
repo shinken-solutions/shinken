@@ -10,7 +10,7 @@ Shinken can be used to send sms to you and other people when you got an alert.
 I will tell you how to do it with ovh gateway. If you need for another one you need to modify a little bit the information. 
 
 
-1. you need to go to your contact.cfg who is for linux in /usr/local/shinken/etc/contacts.cfg 
+1. you need to go to your contact file which is for linux in /etc/shinken/contacts/
 ==============================================================================================
 
 For each user you need to add her phone number in the pager line. (For ovh you need to do it with 0032 for example and not +32 , all phone number must be with the international prefix).
@@ -42,7 +42,7 @@ Then you need to add this at the end of the contacts.cfg
   }
 
 
-2. you need to go to your commands.cfg  who is in /usr/local/shinken/etc/commands.cfg 
+2. you need to go to your commands file  which is in /etc/shinken/commands/
 ======================================================================================
 
 And add these line at the end. 
@@ -69,7 +69,7 @@ And add these line at the end.
 ==================
 
 First you need to be the shinken user so do a : su shinken
-do a : cd /usr/local/shinken/libexec/
+do a : cd /var/lib/shinken/libexec/
 and then create and edit your new script with the name you set above :  nano -w ovhsms.sh
 
 

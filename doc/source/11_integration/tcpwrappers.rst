@@ -58,9 +58,9 @@ Now you're going to have to modify the /etc/hosts.deny file on firestorm. In ord
   
 ::
 
-  ALL: ALL: RFC931: twist (/usr/local/shinken/libexec/eventhandlers/handle_tcp_wrapper %h %d)&
+  ALL: ALL: RFC931: twist (/var/lib/shinken/libexec/eventhandlers/handle_tcp_wrapper %h %d)&
   
-This line assumes that there is a script called handle_tcp_wrapper in the "/usr/local/shinken/libexec/eventhandlers/" directory on firestorm. We'll write that script next.
+This line assumes that there is a script called handle_tcp_wrapper in the "/var/lib/shinken/libexec/eventhandlers/" directory on firestorm. We'll write that script next.
 
 
 Writing The Script 
@@ -72,7 +72,7 @@ The last thing you need to do is write the handle_tcp_wrapper script on firestor
 ::
 
       	#!/bin/sh
-  	/usr/local/shinken/libexec/eventhandlers/submit_check_result firestorm "TCP Wrappers" 2 "Denied $2-$1" > /dev/null 2> /dev/null
+  	/var/lib/shinken/libexec/eventhandlers/submit_check_result firestorm "TCP Wrappers" 2 "Denied $2-$1" > /dev/null 2> /dev/null
   
 Notice that the **handle_tcp_wrapper** script calls the **submit_check_result** script to actually send the alert back to the monitoring host. Assuming your Shinken server is called monitor, the **submit_check_result** script might look like this:
 
@@ -86,7 +86,7 @@ Notice that the **handle_tcp_wrapper** script calls the **submit_check_result** 
   #	$3 = return code
   #	$4 = outputs
   
-  /bin/echo -e "$1\t$2\t$3\t$4\n" | /usr/local/shinken/bin/send_nsca monitor -c /usr/local/shinken/etc/send_nsca.cfg
+  /bin/echo -e "$1\t$2\t$3\t$4\n" | /var/lib/shinken/libexec/send_nsca monitor -c /etc/shinken/send_nsca.cfg
 
 
 Finishing Up 

@@ -21,26 +21,11 @@ PNP4Nagios
 * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,9.0.html
 
 
-.. _integration/pnp#install_pnp4nagios_automatically:
+.. _integration/pnp#install_pnp4nagios:
 
 
-Install PNP4Nagios automatically 
-=================================
-
-You can use the Shinken install script to install everything automatically (if your distro is supported):
-  
-::
-
-  
-  ./install -a pnp4nagios
-
-
-By default PNP4Nagios is installed in ''/usr/local/pnp4nagios''.
-If you prefer another location, edit ''PNPPREFIX'' in ''install.d/shinken.conf''.
-
-
-Install PNP4Nagios manually 
-============================
+Install PNP4Nagios
+===================
 
 See `PHP4Nagios installation`_ documentation.
 
@@ -81,7 +66,7 @@ Don't forget to replace "<PATH_TO_NPCD.CFG>" with your own value; By default som
 Enable it 
 ==========
 
-Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **Broker** to add above defined "NPCDMOD" to its **modules** line:
+Edit ''/etc/shinken/brokers/broker-master.cfg'' and find the object **Broker** to add above defined "NPCDMOD" to its **modules** line:
 
   
 ::
@@ -93,7 +78,7 @@ Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **Broker** to add
   }
 
 
-Edit ''/etc/shinken/shinken-specific.cfg'' and find the object **WebUI** to add above defined "PNP_UI" to its **modules** line:
+Edit ''/etc/shinken/modules/webui.cfg'' and find the object **WebUI** to add above defined "PNP_UI" to its **modules** line:
 
   
 ::

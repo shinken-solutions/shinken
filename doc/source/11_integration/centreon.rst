@@ -30,7 +30,7 @@ The following Shinken Broker modules are required:
   * Simple log
   * Flat file perfdata
 
-Below is the configuration you should set (there is already a sample configuration in your ''/etc/shinken/shinken-specific.cfg'' file)
+Below is the configuration you should set (there is already sample configuration files in your ''/etc/shinken/'' directory)
 
 
 Simple log 
@@ -38,15 +38,15 @@ Simple log
 
 The module **simple_log** puts all Shinken's logs (Arbiter, Scheduler, Poller, etc.) into a single file.
 
-In ''/etc/shinken/shinken-specific.cfg'':
+In ''/etc/shinken/modules/simple-log.cfg'':
 
 ::
 
   define module{
        module_name      Simple-log
        module_type      simple_log
-       path             /var/lib/nagios/nagios.log
-       archive_path     /var/lib/nagios/archives/
+       path             /var/lib/shinken/shinken.log
+       archive_path     /var/lib/shinken/archives/
   }
 
 It takes these parameters:
@@ -62,7 +62,7 @@ The module **ndodb_mysql** exports all data into a NDO MySQL database.
 
 It needs the python module **MySQLdb** (Debian: ''sudo apt-get install python-mysqldb'', or ''easy_install MySQL-python'')
 
-In ''/etc/shinken/shinken-specific.cfg'':
+In ''/etc/shinken/modules/ndodb_mysql.cfg'':
 
 ::
 
@@ -91,7 +91,7 @@ Service Perfdata
 
 The module **service_perfdata** exports service's perfdata to a flat file.
 
-In ''/etc/shinken/shinken-specific.cfg'':
+In ''/etc/shinken/modules/perfdata-service.cfg'':
 
 ::
 
@@ -110,7 +110,7 @@ It takes the following parameters:
 Configure Broker to use these modules 
 --------------------------------------
 
-In ''/etc/shinken/shinken-specific.cfg'' find the object **Broker**, and add the above modules to the **modules** line:
+In ''/etc/shinken/brokers/broker-master.cfg'' find the object **Broker**, and add the above modules to the **modules** line:
 
 ::
 
@@ -126,7 +126,7 @@ Configure Scheduler to match Centreon's Poller
 
 Shinken's "Scheduler" is called a "Poller" in Centreon. If you keep the sample Scheduler name, you won't see any data in the Centreon interface.
 
-So edit ''/etc/shinken/shinken-specific.cfg'' and change the Scheduler name to match the Centreon's Poller name ("default"):
+So edit ''/etc/shinken/schedulers/scheduler-master.cfg'' and change the Scheduler name to match the Centreon's Poller name ("default"):
 
 
 ::

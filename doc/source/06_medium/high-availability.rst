@@ -25,9 +25,10 @@ So like the previous case, you need to install the daemons but not launch them f
 Declare these spares on server1 
 ================================
 
-Daemons on the server1 neeed to know where their spares are. Everything is done in the main configuration file shinken-specific.cfg. It should be at /etc/shinken/shinken-specific.cfg or c:\shinken\etc\shinken-specific.cfg).
+Daemons on the server1 need to know where their spares are. Everything is done in the /etc/shinken directory.
+Each daemon has its own directory into /etc/shinken
 
-Add theses lines:
+Add theses lines regarding the daemon (ex schedulers/scheduler-spare.cfg):
  
 ::
   
@@ -97,7 +98,7 @@ WAIT! There are 2 main pitfalls that can halt HA in its tracks:
 Copy all configuration from server1 to server3 
 ===============================================
 
-.. important::  It's very important that the two arbiter daemons have the same shinken-specific.cfg file. The whole configuration should also be rsync'ed or copied once a day to ensure the spare arbiter can take over in case of a massive failure of active arbiter. 
+.. important::  It's very important that the two arbiter daemons have the same /etc/shinken directory. The whole configuration should also be rsync'ed or copied once a day to ensure the spare arbiter can take over in case of a massive failure of active arbiter.
 
 So copy it in the server3 (overwrite the old one) in the same place.
 
@@ -116,7 +117,7 @@ Ok, everything is ready. All you need now is to start all the daemons:
   $server3: sudo /etc/init.d/shinken start
 
 
-If an active daemon die, the spare will take over. This is detected in a minute or 2 (you can change it in the shinken-specific.cfg, for each daemon).
+If an active daemon die, the spare will take over. This is detected in a minute or 2 (you can change it in the daemons/deamon-spare.cfg, for each daemon).
 
 .. note::  For stateful fail-over of a scheduler, link one of the :ref:`distributed retention modules <packages/distributed-retention-modules>` such as memcache or redis to your schedulers. This will avoid losing the current state of the checks handled by a failed scheduler. Without a retention module, the spare scheduler taking over will need to reschedule all checks and check states will be PENDING until this has completed.
 

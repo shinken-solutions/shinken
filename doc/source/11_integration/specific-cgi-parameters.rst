@@ -22,7 +22,7 @@ Example:
   
 ::
 
-  object_cache_file=/usr/local/shinken/var/objects.cache
+  object_cache_file=/var/lib/shinken/objects.cache
   
 This directive is used to specify a file in which a cached copy of :ref:`Object Configuration Overview <configuration/configobject>` should be stored. The cache file is (re)created every time Shinken is (re)started.
 
@@ -34,7 +34,7 @@ Temp File
 
 ======== ==========================================
 Format:  temp_file=<file_name>                     
-Example: temp_file=/usr/local/nagios/var/nagios.tmp
+Example: temp_file=/var/lib/shinken/nagios.tmp
 ======== ==========================================
 
 This is a temporary file that Nagios periodically creates to use when updating comment data, status data, etc. The file is deleted when it is no longer needed.
@@ -60,7 +60,7 @@ Status File
 
 ======== ============================================
 Format:  status_file=<file_name>                     
-Example: status_file=/usr/local/nagios/var/status.dat
+Example: status_file=/var/lib/shinken/status.dat
 ======== ============================================
 
 This is the file that Nagios uses to store the current status, comment, and downtime information. This file is used by the CGIs so that current monitoring status can be reported via a web interface. The CGIs must have read access to this file in order to function properly. This file is deleted every time Nagios stops and recreated when it starts.

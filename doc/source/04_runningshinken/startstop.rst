@@ -22,11 +22,11 @@ Starting Shinken
 
 ::
 
-  linux:~ # /usr/local/shinken/bin/shinken-scheduler -d -c /usr/local/shinken/etc/schedulerd.ini
-  linux:~ # /usr/local/shinken/bin/shinken-poller -d -c /usr/local/shinken/etc/pollerd.ini
-  linux:~ # /usr/local/shinken/bin/shinken-reactionner -d -c /usr/local/shinken/etc/reactionnerd.ini
-  linux:~ # /usr/local/shinken/bin/shinken-broker -d -c /usr/local/shinken/etc/brokerd.ini
-  linux:~ # /usr/local/shinken/bin/shinken-arbiter -d -c /usr/local/shinken/etc/nagios.cfg -c /usr/local/shinken/etc/shinken-specific.cfg
+  linux:~ # /usr/bin/shinken/shinken-scheduler -d -c /etc/shinken/daemons/schedulerd.ini
+  linux:~ # /usr/bin/shinken/shinken-poller -d -c /etc/shinken/daemons/pollerd.ini
+  linux:~ # /usr/bin/shinken/shinken-reactionner -d -c /etc/shinken/daemons/reactionnerd.ini
+  linux:~ # /usr/bin/shinken/shinken-broker -d -c /etc/shinken/daemons/brokerd.ini
+  linux:~ # /usr/bin/shinken/shinken-arbiter -d -c /etc/shinken/shinken.cfg
   
 .. important::  Enabling debugging output under windows requires changing registry values associated with Shinken
 
@@ -47,7 +47,7 @@ Restarting/reloading is nececessary when you modify your configuration files and
 ::
 
   linux:~ # kill <configobjects/arbiter_pid>
-  linux:~ # /usr/local/shinken/bin/shinken-arbiter. -d -c /usr/local/shinken/etc/nagios.cfg
+  linux:~ # /usr/bin/shinken-arbiter -d -c /etc/shinken/shinken.cfg
 
 
 Stopping Shinken 

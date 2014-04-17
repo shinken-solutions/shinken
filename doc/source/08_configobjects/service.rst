@@ -297,7 +297,7 @@ action_url
   This directive is used to define an optional URL that can be used to provide more actions to be performed on the service. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing service information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///).
 
 icon_image
-  This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this service. This image will be displayed in the :ref:`status <thebasics/cgis#thebasics_cgis_status_cgi>` and :ref:`extended information <thebasics/cgis>` CGIs. The image will look best if it is 40x40 pixels in size. Images for services are assumed to be in the **logos/** subdirectory in your HTML images directory (i.e. "/usr/local/shinken/share/images/logos").
+  This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this service. This image will be displayed in the :ref:`status <thebasics/cgis#thebasics_cgis_status_cgi>` and :ref:`extended information <thebasics/cgis>` CGIs. The image will look best if it is 40x40 pixels in size. Images for services are assumed to be in the **logos/** subdirectory in your HTML images directory.
 
 icon_image_alt
   This variable is used to define an optional string that is used in the ALT tag of the image specified by the *<icon_image>* argument. The ALT tag is used in the :ref:`status <thebasics/cgis#thebasics_cgis_status_cgi>`, :ref:`extended information <thebasics/cgis>` and :ref:`statusmap <thebasics/cgis#thebasics_cgis_statusmap_cgi>` CGIs.

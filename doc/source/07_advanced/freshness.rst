@@ -74,7 +74,7 @@ Notice that active checks are disabled for the service. This is because the resu
 
   define command{
   		        command_name    no-backup-report
-  		        command_line    /usr/local/shinken/libexec/check_dummy 2 "CRITICAL: Results of backup job were not reported!"
+  		        command_line    /var/lib/shinken/libexec/check_dummy 2 "CRITICAL: Results of backup job were not reported!"
   		        }
   
 If Shinken detects that the service results are stale, it will run the "no-backup-report" command as an active service check. This causes the **check_dummy** plugin to be executed, which returns a critical state to Shinken. The service will then go into to a critical state (if it isn't already there) and someone will probably get notified of the problem.

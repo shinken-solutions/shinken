@@ -23,13 +23,6 @@ Install Python on your phone
   * Launch the sl4a application you just installed.
   * click in the menu button, click "view" and then select "interpreter"
   * click the menu button again, then add and select "Python 2.6". Then click to install.
-
-
-
-Go to http://pypi.python.org/pypi/Pyro4/ and download the same Pyro that you are using in Shinken.
-
-  * Connect your phone to a computer, and open the sdcard disk.
-  * Untar the Pyro4 tar ball, and copy the Pyro4 library directory (the one IN the Pyro4-10 directory, NOT the 4.10 directory itself) and copy/paste it in SDCARD/com.googlecode.pythonforandroid\extras\python directory. Be sure the file SDCARD\com.googlecode.pythonforandroid\extras\python\Pyro\__init__.py exists, or you put the wrong directory here.
   * Don't close your sdcard explorer
 
 
@@ -55,7 +48,7 @@ Declare this daemon in the central configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-The phone(s) will be a new reactionner daemon. You should want to only launch SMS with it, not mail commands or nother notifications. So you will have to define this reactionner to manage only the SMS commands. There is an example of such SMS-reactionner in the sample etc/shinken-specific.cfg file and the module AndroidSMS need by this reactionner to send SMS with android.
+The phone(s) will be a new reactionner daemon. You should want to only launch SMS with it, not mail commands or nother notifications. So you will have to define this reactionner to manage only the SMS commands.
 
 
 ::

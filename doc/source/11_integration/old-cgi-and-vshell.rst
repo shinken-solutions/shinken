@@ -18,7 +18,7 @@ Declare the status_dat module
 
 Export all status into a flat file in the old Nagios format. It's for small/medium environment because it's very slow to parse. It can be used by the Nagios CGI. It also exports the objects.cache file for this interface.
 
-Edit your /etc/shinken/shinken-specific.cfg file:
+Edit your /etc/shinken/modules/status-dat.cfg file:
 
   
 ::
@@ -26,8 +26,6 @@ Edit your /etc/shinken/shinken-specific.cfg file:
   
   define module{
   
-::
-
        module_name              Status-Dat
        module_type              status_dat
        status_file              /var/lib/shinken/status.data
@@ -39,7 +37,7 @@ Edit your /etc/shinken/shinken-specific.cfg file:
 Enable it 
 ==========
 
-Edit your /etc/shinken/shinken-specific.cfg file and find the object Broker:
+Edit your /etc/shinken/brokers/broker-master.cfg file and find the object Broker:
 
   
 ::

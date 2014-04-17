@@ -38,26 +38,33 @@ Now you need to launch the scheduler and pollers (or just one of them if you wan
 
 It looks like the launch in the master server? Yes, it's the same :-)
 
-Here you just launch the daemons, now you need to declare them in the shinken-specific.cfg file on the master server (the one with the arbiter daemon). You need to add new entries for these satellites:
+Here you just launch the daemons, now you need to declare them in their respectively directories on the master server (the one with the arbiter daemon). You need to add new entries for these satellites:
    
-  
+In /etc/shinken/schedulers/scheduler-master.cfg (create it if necessary):
+
+
 ::
 
   
   
   define scheduler{
-  
-::
 
        scheduler_name	scheduler-2
        address	192.168.0.2
        port	7768
        spare	0
        }
-  
-  define poller{
-  
+
+
+
+In /etc/shinken/pollers/poller-master.cfg (create it if necessary):
+
+
 ::
+
+
+  define poller{
+
 
        poller_name     poller-2
        address  192.168.0.2
@@ -92,25 +99,31 @@ We keep the load balancing previous installation and we add a new server (if you
 
 Nothing new here. 
 
-And we need to declare the new satellites in the shinken-specific.cfg file near the arbiter:
-  
+And we need to declare the new satellites in the directories near the arbiter:
+
+
+In /etc/shinken/schedulers/scheduler-3.cfg (create it if necessary):
+
 ::
 
-  
+
   
   define scheduler{
   
-::
 
        scheduler_name	scheduler-3
        address	192.168.0.3
        port	7768
        spare	1
        }
-  
-  define poller{
-  
+
+
+In /etc/shinken/pollers/poller-3.cfg (create it if necessary):
+
 ::
+
+
+  define poller{
 
        poller_name     poller-3
        address  192.168.0.3
@@ -129,7 +142,7 @@ Really?
 
 Yes indeed, that's all. Until one of the scheduler/poller fall, these two new daemons will just wait. If anyone falls, the spare daemon will take the configuration and start to work.
 
-You should do the same for arbiter, reactionner and broker. Just install them in the server-3 and declare them in the shinken-specific.cfg file with a spare parameter. Now you've got a full HA architecture (and with load balancing if you keep the server-2 :) ).
+You should do the same for arbiter, reactionner and broker. Just install them in the server-3 and declare them in the reactionners and brokers directories file with a spare parameter. Now you've got a full HA architecture (and with load balancing if you keep the server-2 :) ).
 
 .. note::  Here you have high availability, but if a scheduler dies, the spare takes the configuration, but not the saved states. So it will have to reschedule all checks, and current states will be PENDING. To avoid this, you can link :ref:`distributed retention modules <packages/distributed-retention-modules>` such as memcache to your schedulers
 

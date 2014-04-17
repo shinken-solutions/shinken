@@ -35,7 +35,7 @@ You just need to install a poller with the 'DMZ' tag in the DMZ and then add it 
 Configuration part 
 ===================
 
-So you need to declare in the /etc/shinken.shinken-specific.cfg (or c:\shinken\etc\shinen-specific.cfg):
+So you need to declare in the /etc/pollers/poller-master.cfg (or c:\shinken\etc\pollers\poller-master.cfg):
  
 ::
   

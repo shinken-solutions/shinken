@@ -26,7 +26,7 @@ Shinken WebUI is started at the same time Shinken itself does, and is configured
 Set up the WebUI module 
 ========================
 
-Enable the **webui** module in ''shinken-specific.cfg'' configuration file that is on the server where your **Arbiter** is installed. 
+Enable the **webui** module in ''modules/webui.cfg'' configuration file that is on the server where your **Arbiter** is installed.
 
 ::
 
@@ -142,7 +142,7 @@ Change "adserver" by your own dc server, and set the "user/password" to an accou
 
 Change "mode" from "ad" to "openldap" to make the module ready to authenticate against an OpenLDAP directory service.
 
-You could also find module sample in shinken.specific.cfg.
+You could also find module sample in the modules directory.
 
 
 User photos 
@@ -160,7 +160,7 @@ User preferences modules
 The WebUI use mongodb to store all user preferences, dashboards and other information. 
 
 To enable user preferences do the following:
-  - install mongodb using the Shinken installation script: cd /usr/local/shinken ; ./install -a mongodb
+  - install mongodb
   - add "Mongodb" to your WebUI module list as done in the example at the top of this page
 
 

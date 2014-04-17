@@ -66,9 +66,9 @@ Declare the new poller on the main configuration file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Ok, now you have a brand new poller declared on your new server, server2. **But server1 needs to know that it must give work to it. This is done by declaring the new poller in the shinken-specific.cfg file.**
+Ok, now you have a brand new poller declared on your new server, server2. **But server1 needs to know that it must give work to it. This is done by declaring the new poller in the pollers/poller-master.cfg file.**
 
-Edit your /etc/shinken-specific.cfg file (or c:\shinken\etc\shinken-specific.cfg under Windows) and define your new poller under the existing poller-1 definition (on server1):
+Edit your /etc/shinken/pollers/poller-master.cfg file (or c:\shinken\etc\pollers\poller-master.cfg under Windows) and define your new poller under the existing poller-1 definition (on server1):
 
 ::
   

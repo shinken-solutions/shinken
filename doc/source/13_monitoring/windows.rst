@@ -62,20 +62,14 @@ To make your life a bit easier, configuration templates are provided as a starti
   * A selection of **check_windows** based command definitions have been added to the "commands.cfg" file. This allows you to use the **check_wmi_plus** plugin.
   * A Windows host template (called "windows") is included the "templates.cfg" file. This allows you to add new Windows host definitions in a simple manner.
 
-The above-mentioned config files can be found in the ///usr/local/shinken/etc/packs/os/windows// directory. You can modify the definitions in these and other templates to suit your needs. However, wait until you're more familiar with Shinken before doing so. For the time being, just follow the directions outlined below and you will be monitoring your Windows devices in no time.
+The above-mentioned config files can be found in the /etc/shinken/packs/os/windows/ directory. You can modify the definitions in these and other templates to suit your needs. However, wait until you're more familiar with Shinken before doing so. For the time being, just follow the directions outlined below and you will be monitoring your Windows devices in no time.
 
 
 Setup the check_wmi_plus plugin 
 ================================
 
-The plugin used for windows agent less monitoring is check_wmi_plus. To install it, just launch as root on your shinken server:
-  
-::
-
-  
-  ./install -p check_wmi_plus
-
-(install is an executable script in the shinken base directory, previously known as shinken.sh)
+The plugin used for windows agent less monitoring is check_wmi_plus.
+Download the last version of check_wmi_plus available on the `Check WMI Plus website`_
 
 
 Setup a windows account for WMI queries 
@@ -159,3 +153,4 @@ You're done with modifying the Shinken configuration, so you'll need to :ref:`ve
 If the verification process produces any errors messages, fix your configuration file before continuing. Make sure that you don't (re)start Shinken until the verification process completes without any errors!
 
 .. _Monitoring_Windows_Using_WMI.pdf: http://assets.nagios.com/downloads/nagiosxi/docs/Monitoring_Windows_Using_WMI.pdf
+.. _Check WMI Plus website: http://assets.nagios.com/
