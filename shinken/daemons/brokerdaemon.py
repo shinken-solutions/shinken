@@ -194,9 +194,8 @@ class Broker(BaseSatellite):
         running_id = links[id]['running_id']
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
-
         try:
-            con = links[id]['con'] = HTTPClient(uri=uri)
+            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
         except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after

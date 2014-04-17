@@ -321,7 +321,7 @@ class Satellite(BaseSatellite):
         logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
 
         try:
-            sch_con = sched['con'] = HTTPClient(uri=uri)
+            sch_con = sched['con'] = HTTPClient(uri=uri, strong_ssl=sched['hard_ssl_name_check'])
         except HTTPExceptions, exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None

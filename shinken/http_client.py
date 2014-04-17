@@ -46,7 +46,7 @@ HTTPExceptions = (HTTPException,)
 
 
 class HTTPClient(object):
-    def __init__(self, address='', port=0, use_ssl=False, timeout=3, data_timeout=120, uri=''):
+    def __init__(self, address='', port=0, use_ssl=False, timeout=3, data_timeout=120, uri='', strong_ssl=False):
         self.address = address
         self.port    = port
         self.timeout = timeout
@@ -73,8 +73,14 @@ class HTTPClient(object):
         
 
         # Also set the SSL options to do not look at the certificates too much
-        self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
-        self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
+        # unless the admin asked for it
+        if strong_ssl:
+            self.con.setopt(pycurl.SSL_VERIFYPEER, 1)
+            self.con.setopt(pycurl.SSL_VERIFYHOST, 1)
+        else:
+            self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
+            self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
+            
 
     
     # Try to get an URI path
