@@ -32,8 +32,10 @@ class TestConfig(ShinkenTest):
         print "Create a Scheduler dummy"
         r = self.conf.realms.find_by_name('Default')
 
-        creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0', 'port': '9999', 'check_interval': '1', 'realm': 'Default'}
+        creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0',
+                        'port': '9999', 'check_interval': '1', 'realm': 'Default', 'use_ssl': '0', 'hard_ssl_name_check': '0'}
         s = SchedulerLink(creation_tab)
+        s.pythonize()
         s.last_check = time.time() - 100
         s.timeout = 3
         s.check_interval = 1
