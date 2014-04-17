@@ -160,6 +160,9 @@ class Service(SchedulingItem):
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
+        
+        # snapshots
+        'snapshots_commands':    StringProp(default=''),
     })
 
     # properties used in the running state
@@ -1078,6 +1081,7 @@ class Services(Items):
         self.linkify_s_by_sg(servicegroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
+        self.linkify_command_list_with_commands(commands, 'snapshots_commands')
         self.linkify_with_contacts(contacts)
         self.linkify_with_resultmodulations(resultmodulations)
         self.linkify_with_business_impact_modulations(businessimpactmodulations)
