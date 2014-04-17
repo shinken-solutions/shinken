@@ -540,7 +540,6 @@ config_objects_file = (
                         'templates/generic-service.cfg',
                         'templates/srv-pnp.cfg',
                         'dependencies/sample.cfg',
-                        'time_templates.cfg',
                         'discovery/discovery_rules.cfg',
                         'hosts/localhost.cfg',
                         'services/services.cfg',
