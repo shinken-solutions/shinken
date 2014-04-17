@@ -1,6 +1,6 @@
 recursive-include shinken *.*
 recursive-include shinken/webui *.*
-recursive-include etc *.*
+recursive-include etc *
 recursive-include windows .bat .reg
 recursive-include bin *.* *-* shinken
 recursive-include libexec *.*
