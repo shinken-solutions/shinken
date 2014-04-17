@@ -76,7 +76,7 @@ class HTTPClient(object):
         # unless the admin asked for it
         if strong_ssl:
             self.con.setopt(pycurl.SSL_VERIFYPEER, 1)
-            self.con.setopt(pycurl.SSL_VERIFYHOST, 1)
+            self.con.setopt(pycurl.SSL_VERIFYHOST, 2)
         else:
             self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
             self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
