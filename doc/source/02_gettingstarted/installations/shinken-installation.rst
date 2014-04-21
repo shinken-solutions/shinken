@@ -25,8 +25,20 @@ Ready? Let's go!
 Requirements
 =============
 
- * Python >= 2.6
- * Pycurl
+Mandatory Requirements
+----------------------
+
+* `Python`_ 2.6 or higher (2.7 will get higher performances)
+* `python-pycurl`_ Python package for Shinken daemon communications
+* `setuptools`_ or `distribute` Python package for installation
+
+
+Conditional Requirements
+------------------------
+
+* `Python`_ 2.7 is required for developers to run the test suite, shinken/test/
+* `python-cherrypy3`_ (recommanded) enhanceddaemons communications, especially in HTTPS mode
+
 
 
 .. _gettingstarted/installations/shinken-installation#gnu_linux_unix:
@@ -40,7 +52,7 @@ GNU/Linux & Unix Installation
 Method 1: Pip
 --------------
 
-Shinken 2.0 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.0-RC
+Shinken 2.0 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.0
 You can donwload the tarball and execute the setup.py or just use the pip command to install it automatically.
 
 
@@ -94,8 +106,10 @@ Step are basically the same as the linux one (Python install etc) but in windows
 
 
 
-
-
+.. _Python: http://www.python.org/download/
+.. _python-cherrypy3: http://www.cherrypy.org/
+.. _python-pycurl: http://pycurl.sourceforge.net/
+.. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
 .. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.0.tar.gz
 .. _install.d/README: https://github.com/naparuba/shinken/blob/master/install.d/README
