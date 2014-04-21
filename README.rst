@@ -15,61 +15,21 @@ supports Python, which includes Windows and GNU/Linux.
 Requirements
 ============
 
+See the `Documentation`__ 
+
+__ https://shinken.readthedocs.org/en/latest/02_gettingstarted/installations/shinken-installation.html#requirements
+
 There are mandatory and conditional requirements for the installation
 methods which are described below.
 
 
-Mandatory Requirements
-----------------------
+Installing Shinken
+==================
 
-`shinken` requires
+See the `Documentation`__ 
 
-* `Python`__ 2.6 or higher (2.7 will get higher performances)
-* `python-pycurl`__ Python package for Shinken daemon communications
-* `setuptools`__ or `distribute` Python package for installation
+__ https://shinken.readthedocs.org/en/latest/02_gettingstarted/installations/shinken-installation.html
 
-
-
-__ http://www.python.org/download/
-__ http://pycurl.sourceforge.net/
-__ http://pypi.python.org/pypi/setuptools/
-
-
-
-
-Conditional Requirements
-------------------------
-
-* `Python`__ 2.7 is required for developers to run the test suite, shinken/test/
-* `python-cherrypy3`__ (recommanded) enhanceddaemons communications, especially in HTTPS mode
-
-__ http://www.python.org/download/
-__ http://www.cherrypy.org/
-
-Installing/Checking Common Requirements on Windows
-==================================================
-
-There is an installation guide for Windows and an installation package.
-
-* `Windows Installation guide on the Wiki`__
-
-__ http://www.shinken-monitoring.org/wiki/shinken_10min_start
-
-
-Installing on Linux
-================================================
-
-
-How to install Shinken
-======================
-
-You will need a specific user for running shinken :
-
-   useradd --user-group shinken
-
-You simply need to launch:
-
-  python setup.py install
 
 
 Update
@@ -130,9 +90,9 @@ with Shinken you can start to use its unique and powerful features.
 Learn more about how to use and configure Shinken
 =================================================
 
-Jump to the `Shinken documentation wiki`__.
+Jump to the `Shinken documentation__.
 
-__ http://www.shinken-monitoring.org/wiki/
+__ https://shinken.readthedocs.org/en/latest/
 
 
 If you find a bug
