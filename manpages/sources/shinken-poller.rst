@@ -31,7 +31,6 @@ The **shinken-poller** daemon is in charge of launching plugins as requested by 
 OPTIONS
 =======
 
-  -v, --verify-config                           Verify config file and exit
   -c INI-CONFIG-FILE, --config=INI-CONFIG-FILE  Config file
   -d, --daemon                                  Run in daemon mode
   -r, --replace                                 Replace previous running poller

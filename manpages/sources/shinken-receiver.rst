@@ -31,7 +31,6 @@ The **shinken-receiver** daemon manages passive information and serves as a buff
 OPTIONS
 =======
 
-  -v, --verify-config                           Verify config file and exit
   -c INI-CONFIG-FILE, --config=INI-CONFIG-FILE  Config file
   -d, --daemon                                  Run in daemon mode
   -r, --replace                                 Replace previous running receiver
