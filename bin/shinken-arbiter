@@ -98,7 +98,7 @@ parser.add_option("-a", "--analyse",
                   help="Dump an analyse statistics file, for support")
 parser.add_option("-m", "--migrate",
                   dest="migrate",
-                  help="Migrate the raw configuration read from the arbier to another module. --> VERY EXPERIMENTAL!")
+                  help="Migrate the raw configuration read from the arbiter to another module. --> VERY EXPERIMENTAL!")
 parser.add_option("-n", "--name",
                   dest="arb_name",
                   help="Give the arbiter name to use. Optionnal, will use the hostaddress if not provide to find it.")
