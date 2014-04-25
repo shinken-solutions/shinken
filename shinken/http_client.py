@@ -36,6 +36,7 @@ import urllib
 from StringIO import StringIO
 
 from shinken.bin import VERSION
+from shinken.log import logger
 PYCURL_VERSION = pycurl.version_info()[1]
 
 class HTTPException(Exception):
