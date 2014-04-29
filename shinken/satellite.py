@@ -595,6 +595,7 @@ class Satellite(BaseSatellite):
                 # if so, just delete if from q_by_mod
                 except NotWorkerMod:
                     to_del.append(mod)
+                    break
             """
             # Try to really adjust load if necessary
             if self.get_max_q_len(mod) > self.max_q_size:
