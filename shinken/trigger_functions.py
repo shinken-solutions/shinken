@@ -178,7 +178,7 @@ def allperfs(obj_ref):
     obj = get_object(obj_ref)
     p = PerfDatas(obj.perf_data)
     logger.debug("[trigger] I get all perfdatas")
-    return dict([(metric_name, p[metric_name].value) for metric_name in p])
+    return dict([(metric.name, p[metric.name]) for metric in p])
 
 
 @declared
