@@ -58,7 +58,7 @@ class Packs(Items):
     name_property = "pack_name"
     inner_class = Pack
 
-    # We will dig into the path and load all .trig files
+    # We will dig into the path and load all .pack files
     def load_file(self, path):
         # Now walk for it
         for root, dirs, files in os.walk(path):
