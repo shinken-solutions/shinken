@@ -112,7 +112,7 @@ class Pluginconf(object):
     pass
 
 
-class Unittest2CompatMixIn:
+class _Unittest2CompatMixIn:
     """
     Mixin for simulating methods new in unittest2 resp. Python 2.7.
 
@@ -134,8 +134,8 @@ class Unittest2CompatMixIn:
     def assertIsInstance(self, obj, cls, msg=None):
         self.assertTrue(isinstance(obj, cls))
 
-    def assertRegexpMatches(self, line, patern):
-        r = re.search(patern, line)
+    def assertRegexpMatches(self, line, pattern):
+        r = re.search(pattern, line)
         self.assertTrue(r is not None)
 
     def assertIs(self, obj, cmp, msg=None):
