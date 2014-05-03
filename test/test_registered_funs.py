@@ -39,7 +39,7 @@ daemons_config = {
 }
 
 
-class testRegisteredFunctions(unittest.TestCase):
+class testRegisteredFunctions(ShinkenTest):
     def create_daemon(self):
         cls = Shinken
         return cls(daemons_config[cls], False, True, False, None, '')

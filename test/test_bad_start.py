@@ -145,23 +145,23 @@ class template_Daemon_Bad_Start():
         os.rmdir(d1.workdir)
 
 
-class Test_Broker_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
+class Test_Broker_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
     daemon_cls = Broker
 
 
-class Test_Scheduler_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
+class Test_Scheduler_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
     daemon_cls = Shinken
 
 
-class Test_Poller_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
+class Test_Poller_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
     daemon_cls = Poller
 
 
-class Test_Reactionner_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
+class Test_Reactionner_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
     daemon_cls = Reactionner
 
 
-class Test_Arbiter_Bad_Start(template_Daemon_Bad_Start, unittest.TestCase):
+class Test_Arbiter_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
     daemon_cls = Arbiter
 
     def create_daemon(self):
