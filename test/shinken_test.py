@@ -122,6 +122,7 @@ class Unittest2CompatMixIn:
 
        class MyTestCase(unittest.TestCase, Unittest2CompatMixIn):
            ...
+    In our case, it's better to always inherit from ShinkenTest
 
     """
     def assertNotIn(self, member, container, msg=None):
