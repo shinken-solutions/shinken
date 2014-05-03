@@ -142,7 +142,7 @@ class _Unittest2CompatMixIn:
         self.assertTrue(obj is cmp)
 
 
-class ShinkenTest(unittest.TestCase, Unittest2CompatMixIn):
+class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
