@@ -38,7 +38,8 @@ Conditional Requirements
 
 * `Python`_ 2.7 is required for developers to run the test suite, shinken/test/
 * `python-cherrypy3`_ (recommanded) enhanceddaemons communications, especially in HTTPS mode
-
+* `Monitoring Plugins`_ (recommended) provides a set of plugins to monitor host (Shinken use check_icmp on default install).
+  Monitoring plugins are available on most linux distribution (nagios-plugins package)
 
 
 .. _gettingstarted/installations/shinken-installation#gnu_linux_unix:
@@ -108,6 +109,7 @@ Step are basically the same as the linux one (Python install etc) but in windows
 
 .. _Python: http://www.python.org/download/
 .. _python-cherrypy3: http://www.cherrypy.org/
+.. _Monitoring Plugins: https://www.monitoring-plugins.org/
 .. _python-pycurl: http://pycurl.sourceforge.net/
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
