@@ -1,6 +1,36 @@
 misc Package
 ============
 
+Diagrams
+--------
+
+Simple PerfDatas class diagram :
+
+.. inheritance-diagram:: shinken.misc.perfdata.PerfDatas
+  :parts: 3
+
+
+Simple DataManager class diagram :
+
+.. inheritance-diagram:: shinken.misc.datamanager.DataManager
+  :parts: 3
+
+
+Simple Regenerator class diagram :
+
+.. inheritance-diagram:: shinken.misc.regenerator.Regenerator
+  :parts: 3
+
+
+Simple Metric class diagram :
+
+.. inheritance-diagram::  shinken.misc.perfdata.Metric
+  :parts: 3
+
+
+Package
+--------
+
 :mod:`misc` Package
 -------------------
 
