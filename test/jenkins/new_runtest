@@ -22,11 +22,17 @@
 
 
 
-TESTLIST=$(readlink -f $1)
+
 MODULELIST=$(readlink -f $2)
 COVERAGE=$3
 PYLINT=$4
 PEP8=$5
+
+if [[ "$(echo $1 | tr [A-Z] [a-z])" == "long" ]]; then
+    REGEXPMOD="" # Mod is long, we will take all tests
+else
+    REGEXPMOD="long_" # Mod is normal, we will skip long tests
+fi
 test "$COVERAGE" == "COVERAGE" || COVERAGE="NOCOVERAGE"
 test "$PYLINT" == "PYLINT" || PYLINT="NOPYLINT"
 test "$PEP8" == "PEP8" || PYLINT="NOPEP8"
@@ -130,7 +136,7 @@ function grab_modules {
     for module in $(cat $MODULELIST); do
         git clone $GIT_URL/$module.git tmp/$module
         $SHINKENCLI install --local tmp/$module > /dev/null
-        cp __import_shinken.py shinken_test.py tmp/$module/test
+        cp __import_shinken.py shinken_test.py shinken_modules.py tmp/$module/test
         # Symlink of config files to etc
         if [ -d "tmp/$module/test/etc" ]; then
             for conf_file in tmp/$module/test/etc/*; do
@@ -144,7 +150,7 @@ function grab_modules {
 function test_modules {
     for line in $(grep -vE "#|^ *$" $MODULELIST);do
         if [ -d "tmp/$line/test/" ]; then
-            for ptest in tmp/$line/test/test_*.py;do
+            for ptest in $(ls tmp/$line/test/test_*.py | grep -v "test_$REGEXPMOD.*\.py");do
                 launch_and_assert $ptest
                 test $? -eq 0 || echo "A test failed : $ptest"
             done
@@ -155,12 +161,10 @@ function test_modules {
 }
 
 function test_core {
-    # We this we drop commented line and empty lines.
-    # We could have used "only" grep -v "#" because the $() return only one line and
-    # multiple space are skipped by the for loop
-    # Safer to drop at the very beginning
-    for line in $(grep -vE "#|^ *$" $TESTLIST);do
-        launch_and_assert $line
+    # REGEXPMOD is long_ or ""
+    # If long_, we are in normal mode
+    for test in $(ls test_*.py | grep -v "test_$REGEXPMOD.*\.py") ;do
+        launch_and_assert $test
         test $? -eq 0 || echo "A test failed : $line"
     done
 }
