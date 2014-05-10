@@ -61,7 +61,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-logger.set_level(logger.ERROR)
+#logger.set_level(logger.ERROR)
 
 
 # We overwrite the functions time() and sleep()
