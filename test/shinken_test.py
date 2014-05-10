@@ -61,7 +61,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-
+logger.set_level(logger.ERROR)
 
 
 # We overwrite the functions time() and sleep()
@@ -147,6 +147,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
+        self.print_header()
         # i am arbiter-like
         self.broks = {}
         self.me = None
@@ -395,7 +396,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         return res
 
     def print_header(self):
-        print "#" * 80 + "\n" + "#" + " " * 78 + "#"
+        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
