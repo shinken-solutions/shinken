@@ -670,9 +670,12 @@ Beware : if you set the human format, some automatic parsing log tools won't wor
 Resource File
 --------------
 
-Defined in nagios.cfg file.
+Defined in shinken.cfg file.
 
-Format:
+Format
+
+::
+
    resource_file=<file_name>
 
 Example:
@@ -685,6 +688,23 @@ This is used to specify an optional resource file that can contain "$USERn$" :re
 A classical variable used is $USER1$, used to store the plugins path, "/usr/lib/nagios/plugins" on a classic installation.
 
 
+.. _configuration/configmain-advanced#triggers_dir:
+Triggers directory
+-------------------
+
+Format
+
+::
+
+  triggers_dir=<directory>
+
+Example:
+
+::
+
+   triggers_dir=triggers.d
+
+Used to specify the :ref:`trigger <advanced/triggers>` directory. It will open the directory and look recursively for .trig files.
 
 
 
