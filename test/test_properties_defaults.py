@@ -518,6 +518,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('trigger_edit_output', '0'),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
@@ -781,6 +782,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('trigger_edit_output', '0'),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
@@ -829,6 +831,7 @@ class TestTrigger(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('name', ''),
         ('code_src', ''),
+        ('trigger_edit_output', '0'),
         ])
 
     def setUp(self):
