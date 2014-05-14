@@ -831,7 +831,6 @@ class TestTrigger(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('name', ''),
         ('code_src', ''),
-        ('trigger_edit_output', '0'),
         ])
 
     def setUp(self):
