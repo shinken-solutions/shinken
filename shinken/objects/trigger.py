@@ -41,7 +41,8 @@ class Trigger(Item):
 
     properties = Item.properties.copy()
     properties.update({'trigger_name': StringProp(fill_brok=['full_status']),
-                       'code_src': StringProp(default='', fill_brok=['full_status'])
+                       'code_src': StringProp(default='', fill_brok=['full_status']),
+                       'trigger_edit_output': BoolProp(default='0')
                        })
 
     running_properties = Item.running_properties.copy()
@@ -70,11 +71,12 @@ class Trigger(Item):
         exec code in dict(locals())
 
     def __getstate__(self):
-        return {'trigger_name': self.trigger_name, 'code_src': self.code_src}
+        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_edit_output': self.trigger_edit_output}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']
         self.code_src = d['code_src']
+        self.trigger_edit_output = d['trigger_edit_output']
 
 
 class Triggers(Items):
