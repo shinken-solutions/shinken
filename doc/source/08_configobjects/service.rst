@@ -16,64 +16,67 @@ Description
 
 A service definition is used to identify a “service" that runs on a host. The term “service" is used very loosely. It can mean an actual service that runs on the host (POP, "SMTP", "HTTP", etc.) or some other type of metric associated with the host (response to a ping, number of logged in users, free disk space, etc.). The different arguments to a service definition are outlined below.
 
+=======
+========================================== ======================================
+define service{
+**host_name**                              ***host_name***
+hostgroup_name                             *hostgroup_name*
+**service_description**                    ***service_description***
+display_name                               *display_name*
+servicegroups                              servicegroup_names
+is_volatile                                [0/1]
+**check_command**                          ***command_name***
+initial_state                              [o,w,u,c]
+**max_check_attempts**                     **#**
+**check_interval**                         **#**
+**retry_interval**                         **#**
+active_checks_enabled                      [0/1]
+passive_checks_enabled                     [0/1]
+**check_period**                           ***timeperiod_name***
+obsess_over_service                        [0/1]
+check_freshness                            [0/1]
+freshness_threshold                        #
+event_handler                              *command_name*
+event_handler_enabled                      [0/1]
+low_flap_threshold                         #
+high_flap_threshold                        #
+flap_detection_enabled                     [0/1]
+flap_detection_options                     [o,w,c,u]
+process_perf_data                          [0/1]
+retain_status_information                  [0/1]
+retain_nonstatus_information               [0/1]
+**notification_interval**                  **#**
+first_notification_delay                   #
+**notification_period**                    ***timeperiod_name***
+notification_options                       [w,u,c,r,f,s]
+notifications_enabled                      [0/1]
+**contacts**                               ***contacts***
+**contact_groups**                         ***contact_groups***
+stalking_options                           [o,w,u,c]
+notes                                      *note_string*
+notes_url                                  *url*
+action_url                                 *url*
+icon_image                                 *image_file*
+icon_image_alt                             *alt_string*
+poller_tag                                 *poller_tag*
+service_dependencies                       *host,service_description*
+business_impact                            [0/1/2/3/4/5]
+icon_set                                   [database/disk/network_service/server]
+maintenance_period                         *timeperiod_name*
+labels                                     *labels*
+business_rule_output_template              *template*
+business_rule_smart_notifications          [0/1]
+business_rule_downtime_as_ack              [0/1]
+business_rule_host_notification_options    [d,u,r,f,s]
+business_rule_service_notification_options [w,u,c,r,f,s]
+trigger_name                               *trigger_name*
+trigger_edit_output                        [0/1]
+}
+========================================== ======================================
 
 
-Definition Format 
-==================
-
-
-Bold directives are required, while the others are optional.
-
-
-
-============================ ======================================
-define service{                                                    
-**host_name**                ***host_name***                       
-hostgroup_name               *hostgroup_name*                      
-**service_description**      ***service_description***             
-display_name                 *display_name*                        
-servicegroups                servicegroup_names                    
-is_volatile                  [0/1]                                 
-**check_command**            ***command_name***                    
-initial_state                [o,w,u,c]                             
-**max_check_attempts**       **#**                                 
-**check_interval**           **#**                                 
-**retry_interval**           **#**                                 
-active_checks_enabled        [0/1]                                 
-passive_checks_enabled       [0/1]                                 
-**check_period**             ***timeperiod_name***                 
-obsess_over_service          [0/1]                                 
-check_freshness              [0/1]                                 
-freshness_threshold          #                                     
-event_handler                *command_name*                        
-event_handler_enabled        [0/1]                                 
-low_flap_threshold           #                                     
-high_flap_threshold          #                                     
-flap_detection_enabled       [0/1]                                 
-flap_detection_options       [o,w,c,u]                             
-process_perf_data            [0/1]                                 
-retain_status_information    [0/1]                                 
-retain_nonstatus_information [0/1]                                 
-**notification_interval**    **#**                                 
-first_notification_delay     #                                     
-**notification_period**      ***timeperiod_name***                 
-notification_options         [w,u,c,r,f,s]                         
-notifications_enabled        [0/1]                                 
-**contacts**                 ***contacts***                        
-**contact_groups**           ***contact_groups***                  
-stalking_options             [o,w,u,c]                             
-notes                        *note_string*                         
-notes_url                    *url*                                 
-action_url                   *url*                                 
-icon_image                   *image_file*                          
-icon_image_alt               *alt_string*                          
-poller_tag                   *poller_tag*                          
-service_dependencies         *host,service_description*            
-business_impact              [0/1/2/3/4/5]                         
-icon_set                     [database/disk/network_service/server]
-maintenance_period           *timeperiod_name*                     
-}                                                                  
-============================ ======================================
+Example Definition
+===================
 
 
 
@@ -375,5 +378,14 @@ This variable is used to set the icon in the Shinken Webui. For now, values are 
    maintenance_period
   
 Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <official/thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
+
+trigger_name
+  This options define the trigger that will be executed after a check result (passive or active).
+  This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
+
+trigger_edit_output
+  This option define the behavior of the defined trigger. If set to 1, this means the trigger will modify the output / return code of the check.
+  If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
+  Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

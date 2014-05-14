@@ -10,75 +10,82 @@ Host Definition
 
 Description 
 ============
-
-
-A host definition is used to define a physical server, workstation, device, etc. that resides on your network.
-
-
-
-Definition Format 
+=======
+Definition Format
 ==================
-
 
 Bold directives are required, while the others are optional.
 
 
+========================================== ======================================
+define host{
+**host_name**                              ***host_name***
+**alias**                                  ***alias***
+display_name                               *display_name*
+**address**                                ***address***
+parents                                    *host_names*
+hostgroups                                 *hostgroup_names*
+check_command                              *command_name*
+initial_state                              [o,d,u]
+**max_check_attempts**                     **#**
+check_interval                             #
+retry_interval                             #
+active_checks_enabled                      [0/1]
+passive_checks_enabled                     [0/1]
+**check_period**                           ***timeperiod_name***
+obsess_over_host                           [0/1]
+check_freshness                            [0/1]
+freshness_threshold                        #
+event_handler                              *command_name*
+event_handler_enabled                      [0/1]
+low_flap_threshold                         #
+high_flap_threshold                        #
+flap_detection_enabled                     [0/1]
+flap_detection_options                     [o,d,u]
+process_perf_data                          [0/1]
+retain_status_information                  [0/1]
+retain_nonstatus_information               [0/1]
+**contacts**                               ***contacts***
+**contact_groups**                         ***contact_groups***
+**notification_interval**                  **#**
+first_notification_delay                   #
+**notification_period**                    ***timeperiod_name***
+notification_options                       [d,u,r,f,s]
+notifications_enabled                      [0/1]
+stalking_options                           [o,d,u]
+notes                                      *note_string*
+notes_url                                  *url*
+action_url                                 *url*
+icon_image                                 *image_file*
+icon_image_alt                             *alt_string*
+vrml_image                                 *image_file*
+statusmap_image                            *image_file*
+2d_coords                                  *x_coord,y_coord*
+3d_coords                                  *x_coord,y_coord,z_coord*
+realm                                      *realm*
+poller_tag                                 *poller_tag*
+business_impact                            [0/1/2/3/4/5]
+resultmodulations                          *resultmodulations*
+escalations                                *escalations names*
+business_impact_modulations                *business_impact_modulations names*
+icon_set                                   [database/disk/network_service/server]
+maintenance_period                         *timeperiod_name*
+service_overrides                          *service_description,directive value*
+service_excludes                           *service_description,...*
+labels                                     *labels*
+business_rule_output_template              *template*
+business_rule_smart_notifications          [0/1]
+business_rule_downtime_as_ack              [0/1]
+business_rule_host_notification_options    [d,u,r,f,s]
+business_rule_service_notification_options [w,u,c,r,f,s]
+trigger_name                               *trigger_name*
+trigger_edit_output                        [0/1]
+}
+========================================== ======================================
 
-============================ ======================================
-define host{                                                       
-**host_name**                ***host_name***                       
-**alias**                    ***alias***                           
-display_name                 *display_name*                        
-**address**                  ***address***                         
-parents                      *host_names*                          
-hostgroups                   *hostgroup_names*                     
-check_command                *command_name*                        
-initial_state                [o,d,u]                               
-**max_check_attempts**       **#**                                 
-check_interval               #                                     
-retry_interval               #                                     
-active_checks_enabled        [0/1]                                 
-passive_checks_enabled       [0/1]                                 
-**check_period**             ***timeperiod_name***                 
-obsess_over_host             [0/1]                                 
-check_freshness              [0/1]                                 
-freshness_threshold          #                                     
-event_handler                *command_name*                        
-event_handler_enabled        [0/1]                                 
-low_flap_threshold           #                                     
-high_flap_threshold          #                                     
-flap_detection_enabled       [0/1]                                 
-flap_detection_options       [o,d,u]                               
-process_perf_data            [0/1]                                 
-retain_status_information    [0/1]                                 
-retain_nonstatus_information [0/1]                                 
-**contacts**                 ***contacts***                        
-**contact_groups**           ***contact_groups***                  
-**notification_interval**    **#**                                 
-first_notification_delay     #                                     
-**notification_period**      ***timeperiod_name***                 
-notification_options         [d,u,r,f,s]                           
-notifications_enabled        [0/1]                                 
-stalking_options             [o,d,u]                               
-notes                        *note_string*                         
-notes_url                    *url*                                 
-action_url                   *url*                                 
-icon_image                   *image_file*                          
-icon_image_alt               *alt_string*                          
-vrml_image                   *image_file*                          
-statusmap_image              *image_file*                          
-2d_coords                    *x_coord,y_coord*                     
-3d_coords                    *x_coord,y_coord,z_coord*             
-realm                        *realm*                               
-poller_tag                   *poller_tag*                          
-business_impact              [0/1/2/3/4/5]                         
-resultmodulations            *resultmodulations*                   
-escalations                  *escalations names*                   
-business_impact_modulations  *business_impact_modulations names*   
-icon_set                     [database/disk/network_service/server]
-maintenance_period           *timeperiod_name*                     
-}                                                                  
-============================ ======================================
+
+Example Definition
+===================
 
 
 
@@ -332,6 +339,15 @@ This variable is used to set the icon in the Shinken Webui. For now, values are 
    maintenance_period
   
 Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics-timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
+
+trigger_name
+  This options define the trigger that will be executed after a check result (passive or active).
+  This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
+
+trigger_edit_output
+  This option define the behavior of the defined trigger. If set to 1, this means the trigger will modify the output / return code of the check.
+  If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
+  Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/
