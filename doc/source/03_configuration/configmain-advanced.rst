@@ -689,6 +689,7 @@ A classical variable used is $USER1$, used to store the plugins path, "/usr/lib/
 
 
 .. _configuration/configmain-advanced#triggers_dir:
+
 Triggers directory
 -------------------
 

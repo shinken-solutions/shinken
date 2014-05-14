@@ -78,6 +78,8 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+trigger_name                               *trigger_name*
+trigger_edit_output                        [0/1]
 }
 ========================================== ======================================
 
@@ -306,6 +308,15 @@ business_rule_host_notification_options
 
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+trigger_name
+  This options define the trigger that will be executed after a check result (passive or active).
+  This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
+
+trigger_edit_output
+  This option define the behavior of the defined trigger. If set to 1, this means the trigger will modify the output / return code of the check.
+  If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
+  Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/
