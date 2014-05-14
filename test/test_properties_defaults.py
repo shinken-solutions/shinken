@@ -882,7 +882,6 @@ class TestTrigger(PropertiesTester, ShinkenTest):
         ('definition_order', '100'),
         ('name', ''),
         ('code_src', ''),
-        ('trigger_edit_output', '0'),
         ])
 
     def setUp(self):
