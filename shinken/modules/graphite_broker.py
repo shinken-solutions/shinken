@@ -245,16 +245,14 @@ class Graphite_broker(BaseModule):
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
-                if value:
-                    self.buffer.append(("%s.__HOST__.%s" % (path, metric),
+                self.buffer.append(("%s.__HOST__.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
         else:
             lines = []
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                if value:
-                    lines.append("%s.__HOST__.%s %s %d" % (path, metric,
+                lines.append("%s.__HOST__.%s %s %d" % (path, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
             try:
