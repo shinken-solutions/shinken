@@ -2,6 +2,17 @@
 Shinken ChangeLog
 #######################
 
+1.4.3 - XX/XX/2014
+-------------------
+	CORE FIXES (backport)
+	Fix : Too much brok generated when a trigger modifies it
+	Fix : Possible inconsistant state saved in retention for downtimes
+
+
+	MODULES FIXES (backport)
+	Fix : Graphite module skipping 0 values
+
+
 1.4.2 - 06/03/2014
 ------------------
 	CORE ENHANCEMENT (backport)
