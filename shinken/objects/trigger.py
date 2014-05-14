@@ -42,11 +42,12 @@ class Trigger(Item):
     properties = Item.properties.copy()
     properties.update({'trigger_name': StringProp(fill_brok=['full_status']),
                        'code_src': StringProp(default='', fill_brok=['full_status']),
-                       'trigger_edit_output': BoolProp(default='0')
                        })
 
     running_properties = Item.running_properties.copy()
-    running_properties.update({'code_bin': StringProp(default=None)})
+    running_properties.update({'code_bin': StringProp(default=None),
+                               'trigger_edit_output': BoolProp(default='0')
+                               })
 
     # For debugging purpose only (nice name)
     def get_name(self):
