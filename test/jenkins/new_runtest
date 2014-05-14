@@ -29,9 +29,9 @@ PYLINT=$4
 PEP8=$5
 
 if [[ "$(echo $1 | tr [A-Z] [a-z])" == "long" ]]; then
-    REGEXPMOD="" # Mod is long, we will take all tests
+    REGEXPCMD=";" # Mod is long, we will take all tests
 else
-    REGEXPMOD="long_" # Mod is normal, we will skip long tests
+    REGEXPCMD="| grep -v test_long.*\.py" # Mod is normal, we will skip long tests
 fi
 test "$COVERAGE" == "COVERAGE" || COVERAGE="NOCOVERAGE"
 test "$PYLINT" == "PYLINT" || PYLINT="NOPYLINT"
@@ -150,7 +150,7 @@ function grab_modules {
 function test_modules {
     for line in $(grep -vE "#|^ *$" $MODULELIST);do
         if [ -d "tmp/$line/test/" ]; then
-            for ptest in $(ls tmp/$line/test/test_*.py | grep -v "test_$REGEXPMOD.*\.py");do
+            for ptest in $(eval "ls tmp/$line/test/test_*.py $REGEXPCMD");do
                 launch_and_assert $ptest
                 test $? -eq 0 || echo "A test failed : $ptest"
             done
@@ -161,9 +161,9 @@ function test_modules {
 }
 
 function test_core {
-    # REGEXPMOD is long_ or ""
-    # If long_, we are in normal mode
-    for test in $(ls test_*.py | grep -v "test_$REGEXPMOD.*\.py") ;do
+    # REGEXPCMD is ; or grep -v blabla
+    # If ;, we are in normal mode
+    for test in $(eval "ls test_*.py $REGEXPCMD") ;do
         launch_and_assert $test
         test $? -eq 0 || echo "A test failed : $line"
     done
