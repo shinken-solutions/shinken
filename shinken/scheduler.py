@@ -1300,8 +1300,8 @@ class Scheduler:
 
         # Check maintenance periods
         for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period is not None]:
-            if not hasattr(elt, 'in_maintenance'):
-                setattr(elt, 'in_maintenance', False)
+            #if not hasattr(elt, 'in_maintenance'):
+            #    setattr(elt, 'in_maintenance', False)
 
             if not elt.in_maintenance:
                 if elt.maintenance_period.is_time_valid(now):
