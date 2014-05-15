@@ -136,7 +136,7 @@ class TestMaintPeriod(ShinkenTest):
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc3.downtimes) == 0)
         self.assert_(not svc3.in_scheduled_downtime)
-        self.assert_(svc3.in_maintenance == False)
+        self.assert_(svc3.in_maintenance is None)
 
 
 
