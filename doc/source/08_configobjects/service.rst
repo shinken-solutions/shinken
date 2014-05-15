@@ -69,7 +69,7 @@ business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
 trigger_name                               *trigger_name*
-trigger_edit_output                        [0/1]
+trigger_broker_raise_enabled               [0/1]
 }
 ========================================== ======================================
 
@@ -350,8 +350,8 @@ trigger_name
   This options define the trigger that will be executed after a check result (passive or active).
   This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
 
-trigger_edit_output
-  This option define the behavior of the defined trigger. If set to 1, this means the trigger will modify the output / return code of the check.
+trigger_broker_raise_enabled
+  This option define the behavior of the defined trigger (Default 0). If set to 1, this means the trigger will modify the output / return code of the check.
   If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
   Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 

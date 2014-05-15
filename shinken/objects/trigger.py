@@ -46,7 +46,7 @@ class Trigger(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({'code_bin': StringProp(default=None),
-                               'trigger_edit_output': BoolProp(default='0')
+                               'trigger_broker_raise_enabled': BoolProp(default='0')
                                })
 
     # For debugging purpose only (nice name)
@@ -72,12 +72,12 @@ class Trigger(Item):
         exec code in dict(locals())
 
     def __getstate__(self):
-        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_edit_output': self.trigger_edit_output}
+        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']
         self.code_src = d['code_src']
-        self.trigger_edit_output = d['trigger_edit_output']
+        self.trigger_broker_raise_enabled = d['trigger_broker_raise_enabled']
 
 
 class Triggers(Items):
