@@ -14,7 +14,7 @@ A trigger object is something that can be called after a "change" on an object. 
 
 Here is an example that will raise a critical check if the CPU is too loaded:
 
-.. note:: If your trigger is made to edit output add the trigger_edit_output parameter into the service definition.
+.. note:: If your trigger is made to edit output add the trigger_broker_raise_enabled parameter into the service definition.
           If not, Shinken will generate 2 broks (1 before and 1 after the trigger). This can lead to bad data in broker module (Graphite)
 
 ::
@@ -25,7 +25,7 @@ Here is an example that will raise a critical check if the CPU is too loaded:
         service_description             Current Load trigger
         check_command                   check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
         trigger_name                    simple_cpu
-        trigger_edit_output             1
+        trigger_broker_raise_enabled    1
         }
   
   

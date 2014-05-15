@@ -611,7 +611,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for tname in self.triggers:
             t = triggers.find_by_name(tname)
             if t:
-                setattr(t, 'trigger_edit_output', self.trigger_edit_output)
+                setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
                 new_triggers.append(t)
             else:
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))

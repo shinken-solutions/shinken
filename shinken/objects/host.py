@@ -132,7 +132,7 @@ class Host(SchedulingItem):
         # Load some triggers
         'trigger':         StringProp(default=''),
         'trigger_name':    ListProp(default=''),
-        'trigger_edit_output': BoolProp(default='0'),
+        'trigger_broker_raise_enabled': BoolProp(default='0'),
 
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status']),
