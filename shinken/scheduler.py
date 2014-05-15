@@ -1313,7 +1313,7 @@ class Scheduler:
             else:
                 if not elt.in_maintenance in self.downtimes:
                     # the main downtimes has expired or was manually deleted
-                    elt.in_maintenance = False
+                    elt.in_maintenance = None
 
         #  Check the validity of contact downtimes
         for elt in self.contacts:
