@@ -61,7 +61,8 @@ _brokhandler_ = None
 brokFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
-
+humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
+                           '%a %b %d %H:%M:%S %Y')
 
 class BrokHandler(Handler):
     """
