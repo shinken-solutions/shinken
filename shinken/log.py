@@ -208,4 +208,8 @@ class __ConsoleLogger:
         logger._log(*args, **kwargs)
 
 
+#--- create the main logger ---
+logging.setLoggerClass(Log)
+logger = logging.getLogger('shinken')
+
 console_logger = __ConsoleLogger()
