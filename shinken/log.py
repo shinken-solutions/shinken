@@ -64,7 +64,7 @@ brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(messa
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
                            '%a %b %d %H:%M:%S %Y')
-CONSOLE_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
+consoleFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s')
 
 class BrokHandler(Handler):
     """
@@ -97,7 +97,7 @@ class Log(logging.Logger):
         logging.Logger.__init__(self, name, level)
         self.display_time = True                                                                                                                                                            
         self.display_level = True                                                                                                                                                           
-        self.log_colors = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}    
+        self.log_colors = {WARNING:'yellow', CRITICAL:'magenta', ERROR:'red'}
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -153,11 +153,12 @@ class Log(logging.Logger):
 logging.setLoggerClass(Log)
 logger = logging.getLogger('shinken')
 
-console_logger = logging.getLogger('shinken.console')
+console_logger = logging.getLogger('shinken')
 sh = StreamHandler(sys.stdout)
-sh.setFormatter(Formatter(CONSOLE_FORMAT))
+sh.setFormatter(consoleFormatter)
 console_logger.addHandler(sh)
-del sh
+logger.addHandler(sh)
+#del sh
 
 def send_result(result, *args):
     console_logger.info(result)
