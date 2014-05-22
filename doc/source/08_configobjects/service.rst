@@ -58,6 +58,7 @@ action_url                                 *url*
 icon_image                                 *image_file*
 icon_image_alt                             *alt_string*
 poller_tag                                 *poller_tag*
+duplicate_foreach                          *$MACRO$*
 service_dependencies                       *host,service_description*
 business_impact                            [0/1/2/3/4/5]
 icon_set                                   [database/disk/network_service/server]
@@ -308,6 +309,11 @@ poller_tag
   This variable is used to define the poller_tag of checks from this service. All of theses checks will be taken by pollers that have this value in their poller_tags parameter.
 
   By default there is no poller_tag, so all untaggued pollers can take it.
+
+duplicate_foreach
+  This is used to generate serveral service with only one service declaration.
+  Shinken understands this statement as : "Create a service for earch key in the variable".
+  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a diffrent check)
 
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
