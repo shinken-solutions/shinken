@@ -217,6 +217,7 @@ class Data(list, object):
         if not r in self.grouped_collectd_plugins:
             if self.plugininstance is None:
                 r += '-' + self.plugininstance
+        r = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', r)  # Dirty fix for 1.4.X
         return r
 
     def get_message(self):
