@@ -413,7 +413,7 @@ if __name__ == '__main__':
         
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
-        CONFIG['shinken.io.proxy'] = opts.proxy
+        CONFIG['shinken.io']['proxy'] = opts.proxy
 
     # Maybe he/she just want to list our commands?
     if opts.do_list:

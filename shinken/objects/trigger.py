@@ -41,11 +41,13 @@ class Trigger(Item):
 
     properties = Item.properties.copy()
     properties.update({'trigger_name': StringProp(fill_brok=['full_status']),
-                       'code_src': StringProp(default='', fill_brok=['full_status'])
+                       'code_src': StringProp(default='', fill_brok=['full_status']),
                        })
 
     running_properties = Item.running_properties.copy()
-    running_properties.update({'code_bin': StringProp(default=None)})
+    running_properties.update({'code_bin': StringProp(default=None),
+                               'trigger_broker_raise_enabled': BoolProp(default='0')
+                               })
 
     # For debugging purpose only (nice name)
     def get_name(self):
@@ -70,11 +72,12 @@ class Trigger(Item):
         exec code in dict(locals())
 
     def __getstate__(self):
-        return {'trigger_name': self.trigger_name, 'code_src': self.code_src}
+        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']
         self.code_src = d['code_src']
+        self.trigger_broker_raise_enabled = d['trigger_broker_raise_enabled']
 
 
 class Triggers(Items):

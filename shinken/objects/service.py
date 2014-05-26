@@ -147,6 +147,7 @@ class Service(SchedulingItem):
         # Load some triggers
         'trigger':         StringProp(default=''),
         'trigger_name':    ListProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default='0'),
 
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
@@ -169,6 +170,7 @@ class Service(SchedulingItem):
         'last_chk':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':        BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
+        'in_maintenance':     IntegerProp(default=None, fill_brok=['full_status'], retention=True),
         'latency':            FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True,),
         'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'state':              StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),

@@ -61,7 +61,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-
+#logger.set_level(logger.ERROR)
 
 
 # We overwrite the functions time() and sleep()
@@ -112,11 +112,42 @@ class Pluginconf(object):
     pass
 
 
-class ShinkenTest(unittest.TestCase):
+class _Unittest2CompatMixIn:
+    """
+    Mixin for simulating methods new in unittest2 resp. Python 2.7.
+
+    Every test-case should inherit this *after* unittest.TestCase to
+    make the compatiblity-methods available if they are not defined in
+    unittest.TestCase already. Example::
+
+       class MyTestCase(unittest.TestCase, Unittest2CompatMixIn):
+           ...
+    In our case, it's better to always inherit from ShinkenTest
+
+    """
+    def assertNotIn(self, member, container, msg=None):
+       self.assertTrue(member not in container)
+
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container)
+
+    def assertIsInstance(self, obj, cls, msg=None):
+        self.assertTrue(isinstance(obj, cls))
+
+    def assertRegexpMatches(self, line, pattern):
+        r = re.search(pattern, line)
+        self.assertTrue(r is not None)
+
+    def assertIs(self, obj, cmp, msg=None):
+        self.assertTrue(obj is cmp)
+
+
+class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
+        self.print_header()
         # i am arbiter-like
         self.broks = {}
         self.me = None
@@ -365,7 +396,7 @@ class ShinkenTest(unittest.TestCase):
         return res
 
     def print_header(self):
-        print "#" * 80 + "\n" + "#" + " " * 78 + "#"
+        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
@@ -375,37 +406,6 @@ class ShinkenTest(unittest.TestCase):
 
 
 
-
-
-# Hook for old python some test
-if not hasattr(ShinkenTest, 'assertNotIn'):
-    def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
-    ShinkenTest.assertNotIn = assertNotIn
-
-
-if not hasattr(ShinkenTest, 'assertIn'):
-    def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
-    ShinkenTest.assertIn = assertIn
-
-if not hasattr(ShinkenTest, 'assertIsInstance'):
-    def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
-    ShinkenTest.assertIsInstance = assertIsInstance
-
-
-if not hasattr(ShinkenTest, 'assertRegexpMatches'):
-    def assertRegexpMatches(self, line, patern):
-        r = re.search(patern, line)
-        self.assertTrue(r is not None)
-    ShinkenTest.assertRegexpMatches = assertRegexpMatches
-
-
-if not hasattr(ShinkenTest, 'assertIs'):
-    def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
-    ShinkenTest.assertIs = assertIs
 
 
 if __name__ == '__main__':

@@ -26,6 +26,7 @@ import time
 import subprocess
 import unittest
 from tempfile import NamedTemporaryFile
+from shinken_test import *
 
 try:
     import json
@@ -41,7 +42,12 @@ except ImportError:
 external_mapping = os.path.join(os.path.dirname(__file__),
                                 '..', 'libexec', 'external_mapping.py')
 
-class TestExternalMapping(unittest.TestCase):
+time_hacker.set_real_time()
+
+class TestExternalMapping(ShinkenTest):
+
+    def setUp(self):
+        pass
 
     def __setup(self, inputlines):
         """

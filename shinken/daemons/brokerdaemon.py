@@ -220,7 +220,7 @@ class Broker(BaseSatellite):
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
-                    con.get('fill_initial_broks', {'bname':self.name})
+                    con.get('fill_initial_broks', {'bname':self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except HTTPExceptions, exp:

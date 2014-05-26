@@ -63,7 +63,7 @@ logger.load_obj(Dummy())
 
 
 
-class TestLevels(unittest.TestCase):
+class TestLevels(NoSetup, ShinkenTest):
 
     def test_get_level_id(self):
         for name , level in (
@@ -99,7 +99,7 @@ class TestLevels(unittest.TestCase):
         logger.load_obj(Dummy())
         self.assertEqual(logger._level, logger.CRITICAL)
 
-class TestBasics(unittest.TestCase):
+class TestBasics(NoSetup, ShinkenTest):
 
     def test_setting_and_unsetting_human_timestamp_format(self):
         # :hack: logging.human_timestamp_log is a global variable

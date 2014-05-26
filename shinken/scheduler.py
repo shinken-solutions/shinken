@@ -1300,10 +1300,8 @@ class Scheduler:
 
         # Check maintenance periods
         for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period is not None]:
-            if not hasattr(elt, 'in_maintenance'):
-                setattr(elt, 'in_maintenance', False)
 
-            if not elt.in_maintenance:
+            if elt.in_maintenance is None:
                 if elt.maintenance_period.is_time_valid(now):
                     start_dt = elt.maintenance_period.get_next_valid_time_from_t(now)
                     end_dt = elt.maintenance_period.get_next_invalid_time_from_t(start_dt + 1) - 1
@@ -1315,7 +1313,7 @@ class Scheduler:
             else:
                 if not elt.in_maintenance in self.downtimes:
                     # the main downtimes has expired or was manually deleted
-                    elt.in_maintenance = False
+                    elt.in_maintenance = None
 
         #  Check the validity of contact downtimes
         for elt in self.contacts:

@@ -68,7 +68,7 @@ def cleanup():
             os.remove(f)
 
 
-class TestNat(unittest.TestCase):
+class TestNat(ShinkenTest):
     def setUp(self):
         self.testdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.files = dict()

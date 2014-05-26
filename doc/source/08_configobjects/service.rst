@@ -58,6 +58,7 @@ action_url                                 *url*
 icon_image                                 *image_file*
 icon_image_alt                             *alt_string*
 poller_tag                                 *poller_tag*
+duplicate_foreach                          *$MACRO$*
 service_dependencies                       *host,service_description*
 business_impact                            [0/1/2/3/4/5]
 icon_set                                   [database/disk/network_service/server]
@@ -68,6 +69,8 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+trigger_name                               *trigger_name*
+trigger_broker_raise_enabled               [0/1]
 }
 ========================================== ======================================
 
@@ -307,6 +310,11 @@ poller_tag
 
   By default there is no poller_tag, so all untaggued pollers can take it.
 
+duplicate_foreach
+  This is used to generate serveral service with only one service declaration.
+  Shinken understands this statement as : "Create a service for earch key in the variable".
+  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a diffrent check)
+
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
 
@@ -343,5 +351,14 @@ business_rule_host_notification_options
 
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+trigger_name
+  This options define the trigger that will be executed after a check result (passive or active).
+  This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
+
+trigger_broker_raise_enabled
+  This option define the behavior of the defined trigger (Default 0). If set to 1, this means the trigger will modify the output / return code of the check.
+  If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
+  Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
