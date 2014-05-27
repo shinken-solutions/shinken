@@ -39,8 +39,7 @@ shinken_var = {
     'Notification type': os.getenv('NAGIOS_NOTIFICATIONTYPE'),
     'Hostname': os.getenv('NAGIOS_HOSTNAME'),
     'Host address': os.getenv('NAGIOS_HOSTADDRESS'),
-    'Date' : os.getenv('NAGIOS_LONGDATETIME'),
-    'Contact email': os.getenv('NAGIOS_CONTACTEMAIL') 
+    'Date' : os.getenv('NAGIOS_LONGDATETIME')
 }
 
 # Set up root logging
@@ -72,8 +71,7 @@ def overload_test_variable():
         'Hostname': 'shinken.domain.tld',
         'Host address': '127.0.0.1',
         'Notification type': 'TEST',
-        'Date': 'Now, test',
-        'Contact email': '@'.join((getpass.getuser(), socket.gethostname())) 
+        'Date': 'Now, test'
     }
     return (shinken_notification_object_var, shinken_var)
 
