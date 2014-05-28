@@ -97,7 +97,7 @@ from shinken.daterange import MonthDateDaterange, WeekDayDaterange
 from shinken.daterange import MonthDayDaterange
 from shinken.brok import Brok
 from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Timeperiod(Item):
@@ -233,7 +233,7 @@ class Timeperiod(Item):
                 _to = 1
 
             # Now raise the log
-            console_logger.info('TIMEPERIOD TRANSITION: %s;%d;%d'
+            naglog_result('info', 'TIMEPERIOD TRANSITION: %s;%d;%d'
                                 % (self.get_name(), _from, _to))
 
     # clean the get_next_valid_time_from_t cache

@@ -23,31 +23,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import logging
 import sys
-from logging import Handler, Formatter, StreamHandler
-from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+from logging import Handler, Formatter, StreamHandler, NOTSET
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
 
-def is_tty():
-    # Look if we are in a tty or not
-    if hasattr(sys.stdout, 'isatty'):
-        return sys.stdout.isatty()
-    return False
-
-if is_tty():
-    # Try to load the terminal color. Won't work under python 2.4
-    try:
-        from shinken.misc.termcolor import cprint
-    except (SyntaxError, ImportError), exp:
-        # Outch can't import a cprint, do a simple print
-        def cprint(s, color='', end=''):
-            print s
-# Ok it's a daemon mode, if so, just print
-else:
+try:
+    from shinken.misc.termcolor import cprint
+except (SyntaxError, ImportError), exp:
+    # Outch can't import a cprint, do a simple print
     def cprint(s, color='', end=''):
         print s
 
@@ -59,12 +45,11 @@ human_timestamp_log = False
 _brokhandler_ = None
 
 
-brokFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
-brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
-humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
-                           '%a %b %d %H:%M:%S %Y')
-consoleFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+defaultFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
+humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s', '%a %b %d %H:%M:%S %Y')
+humanFormatter_named = Formatter('[%(asctime)s] %(levelname)s: [%(name)s] %(message)s', '%a %b %d %H:%M:%S %Y')
+nagFormatter = Formatter('[%(created)i] %(message)s')
 
 class BrokHandler(Handler):
     """
@@ -75,7 +60,7 @@ class BrokHandler(Handler):
     """
 
     def __init__(self, broker, name=None):
-        # Only messages of levelINFO or higher are passed on to the
+        # Only messages of level INFO or higher are passed on to the
         # broker. If the Logger level is higher then INFO, the logger
         # already skips the entry.
         Handler.__init__(self, logging.INFO)
@@ -90,14 +75,36 @@ class BrokHandler(Handler):
             self.handleError(record)
 
 
+class ColorStreamHandler(StreamHandler):
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            colors = {'DEBUG': 'cyan', 'INFO': 'magenta', 'WARNING': 'yellow', 'CRITICAL': 'magenta', 'ERROR': 'red'}
+            cprint(msg, colors[record.levelname])
+        except UnicodeEncodeError:
+            print msg.encode('ascii', 'ignore')
+        except:
+            self.handleError(record)
+
 class Log(logging.Logger):
     """Shinken logger class, wrapping access to Python logging standard library."""
 
-    def __init__(self, name='shinken', level=NOTSET):
+    def __init__(self, name="Shinken", level=NOTSET):
         logging.Logger.__init__(self, name, level)
-        self.display_time = True                                                                                                                                                            
-        self.display_level = True                                                                                                                                                           
-        self.log_colors = {WARNING:'yellow', CRITICAL:'magenta', ERROR:'red'}
+
+
+    def setLevel(self, level):
+        if not isinstance(level, int):
+            level = getattr(logging, level, None)
+            if not level or not isinstance(level, int):
+                raise TypeError('log level must be an integer')
+        # Not very useful, all we have to do is no to set the level > info for the brok handler
+        self.level = min(level, logging.INFO)
+        # Only set level to file and/or console handler
+        for handler in self.handlers:
+            if isinstance(handler, BrokHandler):
+                continue
+            handler.setLevel(level)
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -105,21 +112,17 @@ class Log(logging.Logger):
         """
         global _brokhandler_
         _brokhandler_ = BrokHandler(object)
-        if name_:
-            self.name = name_
-            _brokhandler_.setFormatter(brokFormatter_named)
+        if name_ is not None or self.name is not None:
+            if name_ is not None:
+                self.name = name_
+            # We need to se the name format to all other handlers
+            for handler in self.handlers:
+                handler.setFormatter(defaultFormatter_named)
+            _brokhandler_.setFormatter(defaultFormatter_named)
         else:
-            _brokhandler_.setFormatter(brokFormatter)
+            _brokhandler_.setFormatter(defaultFormatter)
         self.addHandler(_brokhandler_)
 
-
-    @staticmethod
-    def get_level_id(lvlName):
-        """Convert a level name (string) to its integer value
-           and vice-versa. Input a level and it will return a name.
-           Raise KeyError when name or level not found
-        """
-        return logging._levelNames[lvlName]
 
     def register_local_log(self, path, level=None):
         """The shinken logging wrapper can write to a local file if needed
@@ -130,11 +133,18 @@ class Log(logging.Logger):
 
         The file will be rotated once a day
         """
+        # Todo : Create a config var for backup count
         handler = TimedRotatingFileHandler(path, 'midnight', backupCount=5)
         if level is not None:
             handler.setLevel(level)
-        handler.setFormatter(defaultFormatter)
+        if self.name is not None:
+            handler.setFormatter(defaultFormatter_named)
+        else:
+            handler.setFormatter(defaultFormatter)
         self.addHandler(handler)
+
+        # Todo : Do we need this now we use logging?
+        return handler.stream.fileno()
 
     def set_human_format(self, on=True):
         """
@@ -146,19 +156,47 @@ class Log(logging.Logger):
         global human_timestamp_log
         human_timestamp_log = bool(on)
 
+        # Apply/Remove the human format to all handlers except the brok one.
+        for handler in self.handlers:
+            if isinstance(handler, BrokHandler):
+                continue
+
+            if self.name is not None:
+                handler.setFormatter(human_timestamp_log and humanFormatter_named or defaultFormatter_named)
+            else:
+                handler.setFormatter(human_timestamp_log and humanFormatter or defaultFormatter)
+
+
 
 
 
 #--- create the main logger ---
 logging.setLoggerClass(Log)
-logger = logging.getLogger('shinken')
+logger = logging.getLogger('Shinken')
+if hasattr(sys.stdout, 'isatty'):
+    csh = ColorStreamHandler(sys.stdout)
+    if logger.name is not None:
+        csh.setFormatter(defaultFormatter_named)
+    else:
+        csh.setFormatter(defaultFormatter)
+    logger.addHandler(csh)
 
-console_logger = logging.getLogger('shinken')
-sh = StreamHandler(sys.stdout)
-sh.setFormatter(consoleFormatter)
-console_logger.addHandler(sh)
-logger.addHandler(sh)
-#del sh
 
-def send_result(result, *args):
-    console_logger.info(result)
+def naglog_result(level, result, *args):
+    """
+    Function use for old Nag compatibility. We to set format properly for this call only.
+
+    Dirty Hack to keep the old format, we should have another logger and
+    # use one for Shinken logs and another for monitoring data
+    """
+    prev_formatters = []
+    for handler in logger.handlers:
+        prev_formatters.append(handler.formatter)
+        handler.setFormatter(nagFormatter)
+
+    log_fun = getattr(logger, level)
+    if log_fun:
+        log_fun(result)
+
+    for index, handler in enumerate(logger.handlers):
+        handler.setFormatter(prev_formatters[index])
