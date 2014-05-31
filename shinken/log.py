@@ -38,8 +38,8 @@ except (SyntaxError, ImportError), exp:
         print s
 
 
-obj = None
-name = None
+#obj = None
+#name = None
 human_timestamp_log = False
 
 _brokhandler_ = None
@@ -59,10 +59,9 @@ class BrokHandler(Handler):
     satellite to not risk overloading them.
     """
 
-    def __init__(self, broker, name=None):
+    def __init__(self, broker):
         # Only messages of level INFO or higher are passed on to the
-        # broker. If the Logger level is higher then INFO, the logger
-        # already skips the entry.
+        # broker. Other handlers have a different level.
         Handler.__init__(self, logging.INFO)
         self._broker = broker
 
@@ -86,14 +85,20 @@ class ColorStreamHandler(StreamHandler):
         except:
             self.handleError(record)
 
+
 class Log(logging.Logger):
-    """Shinken logger class, wrapping access to Python logging standard library."""
+    """
+    Shinken logger class, wrapping access to Python logging standard library.
+    See : https://docs.python.org/2/howto/logging.html#logging-flow for more detail about
+    how log are handled"""
 
     def __init__(self, name="Shinken", level=NOTSET):
         logging.Logger.__init__(self, name, level)
 
-
     def setLevel(self, level):
+        """ Set level of logger and handlers.
+        The logger need the lowest level (see link above)
+        """
         if not isinstance(level, int):
             level = getattr(logging, level, None)
             if not level or not isinstance(level, int):
@@ -122,7 +127,6 @@ class Log(logging.Logger):
         else:
             _brokhandler_.setFormatter(defaultFormatter)
         self.addHandler(_brokhandler_)
-
 
     def register_local_log(self, path, level=None):
         """The shinken logging wrapper can write to a local file if needed
@@ -167,9 +171,6 @@ class Log(logging.Logger):
                 handler.setFormatter(human_timestamp_log and humanFormatter or defaultFormatter)
 
 
-
-
-
 #--- create the main logger ---
 logging.setLoggerClass(Log)
 logger = logging.getLogger('Shinken')
@@ -187,7 +188,7 @@ def naglog_result(level, result, *args):
     Function use for old Nag compatibility. We to set format properly for this call only.
 
     Dirty Hack to keep the old format, we should have another logger and
-    # use one for Shinken logs and another for monitoring data
+    use one for Shinken logs and another for monitoring data
     """
     prev_formatters = []
     for handler in logger.handlers:
