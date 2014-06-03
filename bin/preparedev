@@ -36,13 +36,13 @@ sudo chown $ME:$ME /var/run/shinken
 # Lib directory, with modules, share and co
 sudo mkdir /var/lib/shinken 2>/dev/null
 # If the directory modules is missing (dir or link) create a link with our modules dir
-if [ ! -L /var/lib/shinken/modules ]; then
+if [ ! -L /var/lib/shinken/modules ] && [ ! -d /var/lib/shinken/modules ]; then
   # Control will enter here if $DIRECTORY doesn't exist.
   sudo ln -s  $HERE/../modules /var/lib/shinken/modules
 fi
 
 # If the share modules is missing (dir or link) create a link with our share dir
-if [ ! -L /var/lib/shinken/share ]; then
+if [ ! -L /var/lib/shinken/share ] && [ ! -d /var/lib/shinken/share ]; then
   # Control will enter here if $DIRECTORY doesn't exist.
   sudo ln -s  $HERE/../share /var/lib/shinken/share
 fi
