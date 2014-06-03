@@ -369,6 +369,7 @@ class Regenerator(object):
             # contacts into it
             if cg:
                 cg.members.extend(inpcg.members)
+                cg.members = list(set(cg.members))
             else:  # else take the new one
                 self.contactgroups[inpcg.id] = inpcg
         # We can declare contactgroups done
