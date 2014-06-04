@@ -36,7 +36,12 @@ class TestPlusInInheritance(ShinkenTest):
         print h.contact_groups
         for c in h.contacts:
             print "->",c.get_name()
-                        
+    
+    def _dump_svc(self,s):
+        print "Dumping Service", s.get_name()
+        print "  contact_groups : %s " % s.contact_groups
+        for c in s.contacts:
+            print "->",c.get_name()
 
     def test_contactgroups_plus_inheritance(self):
         host0 = self.sched.hosts.find_by_name("test_host_0")
@@ -71,6 +76,20 @@ class TestPlusInInheritance(ShinkenTest):
         self.assert_("test_contact_1" in [c .get_name() for c in host6.contacts])
         self.assert_("test_contact_2" in [c .get_name() for c in host6.contacts])
 
+        # Now Let's check service inheritance
+
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplA")
+        self._dump_svc(svc1)
+        self.assert_("test_contact_1" in [c .get_name() for c in svc1.contacts])
+
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplB")
+        self._dump_svc(svc2)
+        self.assert_("test_contact_2" in [c .get_name() for c in svc2.contacts])
+
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplA_tmplB")
+        self.assert_("test_contact_1" in [c .get_name() for c in svc3.contacts])
+        self.assert_("test_contact_2" in [c .get_name() for c in svc3.contacts])
+        self._dump_svc(svc3)
 
 if __name__ == '__main__':
     unittest.main()
