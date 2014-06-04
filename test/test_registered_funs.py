@@ -69,6 +69,11 @@ class testRegisteredFunctions(ShinkenTest):
             return
         logger.info("New configuration received")
         d.setup_new_conf()
+        if d.pollers[0]['use_ssl']:
+            assert d.pollers[0]['uri'] == 'https://localhost:7771/'
+        else:
+            assert d.pollers[0]['uri'] == 'http://localhost:7771/'
+
         reg_list = d.http_daemon.registered_fun
         expected_list = ['get_external_commands', 'get_running_id', 'got_conf', 'have_conf',
                          'ping', 'push_broks', 'push_host_names', 'put_conf', 'remove_from_conf',
