@@ -19,6 +19,7 @@ from shinken.objects.config import Config
 shinken_image_dir = '/var/lib/shinken/share/images'
 shinken_customer_logo = 'customer_logo.png'
 webui_config_file = '/etc/shinken/modules/webui.cfg'
+contactemail = os.getenv('NAGIOS_CONTACTEMAIL')
 
 
 shinken_notification_object_var = { 
@@ -110,12 +111,24 @@ def get_mail_subject(object):
 
     return mail_subject[object]
 
+def get_content_to_send():
+    shinken_var.update(shinken_notification_object_var[opts.notification_object])
+
+# Translate a comma separated list of mail recipient into a python list
+def make_receivers_list(receivers):
+    if ',' in receivers:
+        ret = receivers.split(',')
+    else:
+        ret = [receivers]
+
+    return ret
+
 # This just create mail skeleton and doesn't have any content.
 # But can be used to add multiple and differents contents.
 def create_mail(format):
     # Fill SMTP header and body.
     # It has to be multipart since we can include an image in it.
-    logging.debug('Mail format: %s' % (mail_format[format]))
+    logging.debug('Mail format: %s' % (format))
     msg = mail_format[format]
     logging.debug('From: %s' % (get_user()))
     msg['From'] = get_user()
@@ -125,9 +138,6 @@ def create_mail(format):
     msg['Subject'] = get_mail_subject(opts.notification_object)
     
     return msg
-
-def get_content_to_send():
-    shinken_var.update(shinken_notification_object_var[opts.notification_object])
 
 #############################################################################
 # Txt creation lair
@@ -243,7 +253,7 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_details.add_option('-a', '--action', dest='fixaction',
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
-    group_general.add_option('-r', '--receivers', dest='receivers', default=os.getenv('NAGIOS_CONTACTEMAIL'),
+    group_general.add_option('-r', '--receivers', dest='receivers', default=contactemail,
                       help='Mail recipients comma-separated list')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Notify a service Shinken alert. Else it is an host alert.')
@@ -262,7 +272,9 @@ if __name__ == "__main__":
     # Load test values
     if opts.test:
         shinken_notification_object_var, shinken_var = overload_test_variable()
-        opts.receivers = ','.join((opts.receivers, os.getenv('NAGIOS_CONTACTEMAIL')))
+        if opts.receivers == None:
+            logging.error('You must defined a mail recipient using -r')
+            sys.exit(5)
     
     if opts.detailleddesc:
         shinken_var['Detailled description'] = opts.detailleddesc.decode(sys.stdin.encoding)
@@ -270,6 +282,8 @@ if __name__ == "__main__":
         shinken_var['Impact'] = opts.impact.decode(sys.stdin.encoding)
     if opts.fixaction:
         shinken_var['Fix actions'] = opts.fixaction.decode(sys.stdin.encoding)
+
+    receivers = make_receivers_list(opts.receivers)
     
     logging.debug('Create mail skeleton')
     mail = create_mail(opts.format)
@@ -282,5 +296,5 @@ if __name__ == "__main__":
     logging.debug('Connect to %s smtp server' % (opts.smtp))
     smtp = smtplib.SMTP(opts.smtp)
     logging.debug('Send the mail')
-    smtp.sendmail(get_user(), opts.receivers.split(','), mail.as_string())
+    smtp.sendmail(get_user(), receivers, mail.as_string())
     logging.info("Mail sent successfuly")
