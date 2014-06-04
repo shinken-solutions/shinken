@@ -243,7 +243,7 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_details.add_option('-a', '--action', dest='fixaction',
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
-    group_general.add_option('-r', '--receivers', dest='receivers', default=shinken_var['Contact email'],
+    group_general.add_option('-r', '--receivers', dest='receivers', default=os.getenv('NAGIOS_CONTACTEMAIL'),
                       help='Mail recipients comma-separated list')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Notify a service Shinken alert. Else it is an host alert.')
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     # Load test values
     if opts.test:
         shinken_notification_object_var, shinken_var = overload_test_variable()
-        opts.receivers = ','.join((opts.receivers, shinken_var['Contact email']))
+        opts.receivers = ','.join((opts.receivers, os.getenv('NAGIOS_CONTACTEMAIL')))
     
     if opts.detailleddesc:
         shinken_var['Detailled description'] = opts.detailleddesc.decode(sys.stdin.encoding)
