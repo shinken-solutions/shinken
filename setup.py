@@ -431,7 +431,7 @@ for o in not_allowed_options:
 required_pkgs = []
 setup(
     name="Shinken",
-    version="2.0.2",
+    version="2.0.3",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
