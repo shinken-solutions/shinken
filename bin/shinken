@@ -50,15 +50,13 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.log import logger, cprint
+from shinken.log import logger, cprint, nagFormatter
 from shinken.objects.config import Config
 
 
-logger.set_level(logger.WARNING)
-logger.set_display_time(False)
-logger.set_display_level(False)
-logger.log_colors[logger.DEBUG] = 'cyan'
-logger.log_colors[logger.INFO] = 'magenta'
+logger.setLevel('WARNING')
+logger.handlers[0].setFormatter(nagFormatter)
+
 
 
 CONFIG = {}

@@ -31,7 +31,7 @@ from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.commandcall import CommandCall
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 from shinken.pollerlink import PollerLink
 from shinken.eventhandler import EventHandler
 
@@ -1287,7 +1287,7 @@ class ExternalCommandManager:
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            console_logger.info('PASSIVE HOST CHECK: %s;%d;%s'
+            naglog_result('info', 'PASSIVE HOST CHECK: %s;%d;%s'
                                 % (host.get_name().decode('utf8', 'ignore'), status_code, plugin_output.decode('utf8', 'ignore')))
         now = time.time()
         cls = host.__class__
@@ -1304,7 +1304,7 @@ class ExternalCommandManager:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
             if not c:
-                console_logger.error('Passive host check failed. Cannot find the check id %s' % i)
+                logger.error('Passive host check failed. Cannot find the check id %s' % i)
                 return
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
@@ -1325,7 +1325,7 @@ class ExternalCommandManager:
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            console_logger.info('PASSIVE SERVICE CHECK: %s;%s;%d;%s'
+            naglog_result('info', 'PASSIVE SERVICE CHECK: %s;%s;%d;%s'
                                 % (service.host.get_name().decode('utf8', 'ignore'), service.get_name().decode('utf8', 'ignore'),
                                    return_code, plugin_output.decode('utf8', 'ignore')))
         now = time.time()
@@ -1343,7 +1343,7 @@ class ExternalCommandManager:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
             if not c:
-                console_logger.error('Passive service check failed. Cannot find the check id %s' % i)
+                logger.error('Passive service check failed. Cannot find the check id %s' % i)
                 return                
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the service
@@ -1377,7 +1377,7 @@ class ExternalCommandManager:
     def RESTART_PROGRAM(self):
         restart_cmd = self.commands.find_by_name('restart_shinken')
         if not restart_cmd:
-            console_logger.error("Cannot restart Shinken : missing command named 'restart_shinken'. Please add one")
+            logger.error("Cannot restart Shinken : missing command named 'restart_shinken'. Please add one")
             return
         restart_cmd_line = restart_cmd.command_line
         
@@ -1389,11 +1389,11 @@ class ExternalCommandManager:
         while not e.status in ('done', 'timeout'):
             e.check_finished(64000)
         if e.status == 'timeout' or e.exit_status != 0:
-            console_logger.error("Cannot restart Shinken : the 'restart_shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
+            logger.error("Cannot restart Shinken : the 'restart_shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
             return
         # Ok here the command succeed, we can now wait our death
-        console_logger.info("%s\%s" % (e.output, e.long_output))
-        console_logger.info("RESTART command launched. Waiting for the new daemon to kill us")
+        naglog_result('info', "%s\%s" % (e.output, e.long_output))
+        naglog_result('info', "RESTART command launched. Waiting for the new daemon to kill us")
         
         
         

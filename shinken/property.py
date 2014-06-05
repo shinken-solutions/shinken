@@ -26,7 +26,7 @@
 import re
 
 from shinken.util import to_float, to_split, to_char, to_int, unique_value
-from shinken.log  import logger
+import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'CharProp', 'StringProp', 'ListProp',
@@ -222,7 +222,7 @@ class LogLevelProp(StringProp):
 
     def pythonize(self, val):
         val = unique_value(val)
-        return logger.get_level_id(val)
+        return logging.getLevelName(val)
 
 
 class DictProp(Property):

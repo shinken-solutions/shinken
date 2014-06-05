@@ -78,7 +78,7 @@ from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
-from shinken.log import logger, console_logger
+from shinken.log import logger
 from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
 from shinken.daemon import get_cur_user, get_cur_group
 

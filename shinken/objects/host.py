@@ -40,7 +40,7 @@ from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringP
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Host(SchedulingItem):
@@ -503,7 +503,7 @@ class Host(SchedulingItem):
     def get_groupname(self):
         groupname = ''
         for hg in self.hostgroups:
-            # console_logger.info('get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
+            # naglog_result('info', 'get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
             # groupname = "%s [%s]" % (hg.alias, hg.get_name())
             groupname = "%s" % (hg.alias)
         return groupname
@@ -511,7 +511,7 @@ class Host(SchedulingItem):
     def get_groupnames(self):
         groupnames = ''
         for hg in self.hostgroups:
-            # console_logger.info('get_groupnames : %s' % (hg.get_name()))
+            # naglog_result('info', 'get_groupnames : %s' % (hg.get_name()))
             if groupnames == '':
                 groupnames = hg.get_name()
             else:
@@ -717,7 +717,7 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('HOST ALERT: %s;%s;%s;%d;%s'
+        naglog_result('critical', 'HOST ALERT: %s;%s;%s;%d;%s'
                             % (self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -726,7 +726,7 @@ class Host(SchedulingItem):
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT HOST STATE: %s;%s;%s;%d;%s'
+            naglog_result('info', 'CURRENT HOST STATE: %s;%s;%s;%d;%s'
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
@@ -754,7 +754,7 @@ class Host(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.alert("HOST NOTIFICATION: %s;%s;%s;%s;%s"
+            naglog_result('critical', "HOST NOTIFICATION: %s;%s;%s;%s;%s"
                                 % (contact.get_name(), self.get_name(),
                                    state, command.get_name(), self.output))
 
@@ -762,7 +762,7 @@ class Host(SchedulingItem):
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("HOST EVENT HANDLER: %s;%s;%s;%s;%s"
+            naglog_result('critical', "HOST EVENT HANDLER: %s;%s;%s;%s;%s"
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -770,7 +770,7 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STARTED; "
+        naglog_result('critical', "HOST FLAPPING ALERT: %s;STARTED; "
                             "Host appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -778,7 +778,7 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STOPPED; "
+        naglog_result('critical', "HOST FLAPPING ALERT: %s;STOPPED; "
                             "Host appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -792,21 +792,21 @@ class Host(SchedulingItem):
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STARTED; "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;STARTED; "
                             "Host has entered a period of scheduled downtime"
                             % (self.get_name()))
 
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STOPPED; Host has "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;STOPPED; Host has "
                             "exited from a period of scheduled downtime"
                             % (self.get_name()))
 
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;CANCELLED; "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;CANCELLED; "
                             "Scheduled downtime for host has been cancelled."
                             % (self.get_name()))
 
