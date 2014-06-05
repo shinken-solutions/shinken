@@ -54,7 +54,7 @@ from shinken.log import logger, cprint, nagFormatter
 from shinken.objects.config import Config
 
 
-logger.set_level(logger.WARNING)
+logger.setLevel('WARNING')
 logger.handlers[0].setFormatter(nagFormatter)
 
 
