@@ -375,7 +375,10 @@ class Shinken(BaseSatellite):
                 p = dict(p)  # make a copy
                 p.update(override_conf['satellitemap'][p['name']])
 
-            uri = 'http://%s:%s/' % (p['address'], p['port'])
+            proto = 'http'
+            if p['use_ssl']:
+                proto = 'https'
+            uri = '%s://%s:%s/' % (proto, p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
 
