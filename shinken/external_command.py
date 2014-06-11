@@ -1435,11 +1435,14 @@ class ExternalCommandManager:
 
     # SCHEDULE_HOSTGROUP_HOST_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOSTGROUP_HOST_DOWNTIME(self, hostgroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for host in hostgroup:
+            self.SCHEDULE_HOST_DOWNTIME(host, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     # SCHEDULE_HOSTGROUP_SVC_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOSTGROUP_SVC_DOWNTIME(self, hostgroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for host in hostgroup:
+            for s in host.services:
+                self.SCHEDULE_SVC_DOWNTIME(s, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     # SCHEDULE_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_HOST_CHECK(self, host, check_time):
