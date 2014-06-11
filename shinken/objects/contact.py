@@ -27,7 +27,7 @@ from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 _special_properties = ('service_notification_commands', 'host_notification_commands',
                         'service_notification_period', 'host_notification_period',
@@ -194,21 +194,21 @@ class Contact(Item):
     # Raise a log entry when a downtime begins
     # CONTACT DOWNTIME ALERT: test_contact;STARTED; Contact has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;STARTED; Contact has "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;STARTED; Contact has "
                             "entered a period of scheduled downtime"
                             % self.get_name())
 
     # Raise a log entry when a downtime has finished
     # CONTACT DOWNTIME ALERT: test_contact;STOPPED; Contact has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has "
                             "exited from a period of scheduled downtime"
                             % self.get_name())
 
     # Raise a log entry when a downtime prematurely ends
     # CONTACT DOWNTIME ALERT: test_contact;CANCELLED; Contact has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled "
                             "downtime for contact has been cancelled."
                             % self.get_name())
 

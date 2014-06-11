@@ -45,6 +45,7 @@ from shinken.brok import Brok
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
+from logging import ERROR
 
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
@@ -61,7 +62,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-#logger.set_level(logger.ERROR)
+logger.setLevel(ERROR)
 
 
 # We overwrite the functions time() and sleep()

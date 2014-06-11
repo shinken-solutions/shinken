@@ -212,6 +212,14 @@ class Regenerator(object):
                     new_members.append(h)
             hg.members = new_members
 
+        # We need to delete the reversed list here
+        # Because we may override id so that the reversed_list
+        # is inconsistent (used in find by name)
+        # Inconsistency comes from a mix of host group declaration :
+        # within a host or with the define hostgroups statement
+        # No worry, we recreate it just after!
+        delattr(self.hostgroups, 'reversed_list')
+
         # Merge HOSTGROUPS with real ones
         for inphg in inp_hostgroups:
             hgname = inphg.hostgroup_name
@@ -267,6 +275,15 @@ class Regenerator(object):
                 s = inp_services[i]
                 new_members.append(s)
             sg.members = new_members
+
+
+        # We need to delete the reversed list here
+        # Because we may override id so that the reversed_list
+        # is inconsistent (used in find by name)
+        # Inconsistency comes from a mix of service group declaration :
+        # within a service or with the define servicegroup statement
+        # No worry, we recreate it just after!
+        delattr(self.servicegroups, 'reversed_list')
 
         # Merge SERVICEGROUPS with real ones
         for inpsg in inp_servicegroups:
@@ -369,6 +386,7 @@ class Regenerator(object):
             # contacts into it
             if cg:
                 cg.members.extend(inpcg.members)
+                cg.members = list(set(cg.members))
             else:  # else take the new one
                 self.contactgroups[inpcg.id] = inpcg
         # We can declare contactgroups done
