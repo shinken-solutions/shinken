@@ -90,7 +90,7 @@ with Shinken you can start to use its unique and powerful features.
 Learn more about how to use and configure Shinken
 =================================================
 
-Jump to the `Shinken documentation__.
+Jump to the Shinken documentation__.
 
 __ https://shinken.readthedocs.org/en/latest/
 
