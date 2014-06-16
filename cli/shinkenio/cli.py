@@ -134,7 +134,7 @@ def publish_archive(archive):
         status = ret.get('status')
         text   = ret.get('text')
         if status == 200:
-            logger.log(text)
+            logger.info(text)
         else:
             logger.error(text)
 
@@ -182,7 +182,7 @@ def search(look_at):
         status = ret.get('status')
         result   = ret.get('result')
         if status != 200:
-            logger.log(result)
+            logger.info(result)
             return []
         return result
 
