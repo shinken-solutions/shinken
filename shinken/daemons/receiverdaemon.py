@@ -206,7 +206,11 @@ class Receiver(Satellite):
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = 'http://%s:%s/' % (s['address'], s['port'])
+
+            proto = 'http'
+            if s['use_ssl']:
+                proto = 'https'
+            uri = '%s://%s:%s/' % (proto, s['address'], s['port'])
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
