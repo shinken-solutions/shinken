@@ -30,9 +30,15 @@ class TestServiceNoHost(ShinkenTest):
         self.setup_with_file('etc/shinken_service_nohost.cfg')
 
     def test_service_with_no_host(self):
-        # Be sure than the conf is valid (a service is void, but it's not a crime)
-        # and it will not be defined
-        self.assert_(self.sched.conf.conf_is_correct)
+        # A service that has no host to be linked to should raise on error.
+        self.assert_(self.conf.conf_is_correct is False)
+
+        [b.prepare() for b in self.broks.values()]
+        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+
+        self.assert_(len([log for log in logs if re.search(
+            'a service has been defined without host_name nor hostgroups',
+            log)]) > 0)
 
 
 if __name__ == '__main__':

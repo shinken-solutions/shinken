@@ -68,6 +68,8 @@ class Hostdependency(Item):
 
 
 class Hostdependencies(Items):
+    inner_class = Hostdependency  # use for know what is in items
+
     def delete_hostsdep_by_id(self, ids):
         for id in ids:
             del self[id]
@@ -83,9 +85,6 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if hd.is_tpl():  # Exploding template is useless
-                continue
-
             # We explode first the dependent (son) part
             dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
@@ -125,7 +124,7 @@ class Hostdependencies(Items):
                     new_hd = hd.copy()
                     new_hd.dependent_host_name = dephname
                     new_hd.host_name = hname
-                    self.items[new_hd.id] = new_hd
+                    self.add_item(new_hd)
             hstdep_to_remove.append(id)
 
         self.delete_hostsdep_by_id(hstdep_to_remove)
@@ -168,9 +167,6 @@ class Hostdependencies(Items):
     # We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
         for hd in self:
-            # Link template is useless
-            if hd.is_tpl():
-                continue
             # if the host dep conf is bad, pass this one
             if getattr(hd, 'host_name', None) is None or getattr(hd, 'dependent_host_name', None) is None:
                 continue
@@ -190,4 +186,4 @@ class Hostdependencies(Items):
         # Then implicit inheritance
         # self.apply_implicit_inheritance(hosts)
         for h in self:
-            h.get_customs_properties_by_inheritance(self)
+            h.get_customs_properties_by_inheritance()

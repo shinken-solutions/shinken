@@ -147,30 +147,21 @@ class Scheduler:
         self.program_start = int(time.time())
         self.conf = conf
         self.hostgroups = conf.hostgroups
-        self.hostgroups.create_reversed_list()
         self.services = conf.services
         # We need reversed list for search in the retention
         # file read
-        self.services.create_reversed_list()
         self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
-        self.hosts.create_reversed_list()
 
         self.notificationways = conf.notificationways
         self.checkmodulations = conf.checkmodulations
         self.macromodulations = conf.macromodulations
         self.contacts = conf.contacts
-        self.contacts.create_reversed_list()
         self.contactgroups = conf.contactgroups
-        self.contactgroups.create_reversed_list()
         self.servicegroups = conf.servicegroups
-        self.servicegroups.create_reversed_list()
         self.timeperiods = conf.timeperiods
-        self.timeperiods.create_reversed_list()
         self.commands = conf.commands
-        self.commands.create_reversed_list()
         self.triggers = conf.triggers
-        self.triggers.create_reversed_list()
         self.triggers.compile()
         self.triggers.load_objects(self)
 
@@ -245,6 +236,17 @@ class Scheduler:
         except Exception, exp:
             logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
 
+    def dump_config(self):
+        d = tempfile.gettempdir()
+        p = os.path.join(d, 'scheduler-conf-dump-%d' % time.time())
+        logger.info('Opening the DUMP FILE %s' % (p))
+        try:
+            f = open(p, 'w')
+            f.write('Scheduler config DUMP at %d\n' % time.time())
+            self.conf.dump(f)
+            f.close()
+        except Exception, exp:
+            logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
 
     # Load the external command
     def load_external_command(self, e):
@@ -622,8 +624,8 @@ class Scheduler:
                         new_a = a.copy_shell()
                         res.append(new_a)
         return res
-    
-    
+
+
     # Called by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':
@@ -1564,8 +1566,8 @@ class Scheduler:
             if self.need_objects_dump:
                 logger.debug('I need to dump my objects!')
                 self.dump_objects()
+                self.dump_config()
                 self.need_objects_dump = False
-
 
 
 

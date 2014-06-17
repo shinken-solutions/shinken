@@ -64,6 +64,8 @@ class Servicedependency(Item):
 
 
 class Servicedependencies(Items):
+    inner_class = Servicedependency  # use for know what is in items
+
     def delete_servicesdep_by_id(self, ids):
         for id in ids:
             del self[id]
@@ -80,7 +82,7 @@ class Servicedependencies(Items):
             'inherits_parent': '1',
         }
         sd = Servicedependency(prop)
-        self.items[sd.id] = sd
+        self.add_item(sd)
 
     # If we have explode_hostgroup parameter we have to create a service dependency for each host of the hostgroup
     def explode_hostgroup(self, sd, hostgroups):
@@ -110,7 +112,7 @@ class Servicedependencies(Items):
                         new_sd.service_description = sname
                         new_sd.dependent_host_name = hname
                         new_sd.dependent_service_description = dep_sname
-                        self.items[new_sd.id] = new_sd
+                        self.add_item(new_sd)
 
     # We create new servicedep if necessary (host groups and co)
     def explode(self, hostgroups):
@@ -123,11 +125,9 @@ class Servicedependencies(Items):
         servicedeps = self.items.keys()
         for id in servicedeps:
             sd = self.items[id]
-            if sd.is_tpl():  # Exploding template is useless
-                continue
-
             # Have we to explode the hostgroup into many service?
-            if hasattr(sd, 'explode_hostgroup') and hasattr(sd, 'hostgroup_name'):
+            if bool(getattr(sd, 'explode_hostgroup', 0)) and \
+               hasattr(sd, 'hostgroup_name'):
                 self.explode_hostgroup(sd, hostgroups)
                 srvdep_to_remove.append(id)
                 continue
@@ -191,7 +191,7 @@ class Servicedependencies(Items):
                     new_sd.service_description = sname
                     new_sd.dependent_host_name = dep_hname
                     new_sd.dependent_service_description = dep_sname
-                    self.items[new_sd.id] = new_sd
+                    self.add_item(new_sd)
                 # Ok so we can remove the old one
                 srvdep_to_remove.append(id)
 
@@ -244,8 +244,6 @@ class Servicedependencies(Items):
     # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
         for sd in self:
-            if sd.is_tpl():
-                continue
             dsc = sd.dependent_service_description
             sdval = sd.service_description
             if dsc is not None and sdval is not None:
@@ -263,4 +261,4 @@ class Servicedependencies(Items):
         # Then implicit inheritance
         # self.apply_implicit_inheritance(hosts)
         for s in self:
-            s.get_customs_properties_by_inheritance(self)
+            s.get_customs_properties_by_inheritance()

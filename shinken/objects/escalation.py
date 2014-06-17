@@ -195,7 +195,7 @@ class Escalations(Items):
         self.linkify_es_by_h(hosts)
 
     def add_escalation(self, es):
-        self.items[es.id] = es
+        self.add_item(es)
 
     # Will register escalations into service.escalations
     def linkify_es_by_s(self, services):
@@ -234,10 +234,11 @@ class Escalations(Items):
     # We look for contacts property in contacts and
     def explode(self, hosts, hostgroups, contactgroups):
 
-        # items::explode_host_groups_into_hosts
-        # take all hosts from our hostgroup_name into our host_name property
-        self.explode_host_groups_into_hosts(hosts, hostgroups)
+        for i in self:
+            # items::explode_host_groups_into_hosts
+            # take all hosts from our hostgroup_name into our host_name property
+            self.explode_host_groups_into_hosts(i, hosts, hostgroups)
 
-        # items::explode_contact_groups_into_contacts
-        # take all contacts from our contact_groups into our contact property
-        self.explode_contact_groups_into_contacts(contactgroups)
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(i, contactgroups)

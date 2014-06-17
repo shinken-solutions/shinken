@@ -32,13 +32,13 @@
 import re
 import sys
 import string
-import copy
 import os
 import socket
 import itertools
 import time
 import random
 import cPickle
+import tempfile
 from StringIO import StringIO
 from multiprocessing import Process, Manager
 
@@ -81,6 +81,8 @@ from shinken.graph import Graph
 from shinken.log import logger, console_logger
 from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
 from shinken.daemon import get_cur_user, get_cur_group
+from shinken.util import jsonify_r
+import json
 
 no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
 not_interresting_txt = 'We do not think such an option is interesting to manage.'
@@ -313,36 +315,36 @@ class Config(Item):
     # Type: 'name in objects': {Class of object, Class of objects,
     # 'property for self for the objects(config)'
     types_creations = {
-        'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods'),
-        'service':          (Service, Services, 'services'),
-        'servicegroup':     (Servicegroup, Servicegroups, 'servicegroups'),
-        'command':          (Command, Commands, 'commands'),
-        'host':             (Host, Hosts, 'hosts'),
-        'hostgroup':        (Hostgroup, Hostgroups, 'hostgroups'),
-        'contact':          (Contact, Contacts, 'contacts'),
-        'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups'),
-        'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
-        'checkmodulation':  (CheckModulation, CheckModulations, 'checkmodulations'),
-        'macromodulation':  (MacroModulation, MacroModulations, 'macromodulations'),
-        'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
-        'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
-        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters'),
-        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulers'),
-        'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners'),
-        'broker':           (BrokerLink, BrokerLinks, 'brokers'),
-        'receiver':         (ReceiverLink, ReceiverLinks, 'receivers'),
-        'poller':           (PollerLink, PollerLinks, 'pollers'),
-        'realm':            (Realm, Realms, 'realms'),
-        'module':           (Module, Modules, 'modules'),
-        'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations'),
-        'businessimpactmodulation': (Businessimpactmodulation, Businessimpactmodulations, 'businessimpactmodulations'),
-        'escalation':       (Escalation, Escalations, 'escalations'),
-        'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
-        'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
-        'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules'),
-        'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns'),
-        'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo'),
-        'serviceextinfo':   (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo'),
+        'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods', True),
+        'service':          (Service, Services, 'services', False),
+        'servicegroup':     (Servicegroup, Servicegroups, 'servicegroups', True),
+        'command':          (Command, Commands, 'commands', True),
+        'host':             (Host, Hosts, 'hosts', True),
+        'hostgroup':        (Hostgroup, Hostgroups, 'hostgroups', True),
+        'contact':          (Contact, Contacts, 'contacts', True),
+        'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups', True),
+        'notificationway':  (NotificationWay, NotificationWays, 'notificationways', True),
+        'checkmodulation':  (CheckModulation, CheckModulations, 'checkmodulations', True),
+        'macromodulation':  (MacroModulation, MacroModulations, 'macromodulations', True),
+        'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies', True),
+        'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies', True),
+        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters', True),
+        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulers', True),
+        'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners', True),
+        'broker':           (BrokerLink, BrokerLinks, 'brokers', True),
+        'receiver':         (ReceiverLink, ReceiverLinks, 'receivers', True),
+        'poller':           (PollerLink, PollerLinks, 'pollers', True),
+        'realm':            (Realm, Realms, 'realms', True),
+        'module':           (Module, Modules, 'modules', True),
+        'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations', True),
+        'businessimpactmodulation': (Businessimpactmodulation, Businessimpactmodulations, 'businessimpactmodulations', True),
+        'escalation':       (Escalation, Escalations, 'escalations', True),
+        'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations', True),
+        'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations', True),
+        'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules', True),
+        'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns', True),
+        'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo', True),
+        'serviceextinfo':   (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -410,6 +412,9 @@ class Config(Item):
                 if elts[0][0] == '$' and elts[0][-1] == '$':
                     macro_name = elts[0][1:-1]
                     self.resource_macros_names.append(macro_name)
+
+        # Change Nagios2 names to Nagios3 ones (before using them)
+        self.old_properties_names_to_new()
 
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
@@ -668,15 +673,17 @@ class Config(Item):
         #    timeperiods.append(t)
         # self.timeperiods = Timeperiods(timeperiods)
 
-        (cls, clss, prop) = types_creations[t]
+        (cls, clss, prop, initial_index) = types_creations[t]
         # List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
             # We create the object
             o = cls(obj_cfg)
+            # Change Nagios2 names to Nagios3 ones (before using them)
+            o.old_properties_names_to_new()
             lst.append(o)
         # we create the objects Class and we set it in prop
-        setattr(self, prop, clss(lst))
+        setattr(self, prop, clss(lst, initial_index))
 
 
     # Here arbiter and modules objects should be prepare and link
@@ -686,8 +693,6 @@ class Config(Item):
 
         # Should look at hacking command_file module first
         self.hack_old_nagios_parameters_for_arbiter()
-
-        self.modules.create_reversed_list()
 
         if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770")
@@ -958,25 +963,6 @@ class Config(Item):
             # Shutdown the manager, the sub-process should be gone now
             m.shutdown()
 
-
-    def dump(self):
-        print "Slots", Service.__slots__
-        print 'Hosts:'
-        for h in self.hosts:
-            print '\t', h.get_name(), h.contacts
-        print 'Services:'
-        for s in self.services:
-            print '\t', s.get_name(), s.contacts
-
-    # It's used to change Nagios2 names to Nagios3 ones
-    # For hosts and services
-    def old_properties_names_to_new(self):
-        super(Config, self).old_properties_names_to_new()
-        self.hosts.old_properties_names_to_new()
-        self.services.old_properties_names_to_new()
-        self.notificationways.old_properties_names_to_new()
-        self.contacts.old_properties_names_to_new()
-
     # It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
@@ -1021,6 +1007,7 @@ class Config(Item):
 
         #print "Hosts"
         self.hosts.explode(self.hostgroups, self.contactgroups, self.triggers)
+
         #print "Hostgroups"
         self.hostgroups.explode()
 
@@ -1050,15 +1037,6 @@ class Config(Item):
         # Now the architecture part
         #print "Realms"
         self.realms.explode()
-
-    # Remove elements will the same name, so twins :)
-    # In fact only services should be acceptable with twins
-    def remove_twins(self):
-        #self.hosts.remove_twins()
-        self.services.remove_twins()
-        #self.contacts.remove_twins()
-        #self.timeperiods.remove_twins()
-
 
     # Dependencies are important for scheduling
     # This function create dependencies linked between elements.
@@ -1412,33 +1390,6 @@ class Config(Item):
         # But also old srv and host escalations
         self.serviceescalations.linkify_templates()
         self.hostescalations.linkify_templates()
-
-    # Reversed list is a dist with name for quick search by name
-    def create_reversed_list(self):
-        """ Create quick search lists for objects """
-        self.hosts.create_reversed_list()
-        self.hostgroups.create_reversed_list()
-        self.contacts.create_reversed_list()
-        self.contactgroups.create_reversed_list()
-        self.notificationways.create_reversed_list()
-        self.checkmodulations.create_reversed_list()
-        self.macromodulations.create_reversed_list()
-        self.services.create_reversed_list()
-        self.servicegroups.create_reversed_list()
-        self.timeperiods.create_reversed_list()
-        #self.modules.create_reversed_list()
-        self.resultmodulations.create_reversed_list()
-        self.businessimpactmodulations.create_reversed_list()
-        self.escalations.create_reversed_list()
-        self.discoveryrules.create_reversed_list()
-        self.discoveryruns.create_reversed_list()
-        self.commands.create_reversed_list()
-        self.triggers.create_reversed_list()
-
-        # For services it's a special case
-        # we search for hosts, then for services
-        # it's quicker than search in all services
-        self.services.optimize_service_search(self.hosts)
 
     # Some parameters are just not managed like O*HP commands
     # and regexp capabilities
@@ -1959,9 +1910,7 @@ class Config(Item):
 
             # Create ours classes
             cfg.hosts = Hosts(cfg.hosts)
-            cfg.hosts.create_reversed_list()
             cfg.services = Services(cfg.services)
-            cfg.services.create_reversed_list()
             # Fill host groups
             for ori_hg in self.hostgroups:
                 hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
@@ -1997,6 +1946,56 @@ class Config(Item):
             self.confs[i].instance_id = i
             random.seed(time.time())
 
+    def dump(self, f=None):
+        dmp = {}
+
+        for category in (
+                "hosts",
+                "hostgroups",
+                "hostdependencies",
+                "contactgroups",
+                "contacts",
+                "notificationways",
+                "checkmodulations",
+                "macromodulations",
+                "servicegroups",
+                "services",
+                "servicedependencies",
+                "resultmodulations",
+                "businessimpactmodulations",
+                "escalations",
+                "discoveryrules",
+                "discoveryruns",
+                "schedulers",
+                "realms",
+                ):
+            objs = [jsonify_r(i) for i in getattr(self, category)]
+            container = getattr(self, category)
+            if category == "services":
+                objs = sorted(objs, key=lambda o: "%s/%s" %
+                              (o["host_name"], o["service_description"]))
+            elif hasattr(container, "name_property"):
+                np = container.name_property
+                objs = sorted(objs, key=lambda o: getattr(o, np, ''))
+            dmp[category] = objs
+
+        if f is None:
+            d = tempfile.gettempdir()
+            p = os.path.join(d, 'shinken-config-dump-%d' % time.time())
+            f = open(p, "wb")
+            close = True
+        else:
+            close = False
+        f.write(
+            json.dumps(
+                dmp,
+                indent=4,
+                separators=(',', ': '),
+                sort_keys=True
+            )
+        )
+        if close is True:
+            f.close()
 
 # ...
 def lazy():

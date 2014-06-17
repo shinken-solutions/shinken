@@ -139,6 +139,8 @@ def jsonify_r(obj):
         try:
             if isinstance(v, set):
                 v = list(v)
+            if isinstance(v, list):
+                v = sorted(v)
             json.dumps(v)
             res[prop] = v
         except Exception, exp:
@@ -167,8 +169,8 @@ def jsonify_r(obj):
                     continue
                 if t and hasattr(v, t+'_name'):
                     res[prop] = getattr(v, t+'_name')
-                else:
-                    print "CANNOT MANAGE OBJECT", v, type(v), t
+                #else:
+                #    print "CANNOT MANAGE OBJECT", v, type(v), t
     return res
 
 ################################### TIME ##################################
@@ -826,7 +828,6 @@ def filter_service_by_host_template_name(tpl):
         if service is None or service.host is None:
             return False
         return tpl in [t.strip() for t in service.host.use]
-        
 
     return inner_filter
 
@@ -868,3 +869,10 @@ def filter_service_by_bp_rule_label(label):
         return label in service.labels
 
     return inner_filter
+
+
+def is_complex_expr(expr):
+    for m in '()&|!*':
+        if m in expr:
+            return True
+    return False

@@ -28,6 +28,7 @@
 """
 import time
 import cPickle  # for hashing compute
+import itertools
 
 # Try to import md5 function
 try:
@@ -37,16 +38,14 @@ except ImportError:
 
 from copy import copy
 
-from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp, IntegerProp
+from shinken.property import StringProp, ListProp, IntegerProp
 from shinken.brok import Brok
-from shinken.util import strip_and_uniq
+from shinken.util import strip_and_uniq, is_complex_expr
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
-from shinken.complexexpression import ComplexExpressionFactory
 from shinken.log import logger
-
+from shinken.complexexpression import ComplexExpressionFactory
 
 
 class Item(object):
@@ -146,6 +145,11 @@ class Item(object):
                 setattr(i, prop, val)
         # Also copy the customs tab
         i.customs = copy(self.customs)
+        # And tags/templates
+        if hasattr(self, "tags"):
+            i.tags = copy(self.tags)
+        if hasattr(self, "templates"):
+            i.templates = copy(self.templates)
         return i
 
     def clean(self):
@@ -162,10 +166,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def is_tpl(self):
         """ Return if the elements is a template """
-        try:
-            return self.register == '0'
-        except Exception, exp:
-            return False
+        return getattr(self, "register", '') == '0'
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -234,29 +235,19 @@ Like temporary attributes such as "imported_from", etc.. """
         self.id = i
 
     def get_templates(self):
-        if hasattr(self, 'use') and self.use != '':
-            if isinstance(self.use, list):
-                return self.use
-            else:
-                return self.use.split(',')
+        use = getattr(self, 'use', '')
+        if isinstance(use, list):
+            return use
         else:
-            return []
+            return [n.strip() for n in use.split(',') if n.strip()]
 
 
     # We fillfull properties with template ones if need
-    def get_property_by_inheritance(self, items, prop):
-
+    def get_property_by_inheritance(self, prop):
         # If I have the prop, I take mine but I check if I must
         # add a plus property
         if hasattr(self, prop):
             value = getattr(self, prop)
-            # Maybe this value is 'null'. If so, we should NOT inherit
-            # and just delete this entry, and hope of course.
-            # Keep "null" values, because in "inheritance chaining" they must
-            # be passed from one level to the next.
-            #if value == 'null':
-            #    delattr(self, prop)
-            #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
             # Template should keep the '+' at the beginning of the chain
@@ -267,8 +258,10 @@ Like temporary attributes such as "imported_from", etc.. """
             return value
         # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
+        # We reverse list, so that when looking for properties by inheritance,
+        # the least defined template wins (if property is set).
         for i in self.templates:
-            value = i.get_property_by_inheritance(items, prop)
+            value = i.get_property_by_inheritance(prop)
 
             if value is not None:
                 # If our template give us a '+' value, we should continue to loop
@@ -331,9 +324,11 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     # We fillfull properties with template ones if need
-    def get_customs_properties_by_inheritance(self, items):
+    def get_customs_properties_by_inheritance(self):
+        # We reverse list, so that when looking for properties by inheritance,
+        # the least defined template wins (if property is set).
         for i in self.templates:
-            tpl_cv = i.get_customs_properties_by_inheritance(items)
+            tpl_cv = i.get_customs_properties_by_inheritance()
             if tpl_cv is not {}:
                 for prop in tpl_cv:
                     if prop not in self.customs:
@@ -405,13 +400,14 @@ Like temporary attributes such as "imported_from", etc.. """
     # check_interval. There is a old_parameters tab
     # in Classes that give such modifications to do.
     def old_properties_names_to_new(self):
-        old_properties = self.__class__.old_properties
+        old_properties = getattr(self.__class__, "old_properties", {})
         for old_name, new_name in old_properties.items():
             # Ok, if we got old_name and NO new name,
             # we switch the name
             if hasattr(self, old_name) and not hasattr(self, new_name):
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
+                delattr(self, old_name)
 
     # The arbiter is asking us our raw value before all explode or linking
     def get_raw_import_values(self):
@@ -642,17 +638,150 @@ Like temporary attributes such as "imported_from", etc.. """
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
         self.triggers = new_triggers
 
+    def dump(self):
+        dmp = {}
+        for prop in self.properties.keys():
+            if not hasattr(self, prop):
+                continue
+            attr = getattr(self, prop)
+            if isinstance(attr, list) and attr and isinstance(attr[0], Item):
+                dmp[prop] = [i.dump() for i in attr]
+            elif isinstance(attr, Item):
+                dmp[prop] = attr.dump()
+            elif attr:
+                dmp[prop] = getattr(self, prop)
+        return dmp
+
 
 class Items(object):
-    def __init__(self, items):
+    def __init__(self, items, index_items=True):
         self.items = {}
+        self.name_to_item = {}
+        self.templates = {}
+        self.name_to_template = {}
         self.configuration_warnings = []
         self.configuration_errors = []
+        self.add_items(items, index_items)
+
+    def get_source(self, item):
+        source = getattr(item, 'imported_from', None)
+        if source:
+            return " in %s" % source
+        else:
+            return ""
+
+    def add_items(self, items, index_items):
         for i in items:
-            self.items[i.id] = i
-        self.templates = {}
-        # We should keep a graph of templates relations
-        self.templates_graph = Graph()
+            if i.is_tpl():
+                self.add_template(i)
+            else:
+                self.add_item(i, index_items)
+
+    # Cheks if an object holding the same name already exists in the index.
+    # If so, it compares their definition order: the lowest definition order
+    # is kept. If definiton order equal, an error is risen.Item
+    # The method returns the item that should be added after it has decided
+    # which one should be kept. If the new item has precedence over the New
+    # existing one, the existing is removed for the new to replace it.
+    def mamage_conflict(self, item, name):
+        if item.is_tpl():
+            existing = self.name_to_template[name]
+        else:
+            existing = self.name_to_item[name]
+        existing_prio = getattr(
+            existing,
+            "definition_order",
+            existing.properties["definition_order"].default)
+        item_prio = getattr(
+            item,
+            "definition_order",
+            item.properties["definition_order"].default)
+        if existing_prio < item_prio:
+            # Existing item has lower priority, so it has precedence.
+            return existing
+        elif existing_prio > item_prio:
+            # New item has lower priority, so it has precedence.
+            # Existing item will be deleted below
+            pass
+        else:
+            # Don't know which one to keep, lastly defined has precedence
+            objcls = getattr(self.inner_class, "my_type", "[unknown]")
+            mesg = "duplicate %s name %s%s, using lastly defined" % \
+                   (objcls, name, self.get_source(item))
+            item.configuration_warnings.append(mesg)
+        if item.is_tpl():
+            self.remove_template(existing)
+        else:
+            self.remove_item(existing)
+        return item
+
+    def add_template(self, tpl):
+        tpl = self.index_template(tpl)
+        self.templates[tpl.id] = tpl
+
+    def index_template(self, tpl):
+        objcls = self.inner_class.my_type
+        name = getattr(tpl, 'name', '')
+        if not name:
+            mesg = "a %s template has been defined without name%s%s" % \
+                   (objcls, tpl.imported_from, self.get_source(tpl))
+            tpl.configuration_errors.append(mesg)
+        elif name in self.name_to_template:
+            tpl = self.mamage_conflict(tpl, name)
+        self.name_to_template[name] = tpl
+        return tpl
+
+    def remove_template(self, tpl):
+        try:
+            del self.templates[tpl.id]
+        except KeyError:
+            pass
+        self.unindex_template(tpl)
+
+    def unindex_template(self, tpl):
+        name = getattr(tpl, 'name', '')
+        try:
+            del self.name_to_template[name]
+        except KeyError:
+            pass
+
+    def add_item(self, item, index=True):
+        name_property = getattr(self.__class__, "name_property", None)
+        if index is True and name_property:
+            item = self.index_item(item)
+        self.items[item.id] = item
+
+    def index_item(self, item, name=None):
+        name_property = getattr(self.__class__, "name_property", None)
+        objcls = self.inner_class.my_type
+        if name is None and name_property:
+            name = getattr(item, name_property, '')
+        if not name:
+            mesg = "a %s item has been defined without %s%s" % \
+                   (objcls, name_property, self.get_source(item))
+            item.configuration_errors.append(mesg)
+        elif name in self.name_to_item:
+            item = self.mamage_conflict(item, name)
+        self.name_to_item[name] = item
+        return item
+
+    def remove_item(self, item):
+        name_property = getattr(self.__class__, "name_property", None)
+        if name_property:
+            self.unindex_item(item)
+        try:
+            del self.items[item.id]
+        except KeyError:
+            pass
+
+    def unindex_item(self, item, name=None):
+        name_property = getattr(self.__class__, "name_property", None)
+        if name is None and name_property:
+            name = getattr(item, name_property, '')
+        try:
+            del self.name_to_item[name]
+        except KeyError:
+            pass
 
     def __iter__(self):
         return self.items.itervalues()
@@ -662,12 +791,16 @@ class Items(object):
 
     def __delitem__(self, key):
         try:
+            self.unindex_item(self.items[key])
             del self.items[key]
         except KeyError:  # we don't want it, we do not have it. All is perfect
             pass
 
     def __setitem__(self, key, value):
         self.items[key] = value
+        name_property = getattr(self.__class__, "name_property", None)
+        if name_property:
+            self.index_item(value)
 
     def __getitem__(self, key):
         return self.items[key]
@@ -680,44 +813,8 @@ class Items(object):
             i.compute_hash()
 
 
-    # We create the reversed list so search will be faster
-    # We also create a twins list with id of twins (not the original
-    # just the others, higher twins)
-    def create_reversed_list(self):
-        self.reversed_list = {}
-        self.twins = []
-        name_property = self.__class__.name_property
-        for id in self.items:
-            if hasattr(self.items[id], name_property):
-                name = getattr(self.items[id], name_property)
-                if name not in self.reversed_list:
-                    self.reversed_list[name] = id
-                else:
-                    self.twins.append(id)
-
-
-    def find_id_by_name(self, name):
-        if hasattr(self, 'reversed_list'):
-            if name in self.reversed_list:
-                return self.reversed_list[name]
-            else:
-                return None
-        else:  # ok, an early ask, with no reversed list from now...
-            name_property = self.__class__.name_property
-            for i in self:
-                if hasattr(i, name_property):
-                    i_name = getattr(i, name_property)
-                    if i_name == name:
-                        return i.id
-            return None
-
-
     def find_by_name(self, name):
-        id = self.find_id_by_name(name)
-        if id is not None:
-            return self.items[id]
-        else:
-            return None
+        return self.name_to_item.get(name, None)
 
 
     # Search items using a list of filter callbacks. Each callback is passed
@@ -742,61 +839,48 @@ class Items(object):
         for i in self:
             i.prepare_for_conf_sending()
 
-    
+
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
-        for i in self:
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
             i.old_properties_names_to_new()
 
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()
 
-    def create_tpl_list(self):
-        for id in self.items:
-            i = self.items[id]
-            if i.is_tpl():
-                self.templates[id] = i
-
     def find_tpl_by_name(self, name):
-        for i in self.templates.values():
-            if hasattr(i, 'name') and i.name == name:
-                return i
-        return None
+        return self.name_to_template.get(name, None)
+
+    def get_all_tags(self, item):
+        all_tags = item.get_templates()
+
+        for t in item.templates:
+            all_tags.append(t.name)
+            all_tags.extend(self.get_all_tags(t))
+        return list(set(all_tags))
+
+    def linkify_item_templates(self, item):
+        tpls = []
+        tpl_names = item.get_templates()
+
+        for name in tpl_names:
+            t = self.find_tpl_by_name(name)
+            if t is not None:
+                tpls.append(t)
+        item.templates = tpls
 
     # We will link all templates, and create the template
     # graph too
     def linkify_templates(self):
         # First we create a list of all templates
-        self.create_tpl_list()
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
+            self.linkify_item_templates(i)
         for i in self:
-            tpls = i.get_templates()
-            new_tpls = []
-            for tpl in tpls:
-                tpl = tpl.strip()
-                # We save this template in the 'tags' set
-                i.tags.add(tpl)
-                # Then we link it
-                t = self.find_tpl_by_name(tpl)
-                # If it's ok, add the template and update the
-                # template graph too
-                if t is not None:
-                    # add the template object to us
-                    new_tpls.append(t)
-                else:  # not find? not good!
-                    err = "the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
-                    i.configuration_warnings.append(err)
-            i.templates = new_tpls
-
-        # Now we will create the template graph, so
-        # we look only for templates here. First we should declare our nodes
-        for tpl in self.templates.values():
-            self.templates_graph.add_node(tpl)
-        # And then really create our edge
-        for tpl in self.templates.values():
-            for father in tpl.templates:
-                self.templates_graph.add_edge(father, tpl)
+            i.tags = self.get_all_tags(i)
 
     def is_correct(self):
         # we are ok at the beginning. Hope we still ok at the end...
@@ -839,11 +923,7 @@ class Items(object):
 
     def remove_templates(self):
         """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
-        tpls = [i for i in self if i.is_tpl()]
-        for i in tpls:
-            del self[i.id]
         del self.templates
-        del self.templates_graph
 
     def clean(self):
         """ Request to remove the unnecessary attributes/others from our items """
@@ -865,15 +945,15 @@ class Items(object):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in self:
-            i.get_property_by_inheritance(self, prop)
-            if not i.is_tpl():
-                # If a "null" attribute was inherited, delete it
-                try:
-                    if getattr(i, prop) == 'null':
-                        delattr(i, prop)
-                except:
-                    pass
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
+            i.get_property_by_inheritance(prop)
+            # If a "null" attribute was inherited, delete it
+            try:
+                if getattr(i, prop) == 'null':
+                    delattr(i, prop)
+            except:
+                pass
 
     def apply_inheritance(self):
         # We check for all Class properties if the host has it
@@ -882,28 +962,7 @@ class Items(object):
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
         for i in self:
-            i.get_customs_properties_by_inheritance(self)
-
-    # We remove twins
-    # Remember: item id respect the order of conf. So if and item
-    #  is defined multiple times,
-    # we want to keep the first one.
-    # Services are also managed here but they are specials:
-    # We remove twins services with the same host_name/service_description
-    # Remember: host service are take into account first before hostgroup service
-    # Id of host service are lower than hostgroups one, so they are
-    # in self.twins_services
-    # and we can remove them.
-    def remove_twins(self):
-        for id in self.twins:
-            i = self.items[id]
-            type = i.__class__.my_type
-            logger.warning("[items] %s.%s is already defined '%s'" % (type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
-            del self[id]  # bye bye
-        # do not remove twins, we should look in it, but just void it
-        self.twins = []
-        #del self.twins #no more need
-
+            i.get_customs_properties_by_inheritance()
 
 
     # We've got a contacts property with , separated contacts names
@@ -980,27 +1039,28 @@ class Items(object):
     # If we've got a contact_groups properties, we search for all
     # theses groups and ask them their contacts, and then add them
     # all into our contacts property
-    def explode_contact_groups_into_contacts(self, contactgroups):
-        for i in self:
-            if hasattr(i, 'contact_groups'):
-                if isinstance(i.contact_groups, list):
-                    cgnames = i.contact_groups
-                else:
-                    cgnames = i.contact_groups.split(',')
-                cgnames = strip_and_uniq(cgnames)
-                for cgname in cgnames:
-                    cg = contactgroups.find_by_name(cgname)
-                    if cg is None:
-                        err = "The contact group '%s' defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
-                        i.configuration_errors.append(err)
-                        continue
-                    cnames = contactgroups.get_members_by_name(cgname)
-                    # We add contacts into our contacts
-                    if cnames != []:
-                        if hasattr(i, 'contacts'):
-                            i.contacts += ',' + cnames
-                        else:
-                            i.contacts = cnames
+    def explode_contact_groups_into_contacts(self, item, contactgroups):
+        if hasattr(item, 'contact_groups'):
+            if isinstance(item.contact_groups, list):
+                cgnames = item.contact_groups
+            else:
+                cgnames = item.contact_groups.split(',')
+            cgnames = strip_and_uniq(cgnames)
+            for cgname in cgnames:
+                cg = contactgroups.find_by_name(cgname)
+                if cg is None:
+                    err = "The contact group '%s' defined on the %s '%s' do " \
+                          "not exist" % (cgname, item.__class__.my_type,
+                                         item.get_name())
+                    item.configuration_errors.append(err)
+                    continue
+                cnames = contactgroups.get_members_by_name(cgname)
+                # We add contacts into our contacts
+                if cnames != []:
+                    if hasattr(item, 'contacts'):
+                        item.contacts += ',' + cnames
+                    else:
+                        item.contacts = cnames
 
     # Link a timeperiod property (prop)
     def linkify_with_timeperiods(self, timeperiods, prop):
@@ -1125,13 +1185,12 @@ class Items(object):
                     s.configuration_errors.append(err)
             s.modules = new_modules
 
-
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         #print "\n"*10, "looking for expression", expr
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        #print "\n"*10, "looking for expression", expr        
+        #print "\n"*10, "looking for expression", expr
         if look_in=='hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
         else: # templates
@@ -1148,53 +1207,64 @@ class Items(object):
         # HOOK DBG
         return list(set_res)
 
+    def get_hosts_from_hostgroups(self, hgname, hostgroups):
+        if not isinstance(hgname, list):
+            hgname = [e.strip() for e in hgname.split(',') if e.strip()]
 
+        host_names = []
+
+        for name in hgname:
+            hg = hostgroups.find_by_name(name)
+            if hg is None:
+                raise ValueError("the hostgroup '%s' is unknown" % hgname)
+            mbrs = [h.strip() for h in hg.get_hosts().split(',') if h.strip()]
+            host_names.extend(mbrs)
+        return host_names
 
     # If we've got a hostgroup_name property, we search for all
     # theses groups and ask them their hosts, and then add them
     # all into our host_name property
-    def explode_host_groups_into_hosts(self, hosts, hostgroups):
-        for i in self:
-            hnames_list = []
-            if hasattr(i, 'hostgroup_name'):
-                hnames_list.extend(self.evaluate_hostgroup_expression(i.hostgroup_name, hosts, hostgroups))
+    def explode_host_groups_into_hosts(self, item, hosts, hostgroups):
+        hnames_list = []
+        # Gets item's hostgroup_name
+        hgnames = getattr(item, "hostgroup_name", '')
 
-            # Maybe there is no host in the groups, and do not have any
-            # host_name too, so tag is as template to do not look at
-            if hnames_list == [] and not hasattr(i, 'host_name'):
-                i.register = '0'
+        # Defines if hostgroup is a complex expression
+        # Expands hostgroups
+        if is_complex_expr(hgnames):
+            hnames_list.extend(self.evaluate_hostgroup_expression(
+                item.hostgroup_name, hosts, hostgroups))
+        elif hgnames:
+            try:
+                hnames_list.extend(
+                    self.get_hosts_from_hostgroups(hgnames, hostgroups))
+            except ValueError, e:
+                item.configuration_errors.append(str(e))
 
-            if hasattr(i, 'host_name'):
-                hst = i.host_name.split(',')
-                for h in hst:
-                    h = h.strip()
-                    # If the host start with a !, it's to be removed from
-                    # the hostgroup get list
-                    if h.startswith('!'):
-                        hst_to_remove = h[1:].strip()
-                        try:
-                            hnames_list.remove(hst_to_remove)
-                        # was not in it
-                        except ValueError:
-                            pass
-                    # Else it's an host to add, but maybe it's ALL
-                    elif h == '*':
-                        for newhost in  set(h.host_name for h in hosts.items.values() \
-                                            if getattr(h, 'host_name', '') != '' and not h.is_tpl()):
-                            hnames_list.append(newhost)
-                            #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
-                    else:
-                        hnames_list.append(h)
+        # Expands host names
+        hname = getattr(item, "host_name", '')
+        hnames_list.extend([n.strip() for n in hname.split(',') if n.strip()])
+        hnames = set()
 
-            i.host_name = ','.join(list(set(hnames_list)))
+        for h in hnames_list:
+            # If the host start with a !, it's to be removed from
+            # the hostgroup get list
+            if h.startswith('!'):
+                hst_to_remove = h[1:].strip()
+                try:
+                    hnames.remove(hst_to_remove)
+                except KeyError:
+                    pass
+            elif h == '*':
+                [hnames.add(h.host_name) for h in hosts.items.itervalues()
+                 if getattr(h, 'host_name', '')]
+            # Else it's an host to add, but maybe it's ALL
+            else:
+                hnames.add(h)
 
-            # Ok, even with all of it, there is still no host, put it as a template
-            if i.host_name == '':
-                i.register = '0'
-
+        item.host_name = ','.join(hnames)
 
     # Take our trigger strings and create true objects with it
     def explode_trigger_string_into_triggers(self, triggers):
         for i in self:
             i.explode_trigger_string_into_triggers(triggers)
-

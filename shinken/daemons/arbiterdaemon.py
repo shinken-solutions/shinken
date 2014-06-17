@@ -42,13 +42,13 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import jsonify_r
+
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
-    
+
     doc = 'Does the daemon got a configuration (internal)'
     def have_conf(self, magic_hash):
         # Beware, we got an str in entry, not an int
@@ -60,7 +60,7 @@ class IForArbiter(Interface):
             return False
     have_conf.doc = doc
 
-    
+
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
@@ -118,7 +118,7 @@ class IForArbiter(Interface):
     what_i_managed.need_lock = False
     what_i_managed.doc = doc
 
-    
+
     doc = 'Return all the data of the satellites'
     # We will try to export all data from our satellites, but only the json-able fields
     def get_all_states(self):
@@ -142,11 +142,11 @@ class IForArbiter(Interface):
                             except Exception, exp:
                                 print exp
                     lst.append(e)
-                        
+
         return lst
     get_all_states.doc = doc
-    
-    
+
+
     # Try to give some properties of our objects
     doc = 'Dump all objects of the type in [hosts, services, contacts, commands, hostgroups, servicegroups]'
     def get_objects_properties(self, table):
@@ -352,9 +352,6 @@ class Arbiter(Daemon):
         if not self.conf.conf_is_correct:
             sys.exit("***> One or more problems was encountered while processing the config files...")
 
-        # Change Nagios2 names to Nagios3 ones
-        self.conf.old_properties_names_to_new()
-
         # Manage all post-conf modules
         self.hook_point('early_configuration')
 
@@ -375,12 +372,6 @@ class Arbiter(Daemon):
         # Explode between types
         self.conf.explode()
 
-        # Create Name reversed list for searching list
-        self.conf.create_reversed_list()
-
-        # Cleaning Twins objects
-        self.conf.remove_twins()
-
         # Implicit inheritance for services
         self.conf.apply_implicit_inheritance()
 
@@ -393,23 +384,11 @@ class Arbiter(Daemon):
         # We compute simple item hash
         self.conf.compute_hash()
 
-        # We removed templates, and so we must recompute the
-        # search lists
-        self.conf.create_reversed_list()
-
         # Overrides sepecific service instaces properties
         self.conf.override_properties()
 
         # Pythonize values
         self.conf.pythonize()
-
-        # Removes service exceptions based on host configuration
-        count = self.conf.remove_exclusions()
-
-        if count > 0:
-            # We removed excluded services, and so we must recompute the
-            # search lists
-            self.conf.create_reversed_list()
 
         # Linkify objects to each other
         self.conf.linkify()

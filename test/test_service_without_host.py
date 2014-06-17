@@ -31,7 +31,14 @@ class Testservice_without_host(ShinkenTest):
         self.setup_with_file('etc/shinken_service_without_host.cfg')
 
     def test_service_without_host_do_not_break(self):
-        self.assert_(self.conf.conf_is_correct)
+        self.assert_(self.conf.conf_is_correct is False)
+
+        [b.prepare() for b in self.broks.values()]
+        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+
+        self.assert_(len([log for log in logs if re.search(
+            "The service 'WillError' got an unknown host_name 'NOEXIST'",
+            log)]) > 0)
 
 
 if __name__ == '__main__':
