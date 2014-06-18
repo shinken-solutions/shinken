@@ -148,6 +148,14 @@ class Realm(Itemgroup):
                 r.append(s)
         return r
 
+    def get_all_subs_receivers(self):
+        r = copy.copy(self.receivers)
+        for p in self.realm_members:
+            tmps = p.get_all_subs_receivers()
+            for s in tmps:
+                r.append(s)
+        return r
+
 
     def count_reactionners(self):
         self.nb_reactionners = 0
@@ -309,6 +317,7 @@ class Realm(Itemgroup):
         # First we create/void theses links
         broker.cfg['pollers'] = {}
         broker.cfg['reactionners'] = {}
+        broker.cfg['receivers'] = {}
 
         # First our own level
         for p in self.pollers:
@@ -318,6 +327,10 @@ class Realm(Itemgroup):
         for r in self.reactionners:
             cfg = r.give_satellite_cfg()
             broker.cfg['reactionners'][r.id] = cfg
+
+        for b in self.receivers:
+            cfg = b.give_satellite_cfg()
+            broker.cfg['receivers'][b.id] = cfg
 
         # Then sub if we must to it
         if broker.manage_sub_realms:
@@ -330,6 +343,11 @@ class Realm(Itemgroup):
             for r in self.get_all_subs_reactionners():
                 cfg = r.give_satellite_cfg()
                 broker.cfg['reactionners'][r.id] = cfg
+
+            # Now receivers
+            for r in self.get_all_subs_receivers():
+                cfg = r.give_satellite_cfg()
+                broker.cfg['receivers'][r.id] = cfg
 
 
     # Get a conf package of satellites links that can be useful for
