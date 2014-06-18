@@ -25,6 +25,7 @@
 
 import os
 import time
+import re
 
 from shinken.util import to_int, to_bool, split_semicolon
 from shinken.downtime import Downtime
@@ -34,6 +35,7 @@ from shinken.commandcall import CommandCall
 from shinken.log import logger, naglog_result
 from shinken.pollerlink import PollerLink
 from shinken.eventhandler import EventHandler
+from shinken.brok import Brok
 
 MODATTR_NONE = 0
 MODATTR_NOTIFICATIONS_ENABLED = 1
@@ -377,7 +379,40 @@ class ExternalCommandManager:
 
         if not host_found:
             logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
-            #print "Sorry but the host", host_name, "was not found"
+            b = self.get_unknown_check_result_brok(command)
+            if hasattr(self, 'arbiter'):
+                self.arbiter.add(b)
+            elif hasattr(self, 'receiver'):
+                self.receiver.add(b)
+
+    # Takes a PROCESS_SERVICE_CHECK_RESULT
+    #  external command line and returns an unknown_[type]_check_result brok
+    @staticmethod
+    def get_unknown_check_result_brok(cmd_line):
+
+        match = re.match('^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;([^\;]*);([^\;]*);([^\;]*);(.*)', cmd_line)
+        if not match:
+            match = re.match('^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;([^\;]*);([^\;]*);(.*)', cmd_line)
+
+        if not match:
+            return None
+
+        data = {
+            'time_stamp': match.group(1),
+            'host_name': match.group(3),
+        }
+
+        if match.group(2) == 'SERVICE':
+            data['service_description'] = match.group(4)
+            data['return_code'] = match.group(5)
+            data['output'] = match.group(6)
+        else:
+            data['return_code'] = match.group(4)
+            data['output'] = match.group(5)
+
+        b = Brok('unknown_%s_check_result' % match.group(2).lower(), data)
+
+        return b
 
 
     # The command is global, so sent it to every schedulers
