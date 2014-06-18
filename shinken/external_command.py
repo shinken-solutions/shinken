@@ -350,30 +350,30 @@ class ExternalCommandManager:
     # the command
     def search_host_and_dispatch(self, host_name, command, extcmd):
         logger.debug("Calling search_host_and_dispatch for %s" % host_name)
+        host_found = False
 
         # If we are a receiver, just look in the receiver 
         if self.mode == 'receiver':
             logger.info("Receiver looking a scheduler for the external command %s %s" % (host_name, command))
             sched = self.receiver.get_sched_from_hname(host_name)
-            logger.debug("Receiver found a scheduler: %s" % (sched))
             if sched:
-                logger.info("Receiver pushing external command to scheduler %s" % (sched))
+                host_found = True
+                logger.debug("Receiver found a scheduler: %s" % sched)
+                logger.info("Receiver pushing external command to scheduler %s" % sched)
                 sched['external_commands'].append(extcmd)
-            return
-        
-        host_found = False
-        for cfg in self.confs.values():
-            if cfg.hosts.find_by_name(host_name) is not None:
-                logger.debug("Host %s found in a configuration" % host_name)
-                if cfg.is_assigned:
-                    host_found = True
-                    sched = cfg.assigned_to
-                    logger.debug("Sending command to the scheduler %s" % sched.get_name())
-                    #sched.run_external_command(command)
-                    sched.external_commands.append(command)
-                    break
-                else:
-                    logger.warning("Problem: a configuration is found, but is not assigned!")
+        else:
+            for cfg in self.confs.values():
+                if cfg.hosts.find_by_name(host_name) is not None:
+                    logger.debug("Host %s found in a configuration" % host_name)
+                    if cfg.is_assigned:
+                        host_found = True
+                        sched = cfg.assigned_to
+                        logger.debug("Sending command to the scheduler %s" % sched.get_name())
+                        #sched.run_external_command(command)
+                        sched.external_commands.append(command)
+                        break
+                    else:
+                        logger.warning("Problem: a configuration is found, but is not assigned!")
 
         if not host_found:
             logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
