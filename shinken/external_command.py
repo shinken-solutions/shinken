@@ -376,14 +376,12 @@ class ExternalCommandManager:
                         break
                     else:
                         logger.warning("Problem: a configuration is found, but is not assigned!")
-
         if not host_found:
-            logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
-            b = self.get_unknown_check_result_brok(command)
-            if hasattr(self, 'arbiter'):
-                self.arbiter.add(b)
-            elif hasattr(self, 'receiver'):
-                self.receiver.add(b)
+            if getattr(self, 'receiver', self.arbiter).accept_passive_unknown_check_results:
+                b = self.get_unknown_check_result_brok(command)
+                getattr(self, 'receiver', self.arbiter).add(b)
+            else:
+                logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
 
     # Takes a PROCESS_SERVICE_CHECK_RESULT
     #  external command line and returns an unknown_[type]_check_result brok

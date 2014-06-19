@@ -43,6 +43,7 @@ from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.util import jsonify_r
+from shinken.property import BoolProp
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -497,6 +498,7 @@ class Arbiter(Daemon):
         self.daemon_enabled = self.conf.daemon_enabled
         self.daemon_thread_pool_size = self.conf.daemon_thread_pool_size
         self.http_backend = getattr(self.conf, 'http_backend', 'auto')
+        self.accept_passive_unknown_check_results = BoolProp.pythonize(self.me.accept_passive_unknown_check_results)
 
         # If the user sets a workdir, lets use it. If not, use the
         # pidfile directory
