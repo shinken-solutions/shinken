@@ -377,9 +377,9 @@ class ExternalCommandManager:
                     else:
                         logger.warning("Problem: a configuration is found, but is not assigned!")
         if not host_found:
-            if getattr(self, 'receiver', self.arbiter).accept_passive_unknown_check_results:
+            if getattr(self, 'receiver', getattr(self, 'arbiter', None)).accept_passive_unknown_check_results:
                 b = self.get_unknown_check_result_brok(command)
-                getattr(self, 'receiver', self.arbiter).add(b)
+                getattr(self, 'receiver', getattr(self, 'arbiter', None)).add(b)
             else:
                 logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
 
