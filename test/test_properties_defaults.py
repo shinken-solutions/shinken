@@ -838,6 +838,7 @@ class TestService(PropertiesTester, ShinkenTest):
         ('labels', ''),
         ('business_rule_host_notification_options', ''),
         ('business_rule_service_notification_options', ''),
+        ('host_dependency_enabled', '1'),
         ])
 
     def setUp(self):
