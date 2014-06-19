@@ -411,6 +411,8 @@ class StandardDaterange(Daterange):
         b = self.day in Daterange.weekdays
         if not b:
             logger.error("Error: %s is not a valid day" % self.day)
+        # Check also if Daterange is correct.
+        b &= Daterange.is_correct(self)
         return b
 
     def get_start_and_end_time(self, ref=None):
