@@ -98,6 +98,7 @@ class Receiver(Satellite):
 
         self.host_assoc = {}
         self.direct_routing = False
+        self.accept_passive_unknown_check_results = False
 
         self.istats = IStats(self)
         self.ibroks = IBroks(self)
@@ -183,6 +184,7 @@ class Receiver(Satellite):
         self.name = name
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
+        self.accept_passive_unknown_check_results = conf['global']['accept_passive_unknown_check_results']
 
         g_conf = conf['global']
 
