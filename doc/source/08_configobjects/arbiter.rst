@@ -30,7 +30,7 @@ modules            *modules*
 timeout            *number of seconds to block the arbiter waiting for an answer*  
 data_timeout       *seconds to wait when sending data to another satellite(daemon)*
 max_check_attempts *number*                                                        
-check_interval     *seconds to wait before issuing a new check*                    
+check_interval     *seconds to wait before issuing a new check*
 }                                                                                  
 ================== ================================================================
 
@@ -82,3 +82,6 @@ max_check_attempts
 
 check_interval
   Ping node every N seconds. 60 seconds by default.
+
+accept_passive_unknown_check_results
+

@@ -159,8 +159,8 @@ class BoolProp(Property):
     false, no, off for False, and 1, true, yes, on for True).
     """
 
-    #@staticmethod
-    def pythonize(self, val):
+    @staticmethod
+    def pythonize(val):
         val = unique_value(val)
         return _boolean_states[val.lower()]
 
