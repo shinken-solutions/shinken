@@ -131,20 +131,12 @@ class Realm(Itemgroup):
             return ''
 
     def get_all_subs_satellites_by_type(self, sat_type):
-        t = {
-            'poller': self.pollers,
-            'reactionner': self.reactionners,
-        }
-
-        if sat_type in t:
-            r = copy.copy(t[sat_type])
-            for p in self.realm_members:
-                tmps = p.get_all_subs_satellites_by_type(sat_type)
-                for s in tmps:
-                    r.append(s)
-            return r
-        else:
-            return None
+        r = copy.copy(getattr(self, sat_type))
+        for p in self.realm_members:
+            tmps = p.get_all_subs_satellites_by_type(sat_type)
+            for s in tmps:
+                r.append(s)
+        return r
 
     def count_reactionners(self):
         self.nb_reactionners = 0
@@ -319,12 +311,12 @@ class Realm(Itemgroup):
         # Then sub if we must to it
         if broker.manage_sub_realms:
             # Now pollers
-            for p in self.get_all_subs_satellites_by_type('poller'):
+            for p in self.get_all_subs_satellites_by_type('pollers'):
                 cfg = p.give_satellite_cfg()
                 broker.cfg['pollers'][p.id] = cfg
 
             # Now reactionners
-            for r in self.get_all_subs_satellites_by_type('reactionner'):
+            for r in self.get_all_subs_satellites_by_type('reactionners'):
                 cfg = r.give_satellite_cfg()
                 broker.cfg['reactionners'][r.id] = cfg
 
