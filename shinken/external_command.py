@@ -574,7 +574,10 @@ class ExternalCommandManager:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
-                    else:  # error, must be logged
+                    elif self.conf.accept_passive_unknown_check_results:
+                        b = self.get_unknown_check_result_brok(command)
+                        self.sched.add_Brok(b)
+                    else:
                         logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:

@@ -386,6 +386,7 @@ class Dispatcher:
                                         'modules': sched.modules, 'satellites': satellites_for_sched,
                                         'instance_name': sched.scheduler_name, 'push_flavor': conf.push_flavor,
                                         'skip_initial_broks': sched.skip_initial_broks,
+                                        'accept_passive_unknown_check_results': sched.accept_passive_unknown_check_results,
                                         }
 
                         t1 = time.time()
