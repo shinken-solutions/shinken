@@ -329,54 +329,6 @@ class Receiver(Satellite):
         if self.new_conf:
             self.setup_new_conf()
 
-#        # Maybe the last loop we raised some broks internally
-#        # we should integrate them in broks
-#        self.integer_internal_broks()
-
-#        # And from schedulers
-#        self.get_new_broks(type='scheduler')
-#        # And for other satellites
-#        self.get_new_broks(type='poller')
-#        self.get_new_broks(type='reactionner')
-
-#        # Sort the brok list by id
-#        self.broks.sort(sort_by_ids)
-
-#        # and for external queues
-#        # REF: doc/receiver-modules.png (3)
-#        for b in self.broks:
-#            # if b.type != 'log':
-#            #     print "Receiver: put brok id: %d" % b.id
-#            for q in self.modules_manager.get_external_to_queues():
-#                q.put(b)
-
-#        # We must had new broks at the end of the list, so we reverse the list
-#        self.broks.reverse()
-
-        start = time.time()
-        ## while len(self.broks) != 0:
-        ##     now = time.time()
-        ##     # Do not 'manage' more than 1s, we must get new broks
-        ##     # every 1s
-        ##     if now - start > 1:
-        ##         break
-        ##
-        ##     b = self.broks.pop()
-        ##     # Ok, we can get the brok, and doing something with it
-        ##     # REF: doc/receiver-modules.png (4-5)
-        ##     self.manage_brok(b)
-        ##
-        ##     nb_broks = len(self.broks)
-        ##
-        ##     # Ok we manage brok, but we still want to listen to arbiter
-        ##     self.watch_for_new_conf(0.0)
-        ##
-        ##     # if we got new broks here from arbiter, we should break the loop
-        ##     # because such broks will not be managed by the
-        ##     # external modules before this loop (we pop them!)
-        ##     if len(self.broks) != nb_broks:
-        ##         break
-
         # Maybe external modules raised 'objects'
         # we should get them
         self.get_objects_from_from_queues()
