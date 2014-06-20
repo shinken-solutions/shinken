@@ -1695,7 +1695,7 @@ class ExternalCommandManager:
         self.arbiter.dispatcher.satellites.append(p)
         r.pollers.append(p)
         r.count_pollers()
-        r.fill_potential_pollers()
+        r.fill_potential_satellites_by_type('pollers')
         logger.debug("Poller %s added" % poller_name)
         logger.debug("Potential %s" % str(r.get_potential_satellites_by_type('poller')))
 

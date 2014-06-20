@@ -130,24 +130,13 @@ class Realm(Itemgroup):
         else:
             return ''
 
-
-    def get_all_subs_pollers(self):
-        r = copy.copy(self.pollers)
+    def get_all_subs_satellites_by_type(self, sat_type):
+        r = copy.copy(getattr(self, sat_type))
         for p in self.realm_members:
-            tmps = p.get_all_subs_pollers()
+            tmps = p.get_all_subs_satellites_by_type(sat_type)
             for s in tmps:
                 r.append(s)
         return r
-
-
-    def get_all_subs_reactionners(self):
-        r = copy.copy(self.reactionners)
-        for p in self.realm_members:
-            tmps = p.get_all_subs_reactionners()
-            for s in tmps:
-                r.append(s)
-        return r
-
 
     def count_reactionners(self):
         self.nb_reactionners = 0
@@ -159,17 +148,6 @@ class Realm(Itemgroup):
                 if not reactionner.spare and reactionner.manage_sub_realms:
                     self.nb_reactionners += 1
 
-
-    def fill_potential_reactionners(self):
-        self.potential_reactionners = []
-        for reactionner in self.reactionners:
-            self.potential_reactionners.append(reactionner)
-        for realm in self.higher_realms:
-            for reactionner in realm.reactionners:
-                if reactionner.manage_sub_realms:
-                    self.potential_reactionners.append(reactionner)
-
-
     def count_pollers(self):
         self.nb_pollers = 0
         for poller in self.pollers:
@@ -179,17 +157,6 @@ class Realm(Itemgroup):
             for poller in realm.pollers:
                 if not poller.spare and poller.manage_sub_realms:
                     self.nb_pollers += 1
-
-
-    def fill_potential_pollers(self):
-        self.potential_pollers = []
-        for poller in self.pollers:
-            self.potential_pollers.append(poller)
-        for realm in self.higher_realms:
-            for poller in realm.pollers:
-                if poller.manage_sub_realms:
-                    self.potential_pollers.append(poller)
-
 
     def count_brokers(self):
         self.nb_brokers = 0
@@ -201,17 +168,6 @@ class Realm(Itemgroup):
                 if not broker.spare and broker.manage_sub_realms:
                     self.nb_brokers += 1
 
-
-    def fill_potential_brokers(self):
-        self.potential_brokers = []
-        for broker in self.brokers:
-            self.potential_brokers.append(broker)
-        for realm in self.higher_realms:
-            for broker in realm.brokers:
-                if broker.manage_sub_realms:
-                    self.potential_brokers.append(broker)
-
-
     def count_receivers(self):
         self.nb_receivers = 0
         for receiver in self.receivers:
@@ -222,17 +178,6 @@ class Realm(Itemgroup):
                 if not receiver.spare and receiver.manage_sub_realms:
                     self.nb_receivers += 1
 
-
-    def fill_potential_receivers(self):
-        self.potential_receivers = []
-        for broker in self.receivers:
-            self.potential_receivers.append(broker)
-        for realm in self.higher_realms:
-            for broker in realm.receivers:
-                if broker.manage_sub_realms:
-                    self.potential_receivers.append(broker)
-
-
     # Return the list of satellites of a certain type
     # like reactionner -> self.reactionners
     def get_satellties_by_type(self, type):
@@ -241,6 +186,16 @@ class Realm(Itemgroup):
         else:
             logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
+
+    def fill_potential_satellites_by_type(self, sat_type):
+        setattr(self, 'potential_%s' % sat_type, [])
+        for satellite in getattr(self, sat_type):
+            getattr(self, 'potential_%s' % sat_type).append(satellite)
+        for realm in self.higher_realms:
+            for satellite in getattr(realm, sat_type):
+                if satellite.manage_sub_realms:
+                    getattr(self, 'potential_%s' % sat_type).append(satellite)
+
 
 
     # Return the list of potentials satellites of a certain type
@@ -284,13 +239,13 @@ class Realm(Itemgroup):
         self.to_satellites_managed_by['receiver'] = {}
 
         self.count_reactionners()
-        self.fill_potential_reactionners()
+        self.fill_potential_satellites_by_type('reactionners')
         self.count_pollers()
-        self.fill_potential_pollers()
+        self.fill_potential_satellites_by_type('pollers')
         self.count_brokers()
-        self.fill_potential_brokers()
+        self.fill_potential_satellites_by_type('brokers')
         self.count_receivers()
-        self.fill_potential_receivers()
+        self.fill_potential_satellites_by_type('receivers')
 
         s = "%s: (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
             (self.get_name(),
@@ -322,12 +277,12 @@ class Realm(Itemgroup):
         # Then sub if we must to it
         if broker.manage_sub_realms:
             # Now pollers
-            for p in self.get_all_subs_pollers():
+            for p in self.get_all_subs_satellites_by_type('pollers'):
                 cfg = p.give_satellite_cfg()
                 broker.cfg['pollers'][p.id] = cfg
 
             # Now reactionners
-            for r in self.get_all_subs_reactionners():
+            for r in self.get_all_subs_satellites_by_type('reactionners'):
                 cfg = r.give_satellite_cfg()
                 broker.cfg['reactionners'][r.id] = cfg
 
