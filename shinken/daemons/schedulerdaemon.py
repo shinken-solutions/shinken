@@ -342,11 +342,11 @@ class Shinken(BaseSatellite):
         instance_name = pk['instance_name']
         push_flavor = pk['push_flavor']
         skip_initial_broks = pk['skip_initial_broks']
+        accept_passive_unknown_check_results = pk['accept_passive_unknown_check_results']
 
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs" % (t0, time.time() - t0))
-
         self.new_conf = None
 
         # Tag the conf with our data
@@ -354,6 +354,7 @@ class Shinken(BaseSatellite):
         self.conf.push_flavor = push_flavor
         self.conf.instance_name = instance_name
         self.conf.skip_initial_broks = skip_initial_broks
+        self.conf.accept_passive_unknown_check_results = accept_passive_unknown_check_results
 
         self.cur_conf = conf
         self.override_conf = override_conf
