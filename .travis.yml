@@ -5,4 +5,4 @@ python:
 install:
   - "pip install -r shinken/dependencies"
 # command to run tests
-script: ./test/tests.sh
+script: ./test/test.sh
