@@ -22,10 +22,7 @@
 
 import sys
 import time
-import datetime
 import os
-import string
-import re
 
 try:
     import shinken
@@ -37,10 +34,6 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
 from shinken.objects.config import Config
-from shinken.objects.module import Module
-from shinken.objects.item import Item
-from shinken.modulesmanager import ModulesManager
-from shinken.basemodule import BaseModule
 from shinken.log import logger
 from shinken.modules.logstore_sqlite import get_instance as get_instance_sqlite
 from shinken.modules.logstore_mongodb import get_instance as get_instance_mongodb

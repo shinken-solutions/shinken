@@ -24,7 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from shinken.log import logger
 from shinken.util import filter_any, filter_none
 from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group, filter_host_by_template
 from shinken.util import filter_service_by_name

@@ -26,7 +26,6 @@
 import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
-import _mysql_exceptions
 
 
 from shinken.db import DB

@@ -28,7 +28,6 @@ import errno
 import time
 import socket
 import select
-import copy
 import cPickle
 import inspect
 import json

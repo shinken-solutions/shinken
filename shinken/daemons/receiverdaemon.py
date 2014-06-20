@@ -36,8 +36,8 @@ from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.external_command import ExternalCommand, ExternalCommandManager
-from shinken.http_client import HTTPClient, HTTPExceptions
-from shinken.daemon import Daemon, Interface
+from shinken.http_client import HTTPExceptions
+from shinken.daemon import Interface
 
 class IStats(Interface):
     """ 

@@ -54,15 +54,12 @@ else:
 import os
 import copy
 import time
-import sys
 import cPickle
 import traceback
-import socket
 import zlib
 import base64
 import threading
 
-from shinken.http_daemon import HTTPDaemon
 from shinken.http_client import HTTPClient, HTTPExceptions
 
 from shinken.message import Message

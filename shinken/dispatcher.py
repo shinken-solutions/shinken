@@ -33,7 +33,6 @@
 
 import time
 import random
-import itertools
 
 from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger

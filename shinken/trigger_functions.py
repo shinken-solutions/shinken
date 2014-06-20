@@ -24,13 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import os
 import re
 
-from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
-from shinken.property import (BoolProp, IntegerProp, FloatProp,
-                              CharProp, StringProp, ListProp)
 from shinken.log import logger
 
 objs = {'hosts': [], 'services': []}
