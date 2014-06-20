@@ -460,6 +460,10 @@ do_restart_() {
     return $rc
 }
 
+do_force-reload_() {
+    do_restart_ $1
+}
+
 do_reload_() {
     mod="$1"
     echo "Reloading $mod"
@@ -539,7 +543,7 @@ do_cmd_on() {
 ## Main:
 
 case "$CMD" in
-    start|stop|restart|status)
+    start|stop|restart|status|force-reload)
         do_cmd_on "$CMD" "$SUBMODULES"
         ;;
     check|checkconfig|reload)
