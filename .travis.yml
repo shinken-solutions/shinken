@@ -7,3 +7,12 @@ install:
   - "./bin/preparedev"
 # command to run tests
 script: ./test/test.sh
+
+notifications:
+  email: false
+
+  irc: 
+    channels:
+      - "chat.freenode.net#shinken"
+    on_success: always
+    on_failure: always
