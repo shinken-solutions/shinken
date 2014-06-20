@@ -40,7 +40,6 @@ class PollerLink(SatelliteLink):
     properties.update({
         'poller_name':  StringProp(fill_brok=['full_status'], to_send=True),
         'port':         IntegerProp(default=7771, fill_brok=['full_status']),
-        'passive':     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'min_workers':  IntegerProp(default='0', fill_brok=['full_status'], to_send=True),
         'max_workers':  IntegerProp(default='30', fill_brok=['full_status'], to_send=True),
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),

@@ -27,6 +27,9 @@ import os
 import time
 import traceback
 import sys
+import base64
+import zlib
+import cPickle
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -53,6 +56,15 @@ class IStats(Interface):
         return res
     get_raw_stats.doc = doc
 
+class IBroks(Interface):
+    """ Interface for Brokers:
+They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE update...) """
+
+    # A broker ask us broks
+    def get_broks(self, bname):
+        res = self.app.get_broks()
+        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+    get_broks.encode = 'raw'
 
 # Our main APP class
 class Receiver(Satellite):
@@ -84,16 +96,12 @@ class Receiver(Satellite):
         # and the unprocessed one, a buffer
         self.unprocessed_external_commands = []
 
-        # All broks to manage
-        self.broks = []  # broks to manage
-        # broks raised this turn and that need to be put in self.broks
-        self.broks_internal_raised = []
-
         self.host_assoc = {}
         self.direct_routing = False
+        self.accept_passive_unknown_check_results = False
 
         self.istats = IStats(self)
-        
+        self.ibroks = IBroks(self)
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -105,7 +113,7 @@ class Receiver(Satellite):
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
             elt.instance_id = 0
-            self.broks_internal_raised.append(elt)
+            self.broks[elt.id] = elt
             return
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
@@ -176,6 +184,7 @@ class Receiver(Satellite):
         self.name = name
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
+        self.accept_passive_unknown_check_results = conf['global']['accept_passive_unknown_check_results']
 
         g_conf = conf['global']
 
@@ -265,15 +274,14 @@ class Receiver(Satellite):
             self.external_commands.extend(self.unprocessed_external_commands)
             self.unprocessed_external_commands = []
             return
-        
+
+        commands_to_process = self.unprocessed_external_commands
+        self.unprocessed_external_commands = []
+
         # Now get all external commands and put them into the
         # good schedulers
-        for ext_cmd in self.unprocessed_external_commands:
+        for ext_cmd in commands_to_process:
             self.external_command.resolve_command(ext_cmd)
-            self.external_commands.append(ext_cmd)
-        
-        # And clean the previous one
-        self.unprocessed_external_commands = []
         
         # Now for all alive schedulers, send the commands
         for sched_id in self.schedulers:
@@ -305,15 +313,13 @@ class Receiver(Satellite):
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     raise
 
-            # If we sent or not the commands, just clean the scheduler list.
+            # Wether we sent the commands or not, clean the scheduler list
             self.schedulers[sched_id]['external_commands'] = []
-            
-            # If we sent them, remove the commands of this scheduler of the arbiter list
-            if sent:
-                # and remove them from the list for the arbiter (if not, we will send it twice
+
+            # If we didn't send them, add the commands to the arbiter list
+            if not sent:
                 for extcmd in extcmds:
-                    self.external_commands.remove(extcmd)
-            
+                    self.external_commands.append(extcmd)
 
     def do_loop_turn(self):
         sys.stdout.write(".")
@@ -363,13 +369,19 @@ class Receiver(Satellite):
 
             self.uri3 = self.http_daemon.register(self.istats)
 
+            # Register ibroks
+            if self.ibroks is not None:
+                logger.debug("Deconnecting previous Broks Interface")
+                self.http_daemon.unregister(self.ibroks)
+            # Create and connect it
+            self.http_daemon.register(self.ibroks)
+
             #  We wait for initial conf
             self.wait_for_initial_conf()
             if not self.new_conf:
                 return
 
             self.setup_new_conf()
-
             self.modules_manager.set_modules(self.modules)
             self.do_load_modules()
             # and start external modules too
