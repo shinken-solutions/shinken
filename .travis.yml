@@ -4,5 +4,6 @@ python:
 # command to install dependencies
 install:
   - "pip install -r shinken/dependencies"
+  - "./bin/preparedev"
 # command to run tests
 script: ./test/test.sh
