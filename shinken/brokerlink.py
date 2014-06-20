@@ -30,18 +30,7 @@ from shinken.property import IntegerProp, StringProp
 class BrokerLink(SatelliteLink):
     """TODO: Add some comment about this class for the doc"""
     id = 0
-    my_type = 'broker'
-    properties = SatelliteLink.properties.copy()
-    properties.update({
-        'broker_name': StringProp(fill_brok=['full_status'], to_send=True),
-        'port': IntegerProp(default='7772', fill_brok=['full_status']),
-    })
-
-    def get_name(self):
-        return self.broker_name
-
-    def register_to_my_realm(self):
-        self.realm.brokers.append(self)
+    m       self.realm.brokers.append(self)
 
 
 class BrokerLinks(SatelliteLinks):
