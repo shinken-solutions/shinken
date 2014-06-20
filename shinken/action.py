@@ -36,7 +36,6 @@ try:
 except ImportError:
     fcntl = None
 
-from shinken.util import safe_print
 from shinken.log import logger
 
 __all__ = ('Action')

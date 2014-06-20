@@ -25,7 +25,7 @@
 
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 from shinken.http_client import HTTPExceptions
 

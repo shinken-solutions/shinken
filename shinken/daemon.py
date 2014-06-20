@@ -31,9 +31,7 @@ import signal
 import select
 import random
 import ConfigParser
-import json
 import threading
-import inspect
 import traceback
 import cStringIO
 import logging

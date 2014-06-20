@@ -32,7 +32,7 @@ except ImportError:
     json = None
 
 from shinken.objects.item import Item, Items
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import StringProp
 from shinken.log import logger
 
 

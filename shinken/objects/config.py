@@ -32,7 +32,6 @@
 import re
 import sys
 import string
-import copy
 import os
 import socket
 import itertools
@@ -67,8 +66,8 @@ from discoveryrule import Discoveryrule, Discoveryrules
 from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
-from trigger import Trigger, Triggers
-from pack import Pack, Packs
+from trigger import Triggers
+from pack import Packs
 
 from shinken.util import split_semicolon
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks

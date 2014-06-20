@@ -24,9 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.action import Action
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
-from shinken.property import CharProp, StringProp, ListProp
-from shinken.autoslots import AutoSlots
+from shinken.property import BoolProp, IntegerProp, FloatProp
+from shinken.property import StringProp
 
 
 class Check(Action):

@@ -25,7 +25,7 @@
 import os
 
 from shinken.objects import Host
-from shinken.log import logger, cprint
+from shinken.log import logger
 
 # Will be populated by the shinken CLI command
 CONFIG = None

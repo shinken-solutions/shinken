@@ -24,10 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import socket
 
-import json
-import zlib
 import cPickle
 
 from shinken.util import get_obj_name_two_args_and_void

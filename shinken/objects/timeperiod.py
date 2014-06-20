@@ -87,7 +87,6 @@
 
 import time
 import re
-import string
 
 from item import Item, Items
 

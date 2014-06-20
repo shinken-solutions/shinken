@@ -34,7 +34,6 @@ import re
 import random
 import time
 import traceback
-from datetime import datetime
 
 from item import Item
 

@@ -26,12 +26,9 @@
 import time
 import os
 import cStringIO
-import sys
 import tempfile
 import traceback
-import json
 import cPickle
-import zlib
 from Queue import Empty
 
 from shinken.external_command import ExternalCommand
