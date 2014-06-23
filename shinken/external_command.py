@@ -388,9 +388,9 @@ class ExternalCommandManager:
     @staticmethod
     def get_unknown_check_result_brok(cmd_line):
 
-        match = re.match('^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;([^\;]*);([^\;]*);([^\;]*);(.*)', cmd_line)
+        match = re.match('^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;([^\;]*);([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
         if not match:
-            match = re.match('^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;([^\;]*);([^\;]*);(.*)', cmd_line)
+            match = re.match('^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
 
         if not match:
             return None
@@ -404,9 +404,11 @@ class ExternalCommandManager:
             data['service_description'] = match.group(4)
             data['return_code'] = match.group(5)
             data['output'] = match.group(6)
+            data['perf_data'] = match.group(7)
         else:
             data['return_code'] = match.group(4)
             data['output'] = match.group(5)
+            data['perf_data'] = match.group(6)
 
         b = Brok('unknown_%s_check_result' % match.group(2).lower(), data)
 
