@@ -504,6 +504,9 @@ class ExternalCommandManager:
                         h = self.hosts.find_by_name(val)
                         if h is not None:
                             args.append(h)
+                        elif self.conf.accept_passive_unknown_check_results:
+                            b = self.get_unknown_check_result_brok(command)
+                            self.sched.add_Brok(b)
 
                     elif type_searched == 'contact':
                         c = self.contacts.find_by_name(val)
