@@ -168,25 +168,25 @@ class TestConfig(ShinkenTest):
     def test_unknown_check_result_brok(self):
         # unknown_host_check_result_brok
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy'
-        expected = {'time_stamp': '1234567890', 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': None}
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': None}
         result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
         self.assertEqual(expected, result)
 
         # unknown_host_check_result_brok with perfdata
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999'
-        expected = {'time_stamp': '1234567890', 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': 'rtt=9999'}
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': 'rtt=9999'}
         result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
         self.assertEqual(expected, result)
 
         # unknown_service_check_result_brok
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;host-checked;0;Everything OK'
-        expected = {'time_stamp': '1234567890', 'return_code': '0', 'host_name': 'host-checked', 'output': 'Everything OK', 'perf_data': None}
+        expected = {'time_stamp': 1234567890, 'return_code': '0', 'host_name': 'host-checked', 'output': 'Everything OK', 'perf_data': None}
         result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
         self.assertEqual(expected, result)
 
         # unknown_service_check_result_brok with perfdata
         excmd = '[1234567890] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000'
-        expected = {'host_name': 'test_host_0', 'time_stamp': '1234567890', 'service_description': 'test_ok_0', 'return_code': '1', 'output': 'Bobby is not happy', 'perf_data': 'rtt=9999;5;10;0;10000'}
+        expected = {'host_name': 'test_host_0', 'time_stamp': 1234567890, 'service_description': 'test_ok_0', 'return_code': '1', 'output': 'Bobby is not happy', 'perf_data': 'rtt=9999;5;10;0;10000'}
         result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
         self.assertEqual(expected, result)
 

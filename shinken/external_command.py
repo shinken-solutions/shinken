@@ -396,7 +396,7 @@ class ExternalCommandManager:
             return None
 
         data = {
-            'time_stamp': match.group(1),
+            'time_stamp': int(match.group(1)),
             'host_name': match.group(3),
         }
 
