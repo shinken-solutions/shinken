@@ -45,6 +45,7 @@ from shinken.brok import Brok
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
+from shinken.daemons.receiverdaemon import Receiver
 from logging import ERROR
 
 # Modules are by default on the ../modules
