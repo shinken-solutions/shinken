@@ -129,8 +129,6 @@ class TestConfig(ShinkenTest):
         self.assert_(host.perf_data == 'rtt=9999')
 
     def test_unknown_check_result_command(self):
-        self.sched.conf.accept_passive_unknown_check_results = True
-
         # Sched receives known host but unknown service service_check_result
         self.sched.broks.clear()
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
