@@ -24,7 +24,9 @@
 #
 
 from shinken_test import *
+from shinken.external_command import ExternalCommandManager
 import os
+import cPickle
 
 
 class TestConfig(ShinkenTest):
@@ -126,7 +128,67 @@ class TestConfig(ShinkenTest):
         self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
         self.assert_(host.perf_data == 'rtt=9999')
 
+    def test_unknown_check_result_command(self):
+        self.sched.conf.accept_passive_unknown_check_results = True
 
+        # Sched receives known host but unknown service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Sched receives unknown host and service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;unknownhost;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Sched receives unknown host host_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;unknownhost;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_host_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Now turn it off...
+        self.sched.conf.accept_passive_unknown_check_results = False
+
+        # Sched receives known host but unknown service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 0)
+        log_found = self.log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
+        self.clear_logs()
+        self.assertTrue(log_found)
+
+    def test_unknown_check_result_brok(self):
+        # unknown_host_check_result_brok
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy'
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': None}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_host_check_result_brok with perfdata
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999'
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': 'rtt=9999'}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_service_check_result_brok
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;host-checked;0;Everything OK'
+        expected = {'time_stamp': 1234567890, 'return_code': '0', 'host_name': 'host-checked', 'output': 'Everything OK', 'perf_data': None}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_service_check_result_brok with perfdata
+        excmd = '[1234567890] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000'
+        expected = {'host_name': 'test_host_0', 'time_stamp': 1234567890, 'service_description': 'test_ok_0', 'return_code': '1', 'output': 'Bobby is not happy', 'perf_data': 'rtt=9999;5;10;0;10000'}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
 
 
 if __name__ == '__main__':

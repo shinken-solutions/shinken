@@ -80,9 +80,10 @@ class Broker(BaseSatellite):
         # Our arbiters
         self.arbiters = {}
 
-        # Our pollers and reactionners
+        # Our pollers, reactionners and receivers
         self.pollers = {}
         self.reactionners = {}
+        self.receivers = {}
 
         # Modules are load one time
         self.have_modules = False
@@ -150,8 +151,12 @@ class Broker(BaseSatellite):
 
     # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
-        t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
-             'poller': self.pollers, 'reactionner': self.reactionners}
+        t = {'scheduler': self.schedulers,
+             'arbiter': self.arbiters,
+             'poller': self.pollers,
+             'reactionner': self.reactionners,
+             'receiver': self.receivers
+             }
         if type in t:
             return t[type]
         return None
@@ -321,7 +326,6 @@ class Broker(BaseSatellite):
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
-
                     # Ok, we can add theses broks to our queues
                     self.add_broks_to_queue(tmp_broks.values())
 
@@ -523,6 +527,36 @@ class Broker(BaseSatellite):
 
         logger.info("We have our reactionners: %s" % self.reactionners)
 
+        # Now receivers
+        for rec_id in conf['receivers']:
+            #Must look if we already have it
+            already_got = rec_id in self.receivers
+            if already_got:
+                broks = self.receivers[rec_id]['broks']
+                running_id = self.schedulers[sched_id]['running_id']
+            else:
+                broks = {}
+                running_id = 0
+
+            r = conf['receivers'][rec_id]
+            self.receivers[rec_id] = r
+
+            # replacing reactionner address and port by those defined in satellitemap
+            if r['name'] in g_conf['satellitemap']:
+                r = dict(r)  # make a copy
+                r.update(g_conf['satellitemap'][r['name']])
+
+            proto = 'http'
+            if r['use_ssl']:
+                 proto = 'https'
+            uri = '%s://%s:%s/' % (proto, r['address'], r['port'])
+            self.receivers[rec_id]['uri'] = uri
+
+            self.receivers[rec_id]['broks'] = broks
+            self.receivers[rec_id]['instance_id'] = 0  # No use so all to 0
+            self.receivers[rec_id]['running_id'] = running_id
+            self.receivers[rec_id]['last_connection'] = 0
+
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
@@ -617,6 +651,7 @@ class Broker(BaseSatellite):
         # And for other satellites
         self.get_new_broks(type='poller')
         self.get_new_broks(type='reactionner')
+        self.get_new_broks(type='receiver')
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)

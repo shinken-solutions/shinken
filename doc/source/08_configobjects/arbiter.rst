@@ -19,20 +19,21 @@ Definition Format
 Variables in red are required, while those in black are optional. However, you need to supply at least one optional variable in each definition for it to be of much use.
 
 
-================== ================================================================
-define arbiter{                                                                    
-arbiter_name       *arbiter_name*                                                  
-address            *dns name of ip address*                                        
-host_name          *hostname*                                                      
-port               *port*                                                          
-spare              //[0/1]//                                                       
-modules            *modules*                                                       
-timeout            *number of seconds to block the arbiter waiting for an answer*  
-data_timeout       *seconds to wait when sending data to another satellite(daemon)*
-max_check_attempts *number*                                                        
-check_interval     *seconds to wait before issuing a new check*                    
-}                                                                                  
-================== ================================================================
+==================================== =================================================================
+define arbiter{                                                                     
+arbiter_name                          *arbiter_name*                                                  
+address                               *dns name of ip address*                                        
+host_name                             *hostname*                                                      
+port                                  *port*                                                          
+spare                                 //[0/1]//                                                       
+modules                               *modules*                                                       
+timeout                               *number of seconds to block the arbiter waiting for an answer*  
+data_timeout                          *seconds to wait when sending data to another satellite(daemon)*
+max_check_attempts                    *number*                                                        
+check_interval                        *seconds to wait before issuing a new check*                    
+accept_passive_unknown_check_results  //[0/1]//
+}
+==================================== =================================================================
 
 
 Example Definition: 
@@ -82,3 +83,6 @@ max_check_attempts
 
 check_interval
   Ping node every N seconds. 60 seconds by default.
+
+accept_passive_unknown_check_results
+  If this is enabled, the arbiter will accept passive check results for unconfigured hosts and will generate unknown host/service check result broks.

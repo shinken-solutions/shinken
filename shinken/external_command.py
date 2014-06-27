@@ -25,6 +25,7 @@
 
 import os
 import time
+import re
 
 from shinken.util import to_int, to_bool, split_semicolon
 from shinken.downtime import Downtime
@@ -34,6 +35,7 @@ from shinken.commandcall import CommandCall
 from shinken.log import logger, naglog_result
 from shinken.pollerlink import PollerLink
 from shinken.eventhandler import EventHandler
+from shinken.brok import Brok
 
 MODATTR_NONE = 0
 MODATTR_NOTIFICATIONS_ENABLED = 1
@@ -350,34 +352,67 @@ class ExternalCommandManager:
     # the command
     def search_host_and_dispatch(self, host_name, command, extcmd):
         logger.debug("Calling search_host_and_dispatch for %s" % host_name)
+        host_found = False
 
         # If we are a receiver, just look in the receiver 
         if self.mode == 'receiver':
             logger.info("Receiver looking a scheduler for the external command %s %s" % (host_name, command))
             sched = self.receiver.get_sched_from_hname(host_name)
-            logger.debug("Receiver found a scheduler: %s" % (sched))
             if sched:
-                logger.info("Receiver pushing external command to scheduler %s" % (sched))
+                host_found = True
+                logger.debug("Receiver found a scheduler: %s" % sched)
+                logger.info("Receiver pushing external command to scheduler %s" % sched)
                 sched['external_commands'].append(extcmd)
-            return
-        
-        host_found = False
-        for cfg in self.confs.values():
-            if cfg.hosts.find_by_name(host_name) is not None:
-                logger.debug("Host %s found in a configuration" % host_name)
-                if cfg.is_assigned:
-                    host_found = True
-                    sched = cfg.assigned_to
-                    logger.debug("Sending command to the scheduler %s" % sched.get_name())
-                    #sched.run_external_command(command)
-                    sched.external_commands.append(command)
-                    break
-                else:
-                    logger.warning("Problem: a configuration is found, but is not assigned!")
-
+        else:
+            for cfg in self.confs.values():
+                if cfg.hosts.find_by_name(host_name) is not None:
+                    logger.debug("Host %s found in a configuration" % host_name)
+                    if cfg.is_assigned:
+                        host_found = True
+                        sched = cfg.assigned_to
+                        logger.debug("Sending command to the scheduler %s" % sched.get_name())
+                        #sched.run_external_command(command)
+                        sched.external_commands.append(command)
+                        break
+                    else:
+                        logger.warning("Problem: a configuration is found, but is not assigned!")
         if not host_found:
-            logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
-            #print "Sorry but the host", host_name, "was not found"
+            if getattr(self, 'receiver', getattr(self, 'arbiter', None)).accept_passive_unknown_check_results:
+                b = self.get_unknown_check_result_brok(command)
+                getattr(self, 'receiver', getattr(self, 'arbiter', None)).add(b)
+            else:
+                logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
+
+    # Takes a PROCESS_SERVICE_CHECK_RESULT
+    #  external command line and returns an unknown_[type]_check_result brok
+    @staticmethod
+    def get_unknown_check_result_brok(cmd_line):
+
+        match = re.match('^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;([^\;]*);([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
+        if not match:
+            match = re.match('^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
+
+        if not match:
+            return None
+
+        data = {
+            'time_stamp': int(match.group(1)),
+            'host_name': match.group(3),
+        }
+
+        if match.group(2) == 'SERVICE':
+            data['service_description'] = match.group(4)
+            data['return_code'] = match.group(5)
+            data['output'] = match.group(6)
+            data['perf_data'] = match.group(7)
+        else:
+            data['return_code'] = match.group(4)
+            data['output'] = match.group(5)
+            data['perf_data'] = match.group(6)
+
+        b = Brok('unknown_%s_check_result' % match.group(2).lower(), data)
+
+        return b
 
 
     # The command is global, so sent it to every schedulers
@@ -471,6 +506,9 @@ class ExternalCommandManager:
                         h = self.hosts.find_by_name(val)
                         if h is not None:
                             args.append(h)
+                        elif self.conf.accept_passive_unknown_check_results:
+                            b = self.get_unknown_check_result_brok(command)
+                            self.sched.add_Brok(b)
 
                     elif type_searched == 'contact':
                         c = self.contacts.find_by_name(val)
@@ -541,7 +579,10 @@ class ExternalCommandManager:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
-                    else:  # error, must be logged
+                    elif self.conf.accept_passive_unknown_check_results:
+                        b = self.get_unknown_check_result_brok(command)
+                        self.sched.add_Brok(b)
+                    else:
                         logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
