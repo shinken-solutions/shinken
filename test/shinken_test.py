@@ -219,6 +219,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         e2 = ExternalCommandManager(self.conf, 'dispatcher')
         e2.load_arbiter(self)
         self.external_command_dispatcher = e2
+        self.sched.conf.accept_passive_unknown_check_results = True
 
         self.sched.schedule()
 
