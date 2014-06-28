@@ -6,4 +6,4 @@ install:
   - "pip install -r shinken/dependencies"
   - "./bin/preparedev"
 # command to run tests
-script: ./test/test.sh
+script: ./test/quick_tests.sh
