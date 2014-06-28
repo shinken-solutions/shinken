@@ -128,7 +128,8 @@ class TestConfig(ShinkenTest):
         self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
         self.assert_(host.perf_data == 'rtt=9999')
 
-    def test_unknown_check_result_command(self):
+    # Tests sending passive check results for unconfigured hosts to a scheduler
+    def test_unknown_check_result_command_scheduler(self):
         self.sched.conf.accept_passive_unknown_check_results = True
 
         # Sched receives known host but unknown service service_check_result
@@ -164,6 +165,30 @@ class TestConfig(ShinkenTest):
         log_found = self.log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
         self.clear_logs()
         self.assertTrue(log_found)
+
+    #Tests sending passive check results for unconfigured hosts to a receiver
+    def test_unknown_check_result_command_receiver(self):
+        receiverdaemon = Receiver(None, False, False, False, None)
+        receiverdaemon.direct_routing = True
+        receiverdaemon.accept_passive_unknown_check_results = True
+
+        # Receiver receives unknown host external command
+        excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
+        receiverdaemon.unprocessed_external_commands.append(excmd)
+        receiverdaemon.push_external_commands_to_schedulers()
+        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertEqual(len(broks), 1)
+
+        # now turn it off...
+        receiverdaemon.accept_passive_unknown_check_results = False
+
+        excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
+        receiverdaemon.unprocessed_external_commands.append(excmd)
+        receiverdaemon.push_external_commands_to_schedulers()
+        receiverdaemon.broks.clear()
+        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertEqual(len(broks), 0)
+
 
     def test_unknown_check_result_brok(self):
         # unknown_host_check_result_brok
