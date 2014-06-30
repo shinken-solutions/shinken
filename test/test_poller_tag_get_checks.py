@@ -27,6 +27,7 @@ from shinken_test import *
 
 class TestPollerTagGetchecks(ShinkenTest):
     def setUp(self):
+        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_poller_tag_get_checks.cfg')
 
     def test_good_checks_get_only_tags_with_specific_tags(self):

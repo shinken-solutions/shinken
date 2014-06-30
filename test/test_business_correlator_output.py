@@ -23,12 +23,13 @@
 #
 
 import time
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, time_hacker
 
 
 class TestBusinesscorrelOutput(ShinkenTest):
 
     def setUp(self):
+        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_business_correlator_output.cfg')
 
     def test_service_shorten_status(self):

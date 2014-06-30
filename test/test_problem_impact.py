@@ -27,6 +27,7 @@ from shinken_test import *
 
 class TestProblemImpact(ShinkenTest):
     def setUp(self):
+        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_problem_impact.cfg')
 
     def test_problems_impacts(self):

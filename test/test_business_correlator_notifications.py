@@ -23,12 +23,13 @@
 #
 
 import time
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, time_hacker
 
 
 class TestBusinesscorrelNotifications(ShinkenTest):
 
     def setUp(self):
+        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_business_correlator_notifications.cfg')
 
     def test_bprule_standard_notifications(self):
