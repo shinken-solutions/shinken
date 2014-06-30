@@ -103,6 +103,12 @@ class Receiver(Satellite):
         self.istats = IStats(self)
         self.ibroks = IBroks(self)
 
+        # Now create the external commander. It's just here to dispatch
+        # the commands to schedulers
+        e = ExternalCommandManager(None, 'receiver')
+        e.load_receiver(self)
+        self.external_command = e
+
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
@@ -255,15 +261,6 @@ class Receiver(Satellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
-
-
-        # Now create the external commander. It's just here to dispatch
-        # the commands to schedulers
-        e = ExternalCommandManager(None, 'receiver')
-        e.load_receiver(self)
-        self.external_command = e
-
-
 
     # Take all external commands, make packs and send them to
     # the schedulers

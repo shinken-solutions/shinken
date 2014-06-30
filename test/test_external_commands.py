@@ -172,12 +172,6 @@ class TestConfig(ShinkenTest):
         receiverdaemon.direct_routing = True
         receiverdaemon.accept_passive_unknown_check_results = True
 
-        # Now create the external commander. It's just here to dispatch
-        # the commands to schedulers. Pasted from setup_new_conf()
-        e = ExternalCommandManager(None, 'receiver')
-        e.load_receiver(receiverdaemon)
-        receiverdaemon.external_command = e
-
         # Receiver receives unknown host external command
         excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
         receiverdaemon.unprocessed_external_commands.append(excmd)
