@@ -397,8 +397,7 @@ class Scheduler:
         # We do not just del them in the check list, but also in their service/host
         # We want id of lower than max_id - 2*max_checks
         if len(self.checks) > max_checks:
-            id_max = self.checks.keys()[-1]  # The max id is the last id
-                                            #: max is SO slow!
+            id_max = max(self.checks.keys())  # keys does not ensure sorted keys. Max is slow but we have no other way.
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
@@ -425,7 +424,7 @@ class Scheduler:
             b_lists.append(e['broks'])
         for broks in b_lists:
             if len(broks) > max_broks:
-                id_max = broks.keys()[-1]
+                id_max = max(broks.keys())
                 id_to_del_broks = [i for i in broks if i < id_max - max_broks]
                 nb_broks_drops = len(id_to_del_broks)
                 for i in id_to_del_broks:
@@ -434,7 +433,7 @@ class Scheduler:
                 nb_broks_drops = 0
 
         if len(self.actions) > max_actions:
-            id_max = self.actions.keys()[-1]
+            id_max = max(self.actions.keys())
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
