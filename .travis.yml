@@ -6,4 +6,4 @@ install:
   - "pip install -r shinken/dependencies"
   - "./bin/preparedev"
 # command to run tests
-script: ./test/quick_tests.sh
+script: cd test && nosetests -x -s -v --process-restartworker --processes=1 --process-timeout=999999999
