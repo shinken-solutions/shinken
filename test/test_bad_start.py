@@ -106,28 +106,29 @@ class template_Daemon_Bad_Start():
         d = self.get_daemon()
         d.workdir = tempfile.mkdtemp()
         d.pidfile = os.path.join('/DONOTEXISTS', "daemon.pid")
-        #f = open(d.pidfile, "w")
-        #f.close()
-        #os.chmod(d.pidfile, 0)
+        prev_dir = os.getcwd()
         self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start)
-        #os.unlink(d.pidfile)
         os.rmdir(d.workdir)
+        os.chdir(prev_dir)
 
     def test_bad_workdir(self):
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         d = self.get_daemon()
         d.workdir = '/DONOTEXISTS'
-        #os.chmod(d.workdir, 0)
+        prev_dir = os.getcwd()
         self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start)
         d.do_stop()
-        #os.rmdir(d.workdir)
+        os.chdir(prev_dir)
 
     def test_port_not_free(self):
         print("Testing port not free ... mypid=%d" % (os.getpid()))
         d1 = self.get_daemon()
         d1.workdir = tempfile.mkdtemp()
+        prev_dir = os.getcwd()  # We have to remember where we are to get back after
         d1.do_daemon_init_and_start()
-        os.unlink(d1.pidfile)  ## so that second poller will not see first started poller
+        new_dir = os.getcwd()  # We have to remember this one also
+        os.chdir(prev_dir)
+        os.unlink(os.path.join(new_dir, d1.pidfile))  ## so that second poller will not see first started poller
         d2 = self.get_daemon()
         d2.workdir = d1.workdir
         # TODO: find a way in Pyro4 to get the port
@@ -143,6 +144,7 @@ class template_Daemon_Bad_Start():
         if hasattr(d1, 'local_log'):
             os.unlink(os.path.join(d1.workdir, d1.local_log))
         os.rmdir(d1.workdir)
+        os.chdir(prev_dir)  # Back to previous dir for next test!
 
 
 class Test_Broker_Bad_Start(template_Daemon_Bad_Start, ShinkenTest):
