@@ -4,6 +4,9 @@ Presentation of the Shinken project
 
 Welcome to the Shinken project.
 
+.. image:: https://pypip.in/version/Shinken/badge.svg
+    :target: https://pypi.python.org/pypi//Shinken/
+    :alt: Version
 .. image:: https://travis-ci.org/naparuba/shinken.svg
   :target: https://travis-ci.org/naparuba/shinken
 
