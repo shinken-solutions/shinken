@@ -28,10 +28,10 @@ import sys
 from shinken_test import *
 from shinken.action import Action
 
-time_hacker.set_real_time()
-
 class TestAction(ShinkenTest):
-    # setUp is inherited from ShinkenTest
+    def setUp(self):
+        time_hacker.set_real_time()
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def wait_finished(self, a, size=8012):
         start = time.time()
