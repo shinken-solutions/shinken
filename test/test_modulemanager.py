@@ -29,8 +29,8 @@ time_hacker.set_real_time()
 
 class TestModuleManager(ShinkenTest):
     def setUp(self):
-        time_hacker.set_real_time()
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+        time_hacker.set_real_time()
 
     # Try to see if the module manager can manage modules
     def test_modulemanager(self):

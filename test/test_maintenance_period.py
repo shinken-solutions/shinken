@@ -31,7 +31,6 @@ from shinken.objects.timeperiod import Timeperiod
 class TestMaintPeriod(ShinkenTest):
 
     def setUp(self):
-        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_maintenance_period.cfg')
 
     def test_check_defined_maintenance_period(self):

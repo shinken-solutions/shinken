@@ -33,7 +33,6 @@ PROFILE_BP_RULE_RE_PROCESSING = False
 class TestBusinesscorrelExpand(ShinkenTest):
 
     def setUp(self):
-        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_business_correlator_expand_expression.cfg')
 
     def test_hostgroup_expansion_bprule_simple_host_srv(self):
