@@ -107,6 +107,7 @@ class TimeHacker(object):
 
 #Time hacking for every test!
 time_hacker = TimeHacker()
+time_hacker.set_my_time()
 
 
 class Pluginconf(object):
