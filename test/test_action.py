@@ -30,8 +30,8 @@ from shinken.action import Action
 
 class TestAction(ShinkenTest):
     def setUp(self):
-        time_hacker.set_real_time()
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+        time_hacker.set_real_time()
 
     def wait_finished(self, a, size=8012):
         start = time.time()

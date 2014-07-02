@@ -28,7 +28,6 @@ from shinken_test import *
 class TestBusinessRulesBadRealmConf(ShinkenTest):
 
     def setUp(self):
-        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_business_rules_bad_realm_conf.cfg')
 
     def test_bad_conf(self):

@@ -24,13 +24,12 @@
 
 from shinken_test import *
 
-time_hacker.set_real_time()
 
 class TestEscalations(ShinkenTest):
 
     def setUp(self):
-        time_hacker.set_real_time()
         self.setup_with_file('etc/shinken_escalations.cfg')
+        time_hacker.set_real_time()
 
     def test_simple_escalation(self):
         self.print_header()

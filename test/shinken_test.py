@@ -107,7 +107,6 @@ class TimeHacker(object):
 
 #Time hacking for every test!
 time_hacker = TimeHacker()
-time_hacker.set_my_time()
 
 
 class Pluginconf(object):
@@ -146,10 +145,10 @@ class _Unittest2CompatMixIn:
 
 class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
     def setUp(self):
-        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
+        time_hacker.set_my_time()
         self.print_header()
         # i am arbiter-like
         self.broks = {}

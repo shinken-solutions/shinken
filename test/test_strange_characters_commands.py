@@ -29,8 +29,8 @@ from shinken_test import *
 
 class TestStrangeCaracterInCommands(ShinkenTest):
     def setUp(self):
-        time_hacker.set_real_time()
         self.setup_with_file('etc/shinken_strange_characters_commands.cfg')
+        time_hacker.set_real_time()
 
     # Try to call check dummy with very strange caracters and co, see if it run or
     # failed badly

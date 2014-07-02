@@ -36,8 +36,8 @@ modconf = Module()
 class TestTimeout(ShinkenTest):
     def setUp(self):
         # we have an external process, so we must un-fake time functions
-        time_hacker.set_real_time()
         self.setup_with_file('etc/shinken_check_timeout.cfg')
+        time_hacker.set_real_time()
 
     def test_notification_timeout(self):
         if os.name == 'nt':

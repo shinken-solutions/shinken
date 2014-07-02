@@ -115,7 +115,6 @@ class BadBroker(BrokerLink):
 
 class TestPollerAddition(ShinkenTest):
     def setUp(self):
-        time_hacker.set_my_time()
         self.setup_with_file('etc/shinken_dispatcher.cfg')
 
     def test_simple_dispatch_and_addition(self):
