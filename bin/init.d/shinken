@@ -509,13 +509,14 @@ do_check_() {
     echo "Doing config check"
     output=$(do_check "$1" 2>&1)
     rc=$?
+    check_res_file=$(mktemp /tmp/shinken_checkconfig_resultXXXXXXXX)
+    echo "$output" > "$check_res_file"
+    mv $check_res_file /tmp/shinken_checkconfig_result
+    check_res_file="/tmp/shinken_checkconfig_result"
+
     if [ $rc -eq 0 ]; then
         echo_success
     else
-        check_res_file=$(mktemp /tmp/shinken_checkconfig_resultXXXXXXXX)
-        echo "$output" > "$check_res_file"
-        mv $check_res_file /tmp/shinken_checkconfig_result
-        check_res_file="/tmp/shinken_checkconfig_result"
         output=$(echo "$output" | tail -1)
         log_warning_msg "full result is in ${check_res_file}"
         log_failure_msg "ConfigCheck failed: $output"
