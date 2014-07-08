@@ -455,7 +455,8 @@ class Daemon(object):
 
         self.debug_output.append("Replacing previous instance %d" % pid)
         try:
-            os.kill(pid, signal.SIGQUIT)
+            pgid = os.getpgid(pid)
+            os.killpg(pgid, signal.SIGQUIT)
         except os.error as err:
             if err.errno != errno.ESRCH:
                 raise
