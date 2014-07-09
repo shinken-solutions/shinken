@@ -358,11 +358,12 @@ class HTTPDaemon(object):
                             if need_lock:
                                 lock.release()
                         calling_time = time.time() - t0
+                        real_calling_time = calling_time - aqu_lock_time
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
                         json_time = time.time() - t0
-                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s]" % (
-                                fname, args_time, aqu_lock_time, calling_time, json_time) )
+                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [real_calling:%s ] [calling:%s] [json:%s]" % (
+                                fname, args_time, aqu_lock_time, real_calling_time, calling_time, json_time) )
                         
                         return j
                     # Ok now really put the route in place
