@@ -1486,7 +1486,7 @@ class Config(Item):
                 logger.info('\tChecked %d %s' % (len(cur), x))
 
         # Hosts got a special check for loops
-        if not self.hosts.no_loop_in_parents():
+        if not self.hosts.no_loop_in_parents("self", "parents"):
             r = False
             logger.error("Hosts: detected loop in parents ; conf incorrect")
 

@@ -1198,3 +1198,64 @@ class Items(object):
         for i in self:
             i.explode_trigger_string_into_triggers(triggers)
 
+    # Parent graph: use to find quickly relations between all item, and loop
+    # return True if there is a loop
+    def no_loop_in_parents(self, attr1, attr2):
+        """Find loop in dependencies.
+        For now, used with the following attributes :
+            (self, parents) => host dependencies from host object
+            (host_name, dependent_host_name) => host dependencies from hostdependencies object
+            (service_description, dependent_service_description) => service dependencies from servicedependencies object
+        """
+
+        # Ok, we say "from now, no loop :) "
+        r = True
+
+        # Create parent graph
+        parents = Graph()
+
+        # Start with all items as nodes
+        for item in self:
+            # Hack to get self here. Used when looping on host and host parent's
+            if attr1 == "self":
+                obj = item          # obj is a host/service [list]
+            else:
+                obj = getattr(item, attr1, None)
+            if obj is not None:
+                if isinstance(obj, list):
+                    for sobj in obj:
+                        parents.add_node(sobj)
+                else:
+                    parents.add_node(obj)
+
+        # And now fill edges
+        for item in self:
+            if attr1 == "self":
+                obj1 = item
+            else:
+                obj1 = getattr(item, attr1, None)
+            obj2 = getattr(item, attr2, None)
+            if obj2 is not None:
+                if isinstance(obj2, list):
+                    for sobj2 in obj2:
+                        if isinstance(obj1, list):
+                            for sobj1 in obj1:
+                                parents.add_edge(sobj1, sobj2)
+                        else:
+                            parents.add_edge(obj1, sobj2)
+                else:
+                    if isinstance(obj1, list):
+                        for sobj1 in obj1:
+                            parents.add_edge(sobj1, obj2)
+                    else:
+                        parents.add_edge(obj1, obj2)
+
+        # Now get the list of all item in a loop
+        items_in_loops = parents.loop_check()
+
+        # and raise errors about it
+        for item in items_in_loops:
+            logger.error("The %s object '%s'  is part of a circular parent/child chain!" % (item.my_type, item.get_name()))
+            r = False
+
+        return r

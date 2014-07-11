@@ -26,6 +26,7 @@
 from item import Item, Items
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
+from shinken.graph import Graph
 
 
 class Servicedependency(Item):
@@ -264,3 +265,7 @@ class Servicedependencies(Items):
         # self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
+
+    def is_correct(self):
+        r = super(Servicedependencies, self).is_correct()
+        return r and self.no_loop_in_parents("service_description", "dependent_service_description")

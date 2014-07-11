@@ -1146,37 +1146,6 @@ class Hosts(Items):
         for h in self:
             h.fill_parents_dependency()
 
-
-    # Parent graph: use to find quickly relations between all host, and loop
-    # return True if there is a loop
-    def no_loop_in_parents(self):
-        # Ok, we say "from now, no loop :) "
-        r = True
-
-        # Create parent graph
-        parents = Graph()
-
-        # With all hosts as nodes
-        for h in self:
-            if h is not None:
-                parents.add_node(h)
-
-        # And now fill edges
-        for h in self:
-            for p in h.parents:
-                if p is not None:
-                    parents.add_edge(p, h)
-
-        # Now get the list of all hosts in a loop
-        host_in_loops = parents.loop_check()
-
-        # and raise errors about it
-        for h in host_in_loops:
-            logger.error("The host '%s' is part of a circular parent/child chain!" % h.get_name())
-            r = False
-
-        return r
-
     # Return a list of the host_name of the hosts
     # that got the template with name=tpl_name or inherit from
     # a template that use it

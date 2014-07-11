@@ -191,3 +191,7 @@ class Hostdependencies(Items):
         # self.apply_implicit_inheritance(hosts)
         for h in self:
             h.get_customs_properties_by_inheritance(self)
+
+    def is_correct(self):
+        r = super(Hostdependencies, self).is_correct()
+        return r and self.no_loop_in_parents("host_name", "dependent_host_name")
