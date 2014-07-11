@@ -72,6 +72,7 @@ export LANG=en_US.UTF8
 export LC_ALL=en_US.UTF8
 export PYTHONIOENCODING=utf8
 export PYTHONUNBUFFERED="0"
+export TZ=:/etc/localtime
 
 # We try to find the LAST possible Python VERSION
 pythonver() {
