@@ -1,6 +1,6 @@
 #!/bin/bash
 #set -x
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    David GUENAULT, dguenault@monitoring-fr.org
