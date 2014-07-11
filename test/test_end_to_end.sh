@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #
