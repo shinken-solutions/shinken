@@ -1253,7 +1253,7 @@ class Services(Items):
                 if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:
-                        servicegroups.add_member(shname+','+sname, sg)
+                        servicegroups.add_member(shname+','+sname, sg.strip())
 
 
         # Now we explode service_dependencies into Servicedependency
