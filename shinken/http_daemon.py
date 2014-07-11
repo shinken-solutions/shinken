@@ -75,7 +75,6 @@ class CherryPyServer(bottle.ServerAdapter):
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
 
-
         if use_ssl:
             server.ssl_certificate = ssl_cert
             server.ssl_private_key = ssl_key
@@ -343,12 +342,16 @@ class HTTPDaemon(object):
                                     raise Exception('Missing argument %s' % aname)
                                 v = default_args[aname]
                             d[aname] = v
-                        args_time = time.time() - t0
+
+                        t1 = time.time()
+                        args_time = t1 - t0
 
                         if need_lock:
                             logger.debug("HTTP: calling lock for %s" % fname)
                             lock.acquire()
-                        aqu_lock_time = time.time() - t0
+
+                        t2 = time.time()
+                        aqu_lock_time = t2 - t1
                         
                         try:
                             ret = f(**d)
@@ -357,13 +360,18 @@ class HTTPDaemon(object):
                             # Ok now we can release the lock
                             if need_lock:
                                 lock.release()
-                        calling_time = time.time() - t0
-                        real_calling_time = calling_time - aqu_lock_time
+
+                        t3 = time.time()
+                        calling_time = t3 - t2
+
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
-                        json_time = time.time() - t0
-                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [real_calling:%s ] [calling:%s] [json:%s]" % (
-                                fname, args_time, aqu_lock_time, real_calling_time, calling_time, json_time) )
+                        t4 = time.time() 
+                        json_time = t4 - t3
+                      
+                        global_time = t4 - t0 
+                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s] [global:%s]" % (
+                                fname, args_time, aqu_lock_time, calling_time, json_time, global_time) )
                         
                         return j
                     # Ok now really put the route in place
