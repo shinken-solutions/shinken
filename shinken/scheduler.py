@@ -29,6 +29,8 @@ import cStringIO
 import tempfile
 import traceback
 import cPickle
+
+import threading
 from Queue import Empty
 
 from shinken.external_command import ExternalCommand
@@ -54,6 +56,8 @@ class Scheduler:
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True
 
+        # protect this uniq list
+        self.waiting_results_lock = threading.RLock()
         self.waiting_results = []  # satellites returns us results
         # and to not wait for them, we put them here and
         # use them later
@@ -131,7 +135,8 @@ class Scheduler:
 
     def reset(self):
         self.must_run = True
-        del self.waiting_results[:]
+        with self.waiting_results_lock:
+            del self.waiting_results[:]
         for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks, self.brokers:
             o.clear()
 
@@ -835,7 +840,8 @@ class Scheduler:
                     logger.debug("Received %d passive results" % nb_received)
                     for result in results:
                         result.set_type_passive()
-                    self.waiting_results.extend(results)
+                    with self.waiting_results_lock:
+                        self.waiting_results.extend(results)
                 except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
@@ -868,7 +874,8 @@ class Scheduler:
                     logger.debug("Received %d passive results" % nb_received)
                     for result in results:
                         result.set_type_passive()
-                    self.waiting_results.extend(results)
+                    with self.waiting_results_lock:
+                        self.waiting_results.extend(results)
                 except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
@@ -1229,9 +1236,12 @@ class Scheduler:
     def consume_results(self):
         # All results are in self.waiting_results
         # We need to get them first
-        for c in self.waiting_results:
+        with self.waiting_results_lock:
+            waiting_results = self.waiting_results
+            self.waiting_results = []
+
+        for c in waiting_results:
             self.put_results(c)
-        self.waiting_results = []
 
         # Then we consume them
         #print "**********Consume*********"
