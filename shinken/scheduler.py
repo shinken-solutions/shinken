@@ -771,9 +771,7 @@ class Scheduler:
                 lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
                     logger.debug("Sending %s actions" % len(lst))
-                    #con.push_actions(lst, self.instance_id)
                     con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions, exp:
@@ -784,8 +782,6 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -800,9 +796,7 @@ class Scheduler:
                 lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
                     logger.debug("Sending %d actions" % len(lst))
-                    #con.push_actions(lst, self.instance_id)
                     con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions, exp:
@@ -813,8 +807,6 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
@@ -829,8 +821,6 @@ class Scheduler:
             if con is not None:
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    #results = con.get_returns(self.instance_id)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
@@ -850,8 +840,6 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
@@ -863,8 +851,6 @@ class Scheduler:
             if con is not None:
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    #results = con.get_returns(self.instance_id)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
@@ -884,8 +870,6 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
