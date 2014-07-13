@@ -115,10 +115,8 @@ class SatelliteLink(Item):
             return False
 
         try:
-            #pyro.set_timeout(self.con, self.data_timeout)
             self.con.get('ping')
             self.con.post('put_conf', {'conf':conf}, wait='long')
-            #pyro.set_timeout(self.con, self.timeout)
             print "PUT CONF SUCESS", self.get_name()
             return True
         except HTTPExceptions, exp:

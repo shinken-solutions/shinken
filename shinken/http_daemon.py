@@ -396,14 +396,6 @@ class HTTPDaemon(object):
             self.srv.handle_request()
 
 
-        def create_uri(address, port, obj_name, use_ssl=False):
-            return "PYRO:%s@%s:%d" % (obj_name, address, port)
-
-
-        def set_timeout(con, timeout):
-            con._pyroTimeout = timeout
-
-
         # Close all sockets and delete the server object to be sure
         # no one is still alive
         def shutdown(self):

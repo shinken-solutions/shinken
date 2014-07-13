@@ -496,7 +496,7 @@ class Satellite(BaseSatellite):
             # A already dead worker or in a worker
             except (AttributeError, AssertionError):
                 pass
-        # Close the pyro server socket if it was opened
+        # Close the server socket if it was opened
         if self.http_daemon:
             if self.brok_interface:
                 self.http_daemon.unregister(self.brok_interface)
@@ -683,7 +683,6 @@ class Satellite(BaseSatellite):
                 except KeyError:
                     con = None
                 if con is not None:  # None = not initialized
-                    #pyro.set_timeout(con, 120)
                     # OK, go for it :)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
