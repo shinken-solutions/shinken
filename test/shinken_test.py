@@ -313,7 +313,11 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def show_logs(self):
         print "--- logs <<<----------------------------------"
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
                 print "LOG:", brok.data['log']
@@ -383,7 +387,11 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def any_log_match(self, pattern):
         regex = re.compile(pattern)
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
                 if re.search(regex, brok.data['log']):
