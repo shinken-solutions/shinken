@@ -40,6 +40,9 @@ daemons_config = {
 
 
 class testRegisteredFunctions(ShinkenTest):
+    def setUp(self):
+        time_hacker.set_real_time()
+
     def create_daemon(self):
         cls = Shinken
         return cls(daemons_config[cls], False, True, False, None, '')
