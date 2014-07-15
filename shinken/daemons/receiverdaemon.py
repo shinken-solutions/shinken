@@ -41,6 +41,7 @@ from shinken.log import logger
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 from shinken.http_client import HTTPExceptions
 from shinken.daemon import Interface
+from shinken.stats import statsmgr
 
 class IStats(Interface):
     """ 
@@ -188,6 +189,7 @@ class Receiver(Satellite):
         else:
             name = 'Unnamed receiver'
         self.name = name
+        statsmgr.register(self.name, 'receiver')
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
         self.accept_passive_unknown_check_results = conf['global']['accept_passive_unknown_check_results']
@@ -262,6 +264,7 @@ class Receiver(Satellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
 
+
     # Take all external commands, make packs and send them to
     # the schedulers
     def push_external_commands_to_schedulers(self):
@@ -317,6 +320,7 @@ class Receiver(Satellite):
             if not sent:
                 for extcmd in extcmds:
                     self.external_commands.append(extcmd)
+
 
     def do_loop_turn(self):
         sys.stdout.write(".")
@@ -386,7 +390,6 @@ class Receiver(Satellite):
 
             # Do the modules part, we have our modules in self.modules
             # REF: doc/receiver-modules.png (1)
-
 
             # Now the main loop
             self.do_mainloop()

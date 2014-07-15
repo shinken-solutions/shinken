@@ -40,6 +40,7 @@ from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
+from shinken.stats import statsmgr
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.util import jsonify_r
@@ -291,7 +292,8 @@ class Arbiter(Daemon):
                     logger.info("I am the master Arbiter: %s" % arb.get_name())
                 else:
                     logger.info("I am a spare Arbiter: %s" % arb.get_name())
-
+                # export this data to our statsmgr object :)
+                statsmgr.register(arb.get_name(), 'arbiter')
                 # Set myself as alive ;)
                 self.me.alive = True
             else:  # not me
@@ -323,7 +325,8 @@ class Arbiter(Daemon):
         # got items for us
         for inst in self.modules_manager.instances:
             #TODO : clean
-            if 'configuration' in inst.phases:
+            if hasattr(inst, 'get_objects'):
+                _t = time.time()
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
@@ -333,7 +336,7 @@ class Arbiter(Daemon):
                     logger.error("Back trace of this remove: %s" % (output.getvalue()))
                     output.close()
                     continue
-
+                statsmgr.incr('hook.get-objects', time.time() - _t)
                 types_creations = self.conf.types_creations
                 for k in types_creations:
                     (cls, clss, prop) = types_creations[k]
@@ -509,9 +512,6 @@ class Arbiter(Daemon):
             self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
         else:
             self.workdir = self.conf.workdir
-        #print "DBG curpath=", os.getcwd()
-        #print "DBG pidfile=", self.pidfile
-        #print "DBG workdir=", self.workdir
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
@@ -805,11 +805,22 @@ class Arbiter(Daemon):
             self.check_and_log_tp_activation_change()
 
             # Now the dispatcher job
+            _t = time.time()
             self.dispatcher.check_alive()
+            statsmgr.incr('core.check-alive', time.time() - _t)
+            
+            _t = time.time()
             self.dispatcher.check_dispatch()
+            statsmgr.incr('core.check-dispatch', time.time() - _t)
+            
             # REF: doc/shinken-conf-dispatching.png (3)
+            _t = time.time()            
             self.dispatcher.dispatch()
+            statsmgr.incr('core.dispatch', time.time() - _t)
+            
+            _t = time.time()                        
             self.dispatcher.check_bad_dispatch()
+            statsmgr.incr('core.check-bad-dispatch', time.time() - _t)
 
             # Now get things from our module instances
             self.get_objects_from_from_queues()
@@ -828,7 +839,9 @@ class Arbiter(Daemon):
                 logger.debug("Nb Broks send: %d" % self.nb_broks_send)
             self.nb_broks_send = 0
 
+            _t = time.time()
             self.push_external_commands_to_schedulers()
+            statsmgr.incr('core.push-external-commands', time.time() - _t)
 
             # It's sent, do not keep them
             # TODO: check if really sent. Queue by scheduler?

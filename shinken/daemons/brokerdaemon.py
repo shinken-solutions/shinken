@@ -38,6 +38,7 @@ from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids
 from shinken.log import logger
+from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
 from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.daemon import Daemon, Interface
@@ -172,9 +173,18 @@ class Broker(BaseSatellite):
         return False
 
 
+    # wrapper function for the real function do_
+    # just for timing the connexion
+    def pynag_con_init(self, id, type='scheduler'):
+        _t = time.time()
+        r = self.do_pynag_con_init(id, type)
+        statsmgr.incr('con-init.%s' % type, time.time() - _t)
+        return r
+
+
     # initialize or re-initialize connection with scheduler or
     # arbiter if type == arbiter
-    def pynag_con_init(self, id, type='scheduler'):
+    def do_pynag_con_init(self, id, type='scheduler'):
         # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
@@ -239,6 +249,7 @@ class Broker(BaseSatellite):
             return
 
         logger.info("Connection OK to the %s %s" % (type, links[id]['name']))
+
 
     # Get a brok. Our role is to put it in the modules
     # DO NOT CHANGE data of b!!!
@@ -379,7 +390,9 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
+        # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
+        statsmgr.register(name, 'broker')
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
@@ -646,12 +659,13 @@ class Broker(BaseSatellite):
         # Also reap broks sent from the arbiters
         self.interger_arbiter_broks()
         
-        # And from schedulers
-        self.get_new_broks(type='scheduler')
-        # And for other satellites
-        self.get_new_broks(type='poller')
-        self.get_new_broks(type='reactionner')
-        self.get_new_broks(type='receiver')
+        # Main job, go get broks in our distants daemons
+        types = ['scheduler', 'poller', 'reactionner', 'receiver']
+        for _type in types:
+            _t = time.time()
+            # And from schedulers
+            self.get_new_broks(type=_type)
+            statsmgr.incr('get-new-broks.%s' % _type, time.time() - _t)
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)
@@ -670,6 +684,7 @@ class Broker(BaseSatellite):
         # No more need to send them
         for b in to_send:
             b.need_send_to_ext = False
+        statsmgr.incr('core.put-to-external-queue', time.time() - t0)
         logger.debug("Time to send %s broks (%d secs)" % (len(to_send), time.time() - t0))
 
         # We must had new broks at the end of the list, so we reverse the list
@@ -682,13 +697,15 @@ class Broker(BaseSatellite):
             # every 1s
             if now - start > 1:
                 break
-
+            
             b = self.broks.pop()
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
             # We un serialize the brok before consume it
             b.prepare()
+            _t = time.time()
             self.manage_brok(b)
+            statsmgr.incr('core.manage-brok', time.time() - _t)
 
             nb_broks = len(self.broks)
 
@@ -720,6 +737,7 @@ class Broker(BaseSatellite):
         # Say to modules it's a new tick :)
         self.hook_point('tick')
 
+
     #  Main function, will loop forever
     def main(self):
         try:
@@ -747,14 +765,7 @@ class Broker(BaseSatellite):
 
             self.setup_new_conf()
 
-            # We already init modules during the new conf thing
-            # Set modules, init them and start external ones
-            #self.modules_manager.set_modules(self.modules)
-            #self.do_load_modules()
-            #self.modules_manager.start_external_instances()
-
-
-
+            
             # Do the modules part, we have our modules in self.modules
             # REF: doc/broker-modules.png (1)
             self.hook_point('load_retention')

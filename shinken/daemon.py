@@ -961,6 +961,7 @@ class Daemon(object):
     # We call the function of modules that got the this
     # hook function
     def hook_point(self, hook_name):
+        _t = time.time()
         for inst in self.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
             if hasattr(inst, full_hook_name):
@@ -970,6 +971,7 @@ class Daemon(object):
                 except Exception, exp:
                     logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
+        statsmgr.incr('core.hook.%s' % hook_name, time.time() - _t)
 
 
     # Dummy function for daemons. Get all retention data

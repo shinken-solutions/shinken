@@ -67,7 +67,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-
+from shinken.stats import statsmgr
 
 
 # Class to tell that we are facing a non worker module
@@ -302,9 +302,16 @@ class Satellite(BaseSatellite):
         self.q_by_mod = {}
 
 
+    # Wrapper function for the true con init
+    def pynag_con_init(self, id):
+        _t = time.time()
+        r = self.do_pynag_con_init(id)
+        statsmgr.incr('con-init.scheduler', time.time() - _t)
+        return r
+
     
     # Initialize or re-initialize connection with scheduler """
-    def pynag_con_init(self, id):
+    def do_pynag_con_init(self, id):
         sched = self.schedulers[id]
 
         # If sched is not active, I do not try to init
@@ -381,9 +388,18 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
 
+
+    # Wrapper function for stats
+    def manage_returns(self):
+        _t = time.time()
+        r = self.do_manage_returns()
+        statsmgr.incr('core.manage-returns', time.time() - _t)
+        return r
+
+
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
-    def manage_returns(self):
+    def do_manage_returns(self):
         #return
         # For all schedulers, we check for waitforhomerun
         # and we send back results
@@ -400,7 +416,6 @@ class Satellite(BaseSatellite):
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results':ret})
-
                 # Not connected or sched is gone
                 except (HTTPExceptions, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
@@ -418,6 +433,7 @@ class Satellite(BaseSatellite):
             else:
                 self.pynag_con_init(sched_id)
                 logger.warning("Sent failed!")
+
 
     # Get all returning actions for a call from a
     # scheduler
@@ -437,6 +453,7 @@ class Satellite(BaseSatellite):
         sched['wait_homerun'].clear()
 
         return ret
+
 
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
@@ -485,6 +502,7 @@ class Satellite(BaseSatellite):
         # Ok, all is good. Start it!
         w.start()
 
+
     # The main stop of this daemon. Stop all workers
     # modules and sockets
     def do_stop(self):
@@ -504,7 +522,6 @@ class Satellite(BaseSatellite):
                 self.http_daemon.unregister(self.scheduler_interface)
         # And then call our master stop from satellite code
         super(Satellite, self).do_stop()
-
 
 
     # A simple function to add objects in self
@@ -614,6 +631,7 @@ class Satellite(BaseSatellite):
             del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
+
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
     # workers
@@ -656,13 +674,18 @@ class Satellite(BaseSatellite):
         if q is not None:
             q.put(msg)
 
+        
+    # Wrapper function for the real function
+    def get_new_actions(self):
+        _t = time.time()
+        self.do_get_new_actions()
+        statsmgr.incr('core.get-new-actions', time.time() - _t)
+        
 
     # We get new actions from schedulers, we create a Message and we
     # put it in the s queue (from master to slave)
     # REF: doc/shinken-action-queues.png (1)
-    def get_new_actions(self):
-        #now = time.time()  #Unused
-
+    def do_get_new_actions(self):
         # Here are the differences between a
         # poller and a reactionner:
         # Poller will only do checks,
@@ -716,13 +739,16 @@ class Satellite(BaseSatellite):
                 logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                 raise
 
+
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
         return self.returns_queue.qsize()
 
+
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_item(self):
         return self.returns_queue.get()
+
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
@@ -737,6 +763,7 @@ class Satellite(BaseSatellite):
                     self.add(o)
                 except Empty:
                     full_queue = False
+
 
     # An arbiter ask us to wait a new conf, so we must clean
     # all the mess we did, and close modules too
@@ -797,6 +824,8 @@ class Satellite(BaseSatellite):
                     logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" %
                                 (sched_id, sched['name'], mod,
                                  i, q.qsize(), self.get_returns_queue_len()))
+                    # also update the stats module
+                    statsmgr.incr('core.worker-%s.queue-size' % mod, q.qsize())
 
         # Before return or get new actions, see how we manage
         # old ones: are they still in queue (s)? If True, we
@@ -817,12 +846,14 @@ class Satellite(BaseSatellite):
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
         logger.debug("Wait ratio: %f" % wait_ratio)
+        statsmgr.incr('core.wait-ratio', wait_ratio)
 
         # We can wait more than 1s if needed,
         # no more than 5s, but no less than 1
         timeout = self.timeout * wait_ratio
         timeout = max(self.polling_interval, timeout)
         self.timeout = min(5 * self.polling_interval, timeout)
+        statsmgr.incr('core.timeout', wait_ratio)
 
         # Maybe we do not have enough workers, we check for it
         # and launch the new ones if needed
@@ -848,6 +879,7 @@ class Satellite(BaseSatellite):
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
+
 
     # Do this satellite (poller or reactionner) post "daemonize" init:
     # we must register our interfaces for 3 possible callers: arbiter,
@@ -895,6 +927,11 @@ class Satellite(BaseSatellite):
         else:
             name = 'Unnamed satellite'
         self.name = name
+        # we got a name, we can now say it to our statsmgr
+        if 'poller_name' in g_conf:
+            statsmgr.register(self.name, 'poller')
+        else:
+            statsmgr.register(self.name, 'reactionner')            
 
         self.passive = g_conf['passive']
         if self.passive:
@@ -993,6 +1030,7 @@ class Satellite(BaseSatellite):
                 self.modules_manager.modules.append(module)
                 logger.info("[%s] Got module: %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
+
 
     def main(self):
         try:

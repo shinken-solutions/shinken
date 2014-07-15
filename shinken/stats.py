@@ -28,10 +28,11 @@ import time
 
 from log import logger
 
+
 class Stats(object):
     def __init__(self):
-        print "WTF REAPER"*100
         self.name = ''
+        self.type = ''
         self.app = None
         self.stats = {}
 
@@ -80,7 +81,7 @@ class Stats(object):
             logger.debug('REAPER we got a name')
             metrics = []
             for (k,e) in stats.iteritems():
-                nk = '%s.%s' % (self.name, k)
+                nk = '%s.%s.%s' % (self.type, self.name, k)
                 logger.debug('REAP %s:%s' % (nk, e))
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
