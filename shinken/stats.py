@@ -30,7 +30,7 @@ from log import logger
 
 class Stats(object):
     def __init__(self):
-        print "WTF REAPER"*100
+        #print "WTF REAPER"*100
         self.name = ''
         self.app = None
         self.stats = {}
@@ -63,7 +63,7 @@ class Stats(object):
     def reaper(self):
         while True:
             now = int(time.time())
-            print "REAPER LOOP LOOP"
+            #print "REAPER LOOP LOOP"
             logger.debug('REAPER loop')
             stats = self.stats
             self.stats = {}
