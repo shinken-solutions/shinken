@@ -467,7 +467,7 @@ do_restart_() {
     return $rc
 }
 
-do_force_reload_() {
+do_force-reload_() {
     do_restart_ $1
 }
 
