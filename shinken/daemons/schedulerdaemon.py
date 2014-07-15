@@ -39,6 +39,7 @@ from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 from shinken.util import nighty_five_percent
+from shinken.stats import statsmgr
 
 # Interface for Workers
 
@@ -348,7 +349,10 @@ class Shinken(BaseSatellite):
         push_flavor = pk['push_flavor']
         skip_initial_broks = pk['skip_initial_broks']
         accept_passive_unknown_check_results = pk['accept_passive_unknown_check_results']
-
+        
+        # horay, we got a name, we can set it in our stats objects
+        statsmgr.register(instance_name, 'scheduler')
+        
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs" % (t0, time.time() - t0))

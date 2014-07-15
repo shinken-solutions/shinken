@@ -53,6 +53,7 @@ else:
 import http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
+from shinken.stats import statsmgr
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
@@ -614,6 +615,9 @@ class Daemon(object):
                 self.manager.start()
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
+
+        # we can start our stats thread but after the double fork() call
+        statsmgr.launch_reaper_thread()
 
         # Now start the http_daemon thread
         self.http_thread = None
