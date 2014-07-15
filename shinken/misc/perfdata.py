@@ -76,6 +76,7 @@ class Metric:
 
 class PerfDatas:
     def __init__(self, s):
+        s = str(s)
         elts = perfdata_split_pattern.findall(s)
         elts = [e for e in elts if e != '']
         self.metrics = {}

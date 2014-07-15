@@ -130,6 +130,10 @@ class TestParsePerfdata(ShinkenTest):
         self.assert_(m.min == 0)
         self.assert_(m.max is None)
 
+        #Test that creating a perfdata with nothing dosen't fail
+        s = None
+        p = PerfDatas(s)
+        self.assertEqual(len(p), 0)
 
 if __name__ == '__main__':
     unittest.main()
