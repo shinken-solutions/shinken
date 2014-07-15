@@ -554,6 +554,9 @@ case "$CMD" in
     start|stop|restart|status|force-reload)
         do_cmd_on "$CMD" "$SUBMODULES"
         ;;
+    force-reload)
+        do_cmd_on "force_reload" "$SUBMODULES"
+        ;;
     check|checkconfig|reload)
         do_cmd_on "$CMD" "arbiter"
         ;;

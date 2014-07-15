@@ -616,10 +616,10 @@ class Scheduler:
 
                 # And now look for can launch or not :)
                 if a.status == 'scheduled' and a.is_launchable(now):
-                    a.status = 'inpoller'
-                    a.worker = worker_name
                     if not is_master:
                         # This is for child notifications and eventhandlers
+                        a.status = 'inpoller'
+                        a.worker = worker_name
                         new_a = a.copy_shell()
                         res.append(new_a)
         return res
