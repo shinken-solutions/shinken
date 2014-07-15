@@ -254,7 +254,7 @@ class Shinken(BaseSatellite):
         # We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
-        if not hasattr(self, "conf"):
+        if not hasattr(self.sched, "conf"):
             # Race condition where time change before getting conf
             return
 
