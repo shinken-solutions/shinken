@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -129,6 +130,17 @@ class TestParsePerfdata(ShinkenTest):
         self.assert_(m.critical == 2)
         self.assert_(m.min == 0)
         self.assert_(m.max is None)
+
+        s = u"ééé-192.168.0.1=-7.22636468709e-05s;1;2;0;;"
+        p = PerfDatas(s)
+        m = p[u'ééé-192.168.0.1']
+        self.assertEqual(m.name, u'ééé-192.168.0.1')
+        self.assertEqual(m.value, -7.22636468709e-05)
+        self.assertEqual(m.uom, 's')
+        self.assertEqual(m.warning, 1)
+        self.assertEqual(m.critical, 2)
+        self.assertEqual(m.min, 0)
+        self.assertEqual(m.max, None)
 
         #Test that creating a perfdata with nothing dosen't fail
         s = None
