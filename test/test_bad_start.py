@@ -75,6 +75,9 @@ run = 0   # We will open some ports but not close them (yes it's not good) and
 
 class template_Daemon_Bad_Start():
 
+    def setUp(self):
+        time_hacker.set_real_time()
+
     def get_login_and_group(self, p):
         try:
             p.user = get_cur_user()
