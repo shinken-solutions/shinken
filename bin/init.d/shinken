@@ -467,7 +467,7 @@ do_restart_() {
     return $rc
 }
 
-do_force-reload_() {
+do_force_reload_() {
     do_restart_ $1
 }
 
@@ -553,6 +553,9 @@ do_cmd_on() {
 case "$CMD" in
     start|stop|restart|status|force-reload)
         do_cmd_on "$CMD" "$SUBMODULES"
+        ;;
+    force-reload)
+        do_cmd_on "force_reload" "$SUBMODULES"
         ;;
     check|checkconfig|reload)
         do_cmd_on "$CMD" "arbiter"
