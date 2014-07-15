@@ -46,7 +46,7 @@ from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
-
+from shinken.stats import statsmgr
 
 class Scheduler:
     """Please Add a Docstring to describe the class here"""
@@ -1508,8 +1508,10 @@ class Scheduler:
                 # A 0 in the tick will just disable it
                 if nb_ticks != 0:
                     if ticks % nb_ticks == 0:
-                        # print "I run function:", name
+                        # Call it and save the time spend in it
+                        _t = time.time()
                         f()
+                        statsmgr.incr('loop.%s' % name, time.time() - _t)
 
             # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
