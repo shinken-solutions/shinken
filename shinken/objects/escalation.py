@@ -207,12 +207,18 @@ class Escalations(Items):
             if '' in (es_hname.strip(), sdesc.strip()):
                 continue
             for hname in strip_and_uniq(es_hname.split(',')):
-                for sname in strip_and_uniq(sdesc.split(',')):
-                    s = services.find_srv_by_name_and_hostname(hname, sname)
-                    if s is not None:
-                        #print "Linking service", s.get_name(), 'with me', es.get_name()
-                        s.escalations.append(es)
-                                #print "Now service", s.get_name(), 'have', s.escalations
+                if sdesc.strip() == '*':
+                    slist = services.find_srvs_by_hostname(hname)
+                    if slist is not None:
+                        for s in slist:
+                            s.escalations.append(es)
+                else:
+                    for sname in strip_and_uniq(sdesc.split(',')):
+                        s = services.find_srv_by_name_and_hostname(hname, sname)
+                        if s is not None:
+                            #print "Linking service", s.get_name(), 'with me', es.get_name()
+                            s.escalations.append(es)
+                                    #print "Now service", s.get_name(), 'have', s.escalations
 
 
     # Will register escalations into host.escalations
