@@ -1455,10 +1455,6 @@ class Scheduler:
         res.update( {'checks': {}, 'name':self.instance_name, 'type':'scheduler', 'metrics':[]} )
         
         checks = res['checks']
-        checks['scheduled'] = len([c for c in self.checks.values() if c.status == 'scheduled'])
-        checks['inpoller']  = len([c for c in self.checks.values() if c.status == 'inpoller'])
-        checks['zombies']   = len([c for c in self.checks.values() if c.status == 'zombie'])
-        res['notifications'] = len(self.actions)
         
         # Get a overview of the latencies with just
         # a 95 percentile view, but lso min/max values
@@ -1472,6 +1468,10 @@ class Scheduler:
         res['services'] = len(self.services)
         # metrics specific
         metrics = res['metrics']
+        metrics.append( 'scheduler.%s.checks.scheduled %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.checks.inpoller %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.checks.zombie %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.actions.queue %d %d' % (self.instance_name, len(self.actions), now) )
         metrics.append( 'scheduler.%s.broks.queue %d %d' % (self.instance_name, len(self.broks), now) )
         metrics.append( 'scheduler.%s.downtimes %d %d' % (self.instance_name, len(self.downtimes), now) )
         metrics.append( 'scheduler.%s.comments %d %d' % (self.instance_name, len(self.comments), now) )

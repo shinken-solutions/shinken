@@ -877,3 +877,18 @@ class Arbiter(Daemon):
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
 
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        # call the daemon one
+        res = super(Arbiter, self).get_stats_struct()
+        res.update( {'name':self.me.get_name(), 'type':'arbiter'} )
+        res['hosts'] = len(self.conf.hosts)
+        res['services'] = len(self.conf.services)
+        metrics = res['metrics']                
+        # metrics specific
+        metrics.append( 'arbiter.%s.external-commands.queue %d %d' % (self.me.get_name(), len(self.external_commands), now) )
+        
+        return res
+    
