@@ -615,8 +615,8 @@ class Daemon(object):
                 self.manager.start()
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
-
-        # we can start our stats thread but after the double fork() call
+        
+        # We can start our stats thread but after the double fork() call
         statsmgr.launch_reaper_thread()
 
         # Now start the http_daemon thread
@@ -983,3 +983,8 @@ class Daemon(object):
     # Save, to get back all data
     def restore_retention_data(self, data):
         pass
+
+
+    # Dummy function for having the stats main structure before sending somewhere
+    def get_stats_struct(self):
+        return {'metrics':[], 'version':VERSION, 'name':'', 'type':''}

@@ -293,7 +293,9 @@ class Arbiter(Daemon):
                 else:
                     logger.info("I am a spare Arbiter: %s" % arb.get_name())
                 # export this data to our statsmgr object :)
-                statsmgr.register(arb.get_name(), 'arbiter')
+                api_key = getattr(self.conf, 'api_key', '')
+                secret = getattr(self.conf, 'secret', '')
+                statsmgr.register(self, arb.get_name(), 'arbiter', api_key=api_key, secret=secret)
                 # Set myself as alive ;)
                 self.me.alive = True
             else:  # not me
@@ -874,3 +876,4 @@ class Arbiter(Daemon):
         external_commands = data['external_commands']
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
+

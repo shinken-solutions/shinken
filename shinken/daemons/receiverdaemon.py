@@ -189,7 +189,10 @@ class Receiver(Satellite):
         else:
             name = 'Unnamed receiver'
         self.name = name
-        statsmgr.register(self.name, 'receiver')
+        self.api_key = conf['global']['api_key']
+        self.secret = conf['global']['secret']
+        
+        statsmgr.register(self, self.name, 'receiver', api_key=self.api_key, secret=self.secret)
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
         self.accept_passive_unknown_check_results = conf['global']['accept_passive_unknown_check_results']

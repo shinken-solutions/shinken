@@ -345,9 +345,11 @@ class Shinken(BaseSatellite):
         push_flavor = pk['push_flavor']
         skip_initial_broks = pk['skip_initial_broks']
         accept_passive_unknown_check_results = pk['accept_passive_unknown_check_results']
+        api_key = pk['api_key']
+        secret = pk['secret']
         
         # horay, we got a name, we can set it in our stats objects
-        statsmgr.register(instance_name, 'scheduler')
+        statsmgr.register(self.sched, instance_name, 'scheduler')
         
         t0 = time.time()
         conf = cPickle.loads(conf_raw)

@@ -146,6 +146,7 @@ class SatelliteLink(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
+
     def set_dead(self):
         was_alive = self.alive
         self.alive = False
@@ -157,6 +158,7 @@ class SatelliteLink(Item):
             logger.warning("Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
+
 
     # Go in reachable=False and add a failed attempt
     # if we reach the max, go dead
@@ -172,6 +174,7 @@ class SatelliteLink(Item):
         if self.attempt == self.max_check_attempts:
             self.set_dead()
 
+    
     # Update satellite info each self.check_interval seconds
     # so we smooth arbiter actions for just useful actions
     # and not cry for a little timeout
@@ -390,6 +393,9 @@ class SatelliteLink(Item):
         for prop, entry in properties.items():
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
+        # Also add global values
+        self.cfg['global']['api_key'] = self.__class__.api_key
+        self.cfg['global']['secret']  = self.__class__.secret
 
 
     # Some parameters for satellites are not defined in the satellites conf
@@ -415,7 +421,10 @@ class SatelliteLink(Item):
                 'active': True,
                 'passive': self.passive,
                 'poller_tags': getattr(self, 'poller_tags', []),
-                'reactionner_tags': getattr(self, 'reactionner_tags', [])}
+                'reactionner_tags': getattr(self, 'reactionner_tags', []),
+                'api_key': self.__class__.api_key,
+                'secret':  self.__class__.secret,
+                }
 
 
     # Call by pickle for dataify the downtime

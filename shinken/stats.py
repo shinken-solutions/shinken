@@ -25,8 +25,16 @@
 
 import threading
 import time
+import json
 
-from log import logger
+# For old users python-crypto was not mandatory, don't break their setup
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    AES = None
+
+from shinken.log import logger
+from shinken.http_client import HTTPClient, HTTPException
 
 
 class Stats(object):
@@ -35,7 +43,11 @@ class Stats(object):
         self.type = ''
         self.app = None
         self.stats = {}
-
+        self.api_key = ''
+        self.secret = ''
+        self.cyph = None
+        self.con = HTTPClient(uri='http://metrology')
+        
 
     def launch_reaper_thread(self):
         self.reaper_thread = threading.Thread(None, target=self.reaper, name='stats-reaper')
@@ -43,9 +55,18 @@ class Stats(object):
         self.reaper_thread.start()
 
 
-    def register(self, name, _type):
+    def register(self, app, name, _type, api_key='', secret=''):
+        self.app = app
         self.name = name
         self.type = _type
+        self.api_key = api_key
+        self.secret = secret
+        print "RAP REGISTERED", name, _type, api_key, secret
+        # Assumea 16 len secret, but should be alreayd ok
+        self.secret += '\0' * (-len(self.secret) % 16)
+        if AES is not None and self.secret != '':
+            self.cyph = AES.new(self.secret, AES.MODE_ECB)
+
         
 
     # Will increment a stat key, if None, start at 0
@@ -96,6 +117,20 @@ class Stats(object):
                 metrics.append(s)
 
             logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
+            # get the inner data for the daemon
+            struct = self.app.get_stats_struct()
+            struct['metrics'].extend(metrics)
+            logger.debug('REAPER whole struct %s' % struct)
+            j = json.dumps(struct)
+            if self.cyph is not None:
+                logger.debug('PUT to /saas/put/ with %s %s' % (self.api_key, self.secret))
+                # assume a %16 length messagexs
+                j += '\0' * (-len(j) % 16)
+                encrypted_text = self.cyph.encrypt(j)
+                try:
+                    self.con.put('/saas/put/', encrypted_text)
+                except HTTPException, exp:
+                    logger.debug('REAPER cannot put to the metric server %s' % exp)
             time.sleep(10)
 
 

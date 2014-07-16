@@ -387,6 +387,8 @@ class Dispatcher:
                                         'instance_name': sched.scheduler_name, 'push_flavor': conf.push_flavor,
                                         'skip_initial_broks': sched.skip_initial_broks,
                                         'accept_passive_unknown_check_results': sched.accept_passive_unknown_check_results,
+                                        'api_key': self.conf.api_key,
+                                        'secret': self.conf.secret,
                                         }
 
                         t1 = time.time()

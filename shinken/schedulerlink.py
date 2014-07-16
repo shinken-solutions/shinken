@@ -53,8 +53,10 @@ class SchedulerLink(SatelliteLink):
         'push_flavor': IntegerProp(default=0),
     })
 
+
     def get_name(self):
         return self.scheduler_name
+
 
     def run_external_commands(self, commands):
         if self.con is None:
@@ -68,6 +70,7 @@ class SchedulerLink(SatelliteLink):
             self.con = None
             logger.debug(exp)
             return False
+
 
     def register_to_my_realm(self):
         self.realm.schedulers.append(self)

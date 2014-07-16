@@ -1446,6 +1446,42 @@ class Scheduler:
                 except Empty:
                     full_queue = False
 
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        
+        res = self.sched_daemon.get_stats_struct()
+        res.update( {'checks': {}, 'name':self.instance_name, 'type':'scheduler', 'metrics':[]} )
+        
+        checks = res['checks']
+        checks['scheduled'] = len([c for c in self.checks.values() if c.status == 'scheduled'])
+        checks['inpoller']  = len([c for c in self.checks.values() if c.status == 'inpoller'])
+        checks['zombies']   = len([c for c in self.checks.values() if c.status == 'zombie'])
+        res['notifications'] = len(self.actions)
+        
+        # Get a overview of the latencies with just
+        # a 95 percentile view, but lso min/max values
+        latencies = [s.latency for s in self.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        res['latency'] = (0.0,0.0,0.0)
+        if lat_avg:
+            res['latency'] = (lat_avg, lat_min, lat_max)
+        
+        res['hosts'] = len(self.hosts)
+        res['services'] = len(self.services)
+        # metrics specific
+        metrics = res['metrics']
+        metrics.append( 'scheduler.%s.broks.queue %d %d' % (self.instance_name, len(self.broks), now) )
+        metrics.append( 'scheduler.%s.downtimes %d %d' % (self.instance_name, len(self.downtimes), now) )
+        metrics.append( 'scheduler.%s.comments %d %d' % (self.instance_name, len(self.comments), now) )
+        metrics.append( 'scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now) )
+        metrics.append( 'scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now) )
+        metrics.append( 'scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now) )
+        
+        return res
+
+
     # Main function
     def run(self):
         # Then we see if we've got info in the retention file

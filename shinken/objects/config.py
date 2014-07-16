@@ -286,6 +286,13 @@ class Config(Item):
         # Large env tweacks
         'use_multiprocesses_serializer':  BoolProp(default='0'),
 
+        # About shinken.io part
+        'api_key':  StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                                          (BrokerLink, None), (PollerLink, None),
+                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
+        'secret':   StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                                          (BrokerLink, None), (PollerLink, None),
+                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
     }
 
     macros = {
@@ -967,6 +974,7 @@ class Config(Item):
         for s in self.services:
             print '\t', s.get_name(), s.contacts
 
+
     # It's used to change Nagios2 names to Nagios3 ones
     # For hosts and services
     def old_properties_names_to_new(self):
@@ -976,6 +984,7 @@ class Config(Item):
         self.notificationways.old_properties_names_to_new()
         self.contacts.old_properties_names_to_new()
 
+
     # It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
@@ -983,6 +992,7 @@ class Config(Item):
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
                     logger.warning("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
+
 
     # It's used to raise warning if the user got parameter
     # that we do not manage from now
@@ -1145,11 +1155,13 @@ class Config(Item):
         # Now fill some fields we can predict (like address for hosts)
         self.fill_predictive_missing_parameters()
 
+
     # Here is a special functions to fill some special
     # properties that are not filled and should be like
     # address for host (if not set, put host_name)
     def fill_predictive_missing_parameters(self):
         self.hosts.fill_predictive_missing_parameters()
+
 
     # Will check if a realm is defined, if not
     # Create a new one (default) and tag everyone that do not have
@@ -1167,6 +1179,7 @@ class Config(Item):
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
                         logger.info("Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
+
 
     # If a satellite is missing, we add them in the localhost
     # with defaults values
@@ -1193,6 +1206,7 @@ class Config(Item):
                             'manage_arbiters': '1'})
             self.brokers = BrokerLinks([b])
 
+
     # Return if one broker got a module of type: mod_type
     def got_broker_module_type_defined(self, mod_type):
         for b in self.brokers:
@@ -1201,6 +1215,7 @@ class Config(Item):
                     return True
         return False
 
+
     # return if one scheduler got a module of type: mod_type
     def got_scheduler_module_type_defined(self, mod_type):
         for b in self.schedulers:
@@ -1208,6 +1223,7 @@ class Config(Item):
                 if hasattr(m, 'module_type') and m.module_type == mod_type:
                     return True
         return False
+
 
     # return if one arbiter got a module of type: mod_type
     # but this time it's tricky: the python pass is not done!
@@ -1227,6 +1243,7 @@ class Config(Item):
                             return True
         return False
 
+
     # Will ask for each host/service if the
     # check_command is a bp rule. If so, it will create
     # a tree structures with the rules
@@ -1234,10 +1251,12 @@ class Config(Item):
         self.hosts.create_business_rules(self.hosts, self.services)
         self.services.create_business_rules(self.hosts, self.services)
 
+
     # Will fill dep list for business rules
     def create_business_rules_dependencies(self):
         self.hosts.create_business_rules_dependencies()
         self.services.create_business_rules_dependencies()
+
 
     # It's used to hack some old Nagios parameters like
     # log_file or status_file: if they are present in
@@ -1352,6 +1371,7 @@ class Config(Item):
                 for b in self.schedulers:
                     b.modules.append(m)
 
+
     # It's used to hack some old Nagios parameters like
     # but for the arbiter, so very early in the run
     def hack_old_nagios_parameters_for_arbiter(self):
@@ -1383,6 +1403,7 @@ class Config(Item):
                     a.modules = ','.join([getattr(a, 'modules', ''), data['module_name']])
                 self.modules.items[mod.id] = mod
 
+
     # Set our timezone value and give it too to unset satellites
     def propagate_timezone_option(self):
         if self.use_timezone != '':
@@ -1395,6 +1416,7 @@ class Config(Item):
                 for s in t:
                     if s.use_timezone == 'NOTSET':
                         setattr(s, 'use_timezone', self.use_timezone)
+
 
     # Link templates with elements
     def linkify_templates(self):

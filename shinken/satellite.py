@@ -927,11 +927,13 @@ class Satellite(BaseSatellite):
         else:
             name = 'Unnamed satellite'
         self.name = name
+        self.api_key = g_conf['api_key']
+        self.secret = g_conf['secret']
         # we got a name, we can now say it to our statsmgr
         if 'poller_name' in g_conf:
-            statsmgr.register(self.name, 'poller')
+            statsmgr.register(self, self.name, 'poller', api_key=self.api_key, secret=self.secret)
         else:
-            statsmgr.register(self.name, 'reactionner')            
+            statsmgr.register(self, self.name, 'reactionner', api_key=self.api_key, secret=self.secret) 
 
         self.passive = g_conf['passive']
         if self.passive:

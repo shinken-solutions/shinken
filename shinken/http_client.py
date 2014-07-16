@@ -43,6 +43,12 @@ class HTTPException(Exception):
 
 HTTPExceptions = (HTTPException,)
 
+class FileReader:
+    def __init__(self, fp):
+        self.fp = fp
+    def read_callback(self, size):
+        return self.fp.read(size)
+
 
 class HTTPClient(object):
     def __init__(self, address='', port=0, use_ssl=False, timeout=3, data_timeout=120, uri='', strong_ssl=False):
@@ -176,4 +182,49 @@ class HTTPClient(object):
         # Should return us pong string
         return ret
 
+    
+    # Try to get an URI path
+    def put(self, path, v, wait='short'):
+        
+        c = self.con
+        filesize = len(v)
+        f = StringIO(v)
+        
+        c.setopt(pycurl.INFILESIZE, filesize)
+        c.setopt(pycurl.PUT, 1)
+        c.setopt(pycurl.READFUNCTION, FileReader(f).read_callback)
+        
+        # For the TIMEOUT, it will depends if we are waiting for a long query or not
+        # long:data_timeout, like for huge broks receptions
+        # short:timeout, like for just "ok" connection
+        if wait == 'short':
+            c.setopt(c.TIMEOUT, self.timeout)
+        else:
+            c.setopt(c.TIMEOUT, self.data_timeout)
+        #if proxy:
+        #    c.setopt(c.PROXY, proxy)
+        # Pycurl want a list of tuple as args
+        c.setopt(c.URL, str(self.uri+path))
+        # Ok now manage the response
+        response = StringIO()
+        c.setopt(pycurl.WRITEFUNCTION, response.write)
+        #c.setopt(c.VERBOSE, 1)
+        try:
+            c.perform()
+        except pycurl.error, error:
+            errno, errstr = error
+            f.close()
+            raise HTTPException ('Connexion error to %s : %s' % (self.uri, errstr))
+
+        f.close()
+        r = c.getinfo(pycurl.HTTP_CODE)
+        # Do NOT close the connexion
+        #c.close()
+        if r != 200:
+            err = response.getvalue()
+            logger.error("There was a critical error : %s" % err)
+            return ''
+        else:
+            ret = response.getvalue()
+            return ret
     

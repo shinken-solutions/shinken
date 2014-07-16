@@ -390,9 +390,11 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
+        self.api_key = g_conf['api_key']
+        self.secret = g_conf['secret']
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
-        statsmgr.register(name, 'broker')
+        statsmgr.register(self, name, 'broker', api_key=self.api_key, secret=self.secret)
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
@@ -599,6 +601,7 @@ class Broker(BaseSatellite):
 
         for rea_id in self.reactionners:
             self.pynag_con_init(rea_id, type='reactionner')
+
 
     # An arbiter ask us to wait for a new conf, so we must clean
     # all our mess we did, and close modules too
