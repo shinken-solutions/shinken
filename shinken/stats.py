@@ -95,7 +95,7 @@ class Stats(object):
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
             if not self.name:
-                time.sleep(10)
+                time.sleep(60)
                 continue
 
             logger.debug('REAPER we got a name')
@@ -127,10 +127,10 @@ class Stats(object):
                 j += '\0' * (-len(j) % 16)
                 encrypted_text = self.cyph.encrypt(j)
                 try:
-                    self.con.put('/api/v1/put/', encrypted_text)
+                    r = self.con.put('/api/v1/put/', encrypted_text)
                 except HTTPException, exp:
                     logger.debug('REAPER cannot put to the metric server %s' % exp)
-            time.sleep(10)
+            time.sleep(60)
 
 
 statsmgr = Stats()
