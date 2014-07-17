@@ -317,6 +317,10 @@ class Host(SchedulingItem):
 
         # Trigger list
         'triggers':  StringProp(default=[]),
+        
+        # Keep the string of the last command launched for this element
+        'last_check_command': StringProp(default=''),
+        
     })
 
     # Hosts macros and prop that give the information

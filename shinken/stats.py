@@ -61,7 +61,7 @@ class Stats(object):
         self.type = _type
         self.api_key = api_key
         self.secret = secret
-        print "RAP REGISTERED", name, _type, api_key, secret
+
         # Assumea 16 len secret, but should be alreayd ok
         self.secret += '\0' * (-len(self.secret) % 16)
         if AES is not None and self.secret != '':
@@ -85,7 +85,6 @@ class Stats(object):
     def reaper(self):
         while True:
             now = int(time.time())
-            print "REAPER LOOP LOOP"
             logger.debug('REAPER loop')
             stats = self.stats
             self.stats = {}
@@ -123,12 +122,12 @@ class Stats(object):
             logger.debug('REAPER whole struct %s' % struct)
             j = json.dumps(struct)
             if self.cyph is not None:
-                logger.debug('PUT to /saas/put/ with %s %s' % (self.api_key, self.secret))
+                logger.debug('PUT to /api/v1/put/ with %s %s' % (self.api_key, self.secret))
                 # assume a %16 length messagexs
                 j += '\0' * (-len(j) % 16)
                 encrypted_text = self.cyph.encrypt(j)
                 try:
-                    self.con.put('/saas/put/', encrypted_text)
+                    self.con.put('/api/v1/put/', encrypted_text)
                 except HTTPException, exp:
                     logger.debug('REAPER cannot put to the metric server %s' % exp)
             time.sleep(10)

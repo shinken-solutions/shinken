@@ -291,7 +291,10 @@ class Service(SchedulingItem):
         'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers': StringProp(default=[])
+        'triggers': StringProp(default=[]),
+
+        # Keep the string of the last command launched for this element
+        'last_check_command': StringProp(default=''),
 
     })
 

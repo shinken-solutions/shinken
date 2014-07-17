@@ -402,3 +402,18 @@ class Receiver(Satellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
+
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        # call the daemon one
+        res = super(Receiver, self).get_stats_struct()
+        res.update( {'name':self.name, 'type':'receiver',
+                     'direct_routing':self.direct_routing} )
+        metrics = res['metrics']      
+        # metrics specific
+        metrics.append( 'receiver.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now) )
+        
+        return res
+    

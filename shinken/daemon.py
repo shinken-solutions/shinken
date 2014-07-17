@@ -562,7 +562,11 @@ class Daemon(object):
         del self.debug_output
 
 
-    def do_daemon_init_and_start(self, use_pyro=True):
+    # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
+    # and such things to have a true DAEMON :D
+    # use_pyro= open the TCP port for communication
+    # fake= use for test to do not launch runonly feature, like the stats reaper thread
+    def do_daemon_init_and_start(self, use_pyro=True, fake=False):
         self.change_to_user_group()
         self.change_to_workdir()
         self.check_parallel_run()
@@ -615,9 +619,11 @@ class Daemon(object):
                 self.manager.start()
             # Keep this daemon in the http_daemn module
         # Will be add to the modules manager later
-        
-        # We can start our stats thread but after the double fork() call
-        statsmgr.launch_reaper_thread()
+
+        # We can start our stats thread but after the double fork() call and if we are not in
+        # a test launch (time.time() is hooked and will do BIG problems there)
+        if not fake:
+            statsmgr.launch_reaper_thread()
 
         # Now start the http_daemon thread
         self.http_thread = None
@@ -987,4 +993,20 @@ class Daemon(object):
 
     # Dummy function for having the stats main structure before sending somewhere
     def get_stats_struct(self):
-        return {'metrics':[], 'version':VERSION, 'name':'', 'type':''}
+        r = {'metrics':[], 'version':VERSION, 'name':'', 'type':'', 'modules': {'internal':{}, 'external':{}} }
+        modules = r['modules']
+        
+        # first get data for all internal modules
+        for mod in self.modules_manager.get_internal_instances():
+            mname = mod.get_name()
+            state = {True:'ok', False:'stopped'}[(mod not in self.modules_manager.to_restart)]
+            e = {'name':mname, 'state':state}
+            modules['internal'][mname] = e
+        # Same but for external ones
+        for mod in self.modules_manager.get_external_instances():
+            mname = mod.get_name()
+            state = {True:'ok', False:'stopped'}[(mod not in self.modules_manager.to_restart)]
+            e = {'name':mname, 'state':state}
+            modules['external'][mname] = e
+
+        return r

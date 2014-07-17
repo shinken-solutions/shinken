@@ -44,6 +44,7 @@ from shinken.property import PathProp, IntegerProp
 class Reactionner(Satellite):
     do_checks = False  # I do not do checks
     do_actions = True
+    my_type = 'reactionner'
 
     properties = Satellite.properties.copy()
     properties.update({

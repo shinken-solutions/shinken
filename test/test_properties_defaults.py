@@ -228,6 +228,9 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('daemon_thread_pool_size', '8'),
         ('enable_environment_macros', '1'),
         ('timeout_exit_status', '2'),
+
+        ('api_key', ''),
+        ('secret', ''),
         ])
 
     def setUp(self):

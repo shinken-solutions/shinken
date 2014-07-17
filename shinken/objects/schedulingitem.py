@@ -1338,6 +1338,10 @@ class SchedulingItem(Item):
             m = MacroResolver()
             data = self.get_data_for_checks()
             command_line = m.resolve_command(check_command, data)
+
+            # remember it, for pure debuging purpose
+            self.last_check_command = command_line
+            
             # By default env is void
             env = {}
 

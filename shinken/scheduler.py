@@ -1452,9 +1452,7 @@ class Scheduler:
         now = int(time.time())
         
         res = self.sched_daemon.get_stats_struct()
-        res.update( {'checks': {}, 'name':self.instance_name, 'type':'scheduler', 'metrics':[]} )
-        
-        checks = res['checks']
+        res.update( {'name':self.instance_name, 'type':'scheduler'} )
         
         # Get a overview of the latencies with just
         # a 95 percentile view, but lso min/max values
@@ -1462,7 +1460,7 @@ class Scheduler:
         lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
         res['latency'] = (0.0,0.0,0.0)
         if lat_avg:
-            res['latency'] = (lat_avg, lat_min, lat_max)
+            res['latency'] = {'avg':lat_avg, 'min':lat_min, 'max':lat_max}
         
         res['hosts'] = len(self.hosts)
         res['services'] = len(self.services)
@@ -1478,10 +1476,41 @@ class Scheduler:
         metrics.append( 'scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now) )
         metrics.append( 'scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now) )
         metrics.append( 'scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now) )
-        
+
+        all_commands = {}
+        # compute some stats
+        for lst in [self.hosts, self.services]:
+            for i in lst:
+                last_cmd = i.last_check_command
+                if not last_cmd:
+                    continue
+                interval = i.check_interval
+                if interval == 0:
+                    interval = 1
+                cmd = os.path.split(last_cmd.split(' ', 1)[0])[1]
+                u_time = i.u_time
+                s_time = i.s_time
+                old_u_time, old_s_time = all_commands.get(cmd, (0.0, 0.0))
+                old_u_time += u_time/interval
+                old_s_time += s_time/interval
+                all_commands[cmd] = (old_u_time, old_s_time)
+        # now sort it
+        p = []
+        for (c,e) in all_commands.iteritems():
+            u_time,s_time = e
+            p.append( {'cmd':c, 'u_time':u_time, 's_time':s_time } )
+        def p_sort(e1, e2):
+            if e1['u_time'] > e2['u_time']:
+                return 1
+            if e1['u_time'] < e2['u_time']:
+                return -1
+            return 0
+        p.sort(p_sort)
+        # takethe first 10 ones for the put
+        res['commands'] = p[:10]
         return res
-
-
+    
+    
     # Main function
     def run(self):
         # Then we see if we've got info in the retention file

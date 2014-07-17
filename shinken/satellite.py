@@ -1034,6 +1034,22 @@ class Satellite(BaseSatellite):
                 self.q_by_mod[module.module_type] = {}
 
 
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        # call the daemon one
+        res = super(Satellite, self).get_stats_struct()
+        _type = self.__class__.my_type
+        res.update( {'name':self.name, 'type': _type, 'passive':self.passive} )
+        metrics = res['metrics']      
+        # metrics specific
+        metrics.append( '%s.%s.external-commands.queue %d %d' % (_type, self.name, len(self.external_commands), now) )
+        
+        return res
+    
+    
+
+
     def main(self):
         try:
             for line in self.get_header():

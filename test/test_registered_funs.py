@@ -53,7 +53,7 @@ class testRegisteredFunctions(ShinkenTest):
         d.load_config_file()
 
         d.http_backend = 'wsgiref'
-        d.do_daemon_init_and_start()
+        d.do_daemon_init_and_start(fake=True)
         d.load_modules_manager()
         d.http_daemon.register(d.interface)
         reg_list = d.http_daemon.registered_fun

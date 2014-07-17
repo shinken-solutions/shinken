@@ -101,13 +101,14 @@ class template_Daemon_Bad_Start():
         self.get_login_and_group(d)
         return d
 
+
     def test_bad_piddir(self):
         print "Testing bad pidfile ..."
         d = self.get_daemon()
         d.workdir = tempfile.mkdtemp()
         d.pidfile = os.path.join('/DONOTEXISTS', "daemon.pid")
         prev_dir = os.getcwd()
-        self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start)
+        self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start, fake=True)
         os.rmdir(d.workdir)
         os.chdir(prev_dir)
 
@@ -116,7 +117,7 @@ class template_Daemon_Bad_Start():
         d = self.get_daemon()
         d.workdir = '/DONOTEXISTS'
         prev_dir = os.getcwd()
-        self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start)
+        self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start, fake=True)
         d.do_stop()
         os.chdir(prev_dir)
 
@@ -125,7 +126,7 @@ class template_Daemon_Bad_Start():
         d1 = self.get_daemon()
         d1.workdir = tempfile.mkdtemp()
         prev_dir = os.getcwd()  # We have to remember where we are to get back after
-        d1.do_daemon_init_and_start()
+        d1.do_daemon_init_and_start(fake=True)
         new_dir = os.getcwd()  # We have to remember this one also
         os.chdir(prev_dir)
         os.unlink(os.path.join(new_dir, d1.pidfile))  ## so that second poller will not see first started poller
@@ -134,7 +135,7 @@ class template_Daemon_Bad_Start():
         # TODO: find a way in Pyro4 to get the port
         if hasattr(d1.http_daemon, 'port'):
             d2.port = d1.http_daemon.port
-            self.assertRaises(PortNotFree, d2.do_daemon_init_and_start)
+            self.assertRaises(PortNotFree, d2.do_daemon_init_and_start, fake=True)
             d2.do_stop()
         d1.do_stop()
         try:
