@@ -399,6 +399,9 @@ class Service(SchedulingItem):
     def get_host_tags(self):
         return self.host.tags
 
+    def get_service_tags(self):
+        return self.tags
+
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
