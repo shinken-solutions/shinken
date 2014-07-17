@@ -24,6 +24,7 @@
 
 import os
 import tempfile
+import shutil
 
 from shinken_test import *
 
@@ -75,6 +76,9 @@ run = 0   # We will open some ports but not close them (yes it's not good) and
 
 class template_Daemon_Bad_Start():
 
+    def setUp(self):
+        time_hacker.set_real_time()
+
     def get_login_and_group(self, p):
         try:
             p.user = get_cur_user()
@@ -109,7 +113,7 @@ class template_Daemon_Bad_Start():
         d.pidfile = os.path.join('/DONOTEXISTS', "daemon.pid")
         prev_dir = os.getcwd()
         self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start, fake=True)
-        os.rmdir(d.workdir)
+        shutil.rmtree(d.workdir)
         os.chdir(prev_dir)
 
     def test_bad_workdir(self):
@@ -144,7 +148,7 @@ class template_Daemon_Bad_Start():
             pass
         if hasattr(d1, 'local_log'):
             os.unlink(os.path.join(d1.workdir, d1.local_log))
-        os.rmdir(d1.workdir)
+        shutil.rmtree(d1.workdir)
         os.chdir(prev_dir)  # Back to previous dir for next test!
 
 

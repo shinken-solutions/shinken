@@ -25,7 +25,9 @@
 
 import logging
 import sys
-from logging import Handler, Formatter, StreamHandler, NOTSET
+import os
+import stat
+from logging import Handler, Formatter, StreamHandler, NOTSET, FileHandler
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
@@ -138,7 +140,12 @@ class Log(logging.Logger):
         The file will be rotated once a day
         """
         # Todo : Create a config var for backup count
-        handler = TimedRotatingFileHandler(path, 'midnight', backupCount=5)
+        if os.path.exists(path) and not stat.S_ISREG(os.stat(path).st_mode):
+            # We don't have a regular file here. Rotate may fail
+            # It can be one of the stat.S_IS* (FIFO? CHR?)
+            handler = FileHandler(path)
+        else:
+            handler = TimedRotatingFileHandler(path, 'midnight', backupCount=5)
         if level is not None:
             handler.setLevel(level)
         if self.name is not None:

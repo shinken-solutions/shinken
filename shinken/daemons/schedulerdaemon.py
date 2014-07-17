@@ -254,6 +254,10 @@ class Shinken(BaseSatellite):
         # We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
+        if not hasattr(self.sched, "conf"):
+            # Race condition where time change before getting conf
+            return
+
         # Then we compensate all host/services
         for h in self.sched.hosts:
             h.compensate_system_time_change(difference)
