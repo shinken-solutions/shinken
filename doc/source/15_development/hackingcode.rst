@@ -12,7 +12,7 @@ Shinken is an open source program.
 
 Enhancements, optimization, fixes, these are all good reasons to create a patch and send it to the development mailing list. Even if you are not sure about the quality of your patch or your ideas, submit them to the mailing list for review or comment. Having feedback is essential to any project.
 
-This documentation will show how to add code to Shinken. Shinken is written in Python. If you are new to python please consider reading this ` introduction / beginners guide`_.
+This documentation will show how to add code to Shinken. Shinken is written in Python. If you are new to python please consider reading this `introduction / beginners guide`_.
 
 
 Development rules 
@@ -20,6 +20,20 @@ Development rules
 
 If you wish to commit code to the Shinken repository, you must strive to follow the :ref:`Shinken development rules <development/programming-rules>`.
 
+Before sending us a Pull Request please consider the following table
+
+============================= ================ ================= =================== ========================
+Contribution type             Run test cases   Add a test case   Add documentation   Do one commit per step
+Typo fixing in comments                                                              Yes
+Typo fixing in code           Yes                                                    Yes
+Bug fixing                    Yes              Yes                                   Yes
+New feature                   Yes              Yes               Yes                 Yes
+============================= ================ ================= =================== ========================
+
+Depending on the contribution you should ensure the previous condition. If you don't met one of those your pull request may take some time to be merged or simply be rejected.
+Ensuring stability is a top priority. Whenever a piece of code is edit, test should ensure nothing is broken. Documentation is also important, undocumented features are almost useless.
+
+Please try to stick to that when contributing to Shinken. We will be happy to merge your work.
 
 How is Shinken's code organized 
 ================================
@@ -129,7 +143,13 @@ We will see that adding such a parameter is very (very) easy. To do this, only 5
 Configuration part 
 -------------------
 
-In the first one (config.py) we add an entry to the properties dict : "flap_history" : {"required":False, "default":'20", "pythonize": to_int, "class_inherit" : [(Host, None), (Service, None)]}, So this property will be an option, with 20 by default, and will be put in the Host and Service class with the name 'flap_history'.
+In the first one (config.py) we add an entry to the properties dict :
+
+::
+
+   "flap_history" : {"required":False, "default":'20", "pythonize": to_int, "class_inherit" : [(Host, None), (Service, None)]},
+
+So this property will be an option, with 20 by default, and will be put in the Host and Service class with the name 'flap_history'.
 
 That's all for the configuration! Yes, no more add. Just one line :)
 
@@ -139,7 +159,13 @@ That's all for the configuration! Yes, no more add. Just one line :)
 Running part 
 -------------
 
-Now the scheduling part (schedulingitem.py). The hard code 20 was used in 2 functions : add_flapping_change and update_flapping. From this file, we are in an object named self in Python. To access the 'flap_history' of the Host or Service class of this object, we just need to do : flap_history = self.__class__.flap_history Then we change occurrences in the code : if len(self.flapping_changes) > flap_history: [...] r += i*(1.2-0.8)/flap_history + 0.8 r = r / flap_history
+Now the scheduling part (schedulingitem.py). The hard code 20 was used in 2 functions : add_flapping_change and update_flapping.
+From this file, we are in an object named self in Python. To access the 'flap_history' of the Host or Service class of this object, we just need to do :
+
+::
+
+  flap_history = self.__class__.flap_history Then we change occurrences in the code : if len(self.flapping_changes)
+  flap_history: [...] r += i*(1.2-0.8)/flap_history + 0.8 r = r / flap_history
 
 That's all. You can test and propose the patch in the devel list. We will thank you and after some patch proposals, you can ask for a git access, you will be a Shinken developer :)
 
@@ -157,7 +183,7 @@ If you created an automated test case for a new feature. (See development rules)
 
 If you documented any new feature in the documentation wiki.
 
-The patch will be __***perfect***__ :)
+The patch will be **perfect** :)
 
 
-.. _ introduction / beginners guide: http://wiki.python.org/moin/BeginnersGuide 
+.. _introduction / beginners guide: http://wiki.python.org/moin/BeginnersGuide
