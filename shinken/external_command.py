@@ -327,7 +327,9 @@ class ExternalCommandManager:
 
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-            logger.info('EXTERNAL COMMAND: ' + command.rstrip())
+		    # Fix #1263
+            # logger.info('EXTERNAL COMMAND: ' + command.rstrip())
+            naglog_result('info', 'EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command, excmd)
 
         # If we are a receiver, bail out here
