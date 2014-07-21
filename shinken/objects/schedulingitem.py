@@ -196,14 +196,41 @@ class SchedulingItem(Item):
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
                         # Fred: Do not raise a check for passive only checked hosts when not in check period ...
+                        # How to "Freshness checking":
+                        # 4 different host checks configuration:
+                        #  1/ not passive and not active: 
+                        #     Do not care about this dumb configuration ...
+                        #  2/ active only
+                        #     Freshness check is launched as usual. 
+                        #     If freshness is activated and needed, why using freshness checking ? Active checks are not enough ?
+                        #  3/ passive only
+                        #     Freshness check is used to launch the check_command if no passive check are received during the freshness_period
+                        #     check_command is usually defined as a check_dummy!2!"No passive check received" to make the host/service become DOWN/CRITICAL when no passive check is received
+                        #  4/ passive and active
+                        #     The problem with this configuration is that check_command is used for actively checking host/service AND as a freshness check command ...
+                        #     Each active check launches the check_command which obviously cannot be a check_dummy!2!"No passive check received"
+                        #     When freshness check is raised, it will launch the check_command as if an active is launched ... but it may be interesting to have 
+                        #     a freshness_command parameter to define which command is to be launched when freshness period expires !
+                        # 
+                        # What about host and depending services "Freshness checking":
+                        # Host is checked as of 3/ defined previously, when host passive check is not received, check_dummy!2 makes host to be DOWN
+                        
+                        launch_freshness_check = True
                         if self.passive_checks_enabled and not self.active_checks_enabled:
-                            if self.check_period is None or self.check_period.is_time_valid(now):
-                                # Raise a log
-                                self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
-                                # And a new check
-                                return self.launch_check(now)
+                            if self.check_period and not self.check_period.is_time_valid(now):
+                                # Do not launch freshness check if check_period is defined and not currently valid
+                                launch_freshness_check = False
+                                
+                        if launch_freshness_check:
+                            # Freshness needs to be checked.
+                            if self.my_type == 'host':
+                                logger.debug("Freshness check launched for host: %s (%s / %s)." % (self.host_name, self.check_freshness, self.freshness_threshold))
                             else:
-                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
+                                logger.debug("Freshness check launched for service: %s/%s (%s / %s)." % (self.host_name, self.service_description, self.check_freshness, self.freshness_threshold))
+                            # Raise a log
+                            self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
+                            # And a new check
+                            return self.launch_check(now)
         return None
 
 
