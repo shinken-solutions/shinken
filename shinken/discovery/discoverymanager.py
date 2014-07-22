@@ -393,7 +393,7 @@ class DiscoveryManager:
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
-                    logger.error('Database init : %s' % exp)
+                    logger.error('Database init : %s', exp)
 
 
     # We try to init the backend if we got one

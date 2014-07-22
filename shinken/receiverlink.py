@@ -58,7 +58,7 @@ class ReceiverLink(SatelliteLink):
         try:
             if self.con is None:
                 self.create_connection()
-            logger.info(" (%s)" % self.uri)
+            logger.info(" (%s)", self.uri)
 
             # If the connection failed to initialize, bail out
             if self.con is None:

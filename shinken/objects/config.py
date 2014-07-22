@@ -406,7 +406,7 @@ class Config(Item):
             elts = elt.split('=', 1)
             if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
-                logger.error("[config] the parameter %s is malformed! (no = sign)" % elts[0])
+                logger.error("[config] the parameter %s is malformed! (no = sign)", elts[0])
             else:
                 self.params[elts[0]] = elts[1]
                 setattr(self, elts[0], elts[1])
@@ -433,7 +433,7 @@ class Config(Item):
             res.write(os.linesep)
             res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
-                logger.info("[config] opening '%s' configuration file" % file)
+                logger.info("[config] opening '%s' configuration file", file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')
@@ -441,7 +441,7 @@ class Config(Item):
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
             except IOError, exp:
-                logger.error("[config] cannot open config file '%s' for reading: %s" % (file, exp))
+                logger.error("[config] cannot open config file '%s' for reading: %s", file, exp)
                 # The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
@@ -462,14 +462,14 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         if self.read_config_silent == 0:
-                            logger.info("Processing object config file '%s'" % cfg_file_name)
+                            logger.info("Processing object config file '%s'", cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
+                        logger.error("Cannot open config file '%s' for reading: %s", cfg_file_name, exp)
                         # The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
@@ -480,7 +480,7 @@ class Config(Item):
                         cfg_dir_name = os.path.join(self.config_base_dir, elts[1])
                     # Ok, look if it's really a directory
                     if not os.path.isdir(cfg_dir_name):
-                        logger.error("Cannot open config dir '%s' for reading" % cfg_dir_name)
+                        logger.error("Cannot open config dir '%s' for reading", cfg_dir_name)
                         self.conf_is_correct = False
 
                     # Look for .pack file into it :)
@@ -495,7 +495,7 @@ class Config(Item):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 if self.read_config_silent == 0:
-                                    logger.info("Processing object config file '%s'" % os.path.join(root, file))
+                                    logger.info("Processing object config file '%s'", os.path.join(root, file))
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
@@ -504,7 +504,7 @@ class Config(Item):
                                     res.write(os.linesep)
                                     fd.close()
                                 except IOError, exp:
-                                    logger.error("Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
+                                    logger.error("Cannot open config file '%s' for reading: %s", os.path.join(root, file), exp)
                                     # The configuration is invalid
                                     # because we have a bad file!
                                     self.conf_is_correct = False
@@ -516,7 +516,7 @@ class Config(Item):
                         trig_dir_name = os.path.join(self.config_base_dir, elts[1])
                     # Ok, look if it's really a directory
                     if not os.path.isdir(trig_dir_name):
-                        logger.error("Cannot open triggers dir '%s' for reading" % trig_dir_name)
+                        logger.error("Cannot open triggers dir '%s' for reading", trig_dir_name)
                         self.conf_is_correct = False
                         continue
                     # Ok it's a valid one, I keep it
@@ -874,15 +874,15 @@ class Config(Item):
                 for (i, conf) in r.confs.iteritems():
                     # Remember to protect the local conf hostgroups too!
                     conf.hostgroups.prepare_for_sending()
-                    logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
+                    logger.debug('[%s] Serializing the configuration %d', r.get_name(), i)
                     t0 = time.time()
                     r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                    logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
-                    logger.debug("PICKLE LEN : %d" % len(r.serialized_confs[i]))
+                    logger.debug("[config] time to serialize the conf %s:%s is %s", r.get_name(), i, time.time() - t0)
+                    logger.debug("PICKLE LEN : %d", len(r.serialized_confs[i]))
             # Now pickle the whole conf, for easy and quick spare send
             t0 = time.time()
             whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
-            logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+            logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
             self.whole_conf_pack = whole_conf_pack
             print "TOTAL serializing in", time.time() - t1
 
@@ -902,10 +902,10 @@ class Config(Item):
                     def Serialize_config(q, rname, i, conf):
                         # Remember to protect the local conf hostgroups too!
                         conf.hostgroups.prepare_for_sending()
-                        logger.debug('[%s] Serializing the configuration %d' % (rname, i))
+                        logger.debug('[%s] Serializing the configuration %d', rname, i)
                         t0 = time.time()
                         res = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                        logger.debug("[config] time to serialize the conf %s:%s is %s" % (rname, i, time.time() - t0))
+                        logger.debug("[config] time to serialize the conf %s:%s is %s", rname, i, time.time() - t0)
                         q.append((i, res))
 
                     # Prepare a sub-process that will manage the pickle computation
@@ -922,7 +922,7 @@ class Config(Item):
                             # remember to join() so the children can die
                             p.join()
                     for (i, p) in to_del:
-                        logger.debug("The sub process %s is done with the return code %d" % (p.name, p.exitcode))
+                        logger.debug("The sub process %s is done with the return code %d", p.name, p.exitcode)
                         processes.remove( (i, p ) )
                     # Don't be too quick to poll!
                     time.sleep(0.1)
@@ -958,7 +958,7 @@ class Config(Item):
 
             #Get it and save it
             self.whole_conf_pack = whole_queue.pop()
-            logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+            logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
 
             print "TOTAL serializing iin", time.time() - t2
             # Shutdown the manager, the sub-process should be gone now
@@ -991,7 +991,7 @@ class Config(Item):
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    logger.warning("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
+                    logger.warning("The parameter %s is useless and can be removed from the configuration (Reason: %s)", prop, entry.text)
 
 
     # It's used to raise warning if the user got parameter
@@ -1013,7 +1013,7 @@ class Config(Item):
             for s in unmanaged:
                 logger.info(s)
 
-            logger.warning("Unmanaged configuration statement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
+            logger.warning("Unmanaged configuration statement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github ", mailing_list_uri)
 
     # Overrides specific instances properties
     def override_properties(self):
@@ -1172,13 +1172,13 @@ class Config(Item):
             # so all hosts without realm will be link with it
             default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
-            logger.warning("No realms defined, I add one at %s" % default.get_name())
+            logger.warning("No realms defined, I add one at %s", default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
-                        logger.info("Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
+                        logger.info("Tagging %s with realm %s", elt.get_name(), default.get_name())
 
 
     # If a satellite is missing, we add them in the localhost
@@ -1359,7 +1359,7 @@ class Config(Item):
         if mod_to_add != []:
             logger.warning("I autogenerated some Broker modules, please look at your configuration")
             for m in mod_to_add:
-                logger.warning("The module %s is autogenerated" % m.module_name)
+                logger.warning("The module %s is autogenerated", m.module_name)
                 for b in self.brokers:
                     b.modules.append(m)
 
@@ -1367,7 +1367,7 @@ class Config(Item):
         if mod_to_add_to_schedulers != []:
             logger.warning("I autogenerated some Scheduler modules, please look at your configuration")
             for m in mod_to_add_to_schedulers:
-                logger.warning("The module %s is autogenerated" % m.module_name)
+                logger.warning("The module %s is autogenerated", m.module_name)
                 for b in self.schedulers:
                     b.modules.append(m)
 
@@ -1398,7 +1398,7 @@ class Config(Item):
         if mod_to_add != []:
             logger.warning("I autogenerated some Arbiter modules, please look at your configuration")
             for (mod, data) in mod_to_add:
-                logger.warning("Module %s was autogenerated" % data['module_name'])
+                logger.warning("Module %s was autogenerated", data['module_name'])
                 for a in self.arbiters:
                     a.modules = ','.join([getattr(a, 'modules', ''), data['module_name']])
                 self.modules.items[mod.id] = mod
@@ -1498,14 +1498,14 @@ class Config(Item):
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo', 'servicesextinfo', 'checkmodulations', 'macromodulations'):
             if self.read_config_silent == 0:
-                logger.info('Checking %s...' % (x))
+                logger.info('Checking %s...', x)
 
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
-                logger.error("\t%s conf incorrect!!" % (x))
+                logger.error("\t%s conf incorrect!!", x)
             if self.read_config_silent == 0:
-                logger.info('\tChecked %d %s' % (len(cur), x))
+                logger.info('\tChecked %d %s', len(cur), x)
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents("self", "parents"):
@@ -1520,12 +1520,12 @@ class Config(Item):
             except:
                 continue
             if self.read_config_silent == 0:
-                logger.info('Checking %s...' % (x))
+                logger.info('Checking %s...', x)
             if not cur.is_correct():
                 r = False
-                logger.error("\t%s conf incorrect!!" % (x))
+                logger.error("\t%s conf incorrect!!", x)
             if self.read_config_silent == 0:
-                logger.info('\tChecked %d %s' % (len(cur), x))
+                logger.info('\tChecked %d %s', len(cur), x)
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raise an Error
@@ -1533,7 +1533,7 @@ class Config(Item):
             rea = s.realm
             if rea:
                 if len(rea.potential_brokers) == 0:
-                    logger.error("The scheduler %s got no broker in its realm or upper" % s.get_name())
+                    logger.error("The scheduler %s got no broker in its realm or upper", s.get_name())
                     self.add_error("Error: the scheduler %s got no broker in its realm or upper" % s.get_name())
                     r = False
 
@@ -1551,12 +1551,12 @@ class Config(Item):
                 pollers_tag.add(t)
         if not hosts_tag.issubset(pollers_tag):
             for tag in hosts_tag.difference(pollers_tag):
-                logger.error("Hosts exist with poller_tag %s but no poller got this tag" % tag)
+                logger.error("Hosts exist with poller_tag %s but no poller got this tag", tag)
                 self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
         if not services_tag.issubset(pollers_tag):
             for tag in services_tag.difference(pollers_tag):
-                logger.error("Services exist with poller_tag %s but no poller got this tag" % tag)
+                logger.error("Services exist with poller_tag %s but no poller got this tag", tag)
                 self.add_error("Error: services exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
 
@@ -1577,7 +1577,7 @@ class Config(Item):
                             continue
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
-                            logger.error("Business_rule '%s' got hosts from another realm: %s" % (e.get_full_name(), elt_r))
+                            logger.error("Business_rule '%s' got hosts from another realm: %s", e.get_full_name(), elt_r)
                             self.add_error("Error: Business_rule '%s' got hosts from another realm: %s" % (e.get_full_name(), elt_r))
                             r = False
 
@@ -1792,8 +1792,8 @@ class Config(Item):
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
             logger.info("Number of hosts in the realm %s: %d "
-                                "(distributed in %d linked packs)"
-                                % (r.get_name(), nb_elements, len(r.packs)))
+                                "(distributed in %d linked packs)",
+                                 r.get_name(), nb_elements, len(r.packs))
 
             if nb_schedulers == 0 and nb_elements != 0:
                 err = "The realm %s has hosts but no scheduler!" % r.get_name()
@@ -1819,14 +1819,14 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                logger.debug('Trying to open the distribution file %s'
-                                    % self.pack_distribution_file)
+                logger.debug('Trying to open the distribution file %s',
+                                     self.pack_distribution_file)
                 try:
                     f = open(self.pack_distribution_file, 'rb')
                     assoc = cPickle.load(f)
                     f.close()
                 except Exception, exp:
-                    logger.warning('Warning: cannot open the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
+                    logger.warning('Warning: cannot open the distribution file %s: %s', self.pack_distribution_file, str(exp))
 
 
             # Now we explode the numerous packs into nb_packs reals packs:
@@ -1869,23 +1869,23 @@ class Config(Item):
                     assoc[elt.get_name()] = i
 
             try:
-                logger.info('Saving the distribution file %s' % self.pack_distribution_file)
+                logger.info('Saving the distribution file %s', self.pack_distribution_file)
                 f = open(self.pack_distribution_file, 'wb')
                 cPickle.dump(assoc, f)
                 f.close()
             except Exception, exp:
-                logger.warning('Could not save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
+                logger.warning('Could not save the distribution file %s: %s', self.pack_distribution_file, str(exp))
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        logger.info("Total number of hosts : %d"
-                            % nb_elements_all_realms)
+        logger.info("Total number of hosts : %d",
+                             nb_elements_all_realms)
         if len(self.hosts) != nb_elements_all_realms:
             logger.warning("There are %d hosts defined, and %d hosts "
                                 "dispatched in the realms. Some hosts have "
-                                "been ignored"
-                                % (len(self.hosts), nb_elements_all_realms))
+                                "been ignored",
+                                 len(self.hosts), nb_elements_all_realms)
             self.add_error("There are %d hosts defined, and %d hosts "
                            "dispatched in the realms. Some hosts have "
                            "been ignored"

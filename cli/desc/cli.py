@@ -35,7 +35,7 @@ CONFIG = None
 ############# ********************        SERVE           ****************###########
 def serve(port):
     port = int(port)
-    logger.info("Serving documentation at port %s" % port)
+    logger.info("Serving documentation at port %s", port)
     import SimpleHTTPServer
     import SocketServer
     doc_dir   = CONFIG['paths']['doc']

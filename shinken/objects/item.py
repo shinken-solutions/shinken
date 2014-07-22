@@ -389,11 +389,11 @@ Like temporary attributes such as "imported_from", etc.. """
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[item::%s] %s" % (self.get_name(), err))
+                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                logger.warning("[item::%s] %s property is missing" % (self.get_name(), prop))
+                logger.warning("[item::%s] %s property is missing", self.get_name(), prop)
                 state = False
 
         return state
@@ -483,7 +483,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            logger.debug("[item::%s] deleting acknowledge of %s" % (self.get_name(), self.get_dbg_name()))
+            logger.debug("[item::%s] deleting acknowledge of %s", self.get_name(), self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -808,16 +808,16 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.warning("[items] %s.%s is duplicated from %s" %\
-                    (i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
+                logger.warning("[items] %s.%s is duplicated from %s", \
+                    i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source"))
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[items] %s" % err)
+            logger.warning("[items] %s", err)
 
         for err in self.configuration_errors:
-            logger.error("[items] %s" % err)
+            logger.error("[items] %s", err)
             r = False
 
         # Then look for individual ok
@@ -832,7 +832,7 @@ class Items(object):
             # Now other checks
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
-                logger.error("[items] In %s is incorrect ; from %s" % (i.get_name(), n))
+                logger.error("[items] In %s is incorrect ; from %s", i.get_name(), n)
                 r = False
 
         return r
@@ -898,7 +898,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            logger.warning("[items] %s.%s is already defined '%s'" % (type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
+            logger.warning("[items] %s.%s is already defined '%s'", type, i.get_name(), getattr(i, 'imported_from', "unknown source"))
             del self[id]  # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
@@ -1255,7 +1255,7 @@ class Items(object):
 
         # and raise errors about it
         for item in items_in_loops:
-            logger.error("The %s object '%s'  is part of a circular parent/child chain!" % (item.my_type, item.get_name()))
+            logger.error("The %s object '%s'  is part of a circular parent/child chain!", item.my_type, item.get_name())
             r = False
 
         return r

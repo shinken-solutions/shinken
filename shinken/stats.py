@@ -91,7 +91,7 @@ class Stats(object):
 
             if len(stats) != 0:
                 s = ', '.join(['%s:%s' % (k,v) for (k,v) in stats.iteritems()])
-                logger.debug("REAPER: %s " % s)
+                logger.debug("REAPER: %s ", s)
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
             if not self.name:
@@ -102,7 +102,7 @@ class Stats(object):
             metrics = []
             for (k,e) in stats.iteritems():
                 nk = '%s.%s.%s' % (self.type, self.name, k)
-                logger.debug('REAP %s:%s' % (nk, e))
+                logger.debug('REAP %s:%s', nk, e)
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
                 # nb can't be 0 here and _min_max can't be None too
@@ -115,21 +115,21 @@ class Stats(object):
                 s = '%s.count %f %d' % (nk, nb, now)
                 metrics.append(s)
 
-            logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
+            logger.debug('REAPER metrics to send %s (%d)', metrics, len(str(metrics)) )
             # get the inner data for the daemon
             struct = self.app.get_stats_struct()
             struct['metrics'].extend(metrics)
-            logger.debug('REAPER whole struct %s' % struct)
+            logger.debug('REAPER whole struct %s', struct)
             j = json.dumps(struct)
             if self.cyph is not None:
-                logger.debug('PUT to /api/v1/put/ with %s %s' % (self.api_key, self.secret))
+                logger.debug('PUT to /api/v1/put/ with %s %s', self.api_key, self.secret)
                 # assume a %16 length messagexs
                 j += '\0' * (-len(j) % 16)
                 encrypted_text = self.cyph.encrypt(j)
                 try:
                     self.con.put('/api/v1/put/', encrypted_text)
                 except HTTPException, exp:
-                    logger.debug('REAPER cannot put to the metric server %s' % exp)
+                    logger.debug('REAPER cannot put to the metric server %s', exp)
             time.sleep(10)
 
 

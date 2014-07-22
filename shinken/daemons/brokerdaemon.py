@@ -120,7 +120,7 @@ class Broker(BaseSatellite):
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command '%s'" % str(ExternalCommand.__dict__))
+            logger.debug("Enqueuing an external command '%s'", str(ExternalCommand.__dict__))
             self.external_commands.append(elt)
         # Maybe we got a Message from the modules, it's way to ask something
         # like from now a full data from a scheduler for example.
@@ -134,17 +134,17 @@ class Broker(BaseSatellite):
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
                     source = elt.source
-                    logger.info('The module %s is asking me to get all initial data from the scheduler %d' % (source, c_id))
+                    logger.info('The module %s is asking me to get all initial data from the scheduler %d', source, c_id)
                     # so we just reset the connection and the running_id, it will just get all new things
                     try:
                         self.schedulers[c_id]['con'] = None
                         self.schedulers[c_id]['running_id'] = 0
                     except KeyError:  # maybe this instance was not known, forget it
-                        logger.warning("the module %s ask me a full_instance_id for an unknown ID (%d)!" % (source, c_id))
+                        logger.warning("the module %s ask me a full_instance_id for an unknown ID (%d)!", source, c_id)
             # Maybe a module tells me that it's dead, I must log it's last words...
             if elt.get_type() == 'ICrash':
                 data = elt.get_data()
-                logger.error('the module %s just crash! Please look at the traceback:' % data['name'])
+                logger.error('the module %s just crash! Please look at the traceback:', data['name'])
                 logger.error(data['trace'])
 
                 # The module death will be looked for elsewhere and restarted.
@@ -188,7 +188,7 @@ class Broker(BaseSatellite):
         # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.debug('Type unknown for connection! %s' % type)
+            logger.debug('Type unknown for connection! %s', type)
             return
 
         if type == 'scheduler':
@@ -214,7 +214,7 @@ class Broker(BaseSatellite):
         except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
+            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
 
@@ -229,26 +229,26 @@ class Broker(BaseSatellite):
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
             if new_run_id != running_id:
-                logger.debug("[%s] New running id for the %s %s: %s (was %s)" % (self.name, type, links[id]['name'], new_run_id, running_id))
+                logger.debug("[%s] New running id for the %s %s: %s (was %s)", self.name, type, links[id]['name'], new_run_id, running_id)
                 links[id]['broks'].clear()
                 # we must ask for a new full broks if
                 # it's a scheduler
                 if type == 'scheduler':
-                    logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
+                    logger.debug("[%s] I ask for a broks generation to the scheduler %s", self.name, links[id]['name'])
                     con.get('fill_initial_broks', {'bname':self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except HTTPExceptions, exp:
-            logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
+            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
         except KeyError, exp:
-            logger.info("the %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
+            logger.info("the %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             traceback.print_stack()
             return
 
-        logger.info("Connection OK to the %s %s" % (type, links[id]['name']))
+        logger.info("Connection OK to the %s %s", type, links[id]['name'])
 
 
     # Get a brok. Our role is to put it in the modules
@@ -261,9 +261,9 @@ class Broker(BaseSatellite):
                 mod.manage_brok(b)
             except Exception, exp:
                 logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(), str(exp)))
-                logger.warning("Exception type: %s" % type(exp))
-                logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later", mod.get_name(), str(exp))
+                logger.warning("Exception type: %s", type(exp))
+                logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 self.modules_manager.set_to_restart(mod)
 
 
@@ -313,7 +313,7 @@ class Broker(BaseSatellite):
         # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.debug('Type unknown for connection! %s' % type)
+            logger.debug('Type unknown for connection! %s', type)
             return
 
         # We check for new check in each schedulers and put
@@ -331,10 +331,10 @@ class Broker(BaseSatellite):
                         _t = zlib.decompress(_t)
                         tmp_broks = cPickle.loads(_t)
                     except (TypeError, zlib.error, cPickle.PickleError), exp:
-                        logger.error('Cannot load broks data from %s : %s' % (links[sched_id]['name'], exp))
+                        logger.error('Cannot load broks data from %s : %s', links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
                         continue
-                    logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
+                    logger.debug("%s Broks get in %s", len(tmp_broks), time.time() - t0)
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
                     # Ok, we can add theses broks to our queues
@@ -344,14 +344,14 @@ class Broker(BaseSatellite):
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError, exp:
-                logger.debug("Key error for get_broks : %s" % str(exp))
+                logger.debug("Key error for get_broks : %s", str(exp))
                 self.pynag_con_init(sched_id, type=type)
             except HTTPExceptions, exp:
-                logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("Connection problem to the %s %s: %s", type, links[sched_id]['name'], str(exp))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError, exp:
-                logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("The %s %s should not be initialized: %s", type, links[sched_id]['name'], str(exp))
             # scheduler must not have checks
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
@@ -396,7 +396,7 @@ class Broker(BaseSatellite):
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker', api_key=self.api_key, secret=self.secret)
 
-        logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
+        logger.debug("[%s] Sending us configuration %s", self.name, conf)
         # If we've got something in the schedulers, we do not
         # want it anymore
         # self.schedulers.clear()
@@ -439,7 +439,7 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['active'] = s['active']
             self.schedulers[sched_id]['last_connection'] = 0
 
-        logger.info("We have our schedulers: %s " % self.schedulers)
+        logger.info("We have our schedulers: %s ", self.schedulers)
 
         # Now get arbiter
         for arb_id in conf['arbiters']:
@@ -470,7 +470,7 @@ class Broker(BaseSatellite):
 
             # We do not connect to the arbiter. Connection hangs
 
-        logger.info("We have our arbiters: %s " % self.arbiters)
+        logger.info("We have our arbiters: %s ", self.arbiters)
 
         # Now for pollers
         for pol_id in conf['pollers']:
@@ -505,7 +505,7 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(pol_id, 'poller')
 
-        logger.info("We have our pollers: %s" % self.pollers)
+        logger.info("We have our pollers: %s", self.pollers)
 
         # Now reactionners
         for rea_id in conf['reactionners']:
@@ -540,7 +540,7 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(rea_id, 'reactionner')
 
-        logger.info("We have our reactionners: %s" % self.reactionners)
+        logger.info("We have our reactionners: %s", self.reactionners)
 
         # Now receivers
         for rec_id in conf['receivers']:
@@ -575,7 +575,7 @@ class Broker(BaseSatellite):
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
-            logger.info("We received modules %s " % mods)
+            logger.info("We received modules %s ", mods)
 
             # Ok now start, or restart them!
             # Set modules, init them and start external ones
@@ -588,7 +588,7 @@ class Broker(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.info("Setting our timezone to %s" % use_timezone)
+            logger.info("Setting our timezone to %s", use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
 
@@ -622,15 +622,15 @@ class Broker(BaseSatellite):
 
 
     def do_loop_turn(self):
-        logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
+        logger.debug("Begin Loop: managing old broks (%d)", len(self.broks))
 
         # Dump modules Queues size
         insts = [inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
             try:
-                logger.debug("External Queue len (%s): %s" % (inst.get_name(), inst.to_q.qsize()))
+                logger.debug("External Queue len (%s): %s", inst.get_name(), inst.to_q.qsize())
             except Exception, exp:
-                logger.debug("External Queue len (%s): Exception! %s" % (inst.get_name(), exp))
+                logger.debug("External Queue len (%s): Exception! %s", inst.get_name(), exp)
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
@@ -688,7 +688,7 @@ class Broker(BaseSatellite):
         for b in to_send:
             b.need_send_to_ext = False
         statsmgr.incr('core.put-to-external-queue', time.time() - t0)
-        logger.debug("Time to send %s broks (%d secs)" % (len(to_send), time.time() - t0))
+        logger.debug("Time to send %s broks (%d secs)", len(to_send), time.time() - t0)
 
         # We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()
@@ -749,7 +749,7 @@ class Broker(BaseSatellite):
             for line in self.get_header():
                 logger.info(line)
 
-            logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
+            logger.info("[Broker] Using working directory: %s", os.path.abspath(self.workdir))
 
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
@@ -757,7 +757,7 @@ class Broker(BaseSatellite):
             self.load_modules_manager()
             
             self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
-            logger.debug("The Arbiter uri it at %s" % self.uri2)
+            logger.debug("The Arbiter uri it at %s", self.uri2)
 
             self.uri3 = self.http_daemon.register(self.istats)
 
@@ -779,5 +779,5 @@ class Broker(BaseSatellite):
         except Exception, exp:
             logger.critical("I got an unrecoverable error. I have to exit")
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("Back trace of it: %s", traceback.format_exc())
             raise
