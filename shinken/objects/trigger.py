@@ -95,7 +95,7 @@ class Triggers(Items):
                         buf = fd.read()
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
+                        logger.error("Cannot open trigger file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
                     self.create_trigger(buf, file[:-5])

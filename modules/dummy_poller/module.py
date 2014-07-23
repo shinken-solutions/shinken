@@ -45,7 +45,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    logger.info("[Dummy Poller] Get a Dummy poller module for plugin %s" % mod_conf.get_name())
+    logger.info("[Dummy Poller] Get a Dummy poller module for plugin %s", mod_conf.get_name())
     instance = Dummy_poller(mod_conf)
     return instance
 
@@ -68,11 +68,11 @@ class Dummy_poller(BaseModule):
     def get_new_checks(self):
         try:
             while(True):
-                logger.debug("[Dummy Poller] I %d wait for a message" % self.id)
+                logger.debug("[Dummy Poller] I %d wait for a message", self.id)
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                logger.debug("[Dummy Poller] I, %d, got a message!" % self.id)
+                logger.debug("[Dummy Poller] I, %d, got a message!", self.id)
         except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
@@ -83,7 +83,7 @@ class Dummy_poller(BaseModule):
         # queue
         for chk in self.checks:
             if chk.status == 'queue':
-                logger.warning("[Dummy Poller] Dummy (bad) check for %s" % str(chk.command))
+                logger.warning("[Dummy Poller] Dummy (bad) check for %s", str(chk.command))
                 chk.exit_status = 2
                 chk.get_outputs('All is NOT SO well', 8012)
                 chk.status = 'done'
@@ -99,7 +99,7 @@ class Dummy_poller(BaseModule):
             try:
                 self.returns_queue.put(action)
             except IOError, exp:
-                logger.info("[Dummy Poller] %d exiting: %s" % (self.id, exp))
+                logger.info("[Dummy Poller] %d exiting: %s", self.id, exp)
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
@@ -137,7 +137,7 @@ class Dummy_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    logger.info("[Dummy Poller] %d : Dad say we are dying..." % self.id)
+                    logger.info("[Dummy Poller] %d : Dad say we are dying...", self.id)
                     break
             except:
                 pass

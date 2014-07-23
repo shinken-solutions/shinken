@@ -333,7 +333,7 @@ class Daemon(object):
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        logger.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        logger.info("I correctly loaded the modules: [%s]", ','.join([inst.get_name() for inst in self.modules_manager.instances]))
 
 
     # Dummy method for adding broker to this daemon
@@ -379,11 +379,11 @@ class Daemon(object):
 
 
     def unlink(self):
-        logger.debug("Unlinking %s" % self.pidfile)
+        logger.debug("Unlinking %s", self.pidfile)
         try:
             os.unlink(self.pidfile)
         except Exception, e:
-            logger.error("Got an error unlinking our pidfile: %s" % (e))
+            logger.error("Got an error unlinking our pidfile: %s", e)
 
 
     # Look if we need a local log or not
@@ -394,9 +394,9 @@ class Daemon(object):
                 #self.local_log_fd = self.log.register_local_log(self.local_log)
                 self.local_log_fd = logger.register_local_log(self.local_log)
             except IOError, exp:
-                logger.error("Opening the log file '%s' failed with '%s'" % (self.local_log, exp))
+                logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
                 sys.exit(2)
-            logger.info("Using the local log file '%s'" % self.local_log)
+            logger.info("Using the local log file '%s'", self.local_log)
 
 
     # Only on linux: Check for /dev/shm write access
@@ -407,7 +407,7 @@ class Daemon(object):
             # We get the access rights, and we check them
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                logger.critical("The directory %s is not writable or readable. Please make it read writable: %s" % (shm_path, shm_path))
+                logger.critical("The directory %s is not writable or readable. Please make it read writable: %s", shm_path, shm_path)
                 sys.exit(2)
 
 
@@ -439,7 +439,7 @@ class Daemon(object):
         try:
             pid = int(self.fpid.readline().strip(' \r\n'))
         except Exception as err:
-            logger.info("Stale pidfile exists at %s (%s). Reusing it." % (err, self.pidfile))
+            logger.info("Stale pidfile exists at %s (%s). Reusing it.", err, self.pidfile)
             return
 
         try:
@@ -448,7 +448,7 @@ class Daemon(object):
             # this includes :
             #  * PermissionError when a process with same pid exists but is executed by another user.
             #  * ProcessLookupError: [Errno 3] No such process.
-            logger.info("Stale pidfile exists (%s), Reusing it." % err)
+            logger.info("Stale pidfile exists (%s), Reusing it.", err)
             return
 
         if not self.do_replace:
@@ -536,7 +536,7 @@ class Daemon(object):
             # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.error("Something weird happened with/during second fork: status=", status)
+                logger.error("Something weird happened with/during second fork: status= %s", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -651,15 +651,15 @@ class Daemon(object):
         if use_ssl:
             ssl_cert = os.path.abspath(str(ssl_conf.server_cert))
             if not os.path.exists(ssl_cert):
-                logger.error('Error : the SSL certificate %s is missing (server_cert). Please fix it in your configuration' % ssl_cert)
+                logger.error('Error : the SSL certificate %s is missing (server_cert). Please fix it in your configuration', ssl_cert)
                 sys.exit(2)
             ca_cert = os.path.abspath(str(ssl_conf.ca_cert))
-            logger.info("Using ssl ca cert file: %s" % ca_cert)
+            logger.info("Using ssl ca cert file: %s", ca_cert)
             ssl_key = os.path.abspath(str(ssl_conf.server_key))
             if not os.path.exists(ssl_key):
-                logger.error('Error : the SSL key %s is missing (server_key). Please fix it in your configuration' % ssl_key)
+                logger.error('Error : the SSL key %s is missing (server_key). Please fix it in your configuration', ssl_key)
                 sys.exit(2)
-            logger.info("Using ssl server cert/key files: %s/%s" % (ssl_cert, ssl_key))
+            logger.info("Using ssl server cert/key files: %s/%s", ssl_cert, ssl_key)
 
             if ssl_conf.hard_ssl_name_check:
                 logger.info("Enabling hard SSL server name verification")
@@ -692,9 +692,9 @@ class Daemon(object):
             logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
             self.modules_dir = '/var/lib/shinken/modules'
         self.modules_dir = os.path.abspath(self.modules_dir)
-        logger.info("Modules directory: %s" % (self.modules_dir))
+        logger.info("Modules directory: %s", self.modules_dir)
         if not os.path.exists(self.modules_dir):
-            logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modules_dir)
+            logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration", self.modules_dir)
             raise Exception("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modules_dir)
 
         # Ok remember to populate the modulesctx object
@@ -717,7 +717,7 @@ class Daemon(object):
         try:
             return getpwnam(self.user)[2]
         except KeyError, exp:
-            logger.error("The user %s is unknown" % self.user)
+            logger.error("The user %s is unknown", self.user)
             return None
 
     # Just give the gid of a group by looking at its name
@@ -725,7 +725,7 @@ class Daemon(object):
         try:
             return getgrnam(self.group)[2]
         except KeyError, exp:
-            logger.error("The group %s is unknown" % self.group)
+            logger.error("The group %s is unknown", self.group)
             return None
 
     # Change user of the running program. Just insult the admin
@@ -765,13 +765,13 @@ class Daemon(object):
             try:
                 os.initgroups(self.user, gid)
             except OSError, e:
-                logger.warning('Cannot call the additional groups setting with initgroups (%s)' % e.strerror)
+                logger.warning('Cannot call the additional groups setting with initgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
         except OSError, e:
-            logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting" % (self.user, self.group, e.strerror, e.errno))
+            logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting", self.user, self.group, e.strerror, e.errno)
             sys.exit(2)
 
 
@@ -784,7 +784,7 @@ class Daemon(object):
             config = ConfigParser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
-                logger.error("Bad or missing config file: %s " % self.config_file)
+                logger.error("Bad or missing config file: %s ", self.config_file)
                 sys.exit(2)
             try:
                 for (key, value) in config.items('daemon'):
@@ -794,7 +794,7 @@ class Daemon(object):
             except ConfigParser.InterpolationMissingOptionError, e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
-                logger.error("Incorrect or missing variable '%s' in config file : %s" % (wrong_variable, self.config_file))
+                logger.error("Incorrect or missing variable '%s' in config file : %s", wrong_variable, self.config_file)
                 sys.exit(2)
         else:
             logger.warning("No config file specified, use defaults parameters")
@@ -822,7 +822,7 @@ class Daemon(object):
 
 
     def manage_signal(self, sig, frame):
-        logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
+        logger.debug("I'm process %d and I received signal %s", os.getpid(), str(sig))
         if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
         elif sig == signal.SIGUSR2: # if USR2, ask objects dump
@@ -871,10 +871,10 @@ class Daemon(object):
         try:
             self.http_daemon.run()
         except Exception, exp:
-            logger.error('The HTTP daemon failed with the error %s, exiting' % str(exp))
+            logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Back trace of this error: %s" % (output.getvalue()))
+            logger.error("Back trace of this error: %s", output.getvalue())
             output.close()
             self.do_stop()
             # Hard mode exit from a thread
@@ -942,7 +942,7 @@ class Daemon(object):
 
     # Default action for system time change. Actually a log is done
     def compensate_system_time_change(self, difference):
-        logger.warning('A system time change of %s has been detected.  Compensating...' % difference)
+        logger.warning('A system time change of %s has been detected.  Compensating...', difference)
 
 
     # Use to wait conf from arbiter.
@@ -975,7 +975,7 @@ class Daemon(object):
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later' % (inst.get_name(), str(exp)))
+                    logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later', inst.get_name(), str(exp))
                     self.modules_manager.set_to_restart(inst)
         statsmgr.incr('core.hook.%s' % hook_name, time.time() - _t)
 

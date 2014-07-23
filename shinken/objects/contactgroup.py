@@ -75,7 +75,7 @@ class Contactgroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            logger.error("[contactgroup::%s] got a loop in contactgroup definition" % self.get_name())
+            logger.error("[contactgroup::%s] got a loop in contactgroup definition", self.get_name())
             if self.has('members'):
                 return self.members
             else:

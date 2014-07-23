@@ -126,12 +126,12 @@ class Itemgroup(Item):
 
         if self.unknown_members != []:
             for m in self.unknown_members:
-                logger.error("[itemgroup::%s] as %s, got unknown member %s" % (self.get_name(), self.__class__.my_type, m))
+                logger.error("[itemgroup::%s] as %s, got unknown member %s", self.get_name(), self.__class__.my_type, m)
             res = False
 
         if self.configuration_errors != []:
             for err in self.configuration_errors:
-                logger.error("[itemgroup] %s" % err)
+                logger.error("[itemgroup] %s", err)
             res = False
 
         return res

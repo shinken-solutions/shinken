@@ -203,7 +203,7 @@ class SchedulingItem(Item):
                                 # And a new check
                                 return self.launch_check(now)
                             else:
-                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
+                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period.", self.host_name)
         return None
 
 
@@ -1321,7 +1321,7 @@ class SchedulingItem(Item):
         if force or (not self.is_no_check_dependent()):
             # Fred : passive only checked host dependency
             if dependent and self.my_type == 'host' and self.passive_checks_enabled and not self.active_checks_enabled:
-                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !" % (self.host_name))
+                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !", self.host_name)
                 return None
             
             # By default we will use our default check_command
@@ -1598,8 +1598,8 @@ class SchedulingItem(Item):
             except Exception, e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
-                logger.debug("[%s] Error while re-evaluating business rule:\n%s" %
-                             (self.get_name(), traceback.format_exc()))
+                logger.debug("[%s] Error while re-evaluating business rule:\n%s", 
+                             self.get_name(), traceback.format_exc())
                 state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
@@ -1650,4 +1650,4 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                logger.error("We got an exception from a trigger on %s for %s" % (self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())))
+                logger.error("We got an exception from a trigger on %s for %s", self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc()))

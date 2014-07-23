@@ -170,7 +170,7 @@ class Worker:
                 # action launching
                 if r == 'toomanyopenfiles':
                     # We should die as soon as we return all checks
-                    logger.error("[%d] I am dying Too many open files %s ... " % (self.id, chk))
+                    logger.error("[%d] I am dying Too many open files %s ... ", self.id, chk)
                     self.i_am_dying = True
 
 
@@ -193,7 +193,7 @@ class Worker:
                 try:
                     self.returns_queue.put(action)
                 except IOError, exp:
-                    logger.error("[%d] Exiting: %s" % (self.id, exp))
+                    logger.error("[%d] Exiting: %s", self.id, exp)
                     sys.exit(2)
 
         # Little sleep
@@ -229,7 +229,7 @@ class Worker:
         except Exception, exp:
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Worker '%d' exit with an unmanaged exception : %s" % (self.id, output.getvalue()))
+            logger.error("Worker '%d' exit with an unmanaged exception : %s", self.id, output.getvalue())
             output.close()
             # Ok I die now
             raise
@@ -276,7 +276,7 @@ class Worker:
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    logger.debug("[%d] Dad say we are dying..." % self.id)
+                    logger.debug("[%d] Dad say we are dying...", self.id)
                     break
             except:
                 pass
@@ -285,7 +285,7 @@ class Worker:
             # if so, we really die, our master poller will launch a new
             # worker because we were too weak to manage our job :(
             if len(self.checks) == 0 and self.i_am_dying:
-                logger.warning("[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id)
+                logger.warning("[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please.", self.id)
                 break
 
             # Manage a possible time change (our avant will be change with the diff)
