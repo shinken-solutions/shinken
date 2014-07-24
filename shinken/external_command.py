@@ -771,8 +771,55 @@ class ExternalCommandManager:
 
     # CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
-        service.modified_attributes = long(value)
+# This is not enough.
+        # We need to also change each of the needed attributes.
+        previous_value = service.modified_attributes
+        future_value = long(value)
+        changes = future_value ^ previous_value
+        
+        logger.warning("[CHANGE_SVC_MODATTR] Changes to be done %d " % changes)
+        if changes & MODATTR_NOTIFICATIONS_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_NOTIFICATIONS_ENABLED")
+            service.notifications_enabled = not service.notifications_enabled
+            service.modified_attributes = service.modified_attributes - MODATTR_NOTIFICATIONS_ENABLED
+        if changes & MODATTR_ACTIVE_CHECKS_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_ACTIVE_CHECKS_ENABLED")
+            service.active_checks_enabled = not service.active_checks_enabled
+            service.modified_attributes = service.modified_attributes - MODATTR_ACTIVE_CHECKS_ENABLED
 
+        if changes & MODATTR_PASSIVE_CHECKS_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_PASSIVE_CHECKS_ENABLED")
+            service.passive_checks_enabled = not service.passive_checks_enabled
+            service.modified_attributes = service.modified_attributes - MODATTR_PASSIVE_CHECKS_ENABLED
+            
+        if changes & MODATTR_EVENT_HANDLER_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_EVENT_HANDLER_ENABLED")
+            service.event_handler_enabled = not service.event_handler_enabled
+            service.modified_attributes = service.modified_attributes - MODATTR_EVENT_HANDLER_ENABLED
+            
+        if changes & MODATTR_FLAP_DETECTION_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_FLAP_DETECTION_ENABLED")
+            service.flap_detection_enabled = not service.flap_detection_enabled
+            service.modified_attributes = service.modified_attributes - MODATTR_FLAP_DETECTION_ENABLED
+            
+        if changes & MODATTR_PERFORMANCE_DATA_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_PERFORMANCE_DATA_ENABLED")
+            service.process_performance_data = not service.process_performance_data
+            service.modified_attributes = service.modified_attributes - MODATTR_PERFORMANCE_DATA_ENABLED
+            
+        if changes & MODATTR_OBSESSIVE_HANDLER_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_OBSESSIVE_HANDLER_ENABLED")
+            service.obsess_over_service = not service.obsess_over_service
+            service.modified_attributes = service.modified_attributes - MODATTR_OBSESSIVE_HANDLER_ENABLED
+            
+        if changes & MODATTR_FRESHNESS_CHECKS_ENABLED:
+            logger.warning("[CHANGE_SVC_MODATTR] Reset MODATTR_FRESHNESS_CHECKS_ENABLED")
+            service.check_service_freshness = not service.check_service_freshness
+            service.modified_attributes = service.modified_attributes - MODATTR_FRESHNESS_CHECKS_ENABLED
+           
+        # And we need to push the information to the scheduler.
+        self.sched.get_and_register_status_brok(service)
+        
     # CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
         service.modified_attributes |= MODATTR_NOTIFICATION_TIMEPERIOD
