@@ -973,17 +973,23 @@ class Scheduler:
                     if f:
                         v = f(s, v)
                     d[prop] = v
-            # Same for properties, like active checks enabled or not
-            properties = s.__class__.properties
-            for prop, entry in properties.items():
-                if entry.retention:
-                    v = getattr(s, prop)
-                    # Maybe we should "prepare" the data before saving it
-                    # like get only names instead of the whole objects
-                    f = entry.retention_preparation
-                    if f:
-                        v = f(s, v)
-                    d[prop] = v
+                    
+             # We consider the service ONLY if it has modified attributes.
+             # If not, then no non-running attributes will be saved for this service.
+            if s.modified_attributes>0:       
+                # Same for properties, like active checks enabled or not
+                properties = s.__class__.properties
+                
+                for prop, entry in properties.items():
+                    # We save the value only if the attribute is selected for retention AND has been modified.
+                    if entry.retention and entry.modattr & s.modified_attributes:
+                        v = getattr(s, prop)
+                        # Maybe we should "prepare" the data before saving it
+                        # like get only names instead of the whole objects
+                        f = entry.retention_preparation
+                        if f:
+                            v = f(s, v)
+                        d[prop] = v
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
 
