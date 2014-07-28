@@ -36,6 +36,7 @@ from shinken.log import logger, naglog_result
 from shinken.pollerlink import PollerLink
 from shinken.eventhandler import EventHandler
 from shinken.brok import Brok
+from shinken.misc.common import DICT_MODATTR
 
 MODATTR_NONE = 0
 MODATTR_NOTIFICATIONS_ENABLED = 1
@@ -771,7 +772,25 @@ class ExternalCommandManager:
 
     # CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
-        service.modified_attributes = long(value)
+# This is not enough.
+        # We need to also change each of the needed attributes.
+        previous_value = service.modified_attributes
+        future_value = long(value)
+        changes = future_value ^ previous_value
+
+        for modattr in ["MODATTR_NOTIFICATIONS_ENABLED", "MODATTR_ACTIVE_CHECKS_ENABLED",
+                "MODATTR_PASSIVE_CHECKS_ENABLED", "MODATTR_EVENT_HANDLER_ENABLED",
+                "MODATTR_FLAP_DETECTION_ENABLED", "MODATTR_PERFORMANCE_DATA_ENABLED",
+                "MODATTR_OBSESSIVE_HANDLER_ENABLED", "MODATTR_FRESHNESS_CHECKS_ENABLED"]:
+            if changes & DICT_MODATTR[modattr].value:
+                logger.info("[CHANGE_SVC_MODATTR] Reset %s", modattr)
+                setattr(service, DICT_MODATTR[modattr].attribute, not getattr(service, DICT_MODATTR[modattr].attribute))
+                service.modified_attributes = service.modified_attributes - DICT_MODATTR[modattr].value
+
+        logger.info("[CHANGE_SVC_MODATTR] Changes to be done %d " % changes)
+
+        # And we need to push the information to the scheduler.
+        self.sched.get_and_register_status_brok(service)
 
     # CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
