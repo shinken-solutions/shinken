@@ -57,7 +57,8 @@ DICT_MODATTR = {
     "check_freshness": ModAttr("MODATTR_FRESHNESS_CHECKS_ENABLED", "check_freshness", 8192),
     "MODATTR_CHECK_TIMEPERIOD": ModAttr("MODATTR_CHECK_TIMEPERIOD", "check_period",16384),
     "check_period": ModAttr("MODATTR_CHECK_TIMEPERIOD", "check_period",16384),
-    "MODATTR_CUSTOM_VARIABLE": ModAttr("MODATTR_CUSTOM_VARIABLE", "", 32768),
+    "MODATTR_CUSTOM_VARIABLE": ModAttr("MODATTR_CUSTOM_VARIABLE", "customs", 32768),
+    "custom_variable": ModAttr("MODATTR_CUSTOM_VARIABLE", "customs", 32768),
     "MODATTR_NOTIFICATION_TIMEPERIOD": ModAttr("MODATTR_NOTIFICATION_TIMEPERIOD", "notification_period", 65536),
     "notification_period": ModAttr("MODATTR_NOTIFICATION_TIMEPERIOD", "notification_period", 65536),
 
