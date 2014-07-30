@@ -1010,3 +1010,11 @@ class Daemon(object):
             modules['external'][mname] = e
 
         return r
+
+    @staticmethod
+    def print_unrecoverable(self, trace):
+        logger.critical("I got an unrecoverable error. I have to exit.")
+        logger.critical("You can get help at https://github.com/naparuba/shinken")
+        logger.critical("If you think this is a bug, create a new ticket including details mentioned in the README")
+        logger.critical("Back trace of the error: %s", trace)
+

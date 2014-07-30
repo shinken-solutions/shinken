@@ -398,9 +398,7 @@ class Receiver(Satellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.critical("I got an unrecoverable error. I have to exit")
-            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Back trace of it: %s", traceback.format_exc())
+            self.print_unrecoverable(traceback.format_exc())
             raise
 
 

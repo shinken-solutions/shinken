@@ -625,9 +625,7 @@ class Arbiter(Daemon):
             # ends up here and must be handled.
             sys.exit(exp.code)
         except Exception, exp:
-            logger.critical("I got an unrecoverable error. I have to exit")
-            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Exception trace follows: %s", traceback.format_exc())
+            self.print_unrecoverable(traceback.format_exc())
             raise
 
 
