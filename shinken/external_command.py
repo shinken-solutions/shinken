@@ -308,7 +308,7 @@ class ExternalCommandManager:
 
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-		    # Fix #1263
+            # Fix #1263
             # logger.info('EXTERNAL COMMAND: ' + command.rstrip())
             naglog_result('info', 'EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command, excmd)
@@ -752,7 +752,7 @@ class ExternalCommandManager:
 
     # CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
-# This is not enough.
+        # This is not enough.
         # We need to also change each of the needed attributes.
         previous_value = service.modified_attributes
         future_value = long(value)
@@ -765,9 +765,13 @@ class ExternalCommandManager:
             if changes & DICT_MODATTR[modattr].value:
                 logger.info("[CHANGE_SVC_MODATTR] Reset %s", modattr)
                 setattr(service, DICT_MODATTR[modattr].attribute, not getattr(service, DICT_MODATTR[modattr].attribute))
-                service.modified_attributes = service.modified_attributes - DICT_MODATTR[modattr].value
 
-        logger.info("[CHANGE_SVC_MODATTR] Changes to be done %d " % changes)
+        #TODO : Handle not boolean attributes.
+        #["MODATTR_EVENT_HANDLER_COMMAND", "MODATTR_CHECK_COMMAND", "MODATTR_NORMAL_CHECK_INTERVAL",
+        #"MODATTR_RETRY_CHECK_INTERVAL", "MODATTR_MAX_CHECK_ATTEMPTS", "MODATTR_FRESHNESS_CHECKS_ENABLED",
+        #"MODATTR_CHECK_TIMEPERIOD", "MODATTR_CUSTOM_VARIABLE", "MODATTR_NOTIFICATION_TIMEPERIOD"]
+
+        service.modified_attributes = future_value
 
         # And we need to push the information to the scheduler.
         self.sched.get_and_register_status_brok(service)
