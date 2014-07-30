@@ -215,6 +215,15 @@ class TestConfig(ShinkenTest):
         result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
         self.assertEqual(expected, result)
 
+    def test_change_and_reset_modattr(self):
+        # Receiver receives unknown host external command
+        excmd = '[%d] CHANGE_SVC_MODATTR;test_host_0;test_ok_0;1' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        self.assert_(svc.modified_attributes == 1)
+        self.assert_(not getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
 
 if __name__ == '__main__':
     unittest.main()

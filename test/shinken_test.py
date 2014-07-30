@@ -41,6 +41,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.basemodule import BaseModule
 
 from shinken.brok import Brok
+from shinken.misc.common import DICT_MODATTR
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
