@@ -403,7 +403,7 @@ class Arbiter(Daemon):
         # search lists
         self.conf.create_reversed_list()
 
-        # Overrides sepecific service instaces properties
+        # Overrides specific service instances properties
         self.conf.override_properties()
 
         # Pythonize values
