@@ -745,7 +745,7 @@ class Daemon(object):
 
         if (self.user == 'root' or self.group == 'root') and not insane:
             logger.error("You want the application run under the root account?")
-            logger.error("I am not agree with it. If you really want it, put:")
+            logger.error("I do not agree with it. If you really want it, put:")
             logger.error("idontcareaboutsecurity=yes")
             logger.error("in the config file")
             logger.error("Exiting")
@@ -1010,3 +1010,11 @@ class Daemon(object):
             modules['external'][mname] = e
 
         return r
+
+    @staticmethod
+    def print_unrecoverable(trace):
+        logger.critical("I got an unrecoverable error. I have to exit.")
+        logger.critical("You can get help at https://github.com/naparuba/shinken")
+        logger.critical("If you think this is a bug, create a new ticket including details mentioned in the README")
+        logger.critical("Back trace of the error: %s", trace)
+
