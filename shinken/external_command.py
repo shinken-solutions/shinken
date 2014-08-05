@@ -196,6 +196,7 @@ class ExternalCommandManager:
         'REMOVE_HOST_ACKNOWLEDGEMENT': {'global': False, 'args': ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT': {'global': False, 'args': ['service']},
         'RESTART_PROGRAM': {'global': True, 'internal': True, 'args': []},
+        'RELOAD_CONFIG': {'global': True, 'internal': True, 'args': []},
         'SAVE_STATE_INFORMATION': {'global': True, 'args': []},
         'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
@@ -1418,11 +1419,12 @@ class ExternalCommandManager:
 
     # RESTART_PROGRAM
     def RESTART_PROGRAM(self):
-        restart_cmd = self.commands.find_by_name('restart_shinken')
+        restart_cmd = self.commands.find_by_name('restart-shinken')
         if not restart_cmd:
-            logger.error("Cannot restart Shinken : missing command named 'restart_shinken'. Please add one")
+            logger.error("Cannot restart Shinken : missing command named 'restart-shinken'. Please add one")
             return
         restart_cmd_line = restart_cmd.command_line
+        logger.warning("RESTART command : %s", restart_cmd_line)
         
         # Ok get an event handler command that will run in 15min max
         e = EventHandler(restart_cmd_line, timeout=900)
@@ -1432,14 +1434,32 @@ class ExternalCommandManager:
         while not e.status in ('done', 'timeout'):
             e.check_finished(64000)
         if e.status == 'timeout' or e.exit_status != 0:
-            logger.error("Cannot restart Shinken : the 'restart_shinken' command failed with the error code '%d' and the text '%s'.", e.exit_status, e.output)
+            logger.error("Cannot restart Shinken : the 'restart-shinken' command failed with the error code '%d' and the text '%s'.", e.exit_status, e.output)
             return
         # Ok here the command succeed, we can now wait our death
-        naglog_result('info', "%s\%s" % (e.output, e.long_output))
-        naglog_result('info', "RESTART command launched. Waiting for the new daemon to kill us")
+        naglog_result('info', "%s" % (e.output))
+
+    # RELOAD_CONFIG
+    def RELOAD_CONFIG(self):
+        reload_cmd = self.commands.find_by_name('reload-shinken')
+        if not reload_cmd:
+            logger.error("Cannot restart Shinken : missing command named 'reload-shinken'. Please add one")
+            return
+        reload_cmd_line = reload_cmd.command_line
+        logger.warning("RELOAD command : %s", reload_cmd_line)
         
-        
-        
+        # Ok get an event handler command that will run in 15min max
+        e = EventHandler(reload_cmd_line, timeout=900)
+        # Ok now run it
+        e.execute()
+        # And wait for the command to finish
+        while not e.status in ('done', 'timeout'):
+            e.check_finished(64000)
+        if e.status == 'timeout' or e.exit_status != 0:
+            logger.error("Cannot reload Shinken configuration: the 'reload-shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
+            return
+        # Ok here the command succeed, we can now wait our death
+        naglog_result('info', "%s" % (e.output))
 
     # SAVE_STATE_INFORMATION
     def SAVE_STATE_INFORMATION(self):
