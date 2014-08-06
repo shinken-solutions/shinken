@@ -72,6 +72,8 @@ class Graphite_broker(BaseModule):
         self.host_dict = {}
         self.svc_dict = {}
         self.multival = re.compile(r'_(\d+)$')
+        self.chunk_size = 200
+        self.max_chunk_size = 100000
 
         # optional "sub-folder" in graphite to hold the data of a specific host
         self.graphite_data_source = \
@@ -280,17 +282,33 @@ class Graphite_broker(BaseModule):
                 self.ticks = 0
                 return
 
-            # Format the data
-            payload = cPickle.dumps(self.buffer)
-            header = struct.pack("!L", len(payload))
-            packet = header + payload
+            while len(self.buffer) > 0:
+                try:
+                    self.chunk_size = int(self.chunk_size)
+                    buf2 = self.buffer[:self.chunk_size]
+                    self.con.sendall(self.create_pack(buf2))
+                    self.buffer = self.buffer[self.chunk_size:]
+                    self.chunk_size = min(self.max_chunk_size, self.chunk_size * 1.5)
+                except IOError:
+                    self.max_chunk_size = self.chunk_size
+                    self.chunk_size /= 1.5
+                    self.con.close()
 
-            try:
-                self.send_packet(packet)
-                # Flush the buffer after a successful send to Graphite
-                self.buffer = []
-                self.ticks = 0
-            except IOError:
-                self.ticks += 1
-                logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s"
-                             % (self.ticks, self.tick_limits))
+                    try:
+                        self.init()
+                    except IOError:
+                        logger.error("[Graphite broker] Sending data Failed. Buffering state : %s / %s"
+                                     % (self.ticks, self.tick_limit))
+                        self.ticks += 1
+                        return
+
+            self.ticks = 0
+
+
+
+    def create_pack(self, buff):
+        payload = cPickle.dumps(buff)
+        header = struct.pack("!L", len(payload))
+        packet = header + payload
+        return packet
+
