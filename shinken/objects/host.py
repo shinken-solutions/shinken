@@ -491,6 +491,10 @@ class Host(SchedulingItem):
                 return s
         return None
 
+    # Return all of the services on a host
+    def get_services(self):
+        return self.services
+
     # For get a nice name
     def get_name(self):
         if not self.is_tpl():

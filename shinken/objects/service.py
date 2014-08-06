@@ -1032,6 +1032,15 @@ class Services(Items):
                     return s.id
         return None
 
+    # Search for all of the services in a host
+    def find_srvs_by_hostname(self, host_name):
+        if hasattr(self, 'hosts'):
+            h = self.hosts.find_by_name(host_name)
+            if h is None:
+                return None
+            return h.get_services()
+        return None
+
     # Search a service by it's name and hot_name
     def find_srv_by_name_and_hostname(self, host_name, name):
         if hasattr(self, 'hosts'):
