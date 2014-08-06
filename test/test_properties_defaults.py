@@ -412,7 +412,8 @@ class TestHostescalation(PropertiesTester, ShinkenTest):
     without_default = [
         'host_name', 'hostgroup_name',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups'
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time',
         ]
 
     properties = dict([
@@ -704,7 +705,8 @@ class TestServiceescalation(PropertiesTester, ShinkenTest):
         'host_name', 'hostgroup_name',
         'service_description',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups']
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time']
 
     properties = dict([
         ('imported_from', 'unknown'),
