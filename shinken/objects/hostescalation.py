@@ -44,6 +44,8 @@ class Hostescalation(Item):
         'escalation_options':    ListProp(default='d,u,r,w,c'),
         'contacts':              StringProp(),
         'contact_groups':        StringProp(),
+        'first_notification_time': IntegerProp(),
+        'last_notification_time': IntegerProp(),
     })
 
     # For debugging purpose only (nice name)
