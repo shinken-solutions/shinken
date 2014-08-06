@@ -32,6 +32,10 @@ import cPickle
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
+    def setUp(self):
+        self.setup_with_file('etc/shinken_external_commands.cfg')
+        time_hacker.set_real_time()
+
     def send_cmd(self, line):
         s = '[%d] %s\n' % (int(time.time()), line)
         print "Writing %s in %s" % (s, self.conf.command_file)
@@ -39,7 +43,7 @@ class TestConfig(ShinkenTest):
         fd.write(s)
         fd.close()
 
-    def test_external_comand(self):
+    def test_external_commands(self):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         router = self.sched.hosts.find_by_name("test_router_0")
@@ -86,6 +90,38 @@ class TestConfig(ShinkenTest):
         print "perf (%s)" % svc.perf_data
         self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
 
+        # ACK SERVICE
+        excmd = '[%d] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;Big brother;Acknowledge service' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.problem_has_been_acknowledged == True)
+
+        excmd = '[%d] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.problem_has_been_acknowledged == False)
+
+        # Service is going ok ...
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;0;Bobby is happy now!|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.output == 'Bobby is happy now!')
+        self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
+
+        # Host is going up ...
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;0;Bob is also happy now!' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(host.state == 'UP')
+        self.assert_(host.output == 'Bob is also happy now!')
+
         # Clean the command_file
         #try:
         #    os.unlink(self.conf.command_file)
@@ -127,6 +163,32 @@ class TestConfig(ShinkenTest):
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
         self.assert_(host.perf_data == 'rtt=9999')
+
+        # ACK HOST
+        excmd = '[%d] ACKNOWLEDGE_HOST_PROBLEM;test_router_0;2;1;1;Big brother;test' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        print "Host state", host.state, host.problem_has_been_acknowledged
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.problem_has_been_acknowledged == True)
+        
+        # REMOVE ACK HOST
+        excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        print "Host state", host.state, host.problem_has_been_acknowledged
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.problem_has_been_acknowledged == False)
+
+        # RESTART_PROGRAM
+        excmd = '[%d] RESTART_PROGRAM' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+
+        # RELOAD_CONFIG
+        excmd = '[%d] RELOAD_CONFIG' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
 
     # Tests sending passive check results for unconfigured hosts to a scheduler
     def test_unknown_check_result_command_scheduler(self):
