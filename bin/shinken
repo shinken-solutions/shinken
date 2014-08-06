@@ -343,10 +343,10 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if opts.do_verbose:
-        logger.set_level(logger.INFO)
+        logger.setLevel("INFO")
 
     if opts.do_debug:
-        logger.set_level(logger.DEBUG)
+        logger.setLevel("DEBUG")
 
     cfg = None
     if not os.path.exists(opts.iniconfig):
@@ -359,6 +359,15 @@ if __name__ == '__main__':
                 CONFIG[section] = {}
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
+
+    # Now replace if given in command line
+    if opts.api_key:
+        CONFIG['shinken.io']['api_key'] = opts.api_key
+        logger.debug("Using given api-key in command line")
+
+    if opts.proxy:
+        CONFIG['shinken.io']['proxy'] = opts.proxy
+        logger.debug("Using given proxy in command line")
 
     CLI = CLICommander(CONFIG, opts)
 
