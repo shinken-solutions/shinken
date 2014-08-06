@@ -2,15 +2,21 @@
 Shinken ChangeLog
 #######################
 
-1.4.3 - XX/XX/2014
+1.4.3 - 06/08/2014
 -------------------
 	CORE FIXES (backport)
 	Fix : Too much brok generated when a trigger modifies it
 	Fix : Possible inconsistant state saved in retention for downtimes
+	Fix : Reversed_list iconsitent state when merging host/service group
+	Fix : Keys may return unsorted keys, max is necessary
+	Fix : strip servicegroup name when adding member
+	Fix : Scheduler crashes if system time changes before it gets conf
 
 
 	MODULES FIXES (backport)
-	Fix : Graphite module skipping 0 values
+	Fix : Graphite module - skipping 0 values
+	Fix : Graphite module - Split packets into chunks
+	Fix : Collectd module - Replace illegal object character
 
 
 1.4.2 - 06/03/2014
