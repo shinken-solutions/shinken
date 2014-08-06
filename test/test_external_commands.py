@@ -184,11 +184,19 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] RESTART_PROGRAM' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
+        self.assert_(self.any_log_match('RESTART') == True)
+        self.assert_(self.any_log_match('I awoke after sleeping 3 seconds') == True)
 
         # RELOAD_CONFIG
         excmd = '[%d] RELOAD_CONFIG' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
+        self.assert_(self.any_log_match('RELOAD') == True)
+        self.assert_(self.any_log_match('I awoke after sleeping 2 seconds') == True)
+        
+        # Show recent logs
+        self.show_logs()
+
 
     # Tests sending passive check results for unconfigured hosts to a scheduler
     def test_unknown_check_result_command_scheduler(self):
