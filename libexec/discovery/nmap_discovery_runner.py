@@ -356,6 +356,10 @@ for h in hosts:
     if ios:
         #print os.__dict__
         cls = ios.findall('osclass')
+	# if no osclass found, try bellow the osmatch element (nmap recent versions)
+	if len(cls) == 0:
+		cls = ios.find('osmatch').findall('osclass')
+
         for c in cls:
             #print "Class", c.__dict__
             family = c.attrib['osfamily']
