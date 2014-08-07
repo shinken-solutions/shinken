@@ -65,7 +65,7 @@ Let's see what it looks like:
 So here we have a scheduler:
 
     * workdir: working directory of the daemon. By default /var/lib/shinken
-    * pidfile: pid file of the daemon (so we can kill it :) ). By default /var/lib/shinken/schedulerd.pid for a scheduler.
+    * pidfile: PID file of the daemon (so we can kill it :) ). By default /var/lib/shinken/schedulerd.pid for a scheduler.
     * port: TCP port to listen to. By default:
 
        * scheduler: 7768
