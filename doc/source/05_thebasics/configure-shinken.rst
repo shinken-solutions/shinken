@@ -97,7 +97,7 @@ Now each daemon knows in which directory to run, and on which tcp port to listen
 
 The global configuration file is:  **/etc/shinken/shinken.cfg**
 
-The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
+The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (e.g. is it a spare, ...).
 
 Each objects type corresponds to a daemon:
   * arbiter
