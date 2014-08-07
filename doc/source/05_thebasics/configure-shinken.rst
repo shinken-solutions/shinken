@@ -77,7 +77,7 @@ So here we have a scheduler:
     * host: IP interface to listen on. The default 0.0.0.0 means all interfaces
     * user: user used by the daemon to run. By default shinken
     * group: group of the user. By default shinken.
-    * idontcareaboutsecurity: if set to 1, you can run it under the root account. But seriously: do not to this. The default is 0 of course.
+    * idontcareaboutsecurity: if set to 1, you can run it under the root account. But seriously: do not do this. The default is 0 of course.
     * daemon_enabled : if set to 0, the daemon won't run. Useful for distributed setups where you only need a poller for example.
     * use_ssl=0
     * #certs_dir=etc/certs
