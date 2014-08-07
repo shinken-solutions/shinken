@@ -95,7 +95,7 @@ Daemon declaration in the global configuration
 
 Now each daemon knows in which directory to run, and on which tcp port to listen. A daemon is a resource in the Shinken architecture. Such resources must be declared in the global configuration (where the Arbiter is) for them to be utilized.
 
-The global configuration file is:  **/etc/shinken/shinken.cfg/**
+The global configuration file is:  **/etc/shinken/shinken.cfg**
 
 The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
 
