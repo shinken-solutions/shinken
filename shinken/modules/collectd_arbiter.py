@@ -30,6 +30,7 @@ Collectd Plugin for Receiver or arbiter
 
 import os
 import time
+import re
 from itertools import izip
 
 from shinken.basemodule import BaseModule
