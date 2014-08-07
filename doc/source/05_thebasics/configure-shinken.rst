@@ -115,7 +115,7 @@ They have these parameters in common:
   * port: I think you can find it on your own by now :)
   * [spare]: 1 or 0, is a spare or not. :ref:`See advanced features for this <architecture/advanced-features>`.
   * [realm]: realm membership :ref:`See advanced features for this <architecture/advanced-features>`.
-  * [manage_sub_realms]: manage or not sub realms. :ref:`See advanced features for this <architecture/advanced-features>`.
+  * [manage_sub_realms]: whether or not to manage sub realms. :ref:`See advanced features for this <architecture/advanced-features>`.
   * [modules]: modules used by the daemon. See below.
 
 
