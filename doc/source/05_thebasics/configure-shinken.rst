@@ -78,7 +78,7 @@ So here we have a scheduler:
     * user: User used by the daemon to run. By default shinken.
     * group: Group of the user. By default shinken.
     * idontcareaboutsecurity: If set to 1, you can run it under the root account. But seriously: do not to this. The default is 0 of course.
-    * daemon_enabled : If set to 0, the daemon won't run. Useful for distributed setups where you only need a poller for example.
+    * daemon_enabled : If set to 0, the daemon won't run. For example, in distributed setups where you only need a poller.
     * use_ssl=0
     * #certs_dir=etc/certs
     * #ca_cert=etc/certs/ca.pem
