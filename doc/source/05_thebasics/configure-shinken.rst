@@ -87,7 +87,7 @@ So here we have a scheduler:
     * use_local_log=1 : Log all messages that match the log_level for this daemon in a local directory.
     * local_log=brokerd.log : Name of the log file where to save the logs.
     * log_level=INFO : Log_level that will be permitted to be logger. Warning permits Warning, Error, Critical to be logged. INFO by default.
-    * max_queue_size=100000 : If a module got a brok queue() higher than this value, it will be killed and restarted. Set to 0 to disable it.
+    * max_queue_size=100000 : If a module gets a brok queue() higher than this value, it will be killed and restarted. Set to 0 to disable it.
 
 
 Daemon declaration in the global configuration 
