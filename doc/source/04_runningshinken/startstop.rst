@@ -6,6 +6,8 @@
 
 There's more than one way to start, stop, and restart Shinken. Here are some of the more common ones...
 
+In recent Shinken versions, you can use the init script to reload Shinken: your configuration will be checked before restarting the arbiter.
+
 Always make sure you :ref:`verify your configuration <runningshinken/verifyconfig>` before you (re)start Shinken.
 
 
