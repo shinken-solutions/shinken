@@ -77,7 +77,7 @@ So here we have a scheduler:
     * host: IP interface to listen on. The default 0.0.0.0 means all interfaces
     * user: user used by the daemon to run. By default shinken
     * group: group of the user. By default shinken.
-    * idontcareaboutsecurity: if set to 1, you can run it under the root account. But seriously: do not to this. The default is 0 of course.
+    * idontcareaboutsecurity: if set to 1, you can run it under the root account. But seriously: do not do this. The default is 0 of course.
     * daemon_enabled : if set to 0, the daemon won't run. Useful for distributed setups where you only need a poller for example.
     * use_ssl=0
     * #certs_dir=etc/certs
@@ -95,9 +95,9 @@ Daemon declaration in the global configuration
 
 Now each daemon knows in which directory to run, and on which tcp port to listen. A daemon is a resource in the Shinken architecture. Such resources must be declared in the global configuration (where the Arbiter is) for them to be utilized.
 
-The global configuration file is:  **/etc/shinken/shinken.cfg/**
+The global configuration file is:  **/etc/shinken/shinken.cfg**
 
-The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
+The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (e.g. is it a spare, ...).
 
 Each objects type corresponds to a daemon:
   * arbiter
