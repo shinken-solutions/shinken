@@ -107,7 +107,7 @@ Each objects type corresponds to a daemon:
   * broker
   * receiver
 
-The names were chosen to understand their roles more easily. :)
+The names were chosen to clearly represent their roles. :)
 
 They have these parameters in common:
   * \*_name: name of the resource
