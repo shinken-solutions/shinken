@@ -216,7 +216,7 @@ class Data(list, object):
         """ Determine service name from collectd datas """
         r = self.plugin
         if not r in self.grouped_collectd_plugins:
-            if self.plugininstance is None:
+            if self.plugininstance:
                 r += '-' + self.plugininstance
         r = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', r)  # Dirty fix for 1.4.X
         return r
@@ -236,9 +236,9 @@ class Data(list, object):
         """
         r = self.type
         if self.plugin in self.grouped_collectd_plugins:
-            if not self.plugininstance is None:
+            if self.plugininstance:
                 r += '-' + self.plugininstance
-        if self.typeinstance is None:
+        if self.typeinstance:
             r += '-' + self.typeinstance
         return r
 
