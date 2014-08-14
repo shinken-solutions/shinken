@@ -326,7 +326,11 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
-        for a in sorted(self.sched.actions.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -349,24 +353,39 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
 
     def count_logs(self):
-        return len([b for b in self.sched.broks.values() if b.type == 'log'])
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        return len([b for b in broks.values() if b.type == 'log'])
 
 
     def count_actions(self):
-        return len(self.sched.actions.values())
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        return len(actions.values())
 
 
     def clear_logs(self):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
         id_to_del = []
-        for b in self.sched.broks.values():
+        for b in broks.values():
             if b.type == 'log':
                 id_to_del.append(b.id)
         for id in id_to_del:
-            del self.sched.broks[id]
+            del broks[id]
 
 
     def clear_actions(self):
-        self.sched.actions = {}
+        if hasattr(self, "sched"):
+            self.sched.actions = {}
+        else:
+            self.actions = {}
 
 
     def log_match(self, index, pattern):
