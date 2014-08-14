@@ -320,7 +320,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log']
+                print "LOG:", brok.data['log'].encode("utf-8")
         print "--- logs >>>----------------------------------"
 
 
