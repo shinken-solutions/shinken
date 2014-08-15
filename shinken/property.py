@@ -56,7 +56,7 @@ class Property(object):
     def __init__(self, default=none_object, class_inherit=None,
                  unmanaged=False, help='', no_slots=False,
                  fill_brok=None, conf_send_preparation=None,
-                 brok_transformation=None, retention=False,
+                 brok_transformation=None, retention=False, modattr=None,
                  retention_preparation=None, to_send=False,
                  override=False, managed=True, split_on_coma=True, merging='uniq'):
 
@@ -76,6 +76,7 @@ class Property(object):
                      FULL_STATUS for initial and update status,
                      CHECK_RESULT for check results
         `retention`: if set, we will save this property in the retention files
+        `modattr` : Value to compare with modified_attributes to guess if the attribute has been modified.
         `retention_preparation`: function, if set, will go this function before
                      being save to the retention data
         `split_on_coma`: indicates that list property value should not be
@@ -115,6 +116,7 @@ class Property(object):
         self.conf_send_preparation = conf_send_preparation
         self.brok_transformation = brok_transformation
         self.retention = retention
+        self.modattr = modattr
         self.retention_preparation = retention_preparation
         self.to_send = to_send
         self.override = override
