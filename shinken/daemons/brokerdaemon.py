@@ -190,13 +190,20 @@ class Broker(BaseSatellite):
         if links is None:
             logger.debug('Type unknown for connection! %s', type)
             return
-
+        
+        # default timeout for daemons like pollers/reactionners/...
+        timeout = 3
+        data_timeout = 120
+        
         if type == 'scheduler':
             # If sched is not active, I do not try to init
             # it is just useless
             is_active = links[id]['active']
             if not is_active:
                 return
+            # schedulers also got real timeout to respect
+            timeout = links[id]['timeout']
+            data_timeout = links[id]['data_timeout']
 
         # If we try to connect too much, we slow down our tests
         if self.is_connection_try_too_close(links[id]):
@@ -210,7 +217,7 @@ class Broker(BaseSatellite):
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
         try:
-            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
+            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'], timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
@@ -438,6 +445,8 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['running_id'] = running_id
             self.schedulers[sched_id]['active'] = s['active']
             self.schedulers[sched_id]['last_connection'] = 0
+            self.schedulers[sched_id]['timeout'] = s['timeout']
+            self.schedulers[sched_id]['data_timeout'] = s['data_timeout']
 
         logger.info("We have our schedulers: %s ", self.schedulers)
 

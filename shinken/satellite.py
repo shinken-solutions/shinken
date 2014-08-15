@@ -322,16 +322,18 @@ class Satellite(BaseSatellite):
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
-        logger.info("[%s] Init connection with %s at %s", self.name, sname, uri)
+        timeout = sched['timeout']
+        data_timeout = sched['data_timeout']
+        logger.info("[%s] Init connection with %s at %s (%ss,%ss)", self.name, sname, uri, timeout, data_timeout)
 
         try:
-            sch_con = sched['con'] = HTTPClient(uri=uri, strong_ssl=sched['hard_ssl_name_check'])
+            sch_con = sched['con'] = HTTPClient(uri=uri, strong_ssl=sched['hard_ssl_name_check'], timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions, exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s", self.name, sname, str(exp))
             sched['con'] = None
             return
 
-        # timeout of 120 s
+        # timeout of 3s by default (short one)
         # and get the running id
         try:
             new_run_id = sch_con.get('get_running_id')
@@ -980,7 +982,9 @@ class Satellite(BaseSatellite):
                 self.schedulers[sched_id]['actions'] = {}
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
-
+            self.schedulers[sched_id]['timeout'] = s['timeout']
+            self.schedulers[sched_id]['data_timeout'] = s['data_timeout']
+            
             # Do not connect if we are a passive satellite
             if not self.passive and not already_got:
                 # And then we connect to it :)

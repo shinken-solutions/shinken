@@ -246,7 +246,9 @@ class Receiver(Satellite):
                 self.schedulers[sched_id]['con'] = None
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
-
+            self.schedulers[sched_id]['timeout'] = s['timeout']
+            self.schedulers[sched_id]['data_timeout'] = s['data_timeout']
+            
             # Do not connect if we are a passive satellite
             if self.direct_routing and not already_got:
                 # And then we connect to it :)
