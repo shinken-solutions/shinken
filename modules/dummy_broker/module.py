@@ -37,7 +37,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    logger.info("[Dummy Broker] Get a Dummy broker module for plugin %s" % mod_conf.get_name())
+    logger.info("[Dummy Broker] Get a Dummy broker module for plugin %s", mod_conf.get_name())
     instance = Dummy_broker(mod_conf)
     return instance
 

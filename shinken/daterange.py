@@ -415,7 +415,7 @@ class StandardDaterange(Daterange):
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
-            logger.error("Error: %s is not a valid day" % self.day)
+            logger.error("Error: %s is not a valid day", self.day)
         # Check also if Daterange is correct.
         b &= Daterange.is_correct(self)
         return b
@@ -442,11 +442,11 @@ class MonthWeekDayDaterange(Daterange):
         b = True
         b &= self.swday in Daterange.weekdays
         if not b:
-            logger.error("Error: %s is not a valid day" % self.swday)
+            logger.error("Error: %s is not a valid day", self.swday)
 
         b &= self.ewday in Daterange.weekdays
         if not b:
-            logger.error("Error: %s is not a valid day" % self.ewday)
+            logger.error("Error: %s is not a valid day", self.ewday)
 
         return b
 

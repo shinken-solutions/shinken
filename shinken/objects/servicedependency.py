@@ -229,7 +229,7 @@ class Servicedependencies(Items):
                 sd.service_description = s
 
             except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by service %s: %s" % (sd, exp))
+                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, exp)
 
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
@@ -240,7 +240,7 @@ class Servicedependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
             except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by timeperiods: %s" % exp)
+                logger.error("[servicedependency] fail to linkify by timeperiods: %s", exp)
 
     # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):

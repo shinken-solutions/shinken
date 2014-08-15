@@ -152,9 +152,9 @@ class IForArbiter(Interface):
     # Try to give some properties of our objects
     doc = 'Dump all objects of the type in [hosts, services, contacts, commands, hostgroups, servicegroups]'
     def get_objects_properties(self, table):
-        logger.debug('ASK:: table= %s' % str(table))
+        logger.debug('ASK:: table= %s', str(table))
         objs = getattr(self.app.conf, table, None)
-        logger.debug("OBJS:: %s" % str(objs))
+        logger.debug("OBJS:: %s", str(objs))
         if objs is None or len(objs) == 0:
             return []
         res = []
@@ -204,7 +204,7 @@ class Arbiter(Daemon):
         elif isinstance(b, ExternalCommand):
             self.external_commands.append(b)
         else:
-            logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
+            logger.warning('Cannot manage object type %s (%s)', type(b), b)
 
     # We must push our broks to the broker
     # because it's stupid to make a crossing connection
@@ -289,9 +289,9 @@ class Arbiter(Daemon):
                 self.me = arb
                 self.is_master = not self.me.spare
                 if self.is_master:
-                    logger.info("I am the master Arbiter: %s" % arb.get_name())
+                    logger.info("I am the master Arbiter: %s", arb.get_name())
                 else:
-                    logger.info("I am a spare Arbiter: %s" % arb.get_name())
+                    logger.info("I am a spare Arbiter: %s", arb.get_name())
                 # export this data to our statsmgr object :)
                 api_key = getattr(self.conf, 'api_key', '')
                 secret = getattr(self.conf, 'secret', '')
@@ -332,10 +332,10 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
-                    logger.error("Instance %s raised an exception %s. Log and continue to run" % (inst.get_name(), str(exp)))
+                    logger.error("Instance %s raised an exception %s. Log and continue to run", inst.get_name(), str(exp))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.error("Back trace of this remove: %s" % (output.getvalue()))
+                    logger.error("Back trace of this remove: %s", output.getvalue())
                     output.close()
                     continue
                 statsmgr.incr('hook.get-objects', time.time() - _t)
@@ -349,7 +349,7 @@ class Arbiter(Daemon):
                                 raw_objects[k] = []
                             # now append the object
                             raw_objects[k].append(x)
-                        logger.debug("Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name()))
+                        logger.debug("Added %i objects to %s from module %s", len(r[prop]), k, inst.get_name())
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -403,7 +403,7 @@ class Arbiter(Daemon):
         # search lists
         self.conf.create_reversed_list()
 
-        # Overrides sepecific service instaces properties
+        # Overrides specific service instances properties
         self.conf.override_properties()
 
         # Pythonize values
@@ -529,7 +529,7 @@ class Arbiter(Daemon):
             logger.error("Error: json is need for statistics file saving. Please update your python version to 2.6")
             sys.exit(2)
 
-        logger.info("We are doing an statistic analysis on the dump file" % self.analyse)
+        logger.info("We are doing an statistic analysis on the dump file %s", self.analyse)
         stats = {}
         types = ['hosts', 'services', 'contacts', 'timeperiods', 'commands', 'arbiters',
                  'schedulers', 'pollers', 'reactionners', 'brokers', 'receivers', 'modules',
@@ -538,15 +538,15 @@ class Arbiter(Daemon):
             lst = getattr(self.conf, t)
             nb = len([i for i in lst])
             stats['nb_' + t] = nb
-            logger.info("Got %s for %s" % (nb, t))
+            logger.info("Got %s for %s", nb, t)
 
         max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
-        logger.info("Max srv by host" % max_srv_by_host)
+        logger.info("Max srv by host %s", max_srv_by_host)
         stats['max_srv_by_host'] = max_srv_by_host
 
         f = open(self.analyse, 'w')
         s = json.dumps(stats)
-        logger.info("Saving stats data to a file" % s)
+        logger.info("Saving stats data to a file %s", s)
         f.write(s)
         f.close()
 
@@ -625,9 +625,7 @@ class Arbiter(Daemon):
             # ends up here and must be handled.
             sys.exit(exp.code)
         except Exception, exp:
-            logger.critical("I got an unrecoverable error. I have to exit")
-            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Exception trace follows: %s" % (traceback.format_exc()))
+            self.print_unrecoverable(traceback.format_exc())
             raise
 
 
@@ -671,7 +669,7 @@ class Arbiter(Daemon):
                 # Maybe the queue had problems
                 # log it and quit it
                 except (IOError, EOFError), exp:
-                    logger.error("An external module queue got a problem '%s'" % str(exp))
+                    logger.error("An external module queue got a problem '%s'", str(exp))
                     break
 
 
@@ -686,7 +684,7 @@ class Arbiter(Daemon):
         for arb in self.conf.arbiters:
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
-        logger.info("I'll wait master for %d seconds" % master_timeout)
+        logger.info("I'll wait master for %d seconds", master_timeout)
 
 
         while not self.interrupted:
@@ -709,7 +707,7 @@ class Arbiter(Daemon):
             # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > master_timeout:
-                logger.info("Arbiter Master is dead. The arbiter %s take the lead" % self.me.get_name())
+                logger.info("Arbiter Master is dead. The arbiter %s take the lead", self.me.get_name())
                 self.must_run = True
                 break
 
@@ -726,7 +724,7 @@ class Arbiter(Daemon):
         for sched in self.conf.schedulers:
             cmds = sched.external_commands
             if len(cmds) > 0 and sched.alive:
-                logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched.get_name()))
+                logger.debug("Sending %d commands to scheduler %s", len(cmds), sched.get_name())
                 sched.run_external_commands(cmds)
             # clean them
             sched.external_commands = []
@@ -838,7 +836,7 @@ class Arbiter(Daemon):
             # send_conf_to_schedulers()
 
             if self.nb_broks_send != 0:
-                logger.debug("Nb Broks send: %d" % self.nb_broks_send)
+                logger.debug("Nb Broks send: %d", self.nb_broks_send)
             self.nb_broks_send = 0
 
             _t = time.time()

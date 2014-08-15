@@ -55,7 +55,7 @@ class ModulesContext(object):
             else:
                 r = imp.load_compiled(name, mod_path)
         except:
-            logger.warning('The module %s cannot be founded or load' % mod_path)
+            logger.warning('The module %s cannot be founded or load', mod_path)
             raise
         return r
 

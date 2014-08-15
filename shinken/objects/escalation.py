@@ -151,7 +151,7 @@ class Escalation(Item):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.info('%s: I do not have %s' % (self.get_name(), prop))
+                    logger.info('%s: I do not have %s', self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
@@ -162,23 +162,23 @@ class Escalation(Item):
 
         # Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
-            logger.info('%s: I do not have contacts nor contact_groups' % self.get_name())
+            logger.info('%s: I do not have contacts nor contact_groups', self.get_name())
             state = False
 
         # If time_based or not, we do not check all properties
         if self.time_based:
             if not hasattr(self, 'first_notification_time'):
-                logger.info('%s: I do not have first_notification_time' % self.get_name())
+                logger.info('%s: I do not have first_notification_time', self.get_name())
                 state = False
             if not hasattr(self, 'last_notification_time'):
-                logger.info('%s: I do not have last_notification_time' % self.get_name())
+                logger.info('%s: I do not have last_notification_time', self.get_name())
                 state = False
         else:  # we check classical properties
             if not hasattr(self, 'first_notification'):
-                logger.info('%s: I do not have first_notification' % self.get_name())
+                logger.info('%s: I do not have first_notification', self.get_name())
                 state = False
             if not hasattr(self, 'last_notification'):
-                logger.info('%s: I do not have last_notification' % self.get_name())
+                logger.info('%s: I do not have last_notification', self.get_name())
                 state = False
 
         return state
@@ -207,12 +207,18 @@ class Escalations(Items):
             if '' in (es_hname.strip(), sdesc.strip()):
                 continue
             for hname in strip_and_uniq(es_hname.split(',')):
-                for sname in strip_and_uniq(sdesc.split(',')):
-                    s = services.find_srv_by_name_and_hostname(hname, sname)
-                    if s is not None:
-                        #print "Linking service", s.get_name(), 'with me', es.get_name()
-                        s.escalations.append(es)
-                                #print "Now service", s.get_name(), 'have', s.escalations
+                if sdesc.strip() == '*':
+                    slist = services.find_srvs_by_hostname(hname)
+                    if slist is not None:
+                        for s in slist:
+                            s.escalations.append(es)
+                else:
+                    for sname in strip_and_uniq(sdesc.split(',')):
+                        s = services.find_srv_by_name_and_hostname(hname, sname)
+                        if s is not None:
+                            #print "Linking service", s.get_name(), 'with me', es.get_name()
+                            s.escalations.append(es)
+                                    #print "Now service", s.get_name(), 'have', s.escalations
 
 
     # Will register escalations into host.escalations

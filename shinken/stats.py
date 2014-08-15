@@ -127,7 +127,7 @@ class Stats(object):
             metrics = []
             for (k,e) in stats.iteritems():
                 nk = '%s.%s.%s' % (self.type, self.name, k)
-                #logger.debug('REAP %s:%s' % (nk, e))
+                logger.debug('REAP %s:%s' % (nk, e))
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
                 # nb can't be 0 here and _min_max can't be None too

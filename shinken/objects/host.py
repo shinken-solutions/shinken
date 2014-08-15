@@ -422,55 +422,55 @@ class Host(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("[host::%s] %s property not set" % (self.get_name(), prop))
+                    logger.error("[host::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[host::%s] %s" % (self.get_name(), err))
+            logger.warning("[host::%s] %s", self.get_name(), err)
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[host::%s] %s" % (self.get_name(), err))
+                logger.error("[host::%s] %s", self.get_name(), err)
 
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
+            logger.warning("The host %s has no contacts nor contact_groups in (%s)", self.get_name(), source)
 
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            logger.info("%s: my event_handler %s is invalid", self.get_name(), self.event_handler.command)
             state = False
 
         if getattr(self, 'check_command', None) is None:
-            logger.info("%s: I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid", self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.error("[host::%s] %s" % (self.get_name(), bperror))
+                        logger.error("[host::%s] %s", self.get_name(), bperror)
                     state = False
 
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled", self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
         if (getattr(self, 'active_checks_enabled', False)
              and getattr(self, 'check_period', None) is None
              and getattr(self, 'check_interval', 1) != 0):
-            logger.info("%s: check_period is not correct" % self.get_name())
+            logger.info("%s: check_period is not correct", self.get_name())
             state = False
 
         if not hasattr(self, 'check_period'):
@@ -479,7 +479,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.info("%s: My host_name got the character %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My host_name got the character %s that is not allowed.", self.get_name(), c)
                     state = False
 
         return state
@@ -490,6 +490,10 @@ class Host(SchedulingItem):
             if getattr(s, 'service_description', '__UNNAMED_SERVICE__') == service_description:
                 return s
         return None
+
+    # Return all of the services on a host
+    def get_services(self):
+        return self.services
 
     # For get a nice name
     def get_name(self):
@@ -741,10 +745,10 @@ class Host(SchedulingItem):
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of host '%s' are stale by %s "
                        "(threshold=%s).  I'm forcing an immediate check "
-                       "of the host."
-                       % (self.get_name(),
+                       "of the host.",
+                        self.get_name(),
                           format_t_into_dhms_format(t_stale_by),
-                          format_t_into_dhms_format(t_threshold)))
+                          format_t_into_dhms_format(t_threshold))
 
     # Raise a log entry with a Notification alert like
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
@@ -790,8 +794,8 @@ class Host(SchedulingItem):
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the host '%s' "
-                       "because there is not future valid time"
-                       % (self.get_name()))
+                       "because there is not future valid time",
+                        self.get_name())
 
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
@@ -831,7 +835,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s: %s" % (self.get_name(), self.output))
+            logger.info("Stalking %s: %s", self.get_name(), self.output)
 
     # fill act_depend_of with my parents (so network dep)
     # and say parents they impact me, no timeperiod and follow parents of course

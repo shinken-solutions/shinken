@@ -431,12 +431,12 @@ class Timeperiod(Item):
         for dr in self.dateranges:
             d = dr.is_correct()
             if not d:
-                logger.error("[timeperiod::%s] invalid daterange " % (self.get_name()))
+                logger.error("[timeperiod::%s] invalid daterange ", self.get_name())
             b &= d
 
         # Warn about non correct entries
         for e in self.invalid_entries:
-            logger.warning("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
+            logger.warning("[timeperiod::%s] invalid entry '%s'", self.get_name(), e)
         return b
 
     def __str__(self):
@@ -629,7 +629,7 @@ class Timeperiod(Item):
                 day = t0
                 dateranges.append(StandardDaterange(day, other))
                 return
-        logger.info("[timeentry::%s] no match for %s" % (self.get_name(), entry))
+        logger.info("[timeentry::%s] no match for %s", self.get_name(), entry)
         self.invalid_entries.append(entry)
 
     def apply_inheritance(self):
@@ -646,7 +646,7 @@ class Timeperiod(Item):
     def linkify(self, timeperiods):
         new_exclude = []
         if self.has('exclude') and self.exclude != '':
-            logger.debug("[timeentry::%s] have excluded %s" % (self.get_name(), self.exclude))
+            logger.debug("[timeentry::%s] have excluded %s", self.get_name(), self.exclude)
             excluded_tps = self.exclude.split(',')
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
@@ -654,12 +654,12 @@ class Timeperiod(Item):
                 if tp is not None:
                     new_exclude.append(tp)
                 else:
-                    logger.error("[timeentry::%s] unknown %s timeperiod" % (self.get_name(), tp_name))
+                    logger.error("[timeentry::%s] unknown %s timeperiod", self.get_name(), tp_name)
         self.exclude = new_exclude
 
     def check_exclude_rec(self):
         if self.rec_tag:
-            logger.error("[timeentry::%s] is in a loop in exclude parameter" % self.get_name())
+            logger.error("[timeentry::%s] is in a loop in exclude parameter", self.get_name())
             return False
         self.rec_tag = True
         for tp in self.exclude:

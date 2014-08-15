@@ -196,6 +196,7 @@ class ExternalCommandManager:
         'REMOVE_HOST_ACKNOWLEDGEMENT': {'global': False, 'args': ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT': {'global': False, 'args': ['service']},
         'RESTART_PROGRAM': {'global': True, 'internal': True, 'args': []},
+        'RELOAD_CONFIG': {'global': True, 'internal': True, 'args': []},
         'SAVE_STATE_INFORMATION': {'global': True, 'args': []},
         'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
@@ -319,7 +320,7 @@ class ExternalCommandManager:
         try:
             command = excmd.cmd_line
         except AttributeError, exp:
-            logger.debug("resolve_command:: error with command %s: %s" % (excmd, exp))
+            logger.debug("resolve_command:: error with command %s: %s", excmd, exp)
             return
 
         # Strip and get utf8 only strings
@@ -327,7 +328,9 @@ class ExternalCommandManager:
 
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-            logger.info('EXTERNAL COMMAND: ' + command.rstrip())
+		    # Fix #1263
+            # logger.info('EXTERNAL COMMAND: ' + command.rstrip())
+            naglog_result('info', 'EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command, excmd)
 
         # If we are a receiver, bail out here
@@ -339,7 +342,7 @@ class ExternalCommandManager:
             if not is_global:
                 c_name = r['c_name']
                 args = r['args']
-                logger.debug("Got commands %s %s" % (c_name, str(args)))
+                logger.debug("Got commands %s %s", c_name, str(args))
                 f = getattr(self, c_name)
                 apply(f, args)
             else:
@@ -351,26 +354,26 @@ class ExternalCommandManager:
     # by the hostname which scheduler have the host. Then send
     # the command
     def search_host_and_dispatch(self, host_name, command, extcmd):
-        logger.debug("Calling search_host_and_dispatch for %s" % host_name)
+        logger.debug("Calling search_host_and_dispatch for %s", host_name)
         host_found = False
 
         # If we are a receiver, just look in the receiver 
         if self.mode == 'receiver':
-            logger.info("Receiver looking a scheduler for the external command %s %s" % (host_name, command))
+            logger.info("Receiver looking a scheduler for the external command %s %s", host_name, command)
             sched = self.receiver.get_sched_from_hname(host_name)
             if sched:
                 host_found = True
-                logger.debug("Receiver found a scheduler: %s" % sched)
-                logger.info("Receiver pushing external command to scheduler %s" % sched)
+                logger.debug("Receiver found a scheduler: %s", sched)
+                logger.info("Receiver pushing external command to scheduler %s", sched)
                 sched['external_commands'].append(extcmd)
         else:
             for cfg in self.confs.values():
                 if cfg.hosts.find_by_name(host_name) is not None:
-                    logger.debug("Host %s found in a configuration" % host_name)
+                    logger.debug("Host %s found in a configuration", host_name)
                     if cfg.is_assigned:
                         host_found = True
                         sched = cfg.assigned_to
-                        logger.debug("Sending command to the scheduler %s" % sched.get_name())
+                        logger.debug("Sending command to the scheduler %s", sched.get_name())
                         #sched.run_external_command(command)
                         sched.external_commands.append(command)
                         break
@@ -381,7 +384,7 @@ class ExternalCommandManager:
                 b = self.get_unknown_check_result_brok(command)
                 getattr(self, 'receiver', getattr(self, 'arbiter', None)).add(b)
             else:
-                logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
+                logger.warning("Passive check result was received for host '%s', but the host could not be found!", host_name)
 
     # Takes a PROCESS_SERVICE_CHECK_RESULT
     #  external command line and returns an unknown_[type]_check_result brok
@@ -418,7 +421,7 @@ class ExternalCommandManager:
     # The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulers:
-            logger.debug("Sending a command '%s' to scheduler %s" % (command, sched))
+            logger.debug("Sending a command '%s' to scheduler %s", command, sched)
             if sched.alive:
                 #sched.run_external_command(command)
                 sched.external_commands.append(command)
@@ -434,19 +437,19 @@ class ExternalCommandManager:
         elts2 = part1.split(' ')
         #print "Elts2:", elts2
         if len(elts2) != 2:
-            logger.debug("Malformed command '%s'" % command)
+            logger.debug("Malformed command '%s'", command)
             return None
         ts = elts2[0]
         # Now we will get the timestamps as [123456]
         if not ts.startswith('[') or not ts.endswith(']'):
-            logger.debug("Malformed command '%s'" % command)
+            logger.debug("Malformed command '%s'", command)
             return None
         # Ok we remove the [ ]
         ts = ts[1:-1]
         try:  # is an int or not?
             self.current_timestamp = to_int(ts)
         except ValueError:
-            logger.debug("Malformed command '%s'" % command)
+            logger.debug("Malformed command '%s'", command)
             return None
 
         # Now get the command
@@ -454,7 +457,7 @@ class ExternalCommandManager:
 
         #safe_print("Get command name", c_name)
         if c_name not in ExternalCommandManager.commands:
-            logger.debug("Command '%s' is not recognized, sorry" % c_name)
+            logger.debug("Command '%s' is not recognized, sorry", c_name)
             return None
 
         # Split again based on the number of args we expect. We cannot split
@@ -472,10 +475,10 @@ class ExternalCommandManager:
             numargs += 1
         elts = split_semicolon(command, numargs)
 
-        logger.debug("mode= %s, global= %s" % (self.mode, str(entry['global'])))
+        logger.debug("mode= %s, global= %s", self.mode, str(entry['global']))
         if self.mode == 'dispatcher' and entry['global']:
             if not internal:
-                logger.debug("Command '%s' is a global one, we resent it to all schedulers" % c_name)
+                logger.debug("Command '%s' is a global one, we resent it to all schedulers", c_name)
                 return {'global': True, 'cmd': command}
 
         #print "Is global?", c_name, entry['global']
@@ -488,12 +491,12 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                logger.debug("Searching for a new arg: %s (%d)" % (elt, i))
+                logger.debug("Searching for a new arg: %s (%d)", elt, i)
                 val = elt.strip()
                 if val.endswith('\n'):
                     val = val[:-1]
 
-                logger.debug("For command arg: %s" % val)
+                logger.debug("For command arg: %s", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
@@ -583,7 +586,7 @@ class ExternalCommandManager:
                         b = self.get_unknown_check_result_brok(command)
                         self.sched.add_Brok(b)
                     else:
-                        logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
+                        logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!", srv_name, tmp_host)
 
         except IndexError:
             logger.debug("Sorry, the arguments are not corrects")
@@ -595,7 +598,7 @@ class ExternalCommandManager:
             #f = getattr(self, c_name)
             #apply(f, args)
         else:
-            logger.debug("Sorry, the arguments are not corrects (%s)" % str(args))
+            logger.debug("Sorry, the arguments are not corrects (%s)", str(args))
             return None
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
@@ -1345,7 +1348,7 @@ class ExternalCommandManager:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
             if not c:
-                logger.error('Passive host check failed. Cannot find the check id %s' % i)
+                logger.error('Passive host check failed. Cannot find the check id %s', i)
                 return
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
@@ -1384,7 +1387,7 @@ class ExternalCommandManager:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
             if not c:
-                logger.error('Passive service check failed. Cannot find the check id %s' % i)
+                logger.error('Passive service check failed. Cannot find the check id %s', i)
                 return                
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the service
@@ -1416,11 +1419,12 @@ class ExternalCommandManager:
 
     # RESTART_PROGRAM
     def RESTART_PROGRAM(self):
-        restart_cmd = self.commands.find_by_name('restart_shinken')
+        restart_cmd = self.commands.find_by_name('restart-shinken')
         if not restart_cmd:
-            logger.error("Cannot restart Shinken : missing command named 'restart_shinken'. Please add one")
+            logger.error("Cannot restart Shinken : missing command named 'restart-shinken'. Please add one")
             return
         restart_cmd_line = restart_cmd.command_line
+        logger.warning("RESTART command : %s", restart_cmd_line)
         
         # Ok get an event handler command that will run in 15min max
         e = EventHandler(restart_cmd_line, timeout=900)
@@ -1430,14 +1434,32 @@ class ExternalCommandManager:
         while not e.status in ('done', 'timeout'):
             e.check_finished(64000)
         if e.status == 'timeout' or e.exit_status != 0:
-            logger.error("Cannot restart Shinken : the 'restart_shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
+            logger.error("Cannot restart Shinken : the 'restart-shinken' command failed with the error code '%d' and the text '%s'.", e.exit_status, e.output)
             return
         # Ok here the command succeed, we can now wait our death
-        naglog_result('info', "%s\%s" % (e.output, e.long_output))
-        naglog_result('info', "RESTART command launched. Waiting for the new daemon to kill us")
+        naglog_result('info', "%s" % (e.output))
+
+    # RELOAD_CONFIG
+    def RELOAD_CONFIG(self):
+        reload_cmd = self.commands.find_by_name('reload-shinken')
+        if not reload_cmd:
+            logger.error("Cannot restart Shinken : missing command named 'reload-shinken'. Please add one")
+            return
+        reload_cmd_line = reload_cmd.command_line
+        logger.warning("RELOAD command : %s", reload_cmd_line)
         
-        
-        
+        # Ok get an event handler command that will run in 15min max
+        e = EventHandler(reload_cmd_line, timeout=900)
+        # Ok now run it
+        e.execute()
+        # And wait for the command to finish
+        while not e.status in ('done', 'timeout'):
+            e.check_finished(64000)
+        if e.status == 'timeout' or e.exit_status != 0:
+            logger.error("Cannot reload Shinken configuration: the 'reload-shinken' command failed with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
+            return
+        # Ok here the command succeed, we can now wait our death
+        naglog_result('info', "%s" % (e.output))
 
     # SAVE_STATE_INFORMATION
     def SAVE_STATE_INFORMATION(self):
@@ -1690,7 +1712,7 @@ class ExternalCommandManager:
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
         if not son.is_linked_with_host(father):
-            logger.debug("Doing simple link between %s and %s" % (son.get_name(), father.get_name()))
+            logger.debug("Doing simple link between %s and %s", son.get_name(), father.get_name())
             # Flag them so the modules will know that a topology change
             # happened
             son.topology_change = True
@@ -1704,7 +1726,7 @@ class ExternalCommandManager:
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
-            logger.debug("Removing simple link between %s and %s" % (son.get_name(), father.get_name()))
+            logger.debug("Removing simple link between %s and %s", son.get_name(), father.get_name())
             # Flag them so the modules will know that a topology change
             # happened
             son.topology_change = True
@@ -1716,15 +1738,15 @@ class ExternalCommandManager:
 
     # ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
     def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):
-        logger.debug("I need to add the poller (%s, %s, %s, %s)" % (realm_name, poller_name, address, port))
+        logger.debug("I need to add the poller (%s, %s, %s, %s)", realm_name, poller_name, address, port)
 
         # First we look for the realm
         r = self.conf.realms.find_by_name(realm_name)
         if r is None:
-            logger.debug("Sorry, the realm %s is unknown" % realm_name)
+            logger.debug("Sorry, the realm %s is unknown", realm_name)
             return
 
-        logger.debug("We found the realm: %s" % str(r))
+        logger.debug("We found the realm: %s", str(r))
         # TODO: backport this in the config class?
         # We create the PollerLink object
         t = {'poller_name': poller_name, 'address': address, 'port': port}
@@ -1740,8 +1762,8 @@ class ExternalCommandManager:
         r.pollers.append(p)
         r.count_pollers()
         r.fill_potential_satellites_by_type('pollers')
-        logger.debug("Poller %s added" % poller_name)
-        logger.debug("Potential %s" % str(r.get_potential_satellites_by_type('poller')))
+        logger.debug("Poller %s added", poller_name)
+        logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
 
 
 if __name__ == '__main__':
@@ -1755,6 +1777,6 @@ if __name__ == '__main__':
         os.umask(0)
         os.mkfifo(FIFO_PATH, 0660)
         my_fifo = open(FIFO_PATH, 'w+')
-        logger.debug("my_fifo: %s" % (my_fifo))
+        logger.debug("my_fifo: %s", my_fifo)
 
     logger.debug(open(FIFO_PATH, 'r').readline())

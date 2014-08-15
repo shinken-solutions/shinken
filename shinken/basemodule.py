@@ -162,7 +162,7 @@ class BaseModule(object):
         if not self.is_external:
             return
         self.stop_process()
-        logger.info("Starting external process for instance %s" % (self.name))
+        logger.info("Starting external process for instance %s", self.name)
         p = Process(target=self._main, args=())
 
         # Under windows we should not call start() on an object that got
@@ -177,7 +177,7 @@ class BaseModule(object):
         # We save the process data AFTER the fork()
         self.process = p
         self.properties['process'] = p  # TODO: temporary
-        logger.info("%s is now started ; pid=%d" % (self.name, p.pid))
+        logger.info("%s is now started ; pid=%d", self.name, p.pid)
 
 
     def __kill(self):
@@ -199,8 +199,8 @@ class BaseModule(object):
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
-            logger.info("I'm stopping module '%s' process pid:%s " %
-                       (self.get_name(), self.process.pid))
+            logger.info("I'm stopping module '%s' process pid:%s ", 
+                       self.get_name(), self.process.pid)
             self.process.terminate()
             self.process.join(timeout=1)
             if self.process.is_alive():
@@ -279,11 +279,11 @@ class BaseModule(object):
             daemon_inst.shutdown()
         
         self.set_signal_handler()
-        logger.info("[%s[%d]]: Now running.." % (self.name, os.getpid()))
+        logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
         # Will block here!
         self.main()
         self.do_stop()
-        logger.info("[%s]: exiting now.." % (self.name))
+        logger.info("[%s]: exiting now..", self.name)
 
     # TODO: apparently some modules would uses "work" as the main method??
     work = _main

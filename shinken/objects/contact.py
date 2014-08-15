@@ -169,7 +169,7 @@ class Contact(Item):
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
+                    logger.error("[contact::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # There is a case where there is no nw: when there is not special_prop defined
@@ -177,13 +177,13 @@ class Contact(Item):
         if self.notificationways == []:
             for p in _special_properties:
                 if not hasattr(self, p):
-                    logger.error("[contact::%s] %s property is missing" % (self.get_name(), p))
+                    logger.error("[contact::%s] %s property is missing", self.get_name(), p)
                     state = False
 
         if hasattr(self, 'contact_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
-                    logger.error("[contact::%s] %s character not allowed in contact_name" % (self.get_name(), c))
+                    logger.error("[contact::%s] %s character not allowed in contact_name", self.get_name(), c)
                     state = False
         else:
             if hasattr(self, 'alias'):  # take the alias if we miss the contact_name

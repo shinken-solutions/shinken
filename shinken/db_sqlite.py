@@ -42,6 +42,6 @@ class DBSqlite(DB):
 
     def execute_query(self, query):
         """Just run the query"""
-        logger.debug("[SqliteDB] Info: I run query '%s'" % query)
+        logger.debug("[SqliteDB] Info: I run query '%s'", query)
         self.db_cursor.execute(query)
         self.db.commit()

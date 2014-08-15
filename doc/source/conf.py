@@ -46,7 +46,7 @@ MOCK_MODULES = ['MySQLdb',
                 'cx_Oracle',
                 'log',
                 'pymongo',
-                'pycurl',
+                #'pycurl',
                 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

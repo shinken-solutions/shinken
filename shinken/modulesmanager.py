@@ -112,7 +112,7 @@ class ModulesManager(object):
                 
                 # Look if it's a valid module
                 if not hasattr(m, 'properties'):
-                    logger.warning('Bad module file for %s : missing properties dict' % mod_file)
+                    logger.warning('Bad module file for %s : missing properties dict', mod_file)
                     continue
                 
                 # We want to keep only the modules of our type
@@ -120,7 +120,7 @@ class ModulesManager(object):
                     self.imported_modules.append(m)
             except Exception, exp:
                 # Oups, somethign went wrong here...
-                logger.warning("Importing module %s: %s" % (fname, exp))
+                logger.warning("Importing module %s: %s", fname, exp)
 
         # Now we want to find in theses modules the ones we are looking for
         del self.modules_assoc[:]
@@ -134,7 +134,7 @@ class ModulesManager(object):
                     break
             if not is_find:
                 # No module is suitable, we Raise a Warning
-                logger.warning("The module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
+                logger.warning("The module type %s for %s was not found in modules!", module_type, mod_conf.get_name())
 
 
     # Try to "init" the given module instance.
@@ -142,7 +142,7 @@ class ModulesManager(object):
     # Returns: True on successful init. False if instance init method raised any Exception.
     def try_instance_init(self, inst, late_start=False):
         try:
-            logger.info("Trying to init module: %s" % inst.get_name())
+            logger.info("Trying to init module: %s", inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
             if not late_start and inst.init_try > 1:
@@ -157,10 +157,10 @@ class ModulesManager(object):
 
             inst.init()
         except Exception, e:
-            logger.error("The instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
+            logger.error("The instance %s raised an exception %s, I remove it!", inst.get_name(), str(e))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Back trace of this remove: %s" % (output.getvalue()))
+            logger.error("Back trace of this remove: %s", output.getvalue())
             output.close()
             return False
         return True
@@ -192,7 +192,7 @@ class ModulesManager(object):
                 # Give the module the data to which module it is load from
                 inst.set_loaded_into(self.modules_type)
                 if inst is None:  # None = Bad thing happened :)
-                    logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
+                    logger.info("get_instance for module %s returned None!", mod_conf.get_name())
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
@@ -200,17 +200,17 @@ class ModulesManager(object):
                 s = str(exp)
                 if isinstance(s, str):
                     s = s.decode('UTF-8', 'replace')
-                logger.error("The module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
+                logger.error("The module %s raised an exception %s, I remove it!", mod_conf.get_name(), s)
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
-                logger.error("Back trace of this remove: %s" % (output.getvalue()))
+                logger.error("Back trace of this remove: %s", output.getvalue())
                 output.close()
 
         for inst in self.instances:
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
-                logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later", inst.get_name())
                 self.to_restart.append(inst)
 
         return self.instances
@@ -221,12 +221,12 @@ class ModulesManager(object):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
             if not self.try_instance_init(inst, late_start=late_start):
-                logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later", inst.get_name())
                 self.to_restart.append(inst)
                 continue
 
             # ok, init succeed
-            logger.info("Starting external module %s" % inst.get_name())
+            logger.info("Starting external module %s", inst.get_name())
             inst.start()
 
 
@@ -235,7 +235,7 @@ class ModulesManager(object):
     def remove_instance(self, inst):
         # External instances need to be close before (process + queues)
         if inst.is_external:
-            logger.debug("Ask stop process for %s" % inst.get_name())
+            logger.debug("Ask stop process for %s", inst.get_name())
             inst.stop_process()
             logger.debug("Stop process done")
 
@@ -250,8 +250,8 @@ class ModulesManager(object):
         for inst in self.instances:
             if not inst in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
-                    logger.error("The external module %s goes down unexpectedly!" % inst.get_name())
-                    logger.info("Setting the module %s to restart" % inst.get_name())
+                    logger.error("The external module %s goes down unexpectedly!", inst.get_name())
+                    logger.info("Setting the module %s to restart", inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
@@ -270,8 +270,8 @@ class ModulesManager(object):
                 except Exception, exp:
                     pass
                 if queue_size > self.max_queue_size:
-                    logger.error("The external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
-                    logger.info("Setting the module %s to restart" % inst.get_name())
+                    logger.error("The external module %s got a too high brok queue size (%s > %s)!", inst.get_name(), queue_size, self.max_queue_size)
+                    logger.info("Setting the module %s to restart", inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
@@ -281,10 +281,10 @@ class ModulesManager(object):
         to_restart = self.to_restart[:]
         del self.to_restart[:]
         for inst in to_restart:
-            logger.debug("I should try to reinit %s" % inst.get_name())
+            logger.debug("I should try to reinit %s", inst.get_name())
 
             if self.try_instance_init(inst):
-                logger.debug("Good, I try to restart %s" % inst.get_name())
+                logger.debug("Good, I try to restart %s", inst.get_name())
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)

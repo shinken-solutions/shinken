@@ -64,8 +64,8 @@ Let's see what it looks like:
 
 So here we have a scheduler:
 
-    * workdir: working directory of the daemon. By default /var/lib/shinken
-    * pidfile: pid file of the daemon (so we can kill it :) ). By default /var/lib/shinken/schedulerd.pid for a scheduler.
+    * workdir: Working directory of the daemon. By default /var/lib/shinken
+    * pidfile: PID file of the daemon (so we can kill it :) ). By default /var/lib/shinken/schedulerd.pid for a scheduler.
     * port: TCP port to listen to. By default:
 
        * scheduler: 7768
@@ -74,20 +74,20 @@ So here we have a scheduler:
        * broker: 7772
        * arbiter: 7770 (the arbiter configuration will be seen later)
 
-    * host: IP interface to listen on. The default 0.0.0.0 means all interfaces
-    * user: user used by the daemon to run. By default shinken
-    * group: group of the user. By default shinken.
-    * idontcareaboutsecurity: if set to 1, you can run it under the root account. But seriously: do not to this. The default is 0 of course.
-    * daemon_enabled : if set to 0, the daemon won't run. Useful for distributed setups where you only need a poller for example.
+    * host: IP interface to listen on. The default 0.0.0.0 means all interfaces.
+    * user: User used by the daemon to run. By default shinken.
+    * group: Group of the user. By default shinken.
+    * idontcareaboutsecurity: If set to 1, you can run it under the root account. But seriously: do not do this. The default is 0 of course.
+    * daemon_enabled : If set to 0, the daemon won't run. For example, in distributed setups where you only need a poller.
     * use_ssl=0
     * #certs_dir=etc/certs
     * #ca_cert=etc/certs/ca.pem
     * #server_cert=etc/certs/server.pem
     * hard_ssl_name_check=0
-    * use_local_log=1 : Log all messages that match the log_level for this daemon in a local directory
-    * local_log=brokerd.log : name of the log file where to save the logs
+    * use_local_log=1 : Log all messages that match the log_level for this daemon in a local directory.
+    * local_log=brokerd.log : Name of the log file where to save the logs.
     * log_level=INFO : Log_level that will be permitted to be logger. Warning permits Warning, Error, Critical to be logged. INFO by default.
-    * max_queue_size=100000 : If a module got a brok queue() higher than this value, it will be killed and restarted. Put to 0 to disable it
+    * max_queue_size=100000 : If a module gets a brok queue() higher than this value, it will be killed and restarted. Set to 0 to disable it.
 
 
 Daemon declaration in the global configuration 
@@ -95,9 +95,9 @@ Daemon declaration in the global configuration
 
 Now each daemon knows in which directory to run, and on which tcp port to listen. A daemon is a resource in the Shinken architecture. Such resources must be declared in the global configuration (where the Arbiter is) for them to be utilized.
 
-The global configuration file is:  **/etc/shinken/shinken.cfg/**
+The global configuration file is:  **/etc/shinken/shinken.cfg**
 
-The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (is it a spare, ...).
+The daemon declarations are quite simple: each daemon is represented by an object. The information contained in the daemon object are network parameters about how its resources should be treated (e.g. is it a spare, ...).
 
 Each objects type corresponds to a daemon:
   * arbiter
@@ -107,7 +107,7 @@ Each objects type corresponds to a daemon:
   * broker
   * receiver
 
-The names were chosen to understand their roles more easily. :)
+The names were chosen to clearly represent their roles. :)
 
 They have these parameters in common:
   * \*_name: name of the resource
@@ -115,7 +115,7 @@ They have these parameters in common:
   * port: I think you can find it on your own by now :)
   * [spare]: 1 or 0, is a spare or not. :ref:`See advanced features for this <architecture/advanced-features>`.
   * [realm]: realm membership :ref:`See advanced features for this <architecture/advanced-features>`.
-  * [manage_sub_realms]: manage or not sub realms. :ref:`See advanced features for this <architecture/advanced-features>`.
+  * [manage_sub_realms]: whether or not to manage sub realms. :ref:`See advanced features for this <architecture/advanced-features>`.
   * [modules]: modules used by the daemon. See below.
 
 
