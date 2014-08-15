@@ -26,6 +26,8 @@
 import threading
 import time
 import json
+import hashlib
+import base64
 
 # For old users python-crypto was not mandatory, don't break their setup
 try:
@@ -37,6 +39,21 @@ from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPException
 
 
+
+BLOCK_SIZE = 16
+ 
+
+def pad (data):
+    pad = BLOCK_SIZE - len(data) % BLOCK_SIZE
+    return data + pad * chr(pad)
+
+ 
+def unpad (padded):
+    pad = ord(padded[-1])
+    return padded[:-pad]
+
+
+
 class Stats(object):
     def __init__(self):
         self.name = ''
@@ -45,8 +62,7 @@ class Stats(object):
         self.stats = {}
         self.api_key = ''
         self.secret = ''
-        self.cyph = None
-        self.con = HTTPClient(uri='http://metrology')
+        self.con = HTTPClient(uri='http://kernel.shinken.io')
         
 
     def launch_reaper_thread(self):
@@ -61,12 +77,7 @@ class Stats(object):
         self.type = _type
         self.api_key = api_key
         self.secret = secret
-
-        # Assumea 16 len secret, but should be alreayd ok
-        self.secret += '\0' * (-len(self.secret) % 16)
-        if AES is not None and self.secret != '':
-            self.cyph = AES.new(self.secret, AES.MODE_ECB)
-
+        logger.debug('SECRET PUSH %s' % self.secret)
         
 
     # Will increment a stat key, if None, start at 0
@@ -81,28 +92,42 @@ class Stats(object):
         self.stats[k] = (_min, _max, nb, _sum)
 
 
+    def _encrypt(self, data):
+        m = hashlib.md5()
+        m.update(self.secret)
+        key = m.hexdigest()
+        
+        m = hashlib.md5()
+        m.update(self.secret + key)
+        iv = m.hexdigest()
+        
+        data = pad(data)
+        
+        aes = AES.new(key, AES.MODE_CBC, iv[:16])
+        
+        encrypted = aes.encrypt(data)
+        return base64.urlsafe_b64encode(encrypted)
+
+
 
     def reaper(self):
         while True:
             now = int(time.time())
-            logger.debug('REAPER loop')
             stats = self.stats
             self.stats = {}
 
             if len(stats) != 0:
                 s = ', '.join(['%s:%s' % (k,v) for (k,v) in stats.iteritems()])
-                logger.debug("REAPER: %s " % s)
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
             if not self.name:
                 time.sleep(60)
                 continue
 
-            logger.debug('REAPER we got a name')
             metrics = []
             for (k,e) in stats.iteritems():
                 nk = '%s.%s.%s' % (self.type, self.name, k)
-                logger.debug('REAP %s:%s' % (nk, e))
+                #logger.debug('REAP %s:%s' % (nk, e))
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
                 # nb can't be 0 here and _min_max can't be None too
@@ -115,21 +140,22 @@ class Stats(object):
                 s = '%s.count %f %d' % (nk, nb, now)
                 metrics.append(s)
 
-            logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
+            #logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
             # get the inner data for the daemon
             struct = self.app.get_stats_struct()
             struct['metrics'].extend(metrics)
-            logger.debug('REAPER whole struct %s' % struct)
+            #logger.debug('REAPER whole struct %s' % struct)
             j = json.dumps(struct)
-            if self.cyph is not None:
-                logger.debug('PUT to /api/v1/put/ with %s %s' % (self.api_key, self.secret))
+            if AES is not None and self.secret != '':
+                # RESET AFTER EACH calls!
+                logger.debug('Stats PUT to /api/v1/put/ with %s %s' % (self.api_key, self.secret))
+
                 # assume a %16 length messagexs
-                j += '\0' * (-len(j) % 16)
-                encrypted_text = self.cyph.encrypt(j)
+                encrypted_text = self._encrypt(j)
                 try:
-                    r = self.con.put('/api/v1/put/', encrypted_text)
+                    r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key),  encrypted_text)
                 except HTTPException, exp:
-                    logger.debug('REAPER cannot put to the metric server %s' % exp)
+                    logger.debug('Stats REAPER cannot put to the metric server %s' % exp)
             time.sleep(60)
 
 

@@ -621,6 +621,21 @@ class Broker(BaseSatellite):
         self.modules_manager.clear_instances()
 
 
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        # call the daemon one
+        res = super(Broker, self).get_stats_struct()
+        res.update( {'name':self.name, 'type': 'broker'} )
+        metrics = res['metrics']      
+        # metrics specific
+        metrics.append( 'broker.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now) )
+        metrics.append( 'broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now) )
+        
+        return res
+
+
     def do_loop_turn(self):
         logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
 

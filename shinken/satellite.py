@@ -1040,7 +1040,10 @@ class Satellite(BaseSatellite):
         # call the daemon one
         res = super(Satellite, self).get_stats_struct()
         _type = self.__class__.my_type
-        res.update( {'name':self.name, 'type': _type, 'passive':self.passive} )
+        res.update( {'name':self.name, 'type': _type})
+        # The receiver do nto have a passie prop
+        if hasattr(self, 'passive'):
+            res['passive'] = self.passive
         metrics = res['metrics']      
         # metrics specific
         metrics.append( '%s.%s.external-commands.queue %d %d' % (_type, self.name, len(self.external_commands), now) )

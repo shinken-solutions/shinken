@@ -69,7 +69,8 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
 
 # Our main APP class
 class Receiver(Satellite):
-
+    my_type = 'receiver'
+    
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='receiverd.pid'),

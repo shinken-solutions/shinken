@@ -353,7 +353,7 @@ class Shinken(BaseSatellite):
         secret = pk['secret']
         
         # horay, we got a name, we can set it in our stats objects
-        statsmgr.register(self.sched, instance_name, 'scheduler')
+        statsmgr.register(self.sched, instance_name, 'scheduler', api_key=api_key, secret=secret)
         
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
