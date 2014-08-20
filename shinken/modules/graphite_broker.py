@@ -60,13 +60,19 @@ class Graphite_broker(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
-        self.port = int(getattr(modconf, 'port', '2003'))
         self.use_pickle = getattr(modconf, 'use_pickle', '0') == '1'
         if self.use_pickle:
             self.port = int(getattr(modconf, 'port', '2004'))
         else:
             self.port = int(getattr(modconf, 'port', '2003'))
         self.tick_limit = int(getattr(modconf, 'tick_limit', '300'))
+        # Used to reset check time into the scheduled time. 
+        # Carbon/graphite does not like latency data and creates blanks in graphs
+        # Every data with "small" latency will be considered create at scheduled time
+        self.ignore_latency_limit = \
+            int(getattr(modconf, 'ignore_latency_limit', '0'))
+        if self.ignore_latency_limit < 0:
+            self.ignore_latency_limit = 0
         self.buffer = []
         self.ticks = 0
         self.host_dict = {}
@@ -117,10 +123,10 @@ class Graphite_broker(BaseModule):
         metrics = PerfDatas(perf_data)
 
         for e in metrics:
-            try:
-                logger.debug("[Graphite broker] Groking: %s" % str(e))
-            except UnicodeEncodeError:
-                pass
+            #try:
+            #    logger.debug("[Graphite broker] Groking: %s" % str(e))
+            #except UnicodeEncodeError:
+            #    pass
 
             name = self.illegal_char.sub('_', e.name)
             name = self.multival.sub(r'.\1', name)
@@ -134,10 +140,10 @@ class Graphite_broker(BaseModule):
             if name_value[name] == '':
                 continue
 
-            try:
-                logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(e.value)))
-            except UnicodeEncodeError:
-                pass
+            #try:
+            #    logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(e.value)))
+            #except UnicodeEncodeError:
+            #    pass
             for key, value in name_value.items():
                 res.append((key, value))
         return res
@@ -178,13 +184,19 @@ class Graphite_broker(BaseModule):
             if '_GRAPHITE_POST' in customs_datas:
                 desc = ".".join((desc, customs_datas['_GRAPHITE_POST']))
 
-        check_time = int(data['last_chk'])
+        if self.ignore_latency_limit >= data['latency'] > 0:
+            check_time = int(data['last_chk']) - int(data['latency'])
+            logger.info("[Graphite broker] Ignoring latency for service %s. Latency : %s" %
+                data['service_description'], data['latency'])
+        else:
+            check_time = int(data['last_chk']) 
 
-        try:
-            logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s"
-                         % (hname, desc, check_time, str(perf_data)))
-        except UnicodeEncodeError:
-            pass
+
+        #try:
+        #    logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s"
+        #                 % (hname, desc, check_time, str(perf_data)))
+        #except UnicodeEncodeError:
+        #    pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source, desc))
@@ -203,10 +215,10 @@ class Graphite_broker(BaseModule):
             for (metric, value) in couples:
                 lines.append("%s.%s %s %d" % (path, metric, str(value), check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            try:
-                logger.debug("[Graphite broker] Launching: %s" % packet)
-            except UnicodeEncodeError:
-                pass
+            #try:
+            #    logger.debug("[Graphite broker] Launching: %s" % packet)
+            #except UnicodeEncodeError:
+            #    pass
             try:
                 self.send_packet(packet)
             except IOError:
@@ -230,14 +242,20 @@ class Graphite_broker(BaseModule):
             customs_datas = self.host_dict[data['host_name']]
             if '_GRAPHITE_PRE' in customs_datas:
                 hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+        
+        if self.ignore_latency_limit >= data['latency'] > 0:
+            check_time = int(data['last_chk']) - int(data['latency'])
+            logger.info("[Graphite broker] Ignoring latency for host %s. Latency : %s" %
+                data['host_name'], data['latency'])
+        else:
+            check_time = int(data['last_chk'])
 
-        check_time = int(data['last_chk'])
 
-        try:
-            logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s"
-                         % (hname, check_time, str(perf_data)))
-        except UnicodeEncodeError:
-            pass
+        #try:
+        #    logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s"
+        #                 % (hname, check_time, str(perf_data)))
+        #except UnicodeEncodeError:
+        #    pass
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source))
@@ -248,19 +266,17 @@ class Graphite_broker(BaseModule):
             # Buffer the performance data lines
             for (metric, value) in couples:
                 self.buffer.append(("%s.__HOST__.%s" % (path, metric),
-                                       ("%d" % check_time,
-                                        "%s" % value)))
+                                   ("%d" % check_time,"%s" % value)))
         else:
             lines = []
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                lines.append("%s.__HOST__.%s %s %d" % (path, metric,
-                                                           value, check_time))
+                lines.append("%s.__HOST__.%s %s %d" % (path, metric, value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            try:
-                logger.debug("[Graphite broker] Launching: %s" % packet)
-            except UnicodeEncodeError:
-                pass
+            #try:
+            #    logger.debug("[Graphite broker] Launching: %s" % packet)
+            #except UnicodeEncodeError:
+            #    pass
             try:
                 self.send_packet(packet)
             except IOError:
@@ -311,4 +327,3 @@ class Graphite_broker(BaseModule):
         header = struct.pack("!L", len(payload))
         packet = header + payload
         return packet
-
