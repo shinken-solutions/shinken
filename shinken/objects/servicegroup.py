@@ -121,7 +121,7 @@ class Servicegroups(Itemgroups):
             seek = 0
             host_name = ''
             if (len(mbrs) == 1):
-                sg.add_string_unknown_member('%s' % mbrs[0])
+                sg.unknown_members.append('%s' % mbrs[0])
 
             for mbr in mbrs:
                 if seek % 2 == 0:
@@ -132,7 +132,7 @@ class Servicegroups(Itemgroups):
                     if find is not None:
                         new_mbrs.append(find)
                     else:
-                        sg.add_string_unknown_member('%s,%s' % (host_name, service_desc))
+                        sg.unknown_members.append('%s,%s' % (host_name, service_desc))
                 seek += 1
 
             # Make members uniq

@@ -43,7 +43,7 @@ class Itemgroup(Item):
     properties.update({
         'members': StringProp(fill_brok=['full_status']),
         # Shinken specific
-        'unknown_members': StringProp(default=None),
+        'unknown_members': StringProp(default=[]),
     })
 
     def __init__(self, params={}):
@@ -107,12 +107,6 @@ class Itemgroup(Item):
         else:
             self.members = member
 
-    def add_string_unknown_member(self, member):
-        if self.unknown_members:
-            self.unknown_members.append(member)
-        else:
-            self.unknown_members = [member]
-
     def __str__(self):
         return str(self.__dict__) + '\n'
 
@@ -130,7 +124,7 @@ class Itemgroup(Item):
     def is_correct(self):
         res = True
 
-        if self.unknown_members:
+        if self.unknown_members != []:
             for m in self.unknown_members:
                 logger.error("[itemgroup::%s] as %s, got unknown member %s", self.get_name(), self.__class__.my_type, m)
             res = False
