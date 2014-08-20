@@ -127,7 +127,7 @@ class Hostgroups(Itemgroups):
                     if h is not None:
                         new_mbrs.append(h)
                     else:
-                        hg.unknown_members.append(mbr)
+                        hg.add_string_unknown_member(mbr)
 
             # Make members uniq
             new_mbrs = list(set(new_mbrs))

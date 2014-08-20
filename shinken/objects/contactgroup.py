@@ -126,7 +126,7 @@ class Contactgroups(Itemgroups):
                 if m is not None:
                     new_mbrs.append(m)
                 else:
-                    cg.unknown_members.append(mbr)
+                    cg.add_string_unknown_member(mbr)
 
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
