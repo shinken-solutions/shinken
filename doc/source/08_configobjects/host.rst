@@ -20,7 +20,7 @@ Bold directives are required, while the others are optional.
 ========================================== ======================================
 define host{
 **host_name**                              ***host_name***
-**alias**                                  ***alias***
+alias                                      alias
 display_name                               *display_name*
 **address**                                ***address***
 parents                                    *host_names*
