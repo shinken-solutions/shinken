@@ -1514,9 +1514,9 @@ class SchedulingItem(Item):
         output = service_template_string
         mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL", 3: "UNKNOWN"}
         status = mapping[self.business_rule.get_state()]
-        output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
+        output = re.sub(r"\$STATUS\$", status, output)
         short_status = self.status_to_short_status(status)
-        output = re.sub(r"\$SHORT_STATUS\$", short_status, output, flags=re.I)
+        output = re.sub(r"\$SHORT_STATUS\$", short_status, output)
         output = self.expand_business_rule_item_macros(output, self)
         output = re.sub("\$CHILDS_OUTPUT\$", childs_output, output)
         return output.strip()
