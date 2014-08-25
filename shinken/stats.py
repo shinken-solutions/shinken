@@ -119,7 +119,7 @@ class Stats(object):
                 s = ', '.join(['%s:%s' % (k,v) for (k,v) in stats.iteritems()])
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
-            if not self.name:
+            if not self.name or not self.api_key or not self.secret:
                 time.sleep(60)
                 continue
 
