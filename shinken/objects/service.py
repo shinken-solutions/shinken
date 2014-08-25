@@ -1390,7 +1390,11 @@ class Services(Items):
                 sname = s.service_description
                 shname = getattr(s, 'host_name', '')
                 if hasattr(s, 'servicegroups'):
-                    sgs = s.servicegroups.split(',')
+                    if isinstance(s.servicegroups, list):
+                        v = ','.join(s.servicegroups)
+                    else:
+                        v = s.servicegroups
+                    sgs = v.split(',')
                     for sg in sgs:
                         servicegroups.add_member(shname+','+sname, sg.strip())
 
