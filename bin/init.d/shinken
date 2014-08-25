@@ -291,14 +291,14 @@ do_start() {
     if [ "$mod" != "arbiter" ]; then
         modINI=$(echo "$"${mod}CFG | tr '[:lower:]' '[:upper:]')
         modinifile=$(eval echo ${modINI})
-        output=$("$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
+        output=$($PYTHON "$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
         rc=$?
     else
         if ! test "$SHINKENSPECIFICCFG"
         then
-            output=$("$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
         else
-            output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
         fi
         rc=$?
     fi
@@ -384,9 +384,9 @@ do_check() {
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
     if ! test "$SHINKENSPECIFICCFG"
     then
-       "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" $DEBUGCMD 2>&1
+       $PYTHON "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" $DEBUGCMD 2>&1
     else
-       "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1
+       $PYTHON "$BIN/shinken-arbiter" -v -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1
     fi
     return $?
 }
