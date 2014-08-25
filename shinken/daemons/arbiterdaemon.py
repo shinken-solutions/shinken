@@ -145,7 +145,7 @@ class IForArbiter(Interface):
                                 print exp
                     lst.append(e)
                         
-        return lst
+        return res
     get_all_states.doc = doc
     
     
