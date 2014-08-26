@@ -12,7 +12,7 @@ Thruk
 
 
 
-.. image:: /_static/images/thruk.png?640x480
+.. image:: /_static/images/thruk2.png
    :scale: 90 %
 
 

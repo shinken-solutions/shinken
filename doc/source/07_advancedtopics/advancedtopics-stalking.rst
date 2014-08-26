@@ -32,16 +32,10 @@ If you enable stalking for one or more states of a particular host or service, S
 Service Check #: Service State: Service Check Output:                                                           Logged Normally                                                               Logged With Stalking                                                      
 x                OK             RAID array optimal                                                              -                                                                             -                                                                         
 x+1              OK             RAID array optimal                                                              -                                                                             -                                                                         
-x+2              WARNING        RAID array degraded (1 drive bad, 1 hot spare rebuilding)                       .. image:: /_static/images///official/images/checkmark.png}} 
-   :scale: 90 % .. image:: /_static/images///official/images/checkmark.png
-   :scale: 90 %
-x+3              CRITICAL       RAID array degraded (2 drives bad, 1 host spare online, 1 hot spare rebuilding) .. image:: /_static/images///official/images/checkmark.png}} 
-   :scale: 90 % .. image:: /_static/images///official/images/checkmark.png
-   :scale: 90 %
+x+2              WARNING        RAID array degraded (1 drive bad, 1 hot spare rebuilding)                       .. image:: /_static/images///official/images/checkmark.png                    .. image:: /_static/images///official/images/checkmark.png
+x+3              CRITICAL       RAID array degraded (2 drives bad, 1 host spare online, 1 hot spare rebuilding) .. image:: /_static/images///official/images/checkmark.png                    .. image:: /_static/images///official/images/checkmark.png
 x+4              CRITICAL       RAID array degraded (3 drives bad, 2 hot spares online)                         -                                                                             .. image:: /_static/images///official/images/checkmark.png
-   :scale: 90 %
 x+5              CRITICAL       RAID array failed                                                               -                                                                             .. image:: /_static/images///official/images/checkmark.png
-   :scale: 90 %
 x+6              CRITICAL       RAID array failed                                                               -                                                                             -                                                                         
 x+7              CRITICAL       RAID array failed                                                               -                                                                             -                                                                         
 ================ ============== =============================================================================== ============================================================================= ==========================================================================

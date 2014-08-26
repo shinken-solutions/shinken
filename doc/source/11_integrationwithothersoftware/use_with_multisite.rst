@@ -12,7 +12,7 @@ Check_MK Multisite
 
 
 
-.. image:: /_static/images/multisite.png?640x480
+.. image:: /_static/images/multisite2.png
    :scale: 90 %
 
 

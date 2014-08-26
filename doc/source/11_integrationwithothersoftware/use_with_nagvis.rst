@@ -12,7 +12,7 @@ NagVis
 
 
 
-.. image:: /_static/images/nagivs.jpg?640x480
+.. image:: /_static/images/nagivs2.jpg
    :scale: 90 %
 
 

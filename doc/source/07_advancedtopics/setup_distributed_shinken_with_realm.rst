@@ -69,7 +69,7 @@ Here is the isolated one:
 
 
 
-.. image:: /_static/images///official/images/shinken-architecture-isolated-realms.png?800
+.. image:: /_static/images///official/images/shinken-architecture-isolated-realms3.png
    :scale: 90 %
 
 
@@ -79,7 +79,7 @@ And a more common way of sharing reactionner/broker:
 
 
 
-.. image:: /_static/images///official/images/shinken-architecture-global-realm.png?800
+.. image:: /_static/images///official/images/shinken-architecture-global-realm3.png
    :scale: 90 %
 
 

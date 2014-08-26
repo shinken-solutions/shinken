@@ -17,7 +17,7 @@ Shinken WebUI is started at the same time Shinken itself does, and is configured
 
 
 
-.. image:: /_static/images/problems.png?640x480
+.. image:: /_static/images/problems.png
    :scale: 90 %
 
 

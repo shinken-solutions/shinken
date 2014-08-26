@@ -12,7 +12,7 @@ PNP4Nagios
 
 
 
-.. image:: /_static/images/pnp.png?640x480
+.. image:: /_static/images/pnp2.png
    :scale: 90 %
 
 

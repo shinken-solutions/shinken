@@ -28,7 +28,7 @@ Originally developed for Nagios, MK Livetstatus, was re-implemented in Python fo
 
 
 
-.. image:: /_static/images//livestatus_-_network_communications.png?600
+.. image:: /_static/images//livestatus_-_network_communications.png
    :scale: 90 %
 
 

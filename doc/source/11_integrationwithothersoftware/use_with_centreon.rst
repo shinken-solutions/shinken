@@ -14,7 +14,7 @@ Centreon is a famous French monitoring solution based on Nagios, which can also 
 
 
 
-.. image:: /_static/images/centreon.png?640x480
+.. image:: /_static/images/centreon.png
    :scale: 90 %
 
 
