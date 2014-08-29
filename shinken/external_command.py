@@ -1726,7 +1726,7 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
 
-    # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
+    # DEL_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
             logger.debug("Removing simple link between %s and %s", son.get_name(), father.get_name())
