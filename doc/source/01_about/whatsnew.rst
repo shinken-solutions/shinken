@@ -36,7 +36,7 @@ Integrated business rules                                          Hard      Yes
 Problem/impacts                                                    Hard      Yes     NA                 With Nagios it is only available in the notification part, but with Shinken it’s also available in the real time monitoring views!
 Easy DMZ monitoring                                                No        Yes     NA                 Shinken has poller_tag that allow the user to put a poller in a DMZ and do all DMZhosts/services with it. It make less Firewall holes.
 UTF-8 support                                                      No        Yes     NA                 Thank you Python. Now %µ~@^-nöel is supported as a host name.
-Good performances.                                                No        Yes     NA                 Need performance and scalability ? Try that with Nagios…
+Good performances.                                                 No        Yes     NA                 Need performance and scalability ? Try that with Nagios…
 Runs on Windows                                                    No        Yes     NA                 Thank you Python again. Flexible monitoring : direct WMI or Powershell queries!
 Configure flap history                                             No        Yes     NA                 Nagios handles flapping for the 20 latest states only. It’s hard-coded. In Shinken it’s a configuration option.
 Impact management                                                  No        Yes     NA                 For Nagios it’s as important when an incident impacts a qualification application or a production one. Shinken computes dynamically the business impact of the root problem based on criticality!

@@ -41,11 +41,13 @@ class SortedDict(dict):
     '''Dictionary with sorted keys.
 
     The interface is similar to the ordinary dict's one, but:
+
     * methods: __repr__(), __str__(), __iter__(), iterkeys(), itervalues(),
       iteritems(), keys(), values(), items() and popitem() -- return results
       taking into consideration sorted keys order;
     * new methods: largest_key(), largest_item(), smallest_key(),
       smallest_item() added.
+
     '''
 
     def __init__(self, *args, **kwargs):
