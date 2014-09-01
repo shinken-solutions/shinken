@@ -244,9 +244,9 @@ if __name__ == "__main__":
     group_debug.add_option('-l', '--logfile', dest='logfile',
                       help='Specify a log file. Default: log to stdout.')
     group_shinken.add_option('-c', '--commonmacros', dest='commonmacros',
-                      help='Comma separated shinken macros in this order : NOTIFICATIONTYPE,HOSTNAME,HOSTADDRESS,LONGDATETIME.')
+                      help='Double comma separated shinken macros in this order : "NOTIFICATIONTYPE$,,$HOSTNAME$,,$HOSTADDRESS$,,$LONGDATETIME$".')
     group_shinken.add_option('-o', '--objectmacros', dest='objectmacros',
-                      help='Comma separated object shinken macros in this order : "SERVICEDESC,SERVICESTATE,SERVICEOUTPUT,SERVICEDURATION" for a service object and HOSTALIAS,HOSTSTATE,HOSTDURATION with host object')
+                      help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTALIAS$,,$HOSTSTATE$,,$HOSTDURATION$" with host object')
     group_shinken_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
                       help='Specify $_SERVICEDETAILLEDDESC$ custom macros')
     group_shinken_details.add_option('-i', '--impact', dest='impact',
@@ -280,7 +280,7 @@ if __name__ == "__main__":
             'Date' : os.getenv('NAGIOS_LONGDATETIME')
         }
     else:
-        macros = opts.commonmacros.split(',')
+        macros = opts.commonmacros.split(',,')
         shinken_var = {
             'Notification type': macros[0],
             'Hostname': macros[1],
@@ -303,7 +303,7 @@ if __name__ == "__main__":
             }
         }
     else:
-        macros = opts.objectmacros.split(',')
+        macros = opts.objectmacros.split(',,')
         if opts.notification_object == 'service':
             shinken_notification_object_var = { 
                 'service': {
