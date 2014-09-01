@@ -295,7 +295,7 @@ It is possible to combine both **host** and **service** expansion expression to 
           If not so, there is no mean to distinguish an host status from a service status in the expression.
           In servicegroup flag case, as you do not want to apply any filter on the host (you want ALL services which are member of the XXX service group, whichever host they are bound to),
           you may use the * host selector expression. The correct expression syntax should be:
-             bp_rule!*,g:my-servicegroup
+          ``bp_rule!*,g:my-servicegroup``
           The same rule applies to other service selectors (l, r, t, and so on).
 
 Examples of combined expansion expression

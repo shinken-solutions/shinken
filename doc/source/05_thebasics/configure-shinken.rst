@@ -142,8 +142,8 @@ Modules have some common properties:
 
 Module references, :ref:`list of overall modules <architecture/the-shinken-architecture>`:
   * Arbiter modules
-  * :ref:`Scheduler modules <distributed_retention_modules>`
-  * :ref:`Broker modules <the_broker_modules>`
+  * Scheduler modules
+  * Broker modules
   * Receiver modules
   * Pollers modules
   * Reactionner modules

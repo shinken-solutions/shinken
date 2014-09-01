@@ -79,7 +79,7 @@ Programming with broker modules in Shinken
 
 Modules are pieces of code that are executed by a daemon.
 
-Module configuration and startup is controlled in the modules/*.cfg files
+Module configuration and startup is controlled in the modules/\*.cfg files
 
   * The module is declared in a daemon
   * The module itself is defined and its variables set
