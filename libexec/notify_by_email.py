@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 #-*-coding:utf-8-*-
+# Copyright (C) 2012:
+#    Romain Forlot, rforlot@yahoo.com
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
@@ -19,29 +36,7 @@ from shinken.objects.config import Config
 shinken_image_dir = '/var/lib/shinken/share/images'
 shinken_customer_logo = 'customer_logo.png'
 webui_config_file = '/etc/shinken/modules/webui.cfg'
-contactemail = os.getenv('NAGIOS_CONTACTEMAIL')
 
-
-shinken_notification_object_var = { 
-    'service': {
-        'Service description': os.getenv('NAGIOS_SERVICEDESC'),
-        'Service state': os.getenv('NAGIOS_SERVICESTATE'),
-        'Service output': os.getenv('NAGIOS_SERVICEOUTPUT'),
-        'Service duration': os.getenv('NAGIOS_SERVICEDURATION') 
-    },
-    'host': {
-        'Host alias': os.getenv('NAGIOS_HOSTALIAS'),
-        'Host state': os.getenv('NAGIOS_HOSTSTATE'), 
-        'Host duration': os.getenv('NAGIOS_HOSTDURATION') 
-    }
-}
-
-shinken_var = {
-    'Notification type': os.getenv('NAGIOS_NOTIFICATIONTYPE'),
-    'Hostname': os.getenv('NAGIOS_HOSTNAME'),
-    'Host address': os.getenv('NAGIOS_HOSTADDRESS'),
-    'Date' : os.getenv('NAGIOS_LONGDATETIME')
-}
 
 # Set up root logging
 def setup_logging():
@@ -236,7 +231,8 @@ if __name__ == "__main__":
     parser = OptionParser(description='Notify by email receivers of Shinken alerts. Message will be formatted in html and can embed customer logo. To included customer logo, just load png image named customer_logo.png in '+shinken_image_dir)
 
     group_debug = OptionGroup(parser, 'Debugging and test options', 'Useful to debugging script under shinken processes. Useful to just make a standalone test of script to see what it looks like.')
-    group_details = OptionGroup(parser, 'Details and additionnals informations', 'You can include some useful additionnals informations to notification using these options. Good practice is to add HOST or SERVICE macros with these details and pass them to the script')
+    group_shinken_details = OptionGroup(parser, 'Details and additionnals informations', 'You can include some useful additionnals informations to notification using these options. Good practice is to add HOST or SERVICE macros with these details and pass them to the script')
+    group_shinken = OptionGroup(parser, 'Shinken macros to specify.', 'Used to specify usual shinken macros in notify, if not specified then it will try to get them from environment variable. You need to enable_environment_macros in shinken.cfg if you want to used them. It isn\'t recommanded to used them for large environment. You better use option -c and -s or -h depend on which object you\'ll notify.')
     group_general = OptionGroup(parser, 'General options', 'Default options to setup')
 
     group_debug.add_option('-D', '--debug', dest='debug', default=False,
@@ -247,34 +243,97 @@ if __name__ == "__main__":
                       default='html', help='Mail format "html" or "txt". Default: html')
     group_debug.add_option('-l', '--logfile', dest='logfile',
                       help='Specify a log file. Default: log to stdout.')
-    group_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
+    group_shinken.add_option('-c', '--commonmacros', dest='commonmacros',
+                      help='Comma separated shinken macros in this order : NOTIFICATIONTYPE,HOSTNAME,HOSTADDRESS,LONGDATETIME.')
+    group_shinken.add_option('-o', '--objectmacros', dest='objectmacros',
+                      help='Comma separated object shinken macros in this order : "SERVICEDESC,SERVICESTATE,SERVICEOUTPUT,SERVICEDURATION" for a service object and HOSTALIAS,HOSTSTATE,HOSTDURATION with host object')
+    group_shinken_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
                       help='Specify $_SERVICEDETAILLEDDESC$ custom macros')
-    group_details.add_option('-i', '--impact', dest='impact',
+    group_shinken_details.add_option('-i', '--impact', dest='impact',
                       help='Specify the $_SERVICEIMPACT$ custom macros')
-    group_details.add_option('-a', '--action', dest='fixaction',
+    group_shinken_details.add_option('-a', '--action', dest='fixaction',
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
-    group_general.add_option('-r', '--receivers', dest='receivers', default=contactemail,
+    group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Notify a service Shinken alert. Else it is an host alert.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. Default: localhost')
     
-    parser.add_option_group(group_general)
-    parser.add_option_group(group_details)
     parser.add_option_group(group_debug)
+    parser.add_option_group(group_general)
+    parser.add_option_group(group_shinken)
+    parser.add_option_group(group_shinken_details)
 
     (opts, args) = parser.parse_args()
     
     setup_logging()
     
     # Check and process arguments
+    #
+    # Retrieve and setup shinken macros that make the mail content
+    if opts.commonmacros == None:
+        shinken_var = {
+            'Notification type': os.getenv('NAGIOS_NOTIFICATIONTYPE'),
+            'Hostname': os.getenv('NAGIOS_HOSTNAME'),
+            'Host address': os.getenv('NAGIOS_HOSTADDRESS'),
+            'Date' : os.getenv('NAGIOS_LONGDATETIME')
+        }
+    else:
+        macros = opts.commonmacros.split(',')
+        shinken_var = {
+            'Notification type': macros[0],
+            'Hostname': macros[1],
+            'Host address': macros[2],
+            'Date' : macros[3]
+        }
+
+    if opts.objectmacros == None:
+        shinken_notification_object_var = { 
+            'service': {
+                'Service description': os.getenv('NAGIOS_SERVICEDESC'),
+                'Service state': os.getenv('NAGIOS_SERVICESTATE'),
+                'Service output': os.getenv('NAGIOS_SERVICEOUTPUT'),
+                'Service duration': os.getenv('NAGIOS_SERVICEDURATION') 
+            },
+            'host': {
+                'Host alias': os.getenv('NAGIOS_HOSTALIAS'),
+                'Host state': os.getenv('NAGIOS_HOSTSTATE'), 
+                'Host duration': os.getenv('NAGIOS_HOSTDURATION') 
+            }
+        }
+    else:
+        macros = opts.objectmacros.split(',')
+        if opts.notification_object == 'service':
+            shinken_notification_object_var = { 
+                'service': {
+                    'Service description': macros[0],
+                    'Service state': macros[1],
+                    'Service output': macros[2],
+                    'Service duration': macros[3]
+                }
+            }
+        else:
+            shinken_notification_object_var = { 
+                'host': {
+                    'Host alias': macros[0],
+                    'Host state': macros[1], 
+                    'Host duration': macros[2] 
+                }
+            }
+
     # Load test values
     if opts.test:
         shinken_notification_object_var, shinken_var = overload_test_variable()
-        if opts.receivers == None:
-            logging.error('You must defined a mail recipient using -r')
-            sys.exit(5)
+
+    # check required arguments
+    if opts.receivers == None:
+        logging.error('You must defined a mail recipient using -r')
+        sys.exit(5)
+    else:
+        contactemail = opts.receivers
+
+    
     
     if opts.detailleddesc:
         shinken_var['Detailled description'] = opts.detailleddesc.decode(sys.stdin.encoding)
