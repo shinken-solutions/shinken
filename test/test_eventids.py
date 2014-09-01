@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -53,6 +53,13 @@ class TestConfig(ShinkenTest):
 
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
+
+        # This may be truc when running all Shinken test in the same "context" like
+        # nosetest does. If you run this test alone, it will be 0.
+        if SchedulingItem.current_event_id > 0 or  SchedulingItem.current_problem_id > 0:
+            SchedulingItem.current_event_id = 0
+            SchedulingItem.current_problem_id = 0
+
         self.print_ids(host, svc, router)
         #--------------------------------------------------------------
         # initialize host/service state

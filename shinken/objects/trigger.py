@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,15 +23,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import os
 import re
 
 from shinken.objects.item import Item, Items
-from shinken.misc.perfdata import PerfDatas
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, StringProp
 from shinken.log import logger
-from shinken.trigger_functions import objs, trigger_functions
+from shinken.trigger_functions import trigger_functions
+from shinken.trigger_functions import objs
 #objs = {'hosts': [], 'services': []}
 
 
@@ -96,7 +95,7 @@ class Triggers(Items):
                         buf = fd.read()
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
+                        logger.error("Cannot open trigger file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
                     self.create_trigger(buf, file[:-5])

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -27,10 +27,8 @@ from shinken_test import *
 
 class TestPackHashMemory(ShinkenTest):
     def setUp(self):
+        self.prev_id = SchedulerLink.id
         self.setup_with_file('etc/shinken_pack_hash_memory.cfg')
-
-    def setUp2(self):
-        self.setup_with_file('etc/shinken_pack_hash_memory2.cfg')
 
     def test_pack_hash_memory(self):
         packs = {0: set(), 1: set()}
@@ -41,7 +39,7 @@ class TestPackHashMemory(ShinkenTest):
         nb_same = 0
 
         # Reset IDs
-        SchedulerLink.id = 0
+        SchedulerLink.id = self.prev_id
 
         self.setUp()
         for h in self.sched.hosts:

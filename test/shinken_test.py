@@ -41,10 +41,13 @@ from shinken.modulesmanager import ModulesManager
 from shinken.basemodule import BaseModule
 
 from shinken.brok import Brok
+from shinken.misc.common import DICT_MODATTR
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
+from shinken.daemons.receiverdaemon import Receiver
+from logging import ERROR
 
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
@@ -61,7 +64,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-#logger.set_level(logger.ERROR)
+logger.setLevel(ERROR)
 
 
 # We overwrite the functions time() and sleep()
@@ -147,6 +150,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
+        time_hacker.set_my_time()
         self.print_header()
         # i am arbiter-like
         self.broks = {}
@@ -218,6 +222,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         e2 = ExternalCommandManager(self.conf, 'dispatcher')
         e2.load_arbiter(self)
         self.external_command_dispatcher = e2
+        self.sched.conf.accept_passive_unknown_check_results = False
 
         self.sched.schedule()
 
@@ -309,16 +314,24 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def show_logs(self):
         print "--- logs <<<----------------------------------"
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log']
+                print "LOG:", brok.data['log'].encode("utf-8")
         print "--- logs >>>----------------------------------"
 
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
-        for a in sorted(self.sched.actions.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -341,24 +354,39 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
 
     def count_logs(self):
-        return len([b for b in self.sched.broks.values() if b.type == 'log'])
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        return len([b for b in broks.values() if b.type == 'log'])
 
 
     def count_actions(self):
-        return len(self.sched.actions.values())
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        return len(actions.values())
 
 
     def clear_logs(self):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
         id_to_del = []
-        for b in self.sched.broks.values():
+        for b in broks.values():
             if b.type == 'log':
                 id_to_del.append(b.id)
         for id in id_to_del:
-            del self.sched.broks[id]
+            del broks[id]
 
 
     def clear_actions(self):
-        self.sched.actions = {}
+        if hasattr(self, "sched"):
+            self.sched.actions = {}
+        else:
+            self.actions = {}
 
 
     def log_match(self, index, pattern):
@@ -379,7 +407,11 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def any_log_match(self, pattern):
         regex = re.compile(pattern)
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
                 if re.search(regex, brok.data['log']):

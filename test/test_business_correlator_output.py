@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -23,7 +23,7 @@
 #
 
 import time
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, time_hacker
 
 
 class TestBusinesscorrelOutput(ShinkenTest):

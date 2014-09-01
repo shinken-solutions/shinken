@@ -20,7 +20,7 @@ Bold directives are required, while the others are optional.
 ========================================== ======================================
 define host{
 **host_name**                              ***host_name***
-**alias**                                  ***alias***
+alias                                      alias
 display_name                               *display_name*
 **address**                                ***address***
 parents                                    *host_names*
@@ -167,7 +167,7 @@ check_period
 obsess_over_host
   This directive determines whether or not checks for the host will be “obsessed" over using the :ref:`ochp_command <configuration/configmain-advanced#ochp_command>`.
 
-check_freshness :ref:`* <configuration/objectdefinitions#retention_notes>`
+check_freshness
   This directive is used to determine whether or not :ref:`freshness checks <advanced/freshness>` are enabled for this host. Values: 0 = disable freshness checks, 1 = enable freshness checks.
 
 freshness_threshold

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -32,7 +32,7 @@ except ImportError:
     json = None
 
 from shinken.objects.item import Item, Items
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import StringProp
 from shinken.log import logger
 
 
@@ -70,7 +70,7 @@ class Packs(Items):
                         buf = fd.read()
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open pack file '%s' for reading: %s" % (p, exp))
+                        logger.error("Cannot open pack file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
                     self.create_pack(buf, file[:-5])
@@ -78,13 +78,13 @@ class Packs(Items):
     # Create a pack from the string buf, and get a real object from it
     def create_pack(self, buf, name):
         if not json:
-            logger.warning("[Pack] cannot load the pack file '%s': missing json lib" % name)
+            logger.warning("[Pack] cannot load the pack file '%s': missing json lib", name)
             return
         # Ok, go compile the code
         try:
             d = json.loads(buf)
             if not 'name' in d:
-                logger.error("[Pack] no name in the pack '%s'" % name)
+                logger.error("[Pack] no name in the pack '%s'", name)
                 return
             p = Pack({})
             p.pack_name = d['name']
@@ -100,4 +100,4 @@ class Packs(Items):
             # Ok, add it
             self[p.id] = p
         except ValueError, exp:
-            logger.error("[Pack] error in loading pack file '%s': '%s'" % (name, exp))
+            logger.error("[Pack] error in loading pack file '%s': '%s'", name, exp)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -23,13 +23,20 @@
 #
 
 from shinken_test import *
-
-time_hacker.set_real_time()
+from shinken.objects.serviceescalation import Serviceescalation
 
 class TestEscalations(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/shinken_escalations.cfg')
+        time_hacker.set_real_time()
+
+    def test_wildcard_in_service_descrption(self):
+        self.print_header()
+        sid = int(Serviceescalation.id) - 1
+        generated = self.sched.conf.escalations.find_by_name('Generated-Serviceescalation-%d' % sid)
+        for svc in self.sched.services.find_srvs_by_hostname("test_host_0"):
+            self.assert_(generated in svc.escalations)
 
     def test_simple_escalation(self):
         self.print_header()

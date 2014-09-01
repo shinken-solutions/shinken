@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -63,7 +63,7 @@ class LSSyncConnection:
                 self.alive = True
             except IOError, exp:
                 self.alive = False
-                logger.warning("Connection problem: %s" % str(exp))
+                logger.warning("Connection problem: %s", str(exp))
 
     def read(self, size):
         res = ""
@@ -90,26 +90,26 @@ class LSSyncConnection:
             self.socket.send(query)
             data = self.read(16)
             code = data[0:3]
-            logger.debug("RAW DATA: %s" % data)
+            logger.debug("RAW DATA: %s", data)
 
             length = int(data[4:15])
-            logger.debug("Len: %d" % length)
+            logger.debug("Len: %d", length)
 
             data = self.read(length)
-            logger.debug("DATA: %s" % data)
+            logger.debug("DATA: %s", data)
 
             if code == "200":
                 try:
                     return eval(data)
                 except:
-                    logger.warning("BAD VALUE RETURN (data=%s)" % data)
+                    logger.warning("BAD VALUE RETURN (data=%s)", data)
                     return None
             else:
-                logger.warning("BAD RETURN CODE (code= %s, data=%s" % (code, data))
+                logger.warning("BAD RETURN CODE (code= %s, data=%s", code, data)
                 return None
         except IOError, exp:
             self.alive = False
-            logger.warning("SOCKET ERROR (%s)" % str(exp))
+            logger.warning("SOCKET ERROR (%s)", str(exp))
             return None
 
     def exec_command(self, command):
@@ -122,7 +122,7 @@ class LSSyncConnection:
             self.socket.send("COMMAND " + command + "\n")
         except IOError, exp:
             self.alive = False
-            logger.warning("COMMAND EXEC error: %s" % str(exp))
+            logger.warning("COMMAND EXEC error: %s", str(exp))
 
 
 # Query class for define a query, and its states
@@ -209,7 +209,7 @@ class LSAsynConnection(asyncore.dispatcher):
                 self.alive = True
             except IOError, exp:
                 self.alive = False
-                logger.warning("Connection problem: %s" % str(exp))
+                logger.warning("Connection problem: %s", str(exp))
                 self.handle_close()
 
     def do_read(self, size):
@@ -235,7 +235,7 @@ class LSAsynConnection(asyncore.dispatcher):
             self.socket.send("COMMAND " + command + "\n")
         except IOError, exp:
             self.alive = False
-            logger.warning("COMMAND EXEC error: %s" % str(exp))
+            logger.warning("COMMAND EXEC error: %s", str(exp))
 
     def handle_connect(self):
         pass
@@ -294,7 +294,7 @@ class LSAsynConnection(asyncore.dispatcher):
                 return None
         except IOError, exp:
             self.alive = False
-            logger.warning("SOCKET ERROR: %s" % str(exp))
+            logger.warning("SOCKET ERROR: %s", str(exp))
             return q.put(None)
 
         # Now the current is done. We put in in our results queue
@@ -325,7 +325,7 @@ class LSAsynConnection(asyncore.dispatcher):
             q = self.get_query()
             sent = self.send(q.get())
         except socket.error, exp:
-            logger.debug("Write fail: %s" % str(exp))
+            logger.debug("Write fail: %s", str(exp))
             return
 
         #print "Sent", sent, "data"
@@ -377,7 +377,7 @@ class LSConnectionPool(object):
                 path = s
                 con = LSAsynConnection(path=path)
             else:
-                logger.info("Unknown connection type for %s" % s)
+                logger.info("Unknown connection type for %s", s)
 
             self.connections.append(con)
 
@@ -429,6 +429,6 @@ if __name__ == "__main__":
 
     cp = LSConnectionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
     r = cp.launch_raw_query('GET hosts\nColumns name last_check\n')
-    logger.debug("Result= %s" % str(r))
+    logger.debug("Result= %s", str(r))
     import time
     logger.debug(int(time.time()))

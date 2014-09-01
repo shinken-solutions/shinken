@@ -110,4 +110,4 @@ To Samuel Milette-Lacombe for his patch about core configuration export on broke
 To Mathieu Parent for his patch about Thruk doc
 To Aina Rakotoson for his bug report about reactionner_tag logic fail, and his patch to fix about it
 To jylenhofgfi for his bug report about shinken cli problems and | grep
-
+To Alexandre Viau for his patch about passive unmanaged host broks generation

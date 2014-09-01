@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -24,10 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import socket
 
-import json
-import zlib
 import cPickle
 
 from shinken.util import get_obj_name_two_args_and_void
@@ -63,6 +60,7 @@ class SatelliteLink(Item):
         'satellitemap':       DictProp(default=None, elts_prop=AddrProp, to_send=True, override=True),
         'use_ssl':            BoolProp(default='0', fill_brok=['full_status']),
         'hard_ssl_name_check':BoolProp(default='0', fill_brok=['full_status']),
+        'passive':            BoolProp(default='0', fill_brok=['full_status'], to_send=True),
     })
 
     running_properties = Item.running_properties.copy()
@@ -117,15 +115,13 @@ class SatelliteLink(Item):
             return False
 
         try:
-            #pyro.set_timeout(self.con, self.data_timeout)
             self.con.get('ping')
             self.con.post('put_conf', {'conf':conf}, wait='long')
-            #pyro.set_timeout(self.con, self.timeout)
             print "PUT CONF SUCESS", self.get_name()
             return True
         except HTTPExceptions, exp:
             self.con = None
-            logger.error("Failed sending configuration for %s: %s" % (self.get_name(), str(exp)))
+            logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
             return False
             
 
@@ -150,6 +146,7 @@ class SatelliteLink(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
+
     def set_dead(self):
         was_alive = self.alive
         self.alive = False
@@ -158,9 +155,10 @@ class SatelliteLink(Item):
         # We are dead now. Must raise
         # a brok to say it
         if was_alive:
-            logger.warning("Setting the satellite %s to a dead state." % self.get_name())
+            logger.warning("Setting the satellite %s to a dead state.", self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
+
 
     # Go in reachable=False and add a failed attempt
     # if we reach the max, go dead
@@ -170,12 +168,13 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            logger.warning("Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason))
+            logger.warning("Add failed attempt to %s (%d/%d) %s", self.get_name(), self.attempt, self.max_check_attempts, reason)
 
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
 
+    
     # Update satellite info each self.check_interval seconds
     # so we smooth arbiter actions for just useful actions
     # and not cry for a little timeout
@@ -204,11 +203,11 @@ class SatelliteLink(Item):
 
 
     def ping(self):
-        logger.debug("Pinging %s" % self.get_name())
+        logger.debug("Pinging %s", self.get_name())
         try:
             if self.con is None:
                 self.create_connection()
-            logger.debug(" (%s)" % (self.uri))
+            logger.debug(" (%s)", self.uri)
 
             # If the connection failed to initialize, bail out
             if self.con is None:
@@ -394,6 +393,9 @@ class SatelliteLink(Item):
         for prop, entry in properties.items():
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
+        # Also add global values
+        self.cfg['global']['api_key'] = self.__class__.api_key
+        self.cfg['global']['secret']  = self.__class__.secret
 
 
     # Some parameters for satellites are not defined in the satellites conf
@@ -419,7 +421,10 @@ class SatelliteLink(Item):
                 'active': True,
                 'passive': self.passive,
                 'poller_tags': getattr(self, 'poller_tags', []),
-                'reactionner_tags': getattr(self, 'reactionner_tags', [])}
+                'reactionner_tags': getattr(self, 'reactionner_tags', []),
+                'api_key': self.__class__.api_key,
+                'secret':  self.__class__.secret,
+                }
 
 
     # Call by pickle for dataify the downtime

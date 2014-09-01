@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -26,7 +26,7 @@
 import time
 
 from item import Item, Items
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import StringProp
 from shinken.util import to_name_if_possible
 from shinken.log import logger
 
@@ -69,12 +69,12 @@ class MacroModulation(Item):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[item::%s] %s" % (self.get_name(), err))
+                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[macromodulation::%s] %s property not set" % (self.get_name(), prop))
+                    logger.warning("[macromodulation::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Ok just put None as modulation_period, means 24x7

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -26,12 +26,11 @@
 import time
 import os
 import cStringIO
-import sys
 import tempfile
 import traceback
-import json
 import cPickle
-import zlib
+
+import threading
 from Queue import Empty
 
 from shinken.external_command import ExternalCommand
@@ -47,7 +46,8 @@ from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
-
+from shinken.stats import statsmgr
+from shinken.misc.common import DICT_MODATTR
 
 class Scheduler:
     """Please Add a Docstring to describe the class here"""
@@ -57,6 +57,8 @@ class Scheduler:
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True
 
+        # protect this uniq list
+        self.waiting_results_lock = threading.RLock()
         self.waiting_results = []  # satellites returns us results
         # and to not wait for them, we put them here and
         # use them later
@@ -134,7 +136,8 @@ class Scheduler:
 
     def reset(self):
         self.must_run = True
-        del self.waiting_results[:]
+        with self.waiting_results_lock:
+            del self.waiting_results[:]
         for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks, self.brokers:
             o.clear()
 
@@ -180,7 +183,7 @@ class Scheduler:
             # we must relink them
             t0 = time.time()
             self.conf.late_linkify()
-            logger.debug("Late command relink in %d" % (time.time() - t0))
+            logger.debug("Late command relink in %d", time.time() - t0)
 
         # self.status_file = StatusFile(self)        # External status file
         self.instance_id = conf.instance_id  # From Arbiter. Use for
@@ -208,7 +211,7 @@ class Scheduler:
         for i in self.recurrent_works:
             (name, f, old_tick) = self.recurrent_works[i]
             if name == f_name:
-                logger.debug("Changing the tick to %d for the function %s" % (new_tick, name))
+                logger.debug("Changing the tick to %d for the function %s", new_tick, name)
                 self.recurrent_works[i] = (name, f, new_tick)
 
 
@@ -228,7 +231,7 @@ class Scheduler:
     def dump_objects(self):
         d = tempfile.gettempdir()
         p = os.path.join(d, 'scheduler-obj-dump-%d' % time.time())
-        logger.info('Opening the DUMP FILE %s' % (p))
+        logger.info('Opening the DUMP FILE %s', p)
         try:
             f = open(p, 'w')
             f.write('Scheduler DUMP at %d\n' % time.time())
@@ -243,7 +246,7 @@ class Scheduler:
                 f.write(s)
             f.close()
         except Exception, exp:
-            logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
+            logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
 
     # Load the external command
@@ -258,7 +261,7 @@ class Scheduler:
 
 
     def run_external_command(self, command):
-        logger.debug("scheduler resolves command '%s'" % command)
+        logger.debug("scheduler resolves command '%s'", command)
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
@@ -360,17 +363,17 @@ class Scheduler:
     def hook_point(self, hook_name):
         for inst in self.sched_daemon.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
-            logger.debug("hook_point: %s: %s %s" % (inst.get_name(), str(hasattr(inst, full_hook_name)), hook_name))
+            logger.debug("hook_point: %s: %s %s", inst.get_name(), str(hasattr(inst, full_hook_name)), hook_name)
 
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.error("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
+                    logger.error("The instance %s raise an exception %s. I disable it and set it to restart it later", inst.get_name(), str(exp))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.error("Exception trace follows: %s" % (output.getvalue()))
+                    logger.error("Exception trace follows: %s", output.getvalue())
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
@@ -391,12 +394,11 @@ class Scheduler:
         # We do not just del them in the check list, but also in their service/host
         # We want id of lower than max_id - 2*max_checks
         if len(self.checks) > max_checks:
-            id_max = self.checks.keys()[-1]  # The max id is the last id
-                                            #: max is SO slow!
+            id_max = max(self.checks.keys())  # keys does not ensure sorted keys. Max is slow but we have no other way.
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
-                logger.info("I have to del some checks (%d)..., sorry" % nb_checks_drops)
+                logger.info("I have to del some checks (%d)..., sorry", nb_checks_drops)
             for c in to_del_checks:
                 i = c.id
                 elt = c.ref
@@ -419,7 +421,7 @@ class Scheduler:
             b_lists.append(e['broks'])
         for broks in b_lists:
             if len(broks) > max_broks:
-                id_max = broks.keys()[-1]
+                id_max = max(broks.keys())
                 id_to_del_broks = [i for i in broks if i < id_max - max_broks]
                 nb_broks_drops = len(id_to_del_broks)
                 for i in id_to_del_broks:
@@ -428,7 +430,7 @@ class Scheduler:
                 nb_broks_drops = 0
 
         if len(self.actions) > max_actions:
-            id_max = self.actions.keys()[-1]
+            id_max = max(self.actions.keys())
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
@@ -441,7 +443,7 @@ class Scheduler:
             nb_actions_drops = 0
 
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
-            logger.warning("We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
+            logger.warning("We drop %d checks, %d broks and %d actions", nb_checks_drops, nb_broks_drops, nb_actions_drops)
 
     # For tunning purpose we use caches but we do not want them to explode
     # So we clean them
@@ -615,10 +617,10 @@ class Scheduler:
 
                 # And now look for can launch or not :)
                 if a.status == 'scheduled' and a.is_launchable(now):
-                    a.status = 'inpoller'
-                    a.worker = worker_name
                     if not is_master:
                         # This is for child notifications and eventhandlers
+                        a.status = 'inpoller'
+                        a.worker = worker_name
                         new_a = a.copy_shell()
                         res.append(new_a)
         return res
@@ -651,19 +653,19 @@ class Scheduler:
 
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
-                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds" %
-                                   (self.actions[c.id].contact.contact_name,
+                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds", 
+                                   self.actions[c.id].contact.contact_name,
                                     self.actions[c.id].ref.__class__.my_type,
                                     self.actions[c.id].command,
-                                    int(execution_time)))
+                                    int(execution_time))
                 elif c.exit_status != 0:
-                    logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
+                    logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'", c.command, c.exit_status, c.output)
 
             except KeyError, exp:  # bad number for notif, not that bad
-                logger.warning('put_results:: get unknown notification : %s ' % str(exp))
+                logger.warning('put_results:: get unknown notification : %s ', str(exp))
 
             except AttributeError, exp:  # bad object, drop it
-                logger.warning('put_results:: get bad notification : %s ' % str(exp))
+                logger.warning('put_results:: get bad notification : %s ', str(exp))
 
 
 
@@ -683,17 +685,17 @@ class Scheduler:
             # It just die
             try:
                 if c.status == 'timeout':
-                    logger.warning("%s event handler command '%s ' timed out after %d seconds" %
-                                   (self.actions[c.id].ref.__class__.my_type.capitalize(),
+                    logger.warning("%s event handler command '%s ' timed out after %d seconds", 
+                                   self.actions[c.id].ref.__class__.my_type.capitalize(),
                                     self.actions[c.id].command,
-                                    int(c.execution_time)))
+                                    int(c.execution_time))
                 self.actions[c.id].status = 'zombie'
             # Maybe we got a return of a old even handler, so we can forget it
             except KeyError, exp:
-                logger.warning('put_results:: get unknown event handler : %s ' % str(exp))
+                logger.warning('put_results:: get unknown event handler : %s ', str(exp))
                 pass
         else:
-            logger.error("The received result type in unknown! %s" % str(c.is_a))
+            logger.error("The received result type in unknown! %s", str(c.is_a))
 
     # Get the good tabs for links regarding to the kind. If unknown, return None
     def get_links_from_type(self, type):
@@ -716,7 +718,7 @@ class Scheduler:
         # Get good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.debug("Unknown '%s' type for connection!" % type)
+            logger.debug("Unknown '%s' type for connection!", type)
             return
 
         # We want only to initiate connections to the passive
@@ -732,14 +734,14 @@ class Scheduler:
         # Ok, we can now update it
         links[id]['last_connection'] = time.time()
 
-        logger.debug("Init connection with %s" % links[id]['uri'])
+        logger.debug("Init connection with %s", links[id]['uri'])
 
         uri = links[id]['uri']
         try:
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
         except HTTPExceptions, exp:
-            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
 
@@ -747,22 +749,22 @@ class Scheduler:
             # initial ping must be quick
             con.get('ping')
         except HTTPExceptions, exp:
-            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
         except KeyError, exp:
-            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
 
-        logger.info("Connection OK to the %s %s" % (type, links[id]['name']))
+        logger.info("Connection OK to the %s %s", type, links[id]['name'])
 
 
     # We should push actions to our passives satellites
     def push_actions_to_passives_satellites(self):
         # We loop for our passive pollers or reactionners
         for p in filter(lambda p: p['passive'], self.pollers.values()):
-            logger.debug("I will send actions to the poller %s" % str(p))
+            logger.debug("I will send actions to the poller %s", str(p))
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
@@ -770,28 +772,24 @@ class Scheduler:
                 lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    logger.debug("Sending %s actions" % len(lst))
-                    #con.push_actions(lst, self.instance_id)
+                    logger.debug("Sending %s actions", len(lst))
                     con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions, exp:
-                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # TODO:factorize
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
-            logger.debug("I will send actions to the reactionner %s" % str(p))
+            logger.debug("I will send actions to the reactionner %s", str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
@@ -799,21 +797,17 @@ class Scheduler:
                 lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    logger.debug("Sending %d actions" % len(lst))
-                    #con.push_actions(lst, self.instance_id)
+                    logger.debug("Sending %d actions", len(lst))
                     con.post('push_actions', {'actions':lst, 'sched_id':self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions, exp:
-                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
@@ -822,67 +816,61 @@ class Scheduler:
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
         for p in filter(lambda p: p['passive'], self.pollers.values()):
-            logger.debug("I will get actions from the poller %s" % str(p))
+            logger.debug("I will get actions from the poller %s", str(p))
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    #results = con.get_returns(self.instance_id)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
-                    logger.debug("Received %d passive results" % nb_received)
+                    logger.debug("Received %d passive results", nb_received)
                     for result in results:
                         result.set_type_passive()
-                    self.waiting_results.extend(results)
+                    with self.waiting_results_lock:
+                        self.waiting_results.extend(results)
                 except HTTPExceptions, exp:
-                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
-            logger.debug("I will get actions from the reactionner %s" % str(p))
+            logger.debug("I will get actions from the reactionner %s", str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
                 try:
                     # initial ping must be quick
-                    #pyro.set_timeout(con, 120)
-                    #results = con.get_returns(self.instance_id)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
                     results = cPickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
-                    logger.debug("Received %d passive results" % nb_received)
+                    logger.debug("Received %d passive results", nb_received)
                     for result in results:
                         result.set_type_passive()
-                    self.waiting_results.extend(results)
+                    with self.waiting_results_lock:
+                        self.waiting_results.extend(results)
                 except HTTPExceptions, exp:
-                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                # we come back to normal timeout
-                #pyro.set_timeout(con, 5)
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
@@ -986,17 +974,23 @@ class Scheduler:
                     if f:
                         v = f(s, v)
                     d[prop] = v
-            # Same for properties, like active checks enabled or not
-            properties = s.__class__.properties
-            for prop, entry in properties.items():
-                if entry.retention:
-                    v = getattr(s, prop)
-                    # Maybe we should "prepare" the data before saving it
-                    # like get only names instead of the whole objects
-                    f = entry.retention_preparation
-                    if f:
-                        v = f(s, v)
-                    d[prop] = v
+                    
+             # We consider the service ONLY if it has modified attributes.
+             # If not, then no non-running attributes will be saved for this service.
+            if s.modified_attributes>0:       
+                # Same for properties, like active checks enabled or not
+                properties = s.__class__.properties
+                
+                for prop, entry in properties.items():
+                    # We save the value only if the attribute is selected for retention AND has been modified.
+                    if entry.retention and DICT_MODATTR['prop'].value & s.modified_attributes:
+                        v = getattr(s, prop)
+                        # Maybe we should "prepare" the data before saving it
+                        # like get only names instead of the whole objects
+                        f = entry.retention_preparation
+                        if f:
+                            v = f(s, v)
+                        d[prop] = v
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
 
@@ -1153,7 +1147,7 @@ class Scheduler:
                           self.services, self.servicegroups)
 
         self.conf.skip_initial_broks = getattr(self.conf,'skip_initial_broks', False)
-        logger.debug("Skipping initial broks? %s" % str(self.conf.skip_initial_broks))
+        logger.debug("Skipping initial broks? %s", str(self.conf.skip_initial_broks))
         if not self.conf.skip_initial_broks:
             for tab in initial_status_types:
                 for i in tab:
@@ -1175,7 +1169,7 @@ class Scheduler:
         # We now have all full broks
         self.has_full_broks = True
 
-        logger.info("[%s] Created %d initial Broks for broker %s" % (self.instance_name, len(self.brokers[bname]['broks']), bname))
+        logger.info("[%s] Created %d initial Broks for broker %s", self.instance_name, len(self.brokers[bname]['broks']), bname)
 
 
     # Crate a brok with program status info
@@ -1233,9 +1227,12 @@ class Scheduler:
     def consume_results(self):
         # All results are in self.waiting_results
         # We need to get them first
-        for c in self.waiting_results:
+        with self.waiting_results_lock:
+            waiting_results = self.waiting_results
+            self.waiting_results = []
+
+        for c in waiting_results:
             self.put_results(c)
-        self.waiting_results = []
 
         # Then we consume them
         #print "**********Consume*********"
@@ -1424,14 +1421,14 @@ class Scheduler:
                     worker_names[a.worker] += 1
 
         for w in worker_names:
-            logger.warning("%d actions never came back for the satellite '%s'. I reenable them for polling" % (worker_names[w], w))
+            logger.warning("%d actions never came back for the satellite '%s'. I reenable them for polling", worker_names[w], w)
 
     # Each loop we are going to send our broks to our modules (if need)
     def send_broks_to_modules(self):
         t0 = time.time()
         nb_sent = 0
         for mod in self.sched_daemon.modules_manager.get_external_instances():
-            logger.debug("Look for sending to module %s" % mod.get_name())
+            logger.debug("Look for sending to module %s", mod.get_name())
             q = mod.to_q
             to_send = [b for b in self.broks.values() if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
             q.put(to_send)
@@ -1440,7 +1437,7 @@ class Scheduler:
         # No more need to send them
         for b in self.broks.values():
             b.sent_to_sched_externals = True
-        logger.debug("Time to send %s broks (after %d secs)" % (nb_sent, time.time() - t0))
+        logger.debug("Time to send %s broks (after %d secs)", nb_sent, time.time() - t0)
 
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
@@ -1456,6 +1453,71 @@ class Scheduler:
                 except Empty:
                     full_queue = False
 
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        
+        res = self.sched_daemon.get_stats_struct()
+        res.update( {'name':self.instance_name, 'type':'scheduler'} )
+        
+        # Get a overview of the latencies with just
+        # a 95 percentile view, but lso min/max values
+        latencies = [s.latency for s in self.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        res['latency'] = (0.0,0.0,0.0)
+        if lat_avg:
+            res['latency'] = {'avg':lat_avg, 'min':lat_min, 'max':lat_max}
+        
+        res['hosts'] = len(self.hosts)
+        res['services'] = len(self.services)
+        # metrics specific
+        metrics = res['metrics']
+        metrics.append( 'scheduler.%s.checks.scheduled %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.checks.inpoller %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.checks.zombie %d %d' % (self.instance_name, len([c for c in self.checks.values() if c.status == 'scheduled']), now) )
+        metrics.append( 'scheduler.%s.actions.queue %d %d' % (self.instance_name, len(self.actions), now) )
+        metrics.append( 'scheduler.%s.broks.queue %d %d' % (self.instance_name, len(self.broks), now) )
+        metrics.append( 'scheduler.%s.downtimes %d %d' % (self.instance_name, len(self.downtimes), now) )
+        metrics.append( 'scheduler.%s.comments %d %d' % (self.instance_name, len(self.comments), now) )
+        metrics.append( 'scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now) )
+        metrics.append( 'scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now) )
+        metrics.append( 'scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now) )
+
+        all_commands = {}
+        # compute some stats
+        for lst in [self.hosts, self.services]:
+            for i in lst:
+                last_cmd = i.last_check_command
+                if not last_cmd:
+                    continue
+                interval = i.check_interval
+                if interval == 0:
+                    interval = 1
+                cmd = os.path.split(last_cmd.split(' ', 1)[0])[1]
+                u_time = i.u_time
+                s_time = i.s_time
+                old_u_time, old_s_time = all_commands.get(cmd, (0.0, 0.0))
+                old_u_time += u_time/interval
+                old_s_time += s_time/interval
+                all_commands[cmd] = (old_u_time, old_s_time)
+        # now sort it
+        p = []
+        for (c,e) in all_commands.iteritems():
+            u_time,s_time = e
+            p.append( {'cmd':c, 'u_time':u_time, 's_time':s_time } )
+        def p_sort(e1, e2):
+            if e1['u_time'] > e2['u_time']:
+                return 1
+            if e1['u_time'] < e2['u_time']:
+                return -1
+            return 0
+        p.sort(p_sort)
+        # takethe first 10 ones for the put
+        res['commands'] = p[:10]
+        return res
+    
+    
     # Main function
     def run(self):
         # Then we see if we've got info in the retention file
@@ -1466,9 +1528,9 @@ class Scheduler:
         self.sched_daemon.modules_manager.start_external_instances(late_start=True)
 
         # Ok, now all is initialized, we can make the initial broks
-        logger.info("[%s] First scheduling launched" % self.instance_name)
+        logger.info("[%s] First scheduling launched", self.instance_name)
         self.schedule()
-        logger.info("[%s] First scheduling done" % self.instance_name)
+        logger.info("[%s] First scheduling done", self.instance_name)
 
         # Now connect to the passive satellites if needed
         for p_id in self.pollers:
@@ -1486,7 +1548,7 @@ class Scheduler:
         self.nb_check_received = 0
 
         self.load_one_min = Load(initial_value=1)
-        logger.debug("First loop at %d" % time.time())
+        logger.debug("First loop at %d", time.time())
         while self.must_run:
             #print "Loop"
             # Before answer to brokers, we send our broks to modules
@@ -1503,7 +1565,7 @@ class Scheduler:
 
             # load of the scheduler is the percert of time it is waiting
             l = min(100, 100.0 - self.load_one_min.get_load() * 100)
-            logger.debug("Load: (sleep) %.2f (average: %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
+            logger.debug("Load: (sleep) %.2f (average: %.2f) -> %d%%", self.sched_daemon.sleep_time, self.load_one_min.get_load(), l)
 
             self.sched_daemon.sleep_time = 0.0
 
@@ -1518,8 +1580,10 @@ class Scheduler:
                 # A 0 in the tick will just disable it
                 if nb_ticks != 0:
                     if ticks % nb_ticks == 0:
-                        # print "I run function:", name
+                        # Call it and save the time spend in it
+                        _t = time.time()
                         f()
+                        statsmgr.incr('loop.%s' % name, time.time() - _t)
 
             # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
@@ -1534,28 +1598,28 @@ class Scheduler:
             nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
             nb_notifications = len(self.actions)
 
-            logger.debug("Checks: total %s, scheduled %s, inpoller %s, zombies %s, notifications %s" %\
-                (len(self.checks), nb_scheduled, nb_inpoller, nb_zombies, nb_notifications))
+            logger.debug("Checks: total %s, scheduled %s, inpoller %s, zombies %s, notifications %s", \
+                len(self.checks), nb_scheduled, nb_inpoller, nb_zombies, nb_notifications)
 
             # Get a overview of the latencies with just
             # a 95 percentile view, but lso min/max values
             latencies = [s.latency for s in self.services]
             lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
             if lat_avg is not None:
-                logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
+                logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f", lat_avg, lat_min, lat_max)
 
             # print "Notifications:", nb_notifications
             now = time.time()
 
             if self.nb_checks_send != 0:
-                logger.debug("Nb checks/notifications/event send: %s" % self.nb_checks_send)
+                logger.debug("Nb checks/notifications/event send: %s", self.nb_checks_send)
             self.nb_checks_send = 0
             if self.nb_broks_send != 0:
-                logger.debug("Nb Broks send: %s" % self.nb_broks_send)
+                logger.debug("Nb Broks send: %s", self.nb_broks_send)
             self.nb_broks_send = 0
 
             time_elapsed = now - gogogo
-            logger.debug("Check average = %d checks/s" % int(self.nb_check_received / time_elapsed))
+            logger.debug("Check average = %d checks/s", int(self.nb_check_received / time_elapsed))
 
             if self.need_dump_memory:
                 self.sched_daemon.dump_memory()

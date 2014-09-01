@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -70,7 +70,7 @@ class ContactDowntime:
         now = time.time()
         was_is_in_effect = self.is_in_effect
         self.is_in_effect = (self.start_time <= now <= self.end_time)
-        logger.info("CHECK ACTIVATION:%s" % (self.is_in_effect))
+        logger.info("CHECK ACTIVATION:%s", self.is_in_effect)
 
         # Raise a log entry when we get in the downtime
         if not was_is_in_effect and self.is_in_effect:

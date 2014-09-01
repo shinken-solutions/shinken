@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -67,29 +67,22 @@ class DBOracle(DB):
     def execute_query(self, query):
         """ Execute a query against an Oracle database.
         """
-        logger.debug("[DBOracle] Execute Oracle query %s\n" % (query))
+        logger.debug("[DBOracle] Execute Oracle query %s\n", query)
         try:
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an integrity error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise an integrity error: %s, %s", query, exp)
         except ProgrammingError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a programming error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise a programming error: %s, %s", query, exp)
         except DatabaseError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a database error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise a database error: %s, %s", query, exp)
         except InternalError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an internal error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise an internal error: %s, %s", query, exp)
         except DataError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a data error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise a data error: %s, %s", query, exp)
         except OperationalError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an operational error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise an operational error: %s, %s", query, exp)
         except Exception, exp:
-            logger.warning("[DBOracle] Warning: a query raise an unknown error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[DBOracle] Warning: a query raise an unknown error: %s, %s", query, exp)
             logger.warning(exp.__dict__)

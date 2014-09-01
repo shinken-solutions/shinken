@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -26,6 +26,7 @@
 from item import Item, Items
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
+from shinken.graph import Graph
 
 
 class Servicedependency(Item):
@@ -228,7 +229,7 @@ class Servicedependencies(Items):
                 sd.service_description = s
 
             except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by service %s: %s" % (sd, exp))
+                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, exp)
 
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
@@ -239,7 +240,7 @@ class Servicedependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
             except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by timeperiods: %s" % exp)
+                logger.error("[servicedependency] fail to linkify by timeperiods: %s", exp)
 
     # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
@@ -264,3 +265,7 @@ class Servicedependencies(Items):
         # self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
+
+    def is_correct(self):
+        r = super(Servicedependencies, self).is_correct()
+        return r and self.no_loop_in_parents("service_description", "dependent_service_description")

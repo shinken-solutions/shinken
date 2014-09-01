@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -44,7 +44,7 @@ from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_d
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Service(SchedulingItem):
@@ -122,6 +122,7 @@ class Service(SchedulingItem):
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
         'labels':                  ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'host_dependency_enabled':  BoolProp(default='1', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -290,7 +291,10 @@ class Service(SchedulingItem):
         'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers': StringProp(default=[])
+        'triggers': StringProp(default=[]),
+
+        # Keep the string of the last command launched for this element
+        'last_check_command': StringProp(default=''),
 
     })
 
@@ -395,6 +399,9 @@ class Service(SchedulingItem):
     def get_host_tags(self):
         return self.host.tags
 
+    def get_service_tags(self):
+        return self.tags
+
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
@@ -413,19 +420,19 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("The service %s on host '%s' does not have %s" % (desc, hname, prop))
+                    logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[service::%s] %s" % (desc, err))
+            logger.warning("[service::%s] %s", desc, err)
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[service::%s] %s" % (self.get_full_name(), err))
+                logger.error("[service::%s] %s", self.get_full_name(), err)
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -433,7 +440,7 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The service '%s' in the host '%s' does not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+            logger.warning("The service '%s' in the host '%s' does not have contacts nor contact_groups in '%s'", desc, hname, source)
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
@@ -441,45 +448,46 @@ class Service(SchedulingItem):
 
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            logger.info("%s: my event_handler %s is invalid", self.get_name(), self.event_handler.command)
             state = False
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s: I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid", self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s: %s" % (self.get_name(), bperror))
+                        logger.info("%s: %s", self.get_name(), bperror)
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled", self.get_name())
             state = False
         if self.host is None:
-            logger.warning("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
+            logger.warning("The service '%s' got an unknown host_name '%s'.", desc, self.host_name)
             # do not set tis a a true error, only we will delete this after
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s: My service_description got the character %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the character %s that is not allowed.", self.get_name(), c)
                     state = False
         return state
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
+    # TODO: implement "not host dependent" feature.
     def fill_daddy_dependency(self):
         #  Depend of host, all status, is a networkdep
         # and do not have timeperiod, and follow parents dep
-        if self.host is not None:
+        if self.host is not None and self.host_dependency_enabled:
             # I add the dep in MY list
             self.act_depend_of.append((self.host,
                                         ['d', 'u', 's', 'f'],
@@ -719,7 +727,7 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('SERVICE ALERT: %s;%s;%s;%s;%d;%s'
+        naglog_result('critical', 'SERVICE ALERT: %s;%s;%s;%s;%d;%s'
                             % (self.host.get_name(), self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -728,7 +736,7 @@ class Service(SchedulingItem):
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
+            naglog_result('info', 'CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
@@ -739,10 +747,10 @@ class Service(SchedulingItem):
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of service '%s' on host '%s' are stale "
                        "by %s (threshold=%s).  I'm forcing an immediate check "
-                       "of the service."
-                       % (self.get_name(), self.host.get_name(),
+                       "of the service.",
+                        self.get_name(), self.host.get_name(),
                           format_t_into_dhms_format(t_stale_by),
-                          format_t_into_dhms_format(t_threshold)))
+                          format_t_into_dhms_format(t_threshold))
 
     # Raise a log entry with a Notification alert like
     # SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
@@ -756,7 +764,7 @@ class Service(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.alert("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
+            naglog_result('critical', "SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
                                 % (contact.get_name(),
                                    self.host.get_name(), self.get_name(), state,
                                    command.get_name(), self.output))
@@ -765,7 +773,7 @@ class Service(SchedulingItem):
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
+            naglog_result('critical', "SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -773,7 +781,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STARTED; "
+        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STARTED; "
                             "Service appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -782,7 +790,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
+        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
                             "Service appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -791,13 +799,13 @@ class Service(SchedulingItem):
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the service '%s' on "
-                       "host '%s' because there is not future valid time"
-                       % (self.get_name(), self.host.get_name()))
+                       "host '%s' because there is not future valid time",
+                        self.get_name(), self.host.get_name())
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
                             "Service has entered a period of scheduled "
                             "downtime"
                             % (self.host.get_name(), self.get_name()))
@@ -805,14 +813,14 @@ class Service(SchedulingItem):
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
                             "has exited from a period of scheduled downtime"
                             % (self.host.get_name(), self.get_name()))
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
                             "Scheduled downtime for service has been cancelled."
                             % (self.host.get_name(), self.get_name()))
 
@@ -834,7 +842,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s: %s", self.get_name(), c.output)
 
     # Give data for checks's macros
     def get_data_for_checks(self):
@@ -1022,6 +1030,15 @@ class Services(Items):
             if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                 if s.service_description == name and s.host_name == host_name:
                     return s.id
+        return None
+
+    # Search for all of the services in a host
+    def find_srvs_by_hostname(self, host_name):
+        if hasattr(self, 'hosts'):
+            h = self.hosts.find_by_name(host_name)
+            if h is None:
+                return None
+            return h.get_services()
         return None
 
     # Search a service by it's name and hot_name
@@ -1373,9 +1390,13 @@ class Services(Items):
                 sname = s.service_description
                 shname = getattr(s, 'host_name', '')
                 if hasattr(s, 'servicegroups'):
-                    sgs = s.servicegroups.split(',')
+                    if isinstance(s.servicegroups, list):
+                        v = ','.join(s.servicegroups)
+                    else:
+                        v = s.servicegroups
+                    sgs = v.split(',')
                     for sg in sgs:
-                        servicegroups.add_member(shname+','+sname, sg)
+                        servicegroups.add_member(shname+','+sname, sg.strip())
 
 
         # Now we explode service_dependencies into Servicedependency

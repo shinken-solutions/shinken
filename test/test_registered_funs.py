@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -40,6 +40,9 @@ daemons_config = {
 
 
 class testRegisteredFunctions(ShinkenTest):
+    def setUp(self):
+        time_hacker.set_real_time()
+
     def create_daemon(self):
         cls = Shinken
         return cls(daemons_config[cls], False, True, False, None, '')
@@ -53,7 +56,7 @@ class testRegisteredFunctions(ShinkenTest):
         d.load_config_file()
 
         d.http_backend = 'wsgiref'
-        d.do_daemon_init_and_start()
+        d.do_daemon_init_and_start(fake=True)
         d.load_modules_manager()
         d.http_daemon.register(d.interface)
         reg_list = d.http_daemon.registered_fun
@@ -69,6 +72,11 @@ class testRegisteredFunctions(ShinkenTest):
             return
         logger.info("New configuration received")
         d.setup_new_conf()
+        if d.pollers[0]['use_ssl']:
+            assert d.pollers[0]['uri'] == 'https://localhost:7771/'
+        else:
+            assert d.pollers[0]['uri'] == 'http://localhost:7771/'
+
         reg_list = d.http_daemon.registered_fun
         expected_list = ['get_external_commands', 'get_running_id', 'got_conf', 'have_conf',
                          'ping', 'push_broks', 'push_host_names', 'put_conf', 'remove_from_conf',

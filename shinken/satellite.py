@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -54,15 +54,12 @@ else:
 import os
 import copy
 import time
-import sys
 import cPickle
 import traceback
-import socket
 import zlib
 import base64
 import threading
 
-from shinken.http_daemon import HTTPDaemon
 from shinken.http_client import HTTPClient, HTTPExceptions
 
 from shinken.message import Message
@@ -70,7 +67,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-
+from shinken.stats import statsmgr
 
 
 # Class to tell that we are facing a non worker module
@@ -98,7 +95,7 @@ class IForArbiter(Interface):
     # Arbiter ask me which sched_id I manage, If it is not ok with it
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
-        logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
+        logger.debug("The arbiter asked me what I manage. It's %s", self.app.what_i_managed())
         return self.app.what_i_managed()
     what_i_managed.need_lock = False
     what_i_managed.doc = doc
@@ -254,7 +251,7 @@ class BaseSatellite(Daemon):
 
     def do_stop(self):
         if self.http_daemon and self.interface:
-            logger.info("[%s] Stopping all network connections" % self.name)
+            logger.info("[%s] Stopping all network connections", self.name)
             self.http_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
@@ -305,9 +302,16 @@ class Satellite(BaseSatellite):
         self.q_by_mod = {}
 
 
+    # Wrapper function for the true con init
+    def pynag_con_init(self, id):
+        _t = time.time()
+        r = self.do_pynag_con_init(id)
+        statsmgr.incr('con-init.scheduler', time.time() - _t)
+        return r
+
     
     # Initialize or re-initialize connection with scheduler """
-    def pynag_con_init(self, id):
+    def do_pynag_con_init(self, id):
         sched = self.schedulers[id]
 
         # If sched is not active, I do not try to init
@@ -318,33 +322,35 @@ class Satellite(BaseSatellite):
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
-        logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
+        timeout = sched['timeout']
+        data_timeout = sched['data_timeout']
+        logger.info("[%s] Init connection with %s at %s (%ss,%ss)", self.name, sname, uri, timeout, data_timeout)
 
         try:
-            sch_con = sched['con'] = HTTPClient(uri=uri, strong_ssl=sched['hard_ssl_name_check'])
+            sch_con = sched['con'] = HTTPClient(uri=uri, strong_ssl=sched['hard_ssl_name_check'], timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions, exp:
-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s", self.name, sname, str(exp))
             sched['con'] = None
             return
 
-        # timeout of 120 s
+        # timeout of 3s by default (short one)
         # and get the running id
         try:
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
         except (HTTPExceptions, cPickle.PicklingError, KeyError), exp:
-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s", self.name, sname, str(exp))
             sched['con'] = None
             return
 
         # The schedulers have been restarted: it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions"
-                        % (self.name, sname))
+            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions",
+                         self.name, sname)
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
+        logger.info("[%s] Connection OK with scheduler %s", self.name, sname)
 
 
     # Manage action returned from Workers
@@ -384,9 +390,18 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
 
+
+    # Wrapper function for stats
+    def manage_returns(self):
+        _t = time.time()
+        r = self.do_manage_returns()
+        statsmgr.incr('core.manage-returns', time.time() - _t)
+        return r
+
+
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
-    def manage_returns(self):
+    def do_manage_returns(self):
         #return
         # For all schedulers, we check for waitforhomerun
         # and we send back results
@@ -403,16 +418,15 @@ class Satellite(BaseSatellite):
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results':ret})
-
                 # Not connected or sched is gone
                 except (HTTPExceptions, KeyError), exp:
-                    logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
-                    logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
                 except Exception, exp:
-                    logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
+                    logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                     raise
 
             # We clean ONLY if the send is OK
@@ -422,16 +436,17 @@ class Satellite(BaseSatellite):
                 self.pynag_con_init(sched_id)
                 logger.warning("Sent failed!")
 
+
     # Get all returning actions for a call from a
     # scheduler
     def get_return_for_passive(self, sched_id):
         # I do not know this scheduler?
         if sched_id not in self.schedulers:
-            logger.debug("I do not know this scheduler: %s" % sched_id)
+            logger.debug("I do not know this scheduler: %s", sched_id)
             return []
 
         sched = self.schedulers[sched_id]
-        logger.debug("Preparing to return %s" % str(sched['wait_homerun'].values()))
+        logger.debug("Preparing to return %s", str(sched['wait_homerun'].values()))
 
         # prepare our return
         ret = copy.copy(sched['wait_homerun'].values())
@@ -440,6 +455,7 @@ class Satellite(BaseSatellite):
         sched['wait_homerun'].clear()
 
         return ret
+
 
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
@@ -457,7 +473,7 @@ class Satellite(BaseSatellite):
             if exp.errno == 38 and os.name == 'posix':
                 logger.critical("Got an exception (%s). If you are under Linux, "
                                 "please check that your /dev/shm directory exists and"
-                                " is read-write." % (str(exp)))
+                                " is read-write.", str(exp))
             raise
 
         # If we are in the fork module, we do not specify a target
@@ -483,15 +499,16 @@ class Satellite(BaseSatellite):
 
         # And save the Queue of this worker, with key = worker id
         self.q_by_mod[module_name][w.id] = q
-        logger.info("[%s] Allocating new %s Worker: %s" % (self.name, module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker: %s", self.name, module_name, w.id)
 
         # Ok, all is good. Start it!
         w.start()
 
+
     # The main stop of this daemon. Stop all workers
     # modules and sockets
     def do_stop(self):
-        logger.info("[%s] Stopping all workers" % (self.name))
+        logger.info("[%s] Stopping all workers", self.name)
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -499,7 +516,7 @@ class Satellite(BaseSatellite):
             # A already dead worker or in a worker
             except (AttributeError, AssertionError):
                 pass
-        # Close the pyro server socket if it was opened
+        # Close the server socket if it was opened
         if self.http_daemon:
             if self.brok_interface:
                 self.http_daemon.unregister(self.brok_interface)
@@ -507,7 +524,6 @@ class Satellite(BaseSatellite):
                 self.http_daemon.unregister(self.scheduler_interface)
         # And then call our master stop from satellite code
         super(Satellite, self).do_stop()
-
 
 
     # A simple function to add objects in self
@@ -521,7 +537,7 @@ class Satellite(BaseSatellite):
             self.broks[elt.id] = elt
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command '%s'" % str(elt.__dict__))
+            logger.debug("Enqueuing an external command '%s'", str(elt.__dict__))
             with self.external_commands_lock:
                 self.external_commands.append(elt)
 
@@ -552,7 +568,7 @@ class Satellite(BaseSatellite):
             # good: we can think that we have a worker and it's not True
             # So we del it
             if not w.is_alive():
-                logger.warning("[%s] The worker %s goes down unexpectedly!" % (self.name, w.id))
+                logger.warning("[%s] The worker %s goes down unexpectedly!", self.name, w.id)
                 # Terminate immediately
                 w.terminate()
                 w.join(timeout=1)
@@ -582,8 +598,8 @@ class Satellite(BaseSatellite):
     def adjust_worker_number_by_load(self):
         to_del = []
         logger.debug("[%s] Trying to adjust worker number."
-                     " Actual number : %d, min per module : %d, max per module : %d"
-                     % (self.name, len(self.workers), self.min_workers, self.max_workers))
+                     " Actual number : %d, min per module : %d, max per module : %d",
+                      self.name, len(self.workers), self.min_workers, self.max_workers)
 
         # I want at least min_workers by module then if I can, I add worker for load balancing
         for mod in self.q_by_mod:
@@ -613,9 +629,10 @@ class Satellite(BaseSatellite):
 
         for mod in to_del:
             logger.debug("[%s] The module %s is not a worker one, "
-                         "I remove it from the worker list" % (self.name, mod))
+                         "I remove it from the worker list", self.name, mod)
             del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
+
 
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
@@ -659,13 +676,18 @@ class Satellite(BaseSatellite):
         if q is not None:
             q.put(msg)
 
+        
+    # Wrapper function for the real function
+    def get_new_actions(self):
+        _t = time.time()
+        self.do_get_new_actions()
+        statsmgr.incr('core.get-new-actions', time.time() - _t)
+        
 
     # We get new actions from schedulers, we create a Message and we
     # put it in the s queue (from master to slave)
     # REF: doc/shinken-action-queues.png (1)
-    def get_new_actions(self):
-        #now = time.time()  #Unused
-
+    def do_get_new_actions(self):
         # Here are the differences between a
         # poller and a reactionner:
         # Poller will only do checks,
@@ -686,7 +708,6 @@ class Satellite(BaseSatellite):
                 except KeyError:
                     con = None
                 if con is not None:  # None = not initialized
-                    #pyro.set_timeout(con, 120)
                     # OK, go for it :)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
@@ -699,7 +720,7 @@ class Satellite(BaseSatellite):
                     tmp = base64.b64decode(tmp)
                     tmp = zlib.decompress(tmp)
                     tmp = cPickle.loads(str(tmp))
-                    logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
+                    logger.debug("Ask actions to %d, got %d", sched_id, len(tmp))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
@@ -708,25 +729,28 @@ class Satellite(BaseSatellite):
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
             except (HTTPExceptions, KeyError), exp:
-                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
             except AttributeError, exp:
-                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
             # What the F**k? We do not know what happened,
             # log the error message if possible.
             except Exception, exp:
-                logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
+                logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                 raise
+
 
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
         return self.returns_queue.qsize()
 
+
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_item(self):
         return self.returns_queue.get()
+
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
@@ -741,6 +765,7 @@ class Satellite(BaseSatellite):
                     self.add(o)
                 except Empty:
                     full_queue = False
+
 
     # An arbiter ask us to wait a new conf, so we must clean
     # all the mess we did, and close modules too
@@ -798,9 +823,11 @@ class Satellite(BaseSatellite):
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
-                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" %
-                                (sched_id, sched['name'], mod,
-                                 i, q.qsize(), self.get_returns_queue_len()))
+                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)", 
+                                sched_id, sched['name'], mod,
+                                 i, q.qsize(), self.get_returns_queue_len())
+                    # also update the stats module
+                    statsmgr.incr('core.worker-%s.queue-size' % mod, q.qsize())
 
         # Before return or get new actions, see how we manage
         # old ones: are they still in queue (s)? If True, we
@@ -820,13 +847,15 @@ class Satellite(BaseSatellite):
             # it make it come near 2 because if < 2, go up :)
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
-        logger.debug("Wait ratio: %f" % wait_ratio)
+        logger.debug("Wait ratio: %f", wait_ratio)
+        statsmgr.incr('core.wait-ratio', wait_ratio)
 
         # We can wait more than 1s if needed,
         # no more than 5s, but no less than 1
         timeout = self.timeout * wait_ratio
         timeout = max(self.polling_interval, timeout)
         self.timeout = min(5 * self.polling_interval, timeout)
+        statsmgr.incr('core.timeout', wait_ratio)
 
         # Maybe we do not have enough workers, we check for it
         # and launch the new ones if needed
@@ -852,6 +881,7 @@ class Satellite(BaseSatellite):
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
+
 
     # Do this satellite (poller or reactionner) post "daemonize" init:
     # we must register our interfaces for 3 possible callers: arbiter,
@@ -886,7 +916,7 @@ class Satellite(BaseSatellite):
     # Setup the new received conf from arbiter
     def setup_new_conf(self):
         conf = self.new_conf
-        logger.debug("[%s] Sending us a configuration %s" % (self.name, conf))
+        logger.debug("[%s] Sending us a configuration %s", self.name, conf)
         self.new_conf = None
         self.cur_conf = conf
         g_conf = conf['global']
@@ -899,10 +929,17 @@ class Satellite(BaseSatellite):
         else:
             name = 'Unnamed satellite'
         self.name = name
+        self.api_key = g_conf['api_key']
+        self.secret = g_conf['secret']
+        # we got a name, we can now say it to our statsmgr
+        if 'poller_name' in g_conf:
+            statsmgr.register(self, self.name, 'poller', api_key=self.api_key, secret=self.secret)
+        else:
+            statsmgr.register(self, self.name, 'reactionner', api_key=self.api_key, secret=self.secret) 
 
         self.passive = g_conf['passive']
         if self.passive:
-            logger.info("[%s] Passive mode enabled." % self.name)
+            logger.info("[%s] Passive mode enabled.", self.name)
 
         # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers']:
@@ -921,8 +958,8 @@ class Satellite(BaseSatellite):
                     already_got = True
 
             if already_got:
-                logger.info("[%s] We already got the conf %d (%s)"
-                            % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                logger.info("[%s] We already got the conf %d (%s)",
+                             self.name, sched_id, conf['schedulers'][sched_id]['name'])
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
 
@@ -945,7 +982,9 @@ class Satellite(BaseSatellite):
                 self.schedulers[sched_id]['actions'] = {}
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
-
+            self.schedulers[sched_id]['timeout'] = s['timeout']
+            self.schedulers[sched_id]['data_timeout'] = s['data_timeout']
+            
             # Do not connect if we are a passive satellite
             if not self.passive and not already_got:
                 # And then we connect to it :)
@@ -959,14 +998,14 @@ class Satellite(BaseSatellite):
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers = 4
-        logger.info("[%s] Using max workers: %s" % (self.name, self.max_workers))
+        logger.info("[%s] Using max workers: %s", self.name, self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
                 self.min_workers = 4
-        logger.info("[%s] Using min workers: %s" % (self.name, self.min_workers))
+        logger.info("[%s] Using min workers: %s", self.name, self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
@@ -981,11 +1020,11 @@ class Satellite(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = g_conf['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.info("[%s] Setting our timezone to %s" % (self.name, use_timezone))
+            logger.info("[%s] Setting our timezone to %s", self.name, use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        logger.info("We have our schedulers: %s" % (str(self.schedulers)))
+        logger.info("We have our schedulers: %s", str(self.schedulers))
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
@@ -993,10 +1032,30 @@ class Satellite(BaseSatellite):
         for module in mods:
             # If we already got it, bypass
             if not module.module_type in self.q_by_mod:
-                logger.debug("Add module object %s" % str(module))
+                logger.debug("Add module object %s", str(module))
                 self.modules_manager.modules.append(module)
-                logger.info("[%s] Got module: %s " % (self.name, module.module_type))
+                logger.info("[%s] Got module: %s ", self.name, module.module_type)
                 self.q_by_mod[module.module_type] = {}
+
+
+    # stats threads is asking us a main structure for stats
+    def get_stats_struct(self):
+        now = int(time.time())
+        # call the daemon one
+        res = super(Satellite, self).get_stats_struct()
+        _type = self.__class__.my_type
+        res.update( {'name':self.name, 'type': _type})
+        # The receiver do nto have a passie prop
+        if hasattr(self, 'passive'):
+            res['passive'] = self.passive
+        metrics = res['metrics']      
+        # metrics specific
+        metrics.append( '%s.%s.external-commands.queue %d %d' % (_type, self.name, len(self.external_commands), now) )
+        
+        return res
+    
+    
+
 
     def main(self):
         try:
@@ -1038,14 +1097,11 @@ class Satellite(BaseSatellite):
 
                 for mod in to_del:
                     logger.debug("The module %s is not a worker one, "
-                                 "I remove it from the worker list" % mod)
+                                 "I remove it from the worker list", mod)
                     del self.q_by_mod[mod]
 
             # Now main loop
             self.do_mainloop()
         except Exception:
-            logger.critical("I got an unrecoverable error. I have to exit")
-            logger.critical("You can log a bug ticket at "
-                            "https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
+            self.print_unrecoverable(traceback.format_exc())
             raise

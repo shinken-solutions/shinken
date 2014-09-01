@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -28,7 +28,6 @@ import errno
 import time
 import socket
 import select
-import copy
 import cPickle
 import inspect
 import json
@@ -46,7 +45,9 @@ except ImportError:
 
 from wsgiref import simple_server
 
+# load global helper objects for logs and stats computation
 from log import logger
+from shinken.stats import statsmgr
 
 # Let's load bottlecore! :)
 from shinken.webui import bottlecore as bottle
@@ -70,12 +71,11 @@ class CherryPyServer(bottle.ServerAdapter):
     def run(self, handler):  # pragma: no cover
         daemon_thread_pool_size = self.options['daemon_thread_pool_size']
         server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size, shutdown_timeout=1)
-        logger.info('Initializing a CherryPy backend with %d threads' % daemon_thread_pool_size)
+        logger.info('Initializing a CherryPy backend with %d threads', daemon_thread_pool_size)
         use_ssl = self.options['use_ssl']
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
-
 
         if use_ssl:
             server.ssl_certificate = ssl_cert
@@ -111,7 +111,7 @@ class CherryPyBackend(object):
         try:
             self.srv.stop()
         except Exception, exp:
-            logger.warning('Cannot stop the CherryPy backend : %s' % exp)
+            logger.warning('Cannot stop the CherryPy backend : %s', exp)
 
 
     # Will run and LOCK
@@ -138,7 +138,7 @@ class WSGIREFAdapter (bottle.ServerAdapter):
             LoggerHandler = QuietHandler
 
         srv = simple_server.make_server(self.host, self.port, handler, handler_class=LoggerHandler)
-        logger.info('Initializing a wsgiref backend with %d threads' % daemon_thread_pool_size)
+        logger.info('Initializing a wsgiref backend with %d threads', daemon_thread_pool_size)
         use_ssl = self.options['use_ssl']
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
@@ -200,7 +200,7 @@ class WSGIREFBackend(object):
         nb_threads = self.daemon_thread_pool_size
         # Keep a list of our running threads
         threads = []
-        logger.info('Using a %d http pool size' % nb_threads)
+        logger.info('Using a %d http pool size', nb_threads)
         while True:
             # We must not run too much threads, so we will loop until
             # we got at least one free slot available
@@ -253,7 +253,7 @@ class HTTPDaemon(object):
             if use_ssl:
                 protocol = 'https'
             self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
-            logger.info("Opening HTTP socket at %s" % self.uri)
+            logger.info("Opening HTTP socket at %s", self.uri)
 
             # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
@@ -344,12 +344,16 @@ class HTTPDaemon(object):
                                     raise Exception('Missing argument %s' % aname)
                                 v = default_args[aname]
                             d[aname] = v
-                        args_time = time.time() - t0
+
+                        t1 = time.time()
+                        args_time = t1 - t0
 
                         if need_lock:
-                            logger.debug("HTTP: calling lock for %s" % fname)
+                            logger.debug("HTTP: calling lock for %s", fname)
                             lock.acquire()
-                        aqu_lock_time = time.time() - t0
+
+                        t2 = time.time()
+                        aqu_lock_time = t2 - t1
                         
                         try:
                             ret = f(**d)
@@ -358,12 +362,22 @@ class HTTPDaemon(object):
                             # Ok now we can release the lock
                             if need_lock:
                                 lock.release()
-                        calling_time = time.time() - t0
+
+                        t3 = time.time()
+                        calling_time = t3 - t2
+
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
-                        json_time = time.time() - t0
-                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s]" % (
-                                fname, args_time, aqu_lock_time, calling_time, json_time) )
+                        t4 = time.time() 
+                        json_time = t4 - t3
+                      
+                        global_time = t4 - t0 
+                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s] [global:%s]", 
+                                fname, args_time, aqu_lock_time, calling_time, json_time, global_time )
+                        lst = [('args',args_time), ('aqulock',aqu_lock_time), ('calling',calling_time), ('json',json_time), ('global',global_time)]
+                        # increase the stats timers
+                        for (k, _t) in lst:
+                            statsmgr.incr('http.%s.%s' % (fname, k), _t)
                         
                         return j
                     # Ok now really put the route in place
@@ -386,14 +400,6 @@ class HTTPDaemon(object):
 
         def handleRequests(self, s):
             self.srv.handle_request()
-
-
-        def create_uri(address, port, obj_name, use_ssl=False):
-            return "PYRO:%s@%s:%d" % (obj_name, address, port)
-
-
-        def set_timeout(con, timeout):
-            con._pyroTimeout = timeout
 
 
         # Close all sockets and delete the server object to be sure
