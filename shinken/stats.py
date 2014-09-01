@@ -151,7 +151,7 @@ class Stats(object):
                 # assume a %16 length messagexs
                 encrypted_text = self._encrypt(j)
                 try:
-                    r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key),  j)#encrypted_text)
+                    r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
                 except HTTPException, exp:
                     logger.debug('Stats REAPER cannot put to the metric server %s' % exp)
             time.sleep(60)
