@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -24,13 +24,13 @@
 #
 
 from shinken_test import *
-time_hacker.set_real_time()
 
 
 
 class TestStrangeCaracterInCommands(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_strange_characters_commands.cfg')
+        time_hacker.set_real_time()
 
     # Try to call check dummy with very strange caracters and co, see if it run or
     # failed badly

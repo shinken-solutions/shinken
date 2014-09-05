@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -88,34 +88,32 @@ class Hostdependencies(Items):
             # We explode first the dependent (son) part
             dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
-                dephg_names = hd.dependent_hostgroup_name.split(',')
-                dephg_names = [hg_name.strip() for hg_name in dephg_names]
+                dephg_names = [n.strip() for n in hd.dependent_hostgroup_name.split(',')]
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
                         err = "ERROR: the hostdependency got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
-                    dephnames.extend(dephg.members.split(','))
+                    dephnames.extend([m.strip() for m in dephg.members.split(',')])
 
             if hasattr(hd, 'dependent_host_name'):
-                dephnames.extend(hd.dependent_host_name.split(','))
+                dephnames.extend([n.strip() for n in hd.dependent_host_name.split(',')])
 
             # Ok, and now the father part :)
             hnames = []
             if hasattr(hd, 'hostgroup_name'):
-                hg_names = hd.hostgroup_name.split(',')
-                hg_names = [hg_name.strip() for hg_name in hg_names]
+                hg_names = [n.strip() for n in hd.hostgroup_name.split(',')]
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
                         err = "ERROR: the hostdependency got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
-                    hnames.extend(hg.members.split(','))
+                    hnames.extend([m.strip() for m in hg.members.split(',')])
 
             if hasattr(hd, 'host_name'):
-                hnames.extend(hd.host_name.split(','))
+                hnames.extend([n.strip() for n in hd.host_name.split(',')])
 
             # Loop over all sons and fathers to get S*F host deps
             for dephname in dephnames:
@@ -162,7 +160,7 @@ class Hostdependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 hd.dependency_period = tp
             except AttributeError, exp:
-                logger.error("[hostdependency] fail to linkify by timeperiod: %s" % exp)
+                logger.error("[hostdependency] fail to linkify by timeperiod: %s", exp)
 
     # We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
@@ -187,3 +185,7 @@ class Hostdependencies(Items):
         # self.apply_implicit_inheritance(hosts)
         for h in self:
             h.get_customs_properties_by_inheritance()
+
+    def is_correct(self):
+        r = super(Hostdependencies, self).is_correct()
+        return r and self.no_loop_in_parents("host_name", "dependent_host_name")

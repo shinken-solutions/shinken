@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -25,7 +25,7 @@
 
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 from shinken.http_client import HTTPExceptions
 
@@ -42,6 +42,7 @@ class ReceiverLink(SatelliteLink):
         'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
         'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'direct_routing':     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'accept_passive_unknown_check_results': BoolProp(default='0', fill_brok=['full_status'], to_send=True),
     })
 
 
@@ -57,7 +58,7 @@ class ReceiverLink(SatelliteLink):
         try:
             if self.con is None:
                 self.create_connection()
-            logger.info(" (%s)" % self.uri)
+            logger.info(" (%s)", self.uri)
 
             # If the connection failed to initialize, bail out
             if self.con is None:

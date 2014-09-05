@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -28,16 +28,12 @@ about the configuration part. Parameters are merged in Hosts so it's
 no use in running part
 """
 
-import time
 
 from item import Item, Items
 
 from shinken.autoslots import AutoSlots
-from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
-from shinken.macroresolver import MacroResolver
-from shinken.eventhandler import EventHandler
-from shinken.log import logger
+from shinken.util import to_hostnames_list
+from shinken.property import StringProp, ListProp
 
 
 class HostExtInfo(Item):

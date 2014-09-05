@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -46,6 +46,7 @@ from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
 from shinken.complexexpression import ComplexExpressionFactory
+from shinken.graph import Graph
 
 
 class Item(object):
@@ -384,11 +385,11 @@ Like temporary attributes such as "imported_from", etc.. """
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[item::%s] %s" % (self.get_name(), err))
+                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                logger.warning("[item::%s] %s property is missing" % (self.get_name(), prop))
+                logger.warning("[item::%s] %s property is missing", self.get_name(), prop)
                 state = False
 
         return state
@@ -479,7 +480,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            logger.debug("[item::%s] deleting acknowledge of %s" % (self.get_name(), self.get_dbg_name()))
+            logger.debug("[item::%s] deleting acknowledge of %s", self.get_name(), self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -892,16 +893,16 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.warning("[items] %s.%s is duplicated from %s" %\
-                    (i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
+                logger.warning("[items] %s.%s is duplicated from %s", \
+                    i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source"))
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[items] %s" % err)
+            logger.warning("[items] %s", err)
 
         for err in self.configuration_errors:
-            logger.error("[items] %s" % err)
+            logger.error("[items] %s", err)
             r = False
 
         # Then look for individual ok
@@ -916,7 +917,7 @@ class Items(object):
             # Now other checks
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
-                logger.error("[items] In %s is incorrect ; from %s" % (i.get_name(), n))
+                logger.error("[items] In %s is incorrect ; from %s", i.get_name(), n)
                 r = False
 
         return r
@@ -1268,3 +1269,65 @@ class Items(object):
     def explode_trigger_string_into_triggers(self, triggers):
         for i in self:
             i.explode_trigger_string_into_triggers(triggers)
+
+    # Parent graph: use to find quickly relations between all item, and loop
+    # return True if there is a loop
+    def no_loop_in_parents(self, attr1, attr2):
+        """Find loop in dependencies.
+        For now, used with the following attributes :
+        :(self, parents):                                      host dependencies from host object
+        :(host_name, dependent_host_name):                     host dependencies from hostdependencies object
+        :(service_description, dependent_service_description): service dependencies from servicedependencies object
+        """
+
+        # Ok, we say "from now, no loop :) "
+        r = True
+
+        # Create parent graph
+        parents = Graph()
+
+        # Start with all items as nodes
+        for item in self:
+            # Hack to get self here. Used when looping on host and host parent's
+            if attr1 == "self":
+                obj = item          # obj is a host/service [list]
+            else:
+                obj = getattr(item, attr1, None)
+            if obj is not None:
+                if isinstance(obj, list):
+                    for sobj in obj:
+                        parents.add_node(sobj)
+                else:
+                    parents.add_node(obj)
+
+        # And now fill edges
+        for item in self:
+            if attr1 == "self":
+                obj1 = item
+            else:
+                obj1 = getattr(item, attr1, None)
+            obj2 = getattr(item, attr2, None)
+            if obj2 is not None:
+                if isinstance(obj2, list):
+                    for sobj2 in obj2:
+                        if isinstance(obj1, list):
+                            for sobj1 in obj1:
+                                parents.add_edge(sobj1, sobj2)
+                        else:
+                            parents.add_edge(obj1, sobj2)
+                else:
+                    if isinstance(obj1, list):
+                        for sobj1 in obj1:
+                            parents.add_edge(sobj1, obj2)
+                    else:
+                        parents.add_edge(obj1, obj2)
+
+        # Now get the list of all item in a loop
+        items_in_loops = parents.loop_check()
+
+        # and raise errors about it
+        for item in items_in_loops:
+            logger.error("The %s object '%s'  is part of a circular parent/child chain!", item.my_type, item.get_name())
+            r = False
+
+        return r

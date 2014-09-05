@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -27,7 +27,7 @@ from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 _special_properties = ('service_notification_commands', 'host_notification_commands',
                         'service_notification_period', 'host_notification_period',
@@ -169,7 +169,7 @@ class Contact(Item):
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
+                    logger.error("[contact::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # There is a case where there is no nw: when there is not special_prop defined
@@ -177,13 +177,13 @@ class Contact(Item):
         if self.notificationways == []:
             for p in _special_properties:
                 if not hasattr(self, p):
-                    logger.error("[contact::%s] %s property is missing" % (self.get_name(), p))
+                    logger.error("[contact::%s] %s property is missing", self.get_name(), p)
                     state = False
 
         if hasattr(self, 'contact_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
-                    logger.error("[contact::%s] %s character not allowed in contact_name" % (self.get_name(), c))
+                    logger.error("[contact::%s] %s character not allowed in contact_name", self.get_name(), c)
                     state = False
         else:
             if hasattr(self, 'alias'):  # take the alias if we miss the contact_name
@@ -194,21 +194,21 @@ class Contact(Item):
     # Raise a log entry when a downtime begins
     # CONTACT DOWNTIME ALERT: test_contact;STARTED; Contact has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;STARTED; Contact has "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;STARTED; Contact has "
                             "entered a period of scheduled downtime"
                             % self.get_name())
 
     # Raise a log entry when a downtime has finished
     # CONTACT DOWNTIME ALERT: test_contact;STOPPED; Contact has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has "
                             "exited from a period of scheduled downtime"
                             % self.get_name())
 
     # Raise a log entry when a downtime prematurely ends
     # CONTACT DOWNTIME ALERT: test_contact;CANCELLED; Contact has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.info("CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled "
+        naglog_result('info', "CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled "
                             "downtime for contact has been cancelled."
                             % self.get_name())
 

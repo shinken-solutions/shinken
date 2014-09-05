@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -208,6 +208,7 @@ class Regenerator(object):
             #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
+                hgname = hgname.strip()
                 hg = self.hostgroups.find_by_name(hgname)
                 if hg:
                     new_hostgroups.append(hg)
@@ -244,6 +245,7 @@ class Regenerator(object):
                 new_members.append(s)
             sg.members = new_members
 
+
         # Merge SERVICEGROUPS with real ones
         for inpsg in inp_servicegroups:
             sgname = inpsg.servicegroup_name
@@ -259,6 +261,7 @@ class Regenerator(object):
         for s in inp_services:
             new_servicegroups = []
             for sgname in s.servicegroups.split(','):
+                sgname = sgname.strip()
                 sg = self.servicegroups.find_by_name(sgname)
                 if sg:
                     new_servicegroups.append(sg)
@@ -342,6 +345,7 @@ class Regenerator(object):
             # contacts into it
             if cg:
                 cg.members.extend(inpcg.members)
+                cg.members = list(set(cg.members))
             else:  # else take the new one
                 self.contactgroups.add_item(inpcg)
 

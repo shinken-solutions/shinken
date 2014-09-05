@@ -42,12 +42,11 @@ except ImportError:
 external_mapping = os.path.join(os.path.dirname(__file__),
                                 '..', 'libexec', 'external_mapping.py')
 
-time_hacker.set_real_time()
 
 class TestExternalMapping(ShinkenTest):
 
     def setUp(self):
-        pass
+        time_hacker.set_real_time()
 
     def __setup(self, inputlines):
         """

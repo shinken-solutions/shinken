@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -34,7 +34,6 @@ import re
 import random
 import time
 import traceback
-from datetime import datetime
 
 from item import Item
 
@@ -204,7 +203,7 @@ class SchedulingItem(Item):
                                 # And a new check
                                 return self.launch_check(now)
                             else:
-                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period." % (self.host_name))
+                                logger.debug("Should have checked freshness for passive only checked host:%s, but host is not in check period.", self.host_name)
         return None
 
 
@@ -1322,7 +1321,7 @@ class SchedulingItem(Item):
         if force or (not self.is_no_check_dependent()):
             # Fred : passive only checked host dependency
             if dependent and self.my_type == 'host' and self.passive_checks_enabled and not self.active_checks_enabled:
-                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !" % (self.host_name))
+                logger.debug("Host check is for an host that is only passively checked (%s), do not launch the check !", self.host_name)
                 return None
             
             # By default we will use our default check_command
@@ -1339,6 +1338,10 @@ class SchedulingItem(Item):
             m = MacroResolver()
             data = self.get_data_for_checks()
             command_line = m.resolve_command(check_command, data)
+
+            # remember it, for pure debuging purpose
+            self.last_check_command = command_line
+            
             # By default env is void
             env = {}
 
@@ -1511,9 +1514,9 @@ class SchedulingItem(Item):
         output = service_template_string
         mapping = {0: "OK", 1: "WARNING", 2: "CRITICAL", 3: "UNKNOWN"}
         status = mapping[self.business_rule.get_state()]
-        output = re.sub(r"\$STATUS\$", status, output, flags=re.I)
+        output = re.sub(r"\$STATUS\$", status, output)
         short_status = self.status_to_short_status(status)
-        output = re.sub(r"\$SHORT_STATUS\$", short_status, output, flags=re.I)
+        output = re.sub(r"\$SHORT_STATUS\$", short_status, output)
         output = self.expand_business_rule_item_macros(output, self)
         output = re.sub("\$CHILDS_OUTPUT\$", childs_output, output)
         return output.strip()
@@ -1595,8 +1598,8 @@ class SchedulingItem(Item):
             except Exception, e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
-                logger.debug("[%s] Error while re-evaluating business rule:\n%s" %
-                             (self.get_name(), traceback.format_exc()))
+                logger.debug("[%s] Error while re-evaluating business rule:\n%s", 
+                             self.get_name(), traceback.format_exc())
                 state = 3
         # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
@@ -1647,4 +1650,4 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                logger.error("We got an exception from a trigger on %s for %s" % (self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())))
+                logger.error("We got an exception from a trigger on %s for %s", self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc()))

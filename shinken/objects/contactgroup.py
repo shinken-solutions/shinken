@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -58,7 +58,7 @@ class Contactgroup(Itemgroup):
 
     def get_contactgroup_members(self):
         if self.has('contactgroup_members'):
-            return self.contactgroup_members.split(',')
+            return [m.strip() for m in self.contactgroup_members.split(',')]
         else:
             return []
 
@@ -75,7 +75,7 @@ class Contactgroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            logger.error("[contactgroup::%s] got a loop in contactgroup definition" % self.get_name())
+            logger.error("[contactgroup::%s] got a loop in contactgroup definition", self.get_name())
             if self.has('members'):
                 return self.members
             else:
@@ -126,7 +126,7 @@ class Contactgroups(Itemgroups):
                 if m is not None:
                     new_mbrs.append(m)
                 else:
-                    cg.unknown_members.append(mbr)
+                    cg.add_string_unknown_member(mbr)
 
             # Make members uniq
             new_mbrs = list(set(new_mbrs))

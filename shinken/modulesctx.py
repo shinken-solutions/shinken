@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -55,7 +55,7 @@ class ModulesContext(object):
             else:
                 r = imp.load_compiled(name, mod_path)
         except:
-            logger.warning('The module %s cannot be founded or load' % mod_path)
+            logger.warning('The module %s cannot be founded or load', mod_path)
             raise
         return r
 

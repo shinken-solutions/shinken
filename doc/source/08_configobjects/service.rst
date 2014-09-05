@@ -63,6 +63,7 @@ service_dependencies                       *host,service_description*
 business_impact                            [0/1/2/3/4/5]
 icon_set                                   [database/disk/network_service/server]
 maintenance_period                         *timeperiod_name*
+host_dependency_enabled                     [0/1]
 labels                                     *labels*
 business_rule_output_template              *template*
 business_rule_smart_notifications          [0/1]
@@ -334,6 +335,9 @@ icon_set
 maintenance_period
   Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
 
+host_dependency_enabled
+  This variable may be used to remove the dependency between a service and its parent host. Used for volatile services that need notification related to itself and not depend on the host notifications.
+  
 labels
   This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` to identify groups of services.
 

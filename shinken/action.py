@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -36,10 +36,9 @@ try:
 except ImportError:
     fcntl = None
 
-from shinken.util import safe_print
 from shinken.log import logger
 
-__all__ = ('Action')
+__all__ = ('Action', )
 
 valid_exit_status = (0, 1, 2, 3)
 
@@ -310,8 +309,8 @@ if os.name != 'nt':
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
             except OSError, exp:
-                logger.error("Fail launching command: %s %s %s"
-                             % (self.command, exp, force_shell))
+                logger.error("Fail launching command: %s %s %s",
+                              self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
                 if (not force_shell and exp.errno == 8
                     and exp.strerror == 'Exec format error'):
@@ -366,7 +365,7 @@ else:
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     env=self.local_env, shell=True)
             except WindowsError, exp:
-                logger.info("We kill the process: %s %s" % (exp, self.command))
+                logger.info("We kill the process: %s %s", exp, self.command)
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time
 

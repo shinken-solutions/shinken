@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -41,7 +41,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    logger.info("[Dummy Arbiter] Get a Dummy arbiter module for plugin %s" % plugin.get_name())
+    logger.info("[Dummy Arbiter] Get a Dummy arbiter module for plugin %s", plugin.get_name())
     instance = Dummy_arbiter(plugin)
     return instance
 
@@ -71,7 +71,7 @@ class Dummy_arbiter(BaseModule):
                             'use': 'linux-server',
                             'address': 'localhost'
                             })
-        logger.info("[Dummy Arbiter] Returning to Arbiter the hosts: %s" % str(r))
+        logger.info("[Dummy Arbiter] Returning to Arbiter the hosts: %s", str(r))
 
         return r
 

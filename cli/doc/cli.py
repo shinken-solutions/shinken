@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -24,7 +24,7 @@
 
 import os
 
-from shinken.log import logger, cprint
+from shinken.log import logger
 
 # Will be populated by the shinken CLI command
 CONFIG = None
@@ -34,7 +34,7 @@ CONFIG = None
 ############# ********************        SERVE           ****************###########
 def serve(port):
     port = int(port)
-    logger.info("Serving documentation at port %s" % port)
+    logger.info("Serving documentation at port %s", port)
     import SimpleHTTPServer
     import SocketServer
     doc_dir   = CONFIG['paths']['doc']
@@ -52,7 +52,7 @@ def serve(port):
 def do_serve(port='8080'):
     if port is None:
         port = '8080'
-    logger.debug("WILL CALL serve with %s" % port)
+    logger.debug("WILL CALL serve with %s", port)
     serve(port)
 
 

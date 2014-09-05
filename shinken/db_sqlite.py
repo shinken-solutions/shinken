@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -42,6 +42,6 @@ class DBSqlite(DB):
 
     def execute_query(self, query):
         """Just run the query"""
-        logger.debug("[SqliteDB] Info: I run query '%s'" % query)
+        logger.debug("[SqliteDB] Info: I run query '%s'", query)
         self.db_cursor.execute(query)
         self.db.commit()

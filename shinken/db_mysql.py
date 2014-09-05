@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -26,7 +26,6 @@
 import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
-import _mysql_exceptions
 
 
 from shinken.db import DB
@@ -71,16 +70,14 @@ class DBMysql(DB):
         TODO: finish catch
         """
         if do_debug:
-            logger.debug("[MysqlDB]I run query %s" % query)
+            logger.debug("[MysqlDB]I run query %s", query)
         try:
             self.db_cursor.execute(query)
             self.db.commit()
             return True
         except IntegrityError, exp:
-            logger.warning("[MysqlDB] A query raised an integrity error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[MysqlDB] A query raised an integrity error: %s, %s", query, exp)
             return False
         except ProgrammingError, exp:
-            logger.warning("[MysqlDB] A query raised a programming error:" \
-                  " %s, %s" % (query, exp))
+            logger.warning("[MysqlDB] A query raised a programming error: %s, %s", query, exp)
             return False

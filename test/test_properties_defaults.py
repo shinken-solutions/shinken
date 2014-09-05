@@ -228,6 +228,9 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('daemon_thread_pool_size', '8'),
         ('enable_environment_macros', '1'),
         ('timeout_exit_status', '2'),
+
+        ('api_key', ''),
+        ('secret', ''),
         ])
 
     def setUp(self):
@@ -269,7 +272,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ])
 
@@ -409,7 +412,8 @@ class TestHostescalation(PropertiesTester, ShinkenTest):
     without_default = [
         'host_name', 'hostgroup_name',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups'
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time',
         ]
 
     properties = dict([
@@ -464,7 +468,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('notes', ''),
         ('notes_url', ''),
@@ -634,7 +638,7 @@ class TestRealm(PropertiesTester, ShinkenTest):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('realm_members', ''),
         ('higher_realms', ''),
@@ -701,7 +705,8 @@ class TestServiceescalation(PropertiesTester, ShinkenTest):
         'host_name', 'hostgroup_name',
         'service_description',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups']
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time']
 
     properties = dict([
         ('imported_from', 'unknown'),
@@ -751,7 +756,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('notes', ''),
         ('notes_url', ''),
@@ -838,6 +843,7 @@ class TestService(PropertiesTester, ShinkenTest):
         ('labels', ''),
         ('business_rule_host_notification_options', ''),
         ('business_rule_service_notification_options', ''),
+        ('host_dependency_enabled', '1'),
         ])
 
     def setUp(self):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -28,10 +28,10 @@ import sys
 from shinken_test import *
 from shinken.action import Action
 
-time_hacker.set_real_time()
-
 class TestAction(ShinkenTest):
-    # setUp is inherited from ShinkenTest
+    def setUp(self):
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+        time_hacker.set_real_time()
 
     def wait_finished(self, a, size=8012):
         start = time.time()

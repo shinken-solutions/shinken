@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -76,6 +76,7 @@ class Metric:
 
 class PerfDatas:
     def __init__(self, s):
+        s = s or ''
         elts = perfdata_split_pattern.findall(s)
         elts = [e for e in elts if e != '']
         self.metrics = {}
