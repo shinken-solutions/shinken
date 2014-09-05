@@ -398,7 +398,7 @@ class Dispatcher:
                             logger.warning('[%s] configuration dispatching error for scheduler %s', r.get_name(), sched.get_name())
                             continue
 
-                        logger.info('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
+                        logger.info('[%s] Dispatch OK of conf in scheduler %s', r.get_name(), sched.get_name())
 
                         sched.conf = conf
                         sched.push_flavor = conf.push_flavor
