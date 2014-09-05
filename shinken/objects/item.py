@@ -672,19 +672,37 @@ class Items(object):
             return ""
 
     def add_items(self, items, index_items):
+        """
+        Add items into the `items` or `templates` container depending on the
+        is_tpl method result.
+
+        :param itmes:       The items list to add.
+        :param index_items: Flag indicating if the items should be indexed
+                            on the fly.
+        """
         for i in items:
             if i.is_tpl():
                 self.add_template(i)
             else:
                 self.add_item(i, index_items)
 
-    # Cheks if an object holding the same name already exists in the index.
-    # If so, it compares their definition order: the lowest definition order
-    # is kept. If definiton order equal, an error is risen.Item
-    # The method returns the item that should be added after it has decided
-    # which one should be kept. If the new item has precedence over the New
-    # existing one, the existing is removed for the new to replace it.
     def mamage_conflict(self, item, name):
+        """
+        Cheks if an object holding the same name already exists in the index.
+
+        If so, it compares their definition order: the lowest definition order
+        is kept. If definiton order equal, an error is risen.Item
+
+        The method returns the item that should be added after it has decided
+        which one should be kept.
+
+        If the new item has precedence over the New existing one, the
+        existing is removed for the new to replace it.
+
+        :param item:    The new item to check for confict
+        :param name:    The exiting object name
+        :return         The retained object
+        """
         if item.is_tpl():
             existing = self.name_to_template[name]
         else:
@@ -717,10 +735,20 @@ class Items(object):
         return item
 
     def add_template(self, tpl):
+        """
+        Adds and index a template into the `templates` container.
+
+        :param tpl: The template to add
+        """
         tpl = self.index_template(tpl)
         self.templates[tpl.id] = tpl
 
     def index_template(self, tpl):
+        """
+        Indexes a template by `name` into the `name_to_template` dictionnary.
+
+        :param tpl: The template to index
+        """
         objcls = self.inner_class.my_type
         name = getattr(tpl, 'name', '')
         if not name:
@@ -733,6 +761,11 @@ class Items(object):
         return tpl
 
     def remove_template(self, tpl):
+        """
+        Removes and unindexes a template from the `templates` container.
+
+        :param tpl: The template to remove
+        """
         try:
             del self.templates[tpl.id]
         except KeyError:
@@ -740,6 +773,11 @@ class Items(object):
         self.unindex_template(tpl)
 
     def unindex_template(self, tpl):
+        """
+        Unindex a template from the `templates` container.
+
+        :param tpl: The template to unindex
+        """
         name = getattr(tpl, 'name', '')
         try:
             del self.name_to_template[name]
@@ -747,12 +785,31 @@ class Items(object):
             pass
 
     def add_item(self, item, index=True):
+        """
+        Adds a template into the `items` container, and index it depending
+        on the `index` flag.
+
+        :param item:    The item to add
+        :param index:   Flag indicating if the item should be indexed
+        """
         name_property = getattr(self.__class__, "name_property", None)
         if index is True and name_property:
             item = self.index_item(item)
         self.items[item.id] = item
 
     def index_item(self, item, name=None):
+        """
+        Indexes a template by `name` into the `name_to_template` dictionnary.
+
+        If an object holding the same name already exists in the index, the
+        conflict is managed by the `manage_conflict` method.
+
+        An optional `name` may be given to force the name under which the
+        object should be indexed.
+
+        :param item: The item to index
+        :param name: The optional name to use to index the item
+        """
         name_property = getattr(self.__class__, "name_property", None)
         objcls = self.inner_class.my_type
         if name is None and name_property:
@@ -767,6 +824,11 @@ class Items(object):
         return item
 
     def remove_item(self, item):
+        """
+        Removes and unindexes an item from the `items` container.
+
+        :param item: The item to remove
+        """
         name_property = getattr(self.__class__, "name_property", None)
         if name_property:
             self.unindex_item(item)
@@ -776,6 +838,15 @@ class Items(object):
             pass
 
     def unindex_item(self, item, name=None):
+        """
+        Unindexes an item from the `items` container.
+
+        An optional `name` may be given to indicate the mame under which the
+        object was indexed.
+
+        :param item:    The item to unindex
+        :param name:    The name under which the item has been indexed.
+        """
         name_property = getattr(self.__class__, "name_property", None)
         if name is None and name_property:
             name = getattr(item, name_property, '')

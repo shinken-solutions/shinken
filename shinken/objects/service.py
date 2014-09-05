@@ -993,6 +993,14 @@ class Services(Items):
     inner_class = Service  # use for know what is in items
 
     def add_template(self, tpl):
+        """
+        Adds and index a template into the `templates` container.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param tpl: The template to add
+        """
         objcls = self.inner_class.my_type
         name = getattr(tpl, 'name', '')
         hname = getattr(tpl, 'host_name', '')
@@ -1005,6 +1013,15 @@ class Services(Items):
         self.templates[tpl.id] = tpl
 
     def add_item(self, item, index=True):
+        """
+        Adds and index an item into the `items` container.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param item:    The item to add
+        :param index:   Flag indicating if the item should be indexed
+        """
         objcls = self.inner_class.my_type
         hname = getattr(item, 'host_name', '')
         hgname = getattr(item, 'hostgroup_name', '')
@@ -1027,12 +1044,29 @@ class Services(Items):
         self.items[item.id] = item
 
     def index_item(self, item):
+        """
+        Indexes a template by `name` into the `name_to_template` dictionnary.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param item: The item to index
+        """
         hname = getattr(item, 'host_name', '')
         sdescr = getattr(item, 'service_description', '')
         key = (hname, sdescr)
         return Items.index_item(self, item, key)
 
     def unindex_item(self, item):
+        """
+        Unindexes an item from the `items` container.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param item:    The item to unindex
+        :param name:    The name under which the item has been indexed.
+        """
         host_name = getattr(item, 'host_name', '')
         sdescr = getattr(item, 'service_description', '')
         key = (host_name, sdescr)
@@ -1040,9 +1074,6 @@ class Services(Items):
 
     # Search for all of the services in a host
     def find_srvs_by_hostname(self, host_name):
-        print "*****************"
-        print "hosts: %s" % self.hosts
-        print "*****************"
         if hasattr(self, 'hosts'):
             h = self.hosts.find_by_name(host_name)
             if h is None:
@@ -1224,6 +1255,13 @@ class Services(Items):
         return sdescr in excludes
 
     def explode_services_from_hosts(self, hosts, s, hnames):
+        """
+        Explodes a service based on a lis of hosts.
+
+        :param hosts:   The hosts container
+        :param s:       The base service to explode
+        :param hnames:  The host_name list to exlode sevice on
+        """
         duplicate_for_hosts = []  # get the list of our host_names if more than 1
         not_hosts = []  # the list of !host_name so we remove them after
         for hname in hnames:
@@ -1260,10 +1298,14 @@ class Services(Items):
             new_s.host_name = hname
             self.add_item(new_s)
 
-    # Add in our queue a service create from another. Special case:
-    # is a template: so hname is a name of template, so need to get all
-    # hosts that inherit from it.
     def explode_services_from_templates(self, hosts, t):
+        """
+        Explodes services from templates. All hosts holding the specified
+        templates are bound the service.
+
+        :param hosts:   The hosts container
+        :param s:       The service to explode
+        """
         hname = getattr(t, "host_name", None)
         if hname is None:
             return
@@ -1290,10 +1332,13 @@ class Services(Items):
                 for name in hosts.find_hosts_that_use_template(hname):
                     local_create_service(name)
 
-    # Add in our queue a service create from another. Special case:
-    # is a template: so hname is a name of template, so need to get all
-    # hosts that inherit from it.
     def explode_services_duplicates(self, hosts, s):
+        """
+        Explodes services holding a `duplicate_foreach` clause.
+
+        :param hosts:   The hosts container
+        :param s:       The service to explode
+        """
         hname = getattr(s, "host_name", None)
         if hname is None:
             return
@@ -1316,6 +1361,13 @@ class Services(Items):
             self.add_item(new_s)
 
     def register_service_into_servicegroups(self, s, servicegroups):
+        """
+        Registers a service into the service groups declared in its
+        `servicegrous` attribute.
+
+        :param s:   The service to register
+        :param servicegroups:   The servicegroups container
+        """
         if hasattr(s, 'service_description'):
             sname = s.service_description
             shname = getattr(s, 'host_name', '')
@@ -1328,6 +1380,12 @@ class Services(Items):
                     servicegroups.add_member(shname + ',' + sname, sg.strip())
 
     def register_service_dependencies(self, s, servicedependencies):
+        """
+        Registers a service dependencies.
+
+        :param s:                   The service to register
+        :param servicedependencies: The servicedependencies container
+        """
         # We explode service_dependencies into Servicedependency
         # We just create serviceDep with goods values (as STRING!),
         # the link pass will be done after
@@ -1353,6 +1411,16 @@ class Services(Items):
     # We create new service if necessary (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups,
                 servicegroups, servicedependencies, triggers):
+        """
+        Explodes services, from host_name, hostgroup_name, and from templetes.
+
+        :param hosts:               The hosts container
+        :param hostgroups:          The hostgoups container
+        :param contactgroups:       The concactgoups container
+        :param servicegroups:       The servicegoups container
+        :param servicedependencies: The servicedependencies container
+        :param triggers:            The triggers container
+        """
 
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
