@@ -676,7 +676,7 @@ class Items(object):
         Add items into the `items` or `templates` container depending on the
         is_tpl method result.
 
-        :param itmes:       The items list to add.
+        :param items:       The items list to add.
         :param index_items: Flag indicating if the items should be indexed
                             on the fly.
         """

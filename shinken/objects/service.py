@@ -1363,7 +1363,7 @@ class Services(Items):
     def register_service_into_servicegroups(self, s, servicegroups):
         """
         Registers a service into the service groups declared in its
-        `servicegrous` attribute.
+        `servicegroups` attribute.
 
         :param s:   The service to register
         :param servicegroups:   The servicegroups container
