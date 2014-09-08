@@ -1251,7 +1251,8 @@ class Services(Items):
     def is_excluded_for_host(self, host, service):
         sdescr = getattr(service, "service_description", '')
         excludes = getattr(host, "service_excludes", '')
-        excludes = [e.strip() for e in excludes.split(',') if e.strip()]
+        if not isinstance(excludes, list):
+            excludes = [e.strip() for e in excludes.split(',') if e.strip()]
         return sdescr in excludes
 
     def explode_services_from_hosts(self, hosts, s, hnames):
