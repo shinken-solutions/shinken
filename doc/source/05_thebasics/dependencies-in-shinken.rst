@@ -193,7 +193,7 @@ By default, service dependencies are inherited. Let take an example where the my
 ::
 
   define service{
-    host_name              srv-bd
+    host_name              srv-db
     service_description    mysql
     service_dependencies   srv-file,nfs,srv-dns,dns
   }
