@@ -205,7 +205,7 @@ If Shinken find a problem on Http, it will raise a check on mysql. If this one g
 And with the host down/unreachable logic? 
 ------------------------------------------
 
-The dependency logic is done in parallel to the network one. If one logic say it's an impact, then it will tag the problem state as an impact. For example, if the srv-db is down a warning/critical alert on the Http service will be set as an **impact**, like the mysql one, and the root problem will be the srv-bd host that will raise only one notification, a host problem.
+The dependency logic is done in parallel to the network one. If one logic say it's an impact, then it will tag the problem state as an impact. For example, if the srv-db is down a warning/critical alert on the Http service will be set as an **impact**, like the mysql one, and the root problem will be the srv-db host that will raise only one notification, a host problem.
 
 
 Advanced dependencies 
