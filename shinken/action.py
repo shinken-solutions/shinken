@@ -38,7 +38,7 @@ except ImportError:
 
 from shinken.log import logger
 
-__all__ = ('Action')
+__all__ = ('Action', )
 
 valid_exit_status = (0, 1, 2, 3)
 

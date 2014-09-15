@@ -22,7 +22,7 @@ The python style guide provides coding conventions for Python programmers coveri
   * Classes
   * Naming conventions
 
-Keep it as a handy reference: ` PEP8 - Python Style guide`_
+Keep it as a handy reference: `PEP8 - Python Style guide`. We use a relaxed version of PEP 8 with a maximum line length of 100 instead of 79 and error 303 (too many blank lines) ignored.
 
 
 Reference book 

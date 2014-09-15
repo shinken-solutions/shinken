@@ -78,11 +78,12 @@ class BaseModule(object):
     Modules can be used by the different shinken daemons/services
     for different tasks.
     Example of task that a shinken module can do:
-     - load additional configuration objects.
-     - recurrently save hosts/services status/perfdata
+
+    - load additional configuration objects.
+    - recurrently save hosts/services status/perfdata
        informations in different format.
-     - ...
-     """
+    - ...
+    """
 
     def __init__(self, mod_conf):
         """Instanciate a new module.

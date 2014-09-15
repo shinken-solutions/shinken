@@ -1203,9 +1203,9 @@ class Items(object):
     def no_loop_in_parents(self, attr1, attr2):
         """Find loop in dependencies.
         For now, used with the following attributes :
-            (self, parents) => host dependencies from host object
-            (host_name, dependent_host_name) => host dependencies from hostdependencies object
-            (service_description, dependent_service_description) => service dependencies from servicedependencies object
+        :(self, parents):                                      host dependencies from host object
+        :(host_name, dependent_host_name):                     host dependencies from hostdependencies object
+        :(service_description, dependent_service_description): service dependencies from servicedependencies object
         """
 
         # Ok, we say "from now, no loop :) "
