@@ -137,6 +137,8 @@ class Timeperiod(Item):
 
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
                 setattr(self, key, params[key])
+            elif key.startswith('_'):
+                self.customs[key.upper()] = params[key]            
             else:
                 self.unresolved.append(key + ' ' + params[key])
 
