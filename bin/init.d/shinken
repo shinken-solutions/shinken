@@ -301,6 +301,8 @@ do_start() {
             output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
         fi
         rc=$?
+        # Arbiter doesn't write logs in its initial phase - Issue #1320
+        echo "$output" >> $LOG/${mod}d.log
     fi
     # debug:
     #resfile="/tmp/bad_start_for_$mod"
