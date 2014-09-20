@@ -1401,6 +1401,19 @@ class ExternalCommandManager:
             # Set the corresponding service's check_type to passive=1
             c.set_type_passive()
             self.sched.nb_check_received += 1
+            
+            #for monitoring logs in real time
+            #passive check result who have service name start with "log_" is considered to be a log and must be monitoring in real time
+            #so we do the job about it directly
+            item=c.ref
+            servname=item.get_name()
+            apllog=servname.find("log_")
+            if apllog != -1:
+                #for log service only
+                logger.info('I get a logs passively')
+                #we do directly the job for logs events
+                self.sched.do_jobs(c)
+            
             # Ok now this result will be reap by scheduler the next loop
 
 

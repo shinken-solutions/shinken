@@ -1651,3 +1651,402 @@ class SchedulingItem(Item):
                 t.eval(self)
             except Exception, exp:
                 logger.error("We got an exception from a trigger on %s for %s", self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc()))
+
+    # Consume result directly when it's need
+    def consume_result_passif(self, c):
+        OK_UP = self.__class__.ok_up  # OK for service, UP for host
+        # Protect against bad type output
+        # if str, go in unicode
+        if isinstance(c.output, str):
+            c.output = c.output.decode('utf8', 'ignore')
+            c.long_output = c.long_output.decode('utf8', 'ignore')
+
+        # Same for current output
+        # TODO: remove in future version, this is need only for
+        # migration from old shinken version, that got output as str
+        # and not unicode
+        # if str, go in unicode
+        if isinstance(self.output, str):
+            self.output = self.output.decode('utf8', 'ignore')
+            self.long_output = self.long_output.decode('utf8', 'ignore')
+
+        if isinstance(c.perf_data, str):
+            c.perf_data = c.perf_data.decode('utf8', 'ignore')
+
+        # We check for stalking if necessary
+        # so if check is here
+        self.manage_stalking(c)
+
+        # Latency can be <0 is we get a check from the retention file
+        # so if <0, set 0
+        try:
+            self.latency = max(0, c.check_time - c.t_to_go)
+        except TypeError:
+            pass
+
+        # Ok, the first check is done
+        self.has_been_checked = 1
+
+        # Now get data from check
+        self.execution_time = c.execution_time
+        self.last_chk = int(c.check_time)
+
+        # Get output and forgot bad UTF8 values for simple str ones
+        # (we can get already unicode with external commands)
+        self.output = c.output
+        self.long_output = c.long_output
+
+        # Set the check result type also in the host/service
+        # 0 = result came from an active check
+        # 1 = result came from a passive check
+        self.check_type = c.check_type
+
+        # Get the perf_data only if we want it in the configuration
+        if self.__class__.process_performance_data and self.process_perf_data:
+            self.last_perf_data = self.perf_data
+            self.perf_data = c.perf_data
+
+        # Before setting state, modulate them
+        for rm in self.resultmodulations:
+            if rm is not None:
+                c.exit_status = rm.module_return(c.exit_status)
+
+        # If we got a bad result on a normal check, and we have dep,
+        # we raise dep checks
+        # put the actual check in waitdep and we return all new checks
+        if c.exit_status != 0 and c.status == 'waitconsume' and len(self.act_depend_of) != 0:
+            c.status = 'waitdep'
+            # Make sure the check know about his dep
+            # C is my check, and he wants dependencies
+            checks_id = self.raise_dependencies_check(c)
+            for check_id in checks_id:
+                # Get checks_id of dep
+                c.depend_on.append(check_id)
+            # Ok, no more need because checks are not
+            # take by host/service, and not returned
+
+        # remember how we was before this check
+        self.last_state_type = self.state_type
+
+        self.set_state_from_exit_status(c.exit_status)
+
+        # we change the state, do whatever we are or not in
+        # an impact mode, we can put it
+        self.state_changed_since_impact = True
+
+        # The check is consumed, update the in_checking properties
+        self.remove_in_progress_check(c)
+
+        # C is a check and someone wait for it
+        if c.status == 'waitconsume' and c.depend_on_me != []:
+            c.status = 'havetoresolvedep'
+
+        # if finish, check need to be set to a zombie state to be removed
+        # it can be change if necessary before return, like for dependencies
+        if c.status == 'waitconsume' and c.depend_on_me == []:
+            c.status = 'zombie'
+
+        # Use to know if notif is raise or not
+        no_action = False
+
+        # C was waitdep, but now all dep are resolved, so check for deps
+        if c.status == 'waitdep':
+            if c.depend_on_me != []:
+                c.status = 'havetoresolvedep'
+            else:
+                c.status = 'zombie'
+            # Check deps
+            no_action = self.is_no_action_dependent()
+            # We recheck just for network_dep. Maybe we are just unreachable
+            # and we need to override the state_id
+            self.check_and_set_unreachability()
+ 
+
+        # OK following a previous OK. perfect if we were not in SOFT
+        if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
+            #print "Case 1 (OK following a previous OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
+            self.unacknowledge_problem()
+            # action in return can be notification or other checks (dependencies)
+            if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
+                if self.is_max_attempts() and self.state_type == 'SOFT':
+                    self.state_type = 'HARD'
+                else:
+                    self.state_type = 'SOFT'
+            else:
+                self.attempt = 1
+                self.state_type = 'HARD'
+
+        # OK following a NON-OK.
+        elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
+            self.unacknowledge_problem()
+            #print "Case 2 (OK following a NON-OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
+            if self.state_type == 'SOFT':
+                # OK following a NON-OK still in SOFT state
+                self.add_attempt()
+                self.raise_alert_log_entry()
+                # Eventhandler gets OK;SOFT;++attempt, no notification needed
+                self.get_event_handlers()
+                # Internally it is a hard OK
+                self.state_type = 'HARD'
+                self.attempt = 1
+            elif self.state_type == 'HARD':
+                # OK following a HARD NON-OK
+                self.raise_alert_log_entry()
+                # Eventhandler and notifications get OK;HARD;maxattempts
+                # Ok, so current notifications are not needed, we 'zombie' them
+                if not no_action:
+                    #to enable notification with recovery state active it and del pass
+                    pass 
+                self.get_event_handlers()
+                # Internally it is a hard OK
+                self.state_type = 'HARD'
+                self.attempt = 1
+
+                # I'm no more a problem if I was one
+                self.no_more_a_problem()
+
+        # Volatile part
+        # Only for service
+        elif c.exit_status != 0 and getattr(self, 'is_volatile', False):
+            #print "Case 3 (volatile only)"
+            # There are no repeated attempts, so the first non-ok results
+            # in a hard state
+            self.attempt = 1
+            self.state_type = 'HARD'
+            # status != 0 so add a log entry (before actions that can also raise log
+            # it is smarter to log error before notification)
+            self.raise_alert_log_entry()
+            self.check_for_flexible_downtime()
+
+            if not no_action:
+                self.create_notifications_passif('PROBLEM')
+            # Ok, event handlers here too
+                self.get_event_handlers()
+
+            # PROBLEM/IMPACT
+            # I'm a problem only if I'm the root problem,
+            # so not no_action:
+            if not no_action:
+                self.set_myself_as_problem()
+
+        # NON-OK follows OK. Everything was fine, but now trouble is ahead
+        elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
+            if self.is_max_attempts():
+                # if max_attempts == 1 we're already in deep trouble
+                self.state_type = 'HARD'
+                self.raise_alert_log_entry()
+                self.check_for_flexible_downtime()
+                if not no_action:
+                    self.create_notifications_passif('PROBLEM')
+                # Oh? This is the typical go for a event handler :)
+                self.get_event_handlers()
+
+                # PROBLEM/IMPACT
+                # I'm a problem only if I'm the root problem,
+                # so not no_action:
+                if not no_action:
+                    self.set_myself_as_problem()
+
+            else:
+                # This is the first NON-OK result. Initiate the SOFT-sequence
+                # Also launch the event handler, he might fix it.
+                self.attempt = 1
+                self.state_type = 'SOFT'
+                self.raise_alert_log_entry()
+                self.get_event_handlers()
+
+        # If no OK in a no OK: if hard, still hard, if soft,
+        # check at self.max_check_attempts
+        # when we go in hard, we send notification
+        elif c.exit_status != 0 and self.last_state != OK_UP:
+            if self.state_type == 'SOFT':
+                self.add_attempt()
+                if self.is_max_attempts():
+                    # Ok here is when we just go to the hard state
+                    self.state_type = 'HARD'
+                    self.raise_alert_log_entry()
+                    # There is a request in the Nagios trac to enter downtimes
+                    # on soft states which does make sense. If this becomes
+                    # the default behavior, just move the following line
+                    # into the else-branch below.
+                    self.check_for_flexible_downtime()
+                    if not no_action:
+                        self.create_notifications_passif('PROBLEM')
+                    # So event handlers here too
+                    self.get_event_handlers()
+
+                    # PROBLEM/IMPACT
+                    # I'm a problem only if I'm the root problem,
+                    # so not no_action:
+                    if not no_action:
+                        self.set_myself_as_problem()
+                else:
+                    self.raise_alert_log_entry()
+                    # eventhandler is launched each time during the soft state
+                    self.get_event_handlers()
+            else:
+                # Send notifications whenever the state has changed. (W -> C)
+                # but not if the current state is UNKNOWN (hard C-> hard U -> hard C should
+                # not restart notifications)
+                if self.state != self.last_state:
+                    self.update_hard_unknown_phase_state()
+                    #print self.last_state, self.last_state_type, self.state_type, self.state
+                    if not self.in_hard_unknown_reach_phase and not self.was_in_hard_unknown_reach_phase:
+                        self.unacknowledge_problem_if_not_sticky()
+                        self.raise_alert_log_entry()
+                        #self.remove_in_progress_notifications()
+                        if not no_action:
+                            self.create_notifications_passif('PROBLEM')
+
+                        # PROBLEM/IMPACT
+                        # Maybe our new state can raise the problem
+                        # when the last one was not
+                        # I'm a problem only if I'm the root problem,
+                        # so not no_action:
+                        if not no_action:
+                            self.set_myself_as_problem()
+
+                elif self.in_scheduled_downtime_during_last_check == True:
+                    # during the last check i was in a downtime. but now
+                    # the status is still critical and notifications
+                    # are possible again. send an alert immediately
+                    if not no_action:
+                        self.create_notifications_passif('PROBLEM')
+
+        self.update_hard_unknown_phase_state()
+        # Reset this flag. If it was true, actions were already taken
+        self.in_scheduled_downtime_during_last_check = False
+
+        # now is the time to update state_type_id
+        # and our last_hard_state
+        if self.state_type == 'HARD':
+            self.state_type_id = 1
+            self.last_hard_state = self.state
+            self.last_hard_state_id = self.state_id
+        else:
+            self.state_type_id = 0
+
+        # Fill last_hard_state_change to now
+        # if we just change from SOFT->HARD or
+        # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
+        if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
+            self.last_hard_state_change = int(time.time())
+
+        # update event/problem-counters
+        self.update_event_and_problem_id()
+
+        # do not raise a new one
+        if not c.from_trigger:
+            self.eval_triggers()
+
+        self.broks.append(self.get_check_result_brok())
+        self.get_obsessive_compulsive_processor_command()
+        self.get_perfdata_command()
+      
+        
+    
+    
+    
+    def create_notifications_passif(self, type, t_wished=None):
+        cls = self.__class__
+        # here we must look at the self.notification_period
+        if t_wished is None:
+            now = time.time()
+            t_wished = now
+            # if first notification, we must add first_notification_delay
+            if self.current_notification_number == 0 and type == 'PROBLEM':
+                last_time_non_ok_or_up = self.last_time_non_ok_or_up()
+                if last_time_non_ok_or_up == 0:
+                    # this happens at initial
+                    t_wished = now + self.first_notification_delay * cls.interval_length
+                else:
+                    t_wished = last_time_non_ok_or_up + self.first_notification_delay * cls.interval_length
+            if self.notification_period is None:
+                t = int(now)
+            else:
+                t = self.notification_period.get_next_valid_time_from_t(t_wished)
+        else:
+            # We follow our order
+            t = t_wished
+            
+        t = time.time()
+
+        if self.notification_is_blocked_by_item(type, t_wished):
+            # If notifications are blocked on the host/service level somehow
+            # and repeated notifications are not configured,
+            # we can silently drop this one
+            return
+
+        if type == 'PROBLEM':
+            # Create the notification with an incremented notification_number.
+            # The current_notification_number  of the item itself will only
+            # be incremented when this notification (or its children)
+            # have actually be sent.
+            next_notif_nb = self.current_notification_number + 1
+        elif type == 'RECOVERY':
+            # Recovery resets the notification counter to zero
+            self.current_notification_number = 0
+            next_notif_nb = self.current_notification_number
+        else:
+            # downtime/flap/etc do not change the notification number
+            next_notif_nb = self.current_notification_number
+
+        n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
+            timeout=cls.notification_timeout, \
+            notif_nb=next_notif_nb)
+        
+        # Keep a trace in our notifications queue
+        self.notifications_in_progress[n.id] = n
+        # and put it in the temp queue for scheduler
+        #we must scater notification immediatly
+        item=n.ref
+        childnot=item.scatter_notification_passif(n)
+        for child in childnot:
+            self.actions.append(child)
+        
+        
+        
+    def scatter_notification_passif(self, n):
+        cls = self.__class__
+        childnotifications = []
+        if n.contact:
+            # only master notifications can be split up
+            return []
+        if n.type == 'RECOVERY':
+            if self.first_notification_delay != 0 and len(self.notified_contacts) == 0:
+                # Recovered during first_notification_delay. No notifications
+                # have been sent yet, so we keep quiet
+                contacts = []
+            else:
+                # The old way. Only send recover notifications to those contacts
+                # who also got problem notifications
+                contacts = list(self.notified_contacts)
+            self.notified_contacts.clear()
+        else:
+            # Check is an escalation match. If yes, get all contacts from escalations
+            if self.is_escalable(n):
+                contacts = self.get_escalable_contacts(n)
+            # else take normal contacts
+            else:
+                contacts = self.contacts
+        for contact in contacts:
+            # Get the property name for notif commands, like
+            # service_notification_commands for service
+            notif_commands = contact.get_notification_commands(cls.my_type)
+
+            for cmd in notif_commands:
+                rt = cmd.reactionner_tag
+                child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
+                    contact, n.t_to_go, timeout=cls.notification_timeout,
+                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type)
+                    # Update the notification with fresh status information
+                    # of the item. Example: during the notification_delay
+                    # the status of a service may have changed from WARNING to CRITICAL
+                self.update_notification_command(child_n)
+                childnotifications.append(child_n)
+
+                if n.type == 'PROBLEM':
+                    # Remember the contacts. We might need them later in the
+                    # recovery code some lines above
+                    self.notified_contacts.add(contact)
+        return childnotifications
