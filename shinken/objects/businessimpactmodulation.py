@@ -42,7 +42,7 @@ class Businessimpactmodulation(Item):
     properties.update({
             'business_impact_modulation_name': StringProp(),
             'business_impact':                IntegerProp(),
-            'modulation_period':        StringProp(default=None),
+            'modulation_period':        StringProp(default=''),
     })
 
     # For debugging purpose only (nice name)
