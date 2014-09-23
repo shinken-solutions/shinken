@@ -1636,3 +1636,67 @@ class Scheduler:
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us
         self.update_retention_file(True)
+
+
+    #call everitime where a passive result for a log service is detected to do the job
+    #it consume result for every passiv result considered as log
+    def consume_results_passif(self,  c):
+            if c.status == 'waitconsume':
+                item = c.ref
+                item.consume_result_passif(c)
+                #after consume we can zombie it because job about it is finish
+                c.status = 'zombie'
+
+
+    def do_jobs(self,  acti):
+        #we do directly job about passive_result_check considered as log
+        #it means that we consume the result directly with the function consume function for log 
+        logger.info("I do the job about one log")
+        self.consume_results_passif(acti)
+        
+        
+        #self.get_new_broks()
+        self.delete_zombie_checks()
+        self.delete_zombie_actions()
+        self.clean_caches()
+        
+        self.manage_internal_checks()
+        self.reset_topology_change_flag()
+        self.check_for_expire_acknowledge()
+        self.send_broks_to_modules()
+        self.get_objects_from_from_queues()
+        
+        
+        # DBG: push actions to passives?
+        self.push_actions_to_passives_satellites()
+        
+        nb_scheduled = len([c for c in self.checks.values() if c.status == 'scheduled'])
+        nb_inpoller = len([c for c in self.checks.values() if c.status == 'inpoller'])
+        nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
+        nb_notifications = len(self.actions)
+
+        # Get a overview of the latencies with just
+        # a 95 percentile view, but lso min/max values
+        latencies = [s.latency for s in self.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        if lat_avg is not None:
+            logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
+
+        # print "Notifications:", nb_notifications
+        now = time.time()
+        if self.nb_checks_send != 0:
+            logger.debug("Nb checks/notifications/event send: %s" % self.nb_checks_send)
+        self.nb_checks_send = 0
+        if self.nb_broks_send != 0:
+            logger.debug("Nb Broks send: %s" % self.nb_broks_send)
+        self.nb_broks_send = 0
+
+       
+        if self.need_dump_memory:
+            self.sched_daemon.dump_memory()
+            self.need_dump_memory = False
+
+        if self.need_objects_dump:
+            logger.debug('I need to dump my objects!')
+            self.dump_objects()
+            self.need_objects_dump = False
