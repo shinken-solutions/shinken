@@ -294,11 +294,12 @@ do_start() {
         output=$($PYTHON "$modfilepath" -d -c "${modinifile}" $DEBUGCMD 2>&1)
         rc=$?
     else
+        arbiterlogfile=$(cat $SHINKENCFG | grep local_log | cut -d'=' -f2)
         if ! test "$SHINKENSPECIFICCFG"
         then
-            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1) >> $arbiterlogfile
         else
-            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1) >> $arbiterlogfile
         fi
         rc=$?
     fi
