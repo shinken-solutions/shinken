@@ -61,7 +61,7 @@ class Hostgroup(Itemgroup):
 
     def get_hostgroup_members(self):
         if self.has('hostgroup_members'):
-            return self.hostgroup_members.split(',')
+            return [m.strip() for m in self.hostgroup_members.split(',')]
         else:
             return []
 

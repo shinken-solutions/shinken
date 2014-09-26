@@ -211,7 +211,7 @@ class Dispatcher:
                             # is needed
                             # Or maybe it is alive but I thought that this reactionner managed the conf
                             # and it doesn't. I ask a full redispatch of these cfg for both cases
-                            
+
                             if push_flavor == 0 and satellite.alive:
                                 logger.warning('[%s] The %s %s manage a unmanaged configuration', r.get_name(), kind, satellite.get_name())
                                 continue
@@ -397,18 +397,18 @@ class Dispatcher:
                         if not is_sent:
                             logger.warning('[%s] configuration dispatching error for scheduler %s', r.get_name(), sched.get_name())
                             continue
-                        
+
                         logger.info('[%s] Dispatch OK of conf in scheduler %s', r.get_name(), sched.get_name())
-                        
+
                         sched.conf = conf
                         sched.push_flavor = conf.push_flavor
                         sched.need_conf = False
                         conf.is_assigned = True
                         conf.assigned_to = sched
-                        
+
                         # We update all data for this scheduler
                         sched.managed_confs = {conf.id: conf.push_flavor}
-                        
+
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
                         for kind in ('reactionner', 'poller', 'broker', 'receiver'):
@@ -490,7 +490,7 @@ class Dispatcher:
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
                             logger.info(satellite_string)
-                            
+
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
@@ -499,7 +499,7 @@ class Dispatcher:
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
-                                    
+
                                     # Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
@@ -518,7 +518,7 @@ class Dispatcher:
                                         logger.info('[%s] Dispatch OK of configuration %s to %s %s', r.get_name(), cfg_id, kind, satellite.get_name())
                                         # We change the satellite configuration, update our data
                                         satellite.known_conf_managed_push(cfg_id, flavor)
-                                        
+
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
 
@@ -526,7 +526,7 @@ class Dispatcher:
                                         # broker in a classic realm.
                                         if kind == "broker" and not r.broker_complete_links:
                                             break
-                                        
+
                                         #If receiver, we must send the hostnames of this configuration
                                         if kind == 'receiver':
                                             hnames = [h.get_name() for h in cfg.hosts]

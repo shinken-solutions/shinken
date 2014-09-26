@@ -261,7 +261,7 @@ class Contacts(Items):
 
         # Register ourself into the contactsgroups we are in
         for c in self:
-            if c.is_tpl() or not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
+            if not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
                 continue
             for cg in c.contactgroups.split(','):
                 contactgroups.add_member(c.contact_name, cg.strip())
@@ -269,25 +269,23 @@ class Contacts(Items):
         # Now create a notification way with the simple parameter of the
         # contacts
         for c in self:
-            if not c.is_tpl():
-                need_notificationway = False
-                params = {}
-                for p in _simple_way_parameters:
-                    if hasattr(c, p):
-                        need_notificationway = True
-                        params[p] = getattr(c, p)
-                    else:  # put a default text value
-                        # Remove the value and put a default value
-                        setattr(c, p, '')
+            need_notificationway = False
+            params = {}
+            for p in _simple_way_parameters:
+                if hasattr(c, p):
+                    need_notificationway = True
+                    params[p] = getattr(c, p)
+                else:  # put a default text value
+                    # Remove the value and put a default value
+                    setattr(c, p, '')
 
+            if need_notificationway:
+                #print "Create notif way with", params
+                cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
+                nw_name = cname + '_inner_notificationway'
+                notificationways.new_inner_member(nw_name, params)
 
-                if need_notificationway:
-                    #print "Create notif way with", params
-                    cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
-                    nw_name = cname + '_inner_notificationway'
-                    notificationways.new_inner_member(nw_name, params)
-
-                    if not hasattr(c, 'notificationways'):
-                        c.notificationways = nw_name
-                    else:
-                        c.notificationways = c.notificationways + ',' + nw_name
+                if not hasattr(c, 'notificationways'):
+                    c.notificationways = nw_name
+                else:
+                    c.notificationways = c.notificationways + ',' + nw_name

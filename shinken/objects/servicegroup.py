@@ -62,7 +62,7 @@ class Servicegroup(Itemgroup):
 
     def get_servicegroup_members(self):
         if self.has('servicegroup_members'):
-            return self.servicegroup_members.split(',')
+            return [m.strip() for m in self.servicegroup_members.split(',')]
         else:
             return []
 
