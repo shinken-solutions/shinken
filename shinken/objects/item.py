@@ -686,7 +686,7 @@ class Items(object):
             else:
                 self.add_item(i, index_items)
 
-    def mamage_conflict(self, item, name):
+    def manage_conflict(self, item, name):
         """
         Cheks if an object holding the same name already exists in the index.
 
@@ -756,7 +756,7 @@ class Items(object):
                    (objcls, tpl.imported_from, self.get_source(tpl))
             tpl.configuration_errors.append(mesg)
         elif name in self.name_to_template:
-            tpl = self.mamage_conflict(tpl, name)
+            tpl = self.manage_conflict(tpl, name)
         self.name_to_template[name] = tpl
         return tpl
 
@@ -819,7 +819,7 @@ class Items(object):
                    (objcls, name_property, self.get_source(item))
             item.configuration_errors.append(mesg)
         elif name in self.name_to_item:
-            item = self.mamage_conflict(item, name)
+            item = self.manage_conflict(item, name)
         self.name_to_item[name] = item
         return item
 
