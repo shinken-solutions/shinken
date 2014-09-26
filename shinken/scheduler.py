@@ -242,14 +242,14 @@ class Scheduler:
     def dump_config(self):
         d = tempfile.gettempdir()
         p = os.path.join(d, 'scheduler-conf-dump-%d' % time.time())
-        logger.info('Opening the DUMP FILE %s' % (p))
+        logger.info('Opening the DUMP FILE %s', p)
         try:
             f = open(p, 'w')
             f.write('Scheduler config DUMP at %d\n' % time.time())
             self.conf.dump(f)
             f.close()
         except Exception, exp:
-            logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
+            logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
     # Load the external command
     def load_external_command(self, e):
@@ -655,7 +655,7 @@ class Scheduler:
 
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
-                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds", 
+                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds",
                                    self.actions[c.id].contact.contact_name,
                                     self.actions[c.id].ref.__class__.my_type,
                                     self.actions[c.id].command,
@@ -687,7 +687,7 @@ class Scheduler:
             # It just die
             try:
                 if c.status == 'timeout':
-                    logger.warning("%s event handler command '%s ' timed out after %d seconds", 
+                    logger.warning("%s event handler command '%s ' timed out after %d seconds",
                                    self.actions[c.id].ref.__class__.my_type.capitalize(),
                                     self.actions[c.id].command,
                                     int(c.execution_time))
@@ -976,13 +976,13 @@ class Scheduler:
                     if f:
                         v = f(s, v)
                     d[prop] = v
-                    
+
              # We consider the service ONLY if it has modified attributes.
              # If not, then no non-running attributes will be saved for this service.
-            if s.modified_attributes>0:       
+            if s.modified_attributes>0:
                 # Same for properties, like active checks enabled or not
                 properties = s.__class__.properties
-                
+
                 for prop, entry in properties.items():
                     # We save the value only if the attribute is selected for retention AND has been modified.
                     if entry.retention and DICT_MODATTR['prop'].value & s.modified_attributes:
@@ -1459,10 +1459,10 @@ class Scheduler:
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
-        
+
         res = self.sched_daemon.get_stats_struct()
         res.update( {'name':self.instance_name, 'type':'scheduler'} )
-        
+
         # Get a overview of the latencies with just
         # a 95 percentile view, but lso min/max values
         latencies = [s.latency for s in self.services]
@@ -1470,7 +1470,7 @@ class Scheduler:
         res['latency'] = (0.0,0.0,0.0)
         if lat_avg:
             res['latency'] = {'avg':lat_avg, 'min':lat_min, 'max':lat_max}
-        
+
         res['hosts'] = len(self.hosts)
         res['services'] = len(self.services)
         # metrics specific
@@ -1518,8 +1518,8 @@ class Scheduler:
         # takethe first 10 ones for the put
         res['commands'] = p[:10]
         return res
-    
-    
+
+
     # Main function
     def run(self):
         # Then we see if we've got info in the retention file

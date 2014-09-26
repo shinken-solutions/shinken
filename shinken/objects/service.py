@@ -471,10 +471,10 @@ class Service(SchedulingItem):
             logger.info("%s: I've got no notification_interval but I've got notifications enabled", self.get_name())
             state = False
         if not self.host_name:
-            logger.error("The service '%s' is not bound do any host." % desc)
+            logger.error("The service '%s' is not bound do any host.", desc)
             state = False
         elif self.host is None:
-            logger.error("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
+            logger.error("The service '%s' got an unknown host_name '%s'.", desc, self.host_name)
             state = False
 
         if not hasattr(self, 'check_period'):
