@@ -51,8 +51,8 @@ class Command(Item):
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-        'timeout':      IntegerProp(default='-1'),
-        'enable_environment_macros': BoolProp(default=0),
+        'timeout':      IntegerProp(default=-1),
+        'enable_environment_macros': BoolProp(default=False),
     })
 
     def __init__(self, params={}):
@@ -95,10 +95,6 @@ class Command(Item):
 
     def get_name(self):
         return self.command_name
-
-    def pythonize(self):
-        self.command_name = self.command_name.strip()
-        self.timeout = int(self.timeout)
 
     def __str__(self):
         return str(self.__dict__)

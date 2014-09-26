@@ -51,11 +51,11 @@ class Servicedependency(Item):
         'host_name':                     StringProp(),
         'hostgroup_name':                StringProp(default=''),
         'service_description':           StringProp(),
-        'inherits_parent':               BoolProp(default='0'),
-        'execution_failure_criteria':    ListProp(default='n'),
-        'notification_failure_criteria': ListProp(default='n'),
+        'inherits_parent':               BoolProp(default=False),
+        'execution_failure_criteria':    ListProp(default=['n'], split_on_coma=True),
+        'notification_failure_criteria': ListProp(default=['n'], split_on_coma=True),
         'dependency_period':             StringProp(default=''),
-        'explode_hostgroup':             BoolProp(default='0')
+        'explode_hostgroup':             BoolProp(default=False)
     })
 
     # Give a nice name output, for debugging purpose
@@ -104,7 +104,7 @@ class Servicedependencies(Items):
                 self.configuration_errors.append(err)
                 continue
             hnames = []
-            hnames.extend([m.strip() for m in hg.members.split(',')])
+            hnames.extend([m.strip() for m in hg.members])
             for hname in hnames:
                 for dep_sname in dep_snames:
                     for sname in snames:
@@ -144,7 +144,7 @@ class Servicedependencies(Items):
                         err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
-                    hnames.extend([m.strip() for m in hg.members.split(',')])
+                    hnames.extend([m.strip() for m in hg.members])
 
             if not hasattr(sd, 'host_name'):
                 sd.host_name = ''
@@ -171,7 +171,7 @@ class Servicedependencies(Items):
                         err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
-                    dep_hnames.extend([m.strip() for m in hg.members.split(',')])
+                    dep_hnames.extend([m.strip() for m in hg.members])
 
             if not hasattr(sd, 'dependent_host_name'):
                 sd.dependent_host_name = getattr(sd, 'host_name', '')

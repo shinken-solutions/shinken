@@ -38,11 +38,11 @@ class ReceiverLink(SatelliteLink):
     properties = SatelliteLink.properties.copy()
     properties.update({
         'receiver_name':      StringProp(fill_brok=['full_status'], to_send=True),
-        'port':               IntegerProp(default='7772', fill_brok=['full_status']),
-        'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
-        'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
-        'direct_routing':     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
-        'accept_passive_unknown_check_results': BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'port':               IntegerProp(default=7772, fill_brok=['full_status']),
+        'manage_sub_realms':  BoolProp(default=True, fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp(default=False, fill_brok=['full_status'], to_send=True),
+        'direct_routing':     BoolProp(default=False, fill_brok=['full_status'], to_send=True),
+        'accept_passive_unknown_check_results': BoolProp(default=False, fill_brok=['full_status'], to_send=True),
     })
 
 

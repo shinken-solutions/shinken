@@ -26,7 +26,7 @@
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.util import get_obj_name
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
 
@@ -36,7 +36,7 @@ class Hostgroup(Itemgroup):
 
     properties = Itemgroup.properties.copy()
     properties.update({
-        'id':             StringProp(default=0, fill_brok=['full_status']),
+        'id':             IntegerProp(default=0, fill_brok=['full_status']),
         'hostgroup_name': StringProp(fill_brok=['full_status']),
         'alias':          StringProp(fill_brok=['full_status']),
         'notes':          StringProp(default='', fill_brok=['full_status']),
@@ -57,7 +57,10 @@ class Hostgroup(Itemgroup):
         return self.hostgroup_name
 
     def get_hosts(self):
-        return getattr(self, 'members', '')
+        if getattr(self, 'members', None) is not None:
+            return self.members
+        else:
+            return []
 
     def get_hostgroup_members(self):
         if self.has('hostgroup_members'):
@@ -118,12 +121,11 @@ class Hostgroups(Itemgroups):
             mbrs = hg.get_hosts()
             # The new member list, in id
             new_mbrs = []
-
             for mbr in mbrs:
                 if mbr == '*':
                     new_mbrs.extend(hosts)
                 else:
-                    h = hosts.find_by_name(mbr)
+                    h = hosts.find_by_name(mbr.strip())
                     if h is not None:
                         new_mbrs.append(h)
                     else:

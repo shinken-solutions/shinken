@@ -210,7 +210,7 @@ class Shinken(BaseSatellite):
     properties = BaseSatellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='schedulerd.pid'),
-        'port':      IntegerProp(default='7768'),
+        'port':      IntegerProp(default=7768),
         'local_log': PathProp(default='schedulerd.log'),
     })
 

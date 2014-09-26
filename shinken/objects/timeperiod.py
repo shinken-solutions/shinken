@@ -107,13 +107,13 @@ class Timeperiod(Item):
     properties.update({
         'timeperiod_name':  StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='', fill_brok=['full_status']),
-        'use':              StringProp(default=''),
-        'register':         IntegerProp(default='1'),
+        'use':              StringProp(default=None),
+        'register':         IntegerProp(default=1),
 
         # These are needed if a broker module calls methods on timeperiod objects
         'dateranges':       ListProp(fill_brok=['full_status'], default=[]),
         'exclude':          ListProp(fill_brok=['full_status'], default=[]),
-        'is_active':        BoolProp(default='0')
+        'is_active':        BoolProp(default=False)
     })
     running_properties = Item.running_properties.copy()
 
@@ -136,7 +136,7 @@ class Timeperiod(Item):
                     params[key] = ''
 
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
-                setattr(self, key, params[key])
+                setattr(self, key, self.properties[key].pythonize(params[key]))
             elif key.startswith('_'):
                 self.customs[key.upper()] = params[key]            
             else:
@@ -647,9 +647,9 @@ class Timeperiod(Item):
     # Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
         new_exclude = []
-        if self.has('exclude') and self.exclude != '':
+        if self.has('exclude') and self.exclude != []:
             logger.debug("[timeentry::%s] have excluded %s", self.get_name(), self.exclude)
-            excluded_tps = self.exclude.split(',')
+            excluded_tps = self.exclude
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
                 tp = timeperiods.find_by_name(tp_name.strip())

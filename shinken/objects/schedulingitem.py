@@ -867,7 +867,6 @@ class SchedulingItem(Item):
             # We recheck just for network_dep. Maybe we are just unreachable
             # and we need to override the state_id
             self.check_and_set_unreachability()
-
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
             #print "Case 1 (OK following a previous OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
@@ -1229,7 +1228,6 @@ class SchedulingItem(Item):
             # and repeated notifications are not configured,
             # we can silently drop this one
             return
-
         if type == 'PROBLEM':
             # Create the notification with an incremented notification_number.
             # The current_notification_number  of the item itself will only
@@ -1458,6 +1456,7 @@ class SchedulingItem(Item):
     # Create the whole business rule tree
     # if we need it
     def create_business_rules(self, hosts, services, running=False):
+
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout

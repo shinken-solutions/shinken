@@ -57,7 +57,7 @@ class HostExtInfo(Item):
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties = Item.properties.copy()
     properties.update({
-        'host_name':            ListProp(brok_transformation=to_hostnames_list),
+        'host_name':            StringProp(),
         'notes':                StringProp(default=''),
         'notes_url':            StringProp(default=''),
         'icon_image':           StringProp(default=''),
@@ -130,12 +130,11 @@ class HostsExtInfo(Items):
     # Merge extended host information into host
     def merge(self, hosts):
         for ei in self:
-            hosts_names = ei.get_name().split(",")
-            for host_name in hosts_names:
-                h = hosts.find_by_name(host_name)
-                if h is not None:
-                    # FUUUUUUUUUUsion
-                    self.merge_extinfo(h, ei)
+            host_name = ei.get_name()
+            h = hosts.find_by_name(host_name)
+            if h is not None:
+                # FUUUUUUUUUUsion
+                self.merge_extinfo(h, ei)
 
     def merge_extinfo(self, host, extinfo):
         properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt', 'vrml_image', 'statusmap_image']
