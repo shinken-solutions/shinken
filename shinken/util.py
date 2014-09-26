@@ -157,7 +157,8 @@ def jsonify_r(obj):
                     if t and hasattr(_t, t+'_name'):
                         lst.append(getattr(_t, t+'_name'))
                     else:
-                        print "CANNOT MANAGE OBJECT", _t, type(_t), t
+                        pass
+                        #print "CANNOT MANAGE OBJECT", _t, type(_t), t
                 res[prop] = lst
             else:
                 t = getattr(v.__class__, 'my_type', '')
@@ -250,6 +251,14 @@ def to_split(val, split_on_coma=True):
     if val == ['']:
         val = []
     return val
+
+
+def list_split(val, split_on_coma=True):
+    if not split_on_coma:
+        return val
+    new_val = []
+    _ = map(lambda x: new_val.extend(x.split(',')), val)
+    return new_val
 
 
 def to_best_int_float(val):

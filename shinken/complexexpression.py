@@ -276,7 +276,7 @@ class ComplexExpressionFactory(object):
                 error = "Error : cannot find the %s of the expression '%s'" % (self.ctx, pattern)
                 return hg, error
             # Ok the group is found, get the elements!
-            elts = hg.get_hosts().split(',')
+            elts = hg.get_hosts()
             elts = strip_and_uniq(elts)
 
             # Maybe the hostgroup memebrs is '*', if so expand with all hosts

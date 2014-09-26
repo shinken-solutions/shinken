@@ -45,7 +45,7 @@ class Trigger(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({'code_bin': StringProp(default=None),
-                               'trigger_broker_raise_enabled': BoolProp(default='0')
+                               'trigger_broker_raise_enabled': BoolProp(default=False)
                                })
 
     # For debugging purpose only (nice name)
