@@ -167,7 +167,16 @@ class TestListProp(PropertyTests, ShinkenTest):
         p = self.prop_class()
         self.assertEqual(p.pythonize(""), [])
         self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
+        # Default is to split on coma for list also.
+        self.assertEquals(p.pythonize(["1,2,3", "4,5,6"]), ["1","2","3", "4","5","6"])
+
+    def test_pythonize_nosplit(self):
+        p = self.prop_class(split_on_coma=False)
+        self.assertEqual(p.pythonize(""), [""])
+        self.assertEqual(p.pythonize("1,2,3"), ["1,2,3"])
+        # Default is to split on coma for list also.
         self.assertEquals(p.pythonize(["1,2,3", "4,5,6"]), ["1,2,3", "4,5,6"])
+
 
 
 class TestLogLevelProp(PropertyTests, ShinkenTest):

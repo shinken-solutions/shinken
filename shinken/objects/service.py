@@ -165,11 +165,11 @@ class Service(SchedulingItem):
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
 
         # Snapshot part
-        'snapshot_enabled':        BoolProp(default='0'),
+        'snapshot_enabled':        BoolProp(default=False),
         'snapshot_command':        StringProp(default=''),
         'snapshot_period':         StringProp(default=''),
-        'snapshot_criteria':       ListProp(default='w,c,u', fill_brok=['full_status'], merging='join'),
-        'snapshot_interval':       IntegerProp(default='300'),
+        'snapshot_criteria':       ListProp(default=['w','c','u'], fill_brok=['full_status'], merging='join'),
+        'snapshot_interval':       IntegerProp(default=300),
 
     })
 

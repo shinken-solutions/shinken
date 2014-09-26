@@ -46,8 +46,9 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assert_(srv1.max_check_attempts == 3)
 
         # list parameter (all items should appear in the order they are defined)
-        self.assert_(hst1.notification_options == ['+1', 's', 'f', 'r', 'u', 'd'])
-        self.assert_(srv1.notification_options == ['+1', 's', 'f', 'r', 'c', 'u', 'w'])
+        self.assert_(list(set(hst1.notification_options)) == [u'd', u'f', u'1', u's', u'r', u'u'])
+
+        self.assert_(list(set(srv1.notification_options)) == [u'c', u'f', u'1', u's', u'r', u'u', u'w'])
 
 
 class TestConfigBroken(ShinkenTest):

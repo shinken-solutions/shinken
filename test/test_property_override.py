@@ -65,7 +65,7 @@ class TestPropertyOverride(ShinkenTest):
 
         # Check non overriden properies value
         for svc in (svc1, svc1proc1, svc1proc2, svc2proc1, svc12):
-            self.assert_(svc.contact_groups == "test_contact")
+            self.assert_(svc.contact_groups == ["test_contact"])
             self.assert_(svc.maintenance_period is tp24x7)
             self.assert_(svc.retry_interval == 1)
             self.assert_(svc.check_command.command is cmdsvc)
@@ -74,7 +74,7 @@ class TestPropertyOverride(ShinkenTest):
 
         # Check overriden properies value
         for svc in (svc2, svc2proc2, svc22):
-            self.assert_(svc.contact_groups == "admins")
+            self.assert_(svc.contact_groups == ["admins"])
             self.assert_(svc.maintenance_period is tptest)
             self.assert_(svc.retry_interval == 3)
             self.assert_(svc.check_command.command is cmdtest)
