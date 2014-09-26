@@ -725,7 +725,9 @@ class Items(object):
         else:
             # Don't know which one to keep, lastly defined has precedence
             objcls = getattr(self.inner_class, "my_type", "[unknown]")
-            mesg = "duplicate %s name %s%s, using lastly defined" % \
+            mesg = "duplicate %s name %s%s, using lastly defined. You may " \
+                   "manually set the definition_order parameter to avoid " \
+                   "this message." % \
                    (objcls, name, self.get_source(item))
             item.configuration_warnings.append(mesg)
         if item.is_tpl():
