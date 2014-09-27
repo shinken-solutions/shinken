@@ -32,7 +32,7 @@ Contribute by...
       * "configobjects/host"
     
     * the "internal_metrics" links, or create the page based on http://www.shinken-monitoring.org/wiki/internal_metrics
-    * the original "thebasics/cgis" links spread accross the documentation
+    * the original "thebasics/cgis" links spread across the documentation
   
   
 

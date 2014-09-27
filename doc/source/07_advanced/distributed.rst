@@ -127,7 +127,7 @@ The packs aggregations into scheduler configurations
 -----------------------------------------------------
 
 
-When all relation packs are created, the Arbiter aggregates them into N configurations if the administrator has defined N active schedulers (no spares). Packs are aggregated into configurations (it's like "Big packs"). The dispatch looks at the weight property of schedulers: the higher weight a scheduler has, the more packs it will have. This can be shown in the folowing picture :
+When all relation packs are created, the Arbiter aggregates them into N configurations if the administrator has defined N active schedulers (no spares). Packs are aggregated into configurations (it's like "Big packs"). The dispatch looks at the weight property of schedulers: the higher weight a scheduler has, the more packs it will have. This can be shown in the following picture :
 
 
 .. image:: /_static/images///official/images/pack-agregation.png
@@ -251,7 +251,7 @@ In the normal Shinken Architecture is useful for load balancing with high availa
 
 Shinken provides a way to manage different geographic or organizational sites.
 
-We will use a generic term for this site managment, **Realms**.
+We will use a generic term for this site management, **Realms**.
 
 
 .. _advanced/distributed#realms_in_few_words:

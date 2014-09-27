@@ -53,6 +53,6 @@ command_line
   If you want to pass arguments to commands during runtime, you can use :ref:`$ARGn$ macros <thebasics/macrolist#argn>` in the *command_line* directive of the command definition and then separate individual arguments from the command name (and from each other) using bang (!) characters in the object definition directive (host check command, service event handler command, etc.) that references the command. More information on how arguments in command definitions are processed during runtime can be found in the documentation on :ref:`macros <thebasics/macros>`.
 
 poller_tag
-  This directive is used to define the poller_tag of this command. If the host/service that call this command do nto override it with their own poller_tag, it will make this command if used in a check only taken by polelrs that also have this value in their poller_tags parameter.
+  This directive is used to define the poller_tag of this command. If the host/service that call this command do not override it with their own poller_tag, it will make this command if used in a check only taken by polelrs that also have this value in their poller_tags parameter.
   
   By default there is no poller_tag, so all untagged pollers can take it.

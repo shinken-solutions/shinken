@@ -89,7 +89,7 @@ Web Interface
 MK Multisite and Nagvis are the only viable choices for very large installations. They can use multiple Nagios and Shinken monitoring servers as data providers and are based on the Livestatus API. Livestatus is a networked API for efficient remote access to Shinken run time data.
 
 
-Dependancy model 
+Dependency model 
 ~~~~~~~~~~~~~~~~~
 
 

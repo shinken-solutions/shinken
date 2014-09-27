@@ -57,7 +57,7 @@ Let's take the following scenario:
 
   - You schedule downtime for host A from 7:30pm-9:30pm on a Monday
   - You bring the server down about 7:45pm Monday evening to start a hard drive upgrade
-  - After wasting an hour and a half battling with SCSI errors and driver incompatabilities, you finally get the machine to boot up
+  - After wasting an hour and a half battling with SCSI errors and driver incompatibilities, you finally get the machine to boot up
   - At 9:15 you realize that one of your partitions is either hosed or doesn't seem to exist anywhere on the drive
   - Knowing you're in for a long night, you go back and schedule additional downtime for host A from 9:20pm Monday evening to 1:30am Tuesday Morning.
 
