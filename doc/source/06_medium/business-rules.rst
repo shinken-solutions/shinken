@@ -392,7 +392,7 @@ Example:
 
 In the previous example, HTTP/HTTPS services come from the ``http`` pack. If one or more http servers fail, a single notification would be sent, rather than one per failing service.
 
-.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independant failure. Take care to explain this to people in charge of the operations.
+.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independent failure. Take care to explain this to people in charge of the operations.
 
 
 

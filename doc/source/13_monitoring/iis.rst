@@ -24,7 +24,7 @@ These instructions assume that you've installed Shinken according to the :ref:`I
 Overview 
 =========
 
-Monitoring a domain controler is possible in an agentless way by polling via the network using the WMI protocol, like we proposed in the windows template.
+Monitoring a domain controller is possible in an agentless way by polling via the network using the WMI protocol, like we proposed in the windows template.
 
 
 Prerequisites 

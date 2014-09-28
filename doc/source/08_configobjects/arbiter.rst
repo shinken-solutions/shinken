@@ -58,7 +58,7 @@ arbiter_name
   This variable is used to identify the *short name* of the arbiter with which the data will be associated with.
 
 address
-  This directive is used to define the address from where the main arbiter can reach this arbiter (that can be itself). This can be a DNS name or an IP adress.
+  This directive is used to define the address from where the main arbiter can reach this arbiter (that can be itself). This can be a DNS name or an IP address.
 
 host_name
   This variable is used by the arbiters daemons to define which 'arbiter' object they are : all theses daemons on different servers use the same configuration, so the only difference is their server name. This value must be equal to the name of the server (like with the hostname command). If none is defined, the arbiter daemon will put the name of the server where it's launched, but this will not be tolerated with more than one arbiter (because each daemons will think it's the master).

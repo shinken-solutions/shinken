@@ -53,7 +53,7 @@ There are some important things to note about the above service definition:
 Configuring TCP Wrappers 
 =========================
 
-Now you're going to have to modify the /etc/hosts.deny file on firestorm. In order to have the TCP wrappers send an alert to the monitoring host whenever a connection attempt is denied, you'll have to add a line similiar to the following:
+Now you're going to have to modify the /etc/hosts.deny file on firestorm. In order to have the TCP wrappers send an alert to the monitoring host whenever a connection attempt is denied, you'll have to add a line similar to the following:
 
   
 ::

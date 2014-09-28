@@ -21,7 +21,7 @@ Tag your hosts and pollers for being "in the DMZ"
 
 So we will need to "tag" checks, so they will be able to run **only** in the dmz poller, or the lan one.
 
-This tag is done with the **poller_tag** paramter. It can be applied on the following objects:
+This tag is done with the **poller_tag** parameter. It can be applied on the following objects:
  * pollers
  * commands 
  * services

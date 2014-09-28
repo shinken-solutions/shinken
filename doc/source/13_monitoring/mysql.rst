@@ -151,7 +151,7 @@ At this point, you configure your host to be checked with a mysql template. What
   * index-usage: Sum of the Index-Utilization (in contrast to Full Table Scans)	0%..100% (90:, 80:)
   * tmp-disk-tables: Percent of the temporary tables that were created on the disk instead in memory	0%..100% (25, 50)
   * slow-queries: Rate of queries that were detected as "slow"	0..n/sec (0.1, 1)
-  * long-running-procs: Sum of processes that are runnning longer than 1 minute	0..n (10, 20)
+  * long-running-procs: Sum of processes that are running longer than 1 minute	0..n (10, 20)
   * slave-lag: Delay between Master and Slave	0..n Seconds
   * slave-io-running: Checks if the IO-Thread of the Slave-DB is running	 
   * slave-sql-running: Checks if the SQL-Thread of the Slave-DB is running	 

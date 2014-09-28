@@ -50,7 +50,7 @@ Format:  temp_path=<dir_name>
 Example: temp_path=/tmp      
 ======== ====================
 
-This is a directory that Nagios can use as scratch space for creating temporary files used during the monitoring process. You should run **tmpwatch**, or a similiar utility, on this directory occassionally to delete files older than 24 hours.
+This is a directory that Nagios can use as scratch space for creating temporary files used during the monitoring process. You should run **tmpwatch**, or a similar utility, on this directory occasionally to delete files older than 24 hours.
 
 
 .. _integration/specific-cgi-parameters#status_file:

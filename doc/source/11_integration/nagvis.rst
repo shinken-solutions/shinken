@@ -14,7 +14,7 @@ NagVis
 
 * Homepage: http://www.nagvis.org/
 * Screenshots: http://www.nagvis.org/screenshots
-* Description: "NagVis is a visualization addon for the well known network managment system Nagios."
+* Description: "NagVis is a visualization addon for the well known network management system Nagios."
 * License: GPL v2
 * Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,11.0.html
 
