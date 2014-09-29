@@ -140,6 +140,9 @@ class NRPE:
     # Read a return and extract return code
     # and output
     def read(self, data):
+        # TODO: Not sure to get all the data in one shot.
+        # TODO we should buffer it until we get enough to unpack.
+
         if self.state == 'received':
             return (self.rc, self.message)
 
@@ -148,9 +151,9 @@ class NRPE:
 
         try:
             response = struct.unpack(">2hih1024s", data)
-        except:  # bad format...
+        except struct.error as err:  # bad format...
             self.rc = 3
-            self.message = "Error : cannot read output from nrpe daemon..."
+            self.message = "Error : cannot read output from nrpe daemon ; datalen=%s : err=%s" % (len(data), err)
             return (self.rc, self.message)
 
         self.rc = response[3]
