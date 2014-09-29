@@ -62,7 +62,7 @@ from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, Int
 try:
     import pwd, grp
     from pwd import getpwnam
-    from grp import getgrnam
+    from grp import getgrnam, getgrall
 
 
     def get_cur_user():
@@ -71,6 +71,10 @@ try:
 
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
+
+
+    def get_all_groups():
+        return getgrall()
 except ImportError, exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
@@ -79,6 +83,10 @@ except ImportError, exp:  # Like in nt system or Android
 
     def get_cur_group():
         return "shinken"
+
+
+    def get_all_groups():
+        return []
 
 
 ##########################   DAEMON PART    ###############################
@@ -766,6 +774,12 @@ class Daemon(object):
                 os.initgroups(self.user, gid)
             except OSError, e:
                 logger.warning('Cannot call the additional groups setting with initgroups (%s)', e.strerror)
+        elif hasattr(os, 'setgroups'):
+            groups = [gid] + [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
+            try:
+                os.setgroups(groups)
+            except OSError, e:
+                logger.warning('Cannot call the additional groups setting with setgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
