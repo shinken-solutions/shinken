@@ -232,7 +232,10 @@ class NRPEAsyncClient(asyncore.dispatcher, object):
 
         else:
             sock = self.socket
-        sock.shutdown(socket.SHUT_RDWR) # always shutdown the underlying socket.
+        try:
+            sock.shutdown(socket.SHUT_RDWR) # always shutdown the underlying socket.
+        except socket.error as err:
+            logger.debug('socket.shutdown failed: %s' % str(err))
         super(NRPEAsyncClient, self).close()
 
     def set_exit(self, rc, message):
