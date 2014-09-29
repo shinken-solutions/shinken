@@ -174,7 +174,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
         # Instantiate our nrpe helper
         self.nrpe = NRPE()
-        self.nrpe.init_query(host, 5666, use_ssl, msg)
+        self.nrpe.init_query(host, port, use_ssl, msg)
 
         # And now we create a socket for our connection
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
