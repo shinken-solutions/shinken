@@ -165,7 +165,7 @@ class NRPE:
         return (self.rc, self.message)
 
 
-class NRPEAsyncClient(asyncore.dispatcher):
+class NRPEAsyncClient(asyncore.dispatcher, object):
 
     def __init__(self, host, port, use_ssl, timeout, unknown_on_timeout, msg):
         asyncore.dispatcher.__init__(self)
@@ -202,14 +202,38 @@ class NRPEAsyncClient(asyncore.dispatcher):
     def wrap_ssl(self):
         self.context = OpenSSL.SSL.Context(OpenSSL.SSL.TLSv1_METHOD)
         self.context.set_cipher_list('ADH')
+        self._socket = self.socket
         self.socket = OpenSSL.SSL.Connection(self.context, self.socket)
         self.set_accept_state()
 
-    def handle_connect(self):
-        pass
+    def close(self):
+        if self.use_ssl:
+            sock = self._socket
+            for idx in range(4):
+                try:
+                    if self.socket.shutdown():
+                        break
+                except (OpenSSL.SSL.WantWriteError, OpenSSL.SSL.WantReadError):
+                    pass # just retry for now
+                    ## or:
+                    # asyncore.poll2(0.5)
+                    # but not sure we really need it as the shutdown() (SSL_shutdown)
+                    # should take care of it.
+                except OpenSSL.SSL.Error as err:
+                    # on python2.7 I keep getting SSLError instance having no 'reason' nor 'library' attribute or any other detail.
+                    # despite the docs telling the opposite (https://docs.python.org/2/library/ssl.html#ssl.SSLError)
+                    details = 'library=%s reason=%s : %s' % (
+                        getattr(err, 'library', 'missing'),
+                        getattr(err, 'reason', 'missing'),
+                        err)
+                    # output the error in debug mode for now.
+                    logger.debug('Error on SSL shutdown : %s ; %s' % (details, traceback.format_exc()))
+                    # keep retry.
 
-    def handle_close(self):
-        self.close()
+        else:
+            sock = self.socket
+        sock.shutdown(socket.SHUT_RDWR) # always shutdown the underlying socket.
+        super(NRPEAsyncClient, self).close()
 
     def set_exit(self, rc, message):
         self.rc = rc
