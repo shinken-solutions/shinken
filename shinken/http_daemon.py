@@ -122,7 +122,10 @@ class CherryPyBackend(object):
             msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
             raise PortNotFree(msg)
         finally:
-            self.srv.stop()
+            try:
+                self.srv.stop()
+            except:
+                pass
 
 
 # WSGIRef is the default HTTP server, it CAN manage HTTPS, but at a Huge cost for the client, because it's only HTTP1.0
