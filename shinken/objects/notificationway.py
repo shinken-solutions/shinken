@@ -238,4 +238,4 @@ class NotificationWays(Items):
         params['notificationway_name'] = name
         #print "Asking a new inner notificationway from name %s with params %s" % (name, params)
         nw = NotificationWay(params)
-        self.items[nw.id] = nw
+        self.add_item(nw)

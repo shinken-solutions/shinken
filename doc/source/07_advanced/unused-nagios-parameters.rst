@@ -364,7 +364,7 @@ Format:  broker_module=<modulepath> [moduleargs]
 Example: broker_module=/usr/local/nagios/bin/ndomod.o                 cfg_file=/usr/local/nagios/etc/ndomod.cfg
 ======== ======================================================================================================
 
-This directive is used to specify an event broker module that should by loaded by Nagios at startup. Use multiple directives if you want to load more than one module. Arguments that should be passed to the module at startup are seperated from the module path by a space.
+This directive is used to specify an event broker module that should by loaded by Nagios at startup. Use multiple directives if you want to load more than one module. Arguments that should be passed to the module at startup are separated from the module path by a space.
 
 Do NOT overwrite modules while they are being used by Nagios or Nagios will crash in a fiery display of SEGFAULT glory. This is a bug/limitation either in "dlopen()", the kernel, and/or the filesystem. And maybe Nagios...
 

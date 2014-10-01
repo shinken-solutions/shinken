@@ -81,14 +81,12 @@ class Itemgroup(Item):
     # so a python list :)
     # We also strip elements because spaces Stinks!
     def pythonize(self):
-        v =  getattr(self, 'members', '')
+        v = getattr(self, 'members', '')
         # Maybe it's a multi-property like multi hostgroups entries
         # if so "flatten" it
         if isinstance(v, list):
             v = ','.join(v)
-        self.members = [mbr for mbr in
-                            (m.strip() for m in v.split(','))
-                        if mbr != '']
+        self.members = [m.strip() for m in v.split(',') if m.strip()]
 
     def replace_members(self, members):
         self.members = members
@@ -175,7 +173,7 @@ class Itemgroups(Items):
 
 
     def add(self, ig):
-        self.items[ig.id] = ig
+        self.add_item(ig)
 
 
     def get_members_by_name(self, gname):

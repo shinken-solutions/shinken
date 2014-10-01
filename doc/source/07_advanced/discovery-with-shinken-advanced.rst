@@ -183,7 +183,7 @@ Delete something after add
 
 Sometimes you need to simply remove a property that conflicts with a new one. For example, some routers are derived from linux system but does not work with the linux template. That's why you can say a property should be "remove" by using the character "-" before it.
 
-For exemple we want to add the "router-os" template but not the "linux" template on the host and do not remove previously inserted values.
+For example we want to add the "router-os" template but not the "linux" template on the host and do not remove previously inserted values.
    
 
 ::

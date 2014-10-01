@@ -76,7 +76,7 @@ The flap detection logic for services works as described in the example above.
 Flap Detection for Hosts 
 =========================
 
-Host flap detection works in a similiar manner to service flap detection, with one important difference: Shinken will attempt to check to see if a host is flapping whenever:
+Host flap detection works in a similar manner to service flap detection, with one important difference: Shinken will attempt to check to see if a host is flapping whenever:
 
   * The host is checked (actively or passively)
   * Sometimes when a service associated with that host is checked. More specifically, when at least x amount of time has passed since the flap detection was last performed, where x is equal to the average check interval of all services associated with the host.

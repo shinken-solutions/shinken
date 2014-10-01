@@ -39,5 +39,6 @@ class TestSrvOnMissingTemplate(ShinkenTest):
         self.assert_(svc is not None)
 
 
+
 if __name__ == '__main__':
     unittest.main()

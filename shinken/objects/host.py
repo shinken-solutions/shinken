@@ -30,6 +30,7 @@ scheduling/consume check smart things :)
 """
 
 import time
+import itertools
 
 from item import Items
 from schedulingitem import SchedulingItem
@@ -1090,24 +1091,22 @@ class Hosts(Items):
                 h.got_default_realm = True
 
 
-    # We look for hostgroups property in hosts and
-    # link them
+    # We look for hostgroups property in hosts and link them
     def linkify_h_by_hg(self, hostgroups):
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl():
-                new_hostgroups = []
-                if hasattr(h, 'hostgroups') and h.hostgroups != '':
-                    hgs = h.hostgroups.split(',')
-                    for hg_name in hgs:
-                        hg_name = hg_name.strip()
-                        hg = hostgroups.find_by_name(hg_name)
-                        if hg is not None:
-                            new_hostgroups.append(hg)
-                        else:
-                            err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
-                            h.configuration_errors.append(err)
-                h.hostgroups = new_hostgroups
+            new_hostgroups = []
+            if getattr(h, 'hostgroups', ''):
+                hgs = [n.strip() for n in h.hostgroups.split(',') if n.strip()]
+                for hg_name in hgs:
+                    # TODO: should an unknown hostgroup raise an error ?
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is not None:
+                        new_hostgroups.append(hg)
+                    else:
+                        err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
+                        h.configuration_errors.append(err)
+            h.hostgroups = new_hostgroups
 
 
     # We look for hostgroups property in hosts and
@@ -1116,20 +1115,24 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        for t in self.templates.itervalues():
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl() and hasattr(h, 'host_name'):
-                hname = h.host_name
-                if hasattr(h, 'hostgroups'):
-                    if isinstance(h.hostgroups, list):
-                        h.hostgroups = ','.join(h.hostgroups)
-                    hgs = h.hostgroups.split(',')
-                    for hg in hgs:
-                        hostgroups.add_member(hname, hg.strip())
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(h, contactgroups)
 
-        # items::explode_contact_groups_into_contacts
-        # take all contacts from our contact_groups into our contact property
-        self.explode_contact_groups_into_contacts(contactgroups)
+            if hasattr(h, 'host_name') and hasattr(h, 'hostgroups'):
+                hname = h.host_name
+                if isinstance(h.hostgroups, list):
+                    h.hostgroups = ','.join(h.hostgroups)
+                hgs = h.hostgroups.split(',')
+                for hg in hgs:
+                    hostgroups.add_member(hname, hg.strip())
 
 
     # In the scheduler we need to relink the commandCall with
@@ -1158,52 +1161,7 @@ class Hosts(Items):
     # that got the template with name=tpl_name or inherit from
     # a template that use it
     def find_hosts_that_use_template(self, tpl_name):
-        res = set()
-        tpl_name = tpl_name.strip()
-
-        # First find the template
-        tpl = None
-        for h in self:
-            # Look for template with the good name
-            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name:
-                tpl = h
-
-        # If we find none, we should manually lookup all hosts to find this 'tag'
-        if tpl is None:
-            for h in self:
-                if not hasattr(h, 'host_name') or h.is_tpl():
-                    continue
-                # Manually lookup for the templates defines in use
-                tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
-                if tpl_name in tnames:
-                    res.add(h.host_name)
-
-            return list(res)
-
-        # Ok, we find the tpl. We should find its father template too
-        for t in self.templates.values():
-            t.dfs_loop_status = 'DFS_UNCHECKED'
-        all_tpl_searched = self.templates_graph.dfs_get_all_childs(tpl)
-        # Clean the search tag
-        # TODO: better way?
-        for t in self.templates.values():
-            del t.dfs_loop_status
-
-        # Now we got all the templates we are looking for (so the template
-        # and all its own templates too, we search for the hosts that are
-        # using them
-        for h in self:
-            # If the host is a not valid one, skip it
-            if not hasattr(h, 'host_name'):
-                continue
-            # look if there is a match between host templates
-            # and the ones we are looking for
-            for t in h.templates:
-                if t in all_tpl_searched:
-                    res.add(h.host_name)
-                    continue
-
-        return list(res)
+        return [h.host_name for h in self if tpl_name in h.tags if hasattr(h, "host_name")]
 
     # Will create all business tree for the
     # services

@@ -98,7 +98,7 @@ Now that you know what the parent/child relationships look like for hosts that a
   }
   
   
-So basicaly: **in your "child", you declare who is your parent(s)**.
+So basically: **in your "child", you declare who is your parent(s)**.
 
 
 Reachability Logic in Action 
@@ -111,7 +111,7 @@ Now that you're configured Shinken with the proper parent/child relationships fo
    :scale: 90 %
 
 
-When hosts change state (i.e. from UP to DOWN), the host reachability logic in Shinken kicks in. The reachability logic will initiate parallel checks of the parents and children of whatever hosts change state. This allows Shinken to quickly determine the current status of your network infrastructure when changes occur. During this additonal check time, the notification for the web and router1 hosts are blocked because we don't know yet **WHO** is the root problem.
+When hosts change state (i.e. from UP to DOWN), the host reachability logic in Shinken kicks in. The reachability logic will initiate parallel checks of the parents and children of whatever hosts change state. This allows Shinken to quickly determine the current status of your network infrastructure when changes occur. During this additional check time, the notification for the web and router1 hosts are blocked because we don't know yet **WHO** is the root problem.
 
 
 .. image:: /_static/images///official/images/reachability4.png

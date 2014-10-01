@@ -165,7 +165,6 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()
         self.conf.create_objects(raw_objects)
-        self.conf.old_properties_names_to_new()
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
         # Hack push_flavor, that is set by the dispatcher
@@ -175,19 +174,13 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.apply_inheritance()
         self.conf.explode()
         #print "Aconf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
         self.conf.override_properties()
         self.conf.pythonize()
-        count = self.conf.remove_exclusions()
-        if count > 0:
-            self.conf.create_reversed_list()
         self.conf.linkify()
         self.conf.apply_dependencies()
         self.conf.explode_global_conf()
@@ -197,6 +190,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
+            self.conf.dump()
             return
         self.conf.clean()
 

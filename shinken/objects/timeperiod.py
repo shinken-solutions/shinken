@@ -709,7 +709,7 @@ class Timeperiods(Items):
         # The only interesting property to inherit is exclude
         self.apply_partial_inheritance('exclude')
         for i in self:
-            i.get_customs_properties_by_inheritance(self)
+            i.get_customs_properties_by_inheritance()
 
         # And now apply inheritance for unresolved properties
         # like the dateranges in fact

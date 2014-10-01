@@ -107,7 +107,7 @@ host_name
 hostgroup_name
   This directive is used to specify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the service "runs" on or is associated with. Multiple hostgroups should be separated by commas. The hostgroup_name may be used instead of, or in addition to, the host_name directive.
 
-  This is possibleto define "complex" hostgroup expression with the folowing operators :
+  This is possibleto define "complex" hostgroup expression with the following operators :
 
     * & : it's use to make an AND betweens groups
     * | : it's use to make an OR betweens groups
@@ -314,7 +314,7 @@ poller_tag
 duplicate_foreach
   This is used to generate serveral service with only one service declaration.
   Shinken understands this statement as : "Create a service for earch key in the variable".
-  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a diffrent check)
+  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a different check)
 
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
@@ -324,7 +324,7 @@ service_dependencies
     service_dependencies    hostA,service_descriptionA,hostB,service_descriptionB
     service_dependencies    ,service_descriptionA,,service_descriptionB,hostC,service_descriptionC
 
-  By default this value is void so there is no linked dependencies. This is typically used to make a service dependant on an agent software, like an NRPE check dependant on the availability of the NRPE agent.
+  By default this value is void so there is no linked dependencies. This is typically used to make a service dependent on an agent software, like an NRPE check dependent on the availability of the NRPE agent.
 
 business_impact
   This variable is used to set the importance we gave to this service from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
