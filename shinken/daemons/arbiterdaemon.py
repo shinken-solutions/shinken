@@ -391,9 +391,6 @@ class Arbiter(Daemon):
         # Overrides sepecific service instaces properties
         self.conf.override_properties()
 
-        # Pythonize values
-        self.conf.pythonize()
-
         # Linkify objects to each other
         self.conf.linkify()
 

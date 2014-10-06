@@ -51,7 +51,10 @@ class Contactgroup(Itemgroup):
     }
 
     def get_contacts(self):
-        return getattr(self, 'members', '')
+        if getattr(self, 'members', None) is not None:
+            return self.members
+        else:
+            return []
 
     def get_name(self):
         return getattr(self, 'contactgroup_name', 'UNNAMED-CONTACTGROUP')

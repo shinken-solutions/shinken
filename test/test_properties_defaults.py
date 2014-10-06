@@ -30,7 +30,7 @@ from shinken.property import UnusedProp, none_object
 import shinken.daemon
 
 from shinken_test import *
-
+from shinken.property import *
 
 class PropertiesTester(object):
 
@@ -46,8 +46,11 @@ class PropertiesTester(object):
         for name in self.without_default:
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
-            self.assertIs(item.properties[name].default, none_object,
-                          msg='property %r is not `none_object` but %r' % (name, item.properties[name]))
+            self.assert_(isinstance(item.properties[name], ListProp) or
+                         isinstance(item.properties[name], StringProp) or
+                         isinstance(item.properties[name], IntegerProp),
+                          msg='property %r is not `ListProp` or `StringProp` but %r' % (name, item.properties[name]))
+            if not item.properties[name].required: import pdb; pdb.set_trace()
             self.assertTrue(item.properties[name].required)
 
     def test_default_values(self):
@@ -102,68 +105,68 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('workdir', '/var/run/shinken/'),
         ('config_base_dir', ''),
         ('modules_dir', '/var/lib/shinken/modules'),
-        ('use_local_log', '1'),
+        ('use_local_log', True),
         ('log_level', 'WARNING'),
         ('local_log', '/var/log/shinken/arbiterd.log'),
         ('resource_file', '/tmp/resources.txt'),
         ('shinken_user', shinken.daemon.get_cur_user()),
         ('shinken_group', shinken.daemon.get_cur_group()),
-        ('enable_notifications', '1'),
-        ('execute_service_checks', '1'),
-        ('accept_passive_service_checks', '1'),
-        ('execute_host_checks', '1'),
-        ('accept_passive_host_checks', '1'),
-        ('enable_event_handlers', '1'),
+        ('enable_notifications', True),
+        ('execute_service_checks', True),
+        ('accept_passive_service_checks', True),
+        ('execute_host_checks', True),
+        ('accept_passive_host_checks', True),
+        ('enable_event_handlers', True),
         ('log_rotation_method', 'd'),
         ('log_archive_path', '/usr/local/shinken/var/archives'),
-        ('check_external_commands', '1'),
+        ('check_external_commands', True),
         ('command_file', ''),
         ('lock_file', '/var/run/shinken/arbiterd.pid'),
         ('state_retention_file', ''),
-        ('retention_update_interval', '60'),
-        ('use_syslog', '0'),
-        ('log_notifications', '1'),
-        ('log_service_retries', '1'),
-        ('log_host_retries', '1'),
-        ('log_event_handlers', '1'),
-        ('log_initial_states', '1'),
-        ('log_external_commands', '1'),
-        ('log_passive_checks', '1'),
+        ('retention_update_interval', 60),
+        ('use_syslog', False),
+        ('log_notifications', True),
+        ('log_service_retries', True),
+        ('log_host_retries', True),
+        ('log_event_handlers', True),
+        ('log_initial_states', True),
+        ('log_external_commands', True),
+        ('log_passive_checks', True),
         ('global_host_event_handler', ''),
         ('global_service_event_handler', ''),
-        ('max_service_check_spread', '30'),
-        ('max_host_check_spread', '30'),
-        ('interval_length', '60'),
-        ('auto_reschedule_checks', '1'),
-        ('auto_rescheduling_interval', '1'),
-        ('auto_rescheduling_window', '180'),
-        ('use_aggressive_host_checking', '0'),
-        ('translate_passive_host_checks', '1'),
-        ('passive_host_checks_are_soft', '1'),
-        ('enable_predictive_host_dependency_checks', '1'),
-        ('enable_predictive_service_dependency_checks', '1'),
-        ('cached_host_check_horizon', '0'),
-        ('cached_service_check_horizon', '0'),
+        ('max_service_check_spread', 30),
+        ('max_host_check_spread', 30),
+        ('interval_length', 60),
+        ('auto_reschedule_checks', True),
+        ('auto_rescheduling_interval', 1),
+        ('auto_rescheduling_window', 180),
+        ('use_aggressive_host_checking', False),
+        ('translate_passive_host_checks', True),
+        ('passive_host_checks_are_soft', True),
+        ('enable_predictive_host_dependency_checks', True),
+        ('enable_predictive_service_dependency_checks', True),
+        ('cached_host_check_horizon', 0),
+        ('cached_service_check_horizon', 0),
         ('use_large_installation_tweaks', '0'),
-        ('enable_environment_macros', '1'),
-        ('enable_flap_detection', '1'),
-        ('low_service_flap_threshold', '20'),
-        ('high_service_flap_threshold', '30'),
-        ('low_host_flap_threshold', '20'),
-        ('high_host_flap_threshold', '30'),
-        ('soft_state_dependencies', '0'),
-        ('service_check_timeout', '60'),
-        ('host_check_timeout', '30'),
-        ('event_handler_timeout', '30'),
-        ('notification_timeout', '30'),
-        ('ocsp_timeout', '15'),
-        ('ochp_timeout', '15'),
-        ('perfdata_timeout', '5'),
-        ('obsess_over_services', '0'),
+        ('enable_environment_macros', True),
+        ('enable_flap_detection', True),
+        ('low_service_flap_threshold', 20),
+        ('high_service_flap_threshold', 30),
+        ('low_host_flap_threshold', 20),
+        ('high_host_flap_threshold', 30),
+        ('soft_state_dependencies', False),
+        ('service_check_timeout', 60),
+        ('host_check_timeout', 30),
+        ('event_handler_timeout', 30),
+        ('notification_timeout', 30),
+        ('ocsp_timeout', 15),
+        ('ochp_timeout', 15),
+        ('perfdata_timeout', 5),
+        ('obsess_over_services', False),
         ('ocsp_command', ''),
-        ('obsess_over_hosts', '0'),
+        ('obsess_over_hosts', False),
         ('ochp_command', ''),
-        ('process_performance_data', '1'),
+        ('process_performance_data', True),
         ('host_perfdata_command', ''),
         ('service_perfdata_command', ''),
         ('host_perfdata_file', ''),
@@ -172,62 +175,62 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('service_perfdata_file_template', '/tmp/host.perf'),
         ('host_perfdata_file_mode', 'a'),
         ('service_perfdata_file_mode', 'a'),
-        ('host_perfdata_file_processing_interval', '15'),
-        ('service_perfdata_file_processing_interval', '15'),
+        ('host_perfdata_file_processing_interval', 15),
+        ('service_perfdata_file_processing_interval', 15),
         ('host_perfdata_file_processing_command', ''),
         ('service_perfdata_file_processing_command', None),
-        ('check_for_orphaned_services', '1'),
-        ('check_for_orphaned_hosts', '1'),
-        ('check_service_freshness', '1'),
-        ('service_freshness_check_interval', '60'),
-        ('check_host_freshness', '1'),
-        ('host_freshness_check_interval', '60'),
-        ('additional_freshness_latency', '15'),
-        ('enable_embedded_perl', '1'),
-        ('use_embedded_perl_implicitly', '0'),
+        ('check_for_orphaned_services', True),
+        ('check_for_orphaned_hosts', True),
+        ('check_service_freshness', True),
+        ('service_freshness_check_interval', 60),
+        ('check_host_freshness', True),
+        ('host_freshness_check_interval', 60),
+        ('additional_freshness_latency', 15),
+        ('enable_embedded_perl', True),
+        ('use_embedded_perl_implicitly', False),
         ('date_format', None),
         ('use_timezone', ''),
         ('illegal_object_name_chars', '`~!$%^&*"|\'<>?,()='),
         ('illegal_macro_output_chars', ''),
-        ('use_regexp_matching', '0'),
+        ('use_regexp_matching', False),
         ('use_true_regexp_matching', None),
         ('broker_module', ''),
         ('modified_attributes', 0L),
-        ('daemon_enabled', '1'),
+        ('daemon_enabled', True),
 
         # Shinken specific
-        ('idontcareaboutsecurity', '0'),
-        ('flap_history', '20'),
-        ('max_plugins_output_length', '8192'),
-        ('no_event_handlers_during_downtimes', '0'),
-        ('cleaning_queues_interval', '900'),
-        ('disable_old_nagios_parameters_whining', '0'),
-        ('enable_problem_impacts_states_change', '0'),
+        ('idontcareaboutsecurity', False),
+        ('flap_history', 20),
+        ('max_plugins_output_length', 8192),
+        ('no_event_handlers_during_downtimes', False),
+        ('cleaning_queues_interval', 900),
+        ('disable_old_nagios_parameters_whining', False),
+        ('enable_problem_impacts_states_change', False),
         ('resource_macros_names', []),
 
         # SSL part
-        ('use_ssl', '0'),
+        ('use_ssl', False),
         ('server_key', 'etc/certs/server.key'),
         ('ca_cert', 'etc/certs/ca.pem'),
         ('server_cert', 'etc/certs/server.cert'),
-        ('hard_ssl_name_check', '0'),
+        ('hard_ssl_name_check', False),
 
-        ('human_timestamp_log', '0'),
+        ('human_timestamp_log', False),
 
         # Discovery part
-        ('strip_idname_fqdn', '1'),
-        ('runners_timeout', '3600'),
+        ('strip_idname_fqdn', True),
+        ('runners_timeout', 3600),
         ('pack_distribution_file', 'pack_distribution.dat'),
 
         # WebUI part
         ('webui_lock_file', 'webui.pid'),
-        ('webui_port', '8080'),
+        ('webui_port', 8080),
         ('webui_host', '0.0.0.0'),
 
-        ('use_multiprocesses_serializer', '0'),
-        ('daemon_thread_pool_size', '8'),
-        ('enable_environment_macros', '1'),
-        ('timeout_exit_status', '2'),
+        ('use_multiprocesses_serializer', False),
+        ('daemon_thread_pool_size', 8),
+        ('enable_environment_macros', True),
+        ('timeout_exit_status', 2),
 
         ('api_key', ''),
         ('secret', ''),
@@ -246,14 +249,15 @@ class TestCommand(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('poller_tag', 'None'),
         ('reactionner_tag', 'None'),
         ('module_type', None),
-        ('timeout', '-1'),
-        ('enable_environment_macros', 0),
+        ('timeout', -1),
+        ('enable_environment_macros', False),
         ])
 
     def setUp(self):
@@ -265,12 +269,14 @@ class TestContactgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['members', 'contactgroup_name', 'alias']
+    without_default = ['contactgroup_name', 'alias']
 
     properties = dict([
+        ('members', None),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('unknown_members', None),
         ('id', 0),
@@ -288,20 +294,22 @@ class TestContact(PropertiesTester, ShinkenTest):
     without_default = [
         'contact_name',
         'host_notification_period', 'service_notification_period',
-        'host_notification_options', 'service_notification_options',
         'host_notification_commands', 'service_notification_commands'
         ]
 
     properties = dict([
+        ('service_notification_options', ['']),
+        ('host_notification_options', ['']),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('alias', 'none'),
-        ('contactgroups', ''),
-        ('host_notifications_enabled', '1'),
-        ('service_notifications_enabled', '1'),
-        ('min_business_impact', '0'),
+        ('contactgroups', []),
+        ('host_notifications_enabled', True),
+        ('service_notifications_enabled', True),
+        ('min_business_impact', 0),
         ('email', 'none'),
         ('pager', 'none'),
         ('address1', 'none'),
@@ -310,9 +318,9 @@ class TestContact(PropertiesTester, ShinkenTest):
         ('address4', 'none'),
         ('address5', 'none'),
         ('address6', 'none'),
-        ('can_submit_commands', '0'),
-        ('is_admin', '0'),
-        ('retain_status_information', '1'),
+        ('can_submit_commands', False),
+        ('is_admin', False),
+        ('retain_status_information', True),
         ('notificationways', ''),
         ('password', 'NOPASSWORDSET'),
         ])
@@ -330,11 +338,12 @@ class TestDiscoveryrule(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('creation_type', 'service'),
-        ('discoveryrule_order', '0'),
+        ('discoveryrule_order', 0),
         ])
 
     def setUp(self):
@@ -350,8 +359,9 @@ class TestDiscoveryrun(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ])
 
@@ -364,16 +374,19 @@ class TestEscalation(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['escalation_name', 'first_notification', 'last_notification', 'first_notification_time', 'last_notification_time', 'contacts', 'contact_groups']
+    without_default = ['escalation_name', 'first_notification', 'last_notification', 'first_notification_time', 'last_notification_time']
 
     properties = dict([
+        ('contact_groups', []),
+        ('contacts', []),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('notification_interval', '-1'),
+        ('notification_interval', -1),
         ('escalation_period', ''),
-        ('escalation_options', 'd,u,r,w,c'),
+        ('escalation_options', ['d','u','r','w','c']),
         ])
 
     def setUp(self):
@@ -389,14 +402,15 @@ class TestHostdependency(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('dependent_hostgroup_name', ''),
         ('hostgroup_name', ''),
-        ('inherits_parent', '0'),
-        ('execution_failure_criteria', 'n'),
-        ('notification_failure_criteria', 'n'),
+        ('inherits_parent', False),
+        ('execution_failure_criteria', ['n']),
+        ('notification_failure_criteria', ['n']),
         ('dependency_period', ''),
         ])
 
@@ -418,12 +432,13 @@ class TestHostescalation(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('notification_interval', '30'),
+        ('notification_interval', 30),
         ('escalation_period', ''),
-        ('escalation_options', 'd,u,r,w,c'),
+        ('escalation_options', ['d','u','r','w','c']),
         ])
 
     def setUp(self):
@@ -439,8 +454,9 @@ class TestHostextinfo(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('notes', ''),
         ('notes_url', ''),
@@ -461,12 +477,14 @@ class TestHostgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['members', 'hostgroup_name', 'alias']
+    without_default = ['hostgroup_name', 'alias']
 
     properties = dict([
+        ('members', None),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('unknown_members', None),
         ('id', 0),
@@ -491,38 +509,39 @@ class TestHost(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('display_name', ''),
-        ('parents', ''),
-        ('hostgroups', ''),
+        ('parents', []),
+        ('hostgroups', []),
         ('check_command', '_internal_host_up'),
         ('initial_state', 'u'),
-        ('check_interval', '0'),
-        ('max_check_attempts', '1'),
-        ('retry_interval', '0'),
-        ('active_checks_enabled', '1'),
-        ('passive_checks_enabled', '1'),
-        ('obsess_over_host', '0'),
-        ('check_freshness', '0'),
-        ('freshness_threshold', '0'),
+        ('check_interval', 0),
+        ('max_check_attempts', 1),
+        ('retry_interval', 0),
+        ('active_checks_enabled', True),
+        ('passive_checks_enabled', True),
+        ('obsess_over_host', False),
+        ('check_freshness', False),
+        ('freshness_threshold', 0),
         ('event_handler', ''),
-        ('event_handler_enabled', '0'),
-        ('low_flap_threshold', '25'),
-        ('high_flap_threshold', '50'),
-        ('flap_detection_enabled', '1'),
-        ('flap_detection_options', 'o,d,u'),
-        ('process_perf_data', '1'),
-        ('retain_status_information', '1'),
-        ('retain_nonstatus_information', '1'),
-        ('contacts', ''),
-        ('contact_groups', ''),
-        ('notification_interval', '60'),
-        ('first_notification_delay', '0'),
-        ('notification_options', 'd,u,r,f'),
-        ('notifications_enabled', '1'),
-        ('stalking_options', ''),
+        ('event_handler_enabled', False),
+        ('low_flap_threshold', 25),
+        ('high_flap_threshold', 50),
+        ('flap_detection_enabled', True),
+        ('flap_detection_options', ['o','d','u']),
+        ('process_perf_data', True),
+        ('retain_status_information', True),
+        ('retain_nonstatus_information', True),
+        ('contacts', []),
+        ('contact_groups', []),
+        ('notification_interval', 60),
+        ('first_notification_delay', 0),
+        ('notification_options', ['d','u','r','f']),
+        ('notifications_enabled', True),
+        ('stalking_options', ['']),
         ('notes', ''),
         ('notes_url', ''),
         ('action_url', ''),
@@ -533,31 +552,31 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('statusmap_image', ''),
         ('2d_coords', ''),
         ('3d_coords', ''),
-        ('failure_prediction_enabled', '0'),
+        ('failure_prediction_enabled', False),
         ('realm', None),
         ('poller_tag', 'None'),
         ('reactionner_tag', 'None'),
-        ('resultmodulations', ''),
-        ('business_impact_modulations', ''),
-        ('escalations', ''),
+        ('resultmodulations', []),
+        ('business_impact_modulations', []),
+        ('escalations', []),
         ('maintenance_period', ''),
-        ('business_impact', '2'),
+        ('business_impact', 2),
         ('trigger', ''),
         ('trigger_name', ''),
-        ('trigger_broker_raise_enabled', '0'),
-        ('time_to_orphanage', '300'),
-        ('trending_policies', ''),
-        ('checkmodulations', ''),
-        ('macromodulations', ''),
-        ('custom_views', ''),
-        ('service_overrides', ''),
-        ('service_excludes', ''),
+        ('trigger_broker_raise_enabled', False),
+        ('time_to_orphanage', 300),
+        ('trending_policies', []),
+        ('checkmodulations', []),
+        ('macromodulations', []),
+        ('custom_views', []),
+        ('service_overrides', []),
+        ('service_excludes', []),
         ('business_rule_output_template', ''),
-        ('business_rule_smart_notifications', '0'),
-        ('business_rule_downtime_as_ack', '0'),
-        ('labels', ''),
-        ('business_rule_host_notification_options', ''),
-        ('business_rule_service_notification_options', ''),
+        ('business_rule_smart_notifications', False),
+        ('business_rule_downtime_as_ack', False),
+        ('labels', []),
+        ('business_rule_host_notification_options', ['']),
+        ('business_rule_service_notification_options', ['']),
         ])
 
     def setUp(self):
@@ -573,10 +592,11 @@ class TestModule(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('modules', ''),
+        ('modules', ['']),
         ])
 
     def setUp(self):
@@ -591,17 +611,19 @@ class TestNotificationway(PropertiesTester, ShinkenTest):
     without_default = [
         'notificationway_name',
         'host_notification_period', 'service_notification_period',
-        'host_notification_options', 'service_notification_options',
         'host_notification_commands', 'service_notification_commands']
 
     properties = dict([
+        ('service_notification_options', ['']),
+        ('host_notification_options', ['']),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('host_notifications_enabled', '1'),
-        ('service_notifications_enabled', '1'),
-        ('min_business_impact', '0'),
+        ('host_notifications_enabled', True),
+        ('service_notifications_enabled', True),
+        ('min_business_impact', 0),
         ])
 
     def setUp(self):
@@ -617,8 +639,9 @@ class TestPack(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ])
 
@@ -631,19 +654,21 @@ class TestRealm(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['members', 'realm_name']
+    without_default = ['realm_name']
 
     properties = dict([
+        ('members', None),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('unknown_members', None),
         ('id', 0),
-        ('realm_members', ''),
-        ('higher_realms', ''),
-        ('default', '0'),
-        ('broker_complete_links', '0'),
+        ('realm_members', []),
+        ('higher_realms', []),
+        ('default', False),
+        ('broker_complete_links', False),
         ])
 
     def setUp(self):
@@ -659,10 +684,11 @@ class TestResultmodulation(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('exit_codes_match', ''),
+        ('exit_codes_match', []),
         ('exit_code_modulation', None),
         ('modulation_period', None),
         ])
@@ -680,16 +706,17 @@ class TestServicedependency(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('dependent_hostgroup_name', ''),
         ('hostgroup_name', ''),
-        ('inherits_parent', '0'),
-        ('execution_failure_criteria', 'n'),
-        ('notification_failure_criteria', 'n'),
+        ('inherits_parent', False),
+        ('execution_failure_criteria', ['n']),
+        ('notification_failure_criteria', ['n']),
         ('dependency_period', ''),
-        ('explode_hostgroup', '0'),
+        ('explode_hostgroup', False),
         ])
 
     def setUp(self):
@@ -710,12 +737,13 @@ class TestServiceescalation(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('notification_interval', '30'),
+        ('notification_interval', 30),
         ('escalation_period', ''),
-        ('escalation_options', 'd,u,r,w,c'),
+        ('escalation_options', ['d','u','r','w','c']),
         ])
 
     def setUp(self):
@@ -731,8 +759,9 @@ class TestServiceextinfo(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('notes', ''),
         ('notes_url', ''),
@@ -749,12 +778,14 @@ class TestServicegroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['members', 'servicegroup_name', 'alias']
+    without_default = ['servicegroup_name', 'alias']
 
     properties = dict([
+        ('members', None),
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('unknown_members', None),
         ('id', 0),
@@ -779,71 +810,72 @@ class TestService(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
-        ('max_check_attempts', '1'),
+        ('max_check_attempts', 1),
         ('hostgroup_name', ''),
         ('display_name', ''),
         ('servicegroups', ''),
-        ('is_volatile', '0'),
+        ('is_volatile', False),
         ('initial_state', 'o'),
-        ('active_checks_enabled', '1'),
-        ('passive_checks_enabled', '1'),
-        ('obsess_over_service', '0'),
-        ('check_freshness', '0'),
-        ('freshness_threshold', '0'),
+        ('active_checks_enabled', True),
+        ('passive_checks_enabled', True),
+        ('obsess_over_service', False),
+        ('check_freshness', False),
+        ('freshness_threshold', 0),
         ('event_handler', ''),
-        ('event_handler_enabled', '0'),
-        ('low_flap_threshold', '-1'),
-        ('high_flap_threshold', '-1'),
-        ('flap_detection_enabled', '1'),
-        ('flap_detection_options', 'o,w,c,u'),
-        ('process_perf_data', '1'),
-        ('retain_status_information', '1'),
-        ('retain_nonstatus_information', '1'),
-        ('notification_interval', '60'),
-        ('first_notification_delay', '0'),
-        ('notification_options', 'w,u,c,r,f,s'),
-        ('notifications_enabled', '1'),
-        ('contacts', ''),
-        ('contact_groups', ''),
-        ('stalking_options', ''),
+        ('event_handler_enabled', False),
+        ('low_flap_threshold', -1),
+        ('high_flap_threshold', -1),
+        ('flap_detection_enabled', True),
+        ('flap_detection_options', ['o','w','c','u']),
+        ('process_perf_data', True),
+        ('retain_status_information', True),
+        ('retain_nonstatus_information', True),
+        ('notification_interval', 60),
+        ('first_notification_delay', 0),
+        ('notification_options', ['w','u','c','r','f','s']),
+        ('notifications_enabled', True),
+        ('contacts', []),
+        ('contact_groups', []),
+        ('stalking_options', ['']),
         ('notes', ''),
         ('notes_url', ''),
         ('action_url', ''),
         ('icon_image', ''),
         ('icon_image_alt', ''),
         ('icon_set', ''),
-        ('failure_prediction_enabled', '0'),
-        ('parallelize_check', '1'),
+        ('failure_prediction_enabled', False),
+        ('parallelize_check', True),
         ('poller_tag', 'None'),
         ('reactionner_tag', 'None'),
-        ('resultmodulations', ''),
-        ('business_impact_modulations', ''),
-        ('escalations', ''),
+        ('resultmodulations', []),
+        ('business_impact_modulations', []),
+        ('escalations', []),
         ('maintenance_period', ''),
         ('duplicate_foreach', ''),
         ('default_value', ''),
-        ('business_impact', '2'),
+        ('business_impact', 2),
         ('trigger', ''),
         ('trigger_name', ''),
-        ('trigger_broker_raise_enabled', '0'),
-        ('time_to_orphanage', '300'),
-        ('trending_policies', ''),
-        ('checkmodulations', ''),
-        ('macromodulations', ''),
+        ('trigger_broker_raise_enabled', False),
+        ('time_to_orphanage', 300),
+        ('trending_policies', []),
+        ('checkmodulations', []),
+        ('macromodulations', []),
         ('aggregation', ''),
-        ('service_dependencies', ''),
-        ('custom_views', ''),
-        ('merge_host_contacts', '0'),
+        ('service_dependencies', None),
+        ('custom_views', []),
+        ('merge_host_contacts', False),
         ('business_rule_output_template', ''),
-        ('business_rule_smart_notifications', '0'),
-        ('business_rule_downtime_as_ack', '0'),
-        ('labels', ''),
-        ('business_rule_host_notification_options', ''),
-        ('business_rule_service_notification_options', ''),
-        ('host_dependency_enabled', '1'),
+        ('business_rule_smart_notifications', False),
+        ('business_rule_downtime_as_ack', False),
+        ('labels', []),
+        ('business_rule_host_notification_options', None),
+        ('business_rule_service_notification_options', None),
+        ('host_dependency_enabled', True),
         ])
 
     def setUp(self):
@@ -859,16 +891,14 @@ class TestTimeperiod(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('definition_order', 100),
         ('name', ''),
         ('alias', ''),
-        ('use', ''),
-        ('definition_order', '100'),
-        ('register', '1'),
+        ('register', True),
         ('dateranges', []),
         ('exclude', []),
-        ('is_active', '0'),
+        ('is_active', False),
         ])
 
     def setUp(self):
@@ -884,8 +914,9 @@ class TestTrigger(PropertiesTester, ShinkenTest):
 
     properties = dict([
         ('imported_from', 'unknown'),
-        ('use', ''),
-        ('definition_order', '100'),
+        ('use', None),
+        ('register', True),
+        ('definition_order', 100),
         ('name', ''),
         ('code_src', ''),
         ])

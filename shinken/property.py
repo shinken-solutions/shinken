@@ -25,7 +25,7 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int, unique_value
+from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
 import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
@@ -123,6 +123,9 @@ class Property(object):
         self.merging = merging
         self.split_on_coma = split_on_coma
 
+    def pythonize(self, val):
+        return val
+
 
 class UnusedProp(Property):
     """A unused Property. These are typically used by Nagios but
@@ -161,8 +164,13 @@ class BoolProp(Property):
 
     @staticmethod
     def pythonize(val):
-        val = unique_value(val)
-        return _boolean_states[val.lower()]
+        if isinstance(val, bool):
+            return val
+        val = unique_value(val).lower()
+        if val in _boolean_states.keys():
+            return _boolean_states[val]
+        else:
+            raise PythonizeError("Cannot convert '%s' to a boolean value" % val)
 
 
 class IntegerProp(Property):
@@ -214,7 +222,10 @@ class ListProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
-        return to_split(val, self.split_on_coma)
+        if isinstance(val, list):
+            return list_split(val, self.split_on_coma)
+        else:
+            return to_split(val, self.split_on_coma)
 
 
 class LogLevelProp(StringProp):
@@ -237,7 +248,8 @@ class DictProp(Property):
 
         if not elts_prop is None and not issubclass(elts_prop, Property):
             raise TypeError("DictProp constructor only accept Property sub-classes as elts_prop parameter")
-        self.elts_prop = elts_prop()
+        if elts_prop is not None:
+            self.elts_prop = elts_prop()
 
     def pythonize(self, val):
         val = unique_value(val)
@@ -255,6 +267,9 @@ class DictProp(Property):
 
         if val is None:
             return(dict())
+
+        if self.elts_prop is None:
+            return val
 
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
         print ">>>", dict([split(kv) for kv in to_split(val)])
@@ -279,3 +294,26 @@ class AddrProp(Property):
             addr['port'] = int(m.group(2))
 
         return addr
+
+class ToGuessProp(Property):
+    """Unknown property encountered while parsing"""
+
+    @staticmethod
+    def pythonize(val):
+        if isinstance(val, list) and len(set(val)) == 1:
+            # If we have a list with a unique value just use it
+            return val[0]
+        else:
+            # Well, can't choose to remove somthing.
+            return val
+
+class IntListProp(ListProp):
+    """Integer List property"""
+    def pythonize(self, val):
+        super(IntListProp, self).pythonize(val)
+        return [int(e) for e in val]
+
+
+class PythonizeError(Exception):
+    pass
+

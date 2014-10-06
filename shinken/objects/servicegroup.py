@@ -25,7 +25,7 @@
 
 from itemgroup import Itemgroup, Itemgroups
 
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
 
@@ -35,7 +35,7 @@ class Servicegroup(Itemgroup):
 
     properties = Itemgroup.properties.copy()
     properties.update({
-        'id':                StringProp(default=0, fill_brok=['full_status']),
+        'id':                IntegerProp(default=0, fill_brok=['full_status']),
         'servicegroup_name': StringProp(fill_brok=['full_status']),
         'alias':             StringProp(fill_brok=['full_status']),
         'notes':             StringProp(default='', fill_brok=['full_status']),
@@ -52,10 +52,10 @@ class Servicegroup(Itemgroup):
     }
 
     def get_services(self):
-        if self.has('members'):
+        if getattr(self, 'members', None) is not None:
             return self.members
         else:
-            return ''
+            return []
 
     def get_name(self):
         return self.servicegroup_name
@@ -115,12 +115,11 @@ class Servicegroups(Itemgroups):
     def linkify_sg_by_srv(self, services):
         for sg in self:
             mbrs = sg.get_services()
-
             # The new member list, in id
             new_mbrs = []
             seek = 0
             host_name = ''
-            if (len(mbrs) == 1):
+            if len(mbrs) == 1 and mbrs[0] != '':
                 sg.add_string_unknown_member('%s' % mbrs[0])
 
             for mbr in mbrs:

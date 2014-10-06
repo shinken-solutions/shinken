@@ -39,7 +39,7 @@ except ImportError:
 from copy import copy
 
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, IntegerProp
+from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp, PythonizeError
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq, is_complex_expr
 from shinken.acknowledge import Acknowledge
@@ -53,11 +53,11 @@ class Item(object):
 
     properties = {
         'imported_from':            StringProp(default='unknown'),
-        'use':                      ListProp(default=''),
+        'use':                      ListProp(default=None, split_on_coma=True),
         'name':                     StringProp(default=''),
-        'definition_order':         IntegerProp(default='100'),
+        'definition_order':         IntegerProp(default=100),
         # TODO: find why we can't uncomment this line below.
-        #'register':                 BoolProp(default='1'),
+        'register':                 BoolProp(default=True),
     }
 
     running_properties = {
@@ -85,30 +85,56 @@ class Item(object):
         self.plus = {}  # for value with a +
 
         self.init_running_properties()
-
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
-            # delistify attributes if there is only one value
-            params[key] = self.compact_unique_attr_value(params[key])
+            # We want to create instance of object with the good type.
+            # Here we've just parsed config files so everything is a list.
+            # We use the pythonize method to get the good type.
+            try:
+                if key in self.properties:
+                    val = self.properties[key].pythonize(params[key])
+                elif key in self.running_properties:
+                    warning = "using a the running property %s in a config file" % key
+                    self.configuration_warnings.append(warning)
+                    val = self.running_properties[key].pythonize(params[key])
+                elif hasattr(self, 'old_properties') and key in self.old_properties:
+                    val = self.properties[self.old_properties[key]].pythonize(params[key])
+                else:
+                    warning = "Guessing the property %s type because it is not in %s object properties" % \
+                              (key, cls.__name__)
+                    self.configuration_warnings.append(warning)
+                    val = ToGuessProp.pythonize(params[key])
+            except PythonizeError, e:
+                err = "Error while pythonizing parameter %s: %s" % (key, e)
+                self.configuration_errors.append(err)
+                continue
+
             # checks for attribute value special syntax (+ or _)
-            if not isinstance(params[key], list) and \
-               len(params[key]) >= 1 and params[key][0] == '+':
+            # we can have '+param' or ['+template1' , 'template2']
+            if (isinstance(val, str) and len(val) >= 1 and val[0] == '+') :
+                err = "A + value for a single string is not handled"
+                self.configuration_errors.append(err)
+                continue
+
+            if (isinstance(val, list) and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
+                val[0] = val[0][1:]
                 if key[0] == "_":
-                    self.plus[key.upper()] = params[key][1:]  # we remove the +
+
+                    self.plus[key.upper()] = val  # we remove the +
                 else:
-                    self.plus[key] = params[key][1:]  # we remove the +
+                    self.plus[key] = val   # we remove the +
             elif key[0] == "_":
-                if isinstance(params[key], list):
+                if isinstance(val, list):
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
                     continue
                 custom_name = key.upper()
-                self.customs[custom_name] = params[key]
+                self.customs[custom_name] = val
             else:
-                setattr(self, key, params[key])
+                setattr(self, key, val)
 
 
     # When values to set on attributes are unique (single element list),
@@ -167,7 +193,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def is_tpl(self):
         """ Return if the elements is a template """
-        return getattr(self, "register", '') == '0'
+        return not getattr(self, "register", True)
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -203,23 +229,6 @@ Like temporary attributes such as "imported_from", etc.. """
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
 
-    # Use to make python properties
-    def pythonize(self):
-        cls = self.__class__
-        for prop, tab in cls.properties.items():
-            try:
-                new_val = tab.pythonize(getattr(self, prop))
-                setattr(self, prop, new_val)
-            except AttributeError, exp:
-                #print exp
-                pass  # Will be catch at the is_correct moment
-            except KeyError, exp:
-                #print "Missing prop value", exp
-                err = "the property '%s' of '%s' do not have value" % (prop, self.get_name())
-                self.configuration_errors.append(err)
-            except ValueError, exp:
-                err = "incorrect type for property '%s' of '%s'" % (prop, self.get_name())
-                self.configuration_errors.append(err)
 
     # Compute a hash of this element values. Should be launched
     # When we got all our values, but not linked with other objects
@@ -238,13 +247,16 @@ Like temporary attributes such as "imported_from", etc.. """
     def get_templates(self):
         use = getattr(self, 'use', '')
         if isinstance(use, list):
-            return use
+            return [n.strip() for n in use if n.strip()]
         else:
             return [n.strip() for n in use.split(',') if n.strip()]
 
 
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, prop):
+        if prop == 'register':
+            return None  # We do not inherit from register
+
         # If I have the prop, I take mine but I check if I must
         # add a plus property
         if hasattr(self, prop):
@@ -253,9 +265,10 @@ Like temporary attributes such as "imported_from", etc.. """
             # if property is in plus, add or replace it
             # Template should keep the '+' at the beginning of the chain
             if self.has_plus(prop):
-                value = self.get_plus_and_delete(prop) + ',' + value
+                value.insert(0, self.get_plus_and_delete(prop))
                 if self.is_tpl():
-                    value = '+' + value
+                    value = list(value)
+                    value.insert(0, '+')
             return value
         # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
@@ -264,24 +277,29 @@ Like temporary attributes such as "imported_from", etc.. """
         for i in self.templates:
             value = i.get_property_by_inheritance(prop)
 
-            if value is not None:
+            if value is not None and value != []:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
-                if not isinstance(value, list) and value.startswith('+'):
+                if isinstance(value, list) and value[0] == '+':
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
+                        value = list(value)
                         value = value[1:]
                     still_loop = True
 
                 # Maybe in the previous loop, we set a value, use it too
                 if hasattr(self, prop):
                     # If the current value is strong, it will simplify the problem
-                    if not isinstance(value, list) and value.startswith('+'):
+                    if not isinstance(value, list) and value[0] == '+':
                         # In this case we can remove the + from our current
                         # tpl because our value will be final
-                        value = ','.join([getattr(self, prop), value[1:]])
+                        new_val = list(getattr(self, prop))
+                        new_val.extend(value[1:])
+                        value = new_val
                     else: # If not, se should keep the + sign of need
-                        value = ','.join([getattr(self, prop), value])
+                        new_val = list(getattr(self, prop))
+                        new_val.extend(value)
+                        value = new_val
 
 
                 # Ok, we can set it
@@ -292,10 +310,12 @@ Like temporary attributes such as "imported_from", etc.. """
                 if not still_loop:
                     # And set my own value in the end if need
                     if self.has_plus(prop):
-                        value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                        value = list(value)
+                        value = list(getattr(self, prop))
+                        value.extend(self.get_plus_and_delete(prop))
                         # Template should keep their '+'
-                        if self.is_tpl() and not value.startswith('+'):
-                            value = '+' + value
+                        if self.is_tpl() and not value[0] == '+':
+                            value.insert(0, '+')
                         setattr(self, prop, value)
                     return value
 
@@ -308,14 +328,16 @@ Like temporary attributes such as "imported_from", etc.. """
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
-                value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                value = list(getattr(self, prop))
+                value.extend(self.get_plus_and_delete(prop))
             else:
                 value = self.get_plus_and_delete(prop)
             # Template should keep their '+' chain
             # We must say it's a '+' value, so our son will now that it must
             # still loop
-            if self.is_tpl() and not value.startswith('+'):
-                value = '+' + value
+            if self.is_tpl() and value != [] and not value[0] == '+':
+                value.insert(0, '+')
+
             setattr(self, prop, value)
             return value
 
@@ -337,12 +359,13 @@ Like temporary attributes such as "imported_from", etc.. """
                     else:
                         value = self.customs[prop]
                     if self.has_plus(prop):
-                        value = self.get_plus_and_delete(prop) + ',' + value
+                        value.insert(0, self.get_plus_and_delete(prop))
+                        #value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
-                value = self.get_plus_and_delete(prop) + ',' + value
+                value.insert(0, self.get_plus_and_delete(prop))
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put
@@ -627,10 +650,12 @@ Like temporary attributes such as "imported_from", etc.. """
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
-        self.triggers.extend(self.trigger_name)
+        self.triggers.extend([self.trigger_name])
         #print "I am linking my triggers", self.get_full_name(), self.triggers
         new_triggers = []
         for tname in self.triggers:
+            if tname == '':
+                continue
             t = triggers.find_by_name(tname)
             if t:
                 setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
@@ -1044,8 +1069,7 @@ class Items(object):
     def linkify_with_contacts(self, contacts):
         for i in self:
             if hasattr(i, 'contacts'):
-                contacts_tab = i.contacts.split(',')
-                contacts_tab = strip_and_uniq(contacts_tab)
+                contacts_tab = strip_and_uniq(i.contacts)
                 new_contacts = []
                 for c_name in contacts_tab:
                     if c_name != '':
@@ -1064,8 +1088,7 @@ class Items(object):
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
-                escalations_tab = i.escalations.split(',')
-                escalations_tab = strip_and_uniq(escalations_tab)
+                escalations_tab = strip_and_uniq(i.escalations)
                 new_escalations = []
                 for es_name in [e for e in escalations_tab if e != '']:
                     es = escalations.find_by_name(es_name)
@@ -1080,8 +1103,7 @@ class Items(object):
     def linkify_with_resultmodulations(self, resultmodulations):
         for i in self:
             if hasattr(i, 'resultmodulations'):
-                resultmodulations_tab = i.resultmodulations.split(',')
-                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
+                resultmodulations_tab = strip_and_uniq(i.resultmodulations)
                 new_resultmodulations = []
                 for rm_name in resultmodulations_tab:
                     rm = resultmodulations.find_by_name(rm_name)
@@ -1097,8 +1119,7 @@ class Items(object):
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
             if hasattr(i, 'business_impact_modulations'):
-                business_impact_modulations_tab = i.business_impact_modulations.split(',')
-                business_impact_modulations_tab = strip_and_uniq(business_impact_modulations_tab)
+                business_impact_modulations_tab = strip_and_uniq(i.business_impact_modulations)
                 new_business_impact_modulations = []
                 for rm_name in business_impact_modulations_tab:
                     rm = business_impact_modulations.find_by_name(rm_name)
@@ -1115,6 +1136,7 @@ class Items(object):
     # all into our contacts property
     def explode_contact_groups_into_contacts(self, item, contactgroups):
         if hasattr(item, 'contact_groups'):
+            # TODO : See if we can remove this if
             if isinstance(item.contact_groups, list):
                 cgnames = item.contact_groups
             else:
@@ -1132,7 +1154,7 @@ class Items(object):
                 # We add contacts into our contacts
                 if cnames != []:
                     if hasattr(item, 'contacts'):
-                        item.contacts += ',' + cnames
+                        item.contacts.extend(cnames)
                     else:
                         item.contacts = cnames
 
@@ -1291,7 +1313,7 @@ class Items(object):
             hg = hostgroups.find_by_name(name)
             if hg is None:
                 raise ValueError("the hostgroup '%s' is unknown" % hgname)
-            mbrs = [h.strip() for h in hg.get_hosts().split(',') if h.strip()]
+            mbrs = [h.strip() for h in hg.get_hosts() if h.strip()]
             host_names.extend(mbrs)
         return host_names
 
@@ -1346,7 +1368,7 @@ class Items(object):
     # Parent graph: use to find quickly relations between all item, and loop
     # return True if there is a loop
     def no_loop_in_parents(self, attr1, attr2):
-        """Find loop in dependencies.
+        """ Find loop in dependencies.
         For now, used with the following attributes :
         :(self, parents):                                      host dependencies from host object
         :(host_name, dependent_host_name):                     host dependencies from hostdependencies object

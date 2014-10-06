@@ -56,7 +56,7 @@ class ServiceExtInfo(Item):
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties = Item.properties.copy()
     properties.update({
-        'host_name':            ListProp(),
+        'host_name':            StringProp(),
         'service_description':  StringProp(),
         'notes':                StringProp(default=''),
         'notes_url':            StringProp(default=''),
@@ -124,7 +124,7 @@ class ServicesExtInfo(Items):
     # Merge extended host information into host
     def merge(self, services):
         for ei in self:
-            if hasattr(ei, 'register') and getattr(ei, 'register') == '0':
+            if hasattr(ei, 'register') and not getattr(ei, 'register') :
                 # We don't have to merge template
                 continue
             hosts_names = ei.get_name().split(",")

@@ -42,7 +42,7 @@ from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_d
     get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, \
     GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names, to_name_if_possible, \
     is_complex_expr
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp, DictProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
@@ -75,91 +75,91 @@ class Service(SchedulingItem):
         'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'display_name':           StringProp(default='', fill_brok=['full_status']),
         'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names, merging='join'),
-        'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
+        'is_volatile':            BoolProp(default=False, fill_brok=['full_status']),
         'check_command':          StringProp(fill_brok=['full_status']),
         'initial_state':          CharProp(default='o', fill_brok=['full_status']),
-        'max_check_attempts':     IntegerProp(default='1',fill_brok=['full_status']),
+        'max_check_attempts':     IntegerProp(default=1,fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
-        'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'active_checks_enabled':  BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'check_period':           StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'obsess_over_service':    BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':        BoolProp(default='0', fill_brok=['full_status']),
-        'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
+        'obsess_over_service':    BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'check_freshness':        BoolProp(default=False, fill_brok=['full_status']),
+        'freshness_threshold':    IntegerProp(default=0, fill_brok=['full_status']),
         'event_handler':          StringProp(default='', fill_brok=['full_status']),
-        'event_handler_enabled':  BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'low_flap_threshold':     IntegerProp(default='-1', fill_brok=['full_status']),
-        'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'flap_detection_options': ListProp(default='o,w,c,u', fill_brok=['full_status']),
-        'process_perf_data':      BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
-        'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
-        'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
+        'event_handler_enabled':  BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'low_flap_threshold':     IntegerProp(default=-1, fill_brok=['full_status']),
+        'high_flap_threshold':    IntegerProp(default=-1, fill_brok=['full_status']),
+        'flap_detection_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'flap_detection_options': ListProp(default=['o','w','c','u'], fill_brok=['full_status'], split_on_coma=True),
+        'process_perf_data':      BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
+        'retain_nonstatus_information': BoolProp(default=True, fill_brok=['full_status']),
+        'notification_interval':  IntegerProp(default=60, fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(default=0, fill_brok=['full_status']),
         'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options':   ListProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
-        'notifications_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
-        'contact_groups':         StringProp(default='', fill_brok=['full_status'], merging='join'),
-        'stalking_options':       ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'notification_options':   ListProp(default=['w','u','c','r','f','s'], fill_brok=['full_status'], split_on_coma=True),
+        'notifications_enabled':  BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'contacts':               ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
+        'contact_groups':         ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'stalking_options':       ListProp(default=[''], fill_brok=['full_status'], merging='join'),
         'notes':                  StringProp(default='', fill_brok=['full_status']),
         'notes_url':              StringProp(default='', fill_brok=['full_status']),
         'action_url':             StringProp(default='', fill_brok=['full_status']),
         'icon_image':             StringProp(default='', fill_brok=['full_status']),
         'icon_image_alt':         StringProp(default='', fill_brok=['full_status']),
         'icon_set':               StringProp(default='', fill_brok=['full_status']),
-        'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
-        'parallelize_check':       BoolProp(default='1', fill_brok=['full_status']),
+        'failure_prediction_enabled': BoolProp(default=False, fill_brok=['full_status']),
+        'parallelize_check':       BoolProp(default=True, fill_brok=['full_status']),
 
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
         'reactionner_tag':         StringProp(default='None'),
-        'resultmodulations':       StringProp(default='', merging='join'),
-        'business_impact_modulations':    StringProp(default='', merging='join'),
-        'escalations':             StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'resultmodulations':       ListProp(default=[], merging='join'),
+        'business_impact_modulations':    ListProp(default=[], merging='join'),
+        'escalations':             ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
-        'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
-        'labels':                  ListProp(default='', fill_brok=['full_status'], merging='join'),
-        'host_dependency_enabled':  BoolProp(default='1', fill_brok=['full_status']),
+        'time_to_orphanage':       IntegerProp(default=300, fill_brok=['full_status']),
+        'merge_host_contacts':     BoolProp(default=False, fill_brok=['full_status']),
+        'labels':                  ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'host_dependency_enabled':  BoolProp(default=True, fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
         'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
         # Business rules notifications mode
-        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_smart_notifications': BoolProp(default=False, fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
-        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
-        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
-        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
+        'business_rule_host_notification_options':    ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+        'business_rule_service_notification_options': ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
 
         # Easy Service dep definition
-        'service_dependencies':   ListProp(default='', merging='join'), # TODO: find a way to brok it?
+        'service_dependencies':   ListProp(default=None, merging='join', split_on_coma=True), # TODO: find a way to brok it?
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
         'default_value':           StringProp(default=''),
 
         # Business_Impact value
-        'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':         IntegerProp(default=2, fill_brok=['full_status']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
-        'trigger_name':    ListProp(default=''),
-        'trigger_broker_raise_enabled': BoolProp(default='0'),
+        'trigger_name':    StringProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default=False),
 
         # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'trending_policies':    ListProp(default=[], fill_brok=['full_status'], merging='join'),
 
         # Our check ways. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status'], merging='join'),
-        'macromodulations':       ListProp(default='', merging='join'),
+        'checkmodulations':       ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'macromodulations':       ListProp(default=[], merging='join'),
 
         # Custom views
-        'custom_views'     :    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'custom_views'     :    ListProp(default=[], fill_brok=['full_status'], merging='join'),
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
@@ -208,7 +208,7 @@ class Service(SchedulingItem):
 
         'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked
-        'notifications_in_progress': ListProp(default={}, retention=True), # no broks because notifications are too linked
+        'notifications_in_progress': DictProp(default={}, retention=True), # no broks because notifications are too linked
         'downtimes':          ListProp(default=[], fill_brok=['full_status'], retention=True),
         'comments':           ListProp(default=[], fill_brok=['full_status'], retention=True),
         'flapping_changes':   ListProp(default=[], fill_brok=['full_status'], retention=True),
@@ -239,7 +239,7 @@ class Service(SchedulingItem):
         'perf_data':          StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'last_perf_data':     StringProp(default='', retention=True),
         'host':               StringProp(default=None),
-        'customs':            ListProp(default={}, fill_brok=['full_status']),
+        'customs':            DictProp(default={}, fill_brok=['full_status']),
         # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':  ListProp(default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
@@ -292,7 +292,7 @@ class Service(SchedulingItem):
         'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers': StringProp(default=[]),
+        'triggers': ListProp(default=[]),
 
         # Keep the string of the last command launched for this element
         'last_check_command': StringProp(default=''),
@@ -587,13 +587,14 @@ class Service(SchedulingItem):
                             safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                             new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                     # Here is a list of property where we will expand the $KEY$ by the value
-                    _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler']
+                    _the_expandables = ['check_command', 'aggregation', 'event_handler']
                     for prop in _the_expandables:
                         if hasattr(self, prop):
                             # here we can replace VALUE, VALUE1, VALUE2,...
                             setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
-                    if hasattr(self, 'aggregation'):
-                        new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
+                    if hasattr(self, 'service_dependencies'):
+                        for i, sd in enumerate(new_s.service_dependencies):
+                                new_s.service_dependencies[i] = sd.replace('$' + key + '$', key_value[key])
                 # And then add in our list this new service
                 duplicates.append(new_s)
         else:
@@ -1143,7 +1144,10 @@ class Services(Items):
                     err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, sdescr)
                     host.configuration_errors.append(err)
                     continue
-                setattr(service, prop, value)
+
+                # Pythonize the value because here value is str.
+                setattr(service,prop, service.properties[prop].pythonize(value))
+
 
     # We can link services with hosts so
     # We can search in O(hosts) instead
@@ -1373,12 +1377,13 @@ class Services(Items):
             sname = s.service_description
             shname = getattr(s, 'host_name', '')
             if hasattr(s, 'servicegroups'):
+                # Todo: See if we can remove this if
                 if isinstance(s.servicegroups, list):
                     sgs = s.servicegroups
                 else:
                     sgs = s.servicegroups.split(',')
                 for sg in sgs:
-                    servicegroups.add_member(shname + ',' + sname, sg.strip())
+                    servicegroups.add_member([shname, sname], sg.strip())
 
     def register_service_dependencies(self, s, servicedependencies):
         """
@@ -1391,7 +1396,7 @@ class Services(Items):
         # We just create serviceDep with goods values (as STRING!),
         # the link pass will be done after
         sdeps = [d.strip() for d in
-                 getattr(s, "service_dependencies", '').split(',')]
+                 getattr(s, "service_dependencies", [])]
         # %2=0 are for hosts, !=0 are for service_description
         i = 0
         hname = ''

@@ -170,8 +170,11 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         # Hack push_flavor, that is set by the dispatcher
         self.conf.push_flavor = 0
         self.conf.load_triggers()
+        #import pdb;pdb.set_trace()
         self.conf.linkify_templates()
+        #import pdb;pdb.set_trace()
         self.conf.apply_inheritance()
+        #import pdb;pdb.set_trace()
         self.conf.explode()
         #print "Aconf.services has %d elements" % len(self.conf.services)
         self.conf.apply_implicit_inheritance()
@@ -180,7 +183,6 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
         self.conf.override_properties()
-        self.conf.pythonize()
         self.conf.linkify()
         self.conf.apply_dependencies()
         self.conf.explode_global_conf()

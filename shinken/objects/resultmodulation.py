@@ -31,7 +31,7 @@ import time
 
 from item import Item, Items
 
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp, IntegerProp, IntListProp
 
 
 class Resultmodulation(Item):
@@ -41,8 +41,8 @@ class Resultmodulation(Item):
     properties = Item.properties.copy()
     properties.update({
         'resultmodulation_name': StringProp(),
-        'exit_codes_match':      ListProp(default=''),
-        'exit_code_modulation':  StringProp(default=None),
+        'exit_codes_match':      IntListProp(default=[]),
+        'exit_code_modulation':  IntegerProp(default=None),
         'modulation_period':     StringProp(default=None),
     })
 

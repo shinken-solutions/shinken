@@ -1550,6 +1550,7 @@ class ExternalCommandManager:
         service.schedule(force=False, force_time=check_time)
         self.sched.get_and_register_status_brok(service)
 
+
     # SCHEDULE_SVC_DOWNTIME;<host_name>;<service_description><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SVC_DOWNTIME(self, service, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(service, start_time, end_time, fixed, trigger_id, duration, author, comment)
@@ -1755,7 +1756,6 @@ class ExternalCommandManager:
         t = {'poller_name': poller_name, 'address': address, 'port': port}
         p = PollerLink(t)
         p.fill_default()
-        p.pythonize()
         p.prepare_for_conf()
         parameters = {'max_plugins_output_length': self.conf.max_plugins_output_length}
         p.add_global_conf_parameters(parameters)
