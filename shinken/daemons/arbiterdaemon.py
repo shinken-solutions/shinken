@@ -141,7 +141,7 @@ class IForArbiter(Interface):
                                 json.dumps(v)
                                 e[prop] = v
                             except Exception, exp:
-                                print exp
+                                logger.debug('%s', exp)
                     lst.append(e)
         return res
     get_all_states.doc = doc
@@ -361,7 +361,7 @@ class Arbiter(Daemon):
 
         # Ok here maybe we should stop because we are in a pure migration run
         if self.migrate:
-            print "Migration MODE. Early exiting from configuration relinking phase"
+            logger.info("Migration MODE. Early exiting from configuration relinking phase")
             return
 
         # Load all file triggers
@@ -572,12 +572,18 @@ class Arbiter(Daemon):
     # Main loop function
     def main(self):
         try:
+            # Setting log level
+            logger.setLevel('INFO')
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             # Log will be broks
             for line in self.get_header():
                 logger.info(line)
 
             self.load_config_file()
-
+            logger.setLevel(self.log_level)
             # Maybe we are in a migration phase. If so, we will bailout here
             if self.migrate:
                 self.go_migrate()
@@ -585,8 +591,8 @@ class Arbiter(Daemon):
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
-
-            self.uri_arb = self.http_daemon.register(self.interface)#, "ForArbiter")
+            
+            self.uri_arb = self.http_daemon.register(self.interface)
 
             # ok we are now fully daemonized (if requested)
             # now we can start our "external" modules (if any):

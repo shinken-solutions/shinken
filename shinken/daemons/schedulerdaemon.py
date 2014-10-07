@@ -481,6 +481,12 @@ class Shinken(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
+            # Setting log level
+            logger.setLevel(self.log_level)
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()

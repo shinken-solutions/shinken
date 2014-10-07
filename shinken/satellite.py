@@ -1064,6 +1064,12 @@ class Satellite(BaseSatellite):
 
             self.load_config_file()
 
+            # Setting log level
+            logger.setLevel(self.log_level)
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()

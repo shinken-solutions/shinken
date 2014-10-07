@@ -564,9 +564,9 @@ class Daemon(object):
         self.pid = os.getpid()
         self.debug_output.append("We are now fully daemonized :) pid=%d" % self.pid)
         # We can now output some previously silenced debug output
-        logger.warning("Printing stored debug messages prior to our daemonization")
+        logger.info("Printing stored debug messages prior to our daemonization")
         for s in self.debug_output:
-            logger.debug(s)
+            logger.info(s)
         del self.debug_output
 
 
@@ -881,7 +881,6 @@ class Daemon(object):
         # The main thing is to have a pool of X concurrent requests for the http_daemon,
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish
-        print "GO FOR IT"
         try:
             self.http_daemon.run()
         except Exception, exp:

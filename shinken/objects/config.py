@@ -892,7 +892,7 @@ class Config(Item):
             whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
             logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
             self.whole_conf_pack = whole_conf_pack
-            print "TOTAL serializing in", time.time() - t1
+            logger.debug("TOTAL serializing in %s", time.time() - t1)
 
         else:
             logger.info('Using the multiprocessing serialization pass')
@@ -942,7 +942,7 @@ class Config(Item):
                 # Now get the serialized configuration and saved them into self
                 for (i, cfg) in q:
                     r.serialized_confs[i] = cfg
-            print "TOTAL TIME", time.time() - t1
+            logger.debug("TOTAL TIME %s", time.time() - t1)
 
             # Now pickle the whole configuration into one big pickle object, for the arbiter spares
             whole_queue = m.list()
@@ -968,7 +968,7 @@ class Config(Item):
             self.whole_conf_pack = whole_queue.pop()
             logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
 
-            print "TOTAL serializing iin", time.time() - t2
+            logger.debug("TOTAL serializing in %s", time.time() - t2)
             # Shutdown the manager, the sub-process should be gone now
             m.shutdown()
 

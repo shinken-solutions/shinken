@@ -769,7 +769,13 @@ class Broker(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
-
+            
+            # Setting log level
+            logger.setLevel(self.log_level)
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             for line in self.get_header():
                 logger.info(line)
 
