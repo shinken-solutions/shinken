@@ -276,11 +276,6 @@ class Config(Item):
         'strip_idname_fqdn':    BoolProp(default='1'),
         'runners_timeout':    IntegerProp(default='3600'),
 
-        # pack_distribution_file is for keeping a distribution history
-        # of the host distribution in the several "packs" so a same
-        # scheduler will have more change of getting the same host
-        'pack_distribution_file': StringProp(default='pack_distribution.dat'),
-
         ## WEBUI part
         'webui_lock_file':    StringProp(default='webui.pid'),
         'webui_port':    IntegerProp(default='8080'),
@@ -1770,16 +1765,6 @@ class Config(Item):
             # Try to load the history association dict so we will try to
             # send the hosts in the same "pack"
             assoc = {}
-            if os.path.exists(self.pack_distribution_file):
-                logger.debug('Trying to open the distribution file %s',
-                                     self.pack_distribution_file)
-                try:
-                    f = open(self.pack_distribution_file, 'rb')
-                    assoc = cPickle.load(f)
-                    f.close()
-                except Exception, exp:
-                    logger.warning('Warning: cannot open the distribution file %s: %s', self.pack_distribution_file, str(exp))
-
 
             # Now we explode the numerous packs into nb_packs reals packs:
             # we 'load balance' them in a roundrobin way
@@ -1819,14 +1804,6 @@ class Config(Item):
                     #print 'We got the element', elt.get_full_name(), ' in pack', i, packindices
                     packs[packindices[i]].append(elt)
                     assoc[elt.get_name()] = i
-
-            try:
-                logger.info('Saving the distribution file %s', self.pack_distribution_file)
-                f = open(self.pack_distribution_file, 'wb')
-                cPickle.dump(assoc, f)
-                f.close()
-            except Exception, exp:
-                logger.warning('Could not save the distribution file %s: %s', self.pack_distribution_file, str(exp))
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.

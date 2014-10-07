@@ -217,7 +217,6 @@ class TestConfig(PropertiesTester, ShinkenTest):
         # Discovery part
         ('strip_idname_fqdn', '1'),
         ('runners_timeout', '3600'),
-        ('pack_distribution_file', 'pack_distribution.dat'),
 
         # WebUI part
         ('webui_lock_file', 'webui.pid'),
