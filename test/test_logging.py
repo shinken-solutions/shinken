@@ -38,6 +38,8 @@ from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, StreamHandler
 from shinken.log import logger as shinken_logger, naglog_result, Log, human_timestamp_log
 from shinken.log import defaultFormatter, BrokHandler, ColorStreamHandler
 
+shinken_logger.set_log = True
+
 from shinken.brok import Brok
 from shinken_test import *
 
@@ -70,20 +72,20 @@ class NoSetup:
 class TestLevels(NoSetup, ShinkenTest):
 
     def test_default_level(self):
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
         self.assertEqual(logger.level, logging.NOTSET)
 
     def test_setLevel(self):
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
         logger.setLevel(logging.WARNING)
         self.assertEqual(logger.level, min(WARNING, INFO))
 
     def test_setLevel_non_integer_raises(self):
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
         self.assertRaises(TypeError, logger.setLevel, 1.0)
 
     def test_load_obj_must_not_change_level(self):
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
         # argl, load_obj() unsets the level! save and restore it
         logger.setLevel(logging.CRITICAL)
         logger.load_obj(Dummy())
@@ -124,13 +126,15 @@ class LogCollectMixin:
         self._collector = Collector()
         self._stdout = sys.stdout
         sys.stdout = StringIO()
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
 
         sh = StreamHandler(sys.stdout)
         sh.setFormatter(defaultFormatter)
         logger.addHandler(sh)
         logger.load_obj(self._collector)
+        logger.pre_log_buffer = [] # reset the pre_log for several tests
         return logger
+
 
     def _get_logging_output(self):
         broklogs = list(self._get_brok_log_messages(self._collector))
@@ -150,6 +154,7 @@ class LogCollectMixin:
             filelogs = None
         return broklogs, stdoutlogs, filelogs
 
+
     def _put_log(self, log_method, *messages):
         #self._prepare_logging()
         try:
@@ -157,6 +162,7 @@ class LogCollectMixin:
                 log_method(msg)
         finally:
             return self._get_logging_output()
+
 
     def generic_tst(self, fun, msg, lenlist, patterns):
         #sys.stdout = StringIO()
@@ -178,6 +184,7 @@ class TestDefaultLoggingMethods(NoSetup, ShinkenTest, LogCollectMixin):
         shinken_logger.handlers = []
         shinken_logger.addHandler(sh)
         shinken_logger.load_obj(self._collector)
+        shinken_logger.log_set = True
         shinken_logger.setLevel(DEBUG)
         self.generic_tst(lambda x: naglog_result('info', x), 'Some log-message',
                          [1, 1], [r'^\[\d+\] Some log-message\n$', r'^\[\d+\] Some log-message$'])
@@ -314,7 +321,7 @@ class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
         logfile = NamedTemporaryFile("w", delete=False)
         logfile.close()
         self.logfile_name = logfile.name
-        logger.register_local_log(logfile.name)
+        logger.register_local_log(logfile.name, purge_buffer=False)
         return logger
 
     def test_register_local_log_keeps_level(self):
@@ -329,8 +336,9 @@ class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
         logfile = NamedTemporaryFile("w", delete=False)
         logfile.close()
         logfile_name = logfile.name
-        logger.register_local_log(logfile_name)
+        logger.register_local_log(logfile_name, purge_buffer=False)
         self.assertEqual(logger.level, min(ERROR, INFO))
+
 
     def test_basic_logging_log(self):
         sys.stdout = StringIO()
@@ -340,10 +348,11 @@ class TestWithLocalLogging(NoSetup, ShinkenTest, LogCollectMixin):
         shinken_logger.handlers = []
         shinken_logger.addHandler(sh)
         shinken_logger.load_obj(self._collector)
+        shinken_logger.log_set = True
         logfile = NamedTemporaryFile("w", delete=False)
         logfile.close()
         self.logfile_name = logfile.name
-        shinken_logger.register_local_log(logfile.name)
+        shinken_logger.register_local_log(logfile.name, purge_buffer=False)
         shinken_logger.setLevel(DEBUG)
         self.generic_tst(lambda x: naglog_result('info', x), 'Some log-message',
                          [1, 1, 1], ['', r'^\[\d+\] Some log-message$', r'^\[\d+\] Some log-message$'])
@@ -418,7 +427,7 @@ class TestNamedCollector(NoSetup, ShinkenTest, LogCollectMixin):
         self._collector = Collector()
         self._stdout = sys.stdout
         sys.stdout = StringIO()
-        logger = Log(name=None)
+        logger = Log(name=None, log_set=True)
         from shinken.log import defaultFormatter
         from logging import StreamHandler
         sh = StreamHandler(sys.stdout)

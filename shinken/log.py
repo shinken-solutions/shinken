@@ -94,10 +94,10 @@ class Log(logging.Logger):
     See : https://docs.python.org/2/howto/logging.html#logging-flow for more detail about
     how log are handled"""
 
-    def __init__(self, name="Shinken", level=NOTSET):
+    def __init__(self, name="Shinken", level=NOTSET, log_set=False):
         logging.Logger.__init__(self, name, level)
         self.pre_log_buffer = []
-        self.log_set = False
+        self.log_set = log_set
         
 
     def setLevel(self, level):
@@ -135,7 +135,7 @@ class Log(logging.Logger):
         self.addHandler(_brokhandler_)
 
 
-    def register_local_log(self, path, level=None):
+    def register_local_log(self, path, level=None, purge_buffer=True):
         """The shinken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
         close it.
@@ -161,7 +161,8 @@ class Log(logging.Logger):
         self.addHandler(handler)
 
         # Ok now unstack all previous logs
-        self._destack()
+        if purge_buffer:
+            self._destack()
 
         # Todo : Do we need this now we use logging?
         return handler.stream.fileno()
@@ -200,7 +201,6 @@ class Log(logging.Logger):
 
     # Ok, we are opening a log file, flush all the logs now
     def _destack(self):
-        self.info('Destacking %d pre-daemon logs' % len(self.pre_log_buffer))
         for (level, args, kwargs) in self.pre_log_buffer:
             f = getattr(logging.Logger, level, None)
             if f is None:
@@ -213,10 +213,12 @@ class Log(logging.Logger):
         self._stack('debug', args, kwargs)
         logging.Logger.debug(self, *args, **kwargs)
 
-
+    
     def info(self, *args, **kwargs):
         self._stack('info', args, kwargs)
+        #super(logging.Logger, self).info(*args, **kwargs)
         logging.Logger.info(self, *args, **kwargs)
+    
 
 
     def warning(self, *args, **kwargs):
@@ -256,6 +258,7 @@ def naglog_result(level, result, *args):
         handler.setFormatter(nagFormatter)
 
     log_fun = getattr(logger, level)
+    
     if log_fun:
         log_fun(result)
 
