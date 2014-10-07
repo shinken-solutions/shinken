@@ -312,6 +312,7 @@ class TestContact(PropertiesTester, ShinkenTest):
         ('address6', 'none'),
         ('can_submit_commands', '0'),
         ('is_admin', '0'),
+        ('expert', '0'),
         ('retain_status_information', '1'),
         ('notificationways', ''),
         ('password', 'NOPASSWORDSET'),
