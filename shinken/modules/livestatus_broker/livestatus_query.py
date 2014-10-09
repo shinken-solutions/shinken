@@ -26,23 +26,44 @@ import os
 import re
 import time
 import copy
+
+from shinken.log import logger
 from mapping import table_class_map, find_filter_converter, list_livestatus_attributes, Problem
 from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
 from livestatus_query_metainfo import LiveStatusQueryMetainfo
-from shinken.log import logger
+from livestatus_response import Separators
+from livestatus_broker_common import LiveStatusQueryError
 
+#############################################################################
 
-class LiveStatusQueryError(Exception):
-    messages = {
-        200: 'OK',
-        404: 'Invalid GET request, no such table \'%s\'',
-        450: 'Invalid GET request, no such column \'%s\'',
-        452: 'Completely invalid GET request \'%s\'',
-    }
-    pass
+def gen_all(values):
+    for val in values:
+        yield val
 
+def gen_filtered(values, filterfunc):
+    for val in values:
+        if filterfunc(val):
+            yield val
+
+def gen_limit(values, maxelements):
+    ''' This is a generator which returns up to <limit> elements '''
+    loopcnt = 1
+    for val in values:
+        if loopcnt > maxelements:
+            return
+        yield val
+        loopcnt += 1
+
+# This is a generator which returns up to <limit> elements
+# which passed the filter. If the limit has been reached
+# it is no longer necessary to loop through the original list.
+def gen_limit_filtered(values, maxelements, filterfunc):
+    for val in gen_limit(gen_filtered(values, filterfunc), maxelements):
+        yield val
+
+#############################################################################
 
 class LiveStatusQuery(object):
 
@@ -242,7 +263,7 @@ class LiveStatusQuery(object):
                 self.stats_filter_stack.or_elements(ornum)
             elif keyword == 'Separators':
                 _, sep1, sep2, sep3, sep4 = line.split(' ', 5)
-                self.response.separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
+                self.response.separators = Separators(*map(lambda x: chr(int(x)), (sep1, sep2, sep3, sep4)))
             elif keyword == 'Localtime':
                 _, self.client_localtime = self.split_option(line)
             elif keyword == 'COMMAND':
@@ -354,35 +375,6 @@ class LiveStatusQuery(object):
         return result
 
     def get_hosts_or_services_livedata(self, cs):
-        def gen_all(values):
-            for val in values:
-                yield val
-            return
-
-        def gen_filtered(values, filterfunc):
-            for val in gen_all(values):
-                if filterfunc(val):
-                    yield val
-            return
-
-        # This is a generator which returns up to <limit> elements
-        def gen_limit(values, maxelements):
-            loopcnt = 1
-            for val in gen_all(values):
-                if loopcnt > maxelements:
-                    return
-                else:
-                    yield val
-                    loopcnt += 1
-
-        # This is a generator which returns up to <limit> elements
-        # which passed the filter. If the limit has been reached
-        # it is no longer necessary to loop through the original list.
-        def gen_limit_filtered(values, maxelements, filterfunc):
-            for val in gen_limit(gen_filtered(values, filterfunc), maxelements):
-                yield val
-            return
-
         # Get an iterator which will return the list of elements belonging to a specific table.
         # Depending on the hints in the query's metainfo, the list can be only a subset.
         self.metainfo.query_hints["qclass"] = self.__class__.__name__
@@ -608,14 +600,21 @@ class LiveStatusQuery(object):
             output[column] = value
         return output
 
+    def _get_live_data_log(self, cs):
+        for x in self.db.get_live_data_log():
+            z = x.fill(self.datamgr)
+            if cs.without_filter or cs.filter_func(z):
+                yield z
+
     def get_live_data_log(self, cs):
-        firstdb = [x for x in self.db.get_live_data_log()]
-        dbresult = [z for z in (
-            x.fill(self.datamgr) for x in [copy.copy(y) for y in firstdb]
- # we better manipulate a copy of the rg objects
-            ) if (cs.without_filter or cs.filter_func(z))
-        ]
-        return dbresult
+        '''
+        :param cs: The `LiveStatusConstraints´ instance to use for the live data logs.
+        :return: a generator which yields logs matching the given "cs" constraints.
+        '''
+        items = self._get_live_data_log(cs)
+        if self.limit:
+            items = gen_limit(items, self.limit)
+        return items
 
     def statsify_result(self, filtresult):
         """Applies the stats filter functions to the result.

@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2012:
@@ -86,7 +85,7 @@ def modified_attributes_names(self):
 def join_with_separators(request, *args):
     if request.response.outputformat == 'csv':
         try:
-            return request.response.separators[3].join([str(arg) for arg in args])
+            return request.response.separators.pipe.join([str(arg) for arg in args])
         except Exception, e:
             logger.error("[Livestatus Broker Mapping] Bang Error: %s" % e)
     elif request.response.outputformat == 'json' or request.response.outputformat == 'python':
@@ -162,7 +161,7 @@ def get_livestatus_full_name(item, req):
     cls_name = item.__class__.my_type
     if req.response.outputformat == 'csv':
         if cls_name == 'service':
-            return item.host_name + req.response.separators[3] + item.service_description
+            return item.host_name + req.response.separators.pipe + item.service_description
         else:
             return item.host_name
     elif req.response.outputformat == 'json' or req.response.outputformat == 'python':
