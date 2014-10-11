@@ -373,7 +373,11 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
         'TOTALHOSTSERVICESUNKNOWN': 'get_total_services_unknown',
         'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical',
-        'HOSTBUSINESSIMPACT':  'business_impact'
+        'HOSTBUSINESSIMPACT':  'business_impact',
+        # Business rules output formatting related macros
+        'STATUS':            'get_status',
+        'SHORTSTATUS':       'get_short_status',
+        'FULLNAME':          'get_full_name',
     }
 
     # Manage ADDRESSX macros by adding them dynamically
@@ -1010,6 +1014,28 @@ class Host(SchedulingItem):
 
     def get_check_command(self):
         return self.check_command.get_name()
+
+    def get_short_status(self):
+        mapping = {
+            0: "U",
+            1: "D",
+            2: "N",
+        }
+        if self.got_business_rule:
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return mapping.get(self.state_id, "n/a")
+
+    def get_status(self):
+        if self.got_business_rule:
+            mapping = {
+                0: "UP",
+                1: "DOWN",
+                2: "UNREACHABLE",
+            }
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return self.state
 
 
 # CLass for the hosts lists. It's mainly for configuration

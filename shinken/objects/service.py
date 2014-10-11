@@ -341,7 +341,11 @@ class Service(SchedulingItem):
         'SERVICEACTIONURL':       'action_url',
         'SERVICENOTESURL':        'notes_url',
         'SERVICENOTES':           'notes',
-        'SERVICEBUSINESSIMPACT':  'business_impact'
+        'SERVICEBUSINESSIMPACT':  'business_impact',
+        # Business rules output formatting related macros
+        'STATUS':                 'get_status',
+        'SHORTSTATUS':            'get_short_status',
+        'FULLNAME':               'get_full_name',
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -986,6 +990,31 @@ class Service(SchedulingItem):
 
         # ok we can put it in our temp action queue
         self.actions.append(e)
+
+    def get_short_status(self):
+        mapping = {
+            0: "O",
+            1: "W",
+            2: "C",
+            3: "U",
+        }
+        if self.got_business_rule:
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return mapping.get(self.state_id, "n/a")
+
+    def get_status(self):
+
+        if self.got_business_rule:
+            mapping = {
+                0: "OK",
+                1: "WARNING",
+                2: "CRITICAL",
+                3: "UNKNOWN",
+            }
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return self.state
 
 
 # Class for list of services. It's mainly, mainly for configuration part

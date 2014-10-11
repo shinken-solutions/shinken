@@ -461,6 +461,10 @@ To do so, you may set the ``business_rule_output_template`` option on the host o
 
   * All macros **between** the ``$(`` and ``)$`` sequences are expanded for each underlying problem using its attributes.
 
+All macros defined on hosts or services composing or holding the business rule may be used in the outer or inner part of the template respectively.
+
+To ease writing output template for business rules made of both hosts and services, 3 convinience macros having the same meaning for each type may be used: ``STATUS``, ``SHORTSTATUS``, and ``FULLNAME``, which expand respectively to the host or service status, its status abreviated form and its full name (``host_name`` for hosts, or ``host_name/service_description`` for services).
+
 Example:
 
 Imagine you want to build a consolidated service which notifications contain links to the underlying problems in the WebUI, allowing to acknowledge them without having to search. You may use a template looking like:
@@ -471,11 +475,12 @@ Imagine you want to build a consolidated service which notifications contain lin
          host_name meta
          service_description            Web cluster
          check_command                  bp_rule!$_HOSTXOF_WEB$ g:web,g:HTTPS?
-         business_rule_output_template  Down web services: $(<a href='http://webui.url/service/$HOST_NAME$/$SERVICE_DESCRIPTION$'>$HOST_NAME$</a> )$
+         business_rule_output_template  Down web services: $(<a href='http://webui.url/service/$HOSTNAME$/$SERVICEDESC$'>($SHORTSTATUS$) $HOSTNAME$</a> )$
          ...
          }
 
 
 The resulting output would look like ``Down web services: link1 link2 link3 ...`` where ``linkN`` are urls leading to the problem in the WebUI.
+
 
 .. _ticket: https://github.com/naparuba/shinken/issues/509
