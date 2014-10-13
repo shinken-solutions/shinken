@@ -339,7 +339,7 @@ class Arbiter(Daemon):
                 statsmgr.incr('hook.get-objects', time.time() - _t)
                 types_creations = self.conf.types_creations
                 for k in types_creations:
-                    (cls, clss, prop) = types_creations[k]
+                    (cls, clss, prop, dummy) = types_creations[k]
                     if prop in r:
                         for x in r[prop]:
                             # test if raw_objects[k] are already set - if not, add empty array
