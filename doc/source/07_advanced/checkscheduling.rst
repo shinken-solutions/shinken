@@ -22,3 +22,19 @@ Nagios make a average of service by host to make it's dispatch of checks in the 
 
 After this first scheduling, the time for the next check is just t_check+check_interval if the timepriod is agree for it (or just the next time available in the timeperiod). In the future, a little random value (like few seconds) will be add for such cases.
 
+
+.. _advanced/unused-nagios-parameters#use_aggressive_host_checking:
+
+Aggressive Host Checking Option (Unused) 
+========================================
+
+======== ==================================
+Format:  use_aggressive_host_checking=<0/1>
+Example: use_aggressive_host_checking=0    
+======== ==================================
+
+Nagios tries to be smart about how and when it checks the status of hosts. In general, disabling this option will allow Nagios to make some smarter decisions and check hosts a bit faster. Enabling this option will increase the amount of time required to check hosts, but may improve reliability a bit. Unless you have problems with Nagios not recognizing that a host recovered, I would suggest not enabling this option.
+
+  * 0 = Don't use aggressive host checking (default)
+  * 1 = Use aggressive host checking
+

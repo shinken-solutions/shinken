@@ -282,21 +282,6 @@ This option determines the “window" of time (in seconds) that Nagios will look
 THIS IS AN EXPERIMENTAL FEATURE AND MAY BE REMOVED IN FUTURE VERSIONS. ENABLING THE AUTO-RESCHEDULING OPTION CAN DEGRADE PERFORMANCE - RATHER THAN INCREASE IT - IF USED IMPROPERLY!
 
 
-.. _advanced/unused-nagios-parameters#use_aggressive_host_checking:
-
-Aggressive Host Checking Option (Unused) 
-========================================
-
-======== ==================================
-Format:  use_aggressive_host_checking=<0/1>
-Example: use_aggressive_host_checking=0    
-======== ==================================
-
-Nagios tries to be smart about how and when it checks the status of hosts. In general, disabling this option will allow Nagios to make some smarter decisions and check hosts a bit faster. Enabling this option will increase the amount of time required to check hosts, but may improve reliability a bit. Unless you have problems with Nagios not recognizing that a host recovered, I would suggest not enabling this option.
-
-  * 0 = Don't use aggressive host checking (default)
-  * 1 = Use aggressive host checking
-
 .. _advanced/unused-nagios-parameters#translate_passive_host_checks:
 
 Translate Passive Host Checks Option (Not implemented) 
