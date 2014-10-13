@@ -144,7 +144,7 @@ class Realm(Itemgroup):
             if not reactionner.spare:
                 self.nb_reactionners += 1
         for realm in self.higher_realms:
-            for reactionner in realm.reactionners:
+            for reactionner in realm.potential_reactionners:
                 if not reactionner.spare and reactionner.manage_sub_realms:
                     self.nb_reactionners += 1
 
@@ -164,7 +164,7 @@ class Realm(Itemgroup):
             if not broker.spare:
                 self.nb_brokers += 1
         for realm in self.higher_realms:
-            for broker in realm.brokers:
+            for broker in realm.potential_brokers:
                 if not broker.spare and broker.manage_sub_realms:
                     self.nb_brokers += 1
 
@@ -192,9 +192,18 @@ class Realm(Itemgroup):
         for satellite in getattr(self, sat_type):
             getattr(self, 'potential_%s' % sat_type).append(satellite)
         for realm in self.higher_realms:
-            for satellite in getattr(realm, sat_type):
-                if satellite.manage_sub_realms:
-                    getattr(self, 'potential_%s' % sat_type).append(satellite)
+            if sat_type == 'reactionners':
+                for satellite in realm.potential_reactionners:
+                    if satellite.manage_sub_realms:
+                        getattr(self, 'potential_%s' % sat_type).append(satellite)
+            elif sat_type == 'brokers':
+                for satellite in realm.potential_brokers:
+                    if satellite.manage_sub_realms:
+                        getattr(self, 'potential_%s' % sat_type).append(satellite)
+            else :
+                for satellite in getattr(realm, sat_type):
+                    if satellite.manage_sub_realms:
+                        getattr(self, 'potential_%s' % sat_type).append(satellite)
 
 
 
