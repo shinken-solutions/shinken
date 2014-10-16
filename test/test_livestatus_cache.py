@@ -1,12 +1,20 @@
-from shinken_test import *
+
+import copy
 import datetime
+import shutil
+
+from shinken_test import *
+
+
+from mock_livestatus import mock_livestatus_handle_request
+
 
 
 def set_to_midnight(dt):
     midnight = datetime.time(0)
     return datetime.datetime.combine(dt.date(), midnight)
 
-
+@mock_livestatus_handle_request
 class TestConfig(ShinkenTest):
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -25,6 +33,7 @@ class TestConfig(ShinkenTest):
     pass
 
 
+@mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
     def setUp(self):
         start_setUp = time.time()
@@ -103,7 +112,7 @@ Stats: state = 2
 Stats: state = 3"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
         print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
-        self.assert_(response == '2000;1993;3;3;1\n')
+        self.assertEquals('2000;1993;3;3;1\n', response)
 
         # Now we play with the cache
         afterresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -303,7 +312,7 @@ OutputFormat: json"""
         pyresponse = eval(response)
         print "pyresponse", len(pyresponse)
         print "should be", should_be
-        self.assert_(len(pyresponse) == should_be)
+        self.assertEquals(should_be, len(pyresponse))
         print "query 2 cache---------------------------------------------"
         tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)

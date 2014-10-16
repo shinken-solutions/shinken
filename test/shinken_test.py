@@ -3,6 +3,7 @@
 #
 # This file is used to test host- and service-downtimes.
 #
+from functools import partial
 
 import sys
 import time
@@ -14,7 +15,12 @@ import random
 import unittest
 
 # import the shinken library from the parent directory
-import __import_shinken ; del __import_shinken
+import __import_shinken ;
+from shinken.modules.livestatus_broker.livestatus_client_thread import LiveStatusClientThread
+from mock_livestatus import mocked_livestatus_client_thread_handle_request
+from mock_livestatus import mocked_livestatus_client_thread_send_data
+
+del __import_shinken
 
 import shinken
 from shinken.objects.config import Config
@@ -372,42 +378,48 @@ class ShinkenTest(unittest.TestCase):
             'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
         })
         modconf.modules = [dbmodconf]
-        self.livestatus_broker = LiveStatus_broker(modconf)
-        self.livestatus_broker.create_queues()
+        LS = self.livestatus_broker = LiveStatus_broker(modconf)
+        LS.create_queues()
 
         #--- livestatus_broker.main
-        self.livestatus_broker.log = logger
+        LS.log = logger
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
-        self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
-        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
+        LS.debug_output = []
+        LS.modules_manager = ModulesManager('livestatus', LS.find_modules_path(), [])
+        LS.modules_manager.set_modules(LS.modules)
         # We can now output some previouly silented debug ouput
-        self.livestatus_broker.do_load_modules()
-        for inst in self.livestatus_broker.modules_manager.instances:
+        LS.do_load_modules()
+        for inst in LS.modules_manager.instances:
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
                     f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
-        for s in self.livestatus_broker.debug_output:
+        for s in LS.debug_output:
             print "errors during load", s
-        del self.livestatus_broker.debug_output
-        self.livestatus_broker.rg = LiveStatusRegenerator()
-        self.livestatus_broker.datamgr = datamgr
-        datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        self.livestatus_broker.query_cache.disable()
-        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
+        del LS.debug_output
+        LS.rg = LiveStatusRegenerator()
+        LS.datamgr = datamgr
+        datamgr.load(LS.rg)
+        LS.query_cache = LiveStatusQueryCache()
+        LS.query_cache.disable()
+        LS.rg.register_cache(self.livestatus_broker.query_cache)
         #--- livestatus_broker.main
 
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        LS.init()
+        LS.db = LS.modules_manager.instances[0]
+        LS.livestatus = LiveStatus(LS.datamgr, LS.query_cache, LS.db, LS.pnp_path, LS.from_q)
 
         #--- livestatus_broker.do_main
-        self.livestatus_broker.db.open()
+        LS.db.open()
+        LS.db.prepare_log_db_table()
         #--- livestatus_broker.do_main
+
+        self.livestatus_client = LiveStatusClientThread(None, None, LS)
+        self.livestatus_client.handle_request = partial(mocked_livestatus_client_thread_handle_request, self.livestatus_client)
+        self.livestatus_client._send_data = partial(mocked_livestatus_client_thread_send_data, self.livestatus_client)
+
 
 
 # Hook for old python some test

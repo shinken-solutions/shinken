@@ -31,6 +31,10 @@ import time
 import random
 import socket
 import threading
+import shutil
+
+from mock_livestatus import mock_livestatus_handle_request
+
 
 from shinken.objects.module import Module
 from shinken.comment import Comment
@@ -38,7 +42,7 @@ from test_livestatus import TestConfig
 
 sys.setcheckinterval(10000)
 
-
+@mock_livestatus_handle_request
 class TestConfigAuth(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')

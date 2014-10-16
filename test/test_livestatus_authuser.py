@@ -34,16 +34,14 @@ import time
 import random
 import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
 from shinken.comment import Comment
-from shinken.util import from_bool_to_int
+from mock_livestatus import mock_livestatus_handle_request
 from test_livestatus import TestConfig
 
 sys.setcheckinterval(10000)
 
 
+@mock_livestatus_handle_request
 class TestConfigAuth(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_livestatus_authuser.cfg')
@@ -557,7 +555,8 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        #self.assert_(len(pyresponse) == 1)
+        # TODO: don't know what waz intended :
+        # self.assertEquals(1, len(pyresponse))
 
         request = """GET hostgroups
 AuthUser: web1
@@ -569,7 +568,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 4)
+        self.assertEquals(4, len(pyresponse))
 
 
 if __name__ == '__main__':

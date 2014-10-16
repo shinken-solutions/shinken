@@ -34,9 +34,8 @@ import time
 import random
 import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
+from mock_livestatus import mock_livestatus_handle_request
+
 from shinken.comment import Comment
 
 sys.setcheckinterval(10000)
@@ -44,6 +43,7 @@ sys.setcheckinterval(10000)
 # we have an external process, so we must un-fake time functions
 time.time = original_time_time
 time.sleep = original_time_sleep
+
 
 
 class TestConfig(ShinkenTest):
@@ -272,6 +272,7 @@ class TestConfig(ShinkenTest):
         time.sleep(5)
 
 
+@mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')

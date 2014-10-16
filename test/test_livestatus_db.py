@@ -43,6 +43,8 @@ from shinken.modules.livestatus_broker.mapping import Logline
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.comment import Comment
 
+from mock_livestatus import mock_livestatus_handle_request
+
 sys.setcheckinterval(10000)
 
 
@@ -89,6 +91,7 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker = None
 
 
+@mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
@@ -537,6 +540,7 @@ ResponseHeader: fixed16
         self.assert_(len(pyresponse) == 2)
 
 
+@mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
 
     def setUp(self):
@@ -769,6 +773,7 @@ OutputFormat: json"""
         time.sleep = fake_time_sleep
 
 
+@mock_livestatus_handle_request
 class TestConfigNoLogstore(TestConfig):
 
     def setUp(self):

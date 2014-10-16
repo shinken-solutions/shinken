@@ -35,8 +35,8 @@ from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SER
 def itersorted(self, hints=None):
     preselected_ids = []
     preselection = False
-    logger.debug("[Livestatus Regenerator] Hint is %s" % hints["target"])
-    if hints == None:
+    logger.debug("[Livestatus Regenerator] Hint is %s" % (hints and hints["target"] or '"False" (or empty)'))
+    if hints is None:
         # return all items
         hints = {}
     elif hints['target'] == HINT_HOST:
