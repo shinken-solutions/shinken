@@ -673,7 +673,7 @@ class Broker(BaseSatellite):
                 return
             self.setup_new_conf()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us.
         # If so, we listen for it
         # When it pushes conf to us, we reinit connections
         self.watch_for_new_conf(0.0)

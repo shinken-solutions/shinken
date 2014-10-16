@@ -570,16 +570,18 @@ class Daemon(object):
         del self.debug_output
 
 
-    # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
-    # and such things to have a true DAEMON :D
-    # use_pyro= open the TCP port for communication
-    # fake= use for test to do not launch runonly feature, like the stats reaper thread
-    def do_daemon_init_and_start(self, use_pyro=True, fake=False):
+    def do_daemon_init_and_start(self, use_communication=True, fake=False):
+        '''Main daemon function.
+Clean, allocates, initializes and starts all necessary resources to go in daemon mode.
+
+:param use_communication: if evaluate as True: the communication channel will be created.
+:param fake: use for test to do not launch runonly feature, like the stats reaper thread.
+        '''
         self.change_to_user_group()
         self.change_to_workdir()
         self.check_parallel_run()
-        if use_pyro:
-            self.setup_pyro_daemon()
+        if use_communication:
+            self.setup_communication_daemon()
 
         # Setting log level
         logger.setLevel(self.log_level)
@@ -635,7 +637,7 @@ class Daemon(object):
 
         # Now start the http_daemon thread
         self.http_thread = None
-        if use_pyro:
+        if use_communication:
             # Directly acquire it, so the http_thread will wait for us
             self.http_daemon.lock.acquire()
             self.http_thread = threading.Thread(None, self.http_daemon_thread, 'http_thread')
@@ -644,8 +646,7 @@ class Daemon(object):
             self.http_thread.start()
 
 
-    # TODO: we do not use pyro anymore, change the function name....
-    def setup_pyro_daemon(self):
+    def setup_communication_daemon(self):
         if hasattr(self, 'use_ssl'):  # "common" daemon
             ssl_conf = self
         else:
@@ -894,7 +895,7 @@ class Daemon(object):
             os._exit(2)
 
 
-    # Wait up to timeout to handle the pyro daemon requests.
+    # Wait up to timeout to handle the requests.
     # If suppl_socks is given it also looks for activity on that list of fd.
     # Returns a 3-tuple:
     # If timeout: first arg is 0, second is [], third is possible system time change value
