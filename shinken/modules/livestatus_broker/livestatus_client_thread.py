@@ -53,7 +53,9 @@ class LiveStatusClientThread(threading.Thread):
         broker = self.livestatus_broker = livestatus_broker
         broker_db = copy.copy(broker.db)
         broker_db.max_logs_age = 0
-        self.livestatus = LiveStatus(broker.datamgr, broker.query_cache, broker_db, broker.pnp_path, broker.from_q)
+        self.livestatus = LiveStatus(broker.datamgr, broker.query_cache,
+                                     broker_db, broker.pnp_path, broker.from_q,
+                                     counters=broker.livestatus.counters)
         self.stop_requested = False
         self.buffer_list = []
         now = time.time()

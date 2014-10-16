@@ -21,12 +21,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+import threading
 
 import time
 
 
 class LiveStatusCounters:  # (LiveStatus):
     def __init__(self):
+        self.lock = threading.Lock()
         self.counters = {
             'neb_callbacks': 0,
             'connections': 0,
@@ -60,21 +62,23 @@ class LiveStatusCounters:  # (LiveStatus):
 
     def increment(self, counter):
         if counter in self.counters:
-            self.counters[counter] += 1
+            with self.lock:
+                self.counters[counter] += 1
 
     def calc_rate(self):
-        elapsed = time.time() - self.last_update
-        if elapsed > self.interval:
-            self.last_update = time.time()
-            for counter in self.counters:
-                delta = self.counters[counter] - self.last_counters[counter]
-                new_rate = delta / elapsed
-                if self.rate[counter] == 0:
-                    avg_rate = new_rate
-                else:
-                    avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
-                self.rate[counter] = avg_rate
-                self.last_counters[counter] = self.counters[counter]
+        with self.lock:
+            elapsed = time.time() - self.last_update
+            if elapsed > self.interval:
+                self.last_update = time.time()
+                for counter in self.counters:
+                    delta = self.counters[counter] - self.last_counters[counter]
+                    new_rate = delta / elapsed
+                    if self.rate[counter] == 0:
+                        avg_rate = new_rate
+                    else:
+                        avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
+                    self.rate[counter] = avg_rate
+                    self.last_counters[counter] = self.counters[counter]
 
     def count(self, counter):
         if counter in self.counters:
