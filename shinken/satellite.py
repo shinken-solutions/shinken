@@ -241,7 +241,7 @@ class BaseSatellite(Daemon):
         self.external_commands_lock = threading.RLock()
 
 
-    # The arbiter can resent us new conf in the pyro_daemon port.
+    # The arbiter can resent us new conf in our communication channel.
     # We do not want to loose time about it, so it's not a blocking
     # wait, timeout = 0s
     # If it send us a new conf, we reinit the connections of all schedulers
@@ -793,7 +793,7 @@ class Satellite(BaseSatellite):
                 return
             self.setup_new_conf()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us.
         # If so, we listen to it
         # When it push a conf, we reinit connections
         # Sleep in waiting a new conf :)

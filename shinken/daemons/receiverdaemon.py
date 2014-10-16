@@ -335,7 +335,7 @@ class Receiver(Satellite):
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us.
         # If so, we listen for it
         # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)
