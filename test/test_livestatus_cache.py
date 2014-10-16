@@ -3,6 +3,8 @@ import copy
 import datetime
 import shutil
 
+
+import unittest
 from shinken_test import *
 
 
@@ -14,6 +16,8 @@ def set_to_midnight(dt):
     midnight = datetime.time(0)
     return datetime.datetime.combine(dt.date(), midnight)
 
+
+@unittest.skip('to be investigated')
 @mock_livestatus_handle_request
 class TestConfig(ShinkenTest):
     def update_broker(self, dodeepcopy=False):
@@ -33,6 +37,7 @@ class TestConfig(ShinkenTest):
     pass
 
 
+@unittest.skip('to be investigated')
 @mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
     def setUp(self):
