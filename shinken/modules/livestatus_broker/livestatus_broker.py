@@ -43,15 +43,16 @@ from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.log import logger
+from shinken.modules.livestatus_broker.livestatus_client_thread import LiveStatusClientThread
 from shinken.modulesmanager import ModulesManager
 from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
+
 # Local import
 from livestatus import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
 from livestatus_query_cache import LiveStatusQueryCache
-from livestatus_response import LiveStatusListResponse
 
 
 
@@ -121,6 +122,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         # We need to have our regenerator now because it will need to load
         # data from scheduler before main() if in scheduler of course
         self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
+        self.client_connections = {} # keys will be socket of client, values are LiveStatusClientThread instances
+        self.db = None
+        self._listening_thread = threading.Thread(target=self._listening_thread_run)
 
     def add_compatibility_sqlite_module(self):
         if len([m for m in self.modules_manager.instances if m.properties['type'].startswith('logstore_')]) == 0:
@@ -139,7 +143,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     def init(self):
         logger.info("[Livestatus Broker] Init of the Livestatus '%s'" % self.name)
         self.prepare_pnp_path()
-        m = MacroResolver()
+        m = MacroResolver() # TODO: don't know/think these 2 lines are necessary..
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
         self.rg.load_external_queue(self.from_q)
 
@@ -235,7 +239,14 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Open the logging database
         self.db = self.modules_manager.instances[0]
+        assert isinstance(self.db, BaseModule)
         self.db.open()
+        if hasattr(self.db, 'prepare_log_db_table'):
+            self.db.prepare_log_db_table()
+            # Immediately archive data. This also splits old-style (storing logs
+            # from more than one day) up into many single-day databases
+            if self.db.max_logs_age > 0:
+                self.db.log_db_do_archive()
 
         # We ill protect the operations on
         # the non read+write with a lock and
@@ -374,23 +385,24 @@ class LiveStatus_broker(BaseModule, Daemon):
         logger.info("[Livestatus Broker] So I quit")
         for s in self.input:
             full_safe_close(s)
+        # client threads could be stopped and joined by the listening_thread..
+        for client in self.client_connections.values():
+            assert isinstance(client, LiveStatusClientThread)
+            client.request_stop()
+        for client in self.client_connections.values():
+            assert isinstance(client, LiveStatusClientThread)
+            client.join()
+        if self._listening_thread:
+            self._listening_thread.join()
         try:
             self.db.close()
+            pass
         except Exception as err:
             logger.warning('Error on db close: %s' % err)
 
 
-
-    # It's the thread function that will get broks
-    # and update data. Will lock the whole thing
-    # while updating
-    def manage_lql_thread(self):
-        logger.info("[Livestatus Broker] Livestatus query thread started")
-        # This is the main object of this broker where the action takes place
-        self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
-
+    def create_listeners(self):
         backlog = 5
-        size = 8192
         self.listeners = []
         if self.port:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -414,7 +426,64 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.listeners.append(sock)
             logger.info("[Livestatus Broker] listening on unix socket: %s" % str(self.socket))
         self.input = self.listeners[:]
-        open_connections = {}
+
+
+    def _listening_thread_run(self):
+        while not self.interrupted:
+            # Check for pending livestatus requests
+            inputready, _, exceptready = select.select(self.input, [], [], 1)
+
+            if len(exceptready) > 0:
+                pass
+
+            if len(inputready) > 0:
+                for s in inputready:
+                # We will identify sockets by their filehandle number
+                # during the rest of this loop
+                    #socketid = s.fileno()
+                    if s in self.listeners:
+                        # handle the server socket
+                        sock, address = s.accept()
+                        if isinstance(address, tuple):
+                            client_ip, _ = address
+                            if self.allowed_hosts and client_ip not in self.allowed_hosts:
+                                logger.warning("[Livestatus Broker] Connection attempt from illegal ip address %s" % str(client_ip))
+                                full_safe_close(sock)
+                                continue
+
+                        new_client = self.client_connections[sock] = LiveStatusClientThread(sock, address, self)
+                        new_client.start()
+                        self.livestatus.count_event('connections')
+
+                # end for s in inputready:
+
+            # At the end of this loop we probably will discard connections
+            kick_connections = []
+            for sock, client in self.client_connections.items():
+                assert isinstance(client, LiveStatusClientThread)
+                if client.is_alive():
+                    pass
+                else:
+                    kick_connections.append(sock)
+
+            for sock in kick_connections:
+                del self.client_connections[sock]
+
+            # try to force release memory:
+            for name in 'query', 'response', 'data':
+                try:                exec 'del %s' % name
+                except NameError:   pass
+            gc.collect()
+
+    # It's the thread function that will get broks
+    # and update data. Will lock the whole thing
+    # while updating
+    def manage_lql_thread(self):
+        logger.info("[Livestatus Broker] Livestatus query thread started")
+        # This is the main object of this broker where the action takes place
+        self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
+        self.create_listeners()
+        self._listening_thread.start()
 
         while not self.interrupted:
             if self.use_threads:
@@ -422,7 +491,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                 self.livestatus.counters.calc_rate()
             else:
                 try:
-                    l = self.to_q.get(True, .01)
+                    l = self.to_q.get(True, 1)
                     for b in l:
                         # Un-serialize the brok data
                         b.prepare()
@@ -447,265 +516,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                     logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                     logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                     raise
-                time.sleep(0.01)
 
             # Commit log broks to the database
             self.db.commit_and_rotate_log_db()
-
-            # Check for pending livestatus requests
-            inputready, _, exceptready = select.select(self.input, [], [], 0)
-
-            now = time.time()
-            if True:
-                # It's True, this is a horrible implementation
-                # It doesn't use triggers yet, so it may be very slow.
-                # I agree.
-                conn = None
-                for socketid in open_connections:
-                    conn = open_connections[socketid]
-                    if conn['state'] == 'waiting' and now > conn['nexttry']:
-                        wait = conn['wait']
-                        query = conn['query']
-                        s = conn['socket']
-                        if wait.wait_timeout:
-                            if now - wait.wait_start > wait.wait_timeout:
-                                # Launch the request and respond
-                                result = query.launch_query()
-                                response = query.response
-                                response.format_live_data(result, query.columns, query.aliases)
-                                output, keepalive = response.respond()
-                                try:
-                                    for data in output:
-                                        s.send(data)
-                                except Exception as err:
-                                    logger.error('Could not send response to client: %s' % err)
-                                    close_it = True
-                                else:
-                                    self.write_protocol('', output)
-                                del output
-                                conn['buffer'] = None
-                                del conn['wait']
-                                del conn['query']
-                                if keepalive == 'on':
-                                    conn['keepalive'] = True
-                                    conn['state'] = 'receiving'
-                                else:
-                                    conn['state'] = 'idle'
-                            else:
-                                if wait.condition_fulfilled():
-                                    # Condition is met, launch the query
-                                    result = query.launch_query()
-                                    response = query.response
-                                    response.format_live_data(result, query.columns, query.aliases)
-                                    output, keepalive = response.respond()
-                                    try:
-                                        for data in output:
-                                            s.send(data)
-                                    except Exception as err:
-                                        logger.error('Could not send response to client: %s' % err)
-                                    else:
-                                        self.write_protocol('', output)
-                                    del output
-                                    conn['buffer'] = None
-                                    del conn['wait']
-                                    del conn['query']
-                                    if keepalive == 'on':
-                                        conn['keepalive'] = True
-                                        conn['state'] = 'receiving'
-                                    else:
-                                        conn['state'] = 'idle'
-                                else:
-                                    # Condition is not met
-                                    conn['nexttry'] = now + 0.5
-                        else:
-                            # This one has no timeout, so try forever
-                            pass
-
-                del conn # to prevent clash with other conn used below..
-
-            # At the end of this loop we probably will discard connections
-            kick_connections = []
-            if len(exceptready) > 0:
-                pass
-
-            if len(inputready) > 0:
-                for s in inputready:
-                # We will identify sockets by their filehandle number
-                # during the rest of this loop
-                    socketid = s.fileno()
-                    if s in self.listeners:
-                        # handle the server socket
-                        client, address = s.accept()
-                        if isinstance(address, tuple):
-                            client_ip, _ = address
-                            if self.allowed_hosts and client_ip not in self.allowed_hosts:
-                                logger.warning("[Livestatus Broker] Connection attempt from illegal ip address %s" % str(client_ip))
-                                full_safe_close(client)
-                                continue
-                        self.input.append(client)
-                        self.livestatus.count_event('connections')
-                    else:
-                        if socketid in open_connections:
-                            # This is a known connection. Register the activity
-                            conn = open_connections[socketid]
-                            conn['lastseen'] = now
-                        else:
-                            # This is a new connection
-                            conn = open_connections[socketid] = {
-                                'keepalive': False,
-                                'lastseen': now,
-                                'buffer': None,
-                                'state': 'receiving',
-                                'socket': s
-                            }
-
-                        data = ''
-                        try:
-                            data = s.recv(size)
-                        except socket.error, e:
-                            # Maybe the other side has already closed the socket
-                            if e.args[0] == errno.EWOULDBLOCK:
-                                # don't know yet how to handle this case
-                                pass
-                            else:
-                                logger.error("[Livestatus Broker] other error %s" % str(errno))
-
-                        # These two flags decide whether the databuffer is
-                        # passed to the livestatus module for execution
-                        # and whether the socket will be closed afterwards
-                        close_it = False
-                        handle_it = False
-
-                        # A connection has two states
-                        # receiving = collect input until a query
-                        #             is complete or aborted by empty input
-                        # idle      = response was sent
-                        if conn['state'] == 'receiving':
-                            if not data:
-                                if conn['buffer']:
-                                    # Empty packet follows some input.
-                                    # Request is considered to be complete
-                                    handle_it = True
-                                else:
-                                    # Empty packet follows empty packet.
-                                    # Terminate this connection
-                                    close_it = True
-                            else:
-                                if conn['buffer']:
-                                    # Additional input was received
-                                    conn['buffer'] += data
-                                else:
-                                    # First input was received
-                                    conn['buffer'] = data
-                                buff = conn['buffer']
-                                if buff.endswith('\n\n') or buff.endswith('\r\n\r\n'):
-                                    # Two \n (= an empty line) mean
-                                    # client sends "request complete, go ahead"
-                                    if buff.rstrip():
-                                        handle_it = True
-                                    else:
-                                        # Someone with telnet hits the enter-key like crazy
-                                        # Only whitespace is like an empty request
-                                        close_it = True
-
-                        elif conn['state'] == 'idle':
-                            if not data:
-                                # Thats it. Client closed the connection
-                                close_it = True
-                            else:
-                                # Got data after is sent a sresponse.
-                                # Too late...."
-                                close_it = True
-
-                        else:
-                            # This code should never be executed
-                            if not data:
-                                if conn['buffer']:
-                                    logger.error("[Livestatus Broker] undef state nodata buffer %s" % conn['state'])
-                                else:
-                                    logger.error("[Livestatus Broker] undef state nodata nobuffer %s" % conn['state'])
-                            else:
-                                if conn['buffer']:
-                                    logger.error("[Livestatus Broker] undef state data buffer %s" % conn['state'])
-                                else:
-                                    logger.error("[Livestatus Broker] undef state data nobuffer %s" % conn['state'])
-
-                        if handle_it:
-                            conn['buffer'] = conn['buffer'].rstrip()
-
-                            response, keepalive = self.livestatus.handle_request(conn['buffer'])
-                            # NOTE-response:
-                            # normally the response coming from handle_request is always a LiveStatusListResponse instance.
-                            # so the str part of the isinstance shouldn't be required.
-                            if isinstance(response, (str, LiveStatusListResponse)):
-                                try:
-                                    if isinstance(response, str): # NOTE-response: same here, this check shouldn't be required.
-                                        response = [ response ]
-                                    for data in response:
-                                        s.send(data)
-                                except Exception as err:
-                                    # Maybe the request was an external command and
-                                    # the peer is not interested in a response at all
-                                    logger.warning('Could not send response to client: %s ; closing connection..' % err)
-                                    close_it = True
-                                else:
-                                    self.write_protocol(conn['buffer'], response)
-
-                                    # Empty the input buffer for the next request
-                                    conn['buffer'] = None
-                                    if keepalive == 'on':
-                                        conn['keepalive'] = True
-                                        conn['state'] = 'receiving'
-                                    else:
-                                        conn['state'] = 'idle'
-                            else:
-                                self.write_protocol(conn['buffer'], "not yet")
-                                # Complicated. A trigger is involved
-                                wait, query = response
-                                conn['buffer'] = None
-                                conn['keepalive'] = True
-                                conn['state'] = 'waiting'
-                                conn['wait'] = wait
-                                conn['query'] = query
-                                conn['nexttry'] = now
-
-                            if isinstance(response, LiveStatusListResponse):
-                                response.clean()
-                            del response
-                            gc.collect()
-
-                        if close_it:
-                            # Register this socket for deletion
-                            kick_connections.append(s.fileno())
-
-                        del conn
-                # end for s in inputready:
-
-                # Now the work is done. Cleanup
-                for socketid, conn in open_connections.items():
-
-                    logger.debug("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" %
-                                 (socketid, now - conn['lastseen'], conn['state']))
-                    if now - conn['lastseen'] > 300:
-                        # After 5 minutes of inactivity we close connections
-                        conn['keepalive'] = False
-                        conn['state'] = 'idle'
-                        kick_connections.append(socketid)
-
-                # Close connections which timed out or are no longer needed
-                for socketid in kick_connections:
-                    for s in self.input:
-                        if s.fileno() == socketid:
-                            full_safe_close(s)
-                            del open_connections[socketid]
-                            self.input.remove(s)
-                            break
-
-            # try to force release memory:
-            for name in 'query', 'response', 'data':
-                try:                exec 'del %s' % name
-                except NameError:   pass
-            gc.collect()
 
         # end: while not self.interrupted:
 
