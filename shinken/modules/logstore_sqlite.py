@@ -79,6 +79,8 @@ class LiveStatusLogStoreError(Exception):
 
 class LiveStatusLogStoreSqlite(BaseModule):
 
+    CURSOR_ARRAYSIZE = 1024
+
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.plugins = []
@@ -95,7 +97,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
             logger.warning("[Logstore SQLite] Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s" % max_logs_age)
-            return None
+            self.max_logs_age = 7
         else:
             if not maxmatch.group(2):
                 self.max_logs_age = int(maxmatch.group(1))
@@ -126,27 +128,24 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def init(self):
         self.old_implementation = old_implementation
 
+
     def open(self):
-        logger.info("[Logstore SQLite] Open LiveStatusLogStoreSqlite ok : %s" % self.database_file)
+        #logger.info("[Logstore SQLite] Open LiveStatusLogStoreSqlite ok : %s" % self.database_file)
         self.dbconn = sqlite3.connect(self.database_file, check_same_thread=False)
         # Get no problem for utf8 insert
         self.dbconn.text_factory = str
         self.dbcursor = self.dbconn.cursor()
+        self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
         #self.dbconn.row_factory = row_factory
         #self.execute("PRAGMA cache_size = 200000")
         # Create db file and tables if not existing
-        self.prepare_log_db_table()
+        #self.prepare_log_db_table()
         # Start with commit and rotate immediately so the interval timers
         # get initialized properly
         now = time.time()
         self.next_log_db_commit = now
         self.next_log_db_rotate = now
-        # Immediately archive data. This also splits old-style (storing logs
-        # from more than one day) up into many single-day databases
-        if self.max_logs_age > 0:
-            # open() is also called from log_db_do_archive (with max_logs_age
-            # of 0 though)
-            self.log_db_do_archive()
+
 
     def close(self):
         self.dbconn.commit()
@@ -162,13 +161,31 @@ class LiveStatusLogStoreSqlite(BaseModule):
             except:
                 pass
 
-    def prepare_log_db_table(self):
+    def prepare_log_db_table(self, table_name='logs'):
         if self.read_only:
             return
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
-        cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
+        cmd = """CREATE TABLE IF NOT EXISTS %s (
+                logobject INT,
+                attempt INT,
+                class INT,
+                command_name VARCHAR(64),
+                comment VARCHAR(256),
+                contact_name VARCHAR(64),
+                host_name VARCHAR(64),
+                lineno INT,
+                message VARCHAR(512),
+                options VARCHAR(512),
+                plugin_output VARCHAR(256),
+                service_description VARCHAR(64),
+                state INT,
+                state_type VARCHAR(10),
+                time INT,
+                type VARCHAR(64)
+        )""" % table_name
         self.execute(cmd)
+
         cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
         self.execute(cmd)
         cmd = "CREATE INDEX IF NOT EXISTS logs_host_name ON logs (host_name)"
@@ -218,11 +235,12 @@ class LiveStatusLogStoreSqlite(BaseModule):
         the contents of the current datafile.
         """
         try:
-            dbresult = self.execute('SELECT MIN(time),MAX(time) FROM logs')
-            mintime = dbresult[0][0]
-            maxtime = dbresult[0][1]
+            dbresults = tuple( self.select('SELECT MIN(time),MAX(time) FROM logs') )[0]
+            mintime = dbresults[0][0]
+            maxtime = dbresults[0][1]
         except sqlite3.Error, e:
             logger.error("[Logstore SQLite] An error occurred: %s" % str(e.args[0]))
+            raise
         except IndexError, e:
             mintime = int(time.time())
             maxtime = int(time.time())
@@ -231,6 +249,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             mintime = int(time.time())
         if maxtime is None:
             maxtime = int(time.time())
+
         return self.log_db_relevant_files(mintime, maxtime, True)
 
     def log_db_relevant_files(self, mintime, maxtime, preview=False):
@@ -288,7 +307,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             return
         try:
             os.stat(self.archive_path)
-        except:
+        except OSError:
             os.mkdir(self.archive_path)
         for day in self.log_db_historic_contents():
             dayobj, handle, archive, starttime, stoptime = day
@@ -297,10 +316,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 continue
             if not os.path.exists(archive):
                 # Create an empty datafile with the logs table
-                #tmpconn = LiveStatusDb(archive, None, 0)
-                #tmpconn.prepare_log_db_table()
-                #tmpconn.close()
-
                 dbmodconf = Module({
                     'module_name': 'LogStore',
                     'module_type': 'logstore_sqlite',
@@ -310,12 +325,14 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 })
                 tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
                 tmpconn.open()
+                tmpconn.prepare_log_db_table()
                 tmpconn.close()
 
             self.commit()
             logger.info("[Logstore SQLite] move logs from %s - %s to database %s" % (time.asctime(time.localtime(starttime)), time.asctime(time.localtime(stoptime)), archive))
             cmd = "ATTACH DATABASE '%s' AS %s" % (archive, handle)
             self.execute_attach(cmd)
+            self._check_table_exist(handle)
             cmd = "INSERT INTO %s.logs SELECT * FROM logs WHERE time >= %d AND time < %d" % (handle, starttime, stoptime)
             self.execute(cmd)
             cmd = "DELETE FROM logs WHERE time >= %d AND time < %d" % (starttime, stoptime)
@@ -326,13 +343,60 @@ class LiveStatusLogStoreSqlite(BaseModule):
             # This is necessary to shrink the database file
             try:
                 self.execute('VACUUM')
-            except sqlite3.DatabaseError, exp:
-                logger.error("[Logstore SQLite] WARNING: it seems your database is corrupted. Please recreate it")
+            except sqlite3.DatabaseError as err:
+                logger.error("[Logstore SQLite] WARNING: it seems your database is corrupted. Error=%s. Please recreate it" % err)
             self.commit()
+
+    def select(self, cmd, values=None, row_factory=None):
+        ''' Same function than execute but it returns a generator instead of a list.
+        NB: The generator yields many rows at a time.
+        :type cmd: The full SELECT query.
+        :type values: unknown or list or tuple
+        :type row_factory: __builtin__.NoneType or __builtin__.function
+        :return: a generator which yields one per one the rows of the selected values.
+        '''
+        if values is None:
+            values = []
+
+        if sqlite3.paramstyle == 'pyformat':
+            matchcount = 0
+            for m in re.finditer(r"\?", cmd):
+                cmd = re.sub('\\?', '%(' + str(matchcount) + ')s', cmd, 1)
+                matchcount += 1
+            values = dict(zip([str(x) for x in xrange(len(values))], values))
+
+        if row_factory is not None:
+            orig_row_factory = getattr(self.dbconn, "row_factory", None)
+            self.dbcursor.close()
+            self.dbconn.row_factory = row_factory
+            # We need to create a new cursor which knows how to row_factory
+            # Simply setting conn.row_factory and using the old cursor
+            # would not work
+            self.dbcursor = self.dbconn.cursor()
+            self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
+
+        try:
+            self.dbcursor.execute(cmd, values)
+            while True:
+                dbresults = self.dbcursor.fetchmany(1024)
+                if not dbresults:
+                    break
+                if row_factory is not None:
+                    if sqlite3.paramstyle == 'pyformat':
+                        dbresult = (row_factory(self.dbcursor, d) for d in dbresult)
+                logger.debug('got %s results' % len(dbresults))
+                yield dbresults
+        finally:
+            if row_factory:
+                self.dbcursor.close()
+                self.dbconn.row_factory = orig_row_factory
+                self.dbcursor = self.dbconn.cursor()
+                self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
+
 
     def execute(self, cmd, values=None, row_factory=None):
         try:
-            if values == None:
+            if values is None:
                 values = []
             if sqlite3.paramstyle == 'pyformat':
                 matchcount = 0
@@ -340,35 +404,32 @@ class LiveStatusLogStoreSqlite(BaseModule):
                     cmd = re.sub('\\?', '%(' + str(matchcount) + ')s', cmd, 1)
                     matchcount += 1
                 values = dict(zip([str(x) for x in xrange(len(values))], values))
+
             if cmd.startswith("SELECT"):
-                already_had_row_factory = hasattr(self.dbconn, "row_factory")
-                if row_factory != None:
+                if row_factory:
                     self.dbcursor.close()
-                    if already_had_row_factory:
-                        orig_row_factory = self.dbconn.row_factory
+                    orig_row_factory = getattr(self.dbconn, 'row_factory', None)
                     self.dbconn.row_factory = row_factory
                     # We need to create a new cursor which knows how to row_factory
                     # Simply setting conn.row_factory and using the old cursor
                     # would not work
                     self.dbcursor = self.dbconn.cursor()
+                    self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
                 self.dbcursor.execute(cmd, values)
                 dbresult = self.dbcursor.fetchall()
-                if row_factory != None:
+                if row_factory:
                     if sqlite3.paramstyle == 'pyformat':
                         dbresult = [row_factory(self.dbcursor, d) for d in dbresult]
-                    if already_had_row_factory:
-                        self.dbconn.row_factory = orig_row_factory
-                    else:
-                        delattr(self.dbconn, "row_factory")
                     self.dbcursor.close()
+                    self.dbconn.row_factory = orig_row_factory
                     self.dbcursor = self.dbconn.cursor()
-                return [x for x in dbresult]
+                    self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
                 return dbresult
             else:
                 self.dbcursor.execute(cmd, values)
-        except sqlite3.Error, e:
-            logger.error("[Logstore SQLite] execute error %s" % str(e))
-            raise LiveStatusLogStoreError(e)
+        except sqlite3.Error as err:
+            logger.error("[Logstore SQLite] execute error %s" % str(err))
+            raise LiveStatusLogStoreError(err)
 
     def execute_attach(self, cmd):
         """
@@ -416,10 +477,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
             values = logline.as_tuple()
             if logline.logclass != LOGCLASS_INVALID:
                 self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
-        except LiveStatusLogStoreError, exp:
-            logger.error("[Logstore SQLite] An error occurred: %s", str(exp.args[0]))
-            logger.error("[Logstore SQLite] DATABASE ERROR!!!!!!!!!!!!!!!!!")
-        except Exception, exp:
+        except LiveStatusLogStoreError as exp:
+            logger.error("[Logstore SQLite] An DB error occurred: %s", str(exp.args[0]))
+        except Exception as exp:
             logger.error("[Logstore SQLite] Unexpected in manage_log_brok: %s" % str(exp))
         # FIXME need access to this #self.livestatus.count_event('log_message')
 
@@ -438,7 +498,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
         self.sql_filter_stack.not_elements()
 
     def get_live_data_log(self):
-        """Like get_live_data, but for log objects"""
+        '''
+        :return: a generator which yields the results one per one.
+        '''
         # finalize the filter stacks
         self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
         self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
@@ -453,7 +515,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             # Be conservative, get everything from the database between
             # two dates and apply the Filter:-clauses in python
             sql_filter_func = self.sql_time_filter_stack.get_stack()
-        result = []
+
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
@@ -469,34 +531,60 @@ class LiveStatusLogStoreSqlite(BaseModule):
         gepat = re.search(r'^(\(*time|(.*\s+time))\s+>=\s+(\d+)', full_filter_clause)
         ltpat = re.search(r'^(\(*time|(.*\s+time))\s+<\s+(\d+)', full_filter_clause)
         lepat = re.search(r'^(\(*time|(.*\s+time))\s+<=\s+(\d+)', full_filter_clause)
-        if gtpat != None:
+        if gtpat is not None:
             fromtime = int(gtpat.group(3)) + 1
-        if gepat != None:
+        if gepat is not None:
             fromtime = int(gepat.group(3))
-        if ltpat != None:
+        if ltpat is not None:
             totime = int(ltpat.group(3)) - 1
-        if lepat != None:
+        if lepat is not None:
             totime = int(lepat.group(3))
-        # now find the list of datafiles
-        dbresult = []
+
         for dateobj, handle, archive, fromtime, totime in self.log_db_relevant_files(fromtime, totime):
-            selectresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
-            dbresult.extend(selectresult)
-        return dbresult
+            gen = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
+            for subgen in gen:
+                for results in subgen:
+                    for row in results:
+                        yield row
+
+    def _check_table_exist(self, handle='main'):
+        ''' Check if the table "logs" does exist in the 'handle' sqlite db namespace.
+        If it does not exist: create it.
+        :param handle:
+        :return:
+        '''
+        res = tuple(self.select("SELECT name FROM %s.sqlite_master WHERE type='table'" % handle))[0]
+        if not res:
+            self.prepare_log_db_table(handle + '.logs')
 
     def select_live_data_log(self, filter_clause, filter_values, handle, archive, fromtime, totime):
-        dbresult = []
+        ''' Returns a generator which yields list of rows per list of rows.
+        :param filter_clause:
+        :param filter_values:
+        :param handle:
+        :param archive:
+        :param fromtime:
+        :param totime:
+        :return:
+        '''
+        def clean():
+            pass
         try:
-            if handle == "main":
-                dbresult = self.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values, row_factory)
-            else:
+            if handle != "main":
                 self.commit()
                 self.execute_attach("ATTACH DATABASE '%s' AS %s" % (archive, handle))
-                dbresult = self.execute('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause), filter_values, row_factory)
-                self.execute("DETACH DATABASE %s" % handle)
-        except LiveStatusLogStoreError, e:
-            logger.error("[Logstore SQLite] An error occurred: %s" % str(e.args[0]))
-        return dbresult
+                def clean():
+                    self.execute("DETACH DATABASE %s" % handle)
+            self._check_table_exist(handle)
+            dbgen = self.select('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause),
+                                filter_values, row_factory)
+        except LiveStatusLogStoreError as err:
+            logger.error("[Logstore SQLite] An error occurred: %s" % str(err.args[0]))
+            raise
+        else:
+            yield dbgen
+        finally:
+            clean()
 
     def make_sql_filter(self, operator, attribute, reference):
         # The filters are text fragments which are put together to form a sql where-condition finally.

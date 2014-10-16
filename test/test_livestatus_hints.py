@@ -34,6 +34,8 @@ from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.comment import Comment
 
+from mock_livestatus import mock_livestatus_handle_request
+
 sys.setcheckinterval(10000)
 
 
@@ -54,6 +56,7 @@ class PerfTest(ShinkenTest):
         self.sched.broks = {}
 
 
+@mock_livestatus_handle_request
 class TestConfigBig(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
@@ -531,6 +534,7 @@ Stats
 
 """
 
+@mock_livestatus_handle_request
 class TestConfigCrazy(TestConfigBig):
     def setUp(self):
         print "comment me for performance tests"
@@ -551,6 +555,7 @@ class TestConfigCrazy(TestConfigBig):
         super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
 
+@mock_livestatus_handle_request
 class TestConfigSmall(TestConfigBig):
     def setUp(self):
         print "comment me for performance tests"

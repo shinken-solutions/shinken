@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2012:
@@ -72,7 +71,7 @@ class LiveStatusRequest:
                 wait_cmds.append(line)
             elif keyword in ('WaitObject', 'WaitCondition', 'WaitConditionOr', 'WaitConditionAnd', 'WaitTrigger', 'WaitTimeout'):
                 wait_cmds.append(line)
-            elif keyword in ('COMMAND'):
+            elif keyword in ('COMMAND',):
                 external_cmds.append(line)
             else:
                 query_cmds.append(line)

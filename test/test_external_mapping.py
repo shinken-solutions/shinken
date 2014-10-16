@@ -70,10 +70,12 @@ class TestExternalMapping(unittest.TestCase):
 
     def __run(self, lines):
         self.__setup(lines)
-        subprocess.call([external_mapping,
+        rc = subprocess.call([external_mapping,
                          '--input', self.input_filename,
                          '--output', self.output_filename])
-        result = json.load(open(self.output_filename))
+        self.assertEquals(0, rc)
+        with open(self.output_filename) as fh:
+            result = json.load(fh)
         self.__cleanup()
         return result
 
