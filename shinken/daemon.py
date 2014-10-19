@@ -57,6 +57,7 @@ from shinken.stats import statsmgr
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
+from shinken.misc.common import setproctitle
 
 
 try:
@@ -577,7 +578,7 @@ class Daemon(object):
         for s in self.debug_output:
             logger.info(s)
         del self.debug_output
-
+        self.set_proctitle()
 
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
     # and such things to have a true DAEMON :D
@@ -865,6 +866,8 @@ class Daemon(object):
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)
 
+    def set_proctitle(self):
+        setproctitle("shinken-%s" % self.name)
 
     def get_header(self):
         return ["Shinken %s" % VERSION,

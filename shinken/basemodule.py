@@ -34,6 +34,7 @@ from re import compile
 from multiprocessing import Queue, Process
 
 from shinken.log import logger
+from shinken.misc.common import setproctitle
 
 # TODO: use a class for defining the module "properties" instead of
 # plain dict??  Like:
@@ -265,11 +266,7 @@ class BaseModule(object):
         raise NotImplementedError()
 
     def set_proctitle(self, name):
-        try:
-            from setproctitle import setproctitle
-            setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
-        except Exception:
-            pass
+        setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
 
     def _main(self):
         """module "main" method. Only used by external modules."""

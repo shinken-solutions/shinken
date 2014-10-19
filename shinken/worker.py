@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -46,8 +45,8 @@ import traceback
 import cStringIO
 
 
-from log import logger
-
+from shinken.log import logger
+from shinken.misc.common import setproctitle
 
 class Worker:
     """This class is used for poller and reactionner to work.
@@ -297,9 +296,5 @@ class Worker:
                 timeout = 1.0
 
     def set_proctitle(self):
-        try:
-            from setproctitle import setproctitle
-            setproctitle("shinken-%s worker" % self.loaded_into)
-        except Exception:
-            pass
+        setproctitle("shinken-%s worker" % self.loaded_into)
 
