@@ -117,7 +117,7 @@ class Item(object):
                 self.configuration_errors.append(err)
                 continue
 
-            if (isinstance(val, list) and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
+            if (isinstance(val, list) and len(val) >= 1 and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 val[0] = val[0][1:]

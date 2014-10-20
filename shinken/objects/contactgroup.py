@@ -52,7 +52,7 @@ class Contactgroup(Itemgroup):
 
     def get_contacts(self):
         if getattr(self, 'members', None) is not None:
-            return self.members
+            return [m.strip() for m in self.members]
         else:
             return []
 
