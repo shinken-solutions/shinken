@@ -201,13 +201,19 @@ class BaseModule(object):
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
-            logger.info("I'm stopping module '%s' process pid:%s ", 
+            logger.info("I'm stopping module %r (pid=%s)",
                        self.get_name(), self.process.pid)
             self.process.terminate()
             self.process.join(timeout=1)
             if self.process.is_alive():
-                logger.info("The process is still alive, I help it to die")
+                logger.warning("%r is still alive normal kill, I help it to die",
+                            self.get_name())
                 self.__kill()
+                self.process.join(1)
+                if self.process.is_alive():
+                    logger.error("%r still alive after brutal kill, I leave it.",
+                                 self.get_name())
+
             self.process = None
 
 
