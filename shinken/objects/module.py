@@ -47,6 +47,9 @@ class Module(Item):
     def get_name(self):
         return self.module_name
 
+    def __repr__(self):
+        return '<module name=%s />' % self.get_name()
+
 
 class Modules(Items):
     name_property = "module_name"
