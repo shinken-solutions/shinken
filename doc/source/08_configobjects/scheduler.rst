@@ -18,16 +18,17 @@ Definition Format
 
 Variables in red are required, while those in black are optional. However, you need to supply at least one optional variable in each definition for it to be of much use.
 
-================= ========================
+==================================== ========================
 define scheduler{                         
-scheduler_name    *scheduler_name*        
-address           *dns name of ip address*
-port              *port*                  
-spare             //[0/1]//               
-realm             *realm name*            
-modules           *modules*               
+scheduler_name                       *scheduler_name*
+address                              *dns name of ip address*
+port                                 *port*
+spare                                //[0/1]//
+realm                                *realm name*
+modules                              *modules*
+accept_passive_unknown_check_results //[0/1]//
 }                                         
-================= ========================
+==================================== ========================
 
 
 Example Definition: 
@@ -69,7 +70,7 @@ scheduler_name
   This variable is used to identify the *short name* of the scheduler which the data is associated with.
 
 address
-  This directive is used to define the adress from where the main arbier can reach this scheduler. This can be a DNS name or a IP adress.
+  This directive is used to define the address from where the main arbier can reach this scheduler. This can be a DNS name or a IP address.
 
 port
   This directive is used to define the TCP port used bu the daemon. The default value is *7768*.
@@ -82,3 +83,6 @@ realm
 
 modules
   This variable is used to define all modules that the scheduler will load.
+
+accept_passive_unknown_check_results
+  If this is enabled, the scheduler will accept passive check results for unconfigured hosts and will generate unknown host/service check result broks.

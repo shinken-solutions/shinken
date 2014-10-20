@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -39,7 +39,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    logger.info("[Dummy Broker] Get a Dummy broker module for plugin %s" % mod_conf.get_name())
+    logger.info("[Dummy Broker] Get a Dummy broker module for plugin %s", mod_conf.get_name())
     instance = Dummy_broker(mod_conf)
     return instance
 

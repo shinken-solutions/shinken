@@ -18,4 +18,4 @@ This part must be splitted and sent in all module repositories
    :maxdepth: 2
       
    *
-   */index   
+   */index

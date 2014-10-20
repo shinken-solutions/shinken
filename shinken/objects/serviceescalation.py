@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -45,6 +45,8 @@ class Serviceescalation(Item):
         'escalation_options':    ListProp(default='d,u,r,w,c'),
         'contacts':              StringProp(),
         'contact_groups':        StringProp(),
+        'first_notification_time': IntegerProp(),
+        'last_notification_time': IntegerProp(),
     })
 
     # For debugging purpose only (nice name)

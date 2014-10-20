@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -98,7 +98,7 @@ class TestMaintPeriod(ShinkenTest):
         print "planned stop ", time.asctime(time.localtime(t_next))
         svc3.maintenance_period = t
 
-        self.assert_(not hasattr(svc3, 'in_maintenance'))
+        self.assert_(not svc3.in_maintenance)
         #
         # now let the scheduler run and wait until the maintenance period begins
         # it is now 10 seconds before the full minute. run for 30 seconds
@@ -136,7 +136,7 @@ class TestMaintPeriod(ShinkenTest):
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc3.downtimes) == 0)
         self.assert_(not svc3.in_scheduled_downtime)
-        self.assert_(svc3.in_maintenance == False)
+        self.assert_(svc3.in_maintenance is None)
 
 
 

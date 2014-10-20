@@ -290,6 +290,13 @@ t     Services which are holding tag               t:http        web-srv1,HTTP &
 
 It is possible to combine both **host** and **service** expansion expression to build complex business rules.
 
+.. note:: A business rule expression always has to be made of a host expression (selector if you prefer)
+          AND a service expression (still selector) separated by a coma when looking at service status.
+          If not so, there is no mean to distinguish a host status from a service status in the expression.
+          In servicegroup flag case, as you do not want to apply any filter on the host (you want ALL services which are member of the XXX service group, whichever host they are bound to),
+          you may use the * host selector expression. The correct expression syntax should be:
+          ``bp_rule!*,g:my-servicegroup``
+          The same rule applies to other service selectors (l, r, t, and so on).
 
 Examples of combined expansion expression
 -----------------------------------------
@@ -325,7 +332,7 @@ As of any host or service check, a business rule having its state in a non ``OK`
 
 This may be what you need, but what if you want the business rule to stop sending notifications ?
 
-Imagine your business rule is composed of all your site's web front ends. If an host fails, you want to know it, but once someone starts to fix the issue, you don't want to be notified anymore. A possible solution is to acknowledge the business rule itself. But if you do so, any other failing host won't get notified. Another solution is to enable *smart notification* on the business rule check.
+Imagine your business rule is composed of all your site's web front ends. If a host fails, you want to know it, but once someone starts to fix the issue, you don't want to be notified anymore. A possible solution is to acknowledge the business rule itself. But if you do so, any other failing host won't get notified. Another solution is to enable *smart notification* on the business rule check.
 
 *Smart notifications* is a way to disable notifications on a business rule having all its problems acknowledged. If a new problem occurs, notifications will be enabled back while it has not been acknowledged.
 
@@ -385,7 +392,7 @@ Example:
 
 In the previous example, HTTP/HTTPS services come from the ``http`` pack. If one or more http servers fail, a single notification would be sent, rather than one per failing service.
 
-.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independant failure. Take care to explain this to people in charge of the operations.
+.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independent failure. Take care to explain this to people in charge of the operations.
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -37,6 +37,7 @@ import ConfigParser
 import imp
 import shlex
 import readline
+import signal
 from StringIO import StringIO
 
 try:
@@ -50,23 +51,33 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.log import logger, cprint
+from shinken.log import logger, cprint, nagFormatter
 from shinken.objects.config import Config
 
 
-logger.set_level(logger.WARNING)
-logger.set_display_time(False)
-logger.set_display_level(False)
-logger.log_colors[logger.DEBUG] = 'cyan'
-logger.log_colors[logger.INFO] = 'magenta'
+logger.setLevel('WARNING')
+logger.handlers[0].setFormatter(nagFormatter)
+
+# Handle some signals
+def sig_handler(signalnum, handle):
+    """ Handle some signals """
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, sig_handler)
+signal.signal(signal.SIGINT, sig_handler)
 
 
 CONFIG = {}
 
-class Dummy():
-    def __init__(self): pass
 
-    def add(self, obj): pass
+class Dummy():
+    def __init__(self):
+        pass
+
+    def add(self, obj):
+        pass
+
+
 logger.load_obj(Dummy())
 
 
@@ -74,10 +85,6 @@ if os.name != 'nt':
     DEFAULT_CFG = os.path.expanduser('~/.shinken.ini')
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\shinken.ini'
-
-
-
-
 
 
 # This will allow to add comments to the generated configuration file, once
@@ -108,9 +115,6 @@ class ConfigParserWithComments(ConfigParser.RawConfigParser):
             fp.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
 
 
-
-
-
 # Commander is the main class for managing the CLI session and behavior
 class CLICommander(object):
 
@@ -131,10 +135,10 @@ class CLICommander(object):
 ''',
             'values'  : [('proxy',''), ('api_key','')]}
                     }
-    
 
-    def __init__(self, config, opts):
+    def __init__(self, config, cfg, opts):
         self.keywords = {}
+        self.cfg = cfg
         self.config = config
         self.init_done = False
 
@@ -144,11 +148,10 @@ class CLICommander(object):
         self.completion_matches = []
 
 
-
     def load_cli_mods(self, opts):
         # Main list of keywords for the first parameter
         self.keywords = {}
-        if not 'paths' in self.config or not 'cli' in self.config.get('paths',[]):
+        if not 'paths' in self.config or not 'cli' in self.config.get('paths', []):
             # We are dign the init, so bail out
             if opts.do_init:
                 return
@@ -156,11 +159,12 @@ class CLICommander(object):
             return
 
         self.init_done = True
-        
+
         cli_mods_dir = os.path.abspath(self.config['paths']['cli'])
-        logger.debug ("WILL LOAD THE CLI DIR %s" %  cli_mods_dir)
+        logger.debug("WILL LOAD THE CLI DIR %s" % cli_mods_dir)
         cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
 
+        new_config_param = False
         for d in cli_mods_dirs:
             f = os.path.join(d, 'cli.py')
             if os.path.exists(f):
@@ -175,11 +179,39 @@ class CLICommander(object):
                 for (f, v) in exports.iteritems():
                     m_keywords = v.get('keywords', [])
                     for k in m_keywords:
-                        e = {'f':f, 'args' : v.get('args', []),
-                             'description':v.get('description', ''),
-                             'came_from':dname}
+                        e = {'f': f,
+                             'args': v.get('args', []),
+                             'description': v.get('description', ''),
+                             'came_from': dname}
                         # Finally save it
                         self.keywords[k] = e
+
+                # And now the configuration part
+                mconfig = getattr(m, 'configurations', {})
+                for (p,e) in mconfig.iteritems():
+                    #print p, e
+                    #print p in self.config
+                    if p not in self.config:
+                        self.ini_defaults[p] = e
+                        new_config_param = True
+                        continue
+                    # Maybe it's just in the self.ini_defaults if so it's not a new
+                    # config
+                    if p not in self.ini_defaults:
+                        self.ini_defaults[p] = e
+                    #print "CONFIG P",p, self.config[p]
+                    cvalues = self.config[p]
+                    ini_defaults_values = self.ini_defaults[p]['values']
+                    mvalues = e.get('values', [])
+                    for (prop, v) in mvalues:
+                        if prop not in cvalues:
+                            ini_defaults_values.append( (prop, v) )
+                            new_config_param = True
+
+        # update our ini with the new defaults
+        if new_config_param:
+            logger.info('New module parameter detected, updating the ini file')
+            write_ini_file(self.cfg, self)
 
         logger.debug('We load the keywords %s' % self.keywords)
 
@@ -223,7 +255,6 @@ class CLICommander(object):
             args = shlex.split(line.encode('utf8', 'ignore'))
             logger.debug("WANT TO CALL WITH ARGS %s" % args)
             self.one_loop(args)
-
 
 
     def execute_shell(self, line):
@@ -274,9 +305,7 @@ class CLICommander(object):
         cmd_opts, cmd_args = command_parser.parse_args(command_args)
         f = mod.get('f', None)
         logger.debug("CALLING" + str(f) + "WITH" + str(cmd_args) + "and" + str(cmd_opts) + str(type(cmd_opts)) + str(dir(cmd_opts)))
-        f(*cmd_args,**cmd_opts.__dict__)
-
-
+        f(*cmd_args, **cmd_opts.__dict__)
 
 
     # Complete is a bit strange in readline. It will call it as it do not answser None, by increasing the
@@ -312,6 +341,42 @@ class CLICommander(object):
         return response
 
 
+
+
+
+def write_ini_file(cfg, CLI):
+        new_cfg = ConfigParserWithComments()
+        modify = False
+        if not cfg:
+            cfg = ConfigParser.ConfigParser()
+
+        # Import data from the loaded configuration
+        for section in cfg.sections():
+            if not new_cfg.has_section(section):
+                new_cfg.add_section(section)
+            for (k, v) in cfg.items(section):
+                new_cfg.set(section, k, v)
+
+        for (s, d) in CLI.ini_defaults.iteritems():
+            comment = d.get('comment', '')
+            values = d.get('values', [])
+            if not cfg.has_section(s) and not new_cfg.has_section(s):
+                print "Creating ini section", s
+                new_cfg.add_section(s)
+                modify = True
+            if comment:
+                new_cfg.add_comment(s, comment)
+            for (k, v) in values:
+                if not cfg.has_option(s, k):
+                    new_cfg.set(s, k, v)
+                    modify = True
+                #print new_cfg.items(s)
+        if modify:
+            print "Saving the new configuration file", opts.iniconfig
+            with open(opts.iniconfig, 'wb') as configfile:
+                new_cfg.write(configfile)
+
+
 if __name__ == '__main__':
     parser = optparse.OptionParser(
         '',
@@ -334,11 +399,10 @@ if __name__ == '__main__':
     parser.add_option('-h', '--help', action='store_true',
                       dest="do_help", help=("Print help"))
 
-
-    # First parsing, for purely internal parameters, but disable 
+    # First parsing, for purely internal parameters, but disable
     # errors, because we only want to see the -D -v things
     old_error = parser.error
-    parser.error = lambda x:1
+    parser.error = lambda x: 1
     opts, args = parser.parse_args()
     # reenable the errors for later use
     parser.error = old_error
@@ -349,10 +413,10 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if opts.do_verbose:
-        logger.set_level(logger.INFO)
+        logger.setLevel('INFO')
 
     if opts.do_debug:
-        logger.set_level(logger.DEBUG)
+        logger.setLevel('DEBUG')
 
     cfg = None
     if not os.path.exists(opts.iniconfig):
@@ -366,7 +430,16 @@ if __name__ == '__main__':
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
 
-    CLI = CLICommander(CONFIG, opts)
+    # Now replace if given in command line
+    if opts.api_key:
+        CONFIG['shinken.io']['api_key'] = opts.api_key
+        logger.debug("Using given api-key in command line")
+
+    if opts.proxy:
+        CONFIG['shinken.io']['proxy'] = opts.proxy
+        logger.debug("Using given proxy in command line")
+
+    CLI = CLICommander(CONFIG, cfg, opts)
 
     # We should look on the sys.argv if we find a valid keywords to
     # call in one loop or not.
@@ -381,7 +454,7 @@ if __name__ == '__main__':
             # Did we found it?
             if founded:
                 command_values.append(arg)
-            else: # ok still not, it's for the shinekn command so
+            else:  # ok still not, it's for the shinekn command so
                 internal_values.append(arg)
 
         sys.argv = internal_values
@@ -402,18 +475,18 @@ if __name__ == '__main__':
         if a not in CLI.keywords:
             logger.error("Cannot find any help for %s" % a)
             sys.exit(1)
-        cprint('%s' %  a, 'green')
+        cprint('%s' % a, 'green')
         for arg in CLI.keywords[a]['args']:
             n = arg.get('name', '')
             desc = arg.get('description', '')
-            cprint('\t%s' %  n, 'green', end='')
+            cprint('\t%s' % n, 'green', end='')
             cprint(': %s' % desc)
-            
+
         sys.exit(0)
-        
+
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
-        CONFIG['shinken.io.proxy'] = opts.proxy
+        CONFIG['shinken.io']['proxy'] = opts.proxy
 
     # Maybe he/she just want to list our commands?
     if opts.do_list:
@@ -424,51 +497,19 @@ if __name__ == '__main__':
         for (k, m) in CLI.keywords.iteritems():
             came_from = m['came_from']
             if came_from not in all_from:
-                all_from[came_from] = [(k,m)]
+                all_from[came_from] = [(k, m)]
             else:
-                all_from[came_from].append((k,m))
+                all_from[came_from].append((k, m))
         for (mod_name, d) in all_from.iteritems():
             print '%s:' % mod_name
-            for (k,m) in d:
-                cprint('\t%s ' %  k , 'green', end='')
-                cprint(': %s' %  m['description'])
+            for (k, m) in d:
+                cprint('\t%s ' % k, 'green', end='')
+                cprint(': %s' % m['description'])
         sys.exit(0)
-
 
     if opts.do_init:
-        new_cfg = ConfigParserWithComments()
-        modify = False
-        if not cfg:
-            cfg = ConfigParser.ConfigParser()
-
-        # Import data from the loaded configuration
-        for section in cfg.sections():
-            if not new_cfg.has_section(section):
-                new_cfg.add_section(section)
-            for (k, v) in cfg.items(section):
-                new_cfg.set(section, k, v)
-
-
-        for (s,d) in CLI.ini_defaults.iteritems():
-            comment = d.get('comment', '')
-            values = d.get('values', [])
-            if not cfg.has_section(s) and not new_cfg.has_section(s):
-                print "Creating ini section", s
-                new_cfg.add_section(s)
-                modify = True
-            if comment:
-                new_cfg.add_comment(s, comment)
-            for (k,v) in values:
-                if not cfg.has_option(s, k):
-                    new_cfg.set(s,k,v)
-                    modify = True
-                #print new_cfg.items(s)
-        if modify:
-            print "Saving the new configuration file", opts.iniconfig
-            with open(opts.iniconfig, 'wb') as configfile:
-                new_cfg.write(configfile)
+        write_ini_file(cfg, CLI)
         sys.exit(0)
-
 
     # if just call shinken, we must open a prompt, but will be for another version
     if len(command_args) == 0:
@@ -477,4 +518,3 @@ if __name__ == '__main__':
 
     # If it's just a one call shot, do it!
     CLI.one_loop(command_args)
-

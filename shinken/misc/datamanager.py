@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -275,7 +275,7 @@ class DataManager(object):
         if len(all_services) == 0:
             res = 0
         else:
-            res = (100-(len(problem_services) *100)/len(all_services))
+            res = int(100-(len(problem_services) *100)/float(len(all_services)))
         return res
               
     # Get percent of all Hosts
@@ -286,7 +286,7 @@ class DataManager(object):
         if len(all_hosts) == 0:
             res = 0
         else:
-            res = (100-(len(problem_hosts) *100)/len(all_hosts))
+            res = int(100-(len(problem_hosts) *100)/float(len(all_hosts)))
         return res
               
 

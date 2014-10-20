@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -40,11 +40,12 @@ from shinken.objects.schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
 from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, \
     get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, \
-    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names, to_name_if_possible
+    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names, to_name_if_possible, \
+    is_complex_expr
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Service(SchedulingItem):
@@ -122,6 +123,7 @@ class Service(SchedulingItem):
         'time_to_orphanage':       IntegerProp(default="300", fill_brok=['full_status']),
         'merge_host_contacts': 	   BoolProp(default='0', fill_brok=['full_status']),
         'labels':                  ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'host_dependency_enabled':  BoolProp(default='1', fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -147,6 +149,7 @@ class Service(SchedulingItem):
         # Load some triggers
         'trigger':         StringProp(default=''),
         'trigger_name':    ListProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default='0'),
 
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
@@ -177,6 +180,7 @@ class Service(SchedulingItem):
         'last_chk':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':        BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
+        'in_maintenance':     IntegerProp(default=None, fill_brok=['full_status'], retention=True),
         'latency':            FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True,),
         'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'state':              StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
@@ -301,6 +305,9 @@ class Service(SchedulingItem):
         # snapshots part
         'last_snapshot':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
 
+        # Keep the string of the last command launched for this element
+        'last_check_command': StringProp(default=''),
+
     })
 
     # Mapping between Macros and properties (can be prop or a function)
@@ -404,6 +411,9 @@ class Service(SchedulingItem):
     def get_host_tags(self):
         return self.host.tags
 
+    def get_service_tags(self):
+        return self.tags
+
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
@@ -422,19 +432,19 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("The service %s on host '%s' does not have %s" % (desc, hname, prop))
+                    logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[service::%s] %s" % (desc, err))
+            logger.warning("[service::%s] %s", desc, err)
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[service::%s] %s" % (self.get_full_name(), err))
+                logger.error("[service::%s] %s", self.get_full_name(), err)
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -442,7 +452,7 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The service '%s' in the host '%s' does not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+            logger.warning("The service '%s' in the host '%s' does not have contacts nor contact_groups in '%s'", desc, hname, source)
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
@@ -450,45 +460,50 @@ class Service(SchedulingItem):
 
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            logger.info("%s: my event_handler %s is invalid", self.get_name(), self.event_handler.command)
             state = False
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s: I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid", self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s: %s" % (self.get_name(), bperror))
+                        logger.info("%s: %s", self.get_name(), bperror)
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled", self.get_name())
             state = False
-        if self.host is None:
-            logger.warning("The service '%s' got an unknown host_name '%s'." % (desc, self.host_name))
-            # do not set tis a a true error, only we will delete this after
+        if not self.host_name:
+            logger.error("The service '%s' is not bound do any host.", desc)
+            state = False
+        elif self.host is None:
+            logger.error("The service '%s' got an unknown host_name '%s'.", desc, self.host_name)
+            state = False
+
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s: My service_description got the character %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the character %s that is not allowed.", self.get_name(), c)
                     state = False
         return state
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
+    # TODO: implement "not host dependent" feature.
     def fill_daddy_dependency(self):
         #  Depend of host, all status, is a networkdep
         # and do not have timeperiod, and follow parents dep
-        if self.host is not None:
+        if self.host is not None and self.host_dependency_enabled:
             # I add the dep in MY list
             self.act_depend_of.append((self.host,
                                         ['d', 'u', 's', 'f'],
@@ -549,61 +564,64 @@ class Service(SchedulingItem):
         prop = self.duplicate_foreach.strip().upper()
 
         # If I do not have the property, we bail out
-        if prop in host.customs:
-            # Get the list entry, and the not one if there is one
-            entry = host.customs[prop]
-            # Look at the list of the key we do NOT want maybe,
-            # for _disks it will be _!disks
-            not_entry = host.customs.get('_' + '!' + prop[1:], '').split(',')
-            not_keys = strip_and_uniq(not_entry)
+        if prop not in host.customs:
+            return []
 
-            default_value = getattr(self, 'default_value', '')
-            # Transform the generator string to a list
-            # Missing values are filled with the default value
-            (key_values, errcode) = get_key_value_sequence(entry, default_value)
+        # Get the list entry, and the not one if there is one
+        entry = host.customs[prop]
+        # Look at the list of the key we do NOT want maybe,
+        # for _disks it will be _!disks
+        not_entry = host.customs.get('_' + '!' + prop[1:], '').split(',')
+        not_keys = strip_and_uniq(not_entry)
 
-            if key_values:
-                for key_value in key_values:
-                    key = key_value['KEY']
-                    # Maybe this key is in the NOT list, if so, skip it
-                    if key in not_keys:
-                        continue
-                    value = key_value['VALUE']
-                    new_s = self.copy()
-                    new_s.host_name = host.get_name()
-                    if self.is_tpl():  # if template, the new one is not
-                        new_s.register = 1
-                    for key in key_value:
-                        if key == 'KEY':
-                            if hasattr(self, 'service_description'):
-                                # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
-                                # because in the "explode" phase, we do not have access to this data! :(
-                                safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
-                                new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
-                        # Here is a list of property where we will expand the $KEY$ by the value
-                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler', 'snapshot_command']
-                        for prop in _the_expandables:
-                            if hasattr(self, prop):
-                                # here we can replace VALUE, VALUE1, VALUE2,...
-                                setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
-                        if hasattr(self, 'aggregation'):
-                            new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
-                    # And then add in our list this new service
-                    duplicates.append(new_s)
-            else:
-                # If error, we should link the error to the host, because self is a template, and so won't be checked not print!
-                if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
-                    err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % (self.duplicate_foreach.strip(), host.get_name(), entry)
-                    logger.warning(err)
-                    host.configuration_errors.append(err)
-                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
-                    err = "The custom property '%s 'of the host '%s' has empty values %s but the service %s has no default_value" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
-                    logger.warning(err)
-                    host.configuration_errors.append(err)
-                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
-                    err = "The custom property '%s' of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry)
-                    logger.warning(err)
-                    host.configuration_errors.append(err)
+        default_value = getattr(self, 'default_value', '')
+        # Transform the generator string to a list
+        # Missing values are filled with the default value
+        (key_values, errcode) = get_key_value_sequence(entry, default_value)
+
+        if key_values:
+            for key_value in key_values:
+                key = key_value['KEY']
+                # Maybe this key is in the NOT list, if so, skip it
+                if key in not_keys:
+                    continue
+                value = key_value['VALUE']
+                new_s = self.copy()
+                new_s.host_name = host.get_name()
+                if self.is_tpl():  # if template, the new one is not
+                    new_s.register = 1
+                for key in key_value:
+                    if key == 'KEY':
+                        if hasattr(self, 'service_description'):
+                            # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
+                            # because in the "explode" phase, we do not have access to this data! :(
+                            safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
+                            new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
+                    # Here is a list of property where we will expand the $KEY$ by the value
+                    _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler']
+                    for prop in _the_expandables:
+                        if hasattr(self, prop):
+                            # here we can replace VALUE, VALUE1, VALUE2,...
+                            setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
+                    if hasattr(self, 'aggregation'):
+                        new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
+                # And then add in our list this new service
+                duplicates.append(new_s)
+        else:
+            # If error, we should link the error to the host, because self is a template, and so won't be checked not print!
+            if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
+                err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % (self.duplicate_foreach.strip(), host.get_name(), entry)
+                logger.warning(err)
+                host.configuration_errors.append(err)
+            elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
+                err = "The custom property '%s 'of the host '%s' has empty values %s but the service %s has no default_value" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                logger.warning(err)
+                host.configuration_errors.append(err)
+            elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
+                err = "The custom property '%s' of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry)
+                logger.warning(err)
+                host.configuration_errors.append(err)
+
         return duplicates
 
 #####
@@ -728,7 +746,7 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('SERVICE ALERT: %s;%s;%s;%s;%d;%s'
+        naglog_result('critical', 'SERVICE ALERT: %s;%s;%s;%s;%d;%s'
                             % (self.host.get_name(), self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -737,7 +755,7 @@ class Service(SchedulingItem):
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
+            naglog_result('info', 'CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s'
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
@@ -748,10 +766,10 @@ class Service(SchedulingItem):
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of service '%s' on host '%s' are stale "
                        "by %s (threshold=%s).  I'm forcing an immediate check "
-                       "of the service."
-                       % (self.get_name(), self.host.get_name(),
+                       "of the service.",
+                        self.get_name(), self.host.get_name(),
                           format_t_into_dhms_format(t_stale_by),
-                          format_t_into_dhms_format(t_threshold)))
+                          format_t_into_dhms_format(t_threshold))
 
     # Raise a log entry with a Notification alert like
     # SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
@@ -765,7 +783,7 @@ class Service(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.alert("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
+            naglog_result('critical', "SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
                                 % (contact.get_name(),
                                    self.host.get_name(), self.get_name(), state,
                                    command.get_name(), self.output))
@@ -774,7 +792,7 @@ class Service(SchedulingItem):
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
+            naglog_result('critical', "SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -784,7 +802,7 @@ class Service(SchedulingItem):
     # SERVICE SNAPSHOT: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_snapshot_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("SERVICE SNAPSHOT: %s;%s;%s;%s;%s;%s"
+            naglog_result('critical', "SERVICE SNAPSHOT: %s;%s;%s;%s;%s;%s"
                                 % (self.host.get_name(), self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -793,7 +811,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STARTED; "
+        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STARTED; "
                             "Service appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -803,7 +821,7 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
+        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
                             "Service appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
@@ -812,13 +830,13 @@ class Service(SchedulingItem):
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the service '%s' on "
-                       "host '%s' because there is not future valid time"
-                       % (self.get_name(), self.host.get_name()))
+                       "host '%s' because there is not future valid time",
+                        self.get_name(), self.host.get_name())
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
                             "Service has entered a period of scheduled "
                             "downtime"
                             % (self.host.get_name(), self.get_name()))
@@ -826,14 +844,14 @@ class Service(SchedulingItem):
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
                             "has exited from a period of scheduled downtime"
                             % (self.host.get_name(), self.get_name()))
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
+        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
                             "Scheduled downtime for service has been cancelled."
                             % (self.host.get_name(), self.get_name()))
 
@@ -855,7 +873,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s: %s", self.get_name(), c.output)
 
     # Give data for checks's macros
     def get_data_for_checks(self):
@@ -997,94 +1015,99 @@ class Service(SchedulingItem):
 class Services(Items):
     inner_class = Service  # use for know what is in items
 
-    # Create the reversed list for speedup search by host_name/name
-    # We also tag service already in list: they are twins. It's a a bad things.
-    # Hostgroups service have an ID higher than host service. So it we tag
-    # an id that already are in the list, this service is already
-    # exist, and is a host,
-    # or a previous hostgroup, but define before.
-    def create_reversed_list(self):
-        self.reversed_list = {}
-        self.twins = []
+    def add_template(self, tpl):
+        """
+        Adds and index a template into the `templates` container.
 
-        # Get a sorted list of all services, by definition_order
-        all_services = [s for s in self]
-        all_services.sort(key=lambda s:int(getattr(s, 'definition_order', '100')))
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
 
-        # Now we sort them, we will have definition_order sorted like we want
-        for s in all_services:
-            if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
-                s_desc = getattr(s, 'service_description')
-                s_host_name = getattr(s, 'host_name')
-                key = (s_host_name, s_desc)
-                if key not in self.reversed_list:
-                    self.reversed_list[key] = s.id
-                else:
-                    self.twins.append(s.id)
+        :param tpl: The template to add
+        """
+        objcls = self.inner_class.my_type
+        name = getattr(tpl, 'name', '')
+        hname = getattr(tpl, 'host_name', '')
+        if not name and not hname:
+            mesg = "a %s template has been defined without name nor " \
+                   "host_name%s" % (objcls, tpl.get_source())
+            tpl.configuration_errors.append(mesg)
+        elif name:
+            tpl = self.index_template(tpl)
+        self.templates[tpl.id] = tpl
 
-        # For service, the reversed_list is not used for
-        # search, so we del it
-        del self.reversed_list
+    def add_item(self, item, index=True):
+        """
+        Adds and index an item into the `items` container.
 
-    # TODO: finish search to use reversed
-    # Search a service id by it's name and host_name
-    def find_srv_id_by_name_and_hostname(self, host_name, name):
-        # key = (host_name, name)
-        # if key in self.reversed_list:
-        #     return self.reversed_list[key]
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
 
-        # if not, maybe in the whole list?
-        for s in self:
-            # Runtime first, available only after linkify
-            if hasattr(s, 'service_description') and hasattr(s, 'host'):
-                if s.service_description == name and s.host == host_name:
-                    return s.id
-            # At config part, available before linkify
-            if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
-                if s.service_description == name and s.host_name == host_name:
-                    return s.id
-        return None
+        :param item:    The item to add
+        :param index:   Flag indicating if the item should be indexed
+        """
+        objcls = self.inner_class.my_type
+        hname = getattr(item, 'host_name', '')
+        hgname = getattr(item, 'hostgroup_name', '')
+        sdesc = getattr(item, 'service_description', '')
+        source = getattr(self, 'imported_from', 'unknown')
+        if source:
+            in_file = " in %s" % source
+        else:
+            in_file = ""
+        if not hname and not hgname:
+            mesg = "a %s has been defined without host_name nor " \
+                   "hostgroups%s" % (objcls, in_file)
+            item.configuration_errors.append(mesg)
+        if not sdesc:
+            mesg = "a %s has been defined without service_description%s" % \
+                   (objcls, in_file)
+            item.configuration_errors.append(mesg)
+        if index is True:
+            item = self.index_item(item)
+        self.items[item.id] = item
 
-    # Search a service by it's name and hot_name
-    def find_srv_by_name_and_hostname(self, host_name, name):
+    def index_item(self, item):
+        """
+        Indexes a template by `name` into the `name_to_template` dictionnary.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param item: The item to index
+        """
+        hname = getattr(item, 'host_name', '')
+        sdescr = getattr(item, 'service_description', '')
+        key = (hname, sdescr)
+        return Items.index_item(self, item, key)
+
+    def unindex_item(self, item):
+        """
+        Unindexes an item from the `items` container.
+
+        This implementation takes into account that a service has two naming
+        attribute: `host_name` and `service_description`.
+
+        :param item:    The item to unindex
+        :param name:    The name under which the item has been indexed.
+        """
+        host_name = getattr(item, 'host_name', '')
+        sdescr = getattr(item, 'service_description', '')
+        key = (host_name, sdescr)
+        Items.unindex_item(self, item, key)
+
+    # Search for all of the services in a host
+    def find_srvs_by_hostname(self, host_name):
         if hasattr(self, 'hosts'):
             h = self.hosts.find_by_name(host_name)
             if h is None:
                 return None
-            return h.find_service_by_name(name)
+            return h.get_services()
+        return None
 
-        id = self.find_srv_id_by_name_and_hostname(host_name, name)
-        if id is not None:
-            return self.items[id]
-        else:
-            return None
-
-    # Removes service exceptions based on host configuration
-    def remove_exclusions(self, hosts):
-        # Looks for hosts having service_excludes attribute set
-        have_excludes = [h for h in hosts if h.service_excludes]
-        to_remove = []
-
-        for host in have_excludes:
-            for descr in host.service_excludes:
-                # Deletes excluded service instances
-                sid = None
-                for service in self:
-                    if service.service_description == descr and \
-                       service.host_name == host.host_name:
-                        sid = service.id
-                        break
-
-                if sid is not None:
-                    to_remove.append(service.id)
-                else:
-                    err = "Error: exclusion contains an undefined service: %s" % descr
-                    host.configuration_errors.append(err)
-
-        for sid in to_remove:
-            del self[sid]
-
-        return len(to_remove)
+    # Search a service by it's name and hot_name
+    def find_srv_by_name_and_hostname(self, host_name, sdescr):
+        key = (host_name, sdescr)
+        return self.name_to_item.get(key, None)
 
     # Make link between elements:
     # service -> host
@@ -1115,50 +1138,34 @@ class Services(Items):
         self.linkify_with_macromodulations(macromodulations)
 
     def override_properties(self, hosts):
-        for host in hosts:
+        ovr_re = re.compile(r'^([^,]+),([^\s]+)\s+(.*)$')
+        ovr_hosts = [h for h in hosts if getattr(h, 'service_overrides', None)]
+        for host in ovr_hosts:
             # We're only looking for hosts having service overrides defined
-            if not hasattr(host, 'service_overrides') or not host.service_overrides:
-                continue
-            cache = {}
             if isinstance(host.service_overrides, list):
                 service_overrides = host.service_overrides
             else:
                 service_overrides = [host.service_overrides]
             for ovr in service_overrides:
                 # Checks service override syntax
-                match = re.match(r'^([^,]+),([^\s]+)\s+(.*)$', ovr)
+                match = ovr_re.search(ovr)
                 if match is None:
                     err = "Error: invalid service override syntax: %s" % ovr
                     host.configuration_errors.append(err)
                     continue
-                name, prop, value = match.groups()
-                # To speep up search if several properties are overriden on the
-                # same service, we keep them in temporary cache
-                key = "%s/%s" % (host.host_name, name)
-                if key in cache:
-                    service = cache[key]
-                else:
-                    # Looks for corresponding service
-                    # As hosts and service are not yet linked, we have to walk
-                    # through services to find which is associated to host.
-                    service = None
-                    for s in self:
-                        if not hasattr(s, "host_name") or not hasattr(s, "service_description"):
-                            # this is a template
-                            continue
-                        if s.host_name == host.host_name and s.service_description == name:
-                            service = s
-                            break
-                    if service is None:
-                        err = "Error: trying to override property '%s' on service '%s' but it's unknown for this host" % (prop, name)
-                        host.configuration_errors.append(err)
-                        continue
-                    cache[key] = service
+                sdescr, prop, value = match.groups()
+                # Looks for corresponding service
+                service = self.find_srv_by_name_and_hostname(
+                    getattr(host, "host_name", ""),  sdescr)
+                if service is None:
+                    err = "Error: trying to override property '%s' on service '%s' but it's unknown for this host" % (prop, sdescr)
+                    host.configuration_errors.append(err)
+                    continue
                 # Checks if override is allowed
                 excludes = ['host_name', 'service_description', 'use',
                             'servicegroups', 'trigger', 'trigger_name']
                 if prop in excludes:
-                    err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, name)
+                    err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, sdescr)
                     host.configuration_errors.append(err)
                     continue
                 setattr(service, prop, value)
@@ -1198,19 +1205,18 @@ class Services(Items):
     # link them
     def linkify_s_by_sg(self, servicegroups):
         for s in self:
-            if not s.is_tpl():
-                new_servicegroups = []
-                if hasattr(s, 'servicegroups') and s.servicegroups != '':
-                    sgs = s.servicegroups.split(',')
-                    for sg_name in sgs:
-                        sg_name = sg_name.strip()
-                        sg = servicegroups.find_by_name(sg_name)
-                        if sg is not None:
-                            new_servicegroups.append(sg)
-                        else:
-                            err = "Error: the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
-                            s.configuration_errors.append(err)
-                s.servicegroups = new_servicegroups
+            new_servicegroups = []
+            if hasattr(s, 'servicegroups') and s.servicegroups != '':
+                sgs = s.servicegroups.split(',')
+                for sg_name in sgs:
+                    sg_name = sg_name.strip()
+                    sg = servicegroups.find_by_name(sg_name)
+                    if sg is not None:
+                        new_servicegroups.append(sg)
+                    else:
+                        err = "Error: the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                        s.configuration_errors.append(err)
+            s.servicegroups = new_servicegroups
 
     # In the scheduler we need to relink the commandCall with
     # the real commands
@@ -1235,11 +1241,10 @@ class Services(Items):
                       'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
                       'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period'):
             for s in self:
-                if not s.is_tpl():
-                    if not hasattr(s, prop) and hasattr(s, 'host_name'):
-                        h = hosts.find_by_name(s.host_name)
-                        if h is not None and hasattr(h, prop):
-                            setattr(s, prop, getattr(h, prop))
+                if not hasattr(s, prop) and hasattr(s, 'host_name'):
+                    h = hosts.find_by_name(s.host_name)
+                    if h is not None and hasattr(h, prop):
+                        setattr(s, prop, getattr(h, prop))
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
@@ -1251,7 +1256,7 @@ class Services(Items):
         # Then implicit inheritance
         # self.apply_implicit_inheritance(hosts)
         for s in self:
-            s.get_customs_properties_by_inheritance(self)
+            s.get_customs_properties_by_inheritance()
 
     # Create dependencies for services (daddy ones)
     def apply_dependencies(self):
@@ -1268,163 +1273,229 @@ class Services(Items):
         for sid in to_del:
             del self.items[sid]
 
-    # Add in our queue a service create from another. Special case:
-    # is a template: so hname is a name of template, so need to get all
-    # hosts that inherit from it.
-    def copy_create_service_from_another(self, hosts, s, hname):
-        for_hosts_to_create = []
-        # if we are not a template, it's easy: copy for all host_name
-        # because they are our final host_name after all
-        if not s.is_tpl():
-            for_hosts_to_create.append(hname)
-        else:
-            # But for template it's more tricky: it's a template name
-            # we've got, not a real host_name/ So we must get a list of host_name
-            # that use this template
-            # Use the complex expression manager for it, it will call find_hosts_that_use_template
-            # for the templates it think it's useful
-            hosts_from_tpl = self.evaluate_hostgroup_expression(hname.strip(), hosts, hosts.templates, look_in='templates')
+    def is_excluded_for_host(self, host, service):
+        sdescr = getattr(service, "service_description", '')
+        excludes = getattr(host, "service_excludes", '')
+        if not isinstance(excludes, list):
+            excludes = [e.strip() for e in excludes.split(',') if e.strip()]
+        return sdescr in excludes
 
-            # And now copy our real services
-            for n in hosts_from_tpl:
-                for_hosts_to_create.append(n)
+    def explode_services_from_hosts(self, hosts, s, hnames):
+        """
+        Explodes a service based on a lis of hosts.
 
-        if getattr(s, 'duplicate_foreach', '') == '':
-            def _loop(name):
-                new_s = s.copy()
-                new_s.host_name = name
-                if s.is_tpl():  # if template, the new one is not
-                    new_s.register = 1
-                self.items[new_s.id] = new_s
-        else:
-            def _loop(name):
-                # the generator case, we must create several new services
-                # we must find our host, and get all key:value we need
-                h = hosts.find_by_name(name.strip())
+        :param hosts:   The hosts container
+        :param s:       The base service to explode
+        :param hnames:  The host_name list to exlode sevice on
+        """
+        duplicate_for_hosts = []  # get the list of our host_names if more than 1
+        not_hosts = []  # the list of !host_name so we remove them after
+        for hname in hnames:
+            hname = hname.strip()
 
-                if h is not None:
-                    for new_s in s.duplicate(h):
-                        self.items[new_s.id] = new_s
-                else:  # TODO: raise an error?
-                    err = 'Error: The hostname %s is unknown for the service %s!' % (name, s.get_name())
-                    s.configuration_errors.append(err)
+            # If the name begin with a !, we put it in
+            # the not list
+            if hname.startswith('!'):
+                not_hosts.append(hname[1:])
+            else:  # the standard list
+                duplicate_for_hosts.append(hname)
+
+        # remove duplicate items from duplicate_for_hosts:
+        duplicate_for_hosts = list(set(duplicate_for_hosts))
+
+        # Ok now we clean the duplicate_for_hosts with all hosts
+        # of the not
+        for hname in not_hosts:
+            try:
+                duplicate_for_hosts.remove(hname)
+            except IndexError:
+                pass
+
+        # Now we duplicate the service for all host_names
+        for hname in duplicate_for_hosts:
+            h = hosts.find_by_name(hname)
+            if h is None:
+                err = 'Error: The hostname %s is unknown for the ' \
+                      'service %s!' % (hname, s.get_name())
+                s.configuration_errors.append(err)
+            if self.is_excluded_for_host(h, s):
+                continue
+            new_s = s.copy()
+            new_s.host_name = hname
+            self.add_item(new_s)
+
+    def explode_services_from_templates(self, hosts, t):
+        """
+        Explodes services from templates. All hosts holding the specified
+        templates are bound the service.
+
+        :param hosts:   The hosts container
+        :param s:       The service to explode
+        """
+        hname = getattr(t, "host_name", None)
+        if hname is None:
+            return
+
+        def local_create_service(name):
+            h = hosts.find_by_name(name.strip())
+            if self.is_excluded_for_host(h, t):
+                return
+            # Creates concrete instance
+            new_s = t.copy()
+            new_s.host_name = name
+            new_s.register = 1
+            self.add_item(new_s)
 
         # Now really create the services
-        for name in for_hosts_to_create:
-            _loop(name)
+        if is_complex_expr(hname):
+            hnames = self.evaluate_hostgroup_expression(
+                hname.strip(), hosts, hosts.templates, look_in='templates')
+            for name in hnames:
+                local_create_service(name)
+        else:
+            hnames = [n.strip() for n in hname.split(',') if n.strip()]
+            for hname in hnames:
+                for name in hosts.find_hosts_that_use_template(hname):
+                    local_create_service(name)
+
+    def explode_services_duplicates(self, hosts, s):
+        """
+        Explodes services holding a `duplicate_foreach` clause.
+
+        :param hosts:   The hosts container
+        :param s:       The service to explode
+        """
+        hname = getattr(s, "host_name", None)
+        if hname is None:
+            return
+
+        # the generator case, we must create several new services
+        # we must find our host, and get all key:value we need
+        h = hosts.find_by_name(hname.strip())
+
+        if h is None:
+            err = 'Error: The hostname %s is unknown for the ' \
+                  'service %s!' % (hname, s.get_name())
+            s.configuration_errors.append(err)
+            return
+
+        # Duplicate services
+        for new_s in s.duplicate(h):
+            if self.is_excluded_for_host(h, new_s):
+                continue
+            # Adds concrete instance
+            self.add_item(new_s)
+
+    def register_service_into_servicegroups(self, s, servicegroups):
+        """
+        Registers a service into the service groups declared in its
+        `servicegroups` attribute.
+
+        :param s:   The service to register
+        :param servicegroups:   The servicegroups container
+        """
+        if hasattr(s, 'service_description'):
+            sname = s.service_description
+            shname = getattr(s, 'host_name', '')
+            if hasattr(s, 'servicegroups'):
+                if isinstance(s.servicegroups, list):
+                    sgs = s.servicegroups
+                else:
+                    sgs = s.servicegroups.split(',')
+                for sg in sgs:
+                    servicegroups.add_member(shname + ',' + sname, sg.strip())
+
+    def register_service_dependencies(self, s, servicedependencies):
+        """
+        Registers a service dependencies.
+
+        :param s:                   The service to register
+        :param servicedependencies: The servicedependencies container
+        """
+        # We explode service_dependencies into Servicedependency
+        # We just create serviceDep with goods values (as STRING!),
+        # the link pass will be done after
+        sdeps = [d.strip() for d in
+                 getattr(s, "service_dependencies", '').split(',')]
+        # %2=0 are for hosts, !=0 are for service_description
+        i = 0
+        hname = ''
+        for elt in sdeps:
+            if i % 2 == 0:  # host
+                hname = elt
+            else:  # description
+                desc = elt
+                # we can register it (s) (depend on) -> (hname, desc)
+                # If we do not have enough data for s, it's no use
+                if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
+                    if hname == '':
+                        hname = s.host_name
+                    servicedependencies.add_service_dependency(
+                        s.host_name, s.service_description, hname, desc)
+            i += 1
 
     # We create new service if necessary (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups,
                 servicegroups, servicedependencies, triggers):
-        # The "old" services will be removed. All services with
-        # more than one host or a host group will be in it
-        srv_to_remove = []
+        """
+        Explodes services, from host_name, hostgroup_name, and from templetes.
+
+        :param hosts:               The hosts container
+        :param hostgroups:          The hostgoups container
+        :param contactgroups:       The concactgoups container
+        :param servicegroups:       The servicegoups container
+        :param servicedependencies: The servicedependencies container
+        :param triggers:            The triggers container
+        """
 
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        # items::explode_host_groups_into_hosts
-        # take all hosts from our hostgroup_name into our host_name property
-        self.explode_host_groups_into_hosts(hosts, hostgroups)
-
-        # items::explode_contact_groups_into_contacts
-        # take all contacts from our contact_groups into our contact property
-        self.explode_contact_groups_into_contacts(contactgroups)
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        service_to_check = self.items.keys()
-
-        for id in service_to_check:
+        for id in self.items.keys():
             s = self.items[id]
-            duplicate_for_hosts = []  # get the list of our host_names if more than 1
-            not_hosts = []  # the list of !host_name so we remove them after
+            # items::explode_host_groups_into_hosts
+            # take all hosts from our hostgroup_name into our host_name property
+            self.explode_host_groups_into_hosts(s, hosts, hostgroups)
 
-            # If do not have an host_name, just delete it
-            if not hasattr(s, 'host_name'):
-                srv_to_remove.append(s.id)
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(s, contactgroups)
 
-            # if not s.is_tpl(): # Exploding template is useless
-            # Explode for real service or template with a host_name
-            if hasattr(s, 'host_name'):
-                hnames = s.host_name.split(',')
-                hnames = strip_and_uniq(hnames)
-                # We will duplicate if we have multiple host_name
-                # or if we are a template (so a clean service)
-                if len(hnames) >= 2 or s.is_tpl() \
-                        or (hasattr(s, 'duplicate_foreach') and s.duplicate_foreach != ''):
-                    for hname in hnames:
-                        hname = hname.strip()
+            hnames = getattr(s, "host_name", '')
+            hnames = list(set([n.strip() for n in hnames.split(',') if n.strip()]))
+            #hnames = strip_and_uniq(hnames)
+            # We will duplicate if we have multiple host_name
+            # or if we are a template (so a clean service)
+            if len(hnames) == 1:
+                self.index_item(s)
+            else:
+                if len(hnames) >= 2:
+                    self.explode_services_from_hosts(hosts, s, hnames)
+                # Delete expanded source service
+                if not s.configuration_errors:
+                    self.remove_item(s)
 
-                        # If the name begin with a !, we put it in
-                        # the not list
-                        if hname.startswith('!'):
-                            not_hosts.append(hname[1:])
-                        else:  # the standard list
-                            duplicate_for_hosts.append(hname)
+        for id in self.templates.keys():
+            t = self.templates[id]
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+            self.explode_services_from_templates(hosts, t)
 
-                    # remove duplicate items from duplicate_for_hosts:
-                    duplicate_for_hosts = list(set(duplicate_for_hosts))
-
-                    # Ok now we clean the duplicate_for_hosts with all hosts
-                    # of the not
-                    for hname in not_hosts:
-                        if hname in duplicate_for_hosts:
-                            duplicate_for_hosts.remove(hname)
-
-                    # Now we duplicate the service for all host_names
-                    for hname in duplicate_for_hosts:
-                        self.copy_create_service_from_another(hosts, s, hname)
-
-                    # Multiple host_name -> the original service
-                    # must be delete. But template are clean else where
-                    # and only the the service not got an error in it's conf
-                    if not s.is_tpl() and s.configuration_errors == []:
-                        srv_to_remove.append(id)
-
-                else:  # Maybe the hnames was full of same host, so we must reset the name
-                    for hname in hnames:  # So even if len == 0, we are protected
-                        s.host_name = hname
-
-        # We clean all service that was for multiple hosts.
-        self.delete_services_by_id(srv_to_remove)
+        # Explode services that have a duplicate_foreach clause
+        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
+        for id in duplicates:
+            s = self.items[id]
+            self.explode_services_duplicates(hosts, s)
+            if not s.configuration_errors:
+                self.remove_item(s)
 
         # Servicegroups property need to be fullfill for got the informations
         # And then just register to this service_group
         for s in self:
-            if not s.is_tpl() and hasattr(s, 'service_description'):
-                sname = s.service_description
-                shname = getattr(s, 'host_name', '')
-                if hasattr(s, 'servicegroups'):
-                    sgs = s.servicegroups.split(',')
-                    for sg in sgs:
-                        servicegroups.add_member(shname+','+sname, sg)
-
-
-        # Now we explode service_dependencies into Servicedependency
-        # We just create serviceDep with goods values (as STRING!),
-        # the link pass will be done after
-        for s in self:
-            # Templates are useless here
-            if not s.is_tpl():
-                if hasattr(s, 'service_dependencies'):
-                    if s.service_dependencies != '':
-                        sdeps = s.service_dependencies.split(',')
-                        # %2=0 are for hosts, !=0 are for service_description
-                        i = 0
-                        hname = ''
-                        for elt in sdeps:
-                            if i % 2 == 0:  # host
-                                hname = elt.strip()
-                            else:  # description
-                                desc = elt.strip()
-                                # we can register it (s) (depend on) -> (hname, desc)
-                                # If we do not have enough data for s, it's no use
-                                if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
-                                    if hname == '':
-                                        hname = s.host_name
-                                    servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
-                            i += 1
+            self.register_service_into_servicegroups(s, servicegroups)
+            self.register_service_dependencies(s, servicedependencies)
 
 
     # Will create all business tree for the
@@ -1432,7 +1503,6 @@ class Services(Items):
     def create_business_rules(self, hosts, services):
         for s in self:
             s.create_business_rules(hosts, services)
-
 
     # Will link all business service/host with theirs
     # dep for problem/impact link

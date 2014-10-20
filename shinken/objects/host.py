@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -30,6 +30,7 @@ scheduling/consume check smart things :)
 """
 
 import time
+import itertools
 
 from item import Items
 from schedulingitem import SchedulingItem
@@ -40,7 +41,7 @@ from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringP
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Host(SchedulingItem):
@@ -146,6 +147,7 @@ class Host(SchedulingItem):
         # Load some triggers
         'trigger':         StringProp(default=''),
         'trigger_name':    ListProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default='0'),
 
         # Trending
         'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
@@ -174,6 +176,7 @@ class Host(SchedulingItem):
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
+        'in_maintenance':       IntegerProp(default=None, fill_brok=['full_status'], retention=True),
         'latency':              FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'attempt':              IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'state':                StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
@@ -326,6 +329,9 @@ class Host(SchedulingItem):
 
         # snapshots part
         'last_snapshot':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        
+        # Keep the string of the last command launched for this element
+        'last_check_command': StringProp(default=''),
     })
 
     # Hosts macros and prop that give the information
@@ -428,55 +434,55 @@ class Host(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("[host::%s] %s property not set" % (self.get_name(), prop))
+                    logger.error("[host::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            logger.warning("[host::%s] %s" % (self.get_name(), err))
+            logger.warning("[host::%s] %s", self.get_name(), err)
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[host::%s] %s" % (self.get_name(), err))
+                logger.error("[host::%s] %s", self.get_name(), err)
 
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
+            logger.warning("The host %s has no contacts nor contact_groups in (%s)", self.get_name(), source)
 
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            logger.info("%s: my event_handler %s is invalid", self.get_name(), self.event_handler.command)
             state = False
 
         if getattr(self, 'check_command', None) is None:
-            logger.info("%s: I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid", self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.error("[host::%s] %s" % (self.get_name(), bperror))
+                        logger.error("[host::%s] %s", self.get_name(), bperror)
                     state = False
 
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled", self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
         if (getattr(self, 'active_checks_enabled', False)
              and getattr(self, 'check_period', None) is None
              and getattr(self, 'check_interval', 1) != 0):
-            logger.info("%s: check_period is not correct" % self.get_name())
+            logger.info("%s: check_period is not correct", self.get_name())
             state = False
 
         if not hasattr(self, 'check_period'):
@@ -485,7 +491,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.info("%s: My host_name got the character %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My host_name got the character %s that is not allowed.", self.get_name(), c)
                     state = False
 
         return state
@@ -497,6 +503,11 @@ class Host(SchedulingItem):
             if getattr(s, 'service_description', '__UNNAMED_SERVICE__') == service_description:
                 return s
         return None
+
+
+    # Return all of the services on a host
+    def get_services(self):
+        return self.services
 
 
     # For get a nice name
@@ -516,7 +527,7 @@ class Host(SchedulingItem):
     def get_groupname(self):
         groupname = ''
         for hg in self.hostgroups:
-            # console_logger.info('get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
+            # naglog_result('info', 'get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
             # groupname = "%s [%s]" % (hg.alias, hg.get_name())
             groupname = "%s" % (hg.alias)
         return groupname
@@ -525,7 +536,7 @@ class Host(SchedulingItem):
     def get_groupnames(self):
         groupnames = ''
         for hg in self.hostgroups:
-            # console_logger.info('get_groupnames : %s' % (hg.get_name()))
+            # naglog_result('info', 'get_groupnames : %s' % (hg.get_name()))
             if groupnames == '':
                 groupnames = hg.get_name()
             else:
@@ -700,12 +711,12 @@ class Host(SchedulingItem):
         else:
             self.last_state = self.state
 
-        if status == 0 or (status == 1 and cls.use_aggressive_host_checking == 0):
+        if status == 0 or (status == 1 and not cls.use_aggressive_host_checking):
             self.state = 'UP'
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
             state_code = 'u'
-        elif status in (2, 3) or (status == 1 and cls.use_aggressive_host_checking == 1):
+        elif status in (2, 3) or (status == 1 and cls.use_aggressive_host_checking):
             self.state = 'DOWN'
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
@@ -748,7 +759,7 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        console_logger.alert('HOST ALERT: %s;%s;%s;%d;%s'
+        naglog_result('critical', 'HOST ALERT: %s;%s;%s;%d;%s'
                             % (self.get_name(),
                                self.state, self.state_type,
                                self.attempt, self.output))
@@ -758,7 +769,7 @@ class Host(SchedulingItem):
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            console_logger.info('CURRENT HOST STATE: %s;%s;%s;%d;%s'
+            naglog_result('info', 'CURRENT HOST STATE: %s;%s;%s;%d;%s'
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
@@ -770,10 +781,10 @@ class Host(SchedulingItem):
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of host '%s' are stale by %s "
                        "(threshold=%s).  I'm forcing an immediate check "
-                       "of the host."
-                       % (self.get_name(),
+                       "of the host.",
+                        self.get_name(),
                           format_t_into_dhms_format(t_stale_by),
-                          format_t_into_dhms_format(t_threshold)))
+                          format_t_into_dhms_format(t_threshold))
 
 
     # Raise a log entry with a Notification alert like
@@ -788,7 +799,7 @@ class Host(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            console_logger.alert("HOST NOTIFICATION: %s;%s;%s;%s;%s"
+            naglog_result('critical', "HOST NOTIFICATION: %s;%s;%s;%s;%s"
                                 % (contact.get_name(), self.get_name(),
                                    state, command.get_name(), self.output))
 
@@ -797,7 +808,7 @@ class Host(SchedulingItem):
     # HOST EVENT HANDLER: superadmin;server;UP;notify-by-rss;no output
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("HOST EVENT HANDLER: %s;%s;%s;%s;%s"
+            naglog_result('critical', "HOST EVENT HANDLER: %s;%s;%s;%s;%s"
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
@@ -807,16 +818,16 @@ class Host(SchedulingItem):
     # HOST SNAPSHOT: superadmin;server;UP;notify-by-rss;no output
     def raise_snapshot_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            console_logger.alert("HOST SNAPSHOT: %s;%s;%s;%s;%s"
-                                % (self.get_name(),
-                                   self.state, self.state_type,
-                                   self.attempt, command.get_name()))
+            naglog_result('critical', "HOST SNAPSHOT: %s;%s;%s;%s;%s"
+                          % (self.get_name(),
+                             self.state, self.state_type,
+                             self.attempt, command.get_name()))
 
 
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STARTED; "
+        naglog_result('critical', "HOST FLAPPING ALERT: %s;STARTED; "
                             "Host appears to have started flapping "
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -825,7 +836,7 @@ class Host(SchedulingItem):
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        console_logger.alert("HOST FLAPPING ALERT: %s;STOPPED; "
+        naglog_result('critical', "HOST FLAPPING ALERT: %s;STOPPED; "
                             "Host appears to have stopped flapping "
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
@@ -834,14 +845,14 @@ class Host(SchedulingItem):
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the host '%s' "
-                       "because there is not future valid time"
-                       % (self.get_name()))
+                       "because there is not future valid time",
+                        self.get_name())
 
 
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STARTED; "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;STARTED; "
                             "Host has entered a period of scheduled downtime"
                             % (self.get_name()))
 
@@ -849,7 +860,7 @@ class Host(SchedulingItem):
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;STOPPED; Host has "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;STOPPED; Host has "
                             "exited from a period of scheduled downtime"
                             % (self.get_name()))
 
@@ -857,7 +868,7 @@ class Host(SchedulingItem):
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        console_logger.alert("HOST DOWNTIME ALERT: %s;CANCELLED; "
+        naglog_result('critical', "HOST DOWNTIME ALERT: %s;CANCELLED; "
                             "Scheduled downtime for host has been cancelled."
                             % (self.get_name()))
 
@@ -879,7 +890,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s: %s" % (self.get_name(), self.output))
+            logger.info("Stalking %s: %s", self.get_name(), self.output)
 
 
     # fill act_depend_of with my parents (so network dep)
@@ -1154,24 +1165,22 @@ class Hosts(Items):
                 h.got_default_realm = True
 
 
-    # We look for hostgroups property in hosts and
-    # link them
+    # We look for hostgroups property in hosts and link them
     def linkify_h_by_hg(self, hostgroups):
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl():
-                new_hostgroups = []
-                if hasattr(h, 'hostgroups') and h.hostgroups != '':
-                    hgs = h.hostgroups.split(',')
-                    for hg_name in hgs:
-                        hg_name = hg_name.strip()
-                        hg = hostgroups.find_by_name(hg_name)
-                        if hg is not None:
-                            new_hostgroups.append(hg)
-                        else:
-                            err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
-                            h.configuration_errors.append(err)
-                h.hostgroups = new_hostgroups
+            new_hostgroups = []
+            if getattr(h, 'hostgroups', ''):
+                hgs = [n.strip() for n in h.hostgroups.split(',') if n.strip()]
+                for hg_name in hgs:
+                    # TODO: should an unknown hostgroup raise an error ?
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is not None:
+                        new_hostgroups.append(hg)
+                    else:
+                        err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
+                        h.configuration_errors.append(err)
+            h.hostgroups = new_hostgroups
 
 
     # We look for hostgroups property in hosts and
@@ -1180,20 +1189,24 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        for t in self.templates.itervalues():
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl() and hasattr(h, 'host_name'):
-                hname = h.host_name
-                if hasattr(h, 'hostgroups'):
-                    if isinstance(h.hostgroups, list):
-                        h.hostgroups = ','.join(h.hostgroups)
-                    hgs = h.hostgroups.split(',')
-                    for hg in hgs:
-                        hostgroups.add_member(hname, hg.strip())
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(h, contactgroups)
 
-        # items::explode_contact_groups_into_contacts
-        # take all contacts from our contact_groups into our contact property
-        self.explode_contact_groups_into_contacts(contactgroups)
+            if hasattr(h, 'host_name') and hasattr(h, 'hostgroups'):
+                hname = h.host_name
+                if isinstance(h.hostgroups, list):
+                    h.hostgroups = ','.join(h.hostgroups)
+                hgs = h.hostgroups.split(',')
+                for hg in hgs:
+                    hostgroups.add_member(hname, hg.strip())
 
 
     # In the scheduler we need to relink the commandCall with
@@ -1218,87 +1231,11 @@ class Hosts(Items):
         for h in self:
             h.fill_parents_dependency()
 
-
-    # Parent graph: use to find quickly relations between all host, and loop
-    # return True if there is a loop
-    def no_loop_in_parents(self):
-        # Ok, we say "from now, no loop :) "
-        r = True
-
-        # Create parent graph
-        parents = Graph()
-
-        # With all hosts as nodes
-        for h in self:
-            if h is not None:
-                parents.add_node(h)
-
-        # And now fill edges
-        for h in self:
-            for p in h.parents:
-                if p is not None:
-                    parents.add_edge(p, h)
-
-        # Now get the list of all hosts in a loop
-        host_in_loops = parents.loop_check()
-
-        # and raise errors about it
-        for h in host_in_loops:
-            logger.error("The host '%s' is part of a circular parent/child chain!" % h.get_name())
-            r = False
-
-        return r
-
     # Return a list of the host_name of the hosts
     # that got the template with name=tpl_name or inherit from
     # a template that use it
     def find_hosts_that_use_template(self, tpl_name):
-        res = set()
-        tpl_name = tpl_name.strip()
-
-        # First find the template
-        tpl = None
-        for h in self:
-            # Look for template with the good name
-            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name:
-                tpl = h
-
-        # If we find none, we should manually lookup all hosts to find this 'tag'
-        if tpl is None:
-            for h in self:
-                if not hasattr(h, 'host_name') or h.is_tpl():
-                    continue
-                # Manually lookup for the templates defines in use
-                tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
-                if tpl_name in tnames:
-                    res.add(h.host_name)
-
-            return list(res)
-
-        # Ok, we find the tpl. We should find its father template too
-        for t in self.templates.values():
-            t.dfs_loop_status = 'DFS_UNCHECKED'
-        all_tpl_searched = self.templates_graph.dfs_get_all_childs(tpl)
-        # Clean the search tag
-        # TODO: better way?
-        for t in self.templates.values():
-            del t.dfs_loop_status
-
-        # Now we got all the templates we are looking for (so the template
-        # and all its own templates too, we search for the hosts that are
-        # using them
-        for h in self:
-            # If the host is a not valid one, skip it
-            if not hasattr(h, 'host_name'):
-                continue
-            # look if there is a match between host templates
-            # and the ones we are looking for
-            for t in h.templates:
-                if t in all_tpl_searched:
-                    res.add(h.host_name)
-                    continue
-
-        return list(res)
+        return [h.host_name for h in self if tpl_name in h.tags if hasattr(h, "host_name")]
 
     # Will create all business tree for the
     # services

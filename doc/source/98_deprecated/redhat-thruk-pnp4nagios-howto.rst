@@ -29,7 +29,7 @@ Installation:
   TARGET=/opt/shinken SKUSER=shinken SKGROUP=shinken ./install -i
   ./install -p nagios-plugins
   ./install -p manubulon  # snmp checks
-  ./install -p check_netint  # network/trafic checks
+  ./install -p check_netint  # network/traffic checks
 
   
 Mandatory configuration:

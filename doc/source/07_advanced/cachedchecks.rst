@@ -11,7 +11,7 @@ Introduction
 .. image:: /_static/images///official/images/cachedchecks1.png
    :scale: 90 %
 
-The performance of Shinken' monitoring logic can be significantly improved by implementing the use of cached checks. Cached checks allow Shinken to forgot executing a host or service check command if it determines a relatively recent check result will do instead.
+The performance of Shinken's monitoring logic can be significantly improved by implementing the use of cached checks. Cached checks allow Shinken to forgo executing a host or service check command if it determines a relatively recent check result will do instead.
 
 
 For On-Demand Checks Only 
@@ -39,7 +39,7 @@ How Caching Works
    :scale: 90 %
 
 
-When Shinken needs to perform an on-demand host or service check, it will make a determination as to whether it can used a cached check result or if it needs to perform an actual check by executing a plugin. It does this by checking to see if the last check of the host or service occured within the last X seconds, where X is the cached host or service check horizon.
+When Shinken needs to perform an on-demand host or service check, it will make a determination as to whether it can used a cached check result or if it needs to perform an actual check by executing a plugin. It does this by checking to see if the last check of the host or service occurred within the last X seconds, where X is the cached host or service check horizon.
 
 If the last check was performed within the timeframe specified by the cached check horizon variable, Shinken will use the result of the last host or service check and will not execute a new check. If the host or service has not yet been checked, or if the last check falls outside of the cached check horizon timeframe, Shinken will execute a new host or service check by running a plugin.
 
@@ -93,7 +93,7 @@ The monitoring installation which produced the graphs above had:
   * An average (regularly scheduled) host check interval of 5 minutes
   * A :ref:`cached_host_check_horizon <configuration/configmain-advanced#cached_host_check_horizon>` of 15 seconds
 
-The first MRTG graph shows how many regularly scheduled host checks compared to how many cached host checks have occured. In this example, an average of 53 host checks occur every five minutes. 9 of these (17%) are on-demand checks.
+The first MRTG graph shows how many regularly scheduled host checks compared to how many cached host checks have occurred. In this example, an average of 53 host checks occur every five minutes. 9 of these (17%) are on-demand checks.
 
 The second MRTG graph shows how many cached host checks have occurred over time. In this example an average of 2 cached host checks occurs every five minutes.
 

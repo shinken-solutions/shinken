@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
+import datetime, time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.brok import Brok
@@ -68,8 +68,9 @@ class Downtime:
     }
 
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        self.id = self.__class__.id
-        self.__class__.id += 1
+        now = datetime.datetime.now()
+        self.id = int(time.mktime(now.timetuple())*1e6 + now.microsecond)
+        self.__class__.id = self.id + 1
         self.ref = ref  # pointer to srv or host we are apply
         self.activate_me = []  # The other downtimes i need to activate
         self.entry_time = int(time.time())

@@ -126,7 +126,7 @@ You need to add a new :ref:`host <configobjects/host>` definition for the Window
   * host_name    is the object name of your host. It must be **unique**.
   * address      is the ip address or hostname of your host (FQDN or just the host portion). 
 
-Note: If you use a hostname be aware that you will have a DNS dependancy in your monitoring system. Either have a periodically updated local hosts file with all relevant entries, long name resolution caching on your host or use an IP address.
+Note: If you use a hostname be aware that you will have a DNS dependency in your monitoring system. Either have a periodically updated local hosts file with all relevant entries, long name resolution caching on your host or use an IP address.
 
 
 What is monitored by the windows template? 

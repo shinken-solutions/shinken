@@ -36,5 +36,5 @@ In order to change global or host- or service-specific attributes during runtime
 A full listing of external commands that can be used for adaptive monitoring (along with examples of how to use them) can be found online at the following URL: http://www.nagios.org/developerinfo/externalcommands/
 
   * When changing check commands, check timeperiods, or event handler commands, it is important to note that the new values for these options must have been defined before shinken was started. Any request to change a command or timeperiod to one which had not been defined when it was started is ignored.
-  * You can specify command arguments along with the actual command name - just seperate individual arguments from the command name (and from each other) using bang (!) characters. More information on how arguments in command definitions are processed during runtime can be found in the documentation on :ref:`macros <thebasics/macros>`.
+  * You can specify command arguments along with the actual command name - just separate individual arguments from the command name (and from each other) using bang (!) characters. More information on how arguments in command definitions are processed during runtime can be found in the documentation on :ref:`macros <thebasics/macros>`.
 

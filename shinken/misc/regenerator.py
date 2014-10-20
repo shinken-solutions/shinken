@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -155,24 +155,6 @@ class Regenerator(object):
             setattr(e, prop, data[prop])
 
 
-    def create_reversed_list(self):
-        self.hosts.create_reversed_list()
-        self.hostgroups.create_reversed_list()
-        self.contacts.create_reversed_list()
-        self.contactgroups.create_reversed_list()
-        self.notificationways.create_reversed_list()
-        self.services.create_reversed_list()
-        self.servicegroups.create_reversed_list()
-        self.timeperiods.create_reversed_list()
-        #self.modules.create_reversed_list()
-        #self.resultmodulations.create_reversed_list()
-        #self.criticitymodulations.create_reversed_list()
-        #self.escalations.create_reversed_list()
-        #self.discoveryrules.create_reversed_list()
-        #self.discoveryruns.create_reversed_list()
-        self.commands.create_reversed_list()
-
-
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
 
@@ -193,11 +175,9 @@ class Regenerator(object):
         # finding
         try:
             inp_hosts = self.inp_hosts[inst_id]
-            inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
-            inp_services.create_reversed_list()
             inp_servicegroups = self.inp_servicegroups[inst_id]
         except Exception, exp:
             print "Warning all done: ", exp
@@ -221,15 +201,14 @@ class Regenerator(object):
             if hg:
                 hg.members.extend(inphg.members)
             else:  # else take the new one
-                self.hostgroups[inphg.id] = inphg
-        # We can declare hostgroups done
-        self.hostgroups.create_reversed_list()
+                self.hostgroups.add_item(inphg)
 
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
             #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
+                hgname = hgname.strip()
                 hg = self.hostgroups.find_by_name(hgname)
                 if hg:
                     new_hostgroups.append(hg)
@@ -254,9 +233,7 @@ class Regenerator(object):
                 self.tags[t] += 1
 
             # We can really declare this host OK now
-            self.hosts[h.id] = h
-
-        self.hosts.create_reversed_list()
+            self.hosts.add_item(h)
 
         # Link SERVICEGROUPS with services
         for sg in inp_servicegroups:
@@ -268,6 +245,7 @@ class Regenerator(object):
                 new_members.append(s)
             sg.members = new_members
 
+
         # Merge SERVICEGROUPS with real ones
         for inpsg in inp_servicegroups:
             sgname = inpsg.servicegroup_name
@@ -277,14 +255,13 @@ class Regenerator(object):
             if sg:
                 sg.members.extend(inpsg.members)
             else:  # else take the new one
-                self.servicegroups[inpsg.id] = inpsg
-        # We can declare servicegroups done
-        self.servicegroups.create_reversed_list()
+                self.servicegroups.add_item(inpsg)
 
         # Now link SERVICES with hosts, servicesgroups, and commands
         for s in inp_services:
             new_servicegroups = []
             for sgname in s.servicegroups.split(','):
+                sgname = sgname.strip()
                 sg = self.servicegroups.find_by_name(sgname)
                 if sg:
                     new_servicegroups.append(sg)
@@ -315,8 +292,7 @@ class Regenerator(object):
                 self.services_tags[t] += 1
 
             # We can really declare this host OK now
-            self.services[s.id] = s
-        self.services.optimize_service_search(self.hosts)
+            self.services.add_item(s, index=True)
 
 
         # Add realm of theses hosts. Only the first is useful
@@ -369,10 +345,9 @@ class Regenerator(object):
             # contacts into it
             if cg:
                 cg.members.extend(inpcg.members)
+                cg.members = list(set(cg.members))
             else:  # else take the new one
-                self.contactgroups[inpcg.id] = inpcg
-        # We can declare contactgroups done
-        self.contactgroups.create_reversed_list()
+                self.contactgroups.add_item(inpcg)
 
         safe_print("ALL LINKING TIME"*10, time.time() - start)
 
@@ -541,9 +516,6 @@ class Regenerator(object):
         for sg in self.servicegroups:
             sg.members = [s for s in sg.members if s.instance_id != c_id]
 
-        # We now regenerate reversed list so the client will find only real objects
-        self.create_reversed_list()
-
 
     # Get a new host. Add in in in progress tab
     def manage_initial_host_status_brok(self, b):
@@ -664,7 +636,7 @@ class Regenerator(object):
             safe_print("Creating Contact:", cname)
             c = Contact({})
             self.update_element(c, data)
-            self.contacts[c.id] = c
+            self.contacts.add_item(c)
 
         # Delete some useless contact values
         del c.host_notification_commands
@@ -684,7 +656,7 @@ class Regenerator(object):
             if not nw:
                 safe_print("Creating notif way", nwname)
                 nw = NotificationWay([])
-                self.notificationways[nw.id] = nw
+                self.notificationways.add_item(nw)
             # Now update it
             for prop in NotificationWay.properties:
                 if hasattr(cnw, prop):
@@ -701,11 +673,6 @@ class Regenerator(object):
             self.linkify_a_timeperiod(nw, 'service_notification_period')
 
         c.notificationways = new_notifways
-
-        # Ok, declare this contact now :)
-        # And notif ways too
-        self.contacts.create_reversed_list()
-        self.notificationways.create_reversed_list()
 
 
     # From now we only create an hostgroup with unlink data in the
@@ -751,9 +718,7 @@ class Regenerator(object):
             #print "Creating Timeperiod:", tpname
             tp = Timeperiod({})
             self.update_element(tp, data)
-            self.timeperiods[tp.id] = tp
-            # We add a timeperiod, we update the reversed list
-            self.timeperiods.create_reversed_list()
+            self.timeperiods.add_item(tp)
 
 
     # For command we got 2 cases: do we already got the command or not.
@@ -771,9 +736,7 @@ class Regenerator(object):
             #print "Creating a new command", cname
             c = Command({})
             self.update_element(c, data)
-            self.commands[c.id] = c
-            # Ok, we can regenerate the reversed list so
-            self.commands.create_reversed_list()
+            self.commands.add_item(c)
 
 
     def manage_initial_scheduler_status_brok(self, b):

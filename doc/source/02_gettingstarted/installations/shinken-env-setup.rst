@@ -20,7 +20,7 @@ This enable Shinken service on a systemd base OS. Note that a Shinken service ca
 ::
 
   for i in arbiter poller reactionner scheduler broker receiver; do
-  systemctl enable shinken.service;
+  systemctl enable shinken-$i.service;
   done
 
 

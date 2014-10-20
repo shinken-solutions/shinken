@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -62,7 +62,7 @@ class Servicegroup(Itemgroup):
 
     def get_servicegroup_members(self):
         if self.has('servicegroup_members'):
-            return self.servicegroup_members.split(',')
+            return [m.strip() for m in self.servicegroup_members.split(',')]
         else:
             return []
 
@@ -79,7 +79,7 @@ class Servicegroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            logger.error("[servicegroup::%s] got a loop in servicegroup definition" % self.get_name())
+            logger.error("[servicegroup::%s] got a loop in servicegroup definition", self.get_name())
             if self.has('members'):
                 return self.members
             else:
@@ -121,7 +121,7 @@ class Servicegroups(Itemgroups):
             seek = 0
             host_name = ''
             if (len(mbrs) == 1):
-                sg.unknown_members.append('%s' % mbrs[0])
+                sg.add_string_unknown_member('%s' % mbrs[0])
 
             for mbr in mbrs:
                 if seek % 2 == 0:
@@ -132,7 +132,7 @@ class Servicegroups(Itemgroups):
                     if find is not None:
                         new_mbrs.append(find)
                     else:
-                        sg.unknown_members.append('%s,%s' % (host_name, service_desc))
+                        sg.add_string_unknown_member('%s,%s' % (host_name, service_desc))
                 seek += 1
 
             # Make members uniq

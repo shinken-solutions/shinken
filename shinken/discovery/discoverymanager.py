@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -26,7 +26,6 @@
 
 
 import sys
-import cPickle
 import os
 import re
 import time
@@ -394,7 +393,7 @@ class DiscoveryManager:
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
-                    logger.error('Database init : %s' % exp)
+                    logger.error('Database init : %s', exp)
 
 
     # We try to init the backend if we got one

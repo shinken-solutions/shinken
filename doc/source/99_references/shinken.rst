@@ -1,6 +1,256 @@
 shinken Package
 ===============
 
+Diagrams
+--------
+
+Simple Acknowledge class diagram :
+
+.. inheritance-diagram:: shinken.acknowledge.Acknowledge
+   :parts: 3
+
+
+Simple Action class diagram :
+
+.. inheritance-diagram:: shinken.action.__Action shinken.action.Action  shinken.eventhandler.EventHandler  shinken.notification.Notification  shinken.check.Check
+   :parts: 3
+
+
+Simple AutoSlots class diagram :
+
+.. inheritance-diagram:: shinken.autoslots.AutoSlots  shinken.singleton.Singleton
+   :parts: 3
+
+
+Simple BaseModule class diagram :
+
+.. inheritance-diagram:: shinken.basemodule.BaseModule
+   :parts: 3
+
+
+Simple Borg class diagram :
+
+.. inheritance-diagram:: shinken.borg.Borg  shinken.macroresolver.MacroResolver
+   :parts: 3
+
+
+Simple Brok class diagram :
+
+.. inheritance-diagram:: shinken.brok.Brok
+   :parts: 3
+
+
+Simple CherryPyBackend class diagram :
+
+.. inheritance-diagram:: shinken.http_daemon.CherryPyBackend
+   :parts: 3
+
+
+Simple Comment class diagram :
+
+.. inheritance-diagram:: shinken.comment.Comment
+   :parts: 3
+
+
+Simple ComplexExpressionFactory class diagram :
+
+.. inheritance-diagram:: shinken.complexexpression.ComplexExpressionFactory
+   :parts: 3
+
+
+Simple ComplexExpressionNode class diagram :
+
+.. inheritance-diagram:: shinken.complexexpression.ComplexExpressionNode
+   :parts: 3
+
+
+Simple ContactDowntime class diagram :
+
+.. inheritance-diagram:: shinken.contactdowntime.ContactDowntime
+   :parts: 3
+
+
+Simple Daemon class diagram :
+
+.. inheritance-diagram:: shinken.daemon.Daemon
+                         shinken.daemons.arbiterdaemon.Arbiter shinken.satellite.BaseSatellite
+                         shinken.daemons.brokerdaemon.Broker  shinken.daemons.schedulerdaemon.Shinken  shinken.satellite.Satellite
+                         shinken.daemons.pollerdaemon.Poller  shinken.daemons.receiverdaemon.Receiver  shinken.daemons.reactionnerdaemon.Reactionner
+   :parts: 3
+
+
+Simple Daterange class diagram :
+
+.. inheritance-diagram:: shinken.daterange.Daterange  shinken.daterange.CalendarDaterange  shinken.daterange.StandardDaterange
+                         shinken.daterange.MonthWeekDayDaterange  shinken.daterange.MonthDateDaterange
+                         shinken.daterange.WeekDayDaterange  shinken.daterange.MonthDayDaterange
+   :parts: 3
+
+
+Simple DB class diagram :
+
+.. inheritance-diagram:: shinken.db.DB  shinken.db_oracle.DBOracle  shinken.db_mysql.DBMysql  shinken.db_sqlite.DBSqlite
+   :parts: 3
+
+
+Simple declared class diagram :
+
+.. inheritance-diagram:: shinken.trigger_functions.declared
+   :parts: 3
+
+
+Simple DependencyNode class diagram :
+
+.. inheritance-diagram:: shinken.dependencynode.DependencyNode
+   :parts: 3
+
+
+Simple DependencyNodeFactory class diagram :
+
+.. inheritance-diagram:: shinken.dependencynode.DependencyNodeFactory
+   :parts: 3
+
+
+Simple Dispatcher class diagram :
+
+.. inheritance-diagram:: shinken.dispatcher.Dispatcher
+   :parts: 3
+
+
+Simple Downtime class diagram :
+
+.. inheritance-diagram:: shinken.downtime.Downtime
+   :parts: 3
+
+
+Simple DummyCommandCall class diagram :
+
+.. inheritance-diagram:: shinken.commandcall.DummyCommandCall  shinken.commandcall.CommandCall
+   :parts: 3
+
+
+Simple ExternalCommand class diagram :
+
+.. inheritance-diagram:: shinken.external_command.ExternalCommand
+   :parts: 3
+
+
+Simple ExternalCommandManager class diagram :
+
+.. inheritance-diagram:: shinken.external_command.ExternalCommandManager
+   :parts: 3
+
+
+Simple Graph class diagram :
+
+.. inheritance-diagram:: shinken.graph.Graph
+   :parts: 3
+
+
+Simple HTTPClient class diagram :
+
+.. inheritance-diagram:: shinken.http_client.HTTPClient
+   :parts: 3
+
+
+Simple HTTPDaemon class diagram :
+
+.. inheritance-diagram:: shinken.http_daemon.HTTPDaemon
+   :parts: 3
+
+
+Simple Load class diagram :
+
+.. inheritance-diagram:: shinken.load.Load
+   :parts: 3
+
+
+Simple Log class diagram :
+
+.. inheritance-diagram:: shinken.log.Log
+   :parts: 3
+
+
+Simple memoized class diagram :
+
+.. inheritance-diagram:: shinken.memoized.memoized
+   :parts: 3
+
+
+Simple Message class diagram :
+
+.. inheritance-diagram:: shinken.message.Message
+   :parts: 3
+
+
+Simple ModulesContext class diagram :
+
+.. inheritance-diagram:: shinken.modulesctx.ModulesContext
+   :parts: 3
+
+
+Simple ModulesManager class diagram :
+
+.. inheritance-diagram:: shinken.modulesmanager.ModulesManager
+   :parts: 3
+
+
+Simple ModulePhases class diagram :
+
+.. inheritance-diagram:: shinken.basemodule.ModulePhases
+   :parts: 3
+
+
+Simple Property class diagram :
+
+.. inheritance-diagram:: shinken.property.Property  shinken.property.UnusedProp  shinken.property.BoolProp
+                         shinken.property.IntegerProp  shinken.property.FloatProp  shinken.property.CharProp
+                         shinken.property.StringProp  shinken.property.PathProp  shinken.property.ConfigPathProp
+                         shinken.property.ListProp  shinken.property.LogLevelProp  shinken.property.DictProp  shinken.property.AddrProp
+   :parts: 3
+
+
+Simple SatelliteLink class diagram :
+
+.. inheritance-diagram:: shinken.objects.item.Item
+                         shinken.satellitelink.SatelliteLink  shinken.schedulerlink.SchedulerLink  shinken.arbiterlink.ArbiterLink
+                         shinken.brokerlink.BrokerLink  shinken.receiverlink.ReceiverLink  shinken.pollerlink.PollerLink
+                         shinken.reactionnerlink.ReactionnerLink
+   :parts: 3
+
+
+Simple Scheduler class diagram :
+
+.. inheritance-diagram:: shinken.scheduler.Scheduler
+   :parts: 3
+
+
+Simple SortedDict class diagram :
+
+.. inheritance-diagram:: shinken.sorteddict.SortedDict
+   :parts: 3
+
+
+Simple Timerange class diagram :
+
+.. inheritance-diagram:: shinken.daterange.Timerange
+   :parts: 3
+
+Simple Worker class diagram :
+
+.. inheritance-diagram:: shinken.worker.Worker
+   :parts: 3
+
+
+Simple WSGIREFBackend class diagram :
+
+.. inheritance-diagram:: shinken.http_daemon.WSGIREFBackend
+   :parts: 3
+
+
+Package
+-------
+
 :mod:`shinken` Package
 ----------------------
 

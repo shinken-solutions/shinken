@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -248,6 +248,15 @@ class TestConfig(ShinkenTest):
         assert(test_host_0.attempt == 0)
 
 
+    def test_disabled_host_service_dependencies(self):
+        self.print_header()
+        now = time.time()
+        test_host_0 = self.sched.hosts.find_by_name("test_host_0")
+        test_host_0.checks_in_progress = []
+        test_host_0.act_depend_of = []  # ignore the router
+        test_host_0_test_ok_0_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_disbld_hst_dep")
+        self.assert_(len(test_host_0_test_ok_0_d.act_depend_of) == 0)
+        self.assert_(test_host_0_test_ok_0_d not in [x[0] for x in test_host_0.act_depend_of_me])
 
 
 

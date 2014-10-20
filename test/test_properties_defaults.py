@@ -70,7 +70,7 @@ class PropertiesTester(object):
             self.assertIn(name, prop_names,
                           msg='unknown property %r found' % name)
 
-class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestConfig(PropertiesTester, ShinkenTest):
 
     unused_props = [
         'log_file', 'object_cache_file', 'precached_object_file',
@@ -217,7 +217,6 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         # Discovery part
         ('strip_idname_fqdn', '1'),
         ('runners_timeout', '3600'),
-        ('pack_distribution_file', 'pack_distribution.dat'),
 
         # WebUI part
         ('webui_lock_file', 'webui.pid'),
@@ -228,6 +227,9 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('daemon_thread_pool_size', '8'),
         ('enable_environment_macros', '1'),
         ('timeout_exit_status', '2'),
+
+        ('api_key', ''),
+        ('secret', ''),
         ])
 
     def setUp(self):
@@ -235,7 +237,7 @@ class TestConfig(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Config()
 
 
-class TestCommand(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestCommand(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -258,7 +260,7 @@ class TestCommand(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Command()
 
 
-class TestContactgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestContactgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -269,7 +271,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ])
 
@@ -278,7 +280,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Contactgroup()
 
 
-class TestContact(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestContact(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -309,6 +311,7 @@ class TestContact(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('address6', 'none'),
         ('can_submit_commands', '0'),
         ('is_admin', '0'),
+        ('expert', '0'),
         ('retain_status_information', '1'),
         ('notificationways', ''),
         ('password', 'NOPASSWORDSET'),
@@ -319,7 +322,7 @@ class TestContact(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Contact()
 
 
-class TestDiscoveryrule(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestDiscoveryrule(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -339,7 +342,7 @@ class TestDiscoveryrule(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Discoveryrule()
 
 
-class TestDiscoveryrun(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestDiscoveryrun(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -357,7 +360,7 @@ class TestDiscoveryrun(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Discoveryrun()
 
 
-class TestEscalation(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestEscalation(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -378,7 +381,7 @@ class TestEscalation(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Escalation()
 
 
-class TestHostdependency(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestHostdependency(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -402,14 +405,15 @@ class TestHostdependency(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Hostdependency()
 
 
-class TestHostescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestHostescalation(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
     without_default = [
         'host_name', 'hostgroup_name',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups'
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time',
         ]
 
     properties = dict([
@@ -427,7 +431,7 @@ class TestHostescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Hostescalation()
 
 
-class TestHostextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestHostextinfo(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -453,7 +457,7 @@ class TestHostextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = HostExtInfo()
 
 
-class TestHostgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestHostgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -464,7 +468,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('notes', ''),
         ('notes_url', ''),
@@ -477,7 +481,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Hostgroup()
 
 
-class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestHost(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -540,6 +544,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('trigger_broker_raise_enabled', '0'),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
@@ -565,7 +570,7 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Host()
 
 
-class TestModule(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestModule(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -584,7 +589,7 @@ class TestModule(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Module()
 
 
-class TestNotificationway(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestNotificationway(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -609,7 +614,7 @@ class TestNotificationway(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = NotificationWay()
 
 
-class TestPack(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestPack(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -627,7 +632,7 @@ class TestPack(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Pack()
 
 
-class TestRealm(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestRealm(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -638,7 +643,7 @@ class TestRealm(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('realm_members', ''),
         ('higher_realms', ''),
@@ -651,7 +656,7 @@ class TestRealm(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Realm()
 
 
-class TestResultmodulation(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestResultmodulation(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -672,7 +677,7 @@ class TestResultmodulation(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Resultmodulation()
 
 
-class TestServicedependency(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestServicedependency(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -697,7 +702,7 @@ class TestServicedependency(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Servicedependency()
 
 
-class TestServiceescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestServiceescalation(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -705,7 +710,8 @@ class TestServiceescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
         'host_name', 'hostgroup_name',
         'service_description',
         'first_notification', 'last_notification',
-        'contacts', 'contact_groups']
+        'contacts', 'contact_groups',
+        'first_notification_time', 'last_notification_time']
 
     properties = dict([
         ('imported_from', 'unknown'),
@@ -722,7 +728,7 @@ class TestServiceescalation(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Serviceescalation()
 
 
-class TestServiceextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestServiceextinfo(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -744,7 +750,7 @@ class TestServiceextinfo(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = ServiceExtInfo()
 
 
-class TestServicegroup(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestServicegroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -755,7 +761,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('use', ''),
         ('definition_order', '100'),
         ('name', ''),
-        ('unknown_members', []),
+        ('unknown_members', None),
         ('id', 0),
         ('notes', ''),
         ('notes_url', ''),
@@ -767,7 +773,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Servicegroup()
 
 
-class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestService(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -827,6 +833,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_impact', '2'),
         ('trigger', ''),
         ('trigger_name', ''),
+        ('trigger_broker_raise_enabled', '0'),
         ('time_to_orphanage', '300'),
         ('trending_policies', ''),
         ('checkmodulations', ''),
@@ -846,6 +853,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('snapshot_criteria', 'w,c,u'),
         ('business_rule_host_notification_options', ''),
         ('business_rule_service_notification_options', ''),
+        ('host_dependency_enabled', '1'),
         ])
 
     def setUp(self):
@@ -853,7 +861,7 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Service()
 
 
-class TestTimeperiod(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestTimeperiod(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
@@ -878,7 +886,7 @@ class TestTimeperiod(PropertiesTester, ShinkenTest, unittest.TestCase):
         self.item = Timeperiod()
 
 
-class TestTrigger(PropertiesTester, ShinkenTest, unittest.TestCase):
+class TestTrigger(PropertiesTester, ShinkenTest):
 
     unused_props = []
 

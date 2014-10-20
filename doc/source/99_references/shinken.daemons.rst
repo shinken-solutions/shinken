@@ -1,5 +1,31 @@
+
+
 daemons Package
 ===============
+
+Diagrams
+--------
+
+Simple Daemon class diagram :
+
+.. inheritance-diagram:: shinken.daemon.Daemon
+                         shinken.daemons.arbiterdaemon.Arbiter shinken.satellite.BaseSatellite
+                         shinken.daemons.brokerdaemon.Broker  shinken.daemons.schedulerdaemon.Shinken  shinken.satellite.Satellite
+                         shinken.daemons.pollerdaemon.Poller  shinken.daemons.receiverdaemon.Receiver  shinken.daemons.reactionnerdaemon.Reactionner
+   :parts: 3
+
+
+
+Simple Interface class diagram :
+
+.. inheritance-diagram:: shinken.daemon.Interface
+                         shinken.daemons.receiverdaemon.IStats  shinken.daemons.brokerdaemon.IStats  shinken.daemons.schedulerdaemon.IChecks
+                         shinken.daemons.schedulerdaemon.IBroks  shinken.daemons.schedulerdaemon.IStats  shinken.daemons.arbiterdaemon.IForArbiter
+                         shinken.satellite.IForArbiter  shinken.satellite.ISchedulers  shinken.satellite.IBroks  shinken.satellite.IStats
+   :parts: 3
+
+Package
+-------
 
 :mod:`daemons` Package
 ----------------------

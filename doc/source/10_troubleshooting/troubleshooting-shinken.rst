@@ -45,7 +45,7 @@ General Shinken troubleshooting steps to resolve common issue
   * Have you reviewed your Shinken centralized (:ref:`Simple-log broker module <the_broker_modules>`) logs for errors
   * Have you reviewed your :ref:`Shinken daemon specific logs <troubleshooting/troubleshooting-shinken#FAQ-1>` for errors or tracebacks (what the system was doing just before a crash)
   * Have you reviewed your :ref:`configuration syntax <configuration/config>` (keywords and values)
-  * Is what you are trying to use installed? Are its dependancies installed! Does it even work.
+  * Is what you are trying to use installed? Are its dependencies installed! Does it even work.
   * Is what you are trying to use :ref:`a supported version <gettingstarted/installations/shinken-installation#requirements>`?
   * Are you using the same Python Pyro module version on all your hosts running a Shinken daemon (You have to!)
   * Are you using the same Python version on all your hosts running a Shinken daemon (You have to!)

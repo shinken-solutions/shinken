@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,15 +23,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import os
 import re
 
 from shinken.objects.item import Item, Items
-from shinken.misc.perfdata import PerfDatas
-from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, StringProp
 from shinken.log import logger
-from shinken.trigger_functions import objs, trigger_functions
+from shinken.trigger_functions import trigger_functions
+from shinken.trigger_functions import objs
 #objs = {'hosts': [], 'services': []}
 
 
@@ -41,11 +40,13 @@ class Trigger(Item):
 
     properties = Item.properties.copy()
     properties.update({'trigger_name': StringProp(fill_brok=['full_status']),
-                       'code_src': StringProp(default='', fill_brok=['full_status'])
+                       'code_src': StringProp(default='', fill_brok=['full_status']),
                        })
 
     running_properties = Item.running_properties.copy()
-    running_properties.update({'code_bin': StringProp(default=None)})
+    running_properties.update({'code_bin': StringProp(default=None),
+                               'trigger_broker_raise_enabled': BoolProp(default='0')
+                               })
 
     # For debugging purpose only (nice name)
     def get_name(self):
@@ -70,11 +71,12 @@ class Trigger(Item):
         exec code in dict(locals())
 
     def __getstate__(self):
-        return {'trigger_name': self.trigger_name, 'code_src': self.code_src}
+        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']
         self.code_src = d['code_src']
+        self.trigger_broker_raise_enabled = d['trigger_broker_raise_enabled']
 
 
 class Triggers(Items):
@@ -93,7 +95,7 @@ class Triggers(Items):
                         buf = fd.read()
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
+                        logger.error("Cannot open trigger file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
                     self.create_trigger(buf, file[:-5])

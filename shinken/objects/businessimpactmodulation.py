@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -42,7 +42,7 @@ class Businessimpactmodulation(Item):
     properties.update({
             'business_impact_modulation_name': StringProp(),
             'business_impact':                IntegerProp(),
-            'modulation_period':        StringProp(default=None),
+            'modulation_period':        StringProp(default=''),
     })
 
     # For debugging purpose only (nice name)

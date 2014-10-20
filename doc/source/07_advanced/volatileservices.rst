@@ -81,7 +81,7 @@ Port Scan Script
 -----------------
 
 
-Create a shell script in the "/var/lib/shinken/libexec/eventhandlers" directory named **submit_check_result**. The contents of the shell script should be something similiar to the following...
+Create a shell script in the "/var/lib/shinken/libexec/eventhandlers" directory named **submit_check_result**. The contents of the shell script should be something similar to the following...
 
   
 ::

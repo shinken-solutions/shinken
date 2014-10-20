@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -653,7 +653,7 @@ if __name__ == "__main__":
         },
 
         name="Shinken",
-        version="2.0-RC7",
+        version="2.0.1",
         packages=find_packages(),
         package_data={'': package_data},
         description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",

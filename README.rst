@@ -4,6 +4,12 @@ Presentation of the Shinken project
 
 Welcome to the Shinken project.
 
+.. image:: https://pypip.in/version/Shinken/badge.svg
+    :target: https://pypi.python.org/pypi//Shinken/
+    :alt: Version
+.. image:: https://api.travis-ci.org/naparuba/shinken.svg?branch=master
+  :target: https://travis-ci.org/naparuba/shinken
+
 Shinken is a modern, Nagios compatible monitoring framework, written in
 Python. Its main goal is to give users a flexible architecture for
 their monitoring system that is designed to scale to large environments.
@@ -90,7 +96,7 @@ with Shinken you can start to use its unique and powerful features.
 Learn more about how to use and configure Shinken
 =================================================
 
-Jump to the `Shinken documentation__.
+Jump to the Shinken documentation__.
 
 __ https://shinken.readthedocs.org/en/latest/
 

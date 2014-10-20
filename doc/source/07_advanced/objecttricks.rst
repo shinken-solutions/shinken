@@ -303,7 +303,7 @@ If you want to create service dependencies for all services that belong in one o
 Same Host Dependencies: 
 ------------------------
 
-If you want to create service dependencies for multiple services that are dependent on services on the same host, leave the "dependent_host_name" and "dependent_hostgroup_name" directives empty. The example below assumes that hosts HOST1 and HOST2 have at least the following four services associated with them: SERVICE1, SERVICE2, SERVICE3, and SERVICE4. In this example, SERVICE3 and SERVICE4 on HOST1 will be dependent on both SERVICE1 and SERVICE2 on HOST1. Similiarly, SERVICE3 and SERVICE4 on HOST2 will be dependent on both SERVICE1 and SERVICE2 on HOST2.
+If you want to create service dependencies for multiple services that are dependent on services on the same host, leave the "dependent_host_name" and "dependent_hostgroup_name" directives empty. The example below assumes that hosts HOST1 and HOST2 have at least the following four services associated with them: SERVICE1, SERVICE2, SERVICE3, and SERVICE4. In this example, SERVICE3 and SERVICE4 on HOST1 will be dependent on both SERVICE1 and SERVICE2 on HOST1. Similarly, SERVICE3 and SERVICE4 on HOST2 will be dependent on both SERVICE1 and SERVICE2 on HOST2.
 
   
 ::
@@ -390,7 +390,7 @@ Host Dependency Definitions
 Multiple Hosts: 
 ----------------
 
-If you want to create :ref:`host dependencies <configobjects/hostdependency>` for multiple hosts, you can specify multiple hosts in the "host_name" and/or "dependent_host_name" directives. The definition below would be equivalent to creating six seperate host dependencies. In the example above, hosts HOST3, HOST4 and HOST5 would be dependent upon both HOST1 and HOST2. All the instances of the host dependencies would be identical except for the host names (i.e. have the same notification failure criteria, etc.).
+If you want to create :ref:`host dependencies <configobjects/hostdependency>` for multiple hosts, you can specify multiple hosts in the "host_name" and/or "dependent_host_name" directives. The definition below would be equivalent to creating six separate host dependencies. In the example above, hosts HOST3, HOST4 and HOST5 would be dependent upon both HOST1 and HOST2. All the instances of the host dependencies would be identical except for the host names (i.e. have the same notification failure criteria, etc.).
 
   
 ::

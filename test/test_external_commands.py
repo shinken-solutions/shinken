@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -24,11 +24,17 @@
 #
 
 from shinken_test import *
+from shinken.external_command import ExternalCommandManager
 import os
+import cPickle
 
 
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
+
+    def setUp(self):
+        self.setup_with_file('etc/shinken_external_commands.cfg')
+        time_hacker.set_real_time()
 
     def send_cmd(self, line):
         s = '[%d] %s\n' % (int(time.time()), line)
@@ -37,7 +43,7 @@ class TestConfig(ShinkenTest):
         fd.write(s)
         fd.close()
 
-    def test_external_comand(self):
+    def test_external_commands(self):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         router = self.sched.hosts.find_by_name("test_router_0")
@@ -84,6 +90,38 @@ class TestConfig(ShinkenTest):
         print "perf (%s)" % svc.perf_data
         self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
 
+        # ACK SERVICE
+        excmd = '[%d] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;Big brother;Acknowledge service' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.problem_has_been_acknowledged == True)
+
+        excmd = '[%d] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.problem_has_been_acknowledged == False)
+
+        # Service is going ok ...
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;0;Bobby is happy now!|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.output == 'Bobby is happy now!')
+        self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
+
+        # Host is going up ...
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;0;Bob is also happy now!' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        self.assert_(host.state == 'UP')
+        self.assert_(host.output == 'Bob is also happy now!')
+
         # Clean the command_file
         #try:
         #    os.unlink(self.conf.command_file)
@@ -126,8 +164,136 @@ class TestConfig(ShinkenTest):
         self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
         self.assert_(host.perf_data == 'rtt=9999')
 
+        # ACK HOST
+        excmd = '[%d] ACKNOWLEDGE_HOST_PROBLEM;test_router_0;2;1;1;Big brother;test' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        print "Host state", host.state, host.problem_has_been_acknowledged
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.problem_has_been_acknowledged == True)
+        
+        # REMOVE ACK HOST
+        excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        print "Host state", host.state, host.problem_has_been_acknowledged
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.problem_has_been_acknowledged == False)
+
+        # RESTART_PROGRAM
+        excmd = '[%d] RESTART_PROGRAM' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        self.assert_(self.any_log_match('RESTART') == True)
+        self.assert_(self.any_log_match('I awoke after sleeping 3 seconds') == True)
+
+        # RELOAD_CONFIG
+        excmd = '[%d] RELOAD_CONFIG' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        self.assert_(self.any_log_match('RELOAD') == True)
+        self.assert_(self.any_log_match('I awoke after sleeping 2 seconds') == True)
+        
+        # Show recent logs
+        self.show_logs()
 
 
+    # Tests sending passive check results for unconfigured hosts to a scheduler
+    def test_unknown_check_result_command_scheduler(self):
+        self.sched.conf.accept_passive_unknown_check_results = True
+
+        # Sched receives known host but unknown service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Sched receives unknown host and service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;unknownhost;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Sched receives unknown host host_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;unknownhost;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_host_check_result']
+        self.assertTrue(len(broks) == 1)
+
+        # Now turn it off...
+        self.sched.conf.accept_passive_unknown_check_results = False
+
+        # Sched receives known host but unknown service service_check_result
+        self.sched.broks.clear()
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
+        self.sched.run_external_command(excmd)
+        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertTrue(len(broks) == 0)
+        log_found = self.log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
+        self.clear_logs()
+        self.assertTrue(log_found)
+
+    #Tests sending passive check results for unconfigured hosts to a receiver
+    def test_unknown_check_result_command_receiver(self):
+        receiverdaemon = Receiver(None, False, False, False, None)
+        receiverdaemon.direct_routing = True
+        receiverdaemon.accept_passive_unknown_check_results = True
+
+        # Receiver receives unknown host external command
+        excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
+        receiverdaemon.unprocessed_external_commands.append(excmd)
+        receiverdaemon.push_external_commands_to_schedulers()
+        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertEqual(len(broks), 1)
+
+        # now turn it off...
+        receiverdaemon.accept_passive_unknown_check_results = False
+
+        excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
+        receiverdaemon.unprocessed_external_commands.append(excmd)
+        receiverdaemon.push_external_commands_to_schedulers()
+        receiverdaemon.broks.clear()
+        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        self.assertEqual(len(broks), 0)
+
+
+    def test_unknown_check_result_brok(self):
+        # unknown_host_check_result_brok
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy'
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': None}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_host_check_result_brok with perfdata
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999'
+        expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': 'rtt=9999'}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_service_check_result_brok
+        excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;host-checked;0;Everything OK'
+        expected = {'time_stamp': 1234567890, 'return_code': '0', 'host_name': 'host-checked', 'output': 'Everything OK', 'perf_data': None}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+        # unknown_service_check_result_brok with perfdata
+        excmd = '[1234567890] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000'
+        expected = {'host_name': 'test_host_0', 'time_stamp': 1234567890, 'service_description': 'test_ok_0', 'return_code': '1', 'output': 'Bobby is not happy', 'perf_data': 'rtt=9999;5;10;0;10000'}
+        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        self.assertEqual(expected, result)
+
+    def test_change_and_reset_modattr(self):
+        # Receiver receives unknown host external command
+        excmd = '[%d] CHANGE_SVC_MODATTR;test_host_0;test_ok_0;1' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
+        svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        self.assert_(svc.modified_attributes == 1)
+        self.assert_(not getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -24,9 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.action import Action
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
-from shinken.property import CharProp, StringProp, ListProp
-from shinken.autoslots import AutoSlots
+from shinken.property import BoolProp, IntegerProp, FloatProp
+from shinken.property import StringProp
 
 
 class Check(Action):

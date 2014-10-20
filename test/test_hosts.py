@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -136,7 +136,7 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_state('d') == True)
 
         # And a special case: use_aggressive_host_checking
-        hst.__class__.use_aggressive_host_checking = 1
+        hst.__class__.use_aggressive_host_checking = True
         hst.set_state_from_exit_status(1)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)

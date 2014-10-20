@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -66,20 +66,6 @@ class TestPropertyOverride(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc2")
         self.assert_(svc is not None)
 
-
-class TestConfigBroken(ShinkenTest):
-
-    def setUp(self):
-        self.setup_with_file('etc/shinken_exclude_services_broken.cfg')
-
-    def test_exclude_services_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
-
-        # Get the arbiter's log broks
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
-
-        self.assert_(len([log for log in logs if re.search('Error: exclusion contains an undefined service: fake', log)]) == 1)
 
 
 if __name__ == '__main__':

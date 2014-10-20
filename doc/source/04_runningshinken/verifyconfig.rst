@@ -4,7 +4,9 @@
 Verifying Your Configuration 
 =============================
 
-Every time you modify your :ref:`Configuration Overview <configuration/config>`, you should run a sanity check on them. It is important to do this before you (re)start Shinken, as Shinken will shut down if your configuration contains errors.
+Every time you modify your :ref:`Configuration <configuration/config>`, you should run a sanity check on them. It is important to do this before you (re)start Shinken, as Shinken will shut down if your configuration contains errors.
+
+.. note:: In recent Shinken versions, a shinken reload will check your configuration before restarting the arbiter: /etc/init.d/shinken reload
 
 
 How to verify the configuration 
@@ -31,5 +33,5 @@ Important caveats
 How to apply your changes 
 ==========================
 
-Once you've verified your configuration files and fixed any errors you can go ahead and :ref:`(re)start Shinken <runningshinken/startstop>`.
+Once you've verified your configuration files and fixed any errors you can go ahead and reload or :ref:`(re)start Shinken <runningshinken/startstop>`.
 

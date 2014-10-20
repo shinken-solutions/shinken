@@ -2,7 +2,7 @@
 
 # -*- mode: python ; coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -26,7 +26,7 @@
 import re
 
 from shinken.util import to_float, to_split, to_char, to_int, unique_value
-from shinken.log  import logger
+import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'CharProp', 'StringProp', 'ListProp',
@@ -159,8 +159,8 @@ class BoolProp(Property):
     false, no, off for False, and 1, true, yes, on for True).
     """
 
-    #@staticmethod
-    def pythonize(self, val):
+    @staticmethod
+    def pythonize(val):
         val = unique_value(val)
         return _boolean_states[val.lower()]
 
@@ -222,7 +222,7 @@ class LogLevelProp(StringProp):
 
     def pythonize(self, val):
         val = unique_value(val)
-        return logger.get_level_id(val)
+        return logging.getLevelName(val)
 
 
 class DictProp(Property):

@@ -41,10 +41,13 @@ from shinken.modulesmanager import ModulesManager
 from shinken.basemodule import BaseModule
 
 from shinken.brok import Brok
+from shinken.misc.common import DICT_MODATTR
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
+from shinken.daemons.receiverdaemon import Receiver
+from logging import ERROR
 
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
@@ -61,7 +64,7 @@ class __DUMMY:
         pass
 
 logger.load_obj(__DUMMY())
-
+logger.setLevel(ERROR)
 
 
 # We overwrite the functions time() and sleep()
@@ -112,11 +115,43 @@ class Pluginconf(object):
     pass
 
 
-class ShinkenTest(unittest.TestCase):
+class _Unittest2CompatMixIn:
+    """
+    Mixin for simulating methods new in unittest2 resp. Python 2.7.
+
+    Every test-case should inherit this *after* unittest.TestCase to
+    make the compatiblity-methods available if they are not defined in
+    unittest.TestCase already. Example::
+
+       class MyTestCase(unittest.TestCase, Unittest2CompatMixIn):
+           ...
+    In our case, it's better to always inherit from ShinkenTest
+
+    """
+    def assertNotIn(self, member, container, msg=None):
+       self.assertTrue(member not in container)
+
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container)
+
+    def assertIsInstance(self, obj, cls, msg=None):
+        self.assertTrue(isinstance(obj, cls))
+
+    def assertRegexpMatches(self, line, pattern):
+        r = re.search(pattern, line)
+        self.assertTrue(r is not None)
+
+    def assertIs(self, obj, cmp, msg=None):
+        self.assertTrue(obj is cmp)
+
+
+class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def setup_with_file(self, path):
+        time_hacker.set_my_time()
+        self.print_header()
         # i am arbiter-like
         self.broks = {}
         self.me = None
@@ -130,7 +165,6 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()
         self.conf.create_objects(raw_objects)
-        self.conf.old_properties_names_to_new()
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
         # Hack push_flavor, that is set by the dispatcher
@@ -140,19 +174,13 @@ class ShinkenTest(unittest.TestCase):
         self.conf.apply_inheritance()
         self.conf.explode()
         #print "Aconf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
         self.conf.override_properties()
         self.conf.pythonize()
-        count = self.conf.remove_exclusions()
-        if count > 0:
-            self.conf.create_reversed_list()
         self.conf.linkify()
         self.conf.apply_dependencies()
         self.conf.explode_global_conf()
@@ -162,6 +190,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
+            self.conf.dump()
             return
         self.conf.clean()
 
@@ -187,6 +216,7 @@ class ShinkenTest(unittest.TestCase):
         e2 = ExternalCommandManager(self.conf, 'dispatcher')
         e2.load_arbiter(self)
         self.external_command_dispatcher = e2
+        self.sched.conf.accept_passive_unknown_check_results = False
 
         self.sched.schedule()
 
@@ -278,16 +308,24 @@ class ShinkenTest(unittest.TestCase):
 
     def show_logs(self):
         print "--- logs <<<----------------------------------"
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log']
+                print "LOG:", brok.data['log'].encode("utf-8")
         print "--- logs >>>----------------------------------"
 
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
-        for a in sorted(self.sched.actions.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -310,24 +348,39 @@ class ShinkenTest(unittest.TestCase):
 
 
     def count_logs(self):
-        return len([b for b in self.sched.broks.values() if b.type == 'log'])
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        return len([b for b in broks.values() if b.type == 'log'])
 
 
     def count_actions(self):
-        return len(self.sched.actions.values())
+        if hasattr(self, "sched"):
+            actions = self.sched.actions
+        else:
+            actions = self.actions
+        return len(actions.values())
 
 
     def clear_logs(self):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
         id_to_del = []
-        for b in self.sched.broks.values():
+        for b in broks.values():
             if b.type == 'log':
                 id_to_del.append(b.id)
         for id in id_to_del:
-            del self.sched.broks[id]
+            del broks[id]
 
 
     def clear_actions(self):
-        self.sched.actions = {}
+        if hasattr(self, "sched"):
+            self.sched.actions = {}
+        else:
+            self.actions = {}
 
 
     def log_match(self, index, pattern):
@@ -348,7 +401,11 @@ class ShinkenTest(unittest.TestCase):
 
     def any_log_match(self, pattern):
         regex = re.compile(pattern)
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        if hasattr(self, "sched"):
+            broks = self.sched.broks
+        else:
+            broks = self.broks
+        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
                 if re.search(regex, brok.data['log']):
@@ -365,7 +422,7 @@ class ShinkenTest(unittest.TestCase):
         return res
 
     def print_header(self):
-        print "#" * 80 + "\n" + "#" + " " * 78 + "#"
+        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
@@ -375,37 +432,6 @@ class ShinkenTest(unittest.TestCase):
 
 
 
-
-
-# Hook for old python some test
-if not hasattr(ShinkenTest, 'assertNotIn'):
-    def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
-    ShinkenTest.assertNotIn = assertNotIn
-
-
-if not hasattr(ShinkenTest, 'assertIn'):
-    def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
-    ShinkenTest.assertIn = assertIn
-
-if not hasattr(ShinkenTest, 'assertIsInstance'):
-    def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
-    ShinkenTest.assertIsInstance = assertIsInstance
-
-
-if not hasattr(ShinkenTest, 'assertRegexpMatches'):
-    def assertRegexpMatches(self, line, patern):
-        r = re.search(patern, line)
-        self.assertTrue(r is not None)
-    ShinkenTest.assertRegexpMatches = assertRegexpMatches
-
-
-if not hasattr(ShinkenTest, 'assertIs'):
-    def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
-    ShinkenTest.assertIs = assertIs
 
 
 if __name__ == '__main__':

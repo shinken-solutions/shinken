@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -24,13 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import os
 import re
 
-from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
-from shinken.property import (BoolProp, IntegerProp, FloatProp,
-                              CharProp, StringProp, ListProp)
 from shinken.log import logger
 
 objs = {'hosts': [], 'services': []}
@@ -48,7 +44,7 @@ class declared(object):
         trigger_functions[n] = f
 
     def __call__(self, *args):
-        logger.debug("Calling %s with arguments %s" % (self.f.func_name, args))
+        logger.debug("Calling %s with arguments %s", self.f.func_name, args)
         return self.f(*args)
 
 @declared
@@ -105,10 +101,10 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     if return_code is None:
         return_code = obj.state_id
 
-    logger.debug("[trigger] Setting %s %s %s for object %s" % (output,
+    logger.debug("[trigger] Setting %s %s %s for object %s", output,
                                                                perfdata,
                                                                return_code,
-                                                               obj.get_full_name()))
+                                                               obj.get_full_name())
 
     if perfdata:
         output = output + ' | ' + perfdata
@@ -178,7 +174,7 @@ def allperfs(obj_ref):
     obj = get_object(obj_ref)
     p = PerfDatas(obj.perf_data)
     logger.debug("[trigger] I get all perfdatas")
-    return dict([(metric_name, p[metric_name].value) for metric_name in p])
+    return dict([(metric.name, p[metric.name]) for metric in p])
 
 
 @declared
@@ -221,7 +217,7 @@ def get_objects(ref):
         elts = name.split('/', 1)
         hname = elts[0]
         sdesc = elts[1]
-    logger.debug("[trigger get_objects] Look for %s %s" % (hname, sdesc))
+    logger.debug("[trigger get_objects] Look for %s %s", hname, sdesc)
     res = []
     hosts = []
     services = []
@@ -235,7 +231,7 @@ def get_objects(ref):
         hname = hname.replace('*', '.*')
         p = re.compile(hname)
         for h in objs['hosts']:
-            logger.debug("[trigger] Compare %s with %s" % (hname, h.get_name()))
+            logger.debug("[trigger] Compare %s with %s", hname, h.get_name())
             if p.search(h.get_name()):
                 hosts.append(h)
 
@@ -252,9 +248,9 @@ def get_objects(ref):
             sdesc = sdesc.replace('*', '.*')
             p = re.compile(sdesc)
             for s in h.services:
-                logger.debug("[trigger] Compare %s with %s" % (s.service_description, sdesc))
+                logger.debug("[trigger] Compare %s with %s", s.service_description, sdesc)
                 if p.search(s.service_description):
                     services.append(s)
 
-    logger.debug("Found the following services: %s" % (services))
+    logger.debug("Found the following services: %s", services)
     return services

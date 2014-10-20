@@ -9,7 +9,6 @@ INSTALLED_FILES
 .settings
 .gitignore
 modules/*
-etc/modules/*
 
 # Logs and databases #
 ######################

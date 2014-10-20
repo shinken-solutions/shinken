@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,10 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 
 from item import Item, Items
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import StringProp
 from shinken.util import to_name_if_possible
 from shinken.log import logger
 
@@ -69,25 +68,25 @@ class CheckModulation(Item):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.error("[item::%s] %s" % (self.get_name(), err))
+                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[checkmodulation::%s] %s property not set" % (self.get_name(), prop))
+                    logger.warning("[checkmodulation::%s] %s property not set", self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'check_command'):
-            logger.warning("[checkmodulation::%s] do not have any check_command defined" % self.get_name())
+            logger.warning("[checkmodulation::%s] do not have any check_command defined", self.get_name())
             state = False
         else:
             if self.check_command is None:
-                logger.warning("[checkmodulation::%s] a check_command is missing" % self.get_name())
+                logger.warning("[checkmodulation::%s] a check_command is missing", self.get_name())
                 state = False
             if not self.check_command.is_valid():
-                logger.warning("[checkmodulation::%s] a check_command is invalid" % self.get_name())
+                logger.warning("[checkmodulation::%s] a check_command is invalid", self.get_name())
                 state = False
 
         # Ok just put None as check_period, means 24x7
@@ -120,4 +119,4 @@ class CheckModulations(Items):
         params['checkmodulation_name'] = name
         #print "Asking a new inner checkmodulation from name %s with params %s" % (name, params)
         cw = CheckModulation(params)
-        self.items[cw.id] = cw
+        self.add_item(cw)

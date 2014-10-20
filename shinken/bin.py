@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -31,7 +31,7 @@ Shinken.
 
 import sys
 
-VERSION = "2.0.1"
+VERSION = "2.0.3"
 
 
 # Make sure people are using Python 2.6 or higher

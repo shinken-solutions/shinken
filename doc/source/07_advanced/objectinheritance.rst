@@ -147,7 +147,7 @@ Using Incomplete Object Definitions as Templates
 =================================================
 
 
-It is possible to use imcomplete object definitions as templates for use by other object definitions. By "incomplete" definition, I mean that all required variables in the object have not been supplied in the object definition. It may sound odd to use incomplete definitions as templates, but it is in fact recommended that you use them. Why? Well, they can serve as a set of defaults for use in all other object definitions. Take the following example:
+It is possible to use incomplete object definitions as templates for use by other object definitions. By "incomplete" definition, I mean that all required variables in the object have not been supplied in the object definition. It may sound odd to use incomplete definitions as templates, but it is in fact recommended that you use them. Why? Well, they can serve as a set of defaults for use in all other object definitions. Take the following example:
 
 
 ::
@@ -600,7 +600,7 @@ Inheritance exclusions
 
 Packs and hostgroups allow de factorize the configuration and greatly reduce the amount of configuration to write to describe infrastructures. The drawback is that it forces hosts to be consistent, as the same configuration is applied to a possibly very large set of machines.
 
-Imagine a web servers cluster. All machines except one should be checked its managenent interface (ILO, iDRAC). In the cluster, there is one virtual server that should be checked the exact same services than the others, except the management interface (as checking it on a virtual server has no meaning). The correponding sevice comes from a pack.
+Imagine a web servers cluster. All machines except one should be checked its managenent interface (ILO, iDRAC). In the cluster, there is one virtual server that should be checked the exact same services than the others, except the management interface (as checking it on a virtual server has no meaning). The corresponding service comes from a pack.
 
 In this situation, there is several ways to manage the situation:
 

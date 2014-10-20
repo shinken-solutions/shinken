@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -87,7 +87,6 @@
 
 import time
 import re
-import string
 
 from item import Item, Items
 
@@ -97,7 +96,7 @@ from shinken.daterange import MonthDateDaterange, WeekDayDaterange
 from shinken.daterange import MonthDayDaterange
 from shinken.brok import Brok
 from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
-from shinken.log import logger, console_logger
+from shinken.log import logger, naglog_result
 
 
 class Timeperiod(Item):
@@ -138,6 +137,8 @@ class Timeperiod(Item):
 
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
                 setattr(self, key, params[key])
+            elif key.startswith('_'):
+                self.customs[key.upper()] = params[key]            
             else:
                 self.unresolved.append(key + ' ' + params[key])
 
@@ -233,7 +234,7 @@ class Timeperiod(Item):
                 _to = 1
 
             # Now raise the log
-            console_logger.info('TIMEPERIOD TRANSITION: %s;%d;%d'
+            naglog_result('info', 'TIMEPERIOD TRANSITION: %s;%d;%d'
                                 % (self.get_name(), _from, _to))
 
     # clean the get_next_valid_time_from_t cache
@@ -430,11 +431,14 @@ class Timeperiod(Item):
     def is_correct(self):
         b = True
         for dr in self.dateranges:
-            b &= dr.is_correct()
+            d = dr.is_correct()
+            if not d:
+                logger.error("[timeperiod::%s] invalid daterange ", self.get_name())
+            b &= d
 
         # Warn about non correct entries
         for e in self.invalid_entries:
-            logger.warning("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
+            logger.warning("[timeperiod::%s] invalid entry '%s'", self.get_name(), e)
         return b
 
     def __str__(self):
@@ -627,7 +631,7 @@ class Timeperiod(Item):
                 day = t0
                 dateranges.append(StandardDaterange(day, other))
                 return
-        logger.info("[timeentry::%s] no match for %s" % (self.get_name(), entry))
+        logger.info("[timeentry::%s] no match for %s", self.get_name(), entry)
         self.invalid_entries.append(entry)
 
     def apply_inheritance(self):
@@ -644,7 +648,7 @@ class Timeperiod(Item):
     def linkify(self, timeperiods):
         new_exclude = []
         if self.has('exclude') and self.exclude != '':
-            logger.debug("[timeentry::%s] have excluded %s" % (self.get_name(), self.exclude))
+            logger.debug("[timeentry::%s] have excluded %s", self.get_name(), self.exclude)
             excluded_tps = self.exclude.split(',')
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
@@ -652,12 +656,12 @@ class Timeperiod(Item):
                 if tp is not None:
                     new_exclude.append(tp)
                 else:
-                    logger.error("[timeentry::%s] unknown %s timeperiod" % (self.get_name(), tp_name))
+                    logger.error("[timeentry::%s] unknown %s timeperiod", self.get_name(), tp_name)
         self.exclude = new_exclude
 
     def check_exclude_rec(self):
         if self.rec_tag:
-            logger.error("[timeentry::%s] is in a loop in exclude parameter" % self.get_name())
+            logger.error("[timeentry::%s] is in a loop in exclude parameter", self.get_name())
             return False
         self.rec_tag = True
         for tp in self.exclude:
@@ -705,7 +709,7 @@ class Timeperiods(Items):
         # The only interesting property to inherit is exclude
         self.apply_partial_inheritance('exclude')
         for i in self:
-            i.get_customs_properties_by_inheritance(self)
+            i.get_customs_properties_by_inheritance()
 
         # And now apply inheritance for unresolved properties
         # like the dateranges in fact

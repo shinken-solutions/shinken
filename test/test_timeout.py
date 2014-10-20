@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -24,8 +24,6 @@
 #
 
 from shinken_test import *
-# we have an external process, so we must un-fake time functions
-time_hacker.set_real_time()
 
 from shinken.worker import Worker
 from multiprocessing import Queue, Manager
@@ -37,7 +35,9 @@ modconf = Module()
 
 class TestTimeout(ShinkenTest):
     def setUp(self):
+        # we have an external process, so we must un-fake time functions
         self.setup_with_file('etc/shinken_check_timeout.cfg')
+        time_hacker.set_real_time()
 
     def test_notification_timeout(self):
         if os.name == 'nt':

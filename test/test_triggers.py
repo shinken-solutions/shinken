@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -111,15 +111,18 @@ class TestTriggers(ShinkenTest):
     # Try to catch the perf_datas of self
     def test_morecomplex_cpu_too_high(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "cpu_too_high_bis")
-        svc.output = 'I am OK'
-        svc.perf_data = 'cpu=95%'
-        # Go launch it!
-        svc.eval_triggers()
-        self.scheduler_loop(2, [])
+
+        firstlen = len([b for b in self.sched.broks.values() if b.type == 'service_check_result'])
+        self.scheduler_loop(1, [(svc, 0, 'I am OK | cpu=95%')])
+        seclen = len([b for b in self.sched.broks.values() if b.type == 'service_check_result'])
+        self.scheduler_loop(1, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
+        print firstlen, seclen
+
         self.assert_(svc.output == "not good!")
         self.assert_(svc.perf_data == "cpu=95")
+        self.assert_(firstlen == seclen)
 
     # Try to load .trig files
     def test_trig_file_loading(self):

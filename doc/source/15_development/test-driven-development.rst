@@ -205,7 +205,7 @@ On the Jenkins one :
  
    * executed every 6 hours
    * ./test/jenkins/new_runtest ./test/jenkins/all_tests.txt ./test/moduleslist COVERAGE PYLINT PEP8
-   * the all_test is regenerated everytime (all test_*.py)
+   * the all_test is regenerated every time (all test_*.py)
    * run all test in all module listed
    * give a full view of shinken coverage.
 
