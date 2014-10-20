@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -44,11 +43,7 @@ try:
 except ImportError:
     is_android = False
 
-if not is_android:
-    from multiprocessing import Queue, Manager, active_children, cpu_count
-    from multiprocessing.managers import SyncManager
-else:
-    from multiprocessing import active_children
+from multiprocessing.managers import SyncManager
 
 import http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
@@ -65,14 +60,11 @@ try:
     from pwd import getpwnam
     from grp import getgrnam, getgrall
 
-
     def get_cur_user():
         return pwd.getpwuid(os.getuid()).pw_name
 
-
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
-
 
     def get_all_groups():
         return getgrall()
@@ -81,10 +73,8 @@ except ImportError, exp:  # Like in nt system or Android
     def get_cur_user():
         return "shinken"
 
-
     def get_cur_group():
         return "shinken"
-
 
     def get_all_groups():
         return []
@@ -314,7 +304,7 @@ class Daemon(object):
         self.unlink()
         self.do_stop()
         # Brok facilities are no longer available simply print the message to STDOUT
-        print ("Stopping daemon. Exiting", )
+        print("Stopping daemon. Exiting")
         sys.exit(0)
 
 
@@ -722,7 +712,6 @@ class Daemon(object):
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
-        act = active_children()
         self.modules_manager.check_alive_instances()
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
