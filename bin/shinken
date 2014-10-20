@@ -500,9 +500,13 @@ if __name__ == '__main__':
                 all_from[came_from] = [(k, m)]
             else:
                 all_from[came_from].append((k, m))
-        for (mod_name, d) in all_from.iteritems():
+        _mods = all_from.keys()
+        _mods.sort()
+        for mod_name in _mods:
+            d = all_from[mod_name]
             print '%s:' % mod_name
-            for (k, m) in d:
+            d.sort(key=lambda e: e[0])
+            for (k,m) in d:
                 cprint('\t%s ' % k, 'green', end='')
                 cprint(': %s' % m['description'])
         sys.exit(0)

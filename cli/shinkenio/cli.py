@@ -386,7 +386,9 @@ def grab_local(d):
 
 
 
-def install_package(pname, raw):
+def install_package(pname, raw, update_only=False):
+    if update_only:
+        logger.debug('UPDATE ONLY ENABLED')
     logger.debug("Installing the package %s (size:%d)", pname, len(raw))
     if len(raw) == 0:
         logger.error('The package %s cannot be found', pname)
@@ -480,28 +482,28 @@ def install_package(pname, raw):
         shutil.copytree(p_doc, doc_dest)
         logger.info("Copy done in the doc directory %s", doc_dest)
 
+        
+    if not update_only:
+        # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
+        p_pack = os.path.join(tmpdir, 'pack')
+        if os.path.exists(p_pack):
+            logger.info("Installing the pack package data")
+            pack_dest = os.path.join(packs_dir, pname)
+            if os.path.exists(pack_dest):
+                logger.info("Removing previous pack install at %s", pack_dest)
+                shutil.rmtree(pack_dest)
+            # shutil will do the create dir
+            shutil.copytree(p_pack, pack_dest)
+            logger.info("Copy done in the pack directory %s", pack_dest)
 
-    # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
-    p_pack = os.path.join(tmpdir, 'pack')
-    if os.path.exists(p_pack):
-        logger.info("Installing the pack package data")
-        pack_dest = os.path.join(packs_dir, pname)
-        if os.path.exists(pack_dest):
-            logger.info("Removing previous pack install at %s", pack_dest)
-            shutil.rmtree(pack_dest)
-        # shutil will do the create dir
-        shutil.copytree(p_pack, pack_dest)
-        logger.info("Copy done in the pack directory %s", pack_dest)
-
-    # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
-    p_etc = os.path.join(tmpdir, 'etc')
-    if os.path.exists(p_etc):
-        logger.info("Merging the etc package data into your etc directory")
-        # We don't use shutils because it NEED etc_dir to be non existant...
-        # Come one guys..... cp is not as terrible as this...
-        _copytree(p_etc, etc_dir)
-        logger.info("Copy done in the etc directory %s", etc_dir)
-
+        # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
+        p_etc = os.path.join(tmpdir, 'etc')
+        if os.path.exists(p_etc):
+            logger.info("Merging the etc package data into your etc directory")
+            # We don't use shutils because it NEED etc_dir to be non existant...
+            # Come one guys..... cp is not as terrible as this...
+            _copytree(p_etc, etc_dir)
+            logger.info("Copy done in the etc directory %s", etc_dir)
 
     # Now install the tests from $TMP$/tests/* to $TESTS$/tests/*
     # if the last one is specified on the configuration file (optionnal)
@@ -573,6 +575,17 @@ def do_install(pname, local, download_only):
     install_package(pname, raw)
 
 
+def do_update(pname, local):
+    raw = ''
+    if local:
+        pname, raw = grab_local(pname)
+
+    if not local:
+        raw = grab_package(pname)
+
+    install_package(pname, raw, update_only=True)
+
+
 
 
 exports = {
@@ -596,6 +609,14 @@ exports = {
             {'name' : '--download-only', 'description':'Only download the package', 'type': 'bool'},
             ],
         'description' : 'Grab and install a package from shinken.io'
+        },
+    do_update : {
+        'keywords': ['update'],
+        'args': [
+            {'name' : 'pname', 'description':'Package to update)'},
+            {'name' : '--local', 'description':'Use a local directory instead of the shinken.io version', 'type': 'bool'},
+            ],
+        'description' : 'Grab and update a package from shinken.io. Only the code and doc, NOT the configuration part! Do not update an not installed package.'
         },
     do_inventory  : {'keywords': ['inventory'], 'args': [],
        'description': 'List locally installed packages'
