@@ -171,7 +171,7 @@ class BaseModule(object):
         # start
         try:
             del self.properties['process']
-        except Exception:
+        except KeyError:
             pass
 
         p.start()
