@@ -33,6 +33,7 @@ import time
 from re import compile
 from multiprocessing import Queue, Process
 
+import shinken.http_daemon
 from shinken.log import logger
 from shinken.misc.common import setproctitle
 
@@ -278,9 +279,9 @@ class BaseModule(object):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
 
-        from http_daemon import daemon_inst
-        if daemon_inst:
-            daemon_inst.shutdown()
+        # TODO: fix this hack:
+        if shinken.http_daemon.daemon_inst:
+            shinken.http_daemon.daemon_inst.shutdown()
         
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
@@ -288,6 +289,7 @@ class BaseModule(object):
         self.main()
         self.do_stop()
         logger.info("[%s]: exiting now..", self.name)
+
 
     # TODO: apparently some modules would uses "work" as the main method??
     work = _main

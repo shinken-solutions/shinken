@@ -423,4 +423,6 @@ class HTTPDaemon(object):
             return ins
 
 
+# TODO: clean this hack:
+# see usage within basemodule & http_daemon.
 daemon_inst = None

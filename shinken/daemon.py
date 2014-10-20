@@ -45,7 +45,7 @@ except ImportError:
 
 from multiprocessing.managers import SyncManager
 
-import http_daemon
+import shinken.http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
 from shinken.stats import statsmgr
@@ -673,8 +673,10 @@ class Daemon(object):
                 logger.info("Enabling hard SSL server name verification")
 
         # Let's create the HTTPDaemon, it will be exec after
-        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
-        http_daemon.daemon_inst = self.http_daemon
+        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key,
+                                      ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
+        # TODO: fix this "hack" :
+        shinken.http_daemon.daemon_inst = self.http_daemon
 
     # Global loop part
     def get_socks_activity(self, socks, timeout):
