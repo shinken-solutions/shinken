@@ -162,8 +162,10 @@ class Notification(Action):
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__(Notification('', '', '', '', '', '', '', id=self.id))
 
+
     def is_launchable(self, t):
         return t >= self.t_to_go
+
 
     def is_administrative(self):
         if self.type in ('PROBLEM', 'RECOVERY'):
@@ -171,11 +173,14 @@ class Notification(Action):
         else:
             return True
 
+
     def __str__(self):
         return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, getattr(self, 'ref', 'unknown'), time.asctime(time.localtime(self.t_to_go)))
 
+
     def get_id(self):
         return self.id
+
 
     def get_return_from(self, n):
         self.exit_status = n.exit_status
@@ -194,6 +199,7 @@ class Notification(Action):
             if brok_type in entry.fill_brok:
                 data[prop] = getattr(self, prop)
 
+
     # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
@@ -201,6 +207,7 @@ class Notification(Action):
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('notification_raise', data)
         return b
+
 
     # Call by pickle for dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
@@ -213,6 +220,7 @@ class Notification(Action):
                 res[prop] = getattr(self, prop)
 
         return res
+
 
     # Inverted function of getstate
     def __setstate__(self, state):

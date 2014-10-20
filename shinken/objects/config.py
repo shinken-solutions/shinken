@@ -1228,6 +1228,7 @@ class Config(Item):
                             return True
         return False
 
+
     # Will ask for each host/service if the
     # check_command is a bp rule. If so, it will create
     # a tree structures with the rules
@@ -1235,10 +1236,12 @@ class Config(Item):
         self.hosts.create_business_rules(self.hosts, self.services)
         self.services.create_business_rules(self.hosts, self.services)
 
+
     # Will fill dep list for business rules
     def create_business_rules_dependencies(self):
         self.hosts.create_business_rules_dependencies()
         self.services.create_business_rules_dependencies()
+
 
     # It's used to hack some old Nagios parameters like
     # log_file or status_file: if they are present in

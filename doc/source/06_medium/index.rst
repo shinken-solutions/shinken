@@ -21,3 +21,4 @@ Medium
    notification-escalations
    notification-ways
    passive-checks
+   snapshots

@@ -20,7 +20,7 @@ Bold directives are required, while the others are optional.
 ========================================== ======================================
 define host{
 **host_name**                              ***host_name***
-**alias**                                  ***alias***
+alias                                      alias
 display_name                               *display_name*
 **address**                                ***address***
 parents                                    *host_names*
@@ -32,7 +32,7 @@ check_interval                             #
 retry_interval                             #
 active_checks_enabled                      [0/1]
 passive_checks_enabled                     [0/1]
-**check_period**                           ***timeperiod_name***
+check_period                               *timeperiod_name*
 obsess_over_host                           [0/1]
 check_freshness                            [0/1]
 freshness_threshold                        #
@@ -49,7 +49,7 @@ retain_nonstatus_information               [0/1]
 **contact_groups**                         ***contact_groups***
 **notification_interval**                  **#**
 first_notification_delay                   #
-**notification_period**                    ***timeperiod_name***
+notification_period                    ***timeperiod_name***
 notification_options                       [d,u,r,f,s]
 notifications_enabled                      [0/1]
 stalking_options                           [o,d,u]
@@ -68,7 +68,7 @@ business_impact                            [0/1/2/3/4/5]
 resultmodulations                          *resultmodulations*
 escalations                                *escalations names*
 business_impact_modulations                *business_impact_modulations names*
-icon_set                                   [database/disk/network_service/server]
+icon_set                                   [database/disk/network_service/server/...]
 maintenance_period                         *timeperiod_name*
 service_overrides                          *service_description,directive value*
 service_excludes                           *service_description,...*
@@ -78,6 +78,12 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+snapshot_enabled                           [0/1]
+snapshot_command                           *command_name*
+snapshot_period                            *timeperiod_name*
+snapshot_criteria                          [d,u]
+snapshot_interval                          #
+
 }
 ========================================== ======================================
 
@@ -306,6 +312,21 @@ business_rule_host_notification_options
 
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+snapshot_enabled
+  This option allows to enable snapshots :ref:`snapshots <medium/snapshots>` on this element.
+
+snapshot_command
+  Command to launch when a snapshot launch occurs
+
+snapshot_period
+  Timeperiod when the snapshot call is allowed
+
+snapshot_criteria
+  List of states that enable the snapshot launch. Mainly bad states.
+
+snapshot_interval
+  Minimum interval between two launch of snapshots to not hammering the host :)
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/

@@ -556,6 +556,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
+
     # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
@@ -565,6 +566,7 @@ Like temporary attributes such as "imported_from", etc.. """
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_' + my_type + '_status', data)
         return b
+
 
     # Get a brok with update item status
     def get_update_status_brok(self):
@@ -576,6 +578,7 @@ Like temporary attributes such as "imported_from", etc.. """
         b = Brok('update_' + my_type + '_status', data)
         return b
 
+
     # Get a brok with check_result
     def get_check_result_brok(self):
         cls = self.__class__
@@ -586,6 +589,7 @@ Like temporary attributes such as "imported_from", etc.. """
         b = Brok(my_type + '_check_result', data)
         return b
 
+
     # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
         cls = self.__class__
@@ -595,6 +599,20 @@ Like temporary attributes such as "imported_from", etc.. """
         self.fill_data_brok_from(data, 'next_schedule')
         b = Brok(my_type + '_next_schedule', data)
         return b
+
+
+    # A snapshot brok is alike a check_result, with also a
+    # output from the snapshot command
+    def get_snapshot_brok(self, snap_output, exit_status):
+        cls = self.__class__
+        my_type = cls.my_type
+        now = int(time.time())
+
+        data = {'snapshot_output':snap_output, 'snapshot_time':now, 'snapshot_exit_status':exit_status}
+        self.fill_data_brok_from(data, 'check_result')
+        b = Brok(my_type + '_snapshot', data)
+        return b
+        
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -626,6 +644,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
+
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):

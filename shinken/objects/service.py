@@ -160,6 +160,14 @@ class Service(SchedulingItem):
 
         # UI aggregation
         'aggregation'      :    StringProp(default='', fill_brok=['full_status']),
+
+        # Snapshot part
+        'snapshot_enabled':        BoolProp(default='0'),
+        'snapshot_command':        StringProp(default=''),
+        'snapshot_period':         StringProp(default=''),
+        'snapshot_criteria':       ListProp(default='w,c,u', fill_brok=['full_status'], merging='join'),
+        'snapshot_interval':       IntegerProp(default='300'),
+
     })
 
     # properties used in the running state
@@ -288,7 +296,10 @@ class Service(SchedulingItem):
         'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers': StringProp(default=[])
+        'triggers': StringProp(default=[]),
+
+        # snapshots part
+        'last_snapshot':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
 
     })
 
@@ -570,7 +581,7 @@ class Service(SchedulingItem):
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                         # Here is a list of property where we will expand the $KEY$ by the value
-                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler']
+                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler', 'snapshot_command']
                         for prop in _the_expandables:
                             if hasattr(self, prop):
                                 # here we can replace VALUE, VALUE1, VALUE2,...
@@ -768,6 +779,17 @@ class Service(SchedulingItem):
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
 
+
+    # Raise a log entry with a Eventhandler alert like
+    # SERVICE SNAPSHOT: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
+    def raise_snapshot_log_entry(self, command):
+        if self.__class__.log_event_handlers:
+            console_logger.alert("SERVICE SNAPSHOT: %s;%s;%s;%s;%s;%s"
+                                % (self.host.get_name(), self.get_name(),
+                                   self.state, self.state_type,
+                                   self.attempt, command.get_name()))
+
+
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
@@ -776,6 +798,7 @@ class Service(SchedulingItem):
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.host.get_name(), self.get_name(),
                                change_ratio, threshold))
+
 
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
@@ -1074,10 +1097,12 @@ class Services(Items):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
+        self.linkify_with_timeperiods(timeperiods, 'snapshot_period')
         self.linkify_s_by_hst(hosts)
         self.linkify_s_by_sg(servicegroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
+        self.linkify_one_command_with_commands(commands, 'snapshot_command')
         self.linkify_with_contacts(contacts)
         self.linkify_with_resultmodulations(resultmodulations)
         self.linkify_with_business_impact_modulations(businessimpactmodulations)
@@ -1190,7 +1215,7 @@ class Services(Items):
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_s_by_commands(self, commands):
-        props = ['check_command', 'event_handler']
+        props = ['check_command', 'event_handler', 'snapshot_command']
         for s in self:
             for prop in props:
                 cc = getattr(s, prop, None)

@@ -551,6 +551,11 @@ class TestHost(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
+        ('snapshot_interval', '300'),
+        ('snapshot_command', ''),
+        ('snapshot_enabled', '0'),
+        ('snapshot_period', ''),
+        ('snapshot_criteria', 'd,u'),
         ('business_rule_host_notification_options', ''),
         ('business_rule_service_notification_options', ''),
         ])
@@ -834,6 +839,11 @@ class TestService(PropertiesTester, ShinkenTest, unittest.TestCase):
         ('business_rule_smart_notifications', '0'),
         ('business_rule_downtime_as_ack', '0'),
         ('labels', ''),
+        ('snapshot_interval', '300'),
+        ('snapshot_command', ''),
+        ('snapshot_enabled', '0'),
+        ('snapshot_period', ''),
+        ('snapshot_criteria', 'w,c,u'),
         ('business_rule_host_notification_options', ''),
         ('business_rule_service_notification_options', ''),
         ])

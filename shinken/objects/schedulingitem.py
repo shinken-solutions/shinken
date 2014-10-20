@@ -662,6 +662,48 @@ class SchedulingItem(Item):
         self.actions.append(e)
 
 
+    # Get a event handler from a snapshot command
+    def get_snapshot(self):
+        # We should have a snapshot_command, to be enabled and of course
+        # in the good time and state :D        
+        if self.snapshot_command is None:
+            return
+
+        if not self.snapshot_enabled:
+            return
+
+        # look at if one state is matching the criteria
+        boolmap = [self.is_state(s) for s in self.snapshot_criteria]
+        if True not in boolmap:
+            return
+        
+        # Time based checks now, we should be in the period and not too far
+        # from the last_snapshot
+        now = int(time.time())
+        if self.last_snapshot > now - self.snapshot_interval: # too close
+            return
+        
+        # no period means 24x7 :)
+        if self.snapshot_period is not None and not self.snapshot_period.is_time_valid(now):
+            return
+
+        cls = self.__class__
+        m = MacroResolver()
+        data = self.get_data_for_event_handler()
+        cmd = m.resolve_command(self.snapshot_command, data)
+        rt = self.snapshot_command.reactionner_tag
+        e = EventHandler(cmd, timeout=cls.event_handler_timeout,
+                         ref=self, reactionner_tag=rt, 
+                         is_snapshot=True)
+        self.raise_snapshot_log_entry(self.snapshot_command)
+        
+        # we save the time we launch the snap
+        self.last_snapshot = now
+
+        # ok we can put it in our temp action queue
+        self.actions.append(e)
+
+
     # Whenever a non-ok hard state is reached, we must check whether this
     # host/service has a flexible downtime waiting to be activated
     def check_for_flexible_downtime(self):
@@ -957,6 +999,7 @@ class SchedulingItem(Item):
                     self.raise_alert_log_entry()
                     # eventhandler is launched each time during the soft state
                     self.get_event_handlers()
+
             else:
                 # Send notifications whenever the state has changed. (W -> C)
                 # but not if the current state is UNKNOWN (hard C-> hard U -> hard C should
@@ -1018,6 +1061,8 @@ class SchedulingItem(Item):
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command()
         self.get_perfdata_command()
+        # Also snapshot if need :)
+        self.get_snapshot()
 
 
     def update_event_and_problem_id(self):

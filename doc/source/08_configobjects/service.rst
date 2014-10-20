@@ -46,7 +46,7 @@ retain_status_information                  [0/1]
 retain_nonstatus_information               [0/1]
 **notification_interval**                  **#**
 first_notification_delay                   #
-**notification_period**                    ***timeperiod_name***
+notification_period                        ***timeperiod_name***
 notification_options                       [w,u,c,r,f,s]
 notifications_enabled                      [0/1]
 **contacts**                               ***contacts***
@@ -68,6 +68,11 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+snapshot_enabled                           [0/1]
+snapshot_command                           *command_name*
+snapshot_period                            *timeperiod_name*
+snapshot_criteria                          [w,c,u]
+snapshot_interval                          #
 }
 ========================================== ======================================
 
@@ -343,5 +348,21 @@ business_rule_host_notification_options
 
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
+
+snapshot_enabled
+  This option allows to enable snapshots :ref:`snapshots <medium/snapshots>` on this element.
+
+snapshot_command
+  Command to launch when a snapshot launch occurs
+
+snapshot_period
+  Timeperiod when the snapshot call is allowed
+
+snapshot_criteria
+  List of states that enable the snapshot launch. Mainly bad states.
+
+snapshot_interval
+  Minimum interval between two launch of snapshots to not hammering the host :)
+
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

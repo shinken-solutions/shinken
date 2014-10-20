@@ -26,7 +26,7 @@
 import time
 
 from action import Action
-from shinken.property import IntegerProp, StringProp, FloatProp
+from shinken.property import IntegerProp, StringProp, FloatProp, BoolProp
 from shinken.autoslots import AutoSlots
 
 """ TODO: Add some comment about this class for the doc"""
@@ -59,11 +59,12 @@ class EventHandler(Action):
         'module_type':    StringProp(default='fork'),
         'worker':         StringProp(default='none'),
         'reactionner_tag':     StringProp(default='None'),
+        'is_snapshot':    BoolProp(default=False),
     }
 
     # id = 0  #Is common to Actions
     def __init__(self, command, id=None, ref=None, timeout=10, env={}, \
-                     module_type='fork', reactionner_tag='None'):
+                     module_type='fork', reactionner_tag='None', is_snapshot=False):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -87,13 +88,15 @@ class EventHandler(Action):
         self.module_type = module_type
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
+        self.is_snapshot = is_snapshot
 
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
-        return self.copy_shell__(EventHandler('', id=self.id))
+        return self.copy_shell__(EventHandler('', id=self.id, is_snapshot=self.is_snapshot))
+
 
     def get_return_from(self, e):
         self.exit_status = e.exit_status
@@ -103,29 +106,22 @@ class EventHandler(Action):
         self.execution_time = getattr(e, 'execution_time', 0.0)
         self.perf_data = getattr(e, 'perf_data', '')
 
-    # <TMI!!>
+    
     def get_outputs(self, out, max_plugins_output_length):
-        elts = out.split('\n')
-        # For perf data
-        elts_line1 = elts[0].split('|')
-        # First line before | is output
-        self.output = elts_line1[0]
-        # After | is perfdata
-        if len(elts_line1) > 1:
-            self.perf_data = elts_line1[1]
-        # The others lines are long_output
-        if len(elts) > 1:
-            self.long_output = '\n'.join(elts[1:])
-    # </TMI!!>
+        self.output = out
+
 
     def is_launchable(self, t):
         return t >= self.t_to_go
 
+
     def __str__(self):
         return "Check %d status:%s command:%s" % (self.id, self.status, self.command)
 
+
     def get_id(self):
         return self.id
+
 
     # Call by pickle to dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
@@ -138,6 +134,7 @@ class EventHandler(Action):
                 res[prop] = getattr(self, prop)
 
         return res
+
 
     # Inverted function of getstate
     def __setstate__(self, state):

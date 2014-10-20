@@ -354,6 +354,7 @@ class Scheduler:
         ExternalCommand:    add_ExternalCommand,
     }
 
+
     # We call the function of modules that got the
     # hook function
     # TODO: find a way to merge this and the version in daemon.py
@@ -373,6 +374,7 @@ class Scheduler:
                     logger.error("Exception trace follows: %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
+
 
     # Ours queues may explode if no one ask us for elements
     # It's very dangerous: you can crash your server... and it's a bad thing :)
@@ -443,11 +445,13 @@ class Scheduler:
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             logger.warning("We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
+
     # For tunning purpose we use caches but we do not want them to explode
     # So we clean them
     def clean_caches(self):
         for tp in self.timeperiods:
             tp.clean_cache()
+
 
     # Ask item (host or service) an update_status
     # and add it to our broks queue
@@ -455,11 +459,13 @@ class Scheduler:
         b = item.get_update_status_brok()
         self.add(b)
 
+
     # Ask item (host or service) a check_result_brok
     # and add it to our broks queue
     def get_and_register_check_result_brok(self, item):
         b = item.get_check_result_brok()
         self.add(b)
+
 
     # We do not want this downtime id
     def del_downtime(self, dt_id):
@@ -467,11 +473,13 @@ class Scheduler:
             self.downtimes[dt_id].ref.del_downtime(dt_id)
             del self.downtimes[dt_id]
 
+
     # We do not want this downtime id
     def del_contact_downtime(self, dt_id):
         if dt_id in self.contact_downtimes:
             self.contact_downtimes[dt_id].ref.del_downtime(dt_id)
             del self.contact_downtimes[dt_id]
+
 
     # We do not want this comment id
     def del_comment(self, c_id):
@@ -479,11 +487,13 @@ class Scheduler:
             self.comments[c_id].ref.del_comment(c_id)
             del self.comments[c_id]
 
+
     # We are looking for outdated acks, and if so, remove them
     def check_for_expire_acknowledge(self):
         for t in [self.hosts, self.services]:
             for i in t:
                 i.check_for_expire_acknowledge()
+
 
     # We update all business_impact to look at new modulation
     # start for impacts, and so update broks status and
@@ -664,9 +674,6 @@ class Scheduler:
 
             except AttributeError, exp:  # bad object, drop it
                 logger.warning('put_results:: get bad notification : %s ' % str(exp))
-
-
-
         elif c.is_a == 'check':
             try:
                 if c.status == 'timeout':
@@ -680,20 +687,29 @@ class Scheduler:
 
 
         elif c.is_a == 'eventhandler':
-            # It just die
             try:
-                if c.status == 'timeout':
-                    logger.warning("%s event handler command '%s ' timed out after %d seconds" %
-                                   (self.actions[c.id].ref.__class__.my_type.capitalize(),
-                                    self.actions[c.id].command,
-                                    int(c.execution_time)))
-                self.actions[c.id].status = 'zombie'
-            # Maybe we got a return of a old even handler, so we can forget it
-            except KeyError, exp:
-                logger.warning('put_results:: get unknown event handler : %s ' % str(exp))
-                pass
+                old_action = self.actions[c.id]
+                old_action.status = 'zombie'
+            except KeyError: # cannot find old action
+                return
+            if c.status == 'timeout':
+                _type = 'event handler'
+                if c.is_snapshot:
+                    _type = 'snapshot'
+                logger.warning("%s %s command '%s ' timed out after %d seconds" %
+                               (self.actions[c.id].ref.__class__.my_type.capitalize(),
+                                _type,
+                                self.actions[c.id].command,
+                                int(c.execution_time)))
+
+            # If it's a snapshot we should get the output an export it
+            if c.is_snapshot:
+                old_action.get_return_from(c)
+                b = old_action.ref.get_snapshot_brok(old_action.output, old_action.exit_status)
+                self.add(b)
         else:
             logger.error("The received result type in unknown! %s" % str(c.is_a))
+
 
     # Get the good tabs for links regarding to the kind. If unknown, return None
     def get_links_from_type(self, type):
@@ -702,6 +718,7 @@ class Scheduler:
             return t[type]
         return None
 
+
     # Check if we do not connect to often to this
     def is_connection_try_too_close(self, elt):
         now = time.time()
@@ -709,6 +726,7 @@ class Scheduler:
         if now - last_connection < 5:
             return  True
         return False
+
 
     # initialize or re-initialize connection with a poller
     # or a reactionner
@@ -899,6 +917,7 @@ class Scheduler:
                 # like for all checks
                 c.status = 'waitconsume'
 
+
     # Call by brokers to have broks
     # We give them, and clean them!
     def get_broks(self, bname):
@@ -924,6 +943,7 @@ class Scheduler:
         for i in  self.services:
             i.topology_change = False
 
+
     # Update the retention file and give all te data in
     # a dict so the read function can pickup what it wants
     # For now compression is not used, but it can be added easily
@@ -936,10 +956,12 @@ class Scheduler:
 
         self.hook_point('save_retention')
 
+
     # Load the retention file and get status from it. It does not get all checks in progress
     # for the moment, just the status and the notifications.
     def retention_load(self):
         self.hook_point('load_retention')
+
 
     # Helper function for module, will give the host and service
     # data
@@ -999,6 +1021,7 @@ class Scheduler:
                     d[prop] = v
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
+
 
     # Get back our broks from a retention module :)
     def restore_retention_data(self, data):
@@ -1228,6 +1251,7 @@ class Scheduler:
         b = Brok('program_status', data)
         return b
 
+
     # Called every 1sec to consume every result in services or hosts
     # with these results, they are OK, CRITICAL, UP/DOWN, etc...
     def consume_results(self):
@@ -1260,6 +1284,7 @@ class Scheduler:
                 item = c.ref
                 item.consume_result(c)
 
+
     # Called every 1sec to delete all checks in a zombie state
     # zombie = not useful anymore
     def delete_zombie_checks(self):
@@ -1273,6 +1298,7 @@ class Scheduler:
         for id in id_to_del:
             del self.checks[id]  # ZANKUSEN!
 
+
     # Called every 1sec to delete all actions in a zombie state
     # zombie = not useful anymore
     def delete_zombie_actions(self):
@@ -1285,6 +1311,7 @@ class Scheduler:
         # *pat pat* GFTO, thks :)
         for id in id_to_del:
             del self.actions[id]  # ZANKUSEN!
+
 
     # Check for downtimes start and stop, and register
     # them if needed
@@ -1358,12 +1385,14 @@ class Scheduler:
         for b in broks:
             self.add(b)
 
+
     # Main schedule function to make the regular scheduling
     def schedule(self):
         # ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 i.schedule()
+
 
     # Main actions reaper function: it get all new checks,
     # notification and event handler from hosts and services
@@ -1377,6 +1406,7 @@ class Scheduler:
                 # We take all, we can clear it
                 i.actions = []
 
+
     # Similar as above, but for broks
     def get_new_broks(self):
         # ask for service and hosts their broks waiting
@@ -1388,6 +1418,7 @@ class Scheduler:
                 # We take all, we can clear it
                 i.broks = []
 
+
     # Raises checks for no fresh states for services and hosts
     def check_freshness(self):
         #print "********** Check freshness******"
@@ -1396,6 +1427,7 @@ class Scheduler:
                 c = i.do_check_freshness()
                 if c is not None:
                     self.add(c)
+
 
     # Check for orphaned checks: checks that never returns back
     # so if inpoller and t_to_go < now - 300s: pb!
@@ -1428,6 +1460,7 @@ class Scheduler:
         for w in worker_names:
             logger.warning("%d actions never came back for the satellite '%s'. I reenable them for polling" % (worker_names[w], w))
 
+
     # Each loop we are going to send our broks to our modules (if need)
     def send_broks_to_modules(self):
         t0 = time.time()
@@ -1444,6 +1477,7 @@ class Scheduler:
             b.sent_to_sched_externals = True
         logger.debug("Time to send %s broks (after %d secs)" % (nb_sent, time.time() - t0))
 
+
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
     # for a module like livestatus to raise external
@@ -1457,6 +1491,7 @@ class Scheduler:
                     self.add(o)
                 except Empty:
                     full_queue = False
+
 
     # Main function
     def run(self):
