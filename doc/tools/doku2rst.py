@@ -68,7 +68,7 @@ def get_image(image_url, image_path):
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
         urlretrieve(image_url, path)
-    except:
+    except Exception:
         import pdb;pdb.set_trace()
 
 def get_lengths(lengths, row):

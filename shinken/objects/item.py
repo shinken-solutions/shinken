@@ -379,7 +379,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def has_plus(self, prop):
         try:
             self.plus[prop]
-        except:
+        except Exception:
             return False
         return True
 
@@ -1070,7 +1070,7 @@ class Items(object):
             try:
                 if getattr(i, prop) == 'null':
                     delattr(i, prop)
-            except:
+            except Exception:
                 pass
 
     def apply_inheritance(self):

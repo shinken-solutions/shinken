@@ -89,7 +89,7 @@ def con_poolmaster(xs, user, password):
      else:
         print "Error: pool con:",  xs, sys.exc_info()[0]
         pass
-  except:
+  except Exception:
     print "Error: pool con:",  xs, sys.exc_info()[0]
     pass
   return None
@@ -112,7 +112,7 @@ def main(output, user, password, rules, xenserver):
             else:
               res[host] = [vm_name]
       s.xenapi.session.logout()
-    except:
+    except Exception:
       pass
   r = create_all_links(res,rules)
   print "Created %d links" % len(r)

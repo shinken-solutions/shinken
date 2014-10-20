@@ -1514,7 +1514,7 @@ class Config(Item):
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try:
                 cur = getattr(self, x)
-            except:
+            except Exception:
                 continue
             if self.read_config_silent == 0:
                 logger.info('Checking %s...', x)

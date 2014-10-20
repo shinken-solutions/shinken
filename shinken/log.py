@@ -72,7 +72,7 @@ class BrokHandler(Handler):
             msg = self.format(record)
             brok = Brok('log', {'log': msg + '\n'})
             self._broker.add(brok)
-        except:
+        except Exception:
             self.handleError(record)
 
 
@@ -84,7 +84,7 @@ class ColorStreamHandler(StreamHandler):
             cprint(msg, colors[record.levelname])
         except UnicodeEncodeError:
             print msg.encode('ascii', 'ignore')
-        except:
+        except Exception:
             self.handleError(record)
 
 

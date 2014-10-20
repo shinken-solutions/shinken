@@ -115,7 +115,7 @@ class TestMaintPeriod(ShinkenTest):
             print self.sched.downtimes[1]
             print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
             print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
-        except:
+        except Exception:
             print "looks like there is no downtime"
             pass
         self.assert_(len(svc3.downtimes) == 1)

@@ -297,7 +297,7 @@ class Daemon(object):
             # Release the lock so the daemon can shutdown without problem
             try:
                 self.http_daemon.lock.release()
-            except:
+            except Exception:
                 pass
             self.http_daemon.shutdown()
 
