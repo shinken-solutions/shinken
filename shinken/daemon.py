@@ -368,6 +368,8 @@ class Daemon(object):
 
 
     def load_modules_manager(self):
+        if not modulesctx.get_modulesdir():
+            modulesctx.set_modulesdir(self.find_modules_path())
         self.modules_manager = ModulesManager(self.name, self.find_modules_path(), [])
         # Set the modules watchdogs
         # TOFIX: Beware, the arbiter do not have the max_queue_size property
@@ -692,23 +694,21 @@ class Daemon(object):
             raise
         return ins
 
-
     # Find the absolute path of the shinken module directory and returns it.
     # If the directory do not exist, we must exit!
     def find_modules_path(self):
-        if not hasattr(self, 'modules_dir') or not self.modules_dir:
-            logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
-            self.modules_dir = '/var/lib/shinken/modules'
-        self.modules_dir = os.path.abspath(self.modules_dir)
-        logger.info("Modules directory: %s", self.modules_dir)
-        if not os.path.exists(self.modules_dir):
-            logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration", self.modules_dir)
-            raise Exception("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modules_dir)
-
-        # Ok remember to populate the modulesctx object
-        modulesctx.set_modulesdir(self.modules_dir)
-
-        return self.modules_dir
+        modules_dir = getattr(self, 'modules_dir', None)
+        if not modules_dir:
+            modules_dir = modulesctx.get_modulesdir()
+            if not modules_dir:
+                logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
+                modules_dir = '/var/lib/shinken/modules'
+                modulesctx.set_modulesdir(modules_dir)
+            self.modules_dir = modules_dir
+        logger.info("Modules directory: %s", modules_dir)
+        if not os.path.exists(modules_dir):
+            raise RuntimeError("The modules directory '%s' is missing! Bailing out. Please fix your configuration", modules_dir)
+        return modules_dir
 
 
     # modules can have process, and they can die
