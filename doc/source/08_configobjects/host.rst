@@ -49,7 +49,7 @@ retain_nonstatus_information               [0/1]
 **contact_groups**                         ***contact_groups***
 **notification_interval**                  **#**
 first_notification_delay                   #
-notification_period                    ***timeperiod_name***
+notification_period                        ***timeperiod_name***
 notification_options                       [d,u,r,f,s]
 notifications_enabled                      [0/1]
 stalking_options                           [o,d,u]
