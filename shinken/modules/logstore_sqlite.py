@@ -347,7 +347,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 logger.error("[Logstore SQLite] WARNING: it seems your database is corrupted. Error=%s. Please recreate it" % err)
             self.commit()
 
-    def select(self, cmd, values=None, row_factory=None):
+    def select(self, cmd, values=None, row_factory=None, post_select=None):
         ''' Same function than execute but it returns a generator instead of a list.
         NB: The generator yields many rows at a time.
         :type cmd: The full SELECT query.
@@ -392,6 +392,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 self.dbconn.row_factory = orig_row_factory
                 self.dbcursor = self.dbconn.cursor()
                 self.dbcursor.arraysize = self.CURSOR_ARRAYSIZE
+            if post_select:
+                post_select()
+
 
 
     def execute(self, cmd, values=None, row_factory=None):
@@ -541,11 +544,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
             totime = int(lepat.group(3))
 
         for dateobj, handle, archive, fromtime, totime in self.log_db_relevant_files(fromtime, totime):
-            gen = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
-            for subgen in gen:
-                for results in subgen:
-                    for row in results:
-                        yield row
+            rows_gen = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
+            for rows in rows_gen:
+                for row in rows:
+                    yield row
 
     def _check_table_exist(self, handle='main'):
         ''' Check if the table "logs" does exist in the 'handle' sqlite db namespace.
@@ -576,15 +578,11 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 def clean():
                     self.execute("DETACH DATABASE %s" % handle)
             self._check_table_exist(handle)
-            dbgen = self.select('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause),
-                                filter_values, row_factory)
+            return self.select('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause),
+                                filter_values, row_factory, post_select=clean)
         except LiveStatusLogStoreError as err:
             logger.error("[Logstore SQLite] An error occurred: %s" % str(err.args[0]))
             raise
-        else:
-            yield dbgen
-        finally:
-            clean()
 
     def make_sql_filter(self, operator, attribute, reference):
         # The filters are text fragments which are put together to form a sql where-condition finally.
