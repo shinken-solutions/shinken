@@ -929,13 +929,24 @@ class Satellite(BaseSatellite):
         else:
             name = 'Unnamed satellite'
         self.name = name
+        # kernel.io part
         self.api_key = g_conf['api_key']
         self.secret = g_conf['secret']
+        # local statsd
+        self.statsd_host = g_conf['statsd_host']
+        self.statsd_port = g_conf['statsd_port']
+        self.statsd_prefix = g_conf['statsd_prefix']
+        self.statsd_enabled = g_conf['statsd_enabled']
+        
         # we got a name, we can now say it to our statsmgr
         if 'poller_name' in g_conf:
-            statsmgr.register(self, self.name, 'poller', api_key=self.api_key, secret=self.secret)
+            statsmgr.register(self, self.name, 'poller', 
+                              api_key=self.api_key, secret=self.secret,
+                              statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)            
         else:
-            statsmgr.register(self, self.name, 'reactionner', api_key=self.api_key, secret=self.secret) 
+            statsmgr.register(self, self.name, 'reactionner', 
+                              api_key=self.api_key, secret=self.secret,
+                              statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
 
         self.passive = g_conf['passive']
         if self.passive:

@@ -1346,6 +1346,118 @@ Example:
 This is the pager number (or pager email gateway) for the administrator of the local machine (i.e. the one that Shinken is running on). The pager number/address can be used in notification commands by using the $ADMINPAGER$ :ref:`macro <thebasics/macros>`.
 
 
+Shinken.io api_key
+-----------------------------
+
+Format:
+
+::
+
+  api_key=<api_key>
+
+Example:
+
+::
+
+  api_key=AZERTYUIOP
+  
+This is the api_key/scret to exchange with shinken.io and especially the kernel.shinken.io service that will print your shinken metrics. To enable it you must fill the api_key and secret parameters. You must register to http://shinken.io and look at your profile http://shinken.io/~ for your api_key and your secret.
+
+
+Shinken.io secret
+-----------------------------
+
+Format:
+
+::
+
+  secret=<secret>
+
+Example:
+
+::
+
+  secret=QSDFGHJ
+  
+This is the api_key/scret to exchange with shinken.io and especially the kernel.shinken.io service that will print your shinken metrics. To enable it you must fill the api_key and secret parameters. You must register to http://shinken.io and look at your profile http://shinken.io/~ for your api_key and your secret.
+
+
+Statsd host
+-----------------------------
+
+Format:
+
+::
+
+  statsd_host=<host or ip>
+
+Example:
+
+::
+
+  statsd_host=localhost
+  
+Configure your local statsd daemon address.
+
+
+
+Statsd port
+-----------------------------
+
+Format:
+
+::
+
+  statsd_port=<int>
+
+Example:
+
+::
+
+  statsd_port=8125
+  
+Configure your local statsd daemon port. Notice that the port is in UDP
+
+
+Statsd prefix
+-----------------------------
+
+Format:
+
+::
+
+  statsd_prefix=<string>
+
+Example:
+
+::
+
+  statsd_prefix=shinken
+  
+The prefix to add before all your stats so you will find them easily in graphite
+
+
+Statsd enabled (or not)
+-----------------------------
+
+Format:
+
+::
+
+  statsd_enabled=<0/1>
+
+Example:
+
+::
+
+  statsd_enabled=0
+  
+Enable or not the statsd communication. By default it's disabled.
+
+
+
+
+
 
 
 .. _Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html

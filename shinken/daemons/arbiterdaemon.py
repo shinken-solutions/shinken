@@ -293,7 +293,14 @@ class Arbiter(Daemon):
                 # export this data to our statsmgr object :)
                 api_key = getattr(self.conf, 'api_key', '')
                 secret = getattr(self.conf, 'secret', '')
-                statsmgr.register(self, arb.get_name(), 'arbiter', api_key=api_key, secret=secret)
+                statsd_host = getattr(self.conf, 'statsd_host', 'localhost')
+                statsd_port = getattr(self.conf, 'statsd_port', 8125)
+                statsd_prefix = getattr(self.conf, 'statsd_prefix', 'shinken')
+                statsd_enabled = getattr(self.conf, 'statsd_enabled', False)
+                statsmgr.register(self, arb.get_name(), 'arbiter', 
+                                  api_key=api_key, secret=secret,
+                                  statsd_host=statsd_host, statsd_port=statsd_port, statsd_prefix=statsd_prefix, statsd_enabled=statsd_enabled)
+
                 # Set myself as alive ;)
                 self.me.alive = True
             else:  # not me

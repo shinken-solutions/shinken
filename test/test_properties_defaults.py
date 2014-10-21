@@ -231,8 +231,15 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('enable_environment_macros', True),
         ('timeout_exit_status', 2),
 
+        # kernel.shinken.io part
         ('api_key', ''),
         ('secret', ''),
+
+        # statsd part
+        ('statsd_host', 'localhost'),
+        ('statsd_port', 8125),
+        ('statsd_prefix', 'shinken'),
+        ('statsd_enabled', False),
         ])
 
     def setUp(self):

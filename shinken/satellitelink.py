@@ -393,9 +393,14 @@ class SatelliteLink(Item):
         for prop, entry in properties.items():
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
+        cls = self.__class__
         # Also add global values
-        self.cfg['global']['api_key'] = self.__class__.api_key
-        self.cfg['global']['secret']  = self.__class__.secret
+        self.cfg['global']['api_key'] = cls.api_key
+        self.cfg['global']['secret']  = cls.secret
+        self.cfg['global']['statsd_host']  = cls.statsd_host
+        self.cfg['global']['statsd_port']  = cls.statsd_port
+        self.cfg['global']['statsd_prefix']  = cls.statsd_prefix
+        self.cfg['global']['statsd_enabled']  = cls.statsd_enabled
 
 
     # Some parameters for satellites are not defined in the satellites conf

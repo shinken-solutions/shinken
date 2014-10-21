@@ -296,6 +296,24 @@ class Config(Item):
         'secret':   StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                                           (BrokerLink, None), (PollerLink, None),
                                                           (ReceiverLink, None),  (ArbiterLink, None)]),
+        # and local statsd one
+        'statsd_host':   StringProp(default='localhost', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_port':   IntegerProp(default=8125, class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_prefix': StringProp(default='shinken', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_enabled': BoolProp(default=False, class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),        
+
     }
 
     macros = {

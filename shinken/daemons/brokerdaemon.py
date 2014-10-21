@@ -399,9 +399,16 @@ class Broker(BaseSatellite):
         self.name = name
         self.api_key = g_conf['api_key']
         self.secret = g_conf['secret']
+        self.statsd_host = g_conf['statsd_host']
+        self.statsd_port = g_conf['statsd_port']
+        self.statsd_prefix = g_conf['statsd_prefix']
+        self.statsd_enabled = g_conf['statsd_enabled']
+
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
-        statsmgr.register(self, name, 'broker', api_key=self.api_key, secret=self.secret)
+        statsmgr.register(self, name, 'broker', 
+                          api_key=self.api_key, secret=self.secret, 
+                          statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
 
         logger.debug("[%s] Sending us configuration %s", self.name, conf)
         # If we've got something in the schedulers, we do not

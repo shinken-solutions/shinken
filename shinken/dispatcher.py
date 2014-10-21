@@ -387,8 +387,15 @@ class Dispatcher:
                                         'instance_name': sched.scheduler_name, 'push_flavor': conf.push_flavor,
                                         'skip_initial_broks': sched.skip_initial_broks,
                                         'accept_passive_unknown_check_results': sched.accept_passive_unknown_check_results,
+                                        # shiken.io part
                                         'api_key': self.conf.api_key,
                                         'secret': self.conf.secret,
+                                        # statsd one too because OlivierHA love statsd and after some years of effort
+                                        # he manages to make me understand the powerfullness of metrics :)
+                                        'statsd_host': self.conf.statsd_host,
+                                        'statsd_port': self.conf.statsd_port,
+                                        'statsd_prefix': self.conf.statsd_prefix,
+                                        'statsd_enabled': self.conf.statsd_enabled,
                                         }
 
                         t1 = time.time()
