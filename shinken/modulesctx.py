@@ -54,11 +54,11 @@ class ModulesContext(object):
                            mod_name, err)
         mod_dir = abspath(join(self.modules_dir, mod_name))
         mod_file = join(mod_dir, 'module.py')
-        load_it = (
-            lambda: (
-                # important, equivalent to import fname from module.py:
-                imp.load_source(mod_name, mod_file) if os.path.exists(mod_file)
-                else imp.load_compiled(mod_name, mod_file + 'c') ) )
+        if os.path.exists(mod_file):
+            # important, equivalent to import fname from module.py:
+            load_it = lambda: imp.load_source(mod_name, mod_file)
+        else:
+            load_it = lambda: imp.load_compiled(mod_name, mod_file+'c')
         # We add this dir to sys.path so the module can load local files too
         if mod_dir not in sys.path:
             sys.path.append(mod_dir)
