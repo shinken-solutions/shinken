@@ -1668,7 +1668,7 @@ class Scheduler:
                 self.dump_config()
                 self.need_objects_dump = False
 
-
+        
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

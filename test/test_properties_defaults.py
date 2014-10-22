@@ -234,6 +234,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         # kernel.shinken.io part
         ('api_key', ''),
         ('secret', ''),
+        ('http_proxy', ''),
 
         # statsd part
         ('statsd_host', 'localhost'),
