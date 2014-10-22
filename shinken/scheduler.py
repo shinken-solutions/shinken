@@ -1516,9 +1516,10 @@ class Scheduler:
         metrics.append( 'scheduler.%s.broks.queue %d %d' % (self.instance_name, len(self.broks), now) )
         metrics.append( 'scheduler.%s.downtimes %d %d' % (self.instance_name, len(self.downtimes), now) )
         metrics.append( 'scheduler.%s.comments %d %d' % (self.instance_name, len(self.comments), now) )
-        metrics.append( 'scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now) )
-        metrics.append( 'scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now) )
-        metrics.append( 'scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now) )
+        if lat_min:
+            metrics.append( 'scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now) )
+            metrics.append( 'scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now) )
+            metrics.append( 'scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now) )
 
         all_commands = {}
         # compute some stats

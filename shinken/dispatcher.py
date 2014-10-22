@@ -390,6 +390,7 @@ class Dispatcher:
                                         # shiken.io part
                                         'api_key': self.conf.api_key,
                                         'secret': self.conf.secret,
+                                        'http_proxy': self.conf.http_proxy,
                                         # statsd one too because OlivierHA love statsd and after some years of effort
                                         # he manages to make me understand the powerfullness of metrics :)
                                         'statsd_host': self.conf.statsd_host,

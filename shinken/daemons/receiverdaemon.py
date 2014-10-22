@@ -192,13 +192,14 @@ class Receiver(Satellite):
         self.name = name
         self.api_key = conf['global']['api_key']
         self.secret = conf['global']['secret']
+        self.http_proxy = conf['global']['http_proxy']
         self.statsd_host = conf['global']['statsd_host']
         self.statsd_port = conf['global']['statsd_port']
         self.statsd_prefix = conf['global']['statsd_prefix']
         self.statsd_enabled = conf['global']['statsd_enabled']
         
         statsmgr.register(self, self.name, 'receiver', 
-                          api_key=self.api_key, secret=self.secret,
+                          api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
                           statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']

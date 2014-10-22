@@ -397,6 +397,7 @@ class SatelliteLink(Item):
         # Also add global values
         self.cfg['global']['api_key'] = cls.api_key
         self.cfg['global']['secret']  = cls.secret
+        self.cfg['global']['http_proxy']  = cls.http_proxy
         self.cfg['global']['statsd_host']  = cls.statsd_host
         self.cfg['global']['statsd_port']  = cls.statsd_port
         self.cfg['global']['statsd_prefix']  = cls.statsd_prefix

@@ -932,6 +932,7 @@ class Satellite(BaseSatellite):
         # kernel.io part
         self.api_key = g_conf['api_key']
         self.secret = g_conf['secret']
+        self.http_proxy = g_conf['http_proxy']
         # local statsd
         self.statsd_host = g_conf['statsd_host']
         self.statsd_port = g_conf['statsd_port']
@@ -941,7 +942,7 @@ class Satellite(BaseSatellite):
         # we got a name, we can now say it to our statsmgr
         if 'poller_name' in g_conf:
             statsmgr.register(self, self.name, 'poller', 
-                              api_key=self.api_key, secret=self.secret,
+                              api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
                               statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)            
         else:
             statsmgr.register(self, self.name, 'reactionner', 

@@ -399,6 +399,7 @@ class Broker(BaseSatellite):
         self.name = name
         self.api_key = g_conf['api_key']
         self.secret = g_conf['secret']
+        self.http_proxy = g_conf['http_proxy']
         self.statsd_host = g_conf['statsd_host']
         self.statsd_port = g_conf['statsd_port']
         self.statsd_prefix = g_conf['statsd_prefix']
@@ -407,7 +408,7 @@ class Broker(BaseSatellite):
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker', 
-                          api_key=self.api_key, secret=self.secret, 
+                          api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
                           statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
 
         logger.debug("[%s] Sending us configuration %s", self.name, conf)

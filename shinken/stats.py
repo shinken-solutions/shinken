@@ -64,6 +64,7 @@ class Stats(object):
         # first the kernel mode
         self.api_key = ''
         self.secret = ''
+        self.http_proxy = ''
         self.con = HTTPClient(uri='http://kernel.shinken.io')
         # then the statsd one
         self.statsd_sock = None
@@ -76,13 +77,14 @@ class Stats(object):
         self.reaper_thread.start()
 
 
-    def register(self, app, name, _type, api_key='', secret='', statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken', statsd_enabled=False):
+    def register(self, app, name, _type, api_key='', secret='', http_proxy='', statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken', statsd_enabled=False):
         self.app = app
         self.name = name
         self.type = _type
         # kernel.io part
         self.api_key = api_key
         self.secret = secret
+        self.http_proxy = http_proxy
         # local statsd part
         self.statsd_host = statsd_host
         self.statsd_port = statsd_port
@@ -92,6 +94,9 @@ class Stats(object):
         if self.statsd_enabled:
             logger.debug('Loading statsd communication with %s:%s.%s', self.statsd_host, self.statsd_port, self.statsd_prefix)
             self.load_statsd()
+
+        # Also load the proxy if need
+        self.con.set_proxy(self.http_proxy)
 
 
     # Let be crystal clear about why I don't use the statsd lib in python: it's crappy.
@@ -182,7 +187,6 @@ class Stats(object):
             #logger.debug('REAPER whole struct %s' % struct)
             j = json.dumps(struct)
             if AES is not None and self.secret != '':
-                # RESET AFTER EACH calls!
                 logger.debug('Stats PUT to kernel.shinken.io/api/v1/put/ with %s %s' % (self.api_key, self.secret))
 
                 # assume a %16 length messagexs

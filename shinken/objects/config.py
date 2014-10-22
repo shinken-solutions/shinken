@@ -290,12 +290,19 @@ class Config(Item):
         'use_multiprocesses_serializer':  BoolProp(default=False),
 
         # About shinken.io part
-        'api_key':  StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                                          (BrokerLink, None), (PollerLink, None),
-                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
-        'secret':   StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                                          (BrokerLink, None), (PollerLink, None),
-                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
+        'api_key':  StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'secret':   StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'http_proxy':   StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        
         # and local statsd one
         'statsd_host':   StringProp(default='localhost', class_inherit=[
             (SchedulerLink, None), (ReactionnerLink, None),
