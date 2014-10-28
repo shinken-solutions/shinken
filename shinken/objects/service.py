@@ -79,8 +79,8 @@ class Service(SchedulingItem):
         'check_command':          StringProp(fill_brok=['full_status']),
         'initial_state':          CharProp(default='o', fill_brok=['full_status']),
         'max_check_attempts':     IntegerProp(default=1,fill_brok=['full_status']),
-        'check_interval':         IntegerProp(fill_brok=['full_status']),
-        'retry_interval':         IntegerProp(fill_brok=['full_status']),
+        'check_interval':         IntegerProp(fill_brok=['full_status', 'check_result']]),
+        'retry_interval':         IntegerProp(fill_brok=['full_status', 'check_result']]),
         'active_checks_enabled':  BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'passive_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'check_period':           StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
@@ -222,7 +222,7 @@ class Service(SchedulingItem):
         'flapping_changes':   ListProp(default=[], fill_brok=['full_status'], retention=True),
         'flapping_comment_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'percent_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
-        'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
         'acknowledgement':    StringProp(default=None, retention=True),
         'acknowledgement_type': IntegerProp(default=1, fill_brok=['full_status', 'check_result'], retention=True),
         'check_type':         IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -251,7 +251,7 @@ class Service(SchedulingItem):
         # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':  ListProp(default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
-        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
         'actions':            ListProp(default=[]), # put here checks and notif raised
         'broks':              ListProp(default=[]), # and here broks raised
