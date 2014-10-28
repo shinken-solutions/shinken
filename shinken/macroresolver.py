@@ -68,6 +68,17 @@ class MacroResolver(Borg):
         'EVENTSTARTTIME':       '_get_events_start_time',
     }
 
+    output_macros = [
+        'HOSTOUTPUT',
+        'HOSTPERFDATA',
+        'HOSTACKAUTHOR',
+        'HOSTACKCOMMENT',
+        'SERVICEOUTPUT',
+        'SERVICEPERFDATA',
+        'SERVICEACKAUTHOR',
+        'SERVICEACKCOMMENT'
+    ]
+
     # This must be called ONCE. It just put links for elements
     # by scheduler
     def init(self, conf):
@@ -90,7 +101,6 @@ class MacroResolver(Borg):
         self.contactgroups = conf.contactgroups
         self.lists_on_demand.append(self.contactgroups)
         self.illegal_macro_output_chars = conf.illegal_macro_output_chars
-        self.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
 
         # Try cache :)
         #self.cache = {}
