@@ -47,7 +47,7 @@ class PollerLink(SatelliteLink):
     })
 
     def get_name(self):
-        return self.poller_name
+        return getattr(self, 'poller_name', 'UNNAMED-POLLER')
 
     def register_to_my_realm(self):
         self.realm.pollers.append(self)

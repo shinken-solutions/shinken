@@ -25,7 +25,7 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
+from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split, strip_and_uniq
 import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
@@ -223,9 +223,9 @@ class ListProp(Property):
     #@staticmethod
     def pythonize(self, val):
         if isinstance(val, list):
-            return list_split(val, self.split_on_coma)
+            return [s.strip() for s in list_split(val, self.split_on_coma)]
         else:
-            return to_split(val, self.split_on_coma)
+            return [s.strip() for s in to_split(val, self.split_on_coma)]
 
 
 class LogLevelProp(StringProp):
@@ -295,6 +295,7 @@ class AddrProp(Property):
 
         return addr
 
+
 class ToGuessProp(Property):
     """Unknown property encountered while parsing"""
 
@@ -306,6 +307,7 @@ class ToGuessProp(Property):
         else:
             # Well, can't choose to remove somthing.
             return val
+
 
 class IntListProp(ListProp):
     """Integer List property"""

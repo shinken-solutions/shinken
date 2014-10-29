@@ -257,7 +257,8 @@ def list_split(val, split_on_coma=True):
     if not split_on_coma:
         return val
     new_val = []
-    _ = map(lambda x: new_val.extend(x.split(',')), val)
+    for x in val:
+        new_val.extend(x.split(','))
     return new_val
 
 
