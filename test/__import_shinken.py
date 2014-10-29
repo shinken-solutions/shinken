@@ -25,11 +25,15 @@ test-suite only, do NOT use the installed one if present.
 
 """
 
-import imp, os
 try:
     import shinken
 except ImportError:
-    imp.load_module('shinken', 
-                    *imp.find_module('shinken',
-                                     [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
-    
+    import imp, os
+    # For security reasons, try not to load `shinken` from parent
+    # directory when running as root.
+    if True or not hasattr(os, 'getuid') or os.getuid() != 0:
+        imp.load_module('shinken', *imp.find_module('shinken',
+                                                    [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
+    else:
+        # running as root: re-raise the exception
+        raise
