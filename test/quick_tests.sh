@@ -31,6 +31,7 @@ rm -f .coverage
 function launch_and_assert {
     SCRIPT=$1
     #nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
+    
     python ./$SCRIPT
     if [ $? != 0 ] ; then
 	echo "Error: the test $SCRIPT failed"
