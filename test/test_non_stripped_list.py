@@ -32,6 +32,12 @@ class TestNonStrippedList(ShinkenTest):
 
     def test_dummy(self):
         now = time.time()
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        host = self.sched.hosts.find_by_name("OBIWAN")
         self.assert_('d' in host.flap_detection_options)
 
 
