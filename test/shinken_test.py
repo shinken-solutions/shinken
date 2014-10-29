@@ -14,7 +14,7 @@ import random
 import unittest
 import copy
 
-# import the shinken library from the installed directory first (for modules) andthen fail back to local is not founded. Need to find a way to inverse the method
+# import the shinken library from the parent directory only, not the isntalled version
 import __import_shinken ; del __import_shinken
 
 import shinken

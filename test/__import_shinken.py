@@ -27,9 +27,8 @@ test-suite only, do NOT use the installed one if present.
 
 import imp, os
 try:
-    import shinken
-except ImportError:
     imp.load_module('shinken', 
                     *imp.find_module('shinken',
                                      [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
-    
+except ImportError:
+    import shinken
