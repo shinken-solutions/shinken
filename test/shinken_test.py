@@ -14,7 +14,7 @@ import random
 import unittest
 import copy
 
-# import the shinken library from the parent directory
+# import the shinken library from the parent directory only, not the isntalled version
 import __import_shinken ; del __import_shinken
 
 import shinken

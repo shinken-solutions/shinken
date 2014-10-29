@@ -21,26 +21,14 @@
 """
 
 Helper module for importing the shinken library from the (uninstalled)
-test-suite.
+test-suite only, do NOT use the installed one if present.
 
-If importing shinken fails, try to load from parent directory to
-support running the test-suite without installation.
-
-This does not manipulate sys.path, but uses lower-level Python modules
-for looking up and loading the module `shinken` from the directory one
-level above this module.
 """
 
+import imp, os
 try:
-    import shinken
+    imp.load_module('shinken', 
+                    *imp.find_module('shinken',
+                                     [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
 except ImportError:
-    import imp, os
-    # For security reasons, try not to load `shinken` from parent
-    # directory when running as root.
-    if True or not hasattr(os, 'getuid') or os.getuid() != 0:
-        imp.load_module('shinken', *imp.find_module('shinken',
-            [os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]))
-    else:
-        # running as root: re-raise the exception
-        raise
-
+    import shinken
