@@ -37,13 +37,13 @@ import logging
 import inspect
 
 # Try to see if we are in an android device or not
-is_android = True
 try:
     import android
+    is_android = True
 except ImportError:
     is_android = False
+    from multiprocessing.managers import SyncManager
 
-from multiprocessing.managers import SyncManager
 
 import shinken.http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
@@ -570,6 +570,35 @@ class Daemon(object):
         del self.debug_output
         self.set_proctitle()
 
+
+    if is_android:
+        def _create_manager(self):
+            pass
+    else:
+        # The Manager is a sub-process, so we must be sure it won't have
+        # a socket of your http server alive
+        def _create_manager(self):
+            manager = SyncManager(('127.0.0.1', 0))
+            def close_http_daemon(daemon):
+                try:
+                    # Be sure to release the lock so there won't be lock in shutdown phase
+                    daemon.lock.release()
+                except Exception, exp:
+                    pass
+                daemon.shutdown()
+            # Some multiprocessing lib got problems with start() that cannot take args
+            # so we must look at it before
+            startargs = inspect.getargspec(manager.start)
+            # startargs[0] will be ['self'] if old multiprocessing lib
+            # and ['self', 'initializer', 'initargs'] in newer ones
+            # note: windows do not like pickle http_daemon...
+            if os.name != 'nt' and len(startargs[0]) > 1:
+                manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            else:
+                manager.start()
+            return manager
+
+
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
     # and such things to have a true DAEMON :D
     # use_pyro= open the TCP port for communication
@@ -602,31 +631,7 @@ class Daemon(object):
 
         # Now we can start our Manager
         # interprocess things. It's important!
-        if is_android:
-            self.manager = None
-        else:
-            # The Manager is a sub-process, so we must be sure it won't have
-            # a socket of your http server alive
-            self.manager = SyncManager(('127.0.0.1',0))
-            def close_http_daemon(daemon):
-                try:
-                    # Be sure to release the lock so there won't be lock in shutdown phase
-                    daemon.lock.release()
-                except Exception, exp:
-                    pass
-                daemon.shutdown()
-            # Some multiprocessing lib got problems with start() that cannot take args
-            # so we must look at it before
-            startargs = inspect.getargspec(self.manager.start)
-            # startargs[0] will be ['self'] if old multiprocessing lib
-            # and ['self', 'initializer', 'initargs'] in newer ones
-            # note: windows do not like pickle http_daemon...
-            if os.name != 'nt' and len(startargs[0]) > 1:
-                self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
-            else:
-                self.manager.start()
-            # Keep this daemon in the http_daemn module
-        # Will be add to the modules manager later
+        self.manager = self._create_manager()
 
         # We can start our stats thread but after the double fork() call and if we are not in
         # a test launch (time.time() is hooked and will do BIG problems there)
