@@ -105,7 +105,7 @@ class ModulesManager(object):
                 sys.path.append(mod_dir)
                 try:
                     load_it()
-                except ImportError as err:
+                except Exception as err:
                     logger.warning("Importing module %s failed: %s ; backtrace=%s",
                                    mod_name, err, traceback.format_exc())
                     sys.path.remove(mod_dir)
