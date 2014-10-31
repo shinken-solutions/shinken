@@ -109,6 +109,8 @@ class ShinkenModulesTest(ShinkenTest):
 
         #--- livestatus_broker.do_main
         self.livestatus_broker.db.open()
+        if hasattr(self.livestatus_broker.db, 'prepare_log_db_table'):
+            self.livestatus_broker.db.prepare_log_db_table()
         #--- livestatus_broker.do_main
 
 
