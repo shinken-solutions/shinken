@@ -93,7 +93,7 @@ class ModulesManager(object):
 
             try:
                 mod = importlib.import_module('.module', mod_name)
-            except ImportError as err:
+            except Exception as err:
                 logger.warning('Cannot load %s as a package (%s), trying as module..',
                                mod_name, err)
                 load_it = (
