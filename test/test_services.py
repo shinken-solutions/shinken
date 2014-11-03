@@ -111,32 +111,38 @@ class TestService(ShinkenTest):
     def test_set_state_from_exit_status(self):
         svc = self.get_svc()
         # First OK
-        svc.set_state_from_exit_status(0)
+        c = Check('scheduled', 'foo', svc, 0) # Dummy check for the function
+        c.exit_status = 0
+        svc.set_state_from_exit_status(c)
         self.assert_(svc.state == 'OK')
         self.assert_(svc.state_id == 0)
         self.assert_(svc.is_state('OK') == True)
         self.assert_(svc.is_state('o') == True)
         # Then warning
-        svc.set_state_from_exit_status(1)
+        c.exit_status = 1
+        svc.set_state_from_exit_status(c)
         self.assert_(svc.state == 'WARNING')
         self.assert_(svc.state_id == 1)
         self.assert_(svc.is_state('WARNING') == True)
         self.assert_(svc.is_state('w') == True)
         # Then Critical
-        svc.set_state_from_exit_status(2)
+        c.exit_status = 2
+        svc.set_state_from_exit_status(c)
         self.assert_(svc.state == 'CRITICAL')
         self.assert_(svc.state_id == 2)
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
         # And unknown
-        svc.set_state_from_exit_status(3)
+        c.exit_status = 3
+        svc.set_state_from_exit_status(c)
         self.assert_(svc.state == 'UNKNOWN')
         self.assert_(svc.state_id == 3)
         self.assert_(svc.is_state('UNKNOWN') == True)
         self.assert_(svc.is_state('u') == True)
 
         # And something else :)
-        svc.set_state_from_exit_status(99)
+        c.exit_status = 99
+        svc.set_state_from_exit_status(c)
         self.assert_(svc.state == 'CRITICAL')
         self.assert_(svc.state_id == 2)
         self.assert_(svc.is_state('CRITICAL') == True)
