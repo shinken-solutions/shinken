@@ -697,10 +697,10 @@ class Host(SchedulingItem):
 
     # set the state in UP, DOWN, or UNDETERMINED
     # with the status of a check. Also update last_state
-    def set_state_from_exit_status(self, status):
+    def set_state_from_exit_status(self, chk):
         now = time.time()
         self.last_state_update = now
-
+        status = chk.exit_status
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
         # we can take current state. But if it's the case, the
@@ -712,12 +712,13 @@ class Host(SchedulingItem):
             self.last_state = self.state_before_impact
         else:
             self.last_state = self.state
-
         if status == 0 or (status == 1 and not cls.use_aggressive_host_checking):
             self.state = 'UP'
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
             state_code = 'u'
+            # we need to fake a good check exit code in case of warning and no aggressive
+            chk.exit_status = 0
         elif status in (2, 3) or (status == 1 and cls.use_aggressive_host_checking):
             self.state = 'DOWN'
             self.state_id = 1
