@@ -2,6 +2,27 @@
 Shinken ChangeLog
 #######################
 
+1.4.4 - 03/11/2014
+-------------------
+	CORE ENHANCEMENT (backport)
+	Enh : Doc - Sphinx theme and various clean
+	Enh : Test - Travis fixes
+
+	CORE FIXES (backport)
+	Fix : Warning state on a host is handled correctly (regarding aggressive option)
+
+	MODULE ENHANCEMENT (backport)
+	Add : Graphite -  Parameter to ignore latency for graphite
+	Add : Livestatus - Handle request in a different thread (Perf enhancement)
+	Add : Livestatus - Responses are streamed using generator functions (Avoid memory burst)
+	Enh : Sqlite - New select function to return a generator
+	Enh : Collectd - Clean buffer dict metric when values are no longer updated
+
+	MODULES FIXES (backport)
+	Fix : NRPE - Proper close of SSL connection (NRPE 1.15 compatibility)
+	Fix : Collectd - Handle cases when collectd client does not send every metrics in a single packet
+
+
 1.4.3 - 06/08/2014
 -------------------
 	CORE FIXES (backport)
@@ -53,7 +74,7 @@ Shinken ChangeLog
 	MODULES FIXES
 	Fix : Webui (layout)
 	Fix : Aws-Import-Arbiter error
-																				
+
 
 1.4   - 27/05/2013
 ------------------
