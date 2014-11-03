@@ -103,33 +103,40 @@ class TestConfig(ShinkenTest):
 
     def test_set_state_from_exit_status(self):
         hst = self.get_hst()
+        c = Check('scheduled', 'foo', hst, 0) # Dummy check for the function
+        c.exit_status = 0
         # First OK
-        hst.set_state_from_exit_status(0)
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'UP')
         self.assert_(hst.state_id == 0)
         self.assert_(hst.is_state('UP') == True)
         self.assert_(hst.is_state('o') == True)
         # Then warning
-        hst.set_state_from_exit_status(1)
+        c.exit_status = 1
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'UP')
         self.assert_(hst.state_id == 0)
         self.assert_(hst.is_state('UP') == True)
         self.assert_(hst.is_state('o') == True)
+        self.assert_(c.exit_status == 0)
         # Then Critical
-        hst.set_state_from_exit_status(2)
+        c.exit_status = 2
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
         # And unknown
-        hst.set_state_from_exit_status(3)
+        c.exit_status = 3
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
 
         # And something else :)
-        hst.set_state_from_exit_status(99)
+        c.exit_status = 99
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
@@ -137,7 +144,8 @@ class TestConfig(ShinkenTest):
 
         # And a special case: use_aggressive_host_checking
         hst.__class__.use_aggressive_host_checking = 1
-        hst.set_state_from_exit_status(1)
+        c.exit_status = 1
+        hst.set_state_from_exit_status(c)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)

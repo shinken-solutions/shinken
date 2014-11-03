@@ -779,7 +779,7 @@ class SchedulingItem(Item):
         # remember how we was before this check
         self.last_state_type = self.state_type
 
-        self.set_state_from_exit_status(c.exit_status)
+        self.set_state_from_exit_status(c)
 
         # we change the state, do whatever we are or not in
         # an impact mode, we can put it
