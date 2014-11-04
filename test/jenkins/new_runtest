@@ -144,6 +144,10 @@ function grab_modules {
             done
         fi
     done
+    # DIRTY HACK TO REMOVE
+    cp tmp/mod-livestatus/test/mock_livestatus.py tmp/mod-logstore-sqlite/test
+    cp tmp/mod-livestatus/test/mock_livestatus.py tmp/mod-logstore-mongodb/test
+
 }
 
 
