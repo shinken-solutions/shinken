@@ -58,7 +58,7 @@ class SatelliteLink(Item):
         'use_timezone':       StringProp(default='NOTSET', to_send=True),
         'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
         'satellitemap':       DictProp(default={}, elts_prop=AddrProp, to_send=True, override=True),
-        'use_ssl':            BoolProp(default=True, fill_brok=['full_status']),
+        'use_ssl':            BoolProp(default=False, fill_brok=['full_status']),
         'hard_ssl_name_check':BoolProp(default=True, fill_brok=['full_status']),
         'passive':            BoolProp(default=True, fill_brok=['full_status'], to_send=True),
     })
