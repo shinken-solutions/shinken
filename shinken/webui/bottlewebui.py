@@ -765,6 +765,8 @@ class Bottle(object):
         """ The bottle WSGI-interface. """
         try:
             environ['bottle.app'] = self
+            if environ.has_key('HTTP_X_FORWARDED_PROTO'):
+                environ['wsgi.url_scheme'] = environ['HTTP_X_FORWARDED_PROTO']
             request.bind(environ)
             response.bind()
             out = self._cast(self._handle(environ), request, response)
