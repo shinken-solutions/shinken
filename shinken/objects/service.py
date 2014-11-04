@@ -670,8 +670,7 @@ class Service(SchedulingItem):
 
     # Set state with status return by the check
     # and update flapping state
-    def set_state_from_exit_status(self, chk):
-        status = chk.exit_status
+    def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
 

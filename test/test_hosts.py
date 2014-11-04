@@ -26,7 +26,7 @@ import copy
 from shinken_test import *
 
 
-class TestConfig(ShinkenTest):
+class TestHost(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def get_hst(self):
@@ -38,6 +38,7 @@ class TestConfig(ShinkenTest):
         print hst.get_dbg_name()
         self.assert_(hst.get_name() == 'test_host_0')
         self.assert_(hst.get_dbg_name() == 'test_host_0')
+
 
     # getstate should be with all properties in dict class + id
     # check also the setstate
@@ -57,6 +58,7 @@ class TestConfig(ShinkenTest):
             ## print getattr(hst_copy, p)
             ## print getattr(hst, p)
             self.assert_(getattr(hst_copy, p) == getattr(hst, p))
+
 
     # Look if it can detect all incorrect cases
     def test_is_correct(self):
@@ -89,6 +91,7 @@ class TestConfig(ShinkenTest):
         hst.notification_interval = notification_interval
         self.assert_(hst.is_correct() == True)
 
+
     # Look for set/unset impacted states (unknown)
     def test_impact_state(self):
         hst = self.get_hst()
@@ -101,42 +104,40 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.state == ori_state)
         self.assert_(hst.state_id == ori_state_id)
 
-    def test_set_state_from_exit_status(self):
+
+    def test_states_from_exit_status(self):
         hst = self.get_hst()
-        c = Check('scheduled', 'foo', hst, 0) # Dummy check for the function
-        c.exit_status = 0
+
         # First OK
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 0, 'OK']])
         self.assert_(hst.state == 'UP')
         self.assert_(hst.state_id == 0)
         self.assert_(hst.is_state('UP') == True)
         self.assert_(hst.is_state('o') == True)
+
         # Then warning
-        c.exit_status = 1
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 1, 'WARNING']])
         self.assert_(hst.state == 'UP')
         self.assert_(hst.state_id == 0)
         self.assert_(hst.is_state('UP') == True)
         self.assert_(hst.is_state('o') == True)
-        self.assert_(c.exit_status == 0)
+
         # Then Critical
-        c.exit_status = 2
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 2, 'CRITICAL']])
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
+
         # And unknown
-        c.exit_status = 3
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 3, 'UNKNOWN']])
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
 
         # And something else :)
-        c.exit_status = 99
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 99, 'WTF THE PLUGIN DEV DID? :)']])
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
@@ -144,12 +145,12 @@ class TestConfig(ShinkenTest):
 
         # And a special case: use_aggressive_host_checking
         hst.__class__.use_aggressive_host_checking = True
-        c.exit_status = 1
-        hst.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[hst, 1, 'WARNING SHOULD GO DOWN']])
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
+
 
     def test_hostgroup(self):
         hg = self.sched.hostgroups.find_by_name("hostgroup_01")
@@ -157,6 +158,7 @@ class TestConfig(ShinkenTest):
         h = self.sched.hosts.find_by_name('test_host_0')
         self.assert_(h in hg.members)
         self.assert_(hg in h.hostgroups)
+
 
     def test_childs(self):
         h = self.sched.hosts.find_by_name('test_host_0')

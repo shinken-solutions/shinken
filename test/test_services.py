@@ -32,12 +32,14 @@ class TestService(ShinkenTest):
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
+
     # Look if get_*_name return the good result
     def test_get_name(self):
         svc = self.get_svc()
         print svc.get_dbg_name()
         self.assert_(svc.get_name() == 'test_ok_0')
         self.assert_(svc.get_dbg_name() == 'test_host_0/test_ok_0')
+
 
     # getstate should be with all properties in dict class + id
     # check also the setstate
@@ -57,6 +59,7 @@ class TestService(ShinkenTest):
             ## print getattr(svc_copy, p)
             ## print getattr(svc, p)
             self.assert_(getattr(svc_copy, p) == getattr(svc, p))
+
 
     # Look if it can detect all incorrect cases
     def test_is_correct(self):
@@ -89,6 +92,7 @@ class TestService(ShinkenTest):
         svc.notification_interval = notification_interval
         self.assert_(svc.is_correct() == True)
 
+
     # Look for set/unset impacted states (unknown)
     def test_impact_state(self):
         svc = self.get_svc()
@@ -108,51 +112,49 @@ class TestService(ShinkenTest):
         print 'Full name', svc.get_full_name()
         self.assert_(svc.display_name == 'test_ok_0')
 
-    def test_set_state_from_exit_status(self):
+    def test_states_from_exit_status(self):
         svc = self.get_svc()
+
         # First OK
-        c = Check('scheduled', 'foo', svc, 0) # Dummy check for the function
-        c.exit_status = 0
-        svc.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assert_(svc.state == 'OK')
         self.assert_(svc.state_id == 0)
         self.assert_(svc.is_state('OK') == True)
         self.assert_(svc.is_state('o') == True)
+
         # Then warning
-        c.exit_status = 1
-        svc.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[svc, 1, 'WARNING']])
         self.assert_(svc.state == 'WARNING')
         self.assert_(svc.state_id == 1)
         self.assert_(svc.is_state('WARNING') == True)
         self.assert_(svc.is_state('w') == True)
         # Then Critical
-        c.exit_status = 2
-        svc.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL']])
         self.assert_(svc.state == 'CRITICAL')
         self.assert_(svc.state_id == 2)
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
+
         # And unknown
-        c.exit_status = 3
-        svc.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[svc, 3, 'UNKNOWN']])
         self.assert_(svc.state == 'UNKNOWN')
         self.assert_(svc.state_id == 3)
         self.assert_(svc.is_state('UNKNOWN') == True)
         self.assert_(svc.is_state('u') == True)
 
         # And something else :)
-        c.exit_status = 99
-        svc.set_state_from_exit_status(c)
+        self.scheduler_loop(1, [[svc, 99, 'WTF return :)']])
         self.assert_(svc.state == 'CRITICAL')
         self.assert_(svc.state_id == 2)
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
 
+
     def test_business_impact_value(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         # This service inherit the improtance value from his father, 5
-        print "FUCK", svc.business_impact
         self.assert_(svc.business_impact == 5)
+
 
     # Look if the service is in the servicegroup
     def test_servicegroup(self):

@@ -818,6 +818,17 @@ class SchedulingItem(Item):
             if rm is not None:
                 c.exit_status = rm.module_return(c.exit_status)
 
+        # By design modulation: if we got an host, we should look at the 
+        # use_aggressive_host_checking flag we should module 1 (warning return):
+        # 1 & agressive => DOWN/2
+        # 1 & !agressive => UP/0
+        cls = self.__class__
+        if c.exit_status == 1 and self.__class__.my_type == 'host':
+            if cls.use_aggressive_host_checking:
+                c.exit_status = 2
+            else:
+                c.exit_status = 0        
+        
         # If we got a bad result on a normal check, and we have dep,
         # we raise dep checks
         # put the actual check in waitdep and we return all new checks
@@ -835,7 +846,7 @@ class SchedulingItem(Item):
         # remember how we was before this check
         self.last_state_type = self.state_type
 
-        self.set_state_from_exit_status(c)
+        self.set_state_from_exit_status(c.exit_status)
 
         # we change the state, do whatever we are or not in
         # an impact mode, we can put it
