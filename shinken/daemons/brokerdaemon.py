@@ -51,7 +51,7 @@ class IStats(Interface):
     doc = 'Get raw stats from the daemon'
     def get_raw_stats(self):
         app = self.app
-        res = {}
+        res = []
 
         insts = [inst for inst in app.modules_manager.instances if inst.is_external]
         for inst in insts:
