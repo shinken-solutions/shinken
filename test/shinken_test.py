@@ -14,6 +14,7 @@ import random
 import unittest
 import copy
 
+
 # import the shinken library from the parent directory
 import __import_shinken ; del __import_shinken
 
@@ -317,7 +318,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log'].encode("utf-8")
+                print "LOG:", brok.data['log'].encode(sys.stdout.encoding, errors='xmlcharrefreplace')
         print "--- logs >>>----------------------------------"
 
 
