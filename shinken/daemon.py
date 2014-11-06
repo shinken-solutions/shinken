@@ -107,6 +107,7 @@ class Interface(object):
     def __init__(self, app):
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
+        self.start_time = time.time()
 
     
     doc = 'Test the connexion to the daemon. Returns: pong'
@@ -115,6 +116,9 @@ class Interface(object):
     ping.need_lock = False
     ping.doc = doc
 
+    doc = 'Get the start time of the daemon'
+    def get_start_time(self):
+        return self.start_time
 
     doc = 'Get the current running id of the daemon (scheduler)'
     def get_running_id(self):
