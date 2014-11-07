@@ -5,6 +5,8 @@
 #
 
 import sys
+from sys import stdout
+
 import time
 import datetime
 import os
@@ -318,7 +320,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log'].encode(sys.stdout.encoding, errors='xmlcharrefreplace')
+                encoding = stdout.encoding or 'ascii'
+                print "LOG:", brok.data['log'].encode(encoding, errors='xmlcharrefreplace')
         print "--- logs >>>----------------------------------"
 
 
