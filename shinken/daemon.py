@@ -107,7 +107,7 @@ class Interface(object):
     def __init__(self, app):
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
-        self.start_time = time.time()
+        self.start_time = int(time.time())
 
     
     doc = 'Test the connexion to the daemon. Returns: pong'
