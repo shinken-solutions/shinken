@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../..'))
 import shinken
+from shinken.bin import VERSION
 
 # Fix for missing modules
 class Mock(object):
@@ -89,7 +90,7 @@ copyright = u'2013, Shinken Team'
 # built documents.
 #
 # The short X.Y version.
-version = '1.4'
+version = VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 
