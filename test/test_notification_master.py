@@ -23,7 +23,14 @@
 # This file is used to test reading and processing of config files
 
 
-from shinken_test import *
+import time
+import unittest
+
+
+from shinken.notification import Notification
+
+from shinken_test import ShinkenTest
+
 
 
 class TestMasterNotif(ShinkenTest):
@@ -31,7 +38,6 @@ class TestMasterNotif(ShinkenTest):
     # For a service, we generate a notification and a event handler.
     # Each one got a specific reactionner_tag that we will look for.
     def test_master_notif(self):
-        now = int(time.time())
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
         router.act_depend_of = []  # ignore the router
@@ -44,20 +50,33 @@ class TestMasterNotif(ShinkenTest):
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'BAD | value1=0 value2=0']])
 
-        self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
+        ### hack Notification.__init__ to save the newly created instances :
+        _new_notifs = []
+        _old_notif_init = Notification.__init__
+        def _mock_notif_init(self, *a, **kw):
+            _old_notif_init(self, *a, **kw)
+            _new_notifs.append(self) # save it!
+        Notification.__init__ = _mock_notif_init
+        try:
+            # this scheduler_loop will create a new notification:
+            self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
+        finally: # be courteous and always undo what we've mocked once we don't need  it anymore:
+            Notification.__init__ =  _old_notif_init
+        self.assertNotEqual(0, len(_new_notifs),
+                            "A Notification should have been created !")
+        guessed_notif = _new_notifs[0] # and we hope that it's the good one..
+        self.assertIs(guessed_notif, self.sched.actions.get(guessed_notif.id, None),
+                      "Our guessed notification does not match what's in scheduler actions dict !\n"
+                      "guessed_notif=[%s] sched.actions=%r" % (guessed_notif, self.sched.actions))
 
-        self.sched.actions[12].t_to_go = time.time()  #Hack to set t_to_go now, so that the notification is processed
+        guessed_notif.t_to_go = time.time()  # Hack to set t_to_go now, so that the notification is processed
 
         # Try to set master notif status to inpoller
         actions = self.sched.get_to_run_checks(False, True)
-
-        notif = self.sched.actions.values()[0]
-        
         # But no, still scheduled
-        self.assert_(notif.status == "scheduled")
-
+        self.assertEqual('scheduled', guessed_notif.status)
         # And still no action for our receivers
-        self.assert_(actions == [])
+        self.assertEqual([], actions)
 
 
 
