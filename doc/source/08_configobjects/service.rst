@@ -321,6 +321,41 @@ duplicate_foreach
   This is used to generate serveral service with only one service declaration.
   Shinken understands this statement as : "Create a service for earch key in the variable".
   Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a different check)
+  Moreover, one or several variables can be associated to each key. Then, values can be used in the service definition with $VALUE$ or $VALUEn$ macros.
+
+::
+
+  define host {
+    host_name    linux-server
+    ...
+    _partitions   var $(/var)$ root $(/)
+    _openvpns   vpn1  $(tun1)$$(10.8.0.1)$ vpn2 $(tun2)$$(192.168.3.254)$
+    ...
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     disk-$KEY$
+         check_command           check_disk!$VALUE$
+         ...
+         duplicate_foreach       _partitions
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     openvpn-$KEY$-check-interface
+         check_command           check_int!$VALUE1$
+         ...
+         duplicate_foreach       _openvpns
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     openvpn-$KEY$-check-gateway
+         check_command           check_ping!$VALUE2$
+         ...
+         duplicate_foreach       _openvpns
+  }
 
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
