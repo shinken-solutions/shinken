@@ -18,6 +18,9 @@ import copy
 import locale
 
 
+import unittest
+
+
 # import the shinken library from the parent directory
 import __import_shinken ; del __import_shinken
 

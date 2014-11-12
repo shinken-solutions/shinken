@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -29,12 +28,15 @@ import sys
 import traceback
 import cStringIO
 import imp
-import importlib
+
+
 from os.path import join, isdir, abspath, dirname
 from os import listdir
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
+from shinken.misc import importlib
+
 
 # We need to manage pre-2.0 module types with _ into the new 2.0 - mode
 def uniform_module_type(s):
@@ -79,7 +81,7 @@ class ModulesManager(object):
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
     def load(self):
-        if not self.modules_path in sys.path:
+        if self.modules_path not in sys.path:
             sys.path.append(self.modules_path)
 
         modules_files = [ fname
@@ -89,27 +91,13 @@ class ModulesManager(object):
         del self.imported_modules[:]
         for mod_name in modules_files:
             mod_file = abspath(join(self.modules_path, mod_name, 'module.py'))
-            mod_dir = dirname(mod_file)
 
             try:
                 mod = importlib.import_module('.module', mod_name)
             except Exception as err:
                 logger.warning('Cannot load %s as a package (%s), trying as module..',
                                mod_name, err)
-                load_it = (
-                    lambda: (
-                        # important, equivalent to import fname from module.py:
-                        imp.load_source(mod_name, mod_file) if os.path.exists(mod_file)
-                        else imp.load_compiled(mod_name, mod_file + 'c') ) )
-                # We add this dir to sys.path so the module can load local files too
-                sys.path.append(mod_dir)
-                try:
-                    load_it()
-                except Exception as err:
-                    logger.warning("Importing module %s failed: %s ; backtrace=%s",
-                                   mod_name, err, traceback.format_exc())
-                    sys.path.remove(mod_dir)
-                    continue
+                continue
             try:
                 is_our_type = self.modules_type in mod.properties['daemons']
             except Exception as err:
