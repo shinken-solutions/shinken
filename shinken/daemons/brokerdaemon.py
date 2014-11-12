@@ -710,11 +710,23 @@ class Broker(BaseSatellite):
         # We put to external queues broks that was not already send
         t0 = time.time()
         # We are sending broks as a big list, more efficient than one by one
-        queues = self.modules_manager.get_external_to_queues()
+        ext_modules = self.modules_manager.get_external_instances()
         to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
 
-        for q in queues:
-            q.put(to_send)
+        # Send our pack to all external modules to_q queue so they can get the wole packet
+        # beware, the sub-process/queue can be die/close, so we put to restart the whole module
+        # instead of killing ourself :)
+        for mod in ext_modules:
+            try:
+                mod.to_q.put(to_send)
+            except Exception, exp:
+                # first we must find the modules
+                logger.debug(str(exp.__dict__))
+                logger.warning("The mod %s queue raise an exception: %s, I'm tagging it to restart later", mod.get_name(), str(exp))
+                logger.warning("Exception type: %s", type(exp))
+                logger.warning("Back trace of this kill: %s", traceback.format_exc())
+                self.modules_manager.set_to_restart(mod)
+
 
         # No more need to send them
         for b in to_send:
