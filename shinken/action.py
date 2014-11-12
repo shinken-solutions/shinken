@@ -56,7 +56,7 @@ def no_block_read(output):
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     try:
         return output.read()
-    except:
+    except Exception:
         return ''
 
 
@@ -333,7 +333,7 @@ if os.name != 'nt':
             for fd in [self.process.stdout, self.process.stderr]:
                 try:
                     fd.close()
-                except:
+                except Exception:
                     pass
 
 

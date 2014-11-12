@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if os.path.exists(opts.database):
         try:
             os.stat(opts.archive_path)
-        except:
+        except Exception:
             os.mkdir(opts.archive_path)
         dbh = LiveStatusDb(opts.database, opts.archive_path, 3600)
         dbh.log_db_do_archive()

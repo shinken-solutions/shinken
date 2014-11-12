@@ -171,7 +171,7 @@ class BaseModule(object):
         # start
         try:
             del self.properties['process']
-        except:
+        except KeyError:
             pass
 
         p.start()
@@ -268,7 +268,7 @@ class BaseModule(object):
         try:
             from setproctitle import setproctitle
             setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
-        except:
+        except Exception:
             pass
 
     def _main(self):

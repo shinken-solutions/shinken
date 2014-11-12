@@ -148,7 +148,7 @@ class LogCollectMixin:
             f.close()
             try:
                 os.remove(self.logfile_name)
-            except : # On windows, the file is still lock. But should be close!?!
+            except Exception: # On windows, the file is still lock. But should be close!?!
                 pass
         else:
             filelogs = None

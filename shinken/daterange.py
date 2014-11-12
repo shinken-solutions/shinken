@@ -60,7 +60,7 @@ def find_day_by_weekday_offset(year, month, weekday, offset):
             if nb_found == offset:
                 return cal[i][weekday_id]
         return None
-    except:
+    except Exception:
         return None
 
 
@@ -148,7 +148,7 @@ class Daterange:
     def get_month_id(cls, month):
         try:
             return Daterange.months[month]
-        except:
+        except Exception:
             return None
     get_month_id = classmethod(get_month_id)
 
@@ -164,7 +164,7 @@ class Daterange:
     def get_weekday_id(cls, weekday):
         try:
             return Daterange.weekdays[weekday]
-        except:
+        except Exception:
             return None
     get_weekday_id = classmethod(get_weekday_id)
 

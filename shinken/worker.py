@@ -278,7 +278,7 @@ class Worker:
                 if cmsg.get_type() == 'Die':
                     logger.debug("[%d] Dad say we are dying...", self.id)
                     break
-            except:
+            except Exception:
                 pass
 
             # Look if we are dying, and if we finish all current checks
@@ -300,6 +300,6 @@ class Worker:
         try:
             from setproctitle import setproctitle
             setproctitle("shinken-%s worker" % self.loaded_into)
-        except:
+        except Exception:
             pass
 

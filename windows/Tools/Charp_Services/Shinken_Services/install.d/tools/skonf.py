@@ -270,7 +270,7 @@ def domacros(configfile, args=[]):
         fd = open(configfile, 'r')
         data = map(string.strip, fd.readlines())
         fd.close()
-    except:
+    except Exception:
         return (False, "Error while reading macros file")
 
     authfile = ""
@@ -559,7 +559,7 @@ def getauthdata(authfile):
                     return "There was an error in the authentication file at line: %s" % (line)
                 auth[result.group("address")] = {"login": result.group("login"), "password": result.group("password")}
         return (True, auth)
-    except:
+    except Exception:
         return (False, "Error while loading authentication data")
 
 
@@ -588,7 +588,7 @@ def sync(config, configfile, authfile):
                 ftp.put(configfile, configfile)
                 ftp.close()
                 ssh.close()
-    except:
+    except Exception:
         return (False, "There was an error trying to push configuration to %s" % (address))
 
     return (True, addresses)
@@ -722,7 +722,7 @@ def addobject(config, objectype, directive):
         for pair in directive.split(','):
             (d, v) = pair.split('=')
             directives[d] = v
-    except:
+    except Exception:
         print "An unrecoverable error occured while checking directives"
         sys.exit(2)
 
@@ -835,7 +835,7 @@ def getdirective(config, objectype, directive, filters):
                 return (False, "Filters not matched")
         else:
             return (False, "%s not found" % (objectype))
-    except:
+    except Exception:
         return (False, "Unknown error in getdirective")
 
 
@@ -961,7 +961,7 @@ def loadconfig(configfile):
         r = c.read_config(configfile)
         b = c.read_config_buf(r)
         return (True, b)
-    except:
+    except Exception:
         return (False, "There was an error reading the configuration file")
 
 if __name__ == "__main__":

@@ -124,7 +124,7 @@ class CherryPyBackend(object):
         finally:
             try:
                 self.srv.stop()
-            except:
+            except Exception:
                 pass
 
 
@@ -192,7 +192,7 @@ class WSGIREFBackend(object):
         for s in self.get_sockets():
             try:
                 s.close()
-            except:
+            except Exception:
                 pass
             self.srv.socket = None
 

@@ -83,7 +83,7 @@ class SatelliteLink(Item):
         if hasattr(self, 'port'):
             try:
                 self.arb_satmap['port'] = int(self.port)
-            except:
+            except Exception:
                 pass
 
     

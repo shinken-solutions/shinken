@@ -151,7 +151,7 @@ def jsonify_r(obj):
                     if t == 'CommandCall':
                         try:
                             lst.append(_t.call)
-                        except:
+                        except Exception:
                             pass
                         continue
                     if t and hasattr(_t, t+'_name'):
@@ -165,7 +165,7 @@ def jsonify_r(obj):
                 if t == 'CommandCall':
                     try:
                         res[prop] = v.call
-                    except:
+                    except Exception:
                         pass
                     continue
                 if t and hasattr(v, t+'_name'):
@@ -711,7 +711,7 @@ def expect_file_dirs(root, path):
         if not os.path.exists(_d):
             try:
                 os.mkdir(_d)
-            except:
+            except Exception:
                 return False
         tmp_dir = _d
     return True

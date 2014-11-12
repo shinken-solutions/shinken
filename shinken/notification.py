@@ -124,11 +124,11 @@ class Notification(Action):
         # Set host_name and description from the ref
         try:
             self.host_name = self.ref.host_name
-        except:
+        except Exception:
             self.host_name = host_name
         try:
             self.service_description = self.ref.service_description
-        except:
+        except Exception:
             self.service_description = service_description
 
         self.env = env

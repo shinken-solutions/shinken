@@ -139,7 +139,7 @@ class Dummy_poller(BaseModule):
                 if cmsg.get_type() == 'Die':
                     logger.info("[Dummy Poller] %d : Dad say we are dying...", self.id)
                     break
-            except:
+            except Exception:
                 pass
 
             timeout -= time.time() - begin
