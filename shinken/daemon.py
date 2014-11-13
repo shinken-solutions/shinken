@@ -106,8 +106,8 @@ class Interface(object):
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
         self.app = app
-        self.running_id = "%d.%d" % (time.time(), random.random())
         self.start_time = int(time.time())
+        self.running_id = "%d.%d" % (self.start_time, random.random())
 
     
     doc = 'Test the connexion to the daemon. Returns: pong'
