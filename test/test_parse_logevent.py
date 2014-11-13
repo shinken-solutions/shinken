@@ -102,6 +102,33 @@ class TestParseLogEvent(ShinkenTest):
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
 
+    def test_host_flapping(self):
+        log = '[1375301662] SERVICE FLAPPING ALERT: testhost;check_ssh;STARTED; Service appears to have started flapping (24.2% change >= 20.0% threshold)'
+        expected = {
+            'alert_type': 'SERVICE',
+            'event_type': 'FLAPPING',
+            'hostname': 'testhost',
+            'output': ' Service appears to have started flapping (24.2% change >= 20.0% threshold)',
+            'service_desc': 'check_ssh',
+            'state': 'STARTED',
+            'time': 1375301662
+        }
+        event = LogEvent(log)
+        self.assertEqual(event.data, expected)
+
+    def test_service_flapping(self):
+        log = '[1375301662] HOST FLAPPING ALERT: hostbw;STARTED; Host appears to have started flapping (20.1% change > 20.0% threshold)'
+        expected = {
+            'alert_type': 'HOST',
+            'event_type': 'FLAPPING',
+            'hostname': 'hostbw',
+            'output': ' Host appears to have started flapping (20.1% change > 20.0% threshold)',
+            'service_desc': None,
+            'state': 'STARTED',
+            'time': 1375301662
+        }
+        event = LogEvent(log)
+        self.assertEqual(event.data, expected)
 
 if __name__ == '__main__':
     unittest.main()
