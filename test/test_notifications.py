@@ -204,13 +204,13 @@ class TestNotif(ShinkenTest):
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=1)
         print "Counted actions", self.count_actions()
-        self.assert_(self.count_actions() == 2)
+        self.assertEqual(2, self.count_actions())
         # 1 master, 1 child
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         self.show_actions()
-        self.assert_(len(svc.notifications_in_progress) == 1)  # master is zombieand removed_from_in_progress
+        self.assertEqual(1, len(svc.notifications_in_progress))  # master is zombieand removed_from_in_progress
         self.show_logs()
-        self.assert_(self.log_match(1, 'SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assertTrue(self.log_match(1, 'SERVICE NOTIFICATION.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_actions()
         #-----------------------------------------------------------------
@@ -219,13 +219,13 @@ class TestNotif(ShinkenTest):
         # current_notification_number was reset to 0
         #-----------------------------------------------------------------
         self.scheduler_loop(2, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=1)
-        self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
-        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
-        self.assert_(self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
+        self.assertTrue(self.log_match(1, 'SERVICE ALERT.*;OK;'))
+        self.assertTrue(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
+        self.assertTrue(self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
         # evt reap 2 loops
-        self.assert_(svc.current_notification_number == 0)
-        self.assert_(len(svc.notifications_in_progress) == 0)
-        self.assert_(len(svc.notified_contacts) == 0)
+        self.assertEqual(0, svc.current_notification_number)
+        self.assertEqual(0, len(svc.notifications_in_progress))
+        self.assertEqual(0, len(svc.notified_contacts))
         #self.assert_(self.count_actions() == 2)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
