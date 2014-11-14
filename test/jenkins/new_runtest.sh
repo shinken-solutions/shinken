@@ -28,7 +28,10 @@ COVERAGE=$3
 PYLINT=$4
 PEP8=$5
 
-if [[ "$(echo $1 | tr [A-Z] [a-z])" == "long" ]]; then
+if test "$6"
+then
+    REGEXPCMD="$6"
+elif [[ "$(echo $1 | tr [A-Z] [a-z])" == "long" ]]; then
     REGEXPCMD=";" # Mod is long, we will take all tests
 else
     REGEXPCMD="| grep -v test_long.*\.py" # Mod is normal, we will skip long tests

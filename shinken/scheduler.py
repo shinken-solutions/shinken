@@ -49,7 +49,7 @@ from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.stats import statsmgr
 from shinken.misc.common import DICT_MODATTR
 
-class Scheduler:
+class Scheduler(object):
     """Please Add a Docstring to describe the class here"""
 
     def __init__(self, scheduler_daemon):

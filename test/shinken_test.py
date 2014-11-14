@@ -5,7 +5,7 @@
 #
 
 import sys
-from sys import stdout
+from sys import __stdout__
 
 import time
 import datetime
@@ -15,6 +15,7 @@ import re
 import random
 import unittest
 import copy
+import locale
 
 
 # import the shinken library from the parent directory
@@ -69,6 +70,61 @@ class __DUMMY:
 logger.load_obj(__DUMMY())
 logger.setLevel(ERROR)
 
+#############################################################################
+
+def guess_sys_stdout_encoding():
+    ''' Return the best guessed encoding to be used for printing on sys.stdout. '''
+    return (
+           getattr(sys.stdout, 'encoding', None)
+        or getattr(__stdout__, 'encoding', None)
+        or locale.getpreferredencoding()
+        or sys.getdefaultencoding()
+        or 'ascii'
+    )
+
+
+
+def safe_print(*args, **kw):
+    """" "print" args to sys.stdout,
+    If some of the args aren't unicode then convert them first to unicode,
+        using keyword argument 'in_encoding' if provided (else default to UTF8)
+        and replacing bad encoded bytes.
+    Write to stdout using 'out_encoding' if provided else best guessed encoding,
+        doing xmlcharrefreplace on errors.
+    """
+    in_bytes_encoding = kw.pop('in_encoding', 'UTF-8')
+    out_encoding = kw.pop('out_encoding', guess_sys_stdout_encoding())
+    if kw:
+        raise ValueError('unhandled named/keyword argument(s): %r' % kw)
+    #
+    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+                                else
+                            unicode(str(a), in_bytes_encoding, 'replace')
+                        for a in args )
+
+    possible_codings = ( out_encoding, )
+    if out_encoding != 'ascii':
+        possible_codings += ( 'ascii', )
+
+    for coding in possible_codings:
+        data = u' '.join(make_in_data_gen()).encode(coding, errors='xmlcharrefreplace')
+        try:
+            sys.stdout.write(data)
+            break
+        except UnicodeError as err:
+            # there might still have some problem with the underlying sys.stdout.
+            # it might be a StringIO whose content could be decoded/encoded in this same process
+            # and have encode/decode errors because we could have guessed a bad encoding with it.
+            # in such case fallback on 'ascii'
+            if coding == 'ascii':
+                raise
+            sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
+                coding, err))
+    sys.stdout.write(b'\n')
+
+
+
+#############################################################################
 
 # We overwrite the functions time() and sleep()
 # This way we can modify sleep() so that it immediately returns although
@@ -320,8 +376,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                encoding = stdout.encoding or 'ascii'
-                print "LOG:", brok.data['log'].encode(encoding, errors='xmlcharrefreplace')
+                safe_print("LOG: ", brok.data['log'])
+
         print "--- logs >>>----------------------------------"
 
 
