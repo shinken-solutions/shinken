@@ -110,7 +110,7 @@ def safe_print(*args, **kw):
         possible_codings += ( 'ascii', )
 
     for coding in possible_codings:
-        data = u' '.join(make_in_data_gen()).encode(coding, errors='xmlcharrefreplace')
+        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
         try:
             sys.stdout.write(data)
             break
