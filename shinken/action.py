@@ -220,7 +220,7 @@ class __Action(object):
         elif ('sh: -c: line 0: unexpected EOF while looking for matching'
               in self.stderrdata
               or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
-              or 'sh: Syntax error: Unterminated quoted string'
+              or 'Syntax error: Unterminated quoted string'
               in self.stderrdata):
             # Very, very ugly. But subprocess._handle_exitstatus does
             # not see a difference between a regular "exit 1" and a
@@ -228,6 +228,7 @@ class __Action(object):
             # a difference. (exit_group(1) vs. exit_group(257))
             self.stdoutdata = self.stdoutdata + self.stderrdata
             self.exit_status = 3
+
         # Now grep what we want in the output
         self.get_outputs(self.stdoutdata, max_plugins_output_length)
 

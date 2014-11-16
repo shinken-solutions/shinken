@@ -24,14 +24,16 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import imp
-import importlib
 import os
 import sys
-from os.path import abspath, join, exists
+import imp
 import traceback
+from os.path import abspath, join, exists
+
 
 from shinken.log import logger
+from shinken.misc import importlib
+
 
 class ModulesContext(object):
     def __init__(self):
@@ -49,25 +51,9 @@ class ModulesContext(object):
             sys.path.append(self.modules_dir)
         try:
             return importlib.import_module('.module', mod_name)
-        except ImportError as err:
+        except Exception as err:
             logger.warning('Cannot import %s as a package (%s) ; trying as bare module..',
                            mod_name, err)
-        mod_dir = abspath(join(self.modules_dir, mod_name))
-        mod_file = join(mod_dir, 'module.py')
-        if os.path.exists(mod_file):
-            # important, equivalent to import fname from module.py:
-            load_it = lambda: imp.load_source(mod_name, mod_file)
-        else:
-            load_it = lambda: imp.load_compiled(mod_name, mod_file+'c')
-        # We add this dir to sys.path so the module can load local files too
-        if mod_dir not in sys.path:
-            sys.path.append(mod_dir)
-        try:
-            return load_it()
-        except Exception as err:
-            logger.warning("Importing module %s failed: %s ; backtrace=%s",
-                           mod_name, err, traceback.format_exc())
-            sys.path.remove(mod_dir)
             raise
 
 
