@@ -11,7 +11,7 @@ install:
 # command to run tests
 script:
   - cd test
-  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999 --with-coverage --cover-package=shinken
+  - nosetests -xv --process-timeout=999999999 --with-coverage --cover-package=shinken
 # specific call to launch coverage data into coveralls.io
 after_success:
   coveralls
