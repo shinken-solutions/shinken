@@ -43,7 +43,6 @@ elif python_version >= (3,):
 
 
 
-
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
 def read(fname):
