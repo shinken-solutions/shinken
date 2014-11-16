@@ -6,8 +6,12 @@ python:
 # command to install dependencies
 install:
   - "pip install -r shinken/dependencies"
+  - "pip install coveralls"
   - "./bin/preparedev"
 # command to run tests
 script:
   - cd test
-  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999
+  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999 --with-coverage --cover-package=shinken
+# specific call to launch coverage data into coveralls.io
+after_success:
+  coveralls
