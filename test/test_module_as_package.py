@@ -2,13 +2,11 @@
 
 from os.path import abspath, dirname, join
 
+from shinken_test import unittest, ShinkenTest
+
 from shinken.objects.module import Module
 from shinken.modulesmanager import ModulesManager
 
-from shinken_test import (
-    unittest,
-    ShinkenTest,
-)
 
 
 modules_dir = join(dirname(abspath(__file__)), 'test_module_as_package')

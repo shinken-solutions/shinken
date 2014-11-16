@@ -27,9 +27,9 @@ import time
 import unittest
 
 
-from shinken.notification import Notification
 
 from shinken_test import ShinkenTest
+from shinken.notification import Notification
 
 
 
