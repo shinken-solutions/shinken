@@ -6,6 +6,7 @@
 
 import sys
 from sys import __stdout__
+from functools import partial
 
 import time
 import datetime
@@ -15,7 +16,6 @@ import re
 import random
 import copy
 import locale
-
 
 import unittest2 as unittest
 
@@ -469,18 +469,26 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
                                "broks=%r" % (index, pattern, broks))
 
 
-    def any_log_match(self, pattern):
+    def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
-        if hasattr(self, "sched"):
-            broks = self.sched.broks
-        else:
-            broks = self.broks
-        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
+        broks = getattr(self.sched, 'broks', self.broks)
+        broks = sorted(broks.values(), lambda x, y: x.id - y.id)
+        for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
                 if re.search(regex, brok.data['log']):
-                    return True
-        return False
+                    self.assertTrue(not assert_not,
+                                    "Found matching log line:\n"
+                                    "pattern = %r\nbrok log = %r" % (pattern, brok.data['log'])
+                    )
+                    return
+        self.assertTrue(assert_not,
+            "No matching log line found:\n"
+            "pattern = %r\n" "broks = %r" % (pattern, broks)
+        )
+
+    any_log_match = partial(_any_log_match, assert_not=False)
+    no_log_match = partial(_any_log_match, assert_not=True)
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
