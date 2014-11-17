@@ -348,7 +348,7 @@ class TestNotif(ShinkenTest):
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART')
-        self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
@@ -466,7 +466,7 @@ class TestNotif(ShinkenTest):
 
         # I do not want a notification of a recovery because
         # the user did not have the notif first!
-        self.assert_(self.no_log_match('notify-service'))
+        self.no_log_match('notify-service')
         self.show_and_clear_logs()
         self.show_and_clear_actions()
         self.assertEqual(0, svc.current_notification_number)
@@ -524,10 +524,10 @@ class TestNotif(ShinkenTest):
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.any_log_match('SERVICE DOWNTIME ALERT.*;STARTED')
-        self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
         # To get out of the DT.
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=2)
-        self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
         self.assertEqual(1, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
