@@ -58,7 +58,7 @@ class TestContactDowntime(ShinkenTest):
         # We loop, the downtime wil be check and activate
         self.scheduler_loop(1, [[svc, 0, 'OK'], [host, 0, 'UP']])
 
-        self.any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
+        self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
         self.show_and_clear_logs()
 
         print "downtime was scheduled. check its activity and the comment\n"*5
@@ -74,7 +74,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
         # Now we short the downtime a lot so it will be stop at now + 1 sec.
@@ -86,7 +86,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(1, [])
 
         # So we should be out now, with a log
-        self.any_log_match('CONTACT DOWNTIME ALERT.*;STOPPED')
+        self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STOPPED')
         self.show_and_clear_logs()
 
         print "\n\nDowntime was ended. Check it is really stopped"
@@ -101,7 +101,7 @@ class TestContactDowntime(ShinkenTest):
         # raise notif during a downtime for this contact
         time.sleep(1)
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
-        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
         for n in svc.notifications_in_progress.values():
@@ -139,7 +139,7 @@ class TestContactDowntime(ShinkenTest):
         # We loop, the downtime wil be check and activate
         self.scheduler_loop(1, [[svc, 0, 'OK'], [host, 0, 'UP']])
 
-        self.any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
+        self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
         self.show_and_clear_logs()
 
         print "downtime was scheduled. check its activity and the comment"
@@ -156,7 +156,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
         downtime_id = test_contact.downtimes[0].id
@@ -171,7 +171,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(1, [])
 
         # So we should be out now, with a log
-        self.any_log_match('CONTACT DOWNTIME ALERT.*;CANCELLED')
+        self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;CANCELLED')
         self.show_and_clear_logs()
 
         print "Downtime was cancelled"
@@ -183,7 +183,7 @@ class TestContactDowntime(ShinkenTest):
         # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
-        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
 

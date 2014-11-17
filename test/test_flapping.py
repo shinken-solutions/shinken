@@ -66,8 +66,8 @@ class TestFlapping(ShinkenTest):
         # Should get in flapping now
         self.assert_(svc.is_flapping)
         # and get a log about it
-        self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
-        self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # Now we put it as back :)
         # 10 is not enouth to get back as normal
@@ -81,8 +81,8 @@ class TestFlapping(ShinkenTest):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print "In flapping?", svc.is_flapping
         self.assert_(not svc.is_flapping)
-        self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED')
-        self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP')
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STOPPED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP')
 
         ############ Now get back in flap, and try the exteral commands change
 
@@ -104,8 +104,8 @@ class TestFlapping(ShinkenTest):
         # Should get in flapping now
         self.assert_(svc.is_flapping)
         # and get a log about it
-        self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
-        self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_FLAP_DETECTION" % int(time.time())
@@ -136,8 +136,8 @@ class TestFlapping(ShinkenTest):
         # Should get in flapping now
         self.assert_(svc.is_flapping)
         # and get a log about it
-        self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
-        self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())

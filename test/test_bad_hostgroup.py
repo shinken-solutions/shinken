@@ -31,8 +31,8 @@ class TestBadHostGroupConf(ShinkenTest):
 
     def test_bad_conf(self):
         self.assert_(not self.conf.conf_is_correct)
-        self.any_log_match("itemgroup::.* as hostgroup, got unknown member BADMEMBERHG")
-        self.no_log_match("itemgroup::.* as servicegroup, got unknown member BADMEMBERHG")
+        self.assert_any_log_match("itemgroup::.* as hostgroup, got unknown member BADMEMBERHG")
+        self.assert_no_log_match("itemgroup::.* as servicegroup, got unknown member BADMEMBERHG")
 
 
 if __name__ == '__main__':

@@ -49,7 +49,7 @@ class TestConfig(ShinkenTest):
 
         self.scheduler_loop(5, [[svc, 2, 'CRITICAL']])
         # We should NOT see any event hnalder here :)
-        self.no_log_match('SERVICE EVENT HANDLER')
+        self.assert_no_log_match('SERVICE EVENT HANDLER')
         print "MY Actions", self.sched.actions
 
         # And now we ask for a launch in manual
@@ -58,7 +58,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.any_log_match('SERVICE EVENT HANDLER')
+        self.assert_any_log_match('SERVICE EVENT HANDLER')
 
 
 

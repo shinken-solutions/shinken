@@ -487,8 +487,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
             "pattern = %r\n" "broks = %r" % (pattern, broks)
         )
 
-    any_log_match = partial(_any_log_match, assert_not=False)
-    no_log_match = partial(_any_log_match, assert_not=True)
+    assert_any_log_match = partial(_any_log_match, assert_not=False)
+    assert_no_log_match = partial(_any_log_match, assert_not=True)
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)

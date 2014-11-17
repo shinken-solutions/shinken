@@ -40,20 +40,20 @@ class TestTPStateLog(ShinkenTest):
 
         self.assertIsNot(tp, None)
         tp.check_and_log_activation_change()
-        self.any_log_match("TIMEPERIOD TRANSITION: 24x7;-1;1")
+        self.assert_any_log_match("TIMEPERIOD TRANSITION: 24x7;-1;1")
         self.show_and_clear_logs()
 
         # Now make this tp unable to be active again by removing al it's daterange:p
         dr = tp.dateranges
         tp.dateranges = []
         tp.check_and_log_activation_change()
-        self.any_log_match("TIMEPERIOD TRANSITION: 24x7;1;0")
+        self.assert_any_log_match("TIMEPERIOD TRANSITION: 24x7;1;0")
         self.show_and_clear_logs()
 
         # Ok, let get back to work :)
         tp.dateranges = dr
         tp.check_and_log_activation_change()
-        self.any_log_match("TIMEPERIOD TRANSITION: 24x7;0;1")
+        self.assert_any_log_match("TIMEPERIOD TRANSITION: 24x7;0;1")
         self.show_and_clear_logs()
 
 

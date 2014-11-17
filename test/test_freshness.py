@@ -74,7 +74,7 @@ class TestFreshness(ShinkenTest):
         svc.do_check_freshness()
         self.assertEqual(1, len(svc.actions))
         # And we check for the message in the log too
-        self.any_log_match('The results of service.*')
+        self.assert_any_log_match('The results of service.*')
 
 
 if __name__ == '__main__':

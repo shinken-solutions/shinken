@@ -68,7 +68,7 @@ class TestOrphaned(ShinkenTest):
             self.assertEqual('scheduled', c.status)
 
         # And we correctly raise the log
-        self.any_log_match('actions never came back for the satellite')
+        self.assert_any_log_match('actions never came back for the satellite')
 
 
 if __name__ == '__main__':

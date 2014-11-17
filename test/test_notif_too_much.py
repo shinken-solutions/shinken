@@ -58,8 +58,8 @@ class TestNotifTooMuch(ShinkenTest):
 
         # We should NOT see a send for the notify-service2 call because it's the good contact
         # but NOT the good period for this notifways. So 24x7 ok, not the never :)
-        self.any_log_match('SERVICE NOTIFICATION.*;notify-service')
-        self.no_log_match('SERVICE NOTIFICATION.*;notify-service2')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;notify-service')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;notify-service2')
 
 
 

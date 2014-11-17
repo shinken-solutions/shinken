@@ -114,7 +114,7 @@ class TestProblemImpact(ShinkenTest):
         # Should have host notification, but it's not so simple:
         # our contact say: not under 5, and our hosts are 2. But
         # the impacts have huge business_impact, so the hosts gain such business_impact
-        self.any_log_match('HOST NOTIFICATION.*;')
+        self.assert_any_log_match('HOST NOTIFICATION.*;')
         self.show_and_clear_logs()
 
 
@@ -282,7 +282,7 @@ class TestProblemImpact(ShinkenTest):
         # Should have host notification, but it's not so simple:
         # our contact say: not under 5, and our hosts are 2. And here
         # the business_impact was still low for our test
-        self.no_log_match('HOST NOTIFICATION.*;')
+        self.assert_no_log_match('HOST NOTIFICATION.*;')
         self.show_and_clear_logs()
 
 
