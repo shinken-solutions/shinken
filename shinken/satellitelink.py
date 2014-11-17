@@ -45,7 +45,7 @@ class SatelliteLink(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'address':         StringProp(fill_brok=['full_status']),
+        'address':         StringProp(default='localhost', fill_brok=['full_status']),
         'timeout':         IntegerProp(default=3, fill_brok=['full_status']),
         'data_timeout':    IntegerProp(default=120, fill_brok=['full_status']),
         'check_interval':  IntegerProp(default=60, fill_brok=['full_status']),

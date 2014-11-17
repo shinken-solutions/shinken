@@ -1292,7 +1292,6 @@ class Items(object):
                     continue
 
                 plug = modules.find_by_name(plug_name)
-                print plug
                 if plug is not None:
                     new_modules.append(plug)
                 else:

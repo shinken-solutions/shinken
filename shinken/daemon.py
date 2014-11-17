@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -38,25 +37,22 @@ import logging
 import inspect
 
 # Try to see if we are in an android device or not
-is_android = True
 try:
     import android
+    is_android = True
 except ImportError:
     is_android = False
-
-if not is_android:
-    from multiprocessing import Queue, Manager, active_children, cpu_count
     from multiprocessing.managers import SyncManager
-else:
-    from multiprocessing import active_children
 
-import http_daemon
+
+import shinken.http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
+from shinken.misc.common import setproctitle
 
 
 try:
@@ -64,14 +60,11 @@ try:
     from pwd import getpwnam
     from grp import getgrnam, getgrall
 
-
     def get_cur_user():
         return pwd.getpwuid(os.getuid()).pw_name
 
-
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
-
 
     def get_all_groups():
         return getgrall()
@@ -80,10 +73,8 @@ except ImportError, exp:  # Like in nt system or Android
     def get_cur_user():
         return "shinken"
 
-
     def get_cur_group():
         return "shinken"
-
 
     def get_all_groups():
         return []
@@ -313,7 +304,7 @@ class Daemon(object):
         self.unlink()
         self.do_stop()
         # Brok facilities are no longer available simply print the message to STDOUT
-        print ("Stopping daemon. Exiting", )
+        print("Stopping daemon. Exiting")
         sys.exit(0)
 
 
@@ -577,6 +568,35 @@ class Daemon(object):
         for s in self.debug_output:
             logger.info(s)
         del self.debug_output
+        self.set_proctitle()
+
+
+    if is_android:
+        def _create_manager(self):
+            pass
+    else:
+        # The Manager is a sub-process, so we must be sure it won't have
+        # a socket of your http server alive
+        def _create_manager(self):
+            manager = SyncManager(('127.0.0.1', 0))
+            def close_http_daemon(daemon):
+                try:
+                    # Be sure to release the lock so there won't be lock in shutdown phase
+                    daemon.lock.release()
+                except Exception, exp:
+                    pass
+                daemon.shutdown()
+            # Some multiprocessing lib got problems with start() that cannot take args
+            # so we must look at it before
+            startargs = inspect.getargspec(manager.start)
+            # startargs[0] will be ['self'] if old multiprocessing lib
+            # and ['self', 'initializer', 'initargs'] in newer ones
+            # note: windows do not like pickle http_daemon...
+            if os.name != 'nt' and len(startargs[0]) > 1:
+                manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            else:
+                manager.start()
+            return manager
 
 
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
@@ -611,31 +631,7 @@ class Daemon(object):
 
         # Now we can start our Manager
         # interprocess things. It's important!
-        if is_android:
-            self.manager = None
-        else:
-            # The Manager is a sub-process, so we must be sure it won't have
-            # a socket of your http server alive
-            self.manager = SyncManager(('127.0.0.1',0))
-            def close_http_daemon(daemon):
-                try:
-                    # Be sure to release the lock so there won't be lock in shutdown phase
-                    daemon.lock.release()
-                except Exception, exp:
-                    pass
-                daemon.shutdown()
-            # Some multiprocessing lib got problems with start() that cannot take args
-            # so we must look at it before
-            startargs = inspect.getargspec(self.manager.start)
-            # startargs[0] will be ['self'] if old multiprocessing lib
-            # and ['self', 'initializer', 'initargs'] in newer ones
-            # note: windows do not like pickle http_daemon...
-            if os.name != 'nt' and len(startargs[0]) > 1:
-                self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
-            else:
-                self.manager.start()
-            # Keep this daemon in the http_daemn module
-        # Will be add to the modules manager later
+        self.manager = self._create_manager()
 
         # We can start our stats thread but after the double fork() call and if we are not in
         # a test launch (time.time() is hooked and will do BIG problems there)
@@ -682,8 +678,10 @@ class Daemon(object):
                 logger.info("Enabling hard SSL server name verification")
 
         # Let's create the HTTPDaemon, it will be exec after
-        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
-        http_daemon.daemon_inst = self.http_daemon
+        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key,
+                                      ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
+        # TODO: fix this "hack" :
+        shinken.http_daemon.daemon_inst = self.http_daemon
 
     # Global loop part
     def get_socks_activity(self, socks, timeout):
@@ -721,7 +719,6 @@ class Daemon(object):
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
-        act = active_children()
         self.modules_manager.check_alive_instances()
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
@@ -865,6 +862,8 @@ class Daemon(object):
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)
 
+    def set_proctitle(self):
+        setproctitle("shinken-%s" % self.name)
 
     def get_header(self):
         return ["Shinken %s" % VERSION,

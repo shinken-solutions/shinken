@@ -63,3 +63,8 @@ DICT_MODATTR = {
     "notification_period": ModAttr("MODATTR_NOTIFICATION_TIMEPERIOD", "notification_period", 65536),
 
 }
+
+try:
+    from setproctitle import setproctitle
+except ImportError as err:
+    setproctitle = lambda s: None
