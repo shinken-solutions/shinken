@@ -91,7 +91,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
         # We check if we really notify the level1
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;')
         self.show_and_clear_logs()
         #self.show_and_clear_actions()
         self.show_actions()
@@ -113,7 +113,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
         # Now we raise the notif number of 2, so we can escalade
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
@@ -122,32 +122,32 @@ class TestEscalations(ShinkenTest):
 
         # One more bad, we go 3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # We go 4, still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         # We go 5! we escalade to level3
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # Now we send 10 more notif, we must be still level5
         for i in range(10):
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-            self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+            self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
             self.show_and_clear_logs()
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # notif
         self.scheduler_loop(2, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_actions()
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;')
         self.show_and_clear_logs()
 
     def test_time_based_escalation(self):
@@ -202,7 +202,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
         # We check if we really notify the level1
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -230,7 +230,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
         # Now we raise a notification time of 1hour, we escalade to level2
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -245,7 +245,7 @@ class TestEscalations(ShinkenTest):
 
         # One more bad, we say: he, it's still near 1 hour, so still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # Now we go for level3, so again we say: he, in fact we start one hour earlyer,
@@ -257,7 +257,7 @@ class TestEscalations(ShinkenTest):
 
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
 
@@ -268,16 +268,16 @@ class TestEscalations(ShinkenTest):
                 n.t_to_go = time.time()
 
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-            self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+            self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
             self.show_and_clear_logs()
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif
         self.scheduler_loop(2, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_actions()
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;')
         self.show_and_clear_logs()
 
     # Here we search to know if a escalation really short the notification
@@ -336,7 +336,7 @@ class TestEscalations(ShinkenTest):
 
         print "  ** LEVEL1 ** " * 20
         # We check if we really notify the level1
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -376,7 +376,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
         # Now we raise the time since the begining at 1 hour, so we can escalade
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -393,7 +393,7 @@ class TestEscalations(ShinkenTest):
 
         # One more bad, we say: he, it's 7200 sc of notif, so must be still level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
         for n in svc.notifications_in_progress.values():
@@ -403,7 +403,7 @@ class TestEscalations(ShinkenTest):
 
         # One more, we bypass 7200, so now it's still level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
 
@@ -414,7 +414,7 @@ class TestEscalations(ShinkenTest):
                 n.t_to_go = time.time()
 
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-            self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+            self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
             self.show_and_clear_logs()
 
         # Ok now we get the normal stuff, we do NOT want to raise so soon a
@@ -434,9 +434,9 @@ class TestEscalations(ShinkenTest):
         # recovery notif
         self.scheduler_loop(2, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_actions()
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;')
         self.show_and_clear_logs()
 
     def test_time_based_escalation_with_short_notif_interval(self):
@@ -493,7 +493,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
         # We check if we really notify the level1
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -538,7 +538,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
         # Now we raise a notification time of 1hour, we escalade to level2
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -566,7 +566,7 @@ class TestEscalations(ShinkenTest):
 
         # One more bad, we say: he, it's still near 1 hour, so still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # Ok now go in the Level3 thing
@@ -576,8 +576,8 @@ class TestEscalations(ShinkenTest):
 
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # Ok we should have one notification
@@ -592,7 +592,7 @@ class TestEscalations(ShinkenTest):
         # Make a loop for pass the next notification
         time.sleep(5)
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
@@ -601,16 +601,16 @@ class TestEscalations(ShinkenTest):
         time.sleep(5)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif
         self.scheduler_loop(2, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_actions()
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
+        self.any_log_match('SERVICE NOTIFICATION: level1.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;')
+        self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;')
         self.show_and_clear_logs()
 
 

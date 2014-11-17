@@ -58,7 +58,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.assert_(self.any_log_match('SERVICE EVENT HANDLER'))
+        self.any_log_match('SERVICE EVENT HANDLER')
 
 
 

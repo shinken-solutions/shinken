@@ -49,7 +49,7 @@ class TestConfig(ShinkenTest):
         if os.environ.get('HUDSON_URL', None):
             return
 
-        self.assert_(self.any_log_match(u'.*BADCOMMAND.*') or self.any_log_match('.*BADCOMMAND.*'))
+        self.any_log_match(u'.*BADCOMMAND.*') or self.any_log_match('.*BADCOMMAND.*')
 
 
 if __name__ == '__main__':

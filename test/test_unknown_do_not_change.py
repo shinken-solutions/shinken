@@ -67,7 +67,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assertEqual('HARD', svc.state_type)
 
         # Should have a notification about it
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
         print "GO UNKNOWN HARD" * 10
@@ -97,7 +97,7 @@ class TestUnknownNotChangeState(ShinkenTest):
             n.t_to_go = time.time()
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
         print svc.state, svc.state_type
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
     # We got problem with unknown results on bad connections
@@ -134,7 +134,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assertEqual('HARD', svc.state_type)
 
         # Should have a notification about it
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
         print "GO UNKNOWN HARD" * 10
@@ -148,7 +148,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         # Then we came back as WARNING here, so a different than we came in the phase!
         self.scheduler_loop(1, [[svc, 1, 'WARNING | value1=1 value2=2']])
         print svc.state, svc.state_type
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;WARNING'))
+        self.any_log_match('SERVICE NOTIFICATION.*;WARNING')
         self.show_and_clear_logs()
 
         # We check if we can still have new notifications of course
@@ -157,13 +157,13 @@ class TestUnknownNotChangeState(ShinkenTest):
             n.t_to_go = time.time()
         self.scheduler_loop(1, [[svc, 1, 'WARNING | value1=1 value2=2']])
         print svc.state, svc.state_type
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;WARNING'))
+        self.any_log_match('SERVICE NOTIFICATION.*;WARNING')
         self.show_and_clear_logs()
 
         # And what if we came back as critical so? :)
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
         print svc.state, svc.state_type
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
     # But we want to still raise notif as unknown if we first met this state
@@ -194,13 +194,13 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assertEqual('HARD', svc.state_type)
 
         # Should have a notification about it!
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
+        self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN')
         self.show_and_clear_logs()
 
         # Then we make it as a critical state
         # and we want a notif too
         self.scheduler_loop(1, [[svc, 2, 'critical | value1=1 value2=2']])
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
     # We got problem with unknown results on bad connections
@@ -235,14 +235,14 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assertEqual('HARD', host.state_type)
 
         # Should have a notification about it
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.any_log_match('HOST NOTIFICATION.*;DOWN')
         self.show_and_clear_logs()
 
         print "GO UNREACH HARD" * 10
         # Then we make it as a unknown state
         self.scheduler_loop(3, [[router, 2, 'Bad router | value1=1 value2=2']])
         # so we warn about the router, not the host
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.any_log_match('HOST NOTIFICATION.*;DOWN')
         self.show_and_clear_logs()
 
         print "BIBI" * 100
@@ -259,7 +259,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         # The the router came back :)
         print "Router is back from Hell" * 10
         self.scheduler_loop(1, [[router, 0, 'Ok, I am back guys | value1=1 value2=2']])
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;UP'))
+        self.any_log_match('HOST NOTIFICATION.*;UP')
         self.show_and_clear_logs()
 
         # But how the host will say now?
@@ -279,7 +279,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.scheduler_loop(1, [[host, 2, 'CRITICAL | value1=1 value2=2']])
         print host.state, host.state_type
         # And here we DO NOT WANT new notification
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.any_log_match('HOST NOTIFICATION.*;DOWN')
         self.show_and_clear_logs()
 
 

@@ -347,7 +347,7 @@ class TestNotif(ShinkenTest):
         # no notificatio
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART'))
+        self.any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART')
         self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -523,7 +523,7 @@ class TestNotif(ShinkenTest):
         # no notificatio
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE DOWNTIME ALERT.*;STARTED'))
+        self.any_log_match('SERVICE DOWNTIME ALERT.*;STARTED')
         self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
         # To get out of the DT.
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=2)
