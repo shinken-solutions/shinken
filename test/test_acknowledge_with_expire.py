@@ -58,7 +58,7 @@ class TestAcksWithExpire(ShinkenTest):
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
-        self.assert_(self.assert_log_match(5, 'SERVICE NOTIFICATION'))
+        self.assert_log_match(5, 'SERVICE NOTIFICATION')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -81,7 +81,7 @@ class TestAcksWithExpire(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [], do_sleep=False)
         self.assert_(svc.problem_has_been_acknowledged)
-        self.assert_(self.assert_log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
+        self.assert_log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)')
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
         self.assertEqual(1, self.count_logs())
         self.assertEqual(1, self.count_actions())

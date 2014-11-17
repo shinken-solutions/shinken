@@ -413,7 +413,7 @@ class TestDowntime(ShinkenTest):
         self.assert_(not host.in_scheduled_downtime)
         self.show_logs()
         self.show_actions()
-        self.assert_(self.assert_log_match(1, 'HOST DOWNTIME ALERT.*STOPPED'))
+        self.assert_log_match(1, 'HOST DOWNTIME ALERT.*STOPPED')
         self.clear_logs()
         self.clear_actions()
         # todo
