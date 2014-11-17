@@ -453,7 +453,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def assert_log_match(self, index, pattern, no_match=False):
         # log messages are counted 1...n, so index=1 for the first message
-        self.assertGreaterEqual(self.count_logs(), index)
+        if not no_match:
+            self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
         lognum = 1
         broks = sorted(self.sched.broks.values(), lambda x, y: x.id - y.id)
