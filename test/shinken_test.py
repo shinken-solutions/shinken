@@ -451,7 +451,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
             self.actions = {}
 
 
-    def assert_log_match(self, index, pattern):
+    def assert_log_match(self, index, pattern, no_match=False):
         # log messages are counted 1...n, so index=1 for the first message
         self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
@@ -464,9 +464,12 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
                     if re.search(regex, brok.data['log']):
                         return
                 lognum += 1
-        self.assertTrue(False, "Not found a matched log line in broks :\n"
+        self.assertTrue(no_match, "%s found a matched log line in broks :\n"
                                "index=%s pattern=%r\n"
-                               "broks=%r" % (index, pattern, broks))
+                               "broks=%r" % (
+            '*HAVE*' if no_match else 'Not',
+            index, pattern, broks
+        ))
 
 
     def _any_log_match(self, pattern, assert_not):

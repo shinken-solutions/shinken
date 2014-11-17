@@ -286,7 +286,8 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
         self.assert_log_match(1, 'SERVICE ALERT.*;OK;')
         self.assert_log_match(2, 'SERVICE EVENT HANDLER.*;OK;')
-        self.assert_(not self.assert_log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
+        self.assert_log_match(3, 'SERVICE NOTIFICATION.*;OK;',
+                              no_match=True)
         self.show_actions()
         self.assertEqual(0, len(svc.notifications_in_progress))
         self.assertEqual(0, len(svc.notified_contacts))
