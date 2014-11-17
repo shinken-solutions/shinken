@@ -129,10 +129,10 @@ class TestConfig(ShinkenTest):
         self.assertEqual('DISK OK - free space: / 3326 MB (56%);', svc.output.strip())
         self.assertEqual(u'/=2643MB;5948;5958;0;5968 /boot=68MB;88;93;0;98 /home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980', svc.perf_data.strip())
         print svc.long_output.split('\n')
-        self.assertEqual(u"""/ 15272 MB (77%, svc.long_output);
+        self.assertEqual(u"""/ 15272 MB (77%);
 /boot 68 MB (69%);
 /home 69357 MB (27%);
-/var/log 819 MB (84%);""")
+/var/log 819 MB (84%);""", svc.long_output)
 
 
 
