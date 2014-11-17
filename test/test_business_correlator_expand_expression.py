@@ -24,7 +24,11 @@
 #
 
 import re
-from shinken_test import unittest, ShinkenTest, time_hacker
+
+from shinken_test import (
+    unittest,
+    ShinkenTest,
+)
 
 # Set this variable False to disable profiling test
 PROFILE_BP_RULE_RE_PROCESSING = False

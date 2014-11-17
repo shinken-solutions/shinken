@@ -13,12 +13,11 @@ import os
 import string
 import re
 import random
-import unittest
 import copy
 import locale
 
 
-import unittest
+import unittest2 as unittest
 
 
 # import the shinken library from the parent directory
@@ -190,21 +189,25 @@ class _Unittest2CompatMixIn:
     In our case, it's better to always inherit from ShinkenTest
 
     """
-    def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
+    if False:
+        def assertNotIn(self, member, container, msg=None):
+           self.assertTrue(member not in container, msg)
 
-    def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
+        def assertIn(self, member, container, msg=None):
+            self.assertTrue(member in container)
 
-    def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
+        def assertIsInstance(self, obj, cls, msg=None):
+            self.assertTrue(isinstance(obj, cls))
 
-    def assertRegexpMatches(self, line, pattern):
-        r = re.search(pattern, line)
-        self.assertTrue(r is not None)
+        def assertRegexpMatches(self, line, pattern):
+            r = re.search(pattern, line)
+            self.assertTrue(r is not None)
 
-    def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
+        def assertIs(self, obj, cmp, msg=None):
+            self.assertTrue(obj is cmp, msg or "%r __is not__ %r !" % (obj, cmp))
+
+        def assertIsNot(self, obj, cmp, msg=None):
+            self.assertTrue(obj is not cmp, msg or "%r __is__ %r " % (obj, cmp))
 
 
 class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):

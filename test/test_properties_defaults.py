@@ -23,12 +23,12 @@
 Test default values for item types.
 """
 
-import unittest
 
 import __import_shinken
 from shinken.property import UnusedProp, none_object
 import shinken.daemon
 
+# TODO: clean import *
 from shinken_test import *
 from shinken.property import *
 

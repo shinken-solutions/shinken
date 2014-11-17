@@ -12,3 +12,4 @@ wsgiref==0.1.2
 pycurl
 importlib
 mock
+unittest2

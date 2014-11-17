@@ -29,7 +29,6 @@ import time
 import cPickle
 from cStringIO import StringIO
 
-import unittest
 from tempfile import NamedTemporaryFile
 
 import __import_shinken

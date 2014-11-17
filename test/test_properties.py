@@ -23,10 +23,8 @@
 Test shinken.property
 """
 
-import unittest
 
-import __import_shinken
-import shinken.property
+
 from shinken.property import none_object
 
 from shinken_test import *

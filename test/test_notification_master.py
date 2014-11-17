@@ -24,11 +24,11 @@
 
 
 import time
-import unittest
 
 
 
-from shinken_test import ShinkenTest
+from shinken_test import ShinkenTest, unittest
+
 from shinken.notification import Notification
 
 
