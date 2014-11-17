@@ -50,12 +50,12 @@ class TestNoNotificationPeriod(ShinkenTest):
 
         # Now get bad :)
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(svc.notification_period is None)
+        self.assertIs(None, svc.notification_period)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
 
         # Now for the host :)
         self.scheduler_loop(5, [[host, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.notification_period is None)
+        self.assertIs(None, host.notification_period)
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
 
 

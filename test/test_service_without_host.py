@@ -31,7 +31,7 @@ class Testservice_without_host(ShinkenTest):
         self.setup_with_file('etc/shinken_service_without_host.cfg')
 
     def test_service_without_host_do_not_break(self):
-        self.assert_(self.conf.conf_is_correct is False)
+        self.assertIs(False, self.conf.conf_is_correct)
 
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']

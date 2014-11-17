@@ -66,20 +66,20 @@ class TestPropertyOverride(ShinkenTest):
         # Check non overriden properies value
         for svc in (svc1, svc1proc1, svc1proc2, svc2proc1, svc12):
             self.assertEqual(["test_contact"], svc.contact_groups)
-            self.assert_(svc.maintenance_period is tp24x7)
+            self.assertIs(tp24x7, svc.maintenance_period)
             self.assertEqual(1, svc.retry_interval)
-            self.assert_(svc.check_command.command is cmdsvc)
+            self.assertIs(cmdsvc, svc.check_command.command)
             self.assertEqual(["w","u","c","r","f","s"], svc.notification_options)
-            self.assert_(svc.notifications_enabled is True)
+            self.assertIs(True, svc.notifications_enabled)
 
         # Check overriden properies value
         for svc in (svc2, svc2proc2, svc22):
             self.assertEqual(["admins"], svc.contact_groups)
-            self.assert_(svc.maintenance_period is tptest)
+            self.assertIs(tptest, svc.maintenance_period)
             self.assertEqual(3, svc.retry_interval)
-            self.assert_(svc.check_command.command is cmdtest)
+            self.assertIs(cmdtest, svc.check_command.command)
             self.assertEqual(["c","r"], svc.notification_options)
-            self.assert_(svc.notifications_enabled is False)
+            self.assertIs(False, svc.notifications_enabled)
 
 
 class TestConfigBroken(ShinkenTest):

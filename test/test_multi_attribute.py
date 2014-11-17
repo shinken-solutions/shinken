@@ -38,8 +38,8 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assertIsNot(srv1, None)
 
         # inherited parameter
-        self.assert_(hst1.active_checks_enabled is True)
-        self.assert_(srv1.active_checks_enabled is True)
+        self.assertIs(True, hst1.active_checks_enabled)
+        self.assertIs(True, srv1.active_checks_enabled)
 
         # non list parameter (only the last value set should remain)
         self.assertEqual(3, hst1.max_check_attempts)

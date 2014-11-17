@@ -51,7 +51,7 @@ class TestConfig(ShinkenTest):
         # Check if the service for the good host is here
         self.assertIsNot(svc, None)
         # check if the service for the not one (!) is not here
-        self.assert_(svc_not is None)
+        self.assertIs(None, svc_not)
 
 
 

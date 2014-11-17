@@ -46,16 +46,16 @@ class TestMaintPeriod(ShinkenTest):
 
         # Standard links
         self.assertEqual(a_24_7, test_router_0.maintenance_period)
-        self.assert_(test_host_0.maintenance_period is None)
-        self.assert_(test_nobody.maintenance_period is None)
+        self.assertIs(None, test_host_0.maintenance_period)
+        self.assertIs(None, test_nobody.maintenance_period)
 
         # Now inplicit inheritance
         # This one is defined in the service conf
         self.assertEqual(a_24_7, svc1.maintenance_period)
         # And others are implicitly inherited
-        self.assert_(svc2.maintenance_period is a_24_7)
+        self.assertIs(a_24_7, svc2.maintenance_period)
         # This one got nothing :)
-        self.assert_(svc3.maintenance_period is None)
+        self.assertIs(None, svc3.maintenance_period)
 
     def test_check_enter_downtime(self):
         test_router_0 = self.sched.hosts.find_by_name("test_router_0")
@@ -136,7 +136,7 @@ class TestMaintPeriod(ShinkenTest):
         self.assertEqual(0, len(self.sched.downtimes))
         self.assertEqual(0, len(svc3.downtimes))
         self.assert_(not svc3.in_scheduled_downtime)
-        self.assert_(svc3.in_maintenance is None)
+        self.assertIs(None, svc3.in_maintenance)
 
 
 

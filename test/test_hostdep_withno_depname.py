@@ -45,7 +45,7 @@ class TestHostDepWithNodepname(ShinkenTest):
         self.assert_(len(h2.act_depend_of) > 0)
         l = h2.act_depend_of[0]
         h = l[0]  # the host that h2 depend on
-        self.assert_(h is host)
+        self.assertIs(host, h)
 
 if __name__ == '__main__':
     unittest.main()

@@ -97,8 +97,8 @@ class TestConfig(ShinkenTest):
 
         self.assertIsNot(svc_c, None)
         self.assertIsNot(svc_d, None)
-        self.assert_(svc_e is None)
-        self.assert_(svc_f is None)
+        self.assertIs(None, svc_e)
+        self.assertIs(None, svc_f)
         self.assertIsNot(svc_g, None)
 
     def test_service_generators_key_generator(self):

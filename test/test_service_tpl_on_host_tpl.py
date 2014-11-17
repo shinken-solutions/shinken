@@ -73,7 +73,7 @@ class TestSrvTplOnHostTpl(ShinkenTest):
 
         # The linux and http service should exist on the linux host
         svc = self.sched.services.find_srv_by_name_and_hostname("host_windows_http", "http_AND_linux")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
 
         # The http_OR_linux should be every where
         svc = self.sched.services.find_srv_by_name_and_hostname("host_linux_http", "http_OR_linux")
@@ -83,13 +83,13 @@ class TestSrvTplOnHostTpl(ShinkenTest):
 
         # The http_BUT_NOT_linux should be in the windows host only
         svc = self.sched.services.find_srv_by_name_and_hostname("host_linux_http", "http_BUT_NOT_linux")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("host_windows_http", "http_BUT_NOT_linux")
         self.assertIsNot(svc, None)
 
         # The http_ALL_BUT_NOT_linux should be in the windows host only
         svc = self.sched.services.find_srv_by_name_and_hostname("host_linux_http", "http_ALL_BUT_NOT_linux")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("host_windows_http", "http_ALL_BUT_NOT_linux")
         self.assertIsNot(svc, None)
 

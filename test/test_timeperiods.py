@@ -42,7 +42,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next is None)
+        self.assertIs(None, t_next)
 
         # Then a simple same day
         t = Timeperiod()
@@ -66,7 +66,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next is None)
+        self.assertIs(None, t_next)
 
         # Then a simple same day
         print "Cheking validity for", time.asctime(time.localtime(july_the_12))
@@ -102,7 +102,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next is None)
+        self.assertIs(None, t_next)
 
         # Then a simple same day
         t = Timeperiod()
@@ -164,7 +164,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next is None)
+        self.assertIs(None, t_next)
 
         # Then a simple same day
         t = Timeperiod()

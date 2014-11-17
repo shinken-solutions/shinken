@@ -54,15 +54,15 @@ class TestPropertyOverride(ShinkenTest):
 
         # Half the services only should exist for test_host_02
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc11")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc12")
         self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc21")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc22")
         self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc1")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc2")
         self.assertIsNot(svc, None)
 

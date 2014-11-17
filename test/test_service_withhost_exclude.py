@@ -37,7 +37,7 @@ class Testservice_withhost_exclude(ShinkenTest):
         svc_exist = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "NotEverywhere")
         self.assertIsNot(svc_exist, None)
         svc_not_exist = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "NotEverywhere")
-        self.assert_(svc_not_exist is None)
+        self.assertIs(None, svc_not_exist)
         self.assert_(self.sched.conf.is_correct)
 
 
