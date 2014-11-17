@@ -48,7 +48,7 @@ class TestHost(ShinkenTest):
         # We get the state
         state = hst.__getstate__()
         # Check it's the good length
-        self.assertEqual(len(cls.properties, len(state)) + len(cls.running_properties) + 1)
+        self.assertEqual(len(cls.properties) + len(cls.running_properties) + 1, len(state))
         # we copy the service
         hst_copy = copy.copy(hst)
         # reset the state in the original service
