@@ -58,7 +58,7 @@ class TestService(ShinkenTest):
         for p in cls.properties:
             ## print getattr(svc_copy, p)
             ## print getattr(svc, p)
-            self.assert_(getattr(svc_copy, p) == getattr(svc, p))
+            self.assertEqual(getattr(svc, p), getattr(svc_copy, p) )
 
 
     # Look if it can detect all incorrect cases

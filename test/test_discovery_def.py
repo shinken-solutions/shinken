@@ -40,11 +40,11 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'osversion'
         value = '2003'
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'windows'}
@@ -74,12 +74,12 @@ class TestDiscoveryConf(ShinkenTest):
         self.assertIsNot(genhttpstrict, None)
         key = 'openports'
         value = '80,443'
-        self.assert_(genhttpstrict.is_matching(key, value) == True)
+        self.assertEqual(True, genhttpstrict.is_matching(key, value) )
 
         # But NOT this one
         key = 'openports'
         value = '800'
-        self.assert_(genhttpstrict.is_matching(key, value) == False)
+        self.assertEqual(False, genhttpstrict.is_matching(key, value) )
 
 
     # Look for good definition and call of a discoveryrun
@@ -110,11 +110,11 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'osversion'
         value = '2003'
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'windows'}
@@ -143,12 +143,12 @@ class TestDiscoveryConf(ShinkenTest):
         value = 'linux'
 
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'linux'}
@@ -176,12 +176,12 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'osvendor'
         value = 'microsoft'
         # Should not match this
-        self.assert_(linux.is_matching(key, value) == False)
+        self.assertEqual(False, linux.is_matching(key, value) )
 
         key = 'osvendor'
         value = 'linux'
         # Should match this
-        self.assert_(linux.is_matching(key, value) == True)
+        self.assertEqual(True, linux.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'osvendor': 'linux'}

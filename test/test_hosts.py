@@ -57,7 +57,7 @@ class TestHost(ShinkenTest):
         for p in cls.properties:
             ## print getattr(hst_copy, p)
             ## print getattr(hst, p)
-            self.assert_(getattr(hst_copy, p) == getattr(hst, p))
+            self.assertEqual(getattr(hst, p), getattr(hst_copy, p) )
 
 
     # Look if it can detect all incorrect cases

@@ -427,8 +427,8 @@ class TestConfigBroken(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search('Business rule uses invalid regex', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Business rule got an empty result', log)]) == 3)
+        self.assertEqual(1, len([log for log in logs if re.search('Business rule uses invalid regex', log)]) )
+        self.assertEqual(3, len([log for log in logs if re.search('Business rule got an empty result', log)]) )
 
 
 if __name__ == '__main__':

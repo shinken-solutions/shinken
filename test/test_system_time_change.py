@@ -68,7 +68,7 @@ class TestSystemTimeChange(ShinkenTest):
         self.set_time(tomorow)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(86400)
-        self.assert_(host.last_state_change - last_state_change == 86400)
+        self.assertEqual(86400, host.last_state_change - last_state_change )
         svc.compensate_system_time_change(86400)
         print "Tomorow Host last_state_change", time.asctime(time.localtime(host.last_state_change))
 
@@ -76,7 +76,7 @@ class TestSystemTimeChange(ShinkenTest):
         self.set_time(yesterday)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(-86400 * 2)
-        self.assert_(host.last_state_change - last_state_change == -86400*2)
+        self.assertEqual(-86400*2, host.last_state_change - last_state_change )
         svc.compensate_system_time_change(-86400*2)
         print "Yesterday Host last_state_change", time.asctime(time.localtime(host.last_state_change))
 
@@ -94,8 +94,8 @@ class TestSystemTimeChange(ShinkenTest):
         self.sched.sched_daemon.compensate_system_time_change(86400)
         print "Tomorow Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "Tomorow Service check", time.asctime(time.localtime(srv_check.t_to_go))
-        self.assert_(host_check.t_to_go - host_to_go == 86400)
-        self.assert_(srv_check.t_to_go - srv_to_go == 86400)
+        self.assertEqual(86400, host_check.t_to_go - host_to_go )
+        self.assertEqual(86400, srv_check.t_to_go - srv_to_go )
 
         # and yesterday
         host_to_go = host_check.t_to_go
@@ -107,8 +107,8 @@ class TestSystemTimeChange(ShinkenTest):
         print "New host check", time.asctime(time.localtime(host.next_chk))
         self.assertEqual(host_check.t_to_go, host.next_chk)
         self.assertEqual(srv_check.t_to_go, svc.next_chk)
-        self.assert_(host_check.t_to_go - host_to_go == -86400*2)
-        self.assert_(srv_check.t_to_go - srv_to_go == -86400*2)
+        self.assertEqual(-86400*2, host_check.t_to_go - host_to_go )
+        self.assertEqual(-86400*2, srv_check.t_to_go - srv_to_go )
 
         self.set_time(now_str)
 

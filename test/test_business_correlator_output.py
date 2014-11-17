@@ -106,7 +106,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.assert_(output.find("[CRITICAL: test_host_03/srv3]") > 0)
         self.assert_(output.find("[DOWN: test_host_04]") > 0)
         # Should not display OK state checks
-        self.assert_(output.find("[OK: test_host_01/srv1]") == -1)
+        self.assertEqual(-1, output.find("[OK: test_host_01/srv1]") )
         self.assert_(output.startswith("CRITICAL"))
 
     def test_bprule_xof_one_critical_output(self):

@@ -63,7 +63,7 @@ class TestConfigBroken(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) == 1)
+        self.assertEqual(1, len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) )
 
 
 if __name__ == '__main__':

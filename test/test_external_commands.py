@@ -185,14 +185,14 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
         self.assertEqual(True, self.any_log_match('RESTART'))
-        self.assert_(self.any_log_match('I awoke after sleeping 3 seconds') == True)
+        self.assertEqual(True, self.any_log_match('I awoke after sleeping 3 seconds') )
 
         # RELOAD_CONFIG
         excmd = '[%d] RELOAD_CONFIG' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
         self.assertEqual(True, self.any_log_match('RELOAD'))
-        self.assert_(self.any_log_match('I awoke after sleeping 2 seconds') == True)
+        self.assertEqual(True, self.any_log_match('I awoke after sleeping 2 seconds') )
         
         # Show recent logs
         self.show_logs()

@@ -62,10 +62,10 @@ class TestConfig(ShinkenTest):
         # check the criteria
         # execution_failure_criteria      u,c
         # notification_failure_criteria   u,c,w
-        self.assert_([['u', 'c']] == [x[1] for x in test_host_0_test_ok_1.chk_depend_of if x[0] is test_host_0_test_ok_0])
-        self.assert_([['u', 'c']] == [x[1] for x in test_host_1_test_ok_1.chk_depend_of if x[0] is test_host_1_test_ok_0])
-        self.assert_([['u', 'c', 'w']] == [x[1] for x in test_host_0_test_ok_1.act_depend_of if x[0] is test_host_0_test_ok_0])
-        self.assert_([['u', 'c', 'w']] == [x[1] for x in test_host_1_test_ok_1.act_depend_of if x[0] is test_host_1_test_ok_0])
+        self.assertEqual([x[1] for x in test_host_0_test_ok_1.chk_depend_of if x[0] is test_host_0_test_ok_0], [['u', 'c']] )
+        self.assertEqual([x[1] for x in test_host_1_test_ok_1.chk_depend_of if x[0] is test_host_1_test_ok_0], [['u', 'c']] )
+        self.assertEqual([x[1] for x in test_host_0_test_ok_1.act_depend_of if x[0] is test_host_0_test_ok_0], [['u', 'c', 'w']] )
+        self.assertEqual([x[1] for x in test_host_1_test_ok_1.act_depend_of if x[0] is test_host_1_test_ok_0], [['u', 'c', 'w']] )
 
         # and every service has the host in it's act_depend_of-list
         self.assert_(test_host_0 in [x[0] for x in test_host_0_test_ok_0.act_depend_of])
@@ -119,11 +119,11 @@ class TestConfig(ShinkenTest):
         self.assert_(host_D in [x[0] for x in host_C.chk_depend_of_me])
 
         # check the notification/execution criteria
-        self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_B])
+        self.assertEqual([x[1] for x in host_C.act_depend_of if x[0] is host_B], [['d', 'u']] )
         self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_B], [['d']])
-        self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_A])
+        self.assertEqual([x[1] for x in host_C.act_depend_of if x[0] is host_A], [['d', 'u']] )
         self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_A], [['d']])
-        self.assert_([['d', 'u']] == [x[1] for x in host_B.act_depend_of if x[0] is host_A])
+        self.assertEqual([x[1] for x in host_B.act_depend_of if x[0] is host_A], [['d', 'u']] )
         self.assertEqual([x[1] for x in host_B.chk_depend_of if x[0] is host_A], [['n']])
 
     def test_host_inherits_dependencies(self):
@@ -164,7 +164,7 @@ class TestConfig(ShinkenTest):
 
         # the most important: test_parent is in the chk_depend_of-list of test_son
         print "Dep: ", svc_son.act_depend_of
-        self.assert_([['u', 'c', 'w']] == [x[1] for x in svc_son.act_depend_of if x[0] is svc_parent])
+        self.assertEqual([x[1] for x in svc_son.act_depend_of if x[0] is svc_parent], [['u', 'c', 'w']] )
 
     def test_host_non_inherits_dependencies(self):
         #
@@ -189,9 +189,9 @@ class TestConfig(ShinkenTest):
         print "E dep", host_E.chk_depend_of
         print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
         # If I ask D for dep, he should raise Nothing if we do not want parents.
-        self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=False) == False)
+        self.assertEqual(False, host_D.do_i_raise_dependency('d', inherit_parents=False) )
         # But he should raise a problem (C here) of we ask for its parents
-        self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=True) == True)
+        self.assertEqual(True, host_D.do_i_raise_dependency('d', inherit_parents=True) )
 
 
     def test_check_dependencies(self):
