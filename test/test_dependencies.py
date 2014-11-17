@@ -48,16 +48,16 @@ class TestConfig(ShinkenTest):
         test_host_1_test_ok_0 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_0")
         test_host_1_test_ok_1 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_1")
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
-        self.assert_(test_host_0_test_ok_0 in [x[0] for x in test_host_0_test_ok_1.chk_depend_of])
-        self.assert_(test_host_1_test_ok_0 in [x[0] for x in test_host_1_test_ok_1.chk_depend_of])
+        self.assertIn(test_host_0_test_ok_0, [x[0] for x in test_host_0_test_ok_1.chk_depend_of])
+        self.assertIn(test_host_1_test_ok_0, [x[0] for x in test_host_1_test_ok_1.chk_depend_of])
 
         # and not vice versa
-        self.assert_(test_host_0_test_ok_1 not in [x[0] for x in test_host_0_test_ok_0.chk_depend_of])
-        self.assert_(test_host_1_test_ok_1 not in [x[0] for x in test_host_1_test_ok_0.chk_depend_of])
+        self.assertNotIn(test_host_0_test_ok_1, [x[0] for x in test_host_0_test_ok_0.chk_depend_of])
+        self.assertNotIn(test_host_1_test_ok_1, [x[0] for x in test_host_1_test_ok_0.chk_depend_of])
 
         # test_ok_0 is also in the act_depend_of-list of test_ok_1
-        self.assert_(test_host_0_test_ok_0 in [x[0] for x in test_host_0_test_ok_1.chk_depend_of])
-        self.assert_(test_host_1_test_ok_0 in [x[0] for x in test_host_1_test_ok_1.chk_depend_of])
+        self.assertIn(test_host_0_test_ok_0, [x[0] for x in test_host_0_test_ok_1.chk_depend_of])
+        self.assertIn(test_host_1_test_ok_0, [x[0] for x in test_host_1_test_ok_1.chk_depend_of])
 
         # check the criteria
         # execution_failure_criteria      u,c
@@ -68,10 +68,10 @@ class TestConfig(ShinkenTest):
         self.assertEqual([x[1] for x in test_host_1_test_ok_1.act_depend_of if x[0] is test_host_1_test_ok_0], [['u', 'c', 'w']] )
 
         # and every service has the host in it's act_depend_of-list
-        self.assert_(test_host_0 in [x[0] for x in test_host_0_test_ok_0.act_depend_of])
-        self.assert_(test_host_0 in [x[0] for x in test_host_0_test_ok_1.act_depend_of])
-        self.assert_(test_host_1 in [x[0] for x in test_host_1_test_ok_0.act_depend_of])
-        self.assert_(test_host_1 in [x[0] for x in test_host_1_test_ok_1.act_depend_of])
+        self.assertIn(test_host_0, [x[0] for x in test_host_0_test_ok_0.act_depend_of])
+        self.assertIn(test_host_0, [x[0] for x in test_host_0_test_ok_1.act_depend_of])
+        self.assertIn(test_host_1, [x[0] for x in test_host_1_test_ok_0.act_depend_of])
+        self.assertIn(test_host_1, [x[0] for x in test_host_1_test_ok_1.act_depend_of])
 
         # and final count the masters
         self.assertEqual(0, len(test_host_0_test_ok_0.chk_depend_of))
@@ -101,30 +101,30 @@ class TestConfig(ShinkenTest):
         print host_C.act_depend_of
         print host_C.chk_depend_of
         print host_C.chk_depend_of_me
-        self.assert_(host_B in [x[0] for x in host_C.act_depend_of])
-        self.assert_(host_A in [x[0] for x in host_C.act_depend_of])
-        self.assert_(host_A in [x[0] for x in host_B.act_depend_of])
+        self.assertIn(host_B, [x[0] for x in host_C.act_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_C.act_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_B.act_depend_of])
         self.assertEqual([], host_A.act_depend_of)
-        self.assert_(host_B in [x[0] for x in host_C.chk_depend_of])
-        self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
-        self.assert_(host_A in [x[0] for x in host_B.chk_depend_of])
+        self.assertIn(host_B, [x[0] for x in host_C.chk_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_C.chk_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_B.chk_depend_of])
         self.assertEqual([], host_A.act_depend_of)
-        self.assert_(host_B in [x[0] for x in host_A.act_depend_of_me])
-        self.assert_(host_C in [x[0] for x in host_A.act_depend_of_me])
-        self.assert_(host_C in [x[0] for x in host_B.act_depend_of_me])
+        self.assertIn(host_B, [x[0] for x in host_A.act_depend_of_me])
+        self.assertIn(host_C, [x[0] for x in host_A.act_depend_of_me])
+        self.assertIn(host_C, [x[0] for x in host_B.act_depend_of_me])
         #self.assertEqual([], host_C.act_depend_of_me) # D in here
-        self.assert_(host_B in [x[0] for x in host_A.chk_depend_of_me])
-        self.assert_(host_C in [x[0] for x in host_A.chk_depend_of_me])
-        self.assert_(host_C in [x[0] for x in host_B.chk_depend_of_me])
-        self.assert_(host_D in [x[0] for x in host_C.chk_depend_of_me])
+        self.assertIn(host_B, [x[0] for x in host_A.chk_depend_of_me])
+        self.assertIn(host_C, [x[0] for x in host_A.chk_depend_of_me])
+        self.assertIn(host_C, [x[0] for x in host_B.chk_depend_of_me])
+        self.assertIn(host_D, [x[0] for x in host_C.chk_depend_of_me])
 
         # check the notification/execution criteria
-        self.assertEqual([x[1] for x in host_C.act_depend_of if x[0] is host_B], [['d', 'u']] )
-        self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_B], [['d']])
-        self.assertEqual([x[1] for x in host_C.act_depend_of if x[0] is host_A], [['d', 'u']] )
-        self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_A], [['d']])
-        self.assertEqual([x[1] for x in host_B.act_depend_of if x[0] is host_A], [['d', 'u']] )
-        self.assertEqual([x[1] for x in host_B.chk_depend_of if x[0] is host_A], [['n']])
+        self.assertEqual([['d', 'u']], [x[1] for x in host_C.act_depend_of if x[0] is host_B])
+        self.assertEqual([['d']],       [x[1] for x in host_C.chk_depend_of if x[0] is host_B])
+        self.assertEqual([['d', 'u']], [x[1] for x in host_C.act_depend_of if x[0] is host_A])
+        self.assertEqual([['d']],       [x[1] for x in host_C.chk_depend_of if x[0] is host_A])
+        self.assertEqual([['d', 'u']], [x[1] for x in host_B.act_depend_of if x[0] is host_A])
+        self.assertEqual([['n']],       [x[1] for x in host_B.chk_depend_of if x[0] is host_A])
 
     def test_host_inherits_dependencies(self):
         self.print_header()
@@ -145,10 +145,10 @@ class TestConfig(ShinkenTest):
         print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
 
         self.assertEqual([], host_A.act_depend_of)
-        self.assert_(host_A in [x[0] for x in host_B.act_depend_of])
-        self.assert_(host_A in [x[0] for x in host_C.act_depend_of])
-        self.assert_(host_B in [x[0] for x in host_C.act_depend_of])
-        self.assert_(host_C in [x[0] for x in host_D.act_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_B.act_depend_of])
+        self.assertIn(host_A, [x[0] for x in host_C.act_depend_of])
+        self.assertIn(host_B, [x[0] for x in host_C.act_depend_of])
+        self.assertIn(host_C, [x[0] for x in host_D.act_depend_of])
 
         # and through inherits_parent....
         #self.assert_(host_A in [x[0] for x in host_D.act_depend_of])
@@ -189,9 +189,9 @@ class TestConfig(ShinkenTest):
         print "E dep", host_E.chk_depend_of
         print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
         # If I ask D for dep, he should raise Nothing if we do not want parents.
-        self.assertEqual(False, host_D.do_i_raise_dependency('d', inherit_parents=False) )
+        self.assertFalse(host_D.do_i_raise_dependency('d', inherit_parents=False) )
         # But he should raise a problem (C here) of we ask for its parents
-        self.assertEqual(True, host_D.do_i_raise_dependency('d', inherit_parents=True) )
+        self.assertTrue(host_D.do_i_raise_dependency('d', inherit_parents=True) )
 
 
     def test_check_dependencies(self):
@@ -218,10 +218,10 @@ class TestConfig(ShinkenTest):
 
 
         # This service should have his host dep
-        assert(len(test_host_0_test_ok_0.act_depend_of) != 0)
+        self.assertNotEqual(0, len(test_host_0_test_ok_0.act_depend_of))
 
         # Ok we are at attempt 0 (we should have a 1 with the OK state, but nervermind)
-        assert(test_host_0.attempt == 0)
+        self.assertEqual(0, test_host_0.attempt)
 
         # Add the check to sched queue
         self.sched.add(cs)
@@ -231,7 +231,7 @@ class TestConfig(ShinkenTest):
 
         # Take the host check. The one generated by dependency not the usual one
         c_dep = test_host_0.actions[1]
-        assert(c_dep.dependency_check)
+        self.assertTrue(bool(c_dep.dependency_check))
 
         # Hack it to consider it as down and returning critical state
         c_dep.status = 'waitconsume'
@@ -245,7 +245,7 @@ class TestConfig(ShinkenTest):
         self.sched.consume_results()
 
         # We should not have a new attempt as it was a depency check.
-        assert(test_host_0.attempt == 0)
+        self.assertEqual(0, test_host_0.attempt)
 
 
     def test_disabled_host_service_dependencies(self):
@@ -256,7 +256,7 @@ class TestConfig(ShinkenTest):
         test_host_0.act_depend_of = []  # ignore the router
         test_host_0_test_ok_0_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_disbld_hst_dep")
         self.assertEqual(0, len(test_host_0_test_ok_0_d.act_depend_of))
-        self.assert_(test_host_0_test_ok_0_d not in [x[0] for x in test_host_0.act_depend_of_me])
+        self.assertNotIn(test_host_0_test_ok_0_d, [x[0] for x in test_host_0.act_depend_of_me])
 
 
 

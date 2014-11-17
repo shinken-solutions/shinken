@@ -13,49 +13,29 @@ class TestConfig(ShinkenTest):
         """Check that it is allowed to have a host with the "__ANTI-VIRG__" substring in its hostname"""
 
         # the global configuration must be valid
-        self.assert_(
-                       True == self.conf.conf_is_correct
-                     ,("config is not correct")
-                    )
+        self.assertTrue(self.conf.conf_is_correct)
 
         # try to get the host
         # if it is not possible to get the host, it is probably because
         # "__ANTI-VIRG__" has been replaced by ";"
         hst = self.conf.hosts.find_by_name('test__ANTI-VIRG___0')
-        self.assert_(
-                      hst is not None
-                     ,("host 'test__ANTI-VIRG___0' not found")
-                    )
+        self.assert_(hst is not None, "host 'test__ANTI-VIRG___0' not found")
 
         # Check that the host has a valid configuration
-        self.assert_(
-                      True == hst.is_correct()
-                     ,("config of host '%s' is not true"
-                       % (hst.get_name()))
-                    )
+        self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % hst.get_name())
 
     def test_parsing_comment(self):
         """Check that the semicolon is a comment delimiter"""
 
         # the global configuration must be valid
-        self.assert_(
-                       True == self.conf.conf_is_correct
-                     ,("config is not correct")
-                    )
+        self.assertTrue(self.conf.conf_is_correct, "config is not correct")
 
         # try to get the host
         hst = self.conf.hosts.find_by_name('test_host_1')
-        self.assert_(
-                      hst is not None
-                     ,("host 'test_host_1' not found")
-                    )
+        self.assert_(hst is not None, "host 'test_host_1' not found")
 
         # Check that the host has a valid configuration
-        self.assert_(
-                      True == hst.is_correct()
-                     ,("config of host '%s' is not true"
-                       % (hst.get_name()))
-                    )
+        self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % (hst.get_name()))
 
     def test_escaped_semicolon(self):
         """Check that it is possible to have a host with a semicolon in its hostname
@@ -67,24 +47,14 @@ class TestConfig(ShinkenTest):
         """
 
         # the global configuration must be valid
-        self.assert_(
-                       True == self.conf.conf_is_correct
-                     ,("config is not correct")
-                    )
+        self.assertTrue(self.conf.conf_is_correct)
 
         # try to get the host
         hst = self.conf.hosts.find_by_name('test_host_2;with_semicolon')
-        self.assert_(
-                      hst is not None
-                     ,("host 'test_host_2;with_semicolon' not found")
-                    )
+        self.assert_(hst is not None, "host 'test_host_2;with_semicolon' not found")
 
         # Check that the host has a valid configuration
-        self.assert_(
-                      True == hst.is_correct()
-                     ,("config of host '%s' is not true"
-                       % (hst.get_name()))
-                    )
+        self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % hst.get_name())
 
         # We can send a command by escaping the semicolon.
 

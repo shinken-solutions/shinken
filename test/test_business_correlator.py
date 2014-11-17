@@ -924,8 +924,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(0, svc_cor.last_hard_state_id)
 
         # And no more in impact
-        self.assert_(svc_cor not in svc_bd2.impacts)
-        self.assert_(svc_cor not in svc_bd1.impacts)
+        self.assertNotIn(svc_cor, svc_bd2.impacts)
+        self.assertNotIn(svc_cor, svc_bd1.impacts)
 
         # And what if we set 2 service from distant rule CRITICAL?
         # ERP should be still OK
