@@ -156,8 +156,8 @@ class TestHost(ShinkenTest):
         hg = self.sched.hostgroups.find_by_name("hostgroup_01")
         self.assert_(hg is not None)
         h = self.sched.hosts.find_by_name('test_host_0')
-        self.assert_(h in hg.members)
-        self.assert_(hg in h.hostgroups)
+        self.assertIn(h, hg.members)
+        self.assertIn(hg, h.hostgroups)
 
 
     def test_childs(self):
@@ -165,16 +165,16 @@ class TestHost(ShinkenTest):
         r = self.sched.hosts.find_by_name('test_router_0')
 
         # Search if h is in r.childs
-        self.assert_(h in r.childs)
+        self.assertIn(h, r.childs)
         # and the reverse
-        self.assert_(r in h.parents)
+        self.assertIn(r, h.parents)
         print "r.childs", r.childs
         print "h.childs", h.childs
 
         # And also in the parent/childs dep list
-        self.assert_(h in r.child_dependencies)
+        self.assertIn(h, r.child_dependencies)
         # and the reverse
-        self.assert_(r in h.parent_dependencies)
+        self.assertIn(r, h.parent_dependencies)
 
 
 if __name__ == '__main__':

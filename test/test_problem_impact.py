@@ -107,9 +107,9 @@ class TestProblemImpact(ShinkenTest):
             # business_impact value ofthe impacts, so here 5
             self.assertEqual(5, h.business_impact)
             for s in all_servers:
-                self.assert_(s in h.impacts)
-                self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
-                self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
+                self.assertIn(s, h.impacts)
+                self.assertIn(s.get_dbg_name(), host_router_0_brok.data['impacts']['hosts'])
+                self.assertIn(s.get_dbg_name(), host_router_1_brok.data['impacts']['hosts'])
 
         # Should have host notification, but it's not so simple:
         # our contact say: not under 5, and our hosts are 2. But
@@ -126,16 +126,16 @@ class TestProblemImpact(ShinkenTest):
             for svc in s.services:
                 print "Service state", svc.state
                 self.assertEqual('UNKNOWN', svc.state)
-                self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
-                self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
+                self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
+                self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
                 brk_svc.prepare()
                 self.assert_(brk_svc.data['source_problems']['hosts'] == ['test_router_0', 'test_router_1'])
             for h in all_routers:
-                self.assert_(h in s.source_problems)
+                self.assertIn(h, s.source_problems)
                 brk_hst = s.get_update_status_brok()
                 brk_hst.prepare()
-                self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
+                self.assertIn(h.get_dbg_name(), brk_hst.data['source_problems']['hosts'])
 
         #--------------------------------------------------------------
         # One router get UP now
@@ -275,9 +275,9 @@ class TestProblemImpact(ShinkenTest):
             # business_impact value ofthe impacts, so here 2 because we lower all critcity for our test
             self.assertEqual(2, h.business_impact)
             for s in all_servers:
-                self.assert_(s in h.impacts)
-                self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
-                self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
+                self.assertIn(s, h.impacts)
+                self.assertIn(s.get_dbg_name(), host_router_0_brok.data['impacts']['hosts'])
+                self.assertIn(s.get_dbg_name(), host_router_1_brok.data['impacts']['hosts'])
 
         # Should have host notification, but it's not so simple:
         # our contact say: not under 5, and our hosts are 2. And here
@@ -294,16 +294,16 @@ class TestProblemImpact(ShinkenTest):
             for svc in s.services:
                 print "Service state", svc.state
                 self.assertEqual('UNKNOWN', svc.state)
-                self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
-                self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
+                self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
+                self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
                 brk_svc.prepare()
                 self.assert_(brk_svc.data['source_problems']['hosts'] == ['test_router_0', 'test_router_1'])
             for h in all_routers:
-                self.assert_(h in s.source_problems)
+                self.assertIn(h, s.source_problems)
                 brk_hst = s.get_update_status_brok()
                 brk_hst.prepare()
-                self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
+                self.assertIn(h.get_dbg_name(), brk_hst.data['source_problems']['hosts'])
 
 
         for h in all_hosts:
@@ -316,7 +316,7 @@ class TestProblemImpact(ShinkenTest):
         critmod.modulation_period = None
 
         crit_srv = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_1")
-        self.assert_(critmod in crit_srv.business_impact_modulations)
+        self.assertIn(critmod, crit_srv.business_impact_modulations)
 
         # Now we set the modulation period as always good, we check that the service
         # really update it's business_impact value

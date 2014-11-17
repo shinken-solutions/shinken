@@ -128,7 +128,7 @@ class TestTriggers(ShinkenTest):
     def test_trig_file_loading(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "cpu_too_high_ter")
         t = self.conf.triggers.find_by_name('simple_cpu')
-        self.assert_(t in svc.triggers)
+        self.assertIn(t, svc.triggers)
         svc.output = 'I am OK'
         svc.perf_data = 'cpu=95%'
         svc.eval_triggers()
@@ -141,7 +141,7 @@ class TestTriggers(ShinkenTest):
         # same for host
         host = self.sched.hosts.find_by_name('test_host_trigger2')
         t = self.conf.triggers.find_by_name('simple_cpu')
-        self.assert_(t in host.triggers)
+        self.assertIn(t, host.triggers)
         host.output = 'I am OK'
         host.perf_data = 'cpu=95%'
         host.eval_triggers()

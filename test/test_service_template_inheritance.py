@@ -40,8 +40,8 @@ class TestConfig(ShinkenTest):
         self.assertEqual(False, svc2.process_perf_data)
 
         print svc1.tags
-        self.assert_('no-graph' in svc1.tags)
-        self.assert_('base-service-prod' in svc1.tags)
+        self.assertIn('no-graph', svc1.tags)
+        self.assertIn('base-service-prod', svc1.tags)
 
 
 if __name__ == '__main__':

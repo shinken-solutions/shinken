@@ -46,12 +46,12 @@ class TestConfig(ShinkenTest):
             print "\t", nw.notificationway_name
 
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
-        self.assert_(email_in_day in contact.notificationways)
+        self.assertIn(email_in_day, contact.notificationways)
         email_s_cmd = email_in_day.service_notification_commands.pop()
         email_h_cmd = email_in_day.host_notification_commands.pop()
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
-        self.assert_(sms_the_night in contact.notificationways)
+        self.assertIn(sms_the_night, contact.notificationways)
         sms_s_cmd = sms_the_night.service_notification_commands.pop()
         sms_h_cmd = sms_the_night.host_notification_commands.pop()
 
@@ -73,7 +73,7 @@ class TestConfig(ShinkenTest):
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:
                 print "\t\t", c.get_name()
-        self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
+        self.assertIn(test_contact_simple_inner_notificationway, contact_simple.notificationways)
 
         # we take as criticity a huge value from now
         huge_criticity = 5

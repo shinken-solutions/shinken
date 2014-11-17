@@ -36,7 +36,7 @@ class TestEscalations(ShinkenTest):
         sid = int(Serviceescalation.id) - 1
         generated = self.sched.conf.escalations.find_by_name('Generated-Serviceescalation-%d' % sid)
         for svc in self.sched.services.find_srvs_by_hostname("test_host_0"):
-            self.assert_(generated in svc.escalations)
+            self.assertIn(generated, svc.escalations)
 
     def test_simple_escalation(self):
         self.print_header()
@@ -65,10 +65,10 @@ class TestEscalations(ShinkenTest):
 
         tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
         self.assert_(tolevel2 is not None)
-        self.assert_(tolevel2 in svc.escalations)
+        self.assertIn(tolevel2, svc.escalations)
         tolevel3 = self.sched.conf.escalations.find_by_name('ToLevel3')
         self.assert_(tolevel3 is not None)
-        self.assert_(tolevel3 in svc.escalations)
+        self.assertIn(tolevel3, svc.escalations)
 
 
         for es in svc.escalations:
@@ -178,10 +178,10 @@ class TestEscalations(ShinkenTest):
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
         self.assert_(tolevel2_time is not None)
-        self.assert_(tolevel2_time in svc.escalations)
+        self.assertIn(tolevel2_time, svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
         self.assert_(tolevel3_time is not None)
-        self.assert_(tolevel3_time in svc.escalations)
+        self.assertIn(tolevel3_time, svc.escalations)
 
         # Go for the running part!
 
@@ -313,10 +313,10 @@ class TestEscalations(ShinkenTest):
         # We check that we really linked our escalations :)
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
         self.assert_(tolevel2_time is not None)
-        self.assert_(tolevel2_time in svc.escalations)
+        self.assertIn(tolevel2_time, svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
         self.assert_(tolevel3_time is not None)
-        self.assert_(tolevel3_time in svc.escalations)
+        self.assertIn(tolevel3_time, svc.escalations)
 
         #--------------------------------------------------------------
         # service reaches soft;1
@@ -469,10 +469,10 @@ class TestEscalations(ShinkenTest):
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-shortinterval')
         self.assert_(tolevel2_time is not None)
-        self.assert_(tolevel2_time in svc.escalations)
+        self.assertIn(tolevel2_time, svc.escalations)
         #tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
         #self.assert_(tolevel3_time is not None)
-        #self.assert_(tolevel3_time in svc.escalations)
+        #self.assertIn(tolevel3_time, svc.escalations)
 
         # Go for the running part!
 
@@ -556,7 +556,7 @@ class TestEscalations(ShinkenTest):
         n = next_notifications.pop()
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
         # Should be in the escalation ToLevel2-shortinterval
-        self.assert_('ToLevel2-shortinterval' in n.already_start_escalations)
+        self.assertIn('ToLevel2-shortinterval', n.already_start_escalations)
 
         # Ok we want to be sure we are using the current escalation interval, the 1 interval = 5s
         # So here we should have a new notification for level2
@@ -586,8 +586,8 @@ class TestEscalations(ShinkenTest):
         n = next_notifications.pop()
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
         # Should be in the escalation ToLevel2-shortinterval
-        self.assert_('ToLevel2-shortinterval' in n.already_start_escalations)
-        self.assert_('ToLevel3-shortinterval' in n.already_start_escalations)
+        self.assertIn('ToLevel2-shortinterval', n.already_start_escalations)
+        self.assertIn('ToLevel3-shortinterval', n.already_start_escalations)
 
         # Make a loop for pass the next notification
         time.sleep(5)

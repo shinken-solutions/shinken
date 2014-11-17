@@ -70,7 +70,7 @@ class TestConfig(ShinkenTest):
         svc_c_dep = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C Dependant")
         self.assert_(svc_c_dep is not None)
         # Dep version should a child of svc
-        self.assert_(svc_c_dep in svc_c.child_dependencies)
+        self.assertIn(svc_c_dep, svc_c.child_dependencies)
         # But not on other of course
         self.assert_(svc_c_dep not in svc_d.child_dependencies)
 

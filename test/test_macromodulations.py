@@ -44,7 +44,7 @@ class TestMacroModulations(ShinkenTest):
         mod = self.sched.macromodulations.find_by_name("MODULATION")
         self.assert_(mod is not None)
 
-        self.assert_(mod in host.macromodulations)
+        self.assertIn(mod, host.macromodulations)
 
         c = None
         for c in host.checks_in_progress:

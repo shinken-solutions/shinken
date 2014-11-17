@@ -52,15 +52,15 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
-        self.assert_('test_router_0/SNMP' in svc_postfix_fathers)
-        self.assert_('test_host_0/SNMP' in svc_postfix_fathers)
+        self.assertIn('test_router_0/SNMP', svc_postfix_fathers)
+        self.assertIn('test_host_0/SNMP', svc_postfix_fathers)
 
         # Now look for the routers services
         svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
-        self.assert_('test_router_0/SNMP' in svc_cpu_fathers)
-        self.assert_('test_host_0/SNMP' in svc_cpu_fathers)
+        self.assertIn('test_router_0/SNMP', svc_cpu_fathers)
+        self.assertIn('test_host_0/SNMP', svc_cpu_fathers)
 
         svc.act_depend_of = []  # no hostchecks on critical checkresults
 
@@ -83,13 +83,13 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
-        self.assert_('test_host_0/SSH' in svc_postfix_fathers)
+        self.assertIn('test_host_0/SSH', svc_postfix_fathers)
 
         # Now look for the routers services
         svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
-        self.assert_('test_host_0/SSH' in svc_cpu_fathers)
+        self.assertIn('test_host_0/SSH', svc_cpu_fathers)
 
 
 

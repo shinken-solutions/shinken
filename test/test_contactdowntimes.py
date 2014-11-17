@@ -64,7 +64,7 @@ class TestContactDowntime(ShinkenTest):
         print "downtime was scheduled. check its activity and the comment\n"*5
         self.assertEqual(1, len(self.sched.contact_downtimes))
         self.assertEqual(1, len(test_contact.downtimes))
-        self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
+        self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
         self.assert_(not test_contact.downtimes[0].can_be_deleted)
@@ -145,7 +145,7 @@ class TestContactDowntime(ShinkenTest):
         print "downtime was scheduled. check its activity and the comment"
         self.assertEqual(1, len(self.sched.contact_downtimes))
         self.assertEqual(1, len(test_contact.downtimes))
-        self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
+        self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
         self.assert_(not test_contact.downtimes[0].can_be_deleted)

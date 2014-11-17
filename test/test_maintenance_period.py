@@ -119,7 +119,7 @@ class TestMaintPeriod(ShinkenTest):
             print "looks like there is no downtime"
             pass
         self.assertEqual(1, len(svc3.downtimes))
-        self.assert_(svc3.downtimes[0] in self.sched.downtimes.values())
+        self.assertIn(svc3.downtimes[0], self.sched.downtimes.values())
         self.assert_(svc3.in_scheduled_downtime)
         self.assert_(svc3.downtimes[0].fixed)
         self.assert_(svc3.downtimes[0].is_in_effect)

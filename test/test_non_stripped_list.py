@@ -38,7 +38,7 @@ class TestNonStrippedList(ShinkenTest):
         #
         print "Get the hosts and services"
         host = self.sched.hosts.find_by_name("OBIWAN")
-        self.assert_('d' in host.flap_detection_options)
+        self.assertIn('d', host.flap_detection_options)
 
 
 if __name__ == '__main__':

@@ -43,7 +43,7 @@ class TestModuleOnModule(ShinkenTest):
         mod_sub = self.sched.conf.modules.find_by_name("ToNdodb_Mysql")
         self.assert_(mod_sub is not None)
         print "Got sub module", mod_sub.get_name()
-        self.assert_(mod_sub in mod1.modules)
+        self.assertIn(mod_sub, mod1.modules)
         self.assertEqual([], mod_sub.modules)
 
 

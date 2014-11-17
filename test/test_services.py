@@ -161,8 +161,8 @@ class TestService(ShinkenTest):
         sg = self.sched.servicegroups.find_by_name("servicegroup_01")
         self.assert_(sg is not None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        self.assert_(svc in sg.members)
-        self.assert_(sg in svc.servicegroups)
+        self.assertIn(svc, sg.members)
+        self.assertIn(sg, svc.servicegroups)
 
     # Look at the good of the last_hard_state_change
     def test_service_last_hard_state(self):
@@ -211,9 +211,9 @@ class TestService(ShinkenTest):
     def test_parent_child_dep_list(self):
         svc = self.get_svc()
         # Look if our host is a parent
-        self.assert_(svc.host in svc.parent_dependencies)
+        self.assertIn(svc.host, svc.parent_dependencies)
         # and if we are a child of it
-        self.assert_(svc in svc.host.child_dependencies)
+        self.assertIn(svc, svc.host.child_dependencies)
 
 
 if __name__ == '__main__':

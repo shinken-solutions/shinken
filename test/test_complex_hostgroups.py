@@ -85,7 +85,7 @@ class TestComplexHostgroups(ShinkenTest):
         for h in hg_linux:
             print "H", h.get_name()
 
-        self.assert_(test_linux_web_prod_0 in hg_linux.members)
+        self.assertIn(test_linux_web_prod_0, hg_linux.members)
         self.assert_(test_linux_web_prod_0 not in hg_file.members)
 
         # First the service define for linux only

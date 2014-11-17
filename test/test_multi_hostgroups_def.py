@@ -44,7 +44,7 @@ class TestConfig(ShinkenTest):
 
         grp = self.sched.servicegroups.find_by_name("Crashed")
         self.assert_(grp is not None)
-        self.assert_(svc in grp.members)
+        self.assertIn(svc, grp.members)
 
 if __name__ == '__main__':
     unittest.main()

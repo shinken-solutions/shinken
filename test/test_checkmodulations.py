@@ -44,7 +44,7 @@ class TestCheckModulations(ShinkenTest):
         mod = self.sched.checkmodulations.find_by_name("MODULATION")
         self.assert_(mod is not None)
 
-        self.assert_(mod in host.checkmodulations)
+        self.assertIn(mod, host.checkmodulations)
 
         c = None
         for c in host.checks_in_progress:

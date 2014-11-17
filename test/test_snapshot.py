@@ -59,8 +59,8 @@ class TestSnapshot(ShinkenTest):
         [b.prepare() for b in broks]
         types = set([b.type for b in broks])
         print types
-        self.assert_('service_snapshot' in types)
-        self.assert_('host_snapshot' in types)
+        self.assertIn('service_snapshot', types)
+        self.assertIn('host_snapshot', types)
 
 if __name__ == '__main__':
     unittest.main()

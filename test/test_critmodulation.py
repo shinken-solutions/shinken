@@ -40,7 +40,7 @@ class TestCritMod(ShinkenTest):
         self.assert_(cm is not None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.business_impact_modulations
-        self.assert_(cm in svc.business_impact_modulations)
+        self.assertIn(cm, svc.business_impact_modulations)
 
 
 

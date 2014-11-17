@@ -64,10 +64,10 @@ class TestBusinesscorrel(ShinkenTest):
         # We check for good parent/childs links
         # So svc_cor should be a son of svc_bd1 and svc_bd2
         # and bd1 and bd2 should be parents of svc_cor
-        self.assert_(svc_cor in svc_bd1.child_dependencies)
-        self.assert_(svc_cor in svc_bd2.child_dependencies)
-        self.assert_(svc_bd1 in svc_cor.parent_dependencies)
-        self.assert_(svc_bd2 in svc_cor.parent_dependencies)
+        self.assertIn(svc_cor, svc_bd1.child_dependencies)
+        self.assertIn(svc_cor, svc_bd2.child_dependencies)
+        self.assertIn(svc_bd1, svc_cor.parent_dependencies)
+        self.assertIn(svc_bd2, svc_cor.parent_dependencies)
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -639,9 +639,9 @@ class TestBusinesscorrel(ShinkenTest):
             print i.get_name()
 
         # Assert that Simple_Or Is an impact of the problem bd2
-        self.assert_(svc_cor in svc_bd2.impacts)
+        self.assertIn(svc_cor, svc_bd2.impacts)
         # and bd1 too
-        self.assert_(svc_cor in svc_bd1.impacts)
+        self.assertIn(svc_cor, svc_bd1.impacts)
 
     def test_dep_node_list_elements(self):
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
@@ -659,8 +659,8 @@ class TestBusinesscorrel(ShinkenTest):
         print "All elements", bp_rule.list_all_elements()
         all_elt = bp_rule.list_all_elements()
 
-        self.assert_(svc_bd2 in all_elt)
-        self.assert_(svc_bd1 in all_elt)
+        self.assertIn(svc_bd2, all_elt)
+        self.assertIn(svc_bd1, all_elt)
 
         print "DBG: bd2 depend_on_me", svc_bd2.act_depend_of_me
 
@@ -896,9 +896,9 @@ class TestBusinesscorrel(ShinkenTest):
             print i.get_name()
 
         # Assert that Simple_Or Is an impact of the problem bd2
-        self.assert_(svc_cor in svc_bd2.impacts)
+        self.assertIn(svc_cor, svc_bd2.impacts)
         # and bd1 too
-        self.assert_(svc_cor in svc_bd1.impacts)
+        self.assertIn(svc_cor, svc_bd1.impacts)
 
         # And now all is green :)
         self.scheduler_loop(2, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | value1=1 value2=2']])
@@ -1305,12 +1305,12 @@ class TestBusinesscorrel(ShinkenTest):
         # We check for good parent/childs links
         # So svc_cor should be a son of svc_bd1 and svc_bd2
         # and bd1 and bd2 should be parents of svc_cor
-        self.assert_(svc_cor in svc_bd1.child_dependencies)
-        self.assert_(svc_cor in svc_bd2.child_dependencies)
-        self.assert_(svc_cor in router.child_dependencies)
-        self.assert_(svc_bd1 in svc_cor.parent_dependencies)
-        self.assert_(svc_bd2 in svc_cor.parent_dependencies)
-        self.assert_(router in svc_cor.parent_dependencies)
+        self.assertIn(svc_cor, svc_bd1.child_dependencies)
+        self.assertIn(svc_cor, svc_bd2.child_dependencies)
+        self.assertIn(svc_cor, router.child_dependencies)
+        self.assertIn(svc_bd1, svc_cor.parent_dependencies)
+        self.assertIn(svc_bd2, svc_cor.parent_dependencies)
+        self.assertIn(router, svc_cor.parent_dependencies)
 
 
         sons = bp_rule.sons
@@ -1408,8 +1408,8 @@ class TestBusinesscorrel(ShinkenTest):
         print "Root problems"
         for p in svc_cor.source_problems:
             print p.get_full_name()
-        self.assert_(svc_bd1 in svc_cor.source_problems)
-        self.assert_(svc_bd2 in svc_cor.source_problems)
+        self.assertIn(svc_bd1, svc_cor.source_problems)
+        self.assertIn(svc_bd2, svc_cor.source_problems)
 
 
 
@@ -1427,7 +1427,7 @@ class TestBusinesscorrel(ShinkenTest):
         print "Root problems"
         for p in svc_cor.source_problems:
             print p.get_full_name()
-        self.assert_(router in svc_cor.source_problems)
+        self.assertIn(router, svc_cor.source_problems)
 
 
 
