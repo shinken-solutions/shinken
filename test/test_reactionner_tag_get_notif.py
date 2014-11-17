@@ -80,7 +80,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
         taggued_runonwindows_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['runonwindows'])
-        self.assert_(len(taggued_runonwindows_checks) > 0)
+        self.assertGreater(len(taggued_runonwindows_checks), 0)
         for c in taggued_runonwindows_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/notifier.pl'))
@@ -89,14 +89,14 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
         taggued_sms_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['sms'])
-        self.assert_(len(taggued_sms_checks) > 0)
+        self.assertGreater(len(taggued_sms_checks), 0)
         for c in taggued_sms_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/sms.pl'))
 
 
         taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'])
-        self.assert_(len(taggued_eventtag_checks) > 0)
+        self.assertGreater(len(taggued_eventtag_checks), 0)
         for c in taggued_eventtag_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_eventhandler.pl'))
@@ -138,7 +138,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
         taggued_runonwindows_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['runonwindows'], module_types=['fork'])
-        self.assert_(len(taggued_runonwindows_checks) > 0)
+        self.assertGreater(len(taggued_runonwindows_checks), 0)
         for c in taggued_runonwindows_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/notifier.pl'))

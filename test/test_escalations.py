@@ -117,7 +117,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
 
         # One more bad, we go 3
@@ -236,7 +236,7 @@ class TestEscalations(ShinkenTest):
 
         print "cnn and cur", cnn, svc.current_notification_number
         # We check that we really raise the notif number too
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
 
         for n in svc.notifications_in_progress.values():
@@ -382,7 +382,7 @@ class TestEscalations(ShinkenTest):
 
         print "Level 2 got warn, now we search for level3"
         print "cnn and cur", cnn, svc.current_notification_number
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
 
         # Now the same thing, but for level3, so one more hour
@@ -544,7 +544,7 @@ class TestEscalations(ShinkenTest):
 
         print "cnn and cur", cnn, svc.current_notification_number
         # We check that we really raise the notif number too
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
         
         # Ok we should have one notification

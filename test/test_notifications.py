@@ -89,13 +89,13 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications
         #--------------------------------------------------------------
@@ -104,7 +104,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications (theoretically)
         # BUT: test_contact filters notifications

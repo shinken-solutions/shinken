@@ -53,14 +53,14 @@ class TestPollerTagGetchecks(ShinkenTest):
         # Ask for untag checks only
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'])
         print "Got untaggued_checks", untaggued_checks
-        self.assert_(len(untaggued_checks) > 0)
+        self.assertGreater(len(untaggued_checks), 0)
         for c in untaggued_checks:
             # Should be the service one, but not the host one
             self.assert_(c.command.startswith('plugins/test_servicecheck.pl'))
 
         # Now get only tag ones
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'])
-        self.assert_(len(taggued_checks) > 0)
+        self.assertGreater(len(taggued_checks), 0)
         for c in taggued_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
@@ -90,7 +90,7 @@ class TestPollerTagGetchecks(ShinkenTest):
         # Ask for badly named module type
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
         print "Got untaggued_checks for forks", untaggued_checks
-        self.assert_(len(untaggued_checks) > 0)
+        self.assertGreater(len(untaggued_checks), 0)
         print "NB CHECKS", len(untaggued_checks)
         for c in untaggued_checks:
             print c.command

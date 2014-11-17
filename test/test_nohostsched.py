@@ -58,7 +58,7 @@ class TestHostspecialSched(ShinkenTest):
         self.assert_(host.next_chk - now < 301)
         # but in 5min in fact, so more than 290,
         # something like 299.0
-        self.assert_(host.next_chk - now > 290)
+        self.assertGreater(host.next_chk - now, 290)
 
 
 

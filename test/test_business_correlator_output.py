@@ -102,9 +102,9 @@ class TestBusinesscorrelOutput(ShinkenTest):
 
         # Performs checks
         output = svc_cor.output
-        self.assert_(output.find("[WARNING: test_host_02/srv2]") > 0)
-        self.assert_(output.find("[CRITICAL: test_host_03/srv3]") > 0)
-        self.assert_(output.find("[DOWN: test_host_04]") > 0)
+        self.assertGreater(output.find("[WARNING: test_host_02/srv2]"), 0)
+        self.assertGreater(output.find("[CRITICAL: test_host_03/srv3]"), 0)
+        self.assertGreater(output.find("[DOWN: test_host_04]"), 0)
         # Should not display OK state checks
         self.assertEqual(-1, output.find("[OK: test_host_01/srv1]") )
         self.assert_(output.startswith("CRITICAL"))

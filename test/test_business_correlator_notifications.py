@@ -115,7 +115,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
         self.scheduler_loop(1, [[svc_cor, None, None]])
-        self.assert_(svc2.scheduled_downtime_depth > 0)
+        self.assertGreater(svc2.scheduled_downtime_depth, 0)
 
         self.assertIs(False, svc_cor.notification_is_blocked_by_item('PROBLEM'))
 
@@ -155,7 +155,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
 
         self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
         self.scheduler_loop(1, [[svc_cor, None, None]])
-        self.assert_(hst2.scheduled_downtime_depth > 0)
+        self.assertGreater(hst2.scheduled_downtime_depth, 0)
 
         self.assertIs(False, svc_cor.notification_is_blocked_by_item('PROBLEM'))
 

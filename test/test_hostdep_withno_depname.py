@@ -42,7 +42,7 @@ class TestHostDepWithNodepname(ShinkenTest):
         self.assertIsNot(h2, None)
         # Should got a link between host and h2
         print h2.act_depend_of
-        self.assert_(len(h2.act_depend_of) > 0)
+        self.assertGreater(len(h2.act_depend_of), 0)
         l = h2.act_depend_of[0]
         h = l[0]  # the host that h2 depend on
         self.assertIs(host, h)
