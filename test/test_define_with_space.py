@@ -33,7 +33,7 @@ class TestDefineWithSpaces(ShinkenTest):
     # We got a problem with define    host for example, the type read was "" and not host
     def testdefine_with_spaces(self):
         host = self.sched.hosts.find_by_name("test_host_0")
-        self.assert_(host is not None)
+        self.assertIsNot(host, None)
 
 
 if __name__ == '__main__':

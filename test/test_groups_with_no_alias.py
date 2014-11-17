@@ -38,12 +38,12 @@ class TestGroupwithNoAlias(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         hg = self.sched.hostgroups.find_by_name("NOALIAS")
-        self.assert_(hg is not None)
+        self.assertIsNot(hg, None)
         print hg.__dict__
         self.assertEqual("NOALIAS", hg.alias)
 
         sg = self.sched.servicegroups.find_by_name("NOALIAS")
-        self.assert_(sg is not None)
+        self.assertIsNot(sg, None)
         print sg.__dict__
         self.assertEqual("NOALIAS", sg.alias)
 

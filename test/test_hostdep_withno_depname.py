@@ -39,7 +39,7 @@ class TestHostDepWithNodepname(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         h2 = self.sched.hosts.find_by_name("test_host_1")
-        self.assert_(h2 is not None)
+        self.assertIsNot(h2, None)
         # Should got a link between host and h2
         print h2.act_depend_of
         self.assert_(len(h2.act_depend_of) > 0)

@@ -38,7 +38,7 @@ class TestServicegroup(ShinkenTest):
         for name in ["MYSVCGP", "MYSVCGP2", "MYSVCGP3", "MYSVCGP4"]:
             sg = self.sched.servicegroups.find_by_name(name)
             sgs.append(sg)
-            self.assert_(sg is not None)
+            self.assertIsNot(sg, None)
 
         svc3 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc3")
         svc4 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc4")

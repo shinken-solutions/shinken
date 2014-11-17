@@ -40,7 +40,7 @@ class TestHostspecialSched(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("moncul")
-        self.assert_(host is not None)
+        self.assertIsNot(host, None)
         print "check", host.next_chk
         print "Check in", host.next_chk - now
         self.assert_(host.next_chk - now < 301)

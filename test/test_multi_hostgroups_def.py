@@ -38,12 +38,12 @@ class TestConfig(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("will crash")
-        self.assert_(host is not None)
+        self.assertIsNot(host, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("will crash", "Crash")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
         grp = self.sched.servicegroups.find_by_name("Crashed")
-        self.assert_(grp is not None)
+        self.assertIsNot(grp, None)
         self.assertIn(svc, grp.members)
 
 if __name__ == '__main__':

@@ -64,10 +64,10 @@ class TestEscalations(ShinkenTest):
         self.assertEqual(0, svc.current_notification_number)
 
         tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
-        self.assert_(tolevel2 is not None)
+        self.assertIsNot(tolevel2, None)
         self.assertIn(tolevel2, svc.escalations)
         tolevel3 = self.sched.conf.escalations.find_by_name('ToLevel3')
-        self.assert_(tolevel3 is not None)
+        self.assertIsNot(tolevel3, None)
         self.assertIn(tolevel3, svc.escalations)
 
 
@@ -177,10 +177,10 @@ class TestEscalations(ShinkenTest):
 
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
-        self.assert_(tolevel2_time is not None)
+        self.assertIsNot(tolevel2_time, None)
         self.assertIn(tolevel2_time, svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
-        self.assert_(tolevel3_time is not None)
+        self.assertIsNot(tolevel3_time, None)
         self.assertIn(tolevel3_time, svc.escalations)
 
         # Go for the running part!
@@ -312,10 +312,10 @@ class TestEscalations(ShinkenTest):
 
         # We check that we really linked our escalations :)
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
-        self.assert_(tolevel2_time is not None)
+        self.assertIsNot(tolevel2_time, None)
         self.assertIn(tolevel2_time, svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
-        self.assert_(tolevel3_time is not None)
+        self.assertIsNot(tolevel3_time, None)
         self.assertIn(tolevel3_time, svc.escalations)
 
         #--------------------------------------------------------------
@@ -468,10 +468,10 @@ class TestEscalations(ShinkenTest):
 
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-shortinterval')
-        self.assert_(tolevel2_time is not None)
+        self.assertIsNot(tolevel2_time, None)
         self.assertIn(tolevel2_time, svc.escalations)
         #tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
-        #self.assert_(tolevel3_time is not None)
+        #self.assertIsNot(tolevel3_time, None)
         #self.assertIn(tolevel3_time, svc.escalations)
 
         # Go for the running part!

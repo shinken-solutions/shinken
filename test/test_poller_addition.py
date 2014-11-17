@@ -124,34 +124,34 @@ class TestPollerAddition(ShinkenTest):
             a.__class__ = GoodArbiter
         print "Preparing schedulers"
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
-        self.assert_(scheduler1 is not None)
+        self.assertIsNot(scheduler1, None)
         scheduler1.__class__ = GoodScheduler
         scheduler2 = self.conf.schedulers.find_by_name('scheduler-all-2')
-        self.assert_(scheduler2 is not None)
+        self.assertIsNot(scheduler2, None)
         scheduler2.__class__ = BadScheduler
 
         print "Preparing pollers"
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
-        self.assert_(poller1 is not None)
+        self.assertIsNot(poller1, None)
         poller1.__class__ = GoodPoller
         poller2 = self.conf.pollers.find_by_name('poller-all-2')
-        self.assert_(poller2 is not None)
+        self.assertIsNot(poller2, None)
         poller2.__class__ = BadPoller
 
         print "Preparing reactionners"
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
-        self.assert_(reactionner1 is not None)
+        self.assertIsNot(reactionner1, None)
         reactionner1.__class__ = GoodReactionner
         reactionner2 = self.conf.reactionners.find_by_name('reactionner-all-2')
-        self.assert_(reactionner2 is not None)
+        self.assertIsNot(reactionner2, None)
         reactionner2.__class__ = BadReactionner
 
         print "Preparing brokers"
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
-        self.assert_(broker1 is not None)
+        self.assertIsNot(broker1, None)
         broker1.__class__ = GoodBroker
         broker2 = self.conf.brokers.find_by_name('broker-all-2')
-        self.assert_(broker2 is not None)
+        self.assertIsNot(broker2, None)
         broker2.__class__ = BadBroker
 
         # Ping all elements. Should have 1 as OK, 2 as
@@ -299,7 +299,7 @@ class TestPollerAddition(ShinkenTest):
 
         # Look for the poller now
         newpoller = self.conf.pollers.find_by_name('newpoller')
-        self.assert_(newpoller is not None)
+        self.assertIsNot(newpoller, None)
         newpoller.__class__ = GoodPoller
 
         ### Wht now with our new poller object?

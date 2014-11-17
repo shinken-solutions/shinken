@@ -41,7 +41,7 @@ class TestConfigWithSymlinks(ShinkenTest):
             print "On python 2.4 and 2.5, the symlinks following is NOT managed"
             return
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_HIDDEN")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
 
 if __name__ == '__main__':

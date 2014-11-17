@@ -33,9 +33,9 @@ class TestObjectsAndNotifWays(ShinkenTest):
     # and asking for  broks. Search why
     def test_dummy(self):
         c_normal = self.sched.contacts.find_by_name("test_contact")
-        self.assert_(c_normal is not None)
+        self.assertIsNot(c_normal, None)
         c_nw = self.sched.contacts.find_by_name("test_contact_nw")
-        self.assert_(c_nw is not None)
+        self.assertIsNot(c_nw, None)
 
         b = c_normal.get_initial_status_brok()
         b.prepare()

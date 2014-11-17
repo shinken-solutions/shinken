@@ -35,13 +35,13 @@ class TestBusinesscorrelOutput(ShinkenTest):
     def test_bprule_empty_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "empty_bp_rule_output")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assertEqual("", svc_cor.get_business_rule_output())
 
     def test_bprule_expand_template_macros(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_output")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -81,7 +81,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
     def test_bprule_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_output")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
@@ -112,7 +112,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
     def test_bprule_xof_one_critical_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
@@ -138,7 +138,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
     def test_bprule_xof_all_ok_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")

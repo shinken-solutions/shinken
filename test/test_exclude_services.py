@@ -40,31 +40,31 @@ class TestPropertyOverride(ShinkenTest):
 
         # All services should exist for test_host_01
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc11")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc12")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc21")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc22")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc1")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc2")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
         # Half the services only should exist for test_host_02
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc11")
         self.assert_(svc is None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc12")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc21")
         self.assert_(svc is None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc22")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc1")
         self.assert_(svc is None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc2")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
 
 

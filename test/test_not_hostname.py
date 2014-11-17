@@ -49,7 +49,7 @@ class TestConfig(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         svc_not = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_0")
         # Check if the service for the good host is here
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         # check if the service for the not one (!) is not here
         self.assert_(svc_not is None)
 

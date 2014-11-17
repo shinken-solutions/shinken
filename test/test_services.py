@@ -159,7 +159,7 @@ class TestService(ShinkenTest):
     # Look if the service is in the servicegroup
     def test_servicegroup(self):
         sg = self.sched.servicegroups.find_by_name("servicegroup_01")
-        self.assert_(sg is not None)
+        self.assertIsNot(sg, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.assertIn(svc, sg.members)
         self.assertIn(sg, svc.servicegroups)

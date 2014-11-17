@@ -38,11 +38,11 @@ class TestCheckModulations(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("host_modulated")
-        self.assert_(host is not None)
+        self.assertIsNot(host, None)
         print host.checkmodulations
 
         mod = self.sched.checkmodulations.find_by_name("MODULATION")
-        self.assert_(mod is not None)
+        self.assertIsNot(mod, None)
 
         self.assertIn(mod, host.checkmodulations)
 

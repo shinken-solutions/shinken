@@ -71,7 +71,7 @@ class TestDiscoveryConf(ShinkenTest):
 
         # Now look for strict rule application
         genhttpstrict = self.sched.conf.discoveryrules.find_by_name('GenHttpStrict')
-        self.assert_(genhttpstrict is not None)
+        self.assertIsNot(genhttpstrict, None)
         key = 'openports'
         value = '80,443'
         self.assert_(genhttpstrict.is_matching(key, value) == True)

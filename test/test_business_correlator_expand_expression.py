@@ -39,7 +39,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_00", "bprule_01", "bprule_02", "bprule_03", "bprule_04", "bprule_05", "bprule_06"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('&', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -60,7 +60,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_10", "bprule_11", "bprule_12", "bprule_13", "bprule_14", "bprule_15", "bprule_16", "bprule_17"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('of:', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -81,7 +81,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_20", "bprule_21", "bprule_22", "bprule_23", "bprule_24", "bprule_25", "bprule_26"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('&', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -112,7 +112,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_30", "bprule_31", "bprule_32", "bprule_33", "bprule_34", "bprule_35", "bprule_36"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('|', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -143,7 +143,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_40", "bprule_41", "bprule_42", "bprule_43"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('&', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -164,7 +164,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_50", "bprule_51", "bprule_52", "bprule_53", "bprule_54"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('of:', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -185,7 +185,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_60", "bprule_61"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_01", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('&', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -206,7 +206,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         for name in ("bprule_70", "bprule_71"):
             svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_01", name)
             self.assert_(svc_cor.got_business_rule is True)
-            self.assert_(svc_cor.business_rule is not None)
+            self.assertIsNot(svc_cor.business_rule, None)
             bp_rule = svc_cor.business_rule
             self.assertEqual('of:', bp_rule.operand)
             self.assert_(bp_rule.not_value is False)
@@ -227,7 +227,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Tests macro expansion
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_no_macro")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assertEqual('of:', bp_rule.operand)
@@ -265,7 +265,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Tests macro expansion
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bprule_macro_expand")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assertEqual('of:', bp_rule.operand)
@@ -303,7 +303,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Tests macro modulation
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy_modulated", "bprule_macro_modulated")
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.processed_business_rule == "2 of: test_host_01,srv1 & test_host_02,srv2")
         bp_rule = svc_cor.business_rule
         self.assertEqual('of:', bp_rule.operand)
@@ -345,7 +345,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         self.scheduler_loop(2, [[svc_cor, None, None]], do_sleep=True)
 
         self.assert_(svc_cor.processed_business_rule == "1 of: test_host_01,srv1 & test_host_02,srv2")
-        self.assert_(svc_cor.business_rule is not bp_rule)
+        self.assertIsNot(svc_cor.business_rule, bp_rule)
         bp_rule = svc_cor.business_rule
         self.assertEqual('of:', bp_rule.operand)
         self.assert_(bp_rule.of_values == ('1', '2', '2'))

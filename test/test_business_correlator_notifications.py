@@ -35,7 +35,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_default")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_smart_notifications is False)
 
         dummy = self.sched.hosts.find_by_name("dummy")
@@ -62,7 +62,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_smart_notifications is True)
 
         dummy = self.sched.hosts.find_by_name("dummy")
@@ -91,7 +91,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_smart_notifications is True)
         self.assert_(svc_cor.business_rule_downtime_as_ack is False)
 
@@ -130,7 +130,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_smart_notif")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
         self.assert_(svc_cor.business_rule_smart_notifications is True)
         self.assert_(svc_cor.business_rule_downtime_as_ack is False)
 
@@ -170,7 +170,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "bp_rule_child_notif")
         svc_cor.act_depend_of = []
         self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIsNot(svc_cor.business_rule, None)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         hst2 = self.sched.hosts.find_by_name("test_host_02")

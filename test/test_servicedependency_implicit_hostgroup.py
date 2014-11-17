@@ -38,16 +38,16 @@ class TestServiceDepAndGroups(ShinkenTest):
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX")
-        self.assert_(svc_postfix is not None)
+        self.assertIsNot(svc_postfix, None)
 
         svc_snmp = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "SNMP")
-        self.assert_(svc_snmp is not None)
+        self.assertIsNot(svc_snmp, None)
 
         svc_cpu = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "CPU")
-        self.assert_(svc_cpu is not None)
+        self.assertIsNot(svc_cpu, None)
 
         svc_snmp2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
-        self.assert_(svc_snmp2 is not None)
+        self.assertIsNot(svc_snmp2, None)
 
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
@@ -72,13 +72,13 @@ class TestServiceDepAndGroups(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX_BYSSH")
-        self.assert_(svc_postfix is not None)
+        self.assertIsNot(svc_postfix, None)
 
         svc_ssh = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "SSH")
-        self.assert_(svc_ssh is not None)
+        self.assertIsNot(svc_ssh, None)
 
         svc_cpu = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "CPU_BYSSH")
-        self.assert_(svc_cpu is not None)
+        self.assertIsNot(svc_cpu, None)
 
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers

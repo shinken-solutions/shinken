@@ -219,7 +219,7 @@ class TestProblemImpact(ShinkenTest):
         # Our crit mod that will allow us to play with on the fly
         # business_impact modulation
         critmod = self.sched.conf.businessimpactmodulations.find_by_name('Raise')
-        self.assert_(critmod is not None)
+        self.assertIsNot(critmod, None)
 
         # We lie here, from now we do not want criticities
         for h in all_hosts:

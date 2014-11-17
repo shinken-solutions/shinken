@@ -46,10 +46,10 @@ class TestStarInGroups(ShinkenTest):
         router.checks_in_progress = []
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST_HNAME_STAR")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
 
 if __name__ == '__main__':

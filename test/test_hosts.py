@@ -154,7 +154,7 @@ class TestHost(ShinkenTest):
 
     def test_hostgroup(self):
         hg = self.sched.hostgroups.find_by_name("hostgroup_01")
-        self.assert_(hg is not None)
+        self.assertIsNot(hg, None)
         h = self.sched.hosts.find_by_name('test_host_0')
         self.assertIn(h, hg.members)
         self.assertIn(hg, h.hostgroups)

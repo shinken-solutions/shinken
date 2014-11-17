@@ -38,9 +38,9 @@ class TestConfig(ShinkenTest):
         for s in self.sched.services:
             print s.get_full_name()
         NRPE = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "NRPE")
-        self.assert_(NRPE is not None)
+        self.assertIsNot(NRPE, None)
         Load = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "Load")
-        self.assert_(Load is not None)
+        self.assertIsNot(Load, None)
         print Load.act_depend_of
         self.assert_(NRPE in [e[0] for e in Load.act_depend_of])
 

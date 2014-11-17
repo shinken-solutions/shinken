@@ -37,16 +37,16 @@ class TestNestedHostgroups(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
         router = self.sched.hosts.find_by_name("test_router_0")
         hg_high = self.sched.conf.hostgroups.find_by_name('high_level')
-        self.assert_(hg_high is not None)
+        self.assertIsNot(hg_high, None)
         self.assertIn(host, hg_high.members)
         self.assertIn(router, hg_high.members)
         hg_low = self.sched.conf.hostgroups.find_by_name('low_level')
-        self.assert_(hg_low is not None)
+        self.assertIsNot(hg_low, None)
         self.assertIn(host, hg_low.members)
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "NestedService")
-        self.assert_(svc1 is not None)
+        self.assertIsNot(svc1, None)
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "NestedService")
-        self.assert_(svc2 is not None)
+        self.assertIsNot(svc2, None)
 
         # And now look for the service testHostToGroup apply on the group
         # high_level, and the host test_host_2 should be on it, so it must have
@@ -54,13 +54,13 @@ class TestNestedHostgroups(ShinkenTest):
         host2 = self.sched.hosts.find_by_name("test_host_2")
         self.assertIn(host2, hg_high.members)
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "testHostToGroup")
-        self.assert_(svc3 is not None)
+        self.assertIsNot(svc3, None)
 
         # And same with an host in the low_group, should have it too
         host3 = self.sched.hosts.find_by_name("test_host_3")
         self.assertIn(host3, hg_high.members)
         svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_3", "testHostToGroup")
-        self.assert_(svc4 is not None)
+        self.assertIsNot(svc4, None)
 
 
 

@@ -34,8 +34,8 @@ class TestMultiVuledAttributes(ShinkenTest):
     def test_multi_valued_attributes(self):
         hst1 = self.sched.hosts.find_by_name("test_host_01")
         srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
-        self.assert_(hst1 is not None)
-        self.assert_(srv1 is not None)
+        self.assertIsNot(hst1, None)
+        self.assertIsNot(srv1, None)
 
         # inherited parameter
         self.assert_(hst1.active_checks_enabled is True)

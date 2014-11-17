@@ -145,7 +145,7 @@ class TestTimeperiods(ShinkenTest):
         # Now look for the never case
         print "24x7" * 10
         t = self.conf.timeperiods.find_by_name('24x7')
-        self.assert_(t is not None)
+        self.assertIsNot(t, None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
         print "RES:", t_next_inv #, t.is_time_valid(july_the_12)

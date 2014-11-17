@@ -38,7 +38,7 @@ class TestTPStateLog(ShinkenTest):
         now = time.time()
         tp = self.sched.timeperiods.find_by_name('24x7')
 
-        self.assert_(tp is not None)
+        self.assertIsNot(tp, None)
         tp.check_and_log_activation_change()
         self.assert_(self.any_log_match("TIMEPERIOD TRANSITION: 24x7;-1;1"))
         self.show_and_clear_logs()

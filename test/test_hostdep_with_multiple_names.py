@@ -33,7 +33,7 @@ class TestHostDepWithMultipleNames(ShinkenTest):
     def test_DepWithMultipleNames(self):
         for n in ['svn1', 'svn2', 'svn3', 'svn4', 'nas1', 'nas2', 'nas3']:
             globals()[n] = self.sched.hosts.find_by_name(n)
-            self.assert_(globals()[n] is not None)
+            self.assertIsNot(globals()[n], None)
         # We check that nas3 is a father of svn4, the simple case
         self.assert_(nas3 in [e[0] for e in svn4.act_depend_of])
 

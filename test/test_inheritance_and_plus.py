@@ -38,11 +38,11 @@ class TestInheritanceAndPlus(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         linux = self.sched.hostgroups.find_by_name('linux')
-        self.assert_(linux is not None)
+        self.assertIsNot(linux, None)
         dmz = self.sched.hostgroups.find_by_name('DMZ')
-        self.assert_(dmz is not None)
+        self.assertIsNot(dmz, None)
         mysql = self.sched.hostgroups.find_by_name('mysql')
-        self.assert_(mysql is not None)
+        self.assertIsNot(mysql, None)
 
         host1 = self.sched.hosts.find_by_name("test-server1")
         host2 = self.sched.hosts.find_by_name("test-server2")

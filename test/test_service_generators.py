@@ -49,11 +49,11 @@ class TestConfig(ShinkenTest):
         svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service F")
         svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service G")
 
-        self.assert_(svc_c is not None)
-        self.assert_(svc_d is not None)
-        self.assert_(svc_e is not None)
-        self.assert_(svc_f is not None)
-        self.assert_(svc_g is not None)
+        self.assertIsNot(svc_c, None)
+        self.assertIsNot(svc_d, None)
+        self.assertIsNot(svc_e, None)
+        self.assertIsNot(svc_f, None)
+        self.assertIsNot(svc_g, None)
 
         # two classics
         self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
@@ -68,7 +68,7 @@ class TestConfig(ShinkenTest):
 
         # Now check that the dependencies are also created as Generated Service C Dependant -> Generated Service C
         svc_c_dep = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C Dependant")
-        self.assert_(svc_c_dep is not None)
+        self.assertIsNot(svc_c_dep, None)
         # Dep version should a child of svc
         self.assertIn(svc_c_dep, svc_c.child_dependencies)
         # But not on other of course
@@ -95,11 +95,11 @@ class TestConfig(ShinkenTest):
         svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT F")
         svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT G")
 
-        self.assert_(svc_c is not None)
-        self.assert_(svc_d is not None)
+        self.assertIsNot(svc_c, None)
+        self.assertIsNot(svc_d, None)
         self.assert_(svc_e is None)
         self.assert_(svc_f is None)
-        self.assert_(svc_g is not None)
+        self.assertIsNot(svc_g, None)
 
     def test_service_generators_key_generator(self):
 
@@ -118,13 +118,13 @@ class TestConfig(ShinkenTest):
                 n = "Unit %d Port %d" % (unit_id, port_id)
                 print "Look for port", 'Generated Service ' + n
                 svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
-                self.assert_(svc is not None)
+                self.assertIsNot(svc, None)
         for unit_id in xrange(1, 7):
             port_id = 47
             n = "Unit %d Port %d" % (unit_id, port_id)
             print "Look for port", 'Generated Service ' + n
             svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
-            self.assert_(svc is not None)
+            self.assertIsNot(svc, None)
 
     def test_service_generators_array(self):
 
@@ -137,19 +137,19 @@ class TestConfig(ShinkenTest):
             print s.get_name()
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/1')
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         self.assertEqual('check_service!1!80%!90%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/2')
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         self.assertEqual('check_service!2!80%!90%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Ethernet0/1')
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         self.assertEqual('check_service!3!80%!95%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service ISDN1')
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         self.assertEqual('check_service!4!80%!95%', svc.check_command.call)
 
 

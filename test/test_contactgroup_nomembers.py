@@ -35,7 +35,7 @@ class TestContactgroupWitoutMembers(ShinkenTest):
     def test_contactgroup_nomember(self):
         # Look for the members of the test_contact_nomember
         cg = self.sched.conf.contactgroups.find_by_name('test_contact_nomember')
-        self.assert_(cg is not None)
+        self.assertIsNot(cg, None)
         print cg.members
         self.assertEqual([], cg.members)
 

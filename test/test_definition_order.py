@@ -36,8 +36,8 @@ class TestDefinitionOrder(ShinkenTest):
         svc_specific = self.sched.services.find_srv_by_name_and_hostname("test_host_specific", "ZE-SERVICE")
         svc_generic  = self.sched.services.find_srv_by_name_and_hostname("test_host_generic", "ZE-SERVICE")
         
-        self.assert_(svc_specific is not None)
-        self.assert_(svc_generic is not None)
+        self.assertIsNot(svc_specific, None)
+        self.assertIsNot(svc_generic, None)
 
         print svc_generic.check_command.command.command_name
         self.assertEqual('general', svc_generic.check_command.command.command_name)
