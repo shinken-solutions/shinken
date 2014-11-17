@@ -471,7 +471,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
-        broks = getattr(self.sched, 'broks', self.broks)
+        broks = getattr(self, 'sched', self).broks
         broks = sorted(broks.values(), lambda x, y: x.id - y.id)
         for brok in broks:
             if brok.type == 'log':
@@ -487,8 +487,12 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
             "pattern = %r\n" "broks = %r" % (pattern, broks)
         )
 
-    assert_any_log_match = partial(_any_log_match, assert_not=False)
-    assert_no_log_match = partial(_any_log_match, assert_not=True)
+    def assert_any_log_match(self, pattern):
+        self._any_log_match(pattern, assert_not=False)
+
+    def assert_no_log_match(self, pattern):
+        self._any_log_match(pattern, assert_not=True)
+
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
