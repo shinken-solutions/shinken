@@ -74,7 +74,7 @@ class TestModuleManager(ShinkenTest):
 
         # should be nothing more in to_restart of
         # the module manager
-        self.assert_(self.modulemanager.to_restart == [])
+        self.assertEqual([], self.modulemanager.to_restart)
 
         # Now we look for time restart so we kill it again
         ls._BaseModule__kill()

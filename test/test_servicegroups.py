@@ -33,7 +33,7 @@ class TestServicegroup(ShinkenTest):
 
 
     def test_servicegroup(self):
-        self.assert_(self.conf.conf_is_correct == True)
+        self.assertEqual(True, self.conf.conf_is_correct)
         sgs = []
         for name in ["MYSVCGP", "MYSVCGP2", "MYSVCGP3", "MYSVCGP4"]:
             sg = self.sched.servicegroups.find_by_name(name)

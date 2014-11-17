@@ -37,7 +37,7 @@ class TestContactgroupWitoutMembers(ShinkenTest):
         cg = self.sched.conf.contactgroups.find_by_name('test_contact_nomember')
         self.assert_(cg is not None)
         print cg.members
-        self.assert_(cg.members == [])
+        self.assertEqual([], cg.members)
 
 
 if __name__ == '__main__':

@@ -435,7 +435,7 @@ class TestTimeperiods(ShinkenTest):
 
         print "T next", t_next
     #    print "T now", now
-    #    self.assert_(t_next == now)
+    #    self.assertEqual(now, t_next)
         self.assert_(t_next == "Wed Jul 14 00:00:01 2010")
 
     # short test to check the invalid function of timeranges

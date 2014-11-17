@@ -36,8 +36,8 @@ class TestHost(ShinkenTest):
     def test_get_name(self):
         hst = self.get_hst()
         print hst.get_dbg_name()
-        self.assert_(hst.get_name() == 'test_host_0')
-        self.assert_(hst.get_dbg_name() == 'test_host_0')
+        self.assertEqual('test_host_0', hst.get_name())
+        self.assertEqual('test_host_0', hst.get_dbg_name())
 
 
     # getstate should be with all properties in dict class + id
@@ -48,7 +48,7 @@ class TestHost(ShinkenTest):
         # We get the state
         state = hst.__getstate__()
         # Check it's the good length
-        self.assert_(len(state) == len(cls.properties) + len(cls.running_properties) + 1)
+        self.assertEqual(len(cls.properties, len(state)) + len(cls.running_properties) + 1)
         # we copy the service
         hst_copy = copy.copy(hst)
         # reset the state in the original service
@@ -65,12 +65,12 @@ class TestHost(ShinkenTest):
         hst = self.get_hst()
 
         # first it's ok
-        self.assert_(hst.is_correct() == True)
+        self.assertEqual(True, hst.is_correct())
 
         # Now try to delete a required property
         max_check_attempts = hst.max_check_attempts
         del hst.max_check_attempts
-        self.assert_(hst.is_correct() == True)
+        self.assertEqual(True, hst.is_correct())
         hst.max_check_attempts = max_check_attempts
 
         ###
@@ -80,16 +80,16 @@ class TestHost(ShinkenTest):
         # no check command
         check_command = hst.check_command
         del hst.check_command
-        self.assert_(hst.is_correct() == False)
+        self.assertEqual(False, hst.is_correct())
         hst.check_command = check_command
-        self.assert_(hst.is_correct() == True)
+        self.assertEqual(True, hst.is_correct())
 
         # no notification_interval
         notification_interval = hst.notification_interval
         del hst.notification_interval
-        self.assert_(hst.is_correct() == False)
+        self.assertEqual(False, hst.is_correct())
         hst.notification_interval = notification_interval
-        self.assert_(hst.is_correct() == True)
+        self.assertEqual(True, hst.is_correct())
 
 
     # Look for set/unset impacted states (unknown)
@@ -98,11 +98,11 @@ class TestHost(ShinkenTest):
         ori_state = hst.state
         ori_state_id = hst.state_id
         hst.set_impact_state()
-        self.assert_(hst.state == 'UNREACHABLE')
-        self.assert_(hst.state_id == 2)
+        self.assertEqual('UNREACHABLE', hst.state)
+        self.assertEqual(2, hst.state_id)
         hst.unset_impact_state()
-        self.assert_(hst.state == ori_state)
-        self.assert_(hst.state_id == ori_state_id)
+        self.assertEqual(ori_state, hst.state)
+        self.assertEqual(ori_state_id, hst.state_id)
 
 
     def test_states_from_exit_status(self):
@@ -110,46 +110,46 @@ class TestHost(ShinkenTest):
 
         # First OK
         self.scheduler_loop(1, [[hst, 0, 'OK']])
-        self.assert_(hst.state == 'UP')
-        self.assert_(hst.state_id == 0)
-        self.assert_(hst.is_state('UP') == True)
-        self.assert_(hst.is_state('o') == True)
+        self.assertEqual('UP', hst.state)
+        self.assertEqual(0, hst.state_id)
+        self.assertEqual(True, hst.is_state('UP'))
+        self.assertEqual(True, hst.is_state('o'))
 
         # Then warning
         self.scheduler_loop(1, [[hst, 1, 'WARNING']])
-        self.assert_(hst.state == 'UP')
-        self.assert_(hst.state_id == 0)
-        self.assert_(hst.is_state('UP') == True)
-        self.assert_(hst.is_state('o') == True)
+        self.assertEqual('UP', hst.state)
+        self.assertEqual(0, hst.state_id)
+        self.assertEqual(True, hst.is_state('UP'))
+        self.assertEqual(True, hst.is_state('o'))
 
         # Then Critical
         self.scheduler_loop(1, [[hst, 2, 'CRITICAL']])
-        self.assert_(hst.state == 'DOWN')
-        self.assert_(hst.state_id == 1)
-        self.assert_(hst.is_state('DOWN') == True)
-        self.assert_(hst.is_state('d') == True)
+        self.assertEqual('DOWN', hst.state)
+        self.assertEqual(1, hst.state_id)
+        self.assertEqual(True, hst.is_state('DOWN'))
+        self.assertEqual(True, hst.is_state('d'))
 
         # And unknown
         self.scheduler_loop(1, [[hst, 3, 'UNKNOWN']])
-        self.assert_(hst.state == 'DOWN')
-        self.assert_(hst.state_id == 1)
-        self.assert_(hst.is_state('DOWN') == True)
-        self.assert_(hst.is_state('d') == True)
+        self.assertEqual('DOWN', hst.state)
+        self.assertEqual(1, hst.state_id)
+        self.assertEqual(True, hst.is_state('DOWN'))
+        self.assertEqual(True, hst.is_state('d'))
 
         # And something else :)
         self.scheduler_loop(1, [[hst, 99, 'WTF THE PLUGIN DEV DID? :)']])
-        self.assert_(hst.state == 'DOWN')
-        self.assert_(hst.state_id == 1)
-        self.assert_(hst.is_state('DOWN') == True)
-        self.assert_(hst.is_state('d') == True)
+        self.assertEqual('DOWN', hst.state)
+        self.assertEqual(1, hst.state_id)
+        self.assertEqual(True, hst.is_state('DOWN'))
+        self.assertEqual(True, hst.is_state('d'))
 
         # And a special case: use_aggressive_host_checking
         hst.__class__.use_aggressive_host_checking = True
         self.scheduler_loop(1, [[hst, 1, 'WARNING SHOULD GO DOWN']])
-        self.assert_(hst.state == 'DOWN')
-        self.assert_(hst.state_id == 1)
-        self.assert_(hst.is_state('DOWN') == True)
-        self.assert_(hst.is_state('d') == True)
+        self.assertEqual('DOWN', hst.state)
+        self.assertEqual(1, hst.state_id)
+        self.assertEqual(True, hst.is_state('DOWN'))
+        self.assertEqual(True, hst.is_state('d'))
 
 
     def test_hostgroup(self):

@@ -61,7 +61,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
         self.assert_(tolevel2 is not None)
@@ -103,7 +103,7 @@ class TestEscalations(ShinkenTest):
         # notification_number is already sent. the next one has been scheduled
         # and is waiting for notification_interval to pass. so the current
         # number is 2
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         print "OK, level1 is notified, notif nb = 1"
 
         print "---------------------------------1st round with a hard"
@@ -173,7 +173,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
@@ -211,7 +211,7 @@ class TestEscalations(ShinkenTest):
         # notification_number is already sent. the next one has been scheduled
         # and is waiting for notification_interval to pass. so the current
         # number is 2
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         print "OK, level1 is notified, notif nb = 1"
 
         print "---------------------------------1st round with a hard"
@@ -308,7 +308,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         # We check that we really linked our escalations :)
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
@@ -345,7 +345,7 @@ class TestEscalations(ShinkenTest):
         # notification_number is already sent. the next one has been scheduled
         # and is waiting for notification_interval to pass. so the current
         # number is 2
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         print "OK, level1 is notified, notif nb = 1"
 
         print "---------------------------------1st round with a hard"
@@ -461,7 +461,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         # We hack the interval_length for short time, like 10s
         svc.__class__.interval_length = 5
@@ -502,7 +502,7 @@ class TestEscalations(ShinkenTest):
         # notification_number is already sent. the next one has been scheduled
         # and is waiting for notification_interval to pass. so the current
         # number is 2
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         print "OK, level1 is notified, notif nb = 1"
 
         print "---------------------------------1st round with a hard"
@@ -552,7 +552,7 @@ class TestEscalations(ShinkenTest):
         print "LEN", len(next_notifications)
         for n in next_notifications:
             print n
-        self.assert_(len(next_notifications) == 1)
+        self.assertEqual(1, len(next_notifications))
         n = next_notifications.pop()
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
         # Should be in the escalation ToLevel2-shortinterval
@@ -582,7 +582,7 @@ class TestEscalations(ShinkenTest):
 
         # Ok we should have one notification
         next_notifications = svc.notifications_in_progress.values()
-        self.assert_(len(next_notifications) == 1)
+        self.assertEqual(1, len(next_notifications))
         n = next_notifications.pop()
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
         # Should be in the escalation ToLevel2-shortinterval

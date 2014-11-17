@@ -44,8 +44,8 @@ class TestSnapshot(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(5, [[host, 2, 'DOWN'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('HARD', host.state_type)
         
         self.assert_(self.any_log_match('HOST SNAPSHOT.*'))
         self.assert_(self.log_match(2, 'HOST SNAPSHOT.*'))

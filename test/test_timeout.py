@@ -92,8 +92,8 @@ class TestTimeout(ShinkenTest):
         # with a timeout
         o = from_queue.get()
 
-        self.assert_(o.status == 'timeout')
-        self.assert_(o.exit_status == 3)
+        self.assertEqual('timeout', o.status)
+        self.assertEqual(3, o.exit_status)
         self.assert_(o.execution_time < n.timeout+1)
 
         # Be a good poller and clean up.
@@ -124,11 +124,11 @@ class TestTimeout(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.checks_in_progress
         cs = svc.checks_in_progress
-        self.assert_(len(cs) == 1)
+        self.assertEqual(1, len(cs))
         c = cs.pop()
         print c
         print c.timeout
-        self.assert_(c.timeout == 5)
+        self.assertEqual(5, c.timeout)
 
 
 if __name__ == '__main__':

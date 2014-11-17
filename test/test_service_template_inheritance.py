@@ -35,9 +35,9 @@ class TestConfig(ShinkenTest):
         # no-graph,base-service-prod
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_1")
         self.assert_(svc1.action_url.startswith("/"))
-        self.assert_(svc1.process_perf_data == True)
+        self.assertEqual(True, svc1.process_perf_data)
         self.assert_(not svc2.action_url)
-        self.assert_(svc2.process_perf_data == False)
+        self.assertEqual(False, svc2.process_perf_data)
 
         print svc1.tags
         self.assert_('no-graph' in svc1.tags)

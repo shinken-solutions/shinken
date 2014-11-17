@@ -47,7 +47,7 @@ class TestConfig(ShinkenTest):
             print dr.__dict__
             if hasattr(dr, 'day') and dr.day == 'sunday':
                 got_sunday = True
-        self.assert_(got_sunday == True)
+        self.assertEqual(True, got_sunday)
 
 
 if __name__ == '__main__':

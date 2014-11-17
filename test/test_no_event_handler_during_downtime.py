@@ -44,8 +44,8 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
 
         now = time.time()
         # downtime valid for the next 2 minutes

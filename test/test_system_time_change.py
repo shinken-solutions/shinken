@@ -35,7 +35,7 @@ class TestSystemTimeChange(ShinkenTest):
         # NB: disabled for now because we test in a totally direct way
         #a = commands.getstatusoutput(cmd)
         # Check the time is set correctly!
-        #self.assert_(a[0] == 0)
+        #self.assertEqual(0, a[0])
 
     def test_system_time_change(self):
         #
@@ -105,8 +105,8 @@ class TestSystemTimeChange(ShinkenTest):
         print "Yesterday Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "Yesterday Service check", time.asctime(time.localtime(srv_check.t_to_go))
         print "New host check", time.asctime(time.localtime(host.next_chk))
-        self.assert_(host.next_chk == host_check.t_to_go)
-        self.assert_(svc.next_chk == srv_check.t_to_go)
+        self.assertEqual(host_check.t_to_go, host.next_chk)
+        self.assertEqual(srv_check.t_to_go, svc.next_chk)
         self.assert_(host_check.t_to_go - host_to_go == -86400*2)
         self.assert_(srv_check.t_to_go - srv_to_go == -86400*2)
 

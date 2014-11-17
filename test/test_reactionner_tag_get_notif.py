@@ -62,13 +62,13 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             # And look for good tagging
             if a.command.startswith('plugins/notifier.pl'):
                 print 'TAG:%s' % a.reactionner_tag
-                self.assert_(a.reactionner_tag == 'runonwindows')
+                self.assertEqual('runonwindows', a.reactionner_tag)
             if a.command.startswith('plugins/sms.pl'):
                 print 'TAG:%s' % a.reactionner_tag
-                self.assert_(a.reactionner_tag == 'sms')
+                self.assertEqual('sms', a.reactionner_tag)
             if a.command.startswith('plugins/test_eventhandler.pl'):
                 print 'TAG: %s' % a.reactionner_tag
-                self.assert_(a.reactionner_tag == 'eventtag')
+                self.assertEqual('eventtag', a.reactionner_tag)
 
         print "\n\n"
         for _i in to_del:
@@ -129,11 +129,11 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             if a.command.startswith('plugins/notifier.pl'):
                 print a.__dict__
                 print a.reactionner_tag
-                self.assert_(a.reactionner_tag == 'runonwindows')
+                self.assertEqual('runonwindows', a.reactionner_tag)
             if a.command.startswith('plugins/test_eventhandler.pl'):
                 print a.__dict__
                 print a.reactionner_tag
-                self.assert_(a.reactionner_tag == 'eventtag')
+                self.assertEqual('eventtag', a.reactionner_tag)
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
@@ -144,7 +144,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             self.assert_(c.command.startswith('plugins/notifier.pl'))
 
         taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'], module_types=['myassischicken'])
-        self.assert_(len(taggued_eventtag_checks) == 0)
+        self.assertEqual(0, len(taggued_eventtag_checks))
 
 
 

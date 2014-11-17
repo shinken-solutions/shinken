@@ -35,7 +35,7 @@ class TestWarnAboutNoBrokerInRealm(ShinkenTest):
         self.assert_(dist is not None)
         sched = self.conf.schedulers.find_by_name("Scheduler-distant")
         self.assert_(sched is not None)
-        self.assert_(len(sched.realm.potential_brokers) == 0)
+        self.assertEqual(0, len(sched.realm.potential_brokers))
 
 
 if __name__ == '__main__':

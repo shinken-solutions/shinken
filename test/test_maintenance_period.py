@@ -45,13 +45,13 @@ class TestMaintPeriod(ShinkenTest):
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_nobody", "test_ok_0")
 
         # Standard links
-        self.assert_(test_router_0.maintenance_period == a_24_7)
+        self.assertEqual(a_24_7, test_router_0.maintenance_period)
         self.assert_(test_host_0.maintenance_period is None)
         self.assert_(test_nobody.maintenance_period is None)
 
         # Now inplicit inheritance
         # This one is defined in the service conf
-        self.assert_(svc1.maintenance_period == a_24_7)
+        self.assertEqual(a_24_7, svc1.maintenance_period)
         # And others are implicitly inherited
         self.assert_(svc2.maintenance_period is a_24_7)
         # This one got nothing :)
@@ -109,7 +109,7 @@ class TestMaintPeriod(ShinkenTest):
         print "scheduler_loop end  ", time.asctime()
 
         self.assert_(hasattr(svc3, 'in_maintenance'))
-        self.assert_(len(self.sched.downtimes) == 1)
+        self.assertEqual(1, len(self.sched.downtimes))
         try:
             print "........................................."
             print self.sched.downtimes[1]
@@ -118,13 +118,13 @@ class TestMaintPeriod(ShinkenTest):
         except Exception:
             print "looks like there is no downtime"
             pass
-        self.assert_(len(svc3.downtimes) == 1)
+        self.assertEqual(1, len(svc3.downtimes))
         self.assert_(svc3.downtimes[0] in self.sched.downtimes.values())
         self.assert_(svc3.in_scheduled_downtime)
         self.assert_(svc3.downtimes[0].fixed)
         self.assert_(svc3.downtimes[0].is_in_effect)
         self.assert_(not svc3.downtimes[0].can_be_deleted)
-        self.assert_(svc3.in_maintenance == svc3.downtimes[0].id)
+        self.assertEqual(svc3.downtimes[0].id, svc3.in_maintenance)
 
         #
         # now the downtime should expire...
@@ -133,8 +133,8 @@ class TestMaintPeriod(ShinkenTest):
         # run the remaining 100 seconds plus 5 seconds just to be sure
         self.scheduler_loop(105, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
 
-        self.assert_(len(self.sched.downtimes) == 0)
-        self.assert_(len(svc3.downtimes) == 0)
+        self.assertEqual(0, len(self.sched.downtimes))
+        self.assertEqual(0, len(svc3.downtimes))
         self.assert_(not svc3.in_scheduled_downtime)
         self.assert_(svc3.in_maintenance is None)
 

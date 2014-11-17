@@ -40,10 +40,10 @@ class TestDefinitionOrder(ShinkenTest):
         self.assert_(svc_generic is not None)
 
         print svc_generic.check_command.command.command_name
-        self.assert_(svc_generic.check_command.command.command_name == 'general')
+        self.assertEqual('general', svc_generic.check_command.command.command_name)
         
         print svc_specific.check_command.command.command_name
-        self.assert_(svc_specific.check_command.command.command_name == 'specific')
+        self.assertEqual('specific', svc_specific.check_command.command.command_name)
         
         
 

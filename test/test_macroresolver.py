@@ -110,10 +110,10 @@ class TestMacroResolver(ShinkenTest):
         env = mr.get_env_macros(data)
         print "Env:", env        
         self.assert_(env != {})
-        self.assert_(env['NAGIOS_HOSTNAME'] == 'test_host_0')
-        self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
-        self.assert_(env['NAGIOS__SERVICECUSTNAME'] == 'custvalue')
-        self.assert_(env['NAGIOS__HOSTOSTYPE'] == 'gnulinux')
+        self.assertEqual('test_host_0', env['NAGIOS_HOSTNAME'])
+        self.assertEqual('0.0', env['NAGIOS_SERVICEPERCENTCHANGE'])
+        self.assertEqual('custvalue', env['NAGIOS__SERVICECUSTNAME'])
+        self.assertEqual('gnulinux', env['NAGIOS__HOSTOSTYPE'])
         self.assert_('NAGIOS_USER1' not in env)
 
 

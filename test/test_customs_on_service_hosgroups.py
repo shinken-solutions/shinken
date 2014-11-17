@@ -46,10 +46,10 @@ class TestCustomsonservicehosgroups(ShinkenTest):
         self.assert_(svc_on_group is not None)
 
         # Each one should have customs
-        self.assert_(svc_one_host.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_two_hosts_1.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_two_hosts_2.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_on_group.customs['_CUSTNAME'] == 'custvalue')
+        self.assertEqual('custvalue', svc_one_host.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_two_hosts_1.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_two_hosts_2.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_on_group.customs['_CUSTNAME'])
 
 
 

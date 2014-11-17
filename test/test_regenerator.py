@@ -41,8 +41,8 @@ class TestRegenerator(ShinkenTest):
             orig_h = self.sched.hosts.find_by_name(h.host_name)
             print h.state, orig_h.state
             # Look for same states
-            self.assert_(h.state == orig_h.state)
-            self.assert_(h.state_type == orig_h.state_type)
+            self.assertEqual(orig_h.state, h.state)
+            self.assertEqual(orig_h.state_type, h.state_type)
             # Look for same impacts
             for i in h.impacts:
                 print "Got impact", i.get_name()
@@ -58,8 +58,8 @@ class TestRegenerator(ShinkenTest):
         for s in self.rg.services:
             orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
             print s.state, orig_s.state
-            self.assert_(s.state == orig_s.state)
-            self.assert_(s.state_type == orig_s.state_type)
+            self.assertEqual(orig_s.state, s.state)
+            self.assertEqual(orig_s.state_type, s.state_type)
             # Look for same impacts too
             for i in s.impacts:
                 print "Got impact", i.get_name()
@@ -71,7 +71,7 @@ class TestRegenerator(ShinkenTest):
                 same_pbs = i.get_name() in [j.get_name() for j in orig_s.source_problems]
                 self.assert_(same_pbs)
             # Look for same host
-            self.assert_(s.host.get_name() == orig_s.host.get_name())
+            self.assertEqual(orig_s.host.get_name(), s.host.get_name())
 
     def test_regenerator(self):
         #
@@ -111,8 +111,8 @@ class TestRegenerator(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(3, [[host, 2, 'DOWN | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('HARD', host.state_type)
 
         ids = self.sched.broks.keys()
         ids.sort()

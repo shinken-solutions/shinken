@@ -44,7 +44,7 @@ class TestModuleOnModule(ShinkenTest):
         self.assert_(mod_sub is not None)
         print "Got sub module", mod_sub.get_name()
         self.assert_(mod_sub in mod1.modules)
-        self.assert_(mod_sub.modules == [])
+        self.assertEqual([], mod_sub.modules)
 
 
 if __name__ == '__main__':

@@ -44,26 +44,26 @@ class TestConfig(ShinkenTest):
         router = self.get_router()
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'],])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
 
         # This service got a result modulation. So Criticals are in fact
         # Warnings. So even with some CRITICAL (2), it must be warning
-        self.assert_(svc.state == 'WARNING')
+        self.assertEqual('WARNING', svc.state)
 
         # If we remove the resultmodulations, we should have theclassic behavior
         svc.resultmodulations = []
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(svc.state == 'CRITICAL')
+        self.assertEqual('CRITICAL', svc.state)
 
         # Now look for the inheritaed thing
         # resultmodulation is a inplicit inherited parameter
         # and router define it, but not test_router_0/test_ok_0. So this service should also be impacted
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_ok_0")
-        self.assert_(svc2.resultmodulations == router.resultmodulations)
+        self.assertEqual(router.resultmodulations, svc2.resultmodulations)
 
         self.scheduler_loop(2, [[svc2, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(svc2.state == 'WARNING')
+        self.assertEqual('WARNING', svc2.state)
 
 
 if __name__ == '__main__':

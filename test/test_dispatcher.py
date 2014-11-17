@@ -170,40 +170,40 @@ class TestDispatcher(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 1)
-        self.assert_(scheduler2.reachable == False)
+        self.assertEqual(True, scheduler2.alive)
+        self.assertEqual(1, scheduler2.attempt)
+        self.assertEqual(False, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == True)
-        self.assert_(poller2.attempt == 1)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(True, poller2.alive)
+        self.assertEqual(1, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == True)
-        self.assert_(reactionner2.attempt == 1)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(True, reactionner2.alive)
+        self.assertEqual(1, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == True)
-        self.assert_(broker2.attempt == 1)
-        self.assert_(broker2.reachable == False)
+        self.assertEqual(True, broker2.alive)
+        self.assertEqual(1, broker2.attempt)
+        self.assertEqual(False, broker2.reachable)
         ### Now add another attempt, still alive, but attemp=2/3
 
         print "CheckAlive " * 10
@@ -215,40 +215,40 @@ class TestDispatcher(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 2)
-        self.assert_(scheduler2.reachable == False)
+        self.assertEqual(True, scheduler2.alive)
+        self.assertEqual(2, scheduler2.attempt)
+        self.assertEqual(False, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == True)
-        self.assert_(poller2.attempt == 2)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(True, poller2.alive)
+        self.assertEqual(2, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == True)
-        self.assert_(reactionner2.attempt == 2)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(True, reactionner2.alive)
+        self.assertEqual(2, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == True)
-        self.assert_(broker2.attempt == 2)
-        self.assert_(broker2.reachable == False)
+        self.assertEqual(True, broker2.alive)
+        self.assertEqual(2, broker2.attempt)
+        self.assertEqual(False, broker2.reachable)
 
         ### Now we get BAD, We go DEAD for N2!
         print "CheckAlive " * 10
@@ -259,45 +259,45 @@ class TestDispatcher(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == False)
-        self.assert_(scheduler2.attempt == 3)
-        self.assert_(scheduler2.reachable == False)
+        self.assertEqual(False, scheduler2.alive)
+        self.assertEqual(3, scheduler2.attempt)
+        self.assertEqual(False, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == False)
-        self.assert_(poller2.attempt == 3)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(False, poller2.alive)
+        self.assertEqual(3, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == False)
-        self.assert_(reactionner2.attempt == 3)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(False, reactionner2.alive)
+        self.assertEqual(3, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == False)
-        self.assert_(broker2.attempt == 3)
-        self.assert_(broker2.reachable == False)
+        self.assertEqual(False, broker2.alive)
+        self.assertEqual(3, broker2.attempt)
+        self.assertEqual(False, broker2.reachable)
 
         # Now we check how we should dispatch confs
         self.dispatcher.check_dispatch()
         # the conf should not be in a good shape
-        self.assert_(self.dispatcher.dispatch_ok == False)
+        self.assertEqual(False, self.dispatcher.dispatch_ok)
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
@@ -310,8 +310,8 @@ class TestDispatcher(ShinkenTest):
         # And look if we really dispatch conf as we should
         for r in self.conf.realms:
             for cfg in r.confs.values():
-                self.assert_(cfg.is_assigned == True)
-                self.assert_(cfg.assigned_to == scheduler1)
+                self.assertEqual(True, cfg.is_assigned)
+                self.assertEqual(scheduler1, cfg.assigned_to)
 
 
 class TestDispatcherMultiBroker(ShinkenTest):
@@ -361,40 +361,40 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 0)
-        self.assert_(scheduler2.reachable == True)
+        self.assertEqual(True, scheduler2.alive)
+        self.assertEqual(0, scheduler2.attempt)
+        self.assertEqual(True, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == True)
-        self.assert_(poller2.attempt == 1)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(True, poller2.alive)
+        self.assertEqual(1, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == True)
-        self.assert_(reactionner2.attempt == 1)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(True, reactionner2.alive)
+        self.assertEqual(1, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == True)
-        self.assert_(broker2.attempt == 0)
-        self.assert_(broker2.reachable == True)
+        self.assertEqual(True, broker2.alive)
+        self.assertEqual(0, broker2.attempt)
+        self.assertEqual(True, broker2.reachable)
 
         ### Now add another attempt, still alive, but attemp=2/3
         print "CheckAlive " * 10
@@ -405,40 +405,40 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 0)
-        self.assert_(scheduler2.reachable == True)
+        self.assertEqual(True, scheduler2.alive)
+        self.assertEqual(0, scheduler2.attempt)
+        self.assertEqual(True, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == True)
-        self.assert_(poller2.attempt == 2)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(True, poller2.alive)
+        self.assertEqual(2, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == True)
-        self.assert_(reactionner2.attempt == 2)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(True, reactionner2.alive)
+        self.assertEqual(2, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == True)
-        self.assert_(broker2.attempt == 0)
-        self.assert_(broker2.reachable == True)
+        self.assertEqual(True, broker2.alive)
+        self.assertEqual(0, broker2.attempt)
+        self.assertEqual(True, broker2.reachable)
 
         ### Now we get BAD, We go DEAD for N2!
         print "CheckAlive " * 10
@@ -449,45 +449,45 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.dispatcher.check_alive()
 
         # Check good values
-        self.assert_(scheduler1.alive == True)
-        self.assert_(scheduler1.attempt == 0)
-        self.assert_(scheduler1.reachable == True)
+        self.assertEqual(True, scheduler1.alive)
+        self.assertEqual(0, scheduler1.attempt)
+        self.assertEqual(True, scheduler1.reachable)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 0)
-        self.assert_(scheduler2.reachable == True)
+        self.assertEqual(True, scheduler2.alive)
+        self.assertEqual(0, scheduler2.attempt)
+        self.assertEqual(True, scheduler2.reachable)
 
         # and others satellites too
-        self.assert_(poller1.alive == True)
-        self.assert_(poller1.attempt == 0)
-        self.assert_(poller1.reachable == True)
+        self.assertEqual(True, poller1.alive)
+        self.assertEqual(0, poller1.attempt)
+        self.assertEqual(True, poller1.reachable)
         # still alive, just unreach
-        self.assert_(poller2.alive == False)
-        self.assert_(poller2.attempt == 3)
-        self.assert_(poller2.reachable == False)
+        self.assertEqual(False, poller2.alive)
+        self.assertEqual(3, poller2.attempt)
+        self.assertEqual(False, poller2.reachable)
 
         # and others satellites too
-        self.assert_(reactionner1.alive == True)
-        self.assert_(reactionner1.attempt == 0)
-        self.assert_(reactionner1.reachable == True)
+        self.assertEqual(True, reactionner1.alive)
+        self.assertEqual(0, reactionner1.attempt)
+        self.assertEqual(True, reactionner1.reachable)
         # still alive, just unreach
-        self.assert_(reactionner2.alive == False)
-        self.assert_(reactionner2.attempt == 3)
-        self.assert_(reactionner2.reachable == False)
+        self.assertEqual(False, reactionner2.alive)
+        self.assertEqual(3, reactionner2.attempt)
+        self.assertEqual(False, reactionner2.reachable)
 
         # and others satellites too
-        self.assert_(broker1.alive == True)
-        self.assert_(broker1.attempt == 0)
-        self.assert_(broker1.reachable == True)
+        self.assertEqual(True, broker1.alive)
+        self.assertEqual(0, broker1.attempt)
+        self.assertEqual(True, broker1.reachable)
         # still alive, just unreach
-        self.assert_(broker2.alive == True)
-        self.assert_(broker2.attempt == 0)
-        self.assert_(broker2.reachable == True)
+        self.assertEqual(True, broker2.alive)
+        self.assertEqual(0, broker2.attempt)
+        self.assertEqual(True, broker2.reachable)
 
         # Now we check how we should dispatch confs
         self.dispatcher.check_dispatch()
         # the conf should not be in a good shape
-        self.assert_(self.dispatcher.dispatch_ok == False)
+        self.assertEqual(False, self.dispatcher.dispatch_ok)
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
@@ -503,7 +503,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         # And look if we really dispatch conf as we should
         for r in self.conf.realms:
             for cfg in r.confs.values():
-                self.assert_(cfg.is_assigned == True)
+                self.assertEqual(True, cfg.is_assigned)
                 self.assert_(cfg.assigned_to in [scheduler1, scheduler2])
 
 

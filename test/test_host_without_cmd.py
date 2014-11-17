@@ -51,14 +51,14 @@ class TestConfig(ShinkenTest):
         #svc.act_depend_of = [] # no hostchecks on critical checkresults
 
         # initially the host is pending
-        self.assert_(host.state == 'PENDING')
-        self.assert_(svc.state == 'PENDING')
+        self.assertEqual('PENDING', host.state)
+        self.assertEqual('PENDING', svc.state)
         # now force a dependency check of the host
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
         self.show_actions()
         # and now the host is magically UP
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
         self.assert_(host.output == 'Host assumed to be UP')
 
 

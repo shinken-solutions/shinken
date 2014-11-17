@@ -138,19 +138,19 @@ class TestConfig(ShinkenTest):
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/1')
         self.assert_(svc is not None)
-        self.assert_(svc.check_command.call == 'check_service!1!80%!90%')
+        self.assertEqual('check_service!1!80%!90%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/2')
         self.assert_(svc is not None)
-        self.assert_(svc.check_command.call == 'check_service!2!80%!90%')
+        self.assertEqual('check_service!2!80%!90%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Ethernet0/1')
         self.assert_(svc is not None)
-        self.assert_(svc.check_command.call == 'check_service!3!80%!95%')
+        self.assertEqual('check_service!3!80%!95%', svc.check_command.call)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service ISDN1')
         self.assert_(svc is not None)
-        self.assert_(svc.check_command.call == 'check_service!4!80%!95%')
+        self.assertEqual('check_service!4!80%!95%', svc.check_command.call)
 
 
 if __name__ == '__main__':

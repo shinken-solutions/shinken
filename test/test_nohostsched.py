@@ -48,8 +48,8 @@ class TestHostspecialSched(ShinkenTest):
         host.act_depend_of = []  # ignore the router
         print "Loop"
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
         # Reschedule the host as a normal way
         host.schedule()
         print "Final", host.next_chk, host.in_checking

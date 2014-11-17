@@ -42,8 +42,8 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assert_(srv1.active_checks_enabled is True)
 
         # non list parameter (only the last value set should remain)
-        self.assert_(hst1.max_check_attempts == 3)
-        self.assert_(srv1.max_check_attempts == 3)
+        self.assertEqual(3, hst1.max_check_attempts)
+        self.assertEqual(3, srv1.max_check_attempts)
 
         # list parameter (all items should appear in the order they are defined)
         self.assert_(list(set(hst1.notification_options)) == [u'd', u'f', u'1', u's', u'r', u'u'])

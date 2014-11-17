@@ -43,10 +43,10 @@ class TestConfig(ShinkenTest):
         self.assert_(realm2 is not None)
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
         self.assert_(test_host_realm1 is not None)
-        self.assert_(test_host_realm1.realm == realm1.get_name())
+        self.assertEqual(realm1.get_name(), test_host_realm1.realm)
         test_host_realm2 = self.sched.hosts.find_by_name("test_host_realm2")
         self.assert_(test_host_realm2 is not None)
-        self.assert_(test_host_realm2.realm == realm2.get_name())
+        self.assertEqual(realm2.get_name(), test_host_realm2.realm)
 
     # We check for each host, if they are in the good realm
     # but when they are apply in a hostgroup link
@@ -65,17 +65,17 @@ class TestConfig(ShinkenTest):
         # 1 and 2 are link to realm2 because they are in the hostgroup in_realm2
         test_host1_hg_realm2 = self.sched.hosts.find_by_name("test_host1_hg_realm2")
         self.assert_(test_host1_hg_realm2 is not None)
-        self.assert_(test_host1_hg_realm2.realm == realm2.get_name())
+        self.assertEqual(realm2.get_name(), test_host1_hg_realm2.realm)
         self.assert_(in_realm2 in test_host1_hg_realm2.hostgroups)
 
         test_host2_hg_realm2 = self.sched.hosts.find_by_name("test_host2_hg_realm2")
         self.assert_(test_host2_hg_realm2 is not None)
-        self.assert_(test_host2_hg_realm2.realm == realm2.get_name())
+        self.assertEqual(realm2.get_name(), test_host2_hg_realm2.realm)
         self.assert_(in_realm2 in test_host2_hg_realm2.hostgroups)
 
         test_host3_hg_realm2 = self.sched.hosts.find_by_name("test_host3_hg_realm2")
         self.assert_(test_host3_hg_realm2 is not None)
-        self.assert_(test_host3_hg_realm2.realm == realm1.get_name())
+        self.assertEqual(realm1.get_name(), test_host3_hg_realm2.realm)
         self.assert_(in_realm2 in test_host3_hg_realm2.hostgroups)
 
 

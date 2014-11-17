@@ -47,7 +47,7 @@ class TestConfig(ShinkenTest):
         print type(q), type(c)
         print len(q), len(c)
 
-        self.assert_(q == c)
+        self.assertEqual(c, q)
 
     def test_update_query(self):
         self.create_db()
@@ -64,7 +64,7 @@ class TestConfig(ShinkenTest):
         q = self.db.create_update_query('instances', data, where)
         #print "Q", q
         c = u"UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
-        self.assert_(q.strip() == c.strip())
+        self.assertEqual(c.strip(), q.strip())
 
 
 

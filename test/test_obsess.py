@@ -48,9 +48,9 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.obsess_over_service)
         self.assert_(svc.__class__.obsess_over)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
 
         now = time.time()
         cmd = "[%lu] STOP_OBSESSING_OVER_SVC;test_host_0;test_ok_0" % now
@@ -61,9 +61,9 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.__class__.obsess_over)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 0)
+        self.assertEqual(0, self.count_actions())
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 0)
+        self.assertEqual(0, self.count_actions())
 
         now = time.time()
         cmd = "[%lu] START_OBSESSING_OVER_SVC;test_host_0;test_ok_0" % now
@@ -74,9 +74,9 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.__class__.obsess_over)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
 
         now = time.time()
         cmd = "[%lu] START_OBSESSING_OVER_SVC_CHECKS" % now
@@ -111,14 +111,14 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'OK']])
         self.show_actions()
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [[router, 0, 'OK']])
         self.show_actions()
         print "host", host.obsess_over
         print "rout", router.obsess_over
         print "host", host.obsess_over_host
         print "rout", router.obsess_over_host
-        self.assert_(self.count_actions() == 0)
+        self.assertEqual(0, self.count_actions())
         self.assert_(host.obsess_over_host)
         self.assert_(not router.obsess_over_host)
         # the router does not obsess (host definition)

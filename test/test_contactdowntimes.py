@@ -62,8 +62,8 @@ class TestContactDowntime(ShinkenTest):
         self.show_and_clear_logs()
 
         print "downtime was scheduled. check its activity and the comment\n"*5
-        self.assert_(len(self.sched.contact_downtimes) == 1)
-        self.assert_(len(test_contact.downtimes) == 1)
+        self.assertEqual(1, len(self.sched.contact_downtimes))
+        self.assertEqual(1, len(test_contact.downtimes))
         self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
@@ -90,8 +90,8 @@ class TestContactDowntime(ShinkenTest):
         self.show_and_clear_logs()
 
         print "\n\nDowntime was ended. Check it is really stopped"
-        self.assert_(len(self.sched.contact_downtimes) == 0)
-        self.assert_(len(test_contact.downtimes) == 0)
+        self.assertEqual(0, len(self.sched.contact_downtimes))
+        self.assertEqual(0, len(test_contact.downtimes))
 
         for n in svc.notifications_in_progress.values():
             print "NOTIF", n, n.t_to_go, time.time()
@@ -143,8 +143,8 @@ class TestContactDowntime(ShinkenTest):
         self.show_and_clear_logs()
 
         print "downtime was scheduled. check its activity and the comment"
-        self.assert_(len(self.sched.contact_downtimes) == 1)
-        self.assert_(len(test_contact.downtimes) == 1)
+        self.assertEqual(1, len(self.sched.contact_downtimes))
+        self.assertEqual(1, len(test_contact.downtimes))
         self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
@@ -175,8 +175,8 @@ class TestContactDowntime(ShinkenTest):
         self.show_and_clear_logs()
 
         print "Downtime was cancelled"
-        self.assert_(len(self.sched.contact_downtimes) == 0)
-        self.assert_(len(test_contact.downtimes) == 0)
+        self.assertEqual(0, len(self.sched.contact_downtimes))
+        self.assertEqual(0, len(test_contact.downtimes))
 
         time.sleep(1)
         # Now we want this contact to be really notify!

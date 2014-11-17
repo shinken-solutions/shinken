@@ -41,12 +41,12 @@ class TestFlapping(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
         self.assert_(svc.flap_detection_enabled)
 
         print 'A' * 41, svc.low_flap_threshold
-        self.assert_(svc.low_flap_threshold == -1)
+        self.assertEqual(-1, svc.low_flap_threshold)
 
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])

@@ -74,14 +74,14 @@ class TestConfig(ShinkenTest):
         self.assert_(test_host_1 in [x[0] for x in test_host_1_test_ok_1.act_depend_of])
 
         # and final count the masters
-        self.assert_(len(test_host_0_test_ok_0.chk_depend_of) == 0)
-        self.assert_(len(test_host_0_test_ok_1.chk_depend_of) == 1)
-        self.assert_(len(test_host_1_test_ok_0.chk_depend_of) == 0)
-        self.assert_(len(test_host_1_test_ok_1.chk_depend_of) == 1)
-        self.assert_(len(test_host_0_test_ok_0.act_depend_of) == 1)  # same, plus the host
-        self.assert_(len(test_host_0_test_ok_1.act_depend_of) == 2)
-        self.assert_(len(test_host_1_test_ok_0.act_depend_of) == 1)
-        self.assert_(len(test_host_1_test_ok_1.act_depend_of) == 2)
+        self.assertEqual(0, len(test_host_0_test_ok_0.chk_depend_of))
+        self.assertEqual(1, len(test_host_0_test_ok_1.chk_depend_of))
+        self.assertEqual(0, len(test_host_1_test_ok_0.chk_depend_of))
+        self.assertEqual(1, len(test_host_1_test_ok_1.chk_depend_of))
+        self.assertEqual(1, len(test_host_0_test_ok_0.act_depend_of))  # same, plus the host
+        self.assertEqual(2, len(test_host_0_test_ok_1.act_depend_of))
+        self.assertEqual(1, len(test_host_1_test_ok_0.act_depend_of))
+        self.assertEqual(2, len(test_host_1_test_ok_1.act_depend_of))
 
     def test_host_dependencies(self):
         self.print_header()
@@ -104,15 +104,15 @@ class TestConfig(ShinkenTest):
         self.assert_(host_B in [x[0] for x in host_C.act_depend_of])
         self.assert_(host_A in [x[0] for x in host_C.act_depend_of])
         self.assert_(host_A in [x[0] for x in host_B.act_depend_of])
-        self.assert_(host_A.act_depend_of == [])
+        self.assertEqual([], host_A.act_depend_of)
         self.assert_(host_B in [x[0] for x in host_C.chk_depend_of])
         self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
         self.assert_(host_A in [x[0] for x in host_B.chk_depend_of])
-        self.assert_(host_A.act_depend_of == [])
+        self.assertEqual([], host_A.act_depend_of)
         self.assert_(host_B in [x[0] for x in host_A.act_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_A.act_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_B.act_depend_of_me])
-        #self.assert_(host_C.act_depend_of_me == []) # D in here
+        #self.assertEqual([], host_C.act_depend_of_me) # D in here
         self.assert_(host_B in [x[0] for x in host_A.chk_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_A.chk_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_B.chk_depend_of_me])
@@ -144,7 +144,7 @@ class TestConfig(ShinkenTest):
         print "C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of])
         print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
 
-        self.assert_(host_A.act_depend_of == [])
+        self.assertEqual([], host_A.act_depend_of)
         self.assert_(host_A in [x[0] for x in host_B.act_depend_of])
         self.assert_(host_A in [x[0] for x in host_C.act_depend_of])
         self.assert_(host_B in [x[0] for x in host_C.act_depend_of])
@@ -255,7 +255,7 @@ class TestConfig(ShinkenTest):
         test_host_0.checks_in_progress = []
         test_host_0.act_depend_of = []  # ignore the router
         test_host_0_test_ok_0_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_disbld_hst_dep")
-        self.assert_(len(test_host_0_test_ok_0_d.act_depend_of) == 0)
+        self.assertEqual(0, len(test_host_0_test_ok_0_d.act_depend_of))
         self.assert_(test_host_0_test_ok_0_d not in [x[0] for x in test_host_0.act_depend_of_me])
 
 

@@ -55,7 +55,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
         self.scheduler_loop(1, [[svc_cor, None, None]])
 
-        self.assert_(svc_cor.business_rule.get_state() == 2)
+        self.assertEqual(2, svc_cor.business_rule.get_state())
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
 
     def test_bprule_smart_notifications_ack(self):
@@ -74,7 +74,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
             [svc1, 0, 'OK test_host_01/srv1'],
             [svc2, 2, 'CRITICAL test_host_02/srv2']], do_sleep=True)
 
-        self.assert_(svc_cor.business_rule.get_state() == 2)
+        self.assertEqual(2, svc_cor.business_rule.get_state())
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
 
         now = time.time()
@@ -104,7 +104,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
             [svc1, 0, 'OK test_host_01/srv1'],
             [svc2, 2, 'CRITICAL test_host_02/srv2']], do_sleep=True)
 
-        self.assert_(svc_cor.business_rule.get_state() == 2)
+        self.assertEqual(2, svc_cor.business_rule.get_state())
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
 
         duration = 600
@@ -144,7 +144,7 @@ class TestBusinesscorrelNotifications(ShinkenTest):
             [svc1, 0, 'OK test_host_01/srv1'],
             [svc2, 2, 'CRITICAL test_host_02/srv2']], do_sleep=True)
 
-        self.assert_(svc_cor.business_rule.get_state() == 2)
+        self.assertEqual(2, svc_cor.business_rule.get_state())
         self.assert_(svc_cor.notification_is_blocked_by_item('PROBLEM') is False)
 
         duration = 600

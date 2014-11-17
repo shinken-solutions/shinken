@@ -40,7 +40,7 @@ class TestPollerTagGetchecks(ShinkenTest):
         # schedule the host so it will have a check :)
         # and for ce the execution now
         host.schedule()
-        self.assert_(host.check_command.command.poller_tag == 'mytestistrue')
+        self.assertEqual('mytestistrue', host.check_command.command.poller_tag)
         for a in host.actions:
             print "Tag", a.poller_tag
             a.t_to_go = 0
@@ -76,7 +76,7 @@ class TestPollerTagGetchecks(ShinkenTest):
         # schedule the host so it will have a check :)
         # and for ce the execution now
         host.schedule()
-        self.assert_(host.check_command.command.poller_tag == 'mytestistrue')
+        self.assertEqual('mytestistrue', host.check_command.command.poller_tag)
         for a in host.actions:
             print "Tag", a.poller_tag
             a.t_to_go = 0
@@ -99,7 +99,7 @@ class TestPollerTagGetchecks(ShinkenTest):
 
         # Now get only tag ones and with a bad module type, so get NOTHING
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'], module_types=['myassischicken'])
-        self.assert_(len(taggued_checks) == 0)
+        self.assertEqual(0, len(taggued_checks))
 
 if __name__ == '__main__':
     unittest.main()

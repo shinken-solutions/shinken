@@ -49,10 +49,10 @@ class TestConfig(ShinkenTest):
         # We do not want to be just a string but a real command
         self.assert_(not isinstance(svc.__class__.perfdata_command, str))
         print svc.__class__.perfdata_command.__class__.my_type
-        self.assert_(svc.__class__.perfdata_command.__class__.my_type == 'CommandCall')
+        self.assertEqual('CommandCall', svc.__class__.perfdata_command.__class__.my_type)
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         print "Actions", self.sched.actions
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
 
         # Ok now I disable the perfdata
         now = time.time()
@@ -60,7 +60,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         print "Actions", self.sched.actions
-        self.assert_(self.count_actions() == 0)
+        self.assertEqual(0, self.count_actions())
 
     def test_host_perfdata_command(self):
         # We want an eventhandelr (the perfdata command) to be put in the actions dict
@@ -79,10 +79,10 @@ class TestConfig(ShinkenTest):
         # We do not want to be just a string but a real command
         self.assert_(not isinstance(host.__class__.perfdata_command, str))
         print host.__class__.perfdata_command.__class__.my_type
-        self.assert_(host.__class__.perfdata_command.__class__.my_type == 'CommandCall')
+        self.assertEqual('CommandCall', host.__class__.perfdata_command.__class__.my_type)
         self.scheduler_loop(1, [[host, 0, 'UP | bibi=99%']])
         print "Actions", self.sched.actions
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
 
         # Ok now I disable the perfdata
         now = time.time()
@@ -90,7 +90,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[host, 0, 'UP | bibi=99%']])
         print "Actions", self.sched.actions
-        self.assert_(self.count_actions() == 0)
+        self.assertEqual(0, self.count_actions())
 
     def test_multiline_perfdata(self):
         self.print_header()
@@ -111,7 +111,7 @@ class TestConfig(ShinkenTest):
         # We do not want to be just a string but a real command
         self.assert_(not isinstance(svc.__class__.perfdata_command, str))
         print svc.__class__.perfdata_command.__class__.my_type
-        self.assert_(svc.__class__.perfdata_command.__class__.my_type == 'CommandCall')
+        self.assertEqual('CommandCall', svc.__class__.perfdata_command.__class__.my_type)
         output = """DISK OK - free space: / 3326 MB (56%); | /=2643MB;5948;5958;0;5968
 / 15272 MB (77%);
 /boot 68 MB (69%);

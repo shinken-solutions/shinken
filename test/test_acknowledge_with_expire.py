@@ -46,7 +46,7 @@ class TestAcksWithExpire(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP']])
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         #--------------------------------------------------------------
         # first check the normal behavior
@@ -56,8 +56,8 @@ class TestAcksWithExpire(ShinkenTest):
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
-        self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3)
+        self.assertEqual(1, svc.current_notification_number)
+        self.assertEqual(3, self.count_actions())
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
@@ -83,8 +83,8 @@ class TestAcksWithExpire(ShinkenTest):
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
-        self.assert_(self.count_logs() == 1)
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_logs())
+        self.assertEqual(1, self.count_actions())
         self.show_and_clear_logs()
         self.show_actions()
 

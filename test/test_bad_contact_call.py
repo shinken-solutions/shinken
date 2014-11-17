@@ -34,7 +34,7 @@ class TestConfig(ShinkenTest):
         # The service got a unknow contact. It should raise an error
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print "Contacts:", svc.contacts
-        self.assert_(svc.is_correct() == False)
+        self.assertEqual(False, svc.is_correct())
 
 
 if __name__ == '__main__':

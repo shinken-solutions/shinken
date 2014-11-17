@@ -41,7 +41,7 @@ class TestTriggers(ShinkenTest):
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "not good!")
-        self.assert_(svc.perf_data == "cpu=95%")
+        self.assertEqual("cpu=95%", svc.perf_data)
 
     # Try to catch the perf_datas of self
     def test_function_perfs(self):
@@ -59,7 +59,7 @@ class TestTriggers(ShinkenTest):
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "OK all is green")
-        self.assert_(svc.perf_data == "avgtime=2ms")
+        self.assertEqual("avgtime=2ms", svc.perf_data)
 
     # Try to catch the perf_datas of self
     def test_function_custom(self):
@@ -72,7 +72,7 @@ class TestTriggers(ShinkenTest):
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "OK all is green")
-        self.assert_(svc.perf_data == "users=12")
+        self.assertEqual("users=12", svc.perf_data)
 
     def test_in_conf_trigger(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "i_got_trigger")
@@ -94,7 +94,7 @@ class TestTriggers(ShinkenTest):
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "not good!")
-        self.assert_(svc.perf_data == "cpu=95%")
+        self.assertEqual("cpu=95%", svc.perf_data)
 
         # Same with an host
         host = self.sched.hosts.find_by_name("test_host_trigger")
@@ -106,7 +106,7 @@ class TestTriggers(ShinkenTest):
         print "Output", host.output
         print "Perf_Data", host.perf_data
         self.assert_(host.output == "not good!")
-        self.assert_(host.perf_data == "cpu=95")
+        self.assertEqual("cpu=95", host.perf_data)
 
     # Try to catch the perf_datas of self
     def test_morecomplex_cpu_too_high(self):
@@ -121,8 +121,8 @@ class TestTriggers(ShinkenTest):
         print firstlen, seclen
 
         self.assert_(svc.output == "not good!")
-        self.assert_(svc.perf_data == "cpu=95")
-        self.assert_(firstlen == seclen)
+        self.assertEqual("cpu=95", svc.perf_data)
+        self.assertEqual(seclen, firstlen)
 
     # Try to load .trig files
     def test_trig_file_loading(self):
@@ -136,7 +136,7 @@ class TestTriggers(ShinkenTest):
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "not good!")
-        self.assert_(svc.perf_data == "cpu=95")
+        self.assertEqual("cpu=95", svc.perf_data)
 
         # same for host
         host = self.sched.hosts.find_by_name('test_host_trigger2')
@@ -149,7 +149,7 @@ class TestTriggers(ShinkenTest):
         print "Output", host.output
         print "Perf_Data", host.perf_data
         self.assert_(host.output == "not good!")
-        self.assert_(host.perf_data == "cpu=95")
+        self.assertEqual("cpu=95", host.perf_data)
 
     def test_simple_triggers(self):
         #
