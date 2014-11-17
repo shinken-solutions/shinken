@@ -32,7 +32,7 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
-        self.assert_(genhttp != None)
+        self.assertIsNot(None, genhttp)
         self.assertEqual('service', genhttp.creation_type)
         self.assertEqual('80,443', genhttp.matches['openports'])
         self.assertEqual('windows', genhttp.matches['os'])
@@ -85,10 +85,10 @@ class TestDiscoveryConf(ShinkenTest):
     # Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
-        self.assert_(nmap != None)
+        self.assertIsNot(None, nmap)
         nmapcmd = self.sched.conf.commands.find_by_name('nmap_runner')
-        self.assert_(nmapcmd != None)
-        self.assert_(nmap.discoveryrun_command != None)
+        self.assertIsNot(None, nmapcmd)
+        self.assertIsNot(None, nmap.discoveryrun_command)
         # Launch it
         nmap.launch()
         for i in xrange(1, 5):
@@ -103,7 +103,7 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_host_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
-        self.assert_(genhttp != None)
+        self.assertIsNot(None, genhttp)
         self.assertEqual('host', genhttp.creation_type)
         self.assertEqual('^80$', genhttp.matches['openports'])
 
@@ -135,7 +135,7 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_host_discorule_and_delete(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHostRemoveLinux')
-        self.assert_(genhttp != None)
+        self.assertIsNot(None, genhttp)
         self.assertEqual('host', genhttp.creation_type)
         self.assertEqual('^80$', genhttp.matches['openports'])
 
@@ -169,7 +169,7 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_discorun_matches(self):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
-        self.assert_(linux != None)
+        self.assertIsNot(None, linux)
         print linux.__dict__
         self.assertEqual({u'osvendor': u'linux'}, linux.matches)
 
