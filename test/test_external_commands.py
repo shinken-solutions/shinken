@@ -232,9 +232,9 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
         self.assertTrue(len(broks) == 0)
-        log_found = self.log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
+        self.assert_log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
         self.clear_logs()
-        self.assertTrue(log_found)
+
 
     #Tests sending passive check results for unconfigured hosts to a receiver
     def test_unknown_check_result_command_receiver(self):

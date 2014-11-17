@@ -451,21 +451,23 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
             self.actions = {}
 
 
-    def log_match(self, index, pattern):
+    def assert_log_match(self, index, pattern):
         # log messages are counted 1...n, so index=1 for the first message
-        if index > self.count_logs():
-            return False
-        else:
-            regex = re.compile(pattern)
-            lognum = 1
-            for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
-                if brok.type == 'log':
-                    brok.prepare()
-                    if index == lognum:
-                        if re.search(regex, brok.data['log']):
-                            return True
-                    lognum += 1
-        return False
+        self.assertGreater(index, self.count_logs())
+        regex = re.compile(pattern)
+        lognum = 1
+        broks = sorted(self.sched.broks.values(), lambda x, y: x.id - y.id)
+        for brok in broks:
+            if brok.type == 'log':
+                brok.prepare()
+                if index == lognum:
+                    if re.search(regex, brok.data['log']):
+                        return
+                lognum += 1
+        self.assertTrue(False, "Not found a matched log line in broks :\n"
+                               "index=%s pattern=%r\n"
+                               "broks=%r" % (index, pattern, broks))
+
 
     def any_log_match(self, pattern):
         regex = re.compile(pattern)

@@ -48,10 +48,10 @@ class TestSnapshot(ShinkenTest):
         self.assertEqual('HARD', host.state_type)
         
         self.assert_(self.any_log_match('HOST SNAPSHOT.*'))
-        self.assert_(self.log_match(2, 'HOST SNAPSHOT.*'))
+        self.assert_(self.assert_log_match(2, 'HOST SNAPSHOT.*'))
 
         self.assert_(self.any_log_match('SERVICE SNAPSHOT.*'))
-        self.assert_(self.log_match(4, 'SERVICE SNAPSHOT.*'))
+        self.assert_(self.assert_log_match(4, 'SERVICE SNAPSHOT.*'))
 
         self.show_and_clear_logs()
         
