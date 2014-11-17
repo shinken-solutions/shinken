@@ -82,7 +82,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_output")
         self.assertIs(True, svc_cor.got_business_rule)
         self.assertIsNot(svc_cor.business_rule, None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -113,7 +113,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
         self.assertIs(True, svc_cor.got_business_rule)
         self.assertIsNot(svc_cor.business_rule, None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -133,13 +133,13 @@ class TestBusinesscorrelOutput(ShinkenTest):
 
         # Performs checks
         self.assertEqual(0, svc_cor.business_rule.get_state())
-        self.assert_(svc_cor.output == "OK [CRITICAL: test_host_03/srv3]")
+        self.assertEqual("OK [CRITICAL: test_host_03/srv3]", svc_cor.output)
 
     def test_bprule_xof_all_ok_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
         self.assertIs(True, svc_cor.got_business_rule)
         self.assertIsNot(svc_cor.business_rule, None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULLNAME$] )$")
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -159,7 +159,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
 
         # Performs checks
         self.assertEqual(0, svc_cor.business_rule.get_state())
-        self.assert_(svc_cor.output == "OK all checks were successful.")
+        self.assertEqual("OK all checks were successful.", svc_cor.output)
 
 
 if __name__ == '__main__':

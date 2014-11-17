@@ -56,14 +56,14 @@ class TestConfig(ShinkenTest):
         self.assertIsNot(svc_g, None)
 
         # two classics
-        self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
-        self.assert_(svc_d.check_command.args == ['D', '95%', '70%'])
+        self.assertEqual(['C', '80%', '90%'], svc_c.check_command.args)
+        self.assertEqual(['D', '95%', '70%'], svc_d.check_command.args)
         # a default parameters
-        self.assert_(svc_e.check_command.args == ['E', '38%', '24%'])
+        self.assertEqual(['E', '38%', '24%'], svc_e.check_command.args)
         # and another one
-        self.assert_(svc_f.check_command.args == ['F', '95%', '70%'])
+        self.assertEqual(['F', '95%', '70%'], svc_f.check_command.args)
         # and the tricky last one (with no value :) )
-        self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
+        self.assertEqual(['G', '38%', '24%'], svc_g.check_command.args)
 
 
         # Now check that the dependencies are also created as Generated Service C Dependant -> Generated Service C

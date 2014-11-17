@@ -57,7 +57,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', host.state)
-        self.assert_(host.output == 'Bob is not happy')
+        self.assertEqual('Bob is not happy', host.output)
 
         # Now with performance data
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999' % time.time()
@@ -65,7 +65,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', host.state)
-        self.assert_(host.output == 'Bob is not happy')
+        self.assertEqual('Bob is not happy', host.output)
         self.assertEqual('rtt=9999', host.perf_data)
 
         # Now with full-blown performance data. Here we have to watch out:
@@ -76,7 +76,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', host.state)
-        self.assert_(host.output == 'Bob is not happy')
+        self.assertEqual('Bob is not happy', host.output)
         print "perf (%s)" % host.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', host.perf_data)
 
@@ -86,7 +86,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('WARNING', svc.state)
-        self.assert_(svc.output == 'Bobby is not happy')
+        self.assertEqual('Bobby is not happy', svc.output)
         print "perf (%s)" % svc.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
@@ -111,7 +111,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('OK', svc.state)
-        self.assert_(svc.output == 'Bobby is happy now!')
+        self.assertEqual('Bobby is happy now!', svc.output)
         self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
         # Host is going up ...
@@ -120,7 +120,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('UP', host.state)
-        self.assert_(host.output == 'Bob is also happy now!')
+        self.assertEqual('Bob is also happy now!', host.output)
 
         # Clean the command_file
         #try:
@@ -136,7 +136,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
-        self.assert_(router.output == 'Bob is not happy')
+        self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print "Is the last check agree?", past, router.last_chk
@@ -149,7 +149,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
-        self.assert_(router.output == 'Bob is not happy')
+        self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print "Is the last check agree?", very_past, router.last_chk
@@ -161,7 +161,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
         self.assertEqual('DOWN', host.state)
-        self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
+        self.assertEqual(u'Bob got a crappy character  é   and so is not not happy', host.output)
         self.assertEqual('rtt=9999', host.perf_data)
 
         # ACK HOST

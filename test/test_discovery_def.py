@@ -171,7 +171,7 @@ class TestDiscoveryConf(ShinkenTest):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
         self.assert_(linux != None)
         print linux.__dict__
-        self.assert_(linux.matches == {u'osvendor': u'linux'})
+        self.assertEqual({u'osvendor': u'linux'}, linux.matches)
 
         key = 'osvendor'
         value = 'microsoft'

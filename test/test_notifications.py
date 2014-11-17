@@ -130,7 +130,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number == cnn + 1)
+        self.assertEqual(cnn + 1, svc.current_notification_number)
         #--------------------------------------------------------------
         # now recover. there must be no scheduled/inpoller notification
         #--------------------------------------------------------------
@@ -458,7 +458,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        #self.assert_(svc.current_notification_number == cnn + 1)
+        #self.assertEqual(cnn + 1, svc.current_notification_number)
         #--------------------------------------------------------------
         # now recover. there must be no scheduled/inpoller notification
         #--------------------------------------------------------------

@@ -68,8 +68,8 @@ class TestAction(ShinkenTest):
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
         print a.output
-        self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
-        self.assert_(a.perf_data == "Hip=99% Bob=34mm")
+        self.assertEqual("Hi, I'm for testing only. Please do not use me directly, really", a.output)
+        self.assertEqual("Hip=99% Bob=34mm", a.perf_data)
 
     def test_echo_environment_variables(self):
         if os.name == 'nt':
@@ -218,7 +218,7 @@ class TestAction(ShinkenTest):
             self.assert_(a.output.startswith("/bin/sh"))
             self.assertEqual(3, a.exit_status)
         else:
-            self.assert_(a.output == 'Not a valid shell command: No closing quotation')
+            self.assertEqual('Not a valid shell command: No closing quotation', a.output)
             self.assertEqual(3, a.exit_status)
 
     # We got problems on LARGE output, more than 64K in fact.

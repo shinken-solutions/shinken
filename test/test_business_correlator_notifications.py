@@ -175,8 +175,8 @@ class TestBusinesscorrelNotifications(ShinkenTest):
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         hst2 = self.sched.hosts.find_by_name("test_host_02")
 
-        self.assert_(svc1.notification_options == ['w', 'u', 'c', 'r', 's'])
-        self.assert_(hst2.notification_options == ['d', 'u', 'r', 's'])
+        self.assertEqual(['w', 'u', 'c', 'r', 's'], svc1.notification_options)
+        self.assertEqual(['d', 'u', 'r', 's'], hst2.notification_options)
 
 if __name__ == '__main__':
     unittest.main()

@@ -36,7 +36,7 @@ class TestPropertyOverride(ShinkenTest):
         hst2 = self.sched.hosts.find_by_name("test_host_02")
 
         self.assertEqual([], hst1.service_excludes)
-        self.assert_(hst2.service_excludes == ["srv-svc11", "srv-svc21", "proc proc1"])
+        self.assertEqual(["srv-svc11", "srv-svc21", "proc proc1"], hst2.service_excludes)
 
         # All services should exist for test_host_01
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc11")

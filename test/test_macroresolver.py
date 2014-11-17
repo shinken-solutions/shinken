@@ -51,7 +51,7 @@ class TestMacroResolver(ShinkenTest):
         data = svc.get_data_for_checks()
         com = mr.resolve_command(svc.check_command, data)
         print com
-        self.assert_(com == "plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue")
+        self.assertEqual("plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue", com)
 
 
     # Here call with a special macro TOTALHOSTSUP
@@ -66,7 +66,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing 1')
+        self.assertEqual('plugins/nothing 1', com)
 
 
 
@@ -80,7 +80,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing Default')
+        self.assertEqual('plugins/nothing Default', com)
 
 
     # For output macro we want to delete all illegal macro caracter
@@ -99,7 +99,7 @@ class TestMacroResolver(ShinkenTest):
             cc = CommandCall(self.conf.commands, dummy_call)
             com = mr.resolve_command(cc, data)
             print com
-            self.assert_(com == 'plugins/nothing monculcestdupoulet')
+            self.assertEqual('plugins/nothing monculcestdupoulet', com)
 
     def test_env_macros(self):
         mr = self.get_mr()
@@ -124,13 +124,13 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$USER1$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        self.assert_(com == 'plugins/nothing plugins')
+        self.assertEqual('plugins/nothing plugins', com)
 
         dummy_call = "special_macro!$INTERESTINGVARIABLE$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print "CUCU", com
-        self.assert_(com == 'plugins/nothing interestingvalue')
+        self.assertEqual('plugins/nothing interestingvalue', com)
 
         # Look for multiple = in lines, should split the first
         # and keep others in the macro value
@@ -138,7 +138,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print "CUCU", com
-        self.assert_(com == 'plugins/nothing blabla=toto')
+        self.assertEqual('plugins/nothing blabla=toto', com)
 
 
 
@@ -155,7 +155,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing UP')
+        self.assertEqual('plugins/nothing UP', com)
 
         # Call with a void host name, means : myhost
         data = hst.get_data_for_checks()
@@ -163,7 +163,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing UP')
+        self.assertEqual('plugins/nothing UP', com)
 
         # Now with a service, for our implicit host state
         data = svc.get_data_for_checks()
@@ -171,7 +171,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing UP')
+        self.assertEqual('plugins/nothing UP', com)
                                                         
                                         
         # Now with a service, for our implicit host state
@@ -180,7 +180,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing UP')
+        self.assertEqual('plugins/nothing UP', com)
 
         # Now prepare another service
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_another_service")
@@ -192,7 +192,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing you should not pass')
+        self.assertEqual('plugins/nothing you should not pass', com)
 
         # Ok now with an host implicit way
         data = svc.get_data_for_checks()
@@ -200,7 +200,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing you should not pass')
+        self.assertEqual('plugins/nothing you should not pass', com)
                                                 
                                                 
 
@@ -215,7 +215,7 @@ class TestMacroResolver(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assert_(com == 'plugins/nothing ::1')
+        self.assertEqual('plugins/nothing ::1', com)
 
         
 

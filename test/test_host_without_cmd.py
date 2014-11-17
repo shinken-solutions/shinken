@@ -59,7 +59,7 @@ class TestConfig(ShinkenTest):
         # and now the host is magically UP
         self.assertEqual('UP', host.state)
         self.assertEqual('HARD', host.state_type)
-        self.assert_(host.output == 'Host assumed to be UP')
+        self.assertEqual('Host assumed to be UP', host.output)
 
 
 

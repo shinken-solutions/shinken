@@ -40,7 +40,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(2, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "not good!")
+        self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95%", svc.perf_data)
 
     # Try to catch the perf_datas of self
@@ -58,7 +58,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(4, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "OK all is green")
+        self.assertEqual("OK all is green", svc.output)
         self.assertEqual("avgtime=2ms", svc.perf_data)
 
     # Try to catch the perf_datas of self
@@ -71,7 +71,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(4, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "OK all is green")
+        self.assertEqual("OK all is green", svc.output)
         self.assertEqual("users=12", svc.perf_data)
 
     def test_in_conf_trigger(self):
@@ -81,8 +81,8 @@ class TestTriggers(ShinkenTest):
         svc.eval_triggers()
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "New output")
-        self.assert_(svc.perf_data == "New perf_data")
+        self.assertEqual("New output", svc.output)
+        self.assertEqual("New perf_data", svc.perf_data)
 
     # Try to catch the perf_datas of self
     def test_simple_cpu_too_high(self):
@@ -93,7 +93,7 @@ class TestTriggers(ShinkenTest):
         svc.eval_triggers()
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "not good!")
+        self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95%", svc.perf_data)
 
         # Same with an host
@@ -105,7 +105,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(2, [])
         print "Output", host.output
         print "Perf_Data", host.perf_data
-        self.assert_(host.output == "not good!")
+        self.assertEqual("not good!", host.output)
         self.assertEqual("cpu=95", host.perf_data)
 
     # Try to catch the perf_datas of self
@@ -120,7 +120,7 @@ class TestTriggers(ShinkenTest):
         print "Perf_Data", svc.perf_data
         print firstlen, seclen
 
-        self.assert_(svc.output == "not good!")
+        self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95", svc.perf_data)
         self.assertEqual(seclen, firstlen)
 
@@ -135,7 +135,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(2, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data
-        self.assert_(svc.output == "not good!")
+        self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95", svc.perf_data)
 
         # same for host
@@ -148,7 +148,7 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(2, [])
         print "Output", host.output
         print "Perf_Data", host.perf_data
-        self.assert_(host.output == "not good!")
+        self.assertEqual("not good!", host.output)
         self.assertEqual("cpu=95", host.perf_data)
 
     def test_simple_triggers(self):
@@ -168,7 +168,7 @@ class TestTriggers(ShinkenTest):
         t.compile()
         r = t.eval(svc)
         print "Service output", svc.output
-        self.assert_(svc.output == "Moncul c'est du poulet")
+        self.assertEqual("Moncul c'est du poulet", svc.output)
 
         code = '''self.output = "Moncul c'est du poulet2"
 self.perf_data = "Moncul c'est du poulet3"
@@ -178,8 +178,8 @@ self.perf_data = "Moncul c'est du poulet3"
         r = t.eval(svc)
         print "Service output", svc.output
         print "Service perf_data", svc.perf_data
-        self.assert_(svc.output == "Moncul c'est du poulet2")
-        self.assert_(svc.perf_data == "Moncul c'est du poulet3")
+        self.assertEqual("Moncul c'est du poulet2", svc.output)
+        self.assertEqual("Moncul c'est du poulet3", svc.perf_data)
 
 
 

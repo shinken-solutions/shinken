@@ -82,7 +82,7 @@ class TestParsePerfdata(ShinkenTest):
         p = PerfDatas(s)
         p.metrics
         m = p['Physical Memory Used']
-        self.assert_(m.name == 'Physical Memory Used')
+        self.assertEqual('Physical Memory Used', m.name)
         self.assertEqual(12085620736, m.value)
         self.assertEqual('Bytes', m.uom)
         self.assertIs(None, m.warning)
@@ -91,7 +91,7 @@ class TestParsePerfdata(ShinkenTest):
         self.assertIs(None, m.max)
 
         m = p['Physical Memory Utilisation']
-        self.assert_(m.name == 'Physical Memory Utilisation')
+        self.assertEqual('Physical Memory Utilisation', m.name)
         self.assertEqual(94, m.value)
         self.assertEqual('%', m.uom)
         self.assertEqual(80, m.warning)
@@ -103,7 +103,7 @@ class TestParsePerfdata(ShinkenTest):
         p = PerfDatas(s)
         p.metrics
         m = p['C: Space']
-        self.assert_(m.name == 'C: Space')
+        self.assertEqual('C: Space', m.name)
         self.assertEqual(35.07, m.value)
         self.assertEqual('GB', m.uom)
         self.assertIs(None, m.warning)
@@ -112,7 +112,7 @@ class TestParsePerfdata(ShinkenTest):
         self.assertIs(None, m.max)
 
         m = p['C: Utilisation']
-        self.assert_(m.name == 'C: Utilisation')
+        self.assertEqual('C: Utilisation', m.name)
         self.assertEqual(87.7, m.value)
         self.assertEqual('%', m.uom)
         self.assertEqual(90, m.warning)

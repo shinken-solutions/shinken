@@ -49,7 +49,7 @@ class TestCheckModulations(ShinkenTest):
         c = None
         for c in host.checks_in_progress:
             print c.command
-            self.assert_(c.command == 'plugins/nothing VALUE')
+            self.assertEqual('plugins/nothing VALUE', c.command)
 
 
 if __name__ == '__main__':

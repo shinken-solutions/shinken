@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         self.assertIsNot(svc, None)
         self.assert_(len(svc.checks_in_progress) >= 1)
         print svc.checks_in_progress[0].command
-        self.assert_(svc.checks_in_progress[0].command == 'plugins/nothing BLABLA')
+        self.assertEqual('plugins/nothing BLABLA', svc.checks_in_progress[0].command)
 
 
 if __name__ == '__main__':

@@ -120,11 +120,11 @@ class TestConfig(ShinkenTest):
 
         # check the notification/execution criteria
         self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_B])
-        self.assert_([['d']] == [x[1] for x in host_C.chk_depend_of if x[0] is host_B])
+        self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_B], [['d']])
         self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_A])
-        self.assert_([['d']] == [x[1] for x in host_C.chk_depend_of if x[0] is host_A])
+        self.assertEqual([x[1] for x in host_C.chk_depend_of if x[0] is host_A], [['d']])
         self.assert_([['d', 'u']] == [x[1] for x in host_B.act_depend_of if x[0] is host_A])
-        self.assert_([['n']] == [x[1] for x in host_B.chk_depend_of if x[0] is host_A])
+        self.assertEqual([x[1] for x in host_B.chk_depend_of if x[0] is host_A], [['n']])
 
     def test_host_inherits_dependencies(self):
         self.print_header()

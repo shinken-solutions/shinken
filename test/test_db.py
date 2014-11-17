@@ -37,7 +37,7 @@ class TestConfig(ShinkenTest):
         self.create_db()
         data = {'id': "1", "is_master": True, 'plop': "master of the universe"}
         q = self.db.create_insert_query('instances', data)
-        self.assert_(q == "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )")
+        self.assertEqual("INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )", q)
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': u'£°é§'}
@@ -56,7 +56,7 @@ class TestConfig(ShinkenTest):
         q = self.db.create_update_query('instances', data, where)
         # beware of the last space
         print "Q", q
-        self.assert_(q == "UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ")
+        self.assertEqual("UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ", q)
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': u'£°é§'}

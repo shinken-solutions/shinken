@@ -51,7 +51,7 @@ class TestMacroModulations(ShinkenTest):
             print c.command
             # THE hst got 2 modulations. The first with the value MODULATED
             # and the second with NOT_THE_GOOD. Both are currently active, but we want the firt one
-            self.assert_(c.command == 'plugins/nothing MODULATED')
+            self.assertEqual('plugins/nothing MODULATED', c.command)
 
 
 if __name__ == '__main__':

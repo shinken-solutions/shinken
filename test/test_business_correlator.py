@@ -282,14 +282,14 @@ class TestBusinesscorrel(ShinkenTest):
         # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
         if with_pct is True:
             if with_neg is True:
-                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+                self.assertEqual(('-50%', '2', '2'), bp_rule.of_values)
             else:
-                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+                self.assertEqual(('50%', '2', '2'), bp_rule.of_values)
         else:
             if with_neg is True:
-                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+                self.assertEqual(('-1', '2', '2'), bp_rule.of_values)
             else:
-                self.assert_(bp_rule.of_values == ('1', '2', '2'))
+                self.assertEqual(('1', '2', '2'), bp_rule.of_values)
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -401,14 +401,14 @@ class TestBusinesscorrel(ShinkenTest):
         # Simple 1of: so in fact a triple ('1','2','2') (1of and MAX,MAX
         if with_pct is True:
             if with_neg is True:
-                self.assert_(bp_rule.of_values == ('-50%', '2', '2'))
+                self.assertEqual(('-50%', '2', '2'), bp_rule.of_values)
             else:
-                self.assert_(bp_rule.of_values == ('50%', '2', '2'))
+                self.assertEqual(('50%', '2', '2'), bp_rule.of_values)
         else:
             if with_neg is True:
-                self.assert_(bp_rule.of_values == ('-1', '2', '2'))
+                self.assertEqual(('-1', '2', '2'), bp_rule.of_values)
             else:
-                self.assert_(bp_rule.of_values == ('1', '2', '2'))
+                self.assertEqual(('1', '2', '2'), bp_rule.of_values)
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -1002,9 +1002,9 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assertEqual('of:', bp_rule.operand)
         if with_pct == False:
-            self.assert_(bp_rule.of_values == ('5', '1', '1'))
+            self.assertEqual(('5', '1', '1'), bp_rule.of_values)
         else:
-            self.assert_(bp_rule.of_values == ('100%', '20%', '20%'))
+            self.assertEqual(('100%', '20%', '20%'), bp_rule.of_values)
 
         sons = bp_rule.sons
         print "Sons,", sons
