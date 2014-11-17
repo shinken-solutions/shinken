@@ -61,7 +61,7 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
 e2=0']])
 
         # There should be NO event handlers during a downtime!
-        self.assert_(not self.any_log_match('SERVICE EVENT HANDLER.*;CRITICAL'))
+        self.assert_(self.no_log_match('SERVICE EVENT HANDLER.*;CRITICAL'))
 
 
 

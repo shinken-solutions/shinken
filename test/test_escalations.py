@@ -428,7 +428,7 @@ class TestEscalations(ShinkenTest):
             # Should be "near" one day now, so 84000s
             self.assert_(8300 < abs(n.t_to_go - time.time()) < 85000)
         # And so no notification
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        self.assert_(self.no_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif
@@ -527,7 +527,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
 
         # Now we raise a notification time of 1hour, we escalade to level2
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
+        self.assert_(self.no_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_actions()
 

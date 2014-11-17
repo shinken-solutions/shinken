@@ -74,7 +74,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
         # Now we short the downtime a lot so it will be stop at now + 1 sec.
@@ -156,7 +156,7 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.assert_(self.no_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
         downtime_id = test_contact.downtimes[0].id
