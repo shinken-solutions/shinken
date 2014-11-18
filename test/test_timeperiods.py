@@ -456,5 +456,53 @@ class TestTimeperiods(ShinkenTest):
         print "T next invalid", t_next_invalid
         self.assert_(t_next_invalid == "Wed Jul 14 00:00:01 2010")
 
+
+    def test_issue_1385(self):
+        '''
+        https://github.com/naparuba/shinken/issues/1385
+        '''
+        tp = Timeperiod()
+        tp.timeperiod_name = 'mercredi2-22-02'
+        tp.resolve_daterange(tp.dateranges, 'wednesday 2              00:00-02:00,22:00-24:00')
+        tp.resolve_daterange(tp.dateranges, 'thursday 2                00:00-02:00,22:00-24:00')
+
+        valid_times = (
+            (2014, 11, 12, 1, 0),  # second wednesday of november @ 01:00
+            (2014, 11, 12, 23, 0), # same @23:00
+            (2014, 11, 13, 0, 0), # second thursday @ 00:00
+            # in december:
+            (2014, 12, 10, 1, 0),
+            (2014, 12, 10, 23, 0),
+            (2014, 12, 11, 1, 0),
+            (2014, 12, 11, 23, 0),
+
+        )
+        for valid in valid_times:
+            dt = datetime.datetime(*valid)
+            valid_tm = time.mktime(dt.timetuple())
+            self.assertTrue(tp.is_time_valid(valid_tm))
+
+        invalid_times = (
+            (2014, 11, 3, 1, 0), # first wednesday ..
+            (2014, 11, 4, 1, 0),  # first thursday
+            (2014, 11, 17, 1, 0),   # third ..
+            (2014, 11, 18, 1, 0),
+            # in december:
+            (2014, 12, 5, 3, 0),
+            (2014, 12, 17, 1, 0),
+            (2014, 12, 18, 1, 0),
+            (2014, 12, 24, 1, 0),
+            (2014, 12, 25, 1, 0),
+            (2014, 12, 31, 1, 0),
+        )
+        for invalid in invalid_times:
+            dt = datetime.datetime(*invalid)
+            invalid_tm = time.mktime(dt.timetuple())
+            self.assertFalse(tp.is_time_valid(invalid_tm))
+
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
