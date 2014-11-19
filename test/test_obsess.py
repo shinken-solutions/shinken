@@ -57,7 +57,7 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.assert_(not svc.obsess_over_service)
+        self.assertFalse(svc.obsess_over_service)
         self.assert_(svc.__class__.obsess_over)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
@@ -92,7 +92,7 @@ class TestConfig(ShinkenTest):
         self.sched.get_new_actions()
         self.worker_loop()
         self.assert_(svc.obsess_over_service)
-        self.assert_(not svc.__class__.obsess_over)
+        self.assertFalse(svc.__class__.obsess_over)
 
     def test_ochp(self):
         self.print_header()
@@ -120,7 +120,7 @@ class TestConfig(ShinkenTest):
         print "rout", router.obsess_over_host
         self.assertEqual(0, self.count_actions())
         self.assert_(host.obsess_over_host)
-        self.assert_(not router.obsess_over_host)
+        self.assertFalse(router.obsess_over_host)
         # the router does not obsess (host definition)
         # but it's class does (shinken.cfg)
         self.assert_(router.__class__.obsess_over)

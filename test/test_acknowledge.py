@@ -76,7 +76,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # someone acknowledges the problem before a notification goes out
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -113,7 +113,7 @@ class TestAcks(ShinkenTest):
         self.show_actions()
         self.assertEqual(2, self.count_logs())  # alert, eventhndlr
         self.assertEqual(1, self.count_actions())  # evt zombie
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -163,7 +163,7 @@ class TestAcks(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -192,7 +192,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         # the contact notification was sent immediately (t_to_go)
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_logs()
         self.show_actions()
@@ -218,7 +218,7 @@ class TestAcks(ShinkenTest):
         self.show_actions()
         print self.count_actions()
         self.assertEqual(2, self.count_actions())  # evt, recovery notif zombie
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -272,7 +272,7 @@ class TestAcks(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;1;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -292,7 +292,7 @@ class TestAcks(ShinkenTest):
         # ack is deleted automatically and notifications are sent again
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[svc, 1, 'NOT REALLY BAD']], do_sleep=True)
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.show_logs()
         self.show_actions()
         self.assert_log_match(1, 'SERVICE ALERT.*WARNING')
@@ -316,7 +316,7 @@ class TestAcks(ShinkenTest):
 
         self.show_actions()
         self.assertEqual(2, self.count_actions())  # evt, one notif zombie left
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -370,7 +370,7 @@ class TestAcks(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -411,7 +411,7 @@ class TestAcks(ShinkenTest):
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notification
         self.assertEqual(2, self.count_actions())  # evt, master notif
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
         self.assertEqual(0, len(svc.comments))
         self.show_and_clear_logs()
@@ -466,7 +466,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # someone acknowledges the problem before a notification goes out
         #--------------------------------------------------------------
-        self.assert_(not host.problem_has_been_acknowledged)
+        self.assertFalse(host.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_HOST_PROBLEM;test_host_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -510,7 +510,7 @@ class TestAcks(ShinkenTest):
         
         print self.count_actions()
         self.assertEqual(1, self.count_actions())  # evt, no more notif
-        self.assert_(not host.problem_has_been_acknowledged)
+        self.assertFalse(host.problem_has_been_acknowledged)
         self.assertEqual(0, host.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -561,7 +561,7 @@ class TestAcks(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not host.problem_has_been_acknowledged)
+        self.assertFalse(host.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_HOST_PROBLEM;test_host_0;1;1;0;lausser;blablub" % now
         self.sched.run_external_command(cmd)
@@ -587,7 +587,7 @@ class TestAcks(ShinkenTest):
         self.scheduler_loop(1, [], do_sleep=False)
         #self.worker_loop()
         # the contact notification was sent immediately (t_to_go)
-        self.assert_(not host.problem_has_been_acknowledged)
+        self.assertFalse(host.problem_has_been_acknowledged)
         self.scheduler_loop(2, [[host, 2, 'DOWN']], do_sleep=True)
         self.show_logs()
         self.show_actions()
@@ -611,7 +611,7 @@ class TestAcks(ShinkenTest):
         print self.count_actions()
         self.show_actions()
         self.assertEqual(2, self.count_actions())  # evt,  recovery notif zombie
-        self.assert_(not host.problem_has_been_acknowledged)
+        self.assertFalse(host.problem_has_been_acknowledged)
         self.assertEqual(0, host.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -669,7 +669,7 @@ class TestAcks(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;lausser;blablub1" % now
         self.sched.run_external_command(cmd)
@@ -708,7 +708,7 @@ class TestAcks(ShinkenTest):
         self.sched.get_new_actions()
         self.scheduler_loop(1, [], do_sleep=False)
         #self.worker_loop()
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(2, len(svc.comments))
         self.assertEqual('blablub1', svc.comments[0].comment)
         self.assertEqual('blablub2', svc.comments[1].comment)

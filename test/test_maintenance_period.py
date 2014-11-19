@@ -98,7 +98,7 @@ class TestMaintPeriod(ShinkenTest):
         print "planned stop ", time.asctime(time.localtime(t_next))
         svc3.maintenance_period = t
 
-        self.assert_(not svc3.in_maintenance)
+        self.assertFalse(svc3.in_maintenance)
         #
         # now let the scheduler run and wait until the maintenance period begins
         # it is now 10 seconds before the full minute. run for 30 seconds
@@ -135,7 +135,7 @@ class TestMaintPeriod(ShinkenTest):
 
         self.assertEqual(0, len(self.sched.downtimes))
         self.assertEqual(0, len(svc3.downtimes))
-        self.assert_(not svc3.in_scheduled_downtime)
+        self.assertFalse(svc3.in_scheduled_downtime)
         self.assertIs(None, svc3.in_maintenance)
 
 

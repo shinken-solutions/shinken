@@ -425,7 +425,7 @@ class TestConfigBroken(ShinkenTest):
         self.setup_with_file('etc/shinken_business_correlator_expand_expression_broken.cfg')
 
     def test_hostgroup_expansion_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]

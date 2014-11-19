@@ -57,7 +57,7 @@ class TestConfigBroken(ShinkenTest):
         self.setup_with_file('etc/shinken_multi_attribute_broken.cfg')
 
     def test_multi_valued_attribute_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]

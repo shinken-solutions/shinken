@@ -1519,7 +1519,7 @@ class TestConfigBroken(ShinkenTest):
         # in a controlled manner.
         #
         print "conf_is_correct", self.conf.conf_is_correct
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]

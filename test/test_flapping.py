@@ -80,7 +80,7 @@ class TestFlapping(ShinkenTest):
         for i in xrange(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print "In flapping?", svc.is_flapping
-        self.assert_(not svc.is_flapping)
+        self.assertFalse(svc.is_flapping)
         self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STOPPED')
         self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP')
 
@@ -111,7 +111,7 @@ class TestFlapping(ShinkenTest):
         cmd = "[%lu] DISABLE_FLAP_DETECTION" % int(time.time())
         self.sched.run_external_command(cmd)
 
-        self.assert_(not svc.is_flapping)
+        self.assertFalse(svc.is_flapping)
 
         ############# NOW a local command for this service
         # First reenable flap:p
@@ -143,7 +143,7 @@ class TestFlapping(ShinkenTest):
         cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())
         self.sched.run_external_command(cmd)
 
-        self.assert_(not svc.is_flapping)
+        self.assertFalse(svc.is_flapping)
 
 
 
