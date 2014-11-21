@@ -504,7 +504,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         for r in self.conf.realms:
             for cfg in r.confs.values():
                 self.assertEqual(True, cfg.is_assigned)
-                self.assert_(cfg.assigned_to in [scheduler1, scheduler2])
+                self.assertIn(cfg.assigned_to, [scheduler1, scheduler2])
 
 
 

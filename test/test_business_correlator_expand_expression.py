@@ -57,8 +57,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('service', sons[0].operand)
             self.assertEqual('service', sons[1].operand)
 
-            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_simple_xof_host_srv(self):
         for name in ("bprule_10", "bprule_11", "bprule_12", "bprule_13", "bprule_14", "bprule_15", "bprule_16", "bprule_17"):
@@ -78,8 +78,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('service', sons[0].operand)
             self.assertEqual('service', sons[1].operand)
 
-            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_combined_and(self):
         for name in ("bprule_20", "bprule_21", "bprule_22", "bprule_23", "bprule_24", "bprule_25", "bprule_26"):
@@ -107,10 +107,10 @@ class TestBusinesscorrelExpand(ShinkenTest):
             hst1_srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv2")
             hst2_srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
 
-            self.assert_(hst1_srv1 in (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
-            self.assert_(hst2_srv1 in (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
-            self.assert_(hst1_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
-            self.assert_(hst2_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
+            self.assertIn(hst1_srv1, (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
+            self.assertIn(hst2_srv1, (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
+            self.assertIn(hst1_srv2, (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
+            self.assertIn(hst2_srv2, (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_combined_or(self):
         for name in ("bprule_30", "bprule_31", "bprule_32", "bprule_33", "bprule_34", "bprule_35", "bprule_36"):
@@ -138,10 +138,10 @@ class TestBusinesscorrelExpand(ShinkenTest):
             hst1_srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv2")
             hst2_srv2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
 
-            self.assert_(hst1_srv1 in (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
-            self.assert_(hst2_srv1 in (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
-            self.assert_(hst1_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
-            self.assert_(hst2_srv2 in (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
+            self.assertIn(hst1_srv1, (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
+            self.assertIn(hst2_srv1, (sons[0].sons[0].sons[0], sons[0].sons[1].sons[0]))
+            self.assertIn(hst1_srv2, (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
+            self.assertIn(hst2_srv2, (sons[1].sons[0].sons[0], sons[1].sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_simple_hosts(self):
         for name in ("bprule_40", "bprule_41", "bprule_42", "bprule_43"):
@@ -161,8 +161,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('host', sons[0].operand)
             self.assertEqual('host', sons[1].operand)
 
-            self.assert_(hst1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(hst1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(hst2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_xof_hosts(self):
         for name in ("bprule_50", "bprule_51", "bprule_52", "bprule_53", "bprule_54"):
@@ -182,8 +182,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('host', sons[0].operand)
             self.assertEqual('host', sons[1].operand)
 
-            self.assert_(hst1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(hst2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(hst1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(hst2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_same_host_srv(self):
         for name in ("bprule_60", "bprule_61"):
@@ -203,8 +203,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('service', sons[0].operand)
             self.assertEqual('service', sons[1].operand)
 
-            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_hostgroup_expansion_bprule_xof_same_host_srv(self):
         for name in ("bprule_70", "bprule_71"):
@@ -224,8 +224,8 @@ class TestBusinesscorrelExpand(ShinkenTest):
             self.assertEqual('service', sons[0].operand)
             self.assertEqual('service', sons[1].operand)
 
-            self.assert_(srv1 in (sons[0].sons[0], sons[1].sons[0]))
-            self.assert_(srv2 in (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv1, (sons[0].sons[0], sons[1].sons[0]))
+            self.assertIn(srv2, (sons[0].sons[0], sons[1].sons[0]))
 
     def test_macro_expansion_bprule_no_macro(self):
         # Tests macro expansion
