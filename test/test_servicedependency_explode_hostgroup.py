@@ -50,8 +50,9 @@ class TestServiceDepAndGroups(ShinkenTest):
         service_dependencies.append(service_dependency_cpu)
 
         # Is service correctly depend of first one
-        self.assert_(service_dependency_postfix in s for s in svc.act_depend_of_me)
-        self.assert_(service_dependency_cpu in s for s in svc.act_depend_of_me)
+        for services in svc.act_depend_of_me:
+            self.assertIn(service_dependency_postfix, services)
+            self.assertIn(service_dependency_cpu, services)
 
 if __name__ == '__main__':
     unittest.main()
