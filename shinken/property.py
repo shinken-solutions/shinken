@@ -313,7 +313,10 @@ class IntListProp(ListProp):
     """Integer List property"""
     def pythonize(self, val):
         val = super(IntListProp, self).pythonize(val)
-        return [int(e) for e in val]
+        try:
+            return [int(e) for e in val]
+        except ValueError as value_except:
+            raise PythonizeError(str(value_except))
 
 
 class PythonizeError(Exception):

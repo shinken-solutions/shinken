@@ -105,8 +105,8 @@ class Item(object):
                               (key, cls.__name__)
                     self.configuration_warnings.append(warning)
                     val = ToGuessProp.pythonize(params[key])
-            except PythonizeError, e:
-                err = "Error while pythonizing parameter %s: %s" % (key, e)
+            except PythonizeError as expt:
+                err = "Error while pythonizing parameter '%s': %s" % (key, expt)
                 self.configuration_errors.append(err)
                 continue
 
