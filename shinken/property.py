@@ -312,7 +312,7 @@ class ToGuessProp(Property):
 class IntListProp(ListProp):
     """Integer List property"""
     def pythonize(self, val):
-        super(IntListProp, self).pythonize(val)
+        val = super(IntListProp, self).pythonize(val)
         return [int(e) for e in val]
 
 
