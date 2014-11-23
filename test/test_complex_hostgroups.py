@@ -86,7 +86,7 @@ class TestComplexHostgroups(ShinkenTest):
             print "H", h.get_name()
 
         self.assertIn(test_linux_web_prod_0, hg_linux.members)
-        self.assert_(test_linux_web_prod_0 not in hg_file.members)
+        self.assertNotIn(test_linux_web_prod_0, hg_file.members)
 
         # First the service define for linux only
         svc = self.find_service('test_linux_web_prod_0', 'linux_0')

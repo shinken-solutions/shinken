@@ -114,7 +114,7 @@ class TestMacroResolver(ShinkenTest):
         self.assertEqual('0.0', env['NAGIOS_SERVICEPERCENTCHANGE'])
         self.assertEqual('custvalue', env['NAGIOS__SERVICECUSTNAME'])
         self.assertEqual('gnulinux', env['NAGIOS__HOSTOSTYPE'])
-        self.assert_('NAGIOS_USER1' not in env)
+        self.assertNotIn('NAGIOS_USER1', env)
 
 
     def test_resource_file(self):

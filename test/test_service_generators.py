@@ -72,7 +72,7 @@ class TestConfig(ShinkenTest):
         # Dep version should a child of svc
         self.assertIn(svc_c_dep, svc_c.child_dependencies)
         # But not on other of course
-        self.assert_(svc_c_dep not in svc_d.child_dependencies)
+        self.assertNotIn(svc_c_dep, svc_d.child_dependencies)
 
         
 

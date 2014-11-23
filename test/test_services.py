@@ -205,7 +205,7 @@ class TestService(ShinkenTest):
     # Check if the autoslots are fill like it should
     def test_autoslots(self):
         svc = self.get_svc()
-        self.assert_("check_period" not in svc.__dict__)
+        self.assertNotIn("check_period", svc.__dict__)
 
     # Check if the parent/childs dependencies are fill like it should
     def test_parent_child_dep_list(self):
