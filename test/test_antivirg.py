@@ -19,7 +19,7 @@ class TestConfig(ShinkenTest):
         # if it is not possible to get the host, it is probably because
         # "__ANTI-VIRG__" has been replaced by ";"
         hst = self.conf.hosts.find_by_name('test__ANTI-VIRG___0')
-        self.assert_(hst is not None, "host 'test__ANTI-VIRG___0' not found")
+        self.assertIsNotNone(hst, "host 'test__ANTI-VIRG___0' not found")
 
         # Check that the host has a valid configuration
         self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % hst.get_name())
@@ -32,7 +32,7 @@ class TestConfig(ShinkenTest):
 
         # try to get the host
         hst = self.conf.hosts.find_by_name('test_host_1')
-        self.assert_(hst is not None, "host 'test_host_1' not found")
+        self.assertIsNotNone(hst, "host 'test_host_1' not found")
 
         # Check that the host has a valid configuration
         self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % (hst.get_name()))
@@ -51,7 +51,7 @@ class TestConfig(ShinkenTest):
 
         # try to get the host
         hst = self.conf.hosts.find_by_name('test_host_2;with_semicolon')
-        self.assert_(hst is not None, "host 'test_host_2;with_semicolon' not found")
+        self.assertIsNotNone(hst, "host 'test_host_2;with_semicolon' not found")
 
         # Check that the host has a valid configuration
         self.assertTrue(hst.is_correct(), "config of host '%s' is not true" % hst.get_name())
