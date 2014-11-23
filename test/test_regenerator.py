@@ -47,12 +47,12 @@ class TestRegenerator(ShinkenTest):
             for i in h.impacts:
                 print "Got impact", i.get_name()
                 same_impacts = i.get_name() in [j.get_name() for j in orig_h.impacts]
-                self.assert_(same_impacts)
+                self.assertTrue(same_impacts)
             # And look for same source problems
             for i in h.source_problems:
                 print "Got source pb", i.get_name()
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
-                self.assert_(same_pbs)
+                self.assertTrue(same_pbs)
 
         print "Services:", self.rg.services.__dict__
         for s in self.rg.services:
@@ -64,12 +64,12 @@ class TestRegenerator(ShinkenTest):
             for i in s.impacts:
                 print "Got impact", i.get_name()
                 same_impacts = i.get_name() in [j.get_name() for j in orig_s.impacts]
-                self.assert_(same_impacts)
+                self.assertTrue(same_impacts)
             # And look for same source problems
             for i in s.source_problems:
                 print "Got source pb", i.get_name()
                 same_pbs = i.get_name() in [j.get_name() for j in orig_s.source_problems]
-                self.assert_(same_pbs)
+                self.assertTrue(same_pbs)
             # Look for same host
             self.assertEqual(orig_s.host.get_name(), s.host.get_name())
 

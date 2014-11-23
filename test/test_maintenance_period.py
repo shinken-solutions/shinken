@@ -108,7 +108,7 @@ class TestMaintPeriod(ShinkenTest):
         self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
         print "scheduler_loop end  ", time.asctime()
 
-        self.assert_(hasattr(svc3, 'in_maintenance'))
+        self.assertTrue(hasattr(svc3, 'in_maintenance'))
         self.assertEqual(1, len(self.sched.downtimes))
         try:
             print "........................................."
@@ -120,9 +120,9 @@ class TestMaintPeriod(ShinkenTest):
             pass
         self.assertEqual(1, len(svc3.downtimes))
         self.assertIn(svc3.downtimes[0], self.sched.downtimes.values())
-        self.assert_(svc3.in_scheduled_downtime)
-        self.assert_(svc3.downtimes[0].fixed)
-        self.assert_(svc3.downtimes[0].is_in_effect)
+        self.assertTrue(svc3.in_scheduled_downtime)
+        self.assertTrue(svc3.downtimes[0].fixed)
+        self.assertTrue(svc3.downtimes[0].is_in_effect)
         self.assertFalse(svc3.downtimes[0].can_be_deleted)
         self.assertEqual(svc3.downtimes[0].id, svc3.in_maintenance)
 

@@ -473,7 +473,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -503,7 +503,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -533,7 +533,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -564,7 +564,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -585,7 +585,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -616,7 +616,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -730,7 +730,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -760,7 +760,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -790,7 +790,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -821,7 +821,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -842,7 +842,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -873,7 +873,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -907,7 +907,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check
@@ -936,7 +936,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
-        self.assert_(c.is_launchable(now))
+        self.assertTrue(c.is_launchable(now))
 
         # ask the scheduler to launch this check
         # and ask 2 loops: one for launch the check

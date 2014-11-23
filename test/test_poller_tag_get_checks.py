@@ -56,14 +56,14 @@ class TestPollerTagGetchecks(ShinkenTest):
         self.assertGreater(len(untaggued_checks), 0)
         for c in untaggued_checks:
             # Should be the service one, but not the host one
-            self.assert_(c.command.startswith('plugins/test_servicecheck.pl'))
+            self.assertTrue(c.command.startswith('plugins/test_servicecheck.pl'))
 
         # Now get only tag ones
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'])
         self.assertGreater(len(taggued_checks), 0)
         for c in taggued_checks:
             # Should be the host one only
-            self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
+            self.assertTrue(c.command.startswith('plugins/test_hostcheck.pl'))
 
     def test_good_checks_get_only_tags_with_specific_module_types(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -95,7 +95,7 @@ class TestPollerTagGetchecks(ShinkenTest):
         for c in untaggued_checks:
             print c.command
             # Should be the service one, but not the host one
-            self.assert_(c.command.startswith('plugins/test_servicecheck.pl') or c.command.startswith('plugins/test_hostcheck.pl'))
+            self.assertTrue(c.command.startswith('plugins/test_servicecheck.pl') or c.command.startswith('plugins/test_hostcheck.pl'))
 
         # Now get only tag ones and with a bad module type, so get NOTHING
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'], module_types=['myassischicken'])

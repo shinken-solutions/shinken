@@ -215,7 +215,7 @@ class TestAction(ShinkenTest):
         if sys.version_info < (2, 7):
             # cygwin: /bin/sh: -c: line 0: unexpected EOF while looking for matching'
             # ubuntu: /bin/sh: Syntax error: Unterminated quoted string
-            self.assert_(a.output.startswith("/bin/sh"))
+            self.assertTrue(a.output.startswith("/bin/sh"))
             self.assertEqual(3, a.exit_status)
         else:
             self.assertEqual('Not a valid shell command: No closing quotation', a.output)

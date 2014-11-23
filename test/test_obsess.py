@@ -45,8 +45,8 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        self.assert_(svc.obsess_over_service)
-        self.assert_(svc.__class__.obsess_over)
+        self.assertTrue(svc.obsess_over_service)
+        self.assertTrue(svc.__class__.obsess_over)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [[svc, 0, 'OK']])
@@ -58,7 +58,7 @@ class TestConfig(ShinkenTest):
         self.sched.get_new_actions()
         self.worker_loop()
         self.assertFalse(svc.obsess_over_service)
-        self.assert_(svc.__class__.obsess_over)
+        self.assertTrue(svc.__class__.obsess_over)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, self.count_actions())
@@ -70,8 +70,8 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.assert_(svc.obsess_over_service)
-        self.assert_(svc.__class__.obsess_over)
+        self.assertTrue(svc.obsess_over_service)
+        self.assertTrue(svc.__class__.obsess_over)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(1, self.count_actions())
@@ -83,15 +83,15 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.assert_(svc.obsess_over_service)
-        self.assert_(svc.__class__.obsess_over)
+        self.assertTrue(svc.obsess_over_service)
+        self.assertTrue(svc.__class__.obsess_over)
 
         now = time.time()
         cmd = "[%lu] STOP_OBSESSING_OVER_SVC_CHECKS" % now
         self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
-        self.assert_(svc.obsess_over_service)
+        self.assertTrue(svc.obsess_over_service)
         self.assertFalse(svc.__class__.obsess_over)
 
     def test_ochp(self):
@@ -119,11 +119,11 @@ class TestConfig(ShinkenTest):
         print "host", host.obsess_over_host
         print "rout", router.obsess_over_host
         self.assertEqual(0, self.count_actions())
-        self.assert_(host.obsess_over_host)
+        self.assertTrue(host.obsess_over_host)
         self.assertFalse(router.obsess_over_host)
         # the router does not obsess (host definition)
         # but it's class does (shinken.cfg)
-        self.assert_(router.__class__.obsess_over)
+        self.assertTrue(router.__class__.obsess_over)
 
 
 if __name__ == '__main__':

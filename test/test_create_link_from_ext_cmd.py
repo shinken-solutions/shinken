@@ -42,7 +42,7 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
         e = ExternalCommandManager(self.conf, 'dispatcher')
         cmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;test_host_0;test_router_0" % now
         self.sched.run_external_command(cmd)
-        self.assert_(h.is_linked_with_host(r))
+        self.assertTrue(h.is_linked_with_host(r))
 
         # Now we remove this link
         cmd = "[%lu] DEL_HOST_DEPENDENCY;test_host_0;test_router_0" % now

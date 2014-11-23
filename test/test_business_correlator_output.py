@@ -107,7 +107,7 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.assertGreater(output.find("[DOWN: test_host_04]"), 0)
         # Should not display OK state checks
         self.assertEqual(-1, output.find("[OK: test_host_01/srv1]") )
-        self.assert_(output.startswith("CRITICAL"))
+        self.assertTrue(output.startswith("CRITICAL"))
 
     def test_bprule_xof_one_critical_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")

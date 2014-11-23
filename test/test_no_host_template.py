@@ -39,7 +39,7 @@ class TestNoHostTemplate(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("my_host")
         b = host.is_correct()
-        self.assert_(b)
+        self.assertTrue(b)
 
 
 if __name__ == '__main__':

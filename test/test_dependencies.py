@@ -97,7 +97,7 @@ class TestConfig(ShinkenTest):
         host_D = self.sched.hosts.find_by_name("test_host_D")
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
-        #self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
+        #self.assertTrue(host_A in [x[0] for x in host_C.chk_depend_of])
         print host_C.act_depend_of
         print host_C.chk_depend_of
         print host_C.chk_depend_of_me
@@ -151,8 +151,8 @@ class TestConfig(ShinkenTest):
         self.assertIn(host_C, [x[0] for x in host_D.act_depend_of])
 
         # and through inherits_parent....
-        #self.assert_(host_A in [x[0] for x in host_D.act_depend_of])
-        #self.assert_(host_B in [x[0] for x in host_D.act_depend_of])
+        #self.assertTrue(host_A in [x[0] for x in host_D.act_depend_of])
+        #self.assertTrue(host_B in [x[0] for x in host_D.act_depend_of])
 
 
     # Now test a in service service_dep definition. More easierto use than create a full new object

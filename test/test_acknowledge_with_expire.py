@@ -80,7 +80,7 @@ class TestAcksWithExpire(ShinkenTest):
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;test_host_0;test_ok_0;1;1;0;%d;lausser;blablub" % (now, int(now) + 5)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [], do_sleep=False)
-        self.assert_(svc.problem_has_been_acknowledged)
+        self.assertTrue(svc.problem_has_been_acknowledged)
         self.assert_log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)')
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
         self.assertEqual(1, self.count_logs())

@@ -43,7 +43,7 @@ class TestFlapping(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK']])
         self.assertEqual('UP', host.state)
         self.assertEqual('HARD', host.state_type)
-        self.assert_(svc.flap_detection_enabled)
+        self.assertTrue(svc.flap_detection_enabled)
 
         print 'A' * 41, svc.low_flap_threshold
         self.assertEqual(-1, svc.low_flap_threshold)
@@ -64,7 +64,7 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
         self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
         self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
@@ -74,7 +74,7 @@ class TestFlapping(ShinkenTest):
         for i in xrange(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print "In flapping?", svc.is_flapping
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
 
         # 10 others can be good (near 4.1 %)
         for i in xrange(1, 11):
@@ -102,7 +102,7 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
         self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
         self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
@@ -134,7 +134,7 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
         self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
         self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')

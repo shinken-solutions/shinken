@@ -365,7 +365,7 @@ class TestBusinesscorrelExpand(ShinkenTest):
         # Business rule should have been re-evaluated (macro was modulated)
         self.assertIs(bp_rule, svc_cor.business_rule)
         self.assertEqual(3, svc_cor.last_hard_state_id)
-        self.assert_(svc_cor.output.startswith("Error while re-evaluating business rule"))
+        self.assertTrue(svc_cor.output.startswith("Error while re-evaluating business rule"))
 
     def test_macro_expansion_bprule_macro_profile(self):
         if PROFILE_BP_RULE_RE_PROCESSING is False:

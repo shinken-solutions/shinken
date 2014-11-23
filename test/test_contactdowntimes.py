@@ -66,7 +66,7 @@ class TestContactDowntime(ShinkenTest):
         self.assertEqual(1, len(test_contact.downtimes))
         self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
-        self.assert_(test_contact.downtimes[0].is_in_effect)
+        self.assertTrue(test_contact.downtimes[0].is_in_effect)
         self.assertFalse(test_contact.downtimes[0].can_be_deleted)
 
         # Ok, we define the downtime like we should, now look at if it does the job: do not
@@ -147,7 +147,7 @@ class TestContactDowntime(ShinkenTest):
         self.assertEqual(1, len(test_contact.downtimes))
         self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
-        self.assert_(test_contact.downtimes[0].is_in_effect)
+        self.assertTrue(test_contact.downtimes[0].is_in_effect)
         self.assertFalse(test_contact.downtimes[0].can_be_deleted)
 
         time.sleep(1)
@@ -165,7 +165,7 @@ class TestContactDowntime(ShinkenTest):
         self.sched.run_external_command(cmd)
 
         # We check if the downtime is tag as to remove
-        self.assert_(test_contact.downtimes[0].can_be_deleted)
+        self.assertTrue(test_contact.downtimes[0].can_be_deleted)
 
         # We really delete it
         self.scheduler_loop(1, [])

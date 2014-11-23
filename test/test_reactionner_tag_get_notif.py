@@ -83,7 +83,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         self.assertGreater(len(taggued_runonwindows_checks), 0)
         for c in taggued_runonwindows_checks:
             # Should be the host one only
-            self.assert_(c.command.startswith('plugins/notifier.pl'))
+            self.assertTrue(c.command.startswith('plugins/notifier.pl'))
 
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
@@ -92,14 +92,14 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         self.assertGreater(len(taggued_sms_checks), 0)
         for c in taggued_sms_checks:
             # Should be the host one only
-            self.assert_(c.command.startswith('plugins/sms.pl'))
+            self.assertTrue(c.command.startswith('plugins/sms.pl'))
 
 
         taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'])
         self.assertGreater(len(taggued_eventtag_checks), 0)
         for c in taggued_eventtag_checks:
             # Should be the host one only
-            self.assert_(c.command.startswith('plugins/test_eventhandler.pl'))
+            self.assertTrue(c.command.startswith('plugins/test_eventhandler.pl'))
 
 
     # Same that upper, but with modules types
@@ -141,7 +141,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         self.assertGreater(len(taggued_runonwindows_checks), 0)
         for c in taggued_runonwindows_checks:
             # Should be the host one only
-            self.assert_(c.command.startswith('plugins/notifier.pl'))
+            self.assertTrue(c.command.startswith('plugins/notifier.pl'))
 
         taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'], module_types=['myassischicken'])
         self.assertEqual(0, len(taggued_eventtag_checks))

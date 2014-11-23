@@ -514,7 +514,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def xtest_conf_is_correct(self):
         self.print_header()
-        self.assert_(self.conf.conf_is_correct)
+        self.assertTrue(self.conf.conf_is_correct)
 
 
 

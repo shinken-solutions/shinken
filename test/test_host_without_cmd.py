@@ -32,7 +32,7 @@ class TestConfig(ShinkenTest):
     def test_host_is_pending(self):
         self.print_header()
         # first of all, a host without check_command must be valid
-        self.assert_(self.conf.conf_is_correct)
+        self.assertTrue(self.conf.conf_is_correct)
         # service always ok, host stays pending
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")

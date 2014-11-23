@@ -57,7 +57,7 @@ class TestNotifMacros(ShinkenTest):
             print a.command
             if a.command == r:
                 got_notif = True
-        self.assert_(got_notif)
+        self.assertTrue(got_notif)
 
 
 

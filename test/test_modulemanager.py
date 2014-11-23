@@ -70,7 +70,7 @@ class TestModuleManager(ShinkenTest):
 
         # Here the inst should be alive again
         print "Is alive?", ls.process.is_alive()
-        self.assert_(ls.process.is_alive())
+        self.assertTrue(ls.process.is_alive())
 
         # should be nothing more in to_restart of
         # the module manager
@@ -93,7 +93,7 @@ class TestModuleManager(ShinkenTest):
 
         # Here the inst should be alive again
         print "Is alive?", ls.process.is_alive()
-        self.assert_(ls.process.is_alive())
+        self.assertTrue(ls.process.is_alive())
 
         # And we clear all now
         print "Ask to die"
