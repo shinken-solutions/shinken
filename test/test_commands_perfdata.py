@@ -47,7 +47,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         print "Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command)
         # We do not want to be just a string but a real command
-        self.assert_(not isinstance(svc.__class__.perfdata_command, str))
+        self.assertNotIsInstance(svc.__class__.perfdata_command, str)
         print svc.__class__.perfdata_command.__class__.my_type
         self.assertEqual('CommandCall', svc.__class__.perfdata_command.__class__.my_type)
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
@@ -77,7 +77,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         print "Host perfdata command", host.__class__.perfdata_command, type(host.__class__.perfdata_command)
         # We do not want to be just a string but a real command
-        self.assert_(not isinstance(host.__class__.perfdata_command, str))
+        self.assertNotIsInstance(host.__class__.perfdata_command, str)
         print host.__class__.perfdata_command.__class__.my_type
         self.assertEqual('CommandCall', host.__class__.perfdata_command.__class__.my_type)
         self.scheduler_loop(1, [[host, 0, 'UP | bibi=99%']])
@@ -109,7 +109,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         print "Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command)
         # We do not want to be just a string but a real command
-        self.assert_(not isinstance(svc.__class__.perfdata_command, str))
+        self.assertNotIsInstance(svc.__class__.perfdata_command, str)
         print svc.__class__.perfdata_command.__class__.my_type
         self.assertEqual('CommandCall', svc.__class__.perfdata_command.__class__.my_type)
         output = """DISK OK - free space: / 3326 MB (56%); | /=2643MB;5948;5958;0;5968
