@@ -41,7 +41,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         #
         print "Get the hosts and services"
         svc = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
-        self.assert_(len(svc.act_depend_of_me),2)
+        self.assertEqual(len(svc.act_depend_of_me), 2)
 
         service_dependencies = []
         service_dependency_postfix = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "POSTFIX")
