@@ -67,7 +67,7 @@ class TestContactDowntime(ShinkenTest):
         self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
-        self.assert_(not test_contact.downtimes[0].can_be_deleted)
+        self.assertFalse(test_contact.downtimes[0].can_be_deleted)
 
         # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
@@ -148,7 +148,7 @@ class TestContactDowntime(ShinkenTest):
         self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
 
         self.assert_(test_contact.downtimes[0].is_in_effect)
-        self.assert_(not test_contact.downtimes[0].can_be_deleted)
+        self.assertFalse(test_contact.downtimes[0].can_be_deleted)
 
         time.sleep(1)
         # Ok, we define the downtime like we should, now look at if it does the job: do not

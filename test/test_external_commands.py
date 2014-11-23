@@ -293,7 +293,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.assertEqual(1, svc.modified_attributes)
-        self.assert_(not getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
+        self.assertFalse(getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
 
 if __name__ == '__main__':
     unittest.main()

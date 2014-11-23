@@ -123,7 +123,7 @@ class TestMaintPeriod(ShinkenTest):
         self.assert_(svc3.in_scheduled_downtime)
         self.assert_(svc3.downtimes[0].fixed)
         self.assert_(svc3.downtimes[0].is_in_effect)
-        self.assert_(not svc3.downtimes[0].can_be_deleted)
+        self.assertFalse(svc3.downtimes[0].can_be_deleted)
         self.assertEqual(svc3.downtimes[0].id, svc3.in_maintenance)
 
         #

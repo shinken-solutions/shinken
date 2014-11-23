@@ -55,7 +55,7 @@ class TestDowntime(ShinkenTest):
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(svc.comments))
         self.assertIn(svc.comments[0], self.sched.comments.values())
@@ -70,7 +70,7 @@ class TestDowntime(ShinkenTest):
         self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
 
@@ -81,7 +81,7 @@ class TestDowntime(ShinkenTest):
         self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
 
         # now the state changes to hard
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
@@ -94,7 +94,7 @@ class TestDowntime(ShinkenTest):
         self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
 
         scheduled_downtime_depth = svc.scheduled_downtime_depth
         cmd = "[%lu] DEL_SVC_DOWNTIME;%d" % (now, svc.downtimes[0].id)
@@ -104,7 +104,7 @@ class TestDowntime(ShinkenTest):
         self.assertFalse(svc.in_scheduled_downtime)
         self.assertLess(svc.scheduled_downtime_depth, scheduled_downtime_depth)
         self.assert_(svc.downtimes[0].fixed)
-        self.assert_(not svc.downtimes[0].is_in_effect)
+        self.assertFalse(svc.downtimes[0].is_in_effect)
         self.assert_(svc.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(svc.comments))
@@ -137,9 +137,9 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
-        self.assert_(not svc.downtimes[0].fixed)
-        self.assert_(not svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].fixed)
+        self.assertFalse(svc.downtimes[0].is_in_effect)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(svc.comments))
         self.assertIn(svc.comments[0], self.sched.comments.values())
@@ -153,9 +153,9 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
         self.assertFalse(svc.in_scheduled_downtime)
-        self.assert_(not svc.downtimes[0].fixed)
-        self.assert_(not svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].fixed)
+        self.assertFalse(svc.downtimes[0].is_in_effect)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
         time.sleep(61)
         #----------------------------------------------------------------
         # run the service twice to get a soft critical status
@@ -166,9 +166,9 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
         self.assertFalse(svc.in_scheduled_downtime)
-        self.assert_(not svc.downtimes[0].fixed)
-        self.assert_(not svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].fixed)
+        self.assertFalse(svc.downtimes[0].is_in_effect)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
         time.sleep(61)
         #----------------------------------------------------------------
         # run the service again to get a hard critical status
@@ -179,9 +179,9 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
         self.assert_(svc.in_scheduled_downtime)
-        self.assert_(not svc.downtimes[0].fixed)
+        self.assertFalse(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
-        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assertFalse(svc.downtimes[0].can_be_deleted)
         #----------------------------------------------------------------
         # cancel the downtime
         # check if the downtime is inactive now and can be deleted
@@ -193,8 +193,8 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(1, len(svc.downtimes))
         self.assertFalse(svc.in_scheduled_downtime)
         self.assertLess(svc.scheduled_downtime_depth, scheduled_downtime_depth)
-        self.assert_(not svc.downtimes[0].fixed)
-        self.assert_(not svc.downtimes[0].is_in_effect)
+        self.assertFalse(svc.downtimes[0].fixed)
+        self.assertFalse(svc.downtimes[0].is_in_effect)
         self.assert_(svc.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(svc.comments))
@@ -258,7 +258,7 @@ class TestDowntime(ShinkenTest):
         self.assertIn(host.downtimes[0], self.sched.downtimes.values())
         self.assert_(host.downtimes[0].fixed)
         self.assert_(host.downtimes[0].is_in_effect)
-        self.assert_(not host.downtimes[0].can_be_deleted)
+        self.assertFalse(host.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(host.comments))
         self.assertIn(host.comments[0], self.sched.comments.values())
@@ -362,7 +362,7 @@ class TestDowntime(ShinkenTest):
         self.assertIn(host.downtimes[0], self.sched.downtimes.values())
         self.assert_(host.downtimes[0].fixed)
         self.assert_(host.downtimes[0].is_in_effect)
-        self.assert_(not host.downtimes[0].can_be_deleted)
+        self.assertFalse(host.downtimes[0].can_be_deleted)
         self.assertEqual(1, len(self.sched.comments))
         self.assertEqual(1, len(host.comments))
         self.assertIn(host.comments[0], self.sched.comments.values())
