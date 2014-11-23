@@ -109,7 +109,7 @@ class TestMacroResolver(ShinkenTest):
 
         env = mr.get_env_macros(data)
         print "Env:", env        
-        self.assert_(env != {})
+        self.assertNotEqual(env, {})
         self.assertEqual('test_host_0', env['NAGIOS_HOSTNAME'])
         self.assertEqual('0.0', env['NAGIOS_SERVICEPERCENTCHANGE'])
         self.assertEqual('custvalue', env['NAGIOS__SERVICECUSTNAME'])

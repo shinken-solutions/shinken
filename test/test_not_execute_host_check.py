@@ -44,7 +44,7 @@ class TestNoHostCheck(ShinkenTest):
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.checks_in_progress
-        self.assert_(len(svc.checks_in_progress) != 0)
+        self.assertNotEqual(len(svc.checks_in_progress), 0)
 
         # Now launch passive checks
         cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;test_host_0;1;bobo" % now
