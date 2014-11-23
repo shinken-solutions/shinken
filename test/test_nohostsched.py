@@ -43,7 +43,7 @@ class TestHostspecialSched(ShinkenTest):
         self.assertIsNot(host, None)
         print "check", host.next_chk
         print "Check in", host.next_chk - now
-        self.assert_(host.next_chk - now < 301)
+        self.assertLess(host.next_chk - now, 301)
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
         print "Loop"
@@ -55,7 +55,7 @@ class TestHostspecialSched(ShinkenTest):
         print "Final", host.next_chk, host.in_checking
         print "Next check?", host.next_chk - now
         print "Next check should be still < 300", host.next_chk - now
-        self.assert_(host.next_chk - now < 301)
+        self.assertLess(host.next_chk - now, 301)
         # but in 5min in fact, so more than 290,
         # something like 299.0
         self.assertGreater(host.next_chk - now, 290)

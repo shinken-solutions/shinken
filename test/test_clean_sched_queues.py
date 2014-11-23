@@ -60,7 +60,7 @@ class TestSchedCleanQueues(ShinkenTest):
         self.sched.clean_queues()
         # Should have something like 16 event handler
         print len(self.sched.actions)
-        self.assert_(len(self.sched.actions) < 30)
+        self.assertLess(len(self.sched.actions), 30)
 
         # Now for Notifications and co
         for i in xrange(1, 1001):
@@ -73,7 +73,7 @@ class TestSchedCleanQueues(ShinkenTest):
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         print len(self.sched.actions)
-        self.assert_(len(self.sched.actions) < 30)
+        self.assertLess(len(self.sched.actions), 30)
 
         #####  And now broks
         l = []
@@ -87,7 +87,7 @@ class TestSchedCleanQueues(ShinkenTest):
         self.assertGreaterEqual(len(self.sched.broks), 1000)
         self.sched.clean_queues()
         print "LEn broks", len(self.sched.broks)
-        self.assert_(len(self.sched.broks) < 30)
+        self.assertLess(len(self.sched.broks), 30)
 
 
 

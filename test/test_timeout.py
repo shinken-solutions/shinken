@@ -94,7 +94,7 @@ class TestTimeout(ShinkenTest):
 
         self.assertEqual('timeout', o.status)
         self.assertEqual(3, o.exit_status)
-        self.assert_(o.execution_time < n.timeout+1)
+        self.assertLess(o.execution_time, n.timeout+1)
 
         # Be a good poller and clean up.
         to_queue.close()

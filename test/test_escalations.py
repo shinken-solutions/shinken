@@ -363,7 +363,7 @@ class TestEscalations(ShinkenTest):
             print abs(next - now)
             # Check if we find the next notification for the next hour,
             # and not for the next day like we ask before
-            self.assert_(abs(next - now - 3600) < 10)
+            self.assertLess(abs(next - now - 3600), 10)
 
         # And we hack the notification so we can raise really the level2 escalation
         for n in svc.notifications_in_progress.values():
@@ -426,7 +426,7 @@ class TestEscalations(ShinkenTest):
         for n in svc.notifications_in_progress.values():
             print n, n.t_to_go, time.time(), n.t_to_go - time.time()
             # Should be "near" one day now, so 84000s
-            self.assert_(8300 < abs(n.t_to_go - time.time()) < 85000)
+            self.assertLess(8300 < abs(n.t_to_go - time.time()), 85000)
         # And so no notification
         self.assert_no_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
 
