@@ -36,9 +36,16 @@ class TestServiceNoHost(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search(
-            'a service has been defined without host_name nor hostgroups',
-            log)]) > 0)
+
+        self.assertLess(
+            0,
+            len( [ log
+                        for log in logs
+                        if re.search(
+                                'a service has been defined without host_name nor hostgroups',
+                                log)
+            ])
+        )
 
 
 if __name__ == '__main__':
