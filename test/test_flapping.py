@@ -41,12 +41,12 @@ class TestFlapping(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
-        self.assert_(svc.flap_detection_enabled)
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
+        self.assertTrue(svc.flap_detection_enabled)
 
         print 'A' * 41, svc.low_flap_threshold
-        self.assert_(svc.low_flap_threshold == -1)
+        self.assertEqual(-1, svc.low_flap_threshold)
 
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
@@ -64,25 +64,25 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
-        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # Now we put it as back :)
         # 10 is not enouth to get back as normal
         for i in xrange(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print "In flapping?", svc.is_flapping
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
 
         # 10 others can be good (near 4.1 %)
         for i in xrange(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print "In flapping?", svc.is_flapping
-        self.assert_(not svc.is_flapping)
-        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP'))
+        self.assertFalse(svc.is_flapping)
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STOPPED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP')
 
         ############ Now get back in flap, and try the exteral commands change
 
@@ -102,16 +102,16 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
-        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_FLAP_DETECTION" % int(time.time())
         self.sched.run_external_command(cmd)
 
-        self.assert_(not svc.is_flapping)
+        self.assertFalse(svc.is_flapping)
 
         ############# NOW a local command for this service
         # First reenable flap:p
@@ -134,16 +134,16 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
 
         # Should get in flapping now
-        self.assert_(svc.is_flapping)
+        self.assertTrue(svc.is_flapping)
         # and get a log about it
-        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+        self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STARTED')
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART')
 
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())
         self.sched.run_external_command(cmd)
 
-        self.assert_(not svc.is_flapping)
+        self.assertFalse(svc.is_flapping)
 
 
 

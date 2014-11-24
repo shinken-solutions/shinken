@@ -32,7 +32,7 @@ class TestCssInCommands(ShinkenTest):
 
     def test_dummy(self):
         r = self.conf.conf_is_correct
-        self.assert_(r)
+        self.assertTrue(r)
         print r
 
 

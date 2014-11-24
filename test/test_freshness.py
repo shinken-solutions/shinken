@@ -41,7 +41,7 @@ class TestFreshness(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         svc.active_checks_enabled = False
-        self.assert_(svc.check_freshness == True)
+        self.assertEqual(True, svc.check_freshness)
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -50,9 +50,9 @@ class TestFreshness(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
         # By default check fresh ness is set at false, so no new checks
-        self.assert_(len(svc.actions) == 0)
+        self.assertEqual(0, len(svc.actions))
         svc.do_check_freshness()
-        self.assert_(len(svc.actions) == 0)
+        self.assertEqual(0, len(svc.actions))
 
         # We make it 10s less than it was
         svc.last_state_update = svc.last_state_update - 10
@@ -63,7 +63,7 @@ class TestFreshness(ShinkenTest):
         svc.freshness_threshold = 1
         print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
         svc.do_check_freshness()
-        self.assert_(len(svc.actions) == 0)
+        self.assertEqual(0, len(svc.actions))
 
         # Now active globaly the check freshness
         cmd = "[%lu] ENABLE_SERVICE_FRESHNESS_CHECKS" % now
@@ -72,9 +72,9 @@ class TestFreshness(ShinkenTest):
         # Ok, now, we remove again 10s. Here we will saw the new entry
         svc.last_state_update = svc.last_state_update - 10
         svc.do_check_freshness()
-        self.assert_(len(svc.actions) == 1)
+        self.assertEqual(1, len(svc.actions))
         # And we check for the message in the log too
-        self.assert_(self.any_log_match('The results of service.*'))
+        self.assert_any_log_match('The results of service.*')
 
 
 if __name__ == '__main__':

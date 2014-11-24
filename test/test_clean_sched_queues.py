@@ -50,17 +50,17 @@ class TestSchedCleanQueues(ShinkenTest):
         for i in xrange(1, 1001):
             host.get_obsessive_compulsive_processor_command()
         print "New len", len(host.actions)
-        self.assert_(len(host.actions) >= 1000)
+        self.assertGreaterEqual(len(host.actions), 1000)
         self.sched.get_new_actions()
         print len(self.sched.actions)
         # So get our 1000 external commands
-        self.assert_(len(self.sched.actions) >= 1000)
+        self.assertGreaterEqual(len(self.sched.actions), 1000)
 
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         # Should have something like 16 event handler
         print len(self.sched.actions)
-        self.assert_(len(self.sched.actions) < 30)
+        self.assertLess(len(self.sched.actions), 30)
 
         # Now for Notifications and co
         for i in xrange(1, 1001):
@@ -68,12 +68,12 @@ class TestSchedCleanQueues(ShinkenTest):
         self.sched.get_new_actions()
         print len(self.sched.actions)
         # So get our 1000 notifications
-        self.assert_(len(self.sched.actions) >= 1000)
+        self.assertGreaterEqual(len(self.sched.actions), 1000)
 
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         print len(self.sched.actions)
-        self.assert_(len(self.sched.actions) < 30)
+        self.assertLess(len(self.sched.actions), 30)
 
         #####  And now broks
         l = []
@@ -84,10 +84,10 @@ class TestSchedCleanQueues(ShinkenTest):
 
         self.sched.get_new_broks()
         print "LEn broks", len(self.sched.broks)
-        self.assert_(len(self.sched.broks) >= 1000)
+        self.assertGreaterEqual(len(self.sched.broks), 1000)
         self.sched.clean_queues()
         print "LEn broks", len(self.sched.broks)
-        self.assert_(len(self.sched.broks) < 30)
+        self.assertLess(len(self.sched.broks), 30)
 
 
 

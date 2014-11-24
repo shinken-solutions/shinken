@@ -35,21 +35,21 @@ class TestCustomsonservicehosgroups(ShinkenTest):
     def test_check_for_custom_copy_on_serice_hostgroups(self):
         # The one host service
         svc_one_host = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_on_1_host")
-        self.assert_(svc_one_host is not None)
+        self.assertIsNot(svc_one_host, None)
         # The 2 hosts service(s)
         svc_two_hosts_1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_on_2_hosts")
-        self.assert_(svc_two_hosts_1 is not None)
+        self.assertIsNot(svc_two_hosts_1, None)
         svc_two_hosts_2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_on_2_hosts")
-        self.assert_(svc_two_hosts_2 is not None)
+        self.assertIsNot(svc_two_hosts_2, None)
         # Then the one defined on a hostgroup
         svc_on_group = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_on_group")
-        self.assert_(svc_on_group is not None)
+        self.assertIsNot(svc_on_group, None)
 
         # Each one should have customs
-        self.assert_(svc_one_host.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_two_hosts_1.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_two_hosts_2.customs['_CUSTNAME'] == 'custvalue')
-        self.assert_(svc_on_group.customs['_CUSTNAME'] == 'custvalue')
+        self.assertEqual('custvalue', svc_one_host.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_two_hosts_1.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_two_hosts_2.customs['_CUSTNAME'])
+        self.assertEqual('custvalue', svc_on_group.customs['_CUSTNAME'])
 
 
 

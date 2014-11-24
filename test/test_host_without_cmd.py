@@ -32,7 +32,7 @@ class TestConfig(ShinkenTest):
     def test_host_is_pending(self):
         self.print_header()
         # first of all, a host without check_command must be valid
-        self.assert_(self.conf.conf_is_correct)
+        self.assertTrue(self.conf.conf_is_correct)
         # service always ok, host stays pending
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -51,15 +51,15 @@ class TestConfig(ShinkenTest):
         #svc.act_depend_of = [] # no hostchecks on critical checkresults
 
         # initially the host is pending
-        self.assert_(host.state == 'PENDING')
-        self.assert_(svc.state == 'PENDING')
+        self.assertEqual('PENDING', host.state)
+        self.assertEqual('PENDING', svc.state)
         # now force a dependency check of the host
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
         self.show_actions()
         # and now the host is magically UP
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
-        self.assert_(host.output == 'Host assumed to be UP')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
+        self.assertEqual('Host assumed to be UP', host.output)
 
 
 

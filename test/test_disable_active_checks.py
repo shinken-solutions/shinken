@@ -50,8 +50,8 @@ class TestDisableActiveChecks(ShinkenTest):
         print c.status
 
         self.scheduler_loop(1, [[host, 0, 'I set this host UP | value1=1 value2=2']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
         last_output = host.output
 
         host.schedule()
@@ -60,16 +60,16 @@ class TestDisableActiveChecks(ShinkenTest):
         c = host.checks_in_progress.pop()
         print c.__dict__
         print c.status
-        self.assert_(c.status == 'waitconsume')
+        self.assertEqual('waitconsume', c.status)
         self.scheduler_loop(2, [])
 
         print host.state
         print host.output
-        self.assert_(host.output == last_output)
+        self.assertEqual(last_output, host.output)
 
         print len(host.checks_in_progress)
         print host.in_checking
-        self.assert_(host.in_checking == False)
+        self.assertEqual(False, host.in_checking)
 
 
 

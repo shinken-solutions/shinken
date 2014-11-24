@@ -49,8 +49,8 @@ class TestOrphaned(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         #self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        #self.assert_(host.state == 'UP')
-        #self.assert_(host.state_type == 'HARD')
+        #self.assertEqual('UP', host.state)
+        #self.assertEqual('HARD', host.state_type)
 
         svc.schedule()
         print svc.actions
@@ -65,10 +65,10 @@ class TestOrphaned(ShinkenTest):
 
         # Should be available to poller now :)
         for c in self.sched.checks.values():
-            self.assert_(c.status == 'scheduled')
+            self.assertEqual('scheduled', c.status)
 
         # And we correctly raise the log
-        self.assert_(self.any_log_match('actions never came back for the satellite'))
+        self.assert_any_log_match('actions never came back for the satellite')
 
 
 if __name__ == '__main__':

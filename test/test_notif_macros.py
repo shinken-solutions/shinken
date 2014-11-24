@@ -48,7 +48,7 @@ class TestNotifMacros(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         # Should got a notif here
-        self.assert_(len(svc.notifications_in_progress.values()) > 0)
+        self.assertGreater(len(svc.notifications_in_progress.values()), 0)
         #n = svc.notifications_in_progress.values()[0]
         got_notif = False
         r = 'plugins/macros_check.sh "_HOSTADMINEMAIL=" "monemail@masociete.domain" ' \
@@ -57,7 +57,7 @@ class TestNotifMacros(ShinkenTest):
             print a.command
             if a.command == r:
                 got_notif = True
-        self.assert_(got_notif)
+        self.assertTrue(got_notif)
 
 
 

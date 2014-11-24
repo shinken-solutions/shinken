@@ -44,14 +44,14 @@ class TestSnapshot(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(5, [[host, 2, 'DOWN'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('HARD', host.state_type)
         
-        self.assert_(self.any_log_match('HOST SNAPSHOT.*'))
-        self.assert_(self.log_match(2, 'HOST SNAPSHOT.*'))
+        self.assert_any_log_match('HOST SNAPSHOT.*')
+        self.assert_log_match(2, 'HOST SNAPSHOT.*')
 
-        self.assert_(self.any_log_match('SERVICE SNAPSHOT.*'))
-        self.assert_(self.log_match(4, 'SERVICE SNAPSHOT.*'))
+        self.assert_any_log_match('SERVICE SNAPSHOT.*')
+        self.assert_log_match(4, 'SERVICE SNAPSHOT.*')
 
         self.show_and_clear_logs()
         
@@ -59,8 +59,8 @@ class TestSnapshot(ShinkenTest):
         [b.prepare() for b in broks]
         types = set([b.type for b in broks])
         print types
-        self.assert_('service_snapshot' in types)
-        self.assert_('host_snapshot' in types)
+        self.assertIn('service_snapshot', types)
+        self.assertIn('host_snapshot', types)
 
 if __name__ == '__main__':
     unittest.main()

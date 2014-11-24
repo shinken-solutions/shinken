@@ -49,17 +49,17 @@ class TestNotifTooMuch(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         test_contact = self.sched.contacts.find_by_name('test_contact')
-        self.assert_(test_contact is not None)
+        self.assertIsNot(test_contact, None)
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
 
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
 
         # We should NOT see a send for the notify-service2 call because it's the good contact
         # but NOT the good period for this notifways. So 24x7 ok, not the never :)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;notify-service'))
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;notify-service2'))
+        self.assert_any_log_match('SERVICE NOTIFICATION.*;notify-service')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;notify-service2')
 
 
 

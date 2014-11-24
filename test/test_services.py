@@ -37,8 +37,8 @@ class TestService(ShinkenTest):
     def test_get_name(self):
         svc = self.get_svc()
         print svc.get_dbg_name()
-        self.assert_(svc.get_name() == 'test_ok_0')
-        self.assert_(svc.get_dbg_name() == 'test_host_0/test_ok_0')
+        self.assertEqual('test_ok_0', svc.get_name())
+        self.assertEqual('test_host_0/test_ok_0', svc.get_dbg_name())
 
 
     # getstate should be with all properties in dict class + id
@@ -49,7 +49,7 @@ class TestService(ShinkenTest):
         # We get the state
         state = svc.__getstate__()
         # Check it's the good length
-        self.assert_(len(state) == len(cls.properties) + len(cls.running_properties) + 1)
+        self.assertEqual(len(cls.properties) + len(cls.running_properties) + 1, len(state))
         # we copy the service
         svc_copy = copy.copy(svc)
         # reset the state in the original service
@@ -58,7 +58,7 @@ class TestService(ShinkenTest):
         for p in cls.properties:
             ## print getattr(svc_copy, p)
             ## print getattr(svc, p)
-            self.assert_(getattr(svc_copy, p) == getattr(svc, p))
+            self.assertEqual(getattr(svc, p), getattr(svc_copy, p) )
 
 
     # Look if it can detect all incorrect cases
@@ -66,12 +66,12 @@ class TestService(ShinkenTest):
         svc = self.get_svc()
 
         # first it's ok
-        self.assert_(svc.is_correct() == True)
+        self.assertEqual(True, svc.is_correct())
 
         # Now try to delete a required property
         max_check_attempts = svc.max_check_attempts
         del svc.max_check_attempts
-        self.assert_(svc.is_correct() == True)
+        self.assertEqual(True, svc.is_correct())
         svc.max_check_attempts = max_check_attempts
 
         ###
@@ -81,16 +81,16 @@ class TestService(ShinkenTest):
         # no check command
         check_command = svc.check_command
         del svc.check_command
-        self.assert_(svc.is_correct() == False)
+        self.assertEqual(False, svc.is_correct())
         svc.check_command = check_command
-        self.assert_(svc.is_correct() == True)
+        self.assertEqual(True, svc.is_correct())
 
         # no notification_interval
         notification_interval = svc.notification_interval
         del svc.notification_interval
-        self.assert_(svc.is_correct() == False)
+        self.assertEqual(False, svc.is_correct())
         svc.notification_interval = notification_interval
-        self.assert_(svc.is_correct() == True)
+        self.assertEqual(True, svc.is_correct())
 
 
     # Look for set/unset impacted states (unknown)
@@ -99,70 +99,70 @@ class TestService(ShinkenTest):
         ori_state = svc.state
         ori_state_id = svc.state_id
         svc.set_impact_state()
-        self.assert_(svc.state == 'UNKNOWN')
-        self.assert_(svc.state_id == 3)
+        self.assertEqual('UNKNOWN', svc.state)
+        self.assertEqual(3, svc.state_id)
         svc.unset_impact_state()
-        self.assert_(svc.state == ori_state)
-        self.assert_(svc.state_id == ori_state_id)
+        self.assertEqual(ori_state, svc.state)
+        self.assertEqual(ori_state_id, svc.state_id)
 
     # Look for display name setting
     def test_display_name(self):
         svc = self.get_svc()
         print 'Display name', svc.display_name, 'toto'
         print 'Full name', svc.get_full_name()
-        self.assert_(svc.display_name == 'test_ok_0')
+        self.assertEqual('test_ok_0', svc.display_name)
 
     def test_states_from_exit_status(self):
         svc = self.get_svc()
 
         # First OK
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(svc.state == 'OK')
-        self.assert_(svc.state_id == 0)
-        self.assert_(svc.is_state('OK') == True)
-        self.assert_(svc.is_state('o') == True)
+        self.assertEqual('OK', svc.state)
+        self.assertEqual(0, svc.state_id)
+        self.assertEqual(True, svc.is_state('OK'))
+        self.assertEqual(True, svc.is_state('o'))
 
         # Then warning
         self.scheduler_loop(1, [[svc, 1, 'WARNING']])
-        self.assert_(svc.state == 'WARNING')
-        self.assert_(svc.state_id == 1)
-        self.assert_(svc.is_state('WARNING') == True)
-        self.assert_(svc.is_state('w') == True)
+        self.assertEqual('WARNING', svc.state)
+        self.assertEqual(1, svc.state_id)
+        self.assertEqual(True, svc.is_state('WARNING'))
+        self.assertEqual(True, svc.is_state('w'))
         # Then Critical
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL']])
-        self.assert_(svc.state == 'CRITICAL')
-        self.assert_(svc.state_id == 2)
-        self.assert_(svc.is_state('CRITICAL') == True)
-        self.assert_(svc.is_state('c') == True)
+        self.assertEqual('CRITICAL', svc.state)
+        self.assertEqual(2, svc.state_id)
+        self.assertEqual(True, svc.is_state('CRITICAL'))
+        self.assertEqual(True, svc.is_state('c'))
 
         # And unknown
         self.scheduler_loop(1, [[svc, 3, 'UNKNOWN']])
-        self.assert_(svc.state == 'UNKNOWN')
-        self.assert_(svc.state_id == 3)
-        self.assert_(svc.is_state('UNKNOWN') == True)
-        self.assert_(svc.is_state('u') == True)
+        self.assertEqual('UNKNOWN', svc.state)
+        self.assertEqual(3, svc.state_id)
+        self.assertEqual(True, svc.is_state('UNKNOWN'))
+        self.assertEqual(True, svc.is_state('u'))
 
         # And something else :)
         self.scheduler_loop(1, [[svc, 99, 'WTF return :)']])
-        self.assert_(svc.state == 'CRITICAL')
-        self.assert_(svc.state_id == 2)
-        self.assert_(svc.is_state('CRITICAL') == True)
-        self.assert_(svc.is_state('c') == True)
+        self.assertEqual('CRITICAL', svc.state)
+        self.assertEqual(2, svc.state_id)
+        self.assertEqual(True, svc.is_state('CRITICAL'))
+        self.assertEqual(True, svc.is_state('c'))
 
 
     def test_business_impact_value(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         # This service inherit the improtance value from his father, 5
-        self.assert_(svc.business_impact == 5)
+        self.assertEqual(5, svc.business_impact)
 
 
     # Look if the service is in the servicegroup
     def test_servicegroup(self):
         sg = self.sched.servicegroups.find_by_name("servicegroup_01")
-        self.assert_(sg is not None)
+        self.assertIsNot(sg, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        self.assert_(svc in sg.members)
-        self.assert_(sg in svc.servicegroups)
+        self.assertIn(svc, sg.members)
+        self.assertIn(sg, svc.servicegroups)
 
     # Look at the good of the last_hard_state_change
     def test_service_last_hard_state(self):
@@ -180,40 +180,40 @@ class TestService(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         print "FUCK", svc.last_hard_state_change
         orig = svc.last_hard_state_change
-        self.assert_(svc.last_hard_state == 'OK')
+        self.assertEqual('OK', svc.last_hard_state)
 
         # now still ok
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
-        self.assert_(svc.last_hard_state_change == orig)
-        self.assert_(svc.last_hard_state == 'OK')
+        self.assertEqual(orig, svc.last_hard_state_change)
+        self.assertEqual('OK', svc.last_hard_state)
 
         # now error but still SOFT
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
-        self.assert_(svc.last_hard_state_change == orig)
-        self.assert_(svc.last_hard_state == 'OK')
+        self.assertEqual(orig, svc.last_hard_state_change)
+        self.assertEqual('OK', svc.last_hard_state)
 
         # now go hard!
         now = int(time.time())
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
-        self.assert_(svc.last_hard_state_change == now)
-        self.assert_(svc.last_hard_state == 'CRITICAL')
+        self.assertEqual(now, svc.last_hard_state_change)
+        self.assertEqual('CRITICAL', svc.last_hard_state)
         print "Last hard state id", svc.last_hard_state_id
-        self.assert_(svc.last_hard_state_id == 2)
+        self.assertEqual(2, svc.last_hard_state_id)
 
     # Check if the autoslots are fill like it should
     def test_autoslots(self):
         svc = self.get_svc()
-        self.assert_("check_period" not in svc.__dict__)
+        self.assertNotIn("check_period", svc.__dict__)
 
     # Check if the parent/childs dependencies are fill like it should
     def test_parent_child_dep_list(self):
         svc = self.get_svc()
         # Look if our host is a parent
-        self.assert_(svc.host in svc.parent_dependencies)
+        self.assertIn(svc.host, svc.parent_dependencies)
         # and if we are a child of it
-        self.assert_(svc in svc.host.child_dependencies)
+        self.assertIn(svc, svc.host.child_dependencies)
 
 
 if __name__ == '__main__':

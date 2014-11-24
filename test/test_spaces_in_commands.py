@@ -50,7 +50,7 @@ class TestConfig(ShinkenTest):
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'])
         cc = untaggued_checks[0]
         # There must still be a sequence of 10 blanks
-        self.assert_(cc.command.find("Port 2          ") != -1)
+        self.assertNotEqual(cc.command.find("Port 2          "), -1)
 
 if __name__ == '__main__':
     unittest.main()

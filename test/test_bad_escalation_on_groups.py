@@ -48,9 +48,9 @@ class TestBadEscaOnGroups(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         print svc.escalations
 
-        self.assert_(len(svc.escalations) > 0)
+        self.assertGreater(len(svc.escalations), 0)
         es = svc.escalations.pop()
-        self.assert_(es.is_correct())
+        self.assertTrue(es.is_correct())
 
 
 if __name__ == '__main__':

@@ -46,18 +46,18 @@ class TestConfig(ShinkenTest):
             print "\t", nw.notificationway_name
 
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
-        self.assert_(email_in_day in contact.notificationways)
+        self.assertIn(email_in_day, contact.notificationways)
         email_s_cmd = email_in_day.service_notification_commands.pop()
         email_h_cmd = email_in_day.host_notification_commands.pop()
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
-        self.assert_(sms_the_night in contact.notificationways)
+        self.assertIn(sms_the_night, contact.notificationways)
         sms_s_cmd = sms_the_night.service_notification_commands.pop()
         sms_h_cmd = sms_the_night.host_notification_commands.pop()
 
         # And check the criticity values
-        self.assert_(email_in_day.min_business_impact == 0)
-        self.assert_(sms_the_night.min_business_impact == 5)
+        self.assertEqual(0, email_in_day.min_business_impact)
+        self.assertEqual(5, sms_the_night.min_business_impact)
 
         print "Contact notification way(s):"
         for nw in contact.notificationways:
@@ -73,36 +73,36 @@ class TestConfig(ShinkenTest):
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:
                 print "\t\t", c.get_name()
-        self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
+        self.assertIn(test_contact_simple_inner_notificationway, contact_simple.notificationways)
 
         # we take as criticity a huge value from now
         huge_criticity = 5
 
         # Now all want* functions
         # First is ok with warning alerts
-        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
+        self.assertEqual(True, email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) )
 
         # But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
-        self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
+        self.assertEqual(False, sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) )
 
         # Same with contacts now
         # First is ok for warning in the email_in_day nw
-        self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
+        self.assertEqual(True, contact.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) )
         # Simple is not ok for it
-        self.assert_(contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
+        self.assertEqual(False, contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) )
 
         # Then for host notification
         # First is ok for warning in the email_in_day nw
-        self.assert_(contact.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == True)
+        self.assertEqual(True, contact.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) )
         # Simple is not ok for it
-        self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == False)
+        self.assertEqual(False, contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) )
 
         # And now we check that we refuse SMS for a low level criticity
         # I do not want to be awaken by a dev server! When I sleep, I sleep!
         # (and my wife will kill me if I do...)
 
         # We take the EMAIL test because SMS got the night ony, so we take a very low value for criticity here
-        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) == False)
+        self.assertEqual(False, email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) )
 
 
 

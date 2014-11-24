@@ -48,38 +48,38 @@ class TestPropertyOverride(ShinkenTest):
         svc22 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc2")
 
         # Checks we got the objects we need
-        self.assert_(svc1 is not None)
-        self.assert_(svc2 is not None)
-        self.assert_(svc1proc1 is not None)
-        self.assert_(svc1proc2 is not None)
-        self.assert_(svc2proc1 is not None)
-        self.assert_(svc2proc2 is not None)
-        self.assert_(tp24x7 is not None)
-        self.assert_(tptest is not None)
-        self.assert_(cgtest is not None)
-        self.assert_(cgadm is not None)
-        self.assert_(cmdsvc is not None)
-        self.assert_(cmdtest is not None)
-        self.assert_(svc12 is not None)
-        self.assert_(svc22 is not None)
+        self.assertIsNot(svc1, None)
+        self.assertIsNot(svc2, None)
+        self.assertIsNot(svc1proc1, None)
+        self.assertIsNot(svc1proc2, None)
+        self.assertIsNot(svc2proc1, None)
+        self.assertIsNot(svc2proc2, None)
+        self.assertIsNot(tp24x7, None)
+        self.assertIsNot(tptest, None)
+        self.assertIsNot(cgtest, None)
+        self.assertIsNot(cgadm, None)
+        self.assertIsNot(cmdsvc, None)
+        self.assertIsNot(cmdtest, None)
+        self.assertIsNot(svc12, None)
+        self.assertIsNot(svc22, None)
 
         # Check non overriden properies value
         for svc in (svc1, svc1proc1, svc1proc2, svc2proc1, svc12):
-            self.assert_(svc.contact_groups == ["test_contact"])
-            self.assert_(svc.maintenance_period is tp24x7)
-            self.assert_(svc.retry_interval == 1)
-            self.assert_(svc.check_command.command is cmdsvc)
-            self.assert_(svc.notification_options == ["w","u","c","r","f","s"])
-            self.assert_(svc.notifications_enabled is True)
+            self.assertEqual(["test_contact"], svc.contact_groups)
+            self.assertIs(tp24x7, svc.maintenance_period)
+            self.assertEqual(1, svc.retry_interval)
+            self.assertIs(cmdsvc, svc.check_command.command)
+            self.assertEqual(["w","u","c","r","f","s"], svc.notification_options)
+            self.assertIs(True, svc.notifications_enabled)
 
         # Check overriden properies value
         for svc in (svc2, svc2proc2, svc22):
-            self.assert_(svc.contact_groups == ["admins"])
-            self.assert_(svc.maintenance_period is tptest)
-            self.assert_(svc.retry_interval == 3)
-            self.assert_(svc.check_command.command is cmdtest)
-            self.assert_(svc.notification_options == ["c","r"])
-            self.assert_(svc.notifications_enabled is False)
+            self.assertEqual(["admins"], svc.contact_groups)
+            self.assertIs(tptest, svc.maintenance_period)
+            self.assertEqual(3, svc.retry_interval)
+            self.assertIs(cmdtest, svc.check_command.command)
+            self.assertEqual(["c","r"], svc.notification_options)
+            self.assertIs(False, svc.notifications_enabled)
 
 
 class TestConfigBroken(ShinkenTest):
@@ -88,15 +88,15 @@ class TestConfigBroken(ShinkenTest):
         self.setup_with_file('etc/shinken_property_override_broken.cfg')
 
     def test_service_property_override_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search('Error: invalid service override syntax: fake', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search("Error: trying to override property 'retry_interval' on service 'fakesrv' but it's unknown for this host", log)]) == 1)
-        self.assert_(len([log for log in logs if re.search("Error: trying to override 'host_name', a forbidden property for service 'proc proc2'", log)]) == 1)
+        self.assertEqual(1, len([log for log in logs if re.search('Error: invalid service override syntax: fake', log)]) )
+        self.assertEqual(1, len([log for log in logs if re.search("Error: trying to override property 'retry_interval' on service 'fakesrv' but it's unknown for this host", log)]) )
+        self.assertEqual(1, len([log for log in logs if re.search("Error: trying to override 'host_name', a forbidden property for service 'proc proc2'", log)]) )
 
 
 if __name__ == '__main__':

@@ -34,10 +34,10 @@ class TestBadServiceDependencies(ShinkenTest):
         self.setup_with_file('etc/shinken_bad_servicedependencies.cfg')
 
     def test_bad_conf(self):
-        self.assert_(not self.conf.conf_is_correct)
-        self.assert_(self.any_log_match("hostdependencies conf incorrect!!"))
-        self.assert_(self.any_log_match("servicedependencies conf incorrect!!"))
-        self.assert_(self.any_log_match("The host object 'fake host'  is part of a circular parent/child chain!"))
+        self.assertFalse(self.conf.conf_is_correct)
+        self.assert_any_log_match("hostdependencies conf incorrect!!")
+        self.assert_any_log_match("servicedependencies conf incorrect!!")
+        self.assert_any_log_match("The host object 'fake host'  is part of a circular parent/child chain!")
 
 if __name__ == '__main__':
     unittest.main()

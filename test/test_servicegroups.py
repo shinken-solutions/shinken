@@ -33,24 +33,24 @@ class TestServicegroup(ShinkenTest):
 
 
     def test_servicegroup(self):
-        self.assert_(self.conf.conf_is_correct == True)
+        self.assertEqual(True, self.conf.conf_is_correct)
         sgs = []
         for name in ["MYSVCGP", "MYSVCGP2", "MYSVCGP3", "MYSVCGP4"]:
             sg = self.sched.servicegroups.find_by_name(name)
             sgs.append(sg)
-            self.assert_(sg is not None)
+            self.assertIsNot(sg, None)
 
         svc3 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc3")
         svc4 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc4")
-        self.assert_(svc3 in sgs[0].members)
-        self.assert_(svc3 in sgs[1].members)
-        self.assert_(svc4 in sgs[2].members)
-        self.assert_(svc4 in sgs[3].members)
+        self.assertIn(svc3, sgs[0].members)
+        self.assertIn(svc3, sgs[1].members)
+        self.assertIn(svc4, sgs[2].members)
+        self.assertIn(svc4, sgs[3].members)
 
-        self.assert_(sgs[0] in svc3.servicegroups)
-        self.assert_(sgs[1] in svc3.servicegroups)
-        self.assert_(sgs[2] in svc4.servicegroups)
-        self.assert_(sgs[3] in svc4.servicegroups)
+        self.assertIn(sgs[0], svc3.servicegroups)
+        self.assertIn(sgs[1], svc3.servicegroups)
+        self.assertIn(sgs[2], svc4.servicegroups)
+        self.assertIn(sgs[3], svc4.servicegroups)
 
 
 if __name__ == '__main__':

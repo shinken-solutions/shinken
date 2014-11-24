@@ -38,13 +38,13 @@ class TestModuleOnModule(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         mod1 = self.sched.conf.modules.find_by_name("Simple-log")
-        self.assert_(mod1 is not None)
+        self.assertIsNot(mod1, None)
         print "Got module", mod1.get_name()
         mod_sub = self.sched.conf.modules.find_by_name("ToNdodb_Mysql")
-        self.assert_(mod_sub is not None)
+        self.assertIsNot(mod_sub, None)
         print "Got sub module", mod_sub.get_name()
-        self.assert_(mod_sub in mod1.modules)
-        self.assert_(mod_sub.modules == [])
+        self.assertIn(mod_sub, mod1.modules)
+        self.assertEqual([], mod_sub.modules)
 
 
 if __name__ == '__main__':

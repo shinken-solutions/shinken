@@ -37,17 +37,17 @@ class TestCommand(ShinkenTest):
              'poller_tag': 'DMZ'
              }
         c = Command(t)
-        self.assert_(c.command_name == 'check_command_test')
+        self.assertEqual('check_command_test', c.command_name)
         b = c.get_initial_status_brok()
-        self.assert_(b.type == 'initial_command_status')
+        self.assertEqual('initial_command_status', b.type)
 
         # now create a commands packs
         cs = Commands([c])
         dummy_call = "check_command_test!titi!toto"
         cc = CommandCall(cs, dummy_call)
-        self.assert_(cc.is_valid() == True)
-        self.assert_(cc.command == c)
-        self.assert_(cc.poller_tag == 'DMZ')
+        self.assertEqual(True, cc.is_valid())
+        self.assertEqual(c, cc.command)
+        self.assertEqual('DMZ', cc.poller_tag)
 
 
 

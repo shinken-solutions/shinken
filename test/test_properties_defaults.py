@@ -23,12 +23,12 @@
 Test default values for item types.
 """
 
-import unittest
 
 import __import_shinken
 from shinken.property import UnusedProp, none_object
 import shinken.daemon
 
+# TODO: clean import *
 from shinken_test import *
 from shinken.property import *
 
@@ -46,10 +46,11 @@ class PropertiesTester(object):
         for name in self.without_default:
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
-            self.assert_(isinstance(item.properties[name], ListProp) or
-                         isinstance(item.properties[name], StringProp) or
-                         isinstance(item.properties[name], IntegerProp),
-                          msg='property %r is not `ListProp` or `StringProp` but %r' % (name, item.properties[name]))
+            self.assertIsInstance(
+                item.properties[name],
+                ( ListProp, StringProp, IntegerProp ),
+                msg='property %r is not `ListProp` or `StringProp` but %r' % (name, item.properties[name])
+            )
             self.assertTrue(item.properties[name].required)
 
     def test_default_values(self):

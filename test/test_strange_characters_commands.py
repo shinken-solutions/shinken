@@ -53,24 +53,24 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         #self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        #self.assert_(host.state == 'UP')
-        #self.assert_(host.state_type == 'HARD')
+        #self.assertEqual('UP', host.state)
+        #self.assertEqual('HARD', host.state_type)
         print svc.check_command
-        self.assert_(len(svc.checks_in_progress) == 0)
+        self.assertEqual(0, len(svc.checks_in_progress))
         svc.launch_check(time.time())
         print svc.checks_in_progress
-        self.assert_(len(svc.checks_in_progress) == 1)
+        self.assertEqual(1, len(svc.checks_in_progress))
         c = svc.checks_in_progress.pop()
         #print c
         c.execute()
         time.sleep(0.5)
         c.check_finished(8000)
         print c.status
-        self.assert_(c.status == 'done')
-        self.assert_(c.output == '£°é§')
+        self.assertEqual('done', c.status)
+        self.assertEqual('£°é§', c.output)
         print "Done with good output, that's great"
         svc.consume_result(c)
-        self.assert_(svc.output == unicode('£°é§'.decode('utf8')))
+        self.assertEqual(unicode('£°é§'.decode('utf8')), svc.output)
 
 
 
