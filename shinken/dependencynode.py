@@ -283,7 +283,7 @@ class DependencyNodeFactory(object):
 
         # Look if it's a complex pattern (with rule) or
         # if it's a leaf ofit, like a host/service
-        for m in '()+&|':
+        for m in '()&|':
             if m in pattern:
                 complex_node = True
 
