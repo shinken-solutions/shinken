@@ -1,1 +1,0 @@
-${uri}render/?width=586&height=308&target=legendValue(alias(${host}.${service}.load1%2C%22Load 1 minute%22)%2C%22last%22)&title=Load%20on%20${host}&yMin=0&target=legendValue(alias(${host}.${service}.load5%2C%22Load 5 minutes%22)%2C%22last%22)&target=legendValue(alias(${host}.${service}.load15%2C%22Load 15 minutes%22)%2C%22last%22)&fgcolor=000000&bgcolor=FFFFFF&
