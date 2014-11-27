@@ -29,14 +29,14 @@ class TestParseLogEvent(ShinkenTest):
         log = '[1402515279] SERVICE NOTIFICATION: admin;localhost;check-ssh;CRITICAL;notify-service-by-email;Connection refused'
         expected = {
             'hostname': 'localhost',
-            'acknownledgement': None,
             'event_type': 'NOTIFICATION',
             'service_desc': 'check-ssh',
             'state': 'CRITICAL',
             'contact': 'admin',
             'time': 1402515279,
             'notification_method': 'notify-service-by-email',
-            'notification_type': 'SERVICE'
+            'notification_type': 'SERVICE',
+            'output': 'Connection refused',
         }
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
@@ -45,14 +45,14 @@ class TestParseLogEvent(ShinkenTest):
         log = '[1402515279] HOST NOTIFICATION: admin;localhost;CRITICAL;notify-service-by-email;Connection refused'
         expected = {
             'hostname': 'localhost',
-            'acknownledgement': None,
             'event_type': 'NOTIFICATION',
             'service_desc': None,
             'state': 'CRITICAL',
             'contact': 'admin',
             'time': 1402515279,
             'notification_method': 'notify-service-by-email',
-            'notification_type': 'HOST'
+            'notification_type': 'HOST',
+            'output': 'Connection refused',
         }
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
