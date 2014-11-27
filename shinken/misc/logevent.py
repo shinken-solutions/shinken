@@ -24,7 +24,7 @@ import re
 event_type_pattern = re.compile('^\[[0-9]{10}] (?:HOST|SERVICE) (ALERT|NOTIFICATION|FLAPPING|DOWNTIME)(?: ALERT)?:.*')
 event_types = {
     'NOTIFICATION': {  # ex: "[1402515279] SERVICE NOTIFICATION: admin;localhost;check-ssh;CRITICAL;notify-service-by-email;Connection refused"
-        'pattern': '\[([0-9]{10})\] (HOST|SERVICE) (NOTIFICATION): ([^\;]*);([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);(ACKNOWLEDGEMENT)?.*',
+        'pattern': '\[([0-9]{10})\] (HOST|SERVICE) (NOTIFICATION): ([^\;]*);([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);([^\;]*)',
         'properties': [
             'time',
             'notification_type',  # 'SERVICE' (or could be 'HOST')
@@ -34,7 +34,7 @@ event_types = {
             'service_desc',  # 'check-ssh' (or could be None)
             'state',  # 'CRITICAL'
             'notification_method',  # 'notify-service-by-email'
-            'acknownledgement',  # None or 'ACKNOWLEDGEMENT'
+            'output',  # 'Connection refused'
         ]
     },
     'ALERT': {  # ex: "[1329144231] SERVICE ALERT: dfw01-is02-006;cpu load maui;WARNING;HARD;4;WARNING - load average: 5.04, 4.67, 5.04"
