@@ -66,7 +66,7 @@ class Resultmodulation(Item):
     # to be do at running
     def pythonize(self):
         # First apply Item pythonize
-        super(self.__class__, self).pythonize()
+        super(Resultmodulation, self).pythonize()
 
         # Then very special cases
         # Intify the exit_codes_match, and make list
