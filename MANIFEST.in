@@ -2,7 +2,7 @@ recursive-include shinken *.*
 recursive-include shinken/webui *.*
 recursive-include etc *
 recursive-include windows .bat .reg
-recursive-include bin *.* *-* shinken
+recursive-include bin *
 recursive-include libexec *.*
 recursive-include modules *.*
 recursive-include doc *.*
