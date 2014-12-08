@@ -848,6 +848,9 @@ class SchedulingItem(Item):
 
         self.set_state_from_exit_status(c.exit_status)
 
+        # Set return_code to exit_status to fill the value in broks
+        self.return_code = c.exit_status
+
         # we change the state, do whatever we are or not in
         # an impact mode, we can put it
         self.state_changed_since_impact = True
