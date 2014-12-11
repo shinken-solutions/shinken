@@ -324,12 +324,12 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     data_files = [
         (
             '/usr/local/etc/rc.d',
-            ['bin/rc.d/shinken_arbiter',
-             'bin/rc.d/shinken_broker',
-             'bin/rc.d/shinken_receiver',
-             'bin/rc.d/shinken_poller',
-             'bin/rc.d/shinken_reactionner',
-             'bin/rc.d/shinken_scheduler',
+            ['bin/rc.d/shinken-arbiter',
+             'bin/rc.d/shinken-broker',
+             'bin/rc.d/shinken-receiver',
+             'bin/rc.d/shinken-poller',
+             'bin/rc.d/shinken-reactionner',
+             'bin/rc.d/shinken-scheduler',
              ]
             )
         ]
