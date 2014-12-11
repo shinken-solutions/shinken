@@ -117,7 +117,7 @@ Submitting Passive Check Results From Remote Hosts
    :scale: 90 %
 
 
-DEPRECATED IMAGE - TODO REPLACE WITH MOE ACCURATE DEPTICTION
+DEPRECATED IMAGE - TODO REPLACE WITH MORE ACCURATE DEPICTION
 
 If an application that resides on the same host as Shinken is sending passive host or service check results, it can simply write the results directly to the external command named pipe file as outlined above. However, applications on remote hosts can't do this so easily.
 
