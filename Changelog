@@ -1,13 +1,85 @@
 ########################
 Shinken ChangeLog
-#######################
+########################
 
-2.0-RC   - 2014/02/10
+2.2-RC   - XX/12/2014
+---------------------
+	CORE ENHANCEMENT
+	Add : Bottle - HTTP_X_FORWARDED_PROTO support (for WebUI)
+	Add : BpRules - Expands bp_rules t flag from tags
+	Add : BpRules - Use standard macros expansion in bp_rules output
+	Add : Broks - new type unknown_check_result_brok (included in the previous add)
+	Add : CLI - update command for the shinken.io install
+	Add : Contact - new parameter expert. For UI purpose
+	Add : Escalations - Time properties for host and service escalations
+	Add : External Command - Implement SCHEDULE_HOSTGROUP_HOST_DOWNTIME and SCHEDULE_HOSTGROUP_SVC_DOWNTIME
+	Add : External Commands - Reload-config function
+	Add : External Commands - support for reset modify attribute
+	Add : HTTP API - get_start_time call returning timestamp
+	Add : HTTP API - Inner stats can be sent to shinken.io
+	Add : LogEvent - Output key to properties dict
+	Add : LogEvent - Pattern for FLAPPING events
+	Add : Receiver - Accept passive results from host or service not in configuration
+	Add : SchedulingItem - Parameter to remove host-service dependency
+	Add : Service Escalation - wildcard service_description
+	Add : Service - method  get_service_tags (for WebUI)
+	Add : Snapshots  - Feature to get more output when we have a bad state
+
+	Del : Move WebUI image and template to the good repo
+	Del : Pack Distribution - causing more damage in load balancing that it solve problems
+
+	Enh : Config - Module name formatting in config files
+	Enh : Config parsing - Refactoring to pythonize at object creation. Attribute have correct type very early.
+	Enh : Config parsing - Refactoring to reduce parse time, and scope code to ease future evolutions
+	Enh : Daemon - Refactor bailout and edit message
+	Enh : Datarange - Better datarange parsing
+	Enh : Deamon - additional call to  os.setgroups to drop privileges
+	Enh : Doc - A lot of typo and improvments!
+	Enh : External Command - Moved manager initialization to init
+	Enh : Imports - use importlib when available to import module properly.
+	Enh : Init scripts - Refactoring script. Add LSB standard functions
+	Enh : Logger - Only use time rotated file handler for regular files
+	Enh : Logger - Refactoring logger class to inherit from standard logger class.
+	Enh : Logger - Use lazy logger syntax to enhance performances
+	Enh : Perfdata - Better internal parsing
+	Enh : Realm - Code refactoring
+	Enh : Scheduler - use a lock to acces put_result
+	Enh : Tests - better Jenkins and Travis integration and Coverall support
+	Enh : Tests - Code cleaning
+	Enh : Tests - Use assert function from unittest2
+	Enh : Triggers - Try except statement when executing them
+
+
+	CORE FIXES
+	Fix : BpRules - '+' was causing segfault in some cases
+	Fix : Broker - Crash when sub process goes down
+	Fix : Config parsing - Unknown members list is common to all items
+	Fix : Daemon - Proper https URL
+	Fix : Daemons - Timeout and data timeout for scheduler connexion
+	Fix : Daemon - When replacing a daemon kill all processes in the group instead of one pid
+	Fix : Datamanager -  Service totals and host totals computation
+	Fix : Discovery - Linux hosts with recent nmap versions
+	Fix : HTTP API - Code stabilization
+	Fix : Init scripts - Use last python version
+	Fix : Logs - Manage pre-daemon logs.
+	Fix : Macroresolver - Move output_macros definition to avoid error in WebUI (eltdetail template)
+	Fix : Notifications - Master notifications must not be sent to reactionner so that we scatter them.
+	Fix : Scheduler - Segfault with circular service dependency loop
+	Fix : Scheduler - Skip compensate if daemon is not init
+	Fix : SchedulingItem - Bad behavior for use_aggressive_host_checking.
+	Fix : SchedulingItem - Up state for a host generates a recovery if necessary
+	Fix : SSL - Crash under Windows
+	Fix : Timeperiods - remove bad modulo calculation for months
+
+
+
+
+2.0-RC   - 10/02/2014
 ---------------------
 	CORE ENHANCEMENT
 	Enh : Replace Pyro layer with HTTP(s) communication layer, still the same ports of course
-        Enh : (huge) Business rules enhancement (parsing level, output and tag/group linking) (thanks to Christophe Simon)
-        Add : Shinken command line interface (cli) to install packages (module and packs) and serve doc
+	Enh : (huge) Business rules enhancement (parsing level, output and tag/group linking) (thanks to Christophe Simon)
+	Add : Shinken command line interface (cli) to install packages (module and packs) and serve doc
 	Enh : Split configuration files into directory for daemons and objects
 	Add : service_check_timeout : customize exit status
 	Enh : Ensure LSB path for daemons and default paths
@@ -25,7 +97,7 @@ Shinken ChangeLog
 	Add : (from Christophe Simon) Added reversed (negative) xof business rules
 	Add : (from Christophe Simon) percentage support to Xof: business rules
 	Add : (from Jan Ulferts) enable_environment_macros and disable_environment_macros to commands
-        Add : (from Christophe Simon) service excludes feature
+	Add : (from Christophe Simon) service excludes feature
 	
 
 
@@ -55,6 +127,8 @@ Shinken ChangeLog
 	PACKS ENHANCEMENT
 	Del : Move packs to their own repository! They are now in https://github.com/shinken-monitoring
 	
+
+
 
 1.4   - 27/05/2013
 ------------------
@@ -173,7 +247,7 @@ Shinken ChangeLog
 	
 1.2.3 - 30/01/2013
 ------------------
-        CORE FIXES
+		CORE FIXES
 	* Fix : (Romain Forlot) wrong plugin owners after installation
 	* Fix : (Romain Forlot) add mysql-client for Debian when install the server.
 	* Fix : (Romain Forlot) Make arbiter last after all daemons except skonf because of issue 647
@@ -244,49 +318,49 @@ Shinken ChangeLog
 
 1.2.1 - 22/10/2012
 ------------------
-        CORE ENHANCEMENTS
-        * Add : Landscape (ubuntu SaaS) arbiter importer module
+		CORE ENHANCEMENTS
+		* Add : Landscape (ubuntu SaaS) arbiter importer module
 
 
 	CORE FIXES
-        * Fix : (reported by: Yannig Perre) bad contacts/notifways notif periods were not caught
-        * Fix : Realm objects were not being stripped when hostgroups were used
-        * Fix : (reported by : Rémi BUISSON) there was still realm objects on sub-conf hostgroups objects
-        * Fix : Issue #588 Graphite Templates formatting
-        * Fix : (from Nicolas Boos) output an error at setup if the lsb_release
-        * Fix : make service property service_dependencies take a void hostname
-        * Fix : broker failed to initialize new modules when it get a new configuration
-        * Fix : Restore Python 2.4 compatibility for test suite
-        * Fix : (reported by: Dravail) bad install for PNP in install script
-        * Fix : Cleanup shinken-specific-* files
+		* Fix : (reported by: Yannig Perre) bad contacts/notifways notif periods were not caught
+		* Fix : Realm objects were not being stripped when hostgroups were used
+		* Fix : (reported by : Rémi BUISSON) there was still realm objects on sub-conf hostgroups objects
+		* Fix : Issue #588 Graphite Templates formatting
+		* Fix : (from Nicolas Boos) output an error at setup if the lsb_release
+		* Fix : make service property service_dependencies take a void hostname
+		* Fix : broker failed to initialize new modules when it get a new configuration
+		* Fix : Restore Python 2.4 compatibility for test suite
+		* Fix : (reported by: Dravail) bad install for PNP in install script
+		* Fix : Cleanup shinken-specific-* files
 	* Fix : (from : xkillian) less time latency between checks, so perfdata modules won't lost some checks anymore
 
 	MODULE FIXES
 	* Fix : (Reported by pushou) graphite_broker typo in logger call 
-        * Fix : a bug in livestatus "GET log" for python 2.4 (no partition method)
-        * Fix : No override mongo replication state levels
-        * Fix : Correct livestatus commands table. Fix #520
-        * Fix : (Reported by igup) Livestatus Issue 628 UTF8 not decoded in query matching == 
+		* Fix : a bug in livestatus "GET log" for python 2.4 (no partition method)
+		* Fix : No override mongo replication state levels
+		* Fix : Correct livestatus commands table. Fix #520
+		* Fix : (Reported by igup) Livestatus Issue 628 UTF8 not decoded in query matching == 
 
-        UI ENHANCEMENTS
-        * Add : Business impact Filter
-        * Add : Multiple action URLS (Thanks to h4wkmoon)
-        * Add : (Thanks GAULUPEAU Jonathan) Webui, move the show/hide tool bar button 
+		UI ENHANCEMENTS
+		* Add : Business impact Filter
+		* Add : Multiple action URLS (Thanks to h4wkmoon)
+		* Add : (Thanks GAULUPEAU Jonathan) Webui, move the show/hide tool bar button 
 
-        UI FIXES
-        * Fix : Dynamic reload of widget after save
-        * Fix : bug in active_directory_ui for unknown users
-        * Fix : typo in javascript for bookmarks
-        * Fix : Bookmark Business impact Filter
-        * Fix : Issue #570 gear.png
-        
+		UI FIXES
+		* Fix : Dynamic reload of widget after save
+		* Fix : bug in active_directory_ui for unknown users
+		* Fix : typo in javascript for bookmarks
+		* Fix : Bookmark Business impact Filter
+		* Fix : Issue #570 gear.png
+		
 
-        DEFAULT PACKS
+		DEFAULT PACKS
 	* Fix : (Thanks jhurliman) check_mongodb invalid option -C 
-        * Fix : Missing IMAPS/POPS ports
-        * Fix : update check_nwc_health install to the 1.3 version.
-        * Fix : Typo in Packs.tpl and accept packs with no services
-        * Fix : invalid nmap parameter
+		* Fix : Missing IMAPS/POPS ports
+		* Fix : update check_nwc_health install to the 1.3 version.
+		* Fix : Typo in Packs.tpl and accept packs with no services
+		* Fix : invalid nmap parameter
 
 
 
@@ -323,17 +397,17 @@ Shinken ChangeLog
 	* Add : support to explode_hostgroup directive
 	* Add : new external command, PROCESS_SERVICE_OUTPUT and host, same than check_result for passive, but with no return code.
 	* Add : configurable logging level (per daemon)
-        * Add : shinken-admin can now change logging levels during runtime (Guillaume Bour)
+		* Add : shinken-admin can now change logging levels during runtime (Guillaume Bour)
 	* Add : now passive checks take their timestamp from the external command instead of the received time.
 	* Add : pre-serialize the configurations in the arbiter before going in daemon, and so kill the previous instance. (startup boost)
 	* Add : brok time part boost, with less useless objects sent, like contacts, timeperiods or commands. (big startup boost)
 	* Add : host pack dispatching history is saved in a pickle file, so we will be able to push same objects in the same scheduler
 	* Add : arbiter -p options for dumping profile
-        * Add : (thibault cohen) Added hook in Scheduler daemon to permit the use of the Shinken SNMP poller module, SnmpBooster.
+		* Add : (thibault cohen) Added hook in Scheduler daemon to permit the use of the Shinken SNMP poller module, SnmpBooster.
 
 
 	CORE FIXES
-        * Fix : (from raphaeltr) Typo in mysql monitoring pack command arguments
+		* Fix : (from raphaeltr) Typo in mysql monitoring pack command arguments
 	* Fix : Fix minor installation issues on centos/redhat. Mainly on services activation and pnp
 	* Fix : escalation issue when we restart the scheduler during the escalation process. Should fix #525
 	* Fix : potential endless loop on bp_rule + parent relation ship, and problem/impact setting. Fix #198
@@ -375,7 +449,7 @@ Shinken ChangeLog
 	* Add: (from: xkilian and Thibault Cohen) Graphite broker adds _PRE_GRAPHITE and _POST_GRAPHITE host or service macros to each dot delimited data name
 	* Add: (from: Claneys Skyne) Graphite broker Create additionnal data points for warning and critical thresholds per data value
 	* Add: (from Romain Forlot) Graphite broker Compile regex
-        * Add: (from: bclermont) Graphite broker add graphite_data_source variable between hostname and service name in data to Graphite
+		* Add: (from: bclermont) Graphite broker add graphite_data_source variable between hostname and service name in data to Graphite
 	* Add : a read_only option to logstore_sqlite
 	* Add : Finalyse the time filter to avoid loading all the logs database in use_aggressive_sql=0 mode
 	* Add : Added more hints for the livestatus query metadata resulting in massive speedup for Nagvis, Multisite, Thruk
@@ -385,8 +459,8 @@ Shinken ChangeLog
 	* Add : First working version of Canopsis broker module
 	* Add : Use usjon optional import to improve LS output performance
 	* Add : NDO add table prefix as a parameter.
-        * Add : (Thibault Cohen) Livestatus will now only store STATE messages and no longer any general logs in logstores
-        * Add : (Nicolas Dupeux) TSCA module documentation updated and files consolidated in modules sections of the code
+		* Add : (Thibault Cohen) Livestatus will now only store STATE messages and no longer any general logs in logstores
+		* Add : (Nicolas Dupeux) TSCA module documentation updated and files consolidated in modules sections of the code
 
 	MODULE FIXES
 	* Fix : issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
@@ -416,7 +490,7 @@ Shinken ChangeLog
 
 	UI FIXES
 	* Fix : (reported by : Vincent Riquer) WebUI do not print 1970 for 0 time, but N/A instead. issue fix #241
-        * Fix : (reported by : xkilian) WebUI would not display names containing dots.
+		* Fix : (reported by : xkilian) WebUI would not display names containing dots.
 
 	DEFAULT PACKS
 	* Add : discovery packs for ibm storage management and beginning of clustering solutions discovery
@@ -498,7 +572,7 @@ Shinken ChangeLog
 	* Add: (From Michael Leinartas) man pages updates
 	* Add: '+' in discovery rule management, so you can 'add' something, like a template
 	* Add: using an undefined template in the configuration is no longer a critical error, just a warning.
-                So the user can just 'tag' hosts first and then create the template
+				So the user can just 'tag' hosts first and then create the template
 	* Add: Sebastien Coavoux conducted a large code review! :)
 	* Add: xkilian reviewed and corrected many many pages of the wiki documentation and a few english fixes in the distribution :)
 	* Add: skonf daemon preview. It is not yet meant for production, but is included to get feedback
@@ -557,7 +631,7 @@ Shinken ChangeLog
 	* Add: ip_tag module that can change configuration properties based on the host IP address or IP address range.
 	* Add: simulation mode for the nmap disco wrapper, so we can ask for xml output from users, and then simulate it easily.
 	* Add: new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now,
-                it's far more a BIG thanks to all folks that send me sample xml output :)
+				it's far more a BIG thanks to all folks that send me sample xml output :)
 	* Add: enhanced capabilities for the mysql import module (OlivierHa)
 
 	MODULE FIXES
