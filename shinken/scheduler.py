@@ -1007,7 +1007,7 @@ class Scheduler(object):
 
                 for prop, entry in properties.items():
                     # We save the value only if the attribute is selected for retention AND has been modified.
-                    if entry.retention and DICT_MODATTR['prop'].value & s.modified_attributes:
+                    if entry.retention and not (prop in DICT_MODATTR and not DICT_MODATTR[prop].value & s.modified_attributes ):
                         v = getattr(s, prop)
                         # Maybe we should "prepare" the data before saving it
                         # like get only names instead of the whole objects
@@ -1668,7 +1668,7 @@ class Scheduler(object):
                 self.dump_config()
                 self.need_objects_dump = False
 
-        
+
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us
