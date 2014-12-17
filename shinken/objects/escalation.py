@@ -106,6 +106,7 @@ class Escalation(Item):
         # Ok, I do not see why not escalade. So it's True :)
         return True
 
+
     # t = the reference time
     def get_next_notif_time(self, t_wished, status, creation_time, interval):
         small_states = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
@@ -133,6 +134,7 @@ class Escalation(Item):
 
         # Ok so I ask for my start as a possibility for the next notification time
         return start
+
 
     # Check is required prop are set:
     # template are always correct
@@ -194,8 +196,10 @@ class Escalations(Items):
         self.linkify_es_by_s(services)
         self.linkify_es_by_h(hosts)
 
+
     def add_escalation(self, es):
         self.add_item(es)
+
 
     # Will register escalations into service.escalations
     def linkify_es_by_s(self, services):
@@ -239,7 +243,6 @@ class Escalations(Items):
 
     # We look for contacts property in contacts and
     def explode(self, hosts, hostgroups, contactgroups):
-
         for i in self:
             # items::explode_host_groups_into_hosts
             # take all hosts from our hostgroup_name into our host_name property

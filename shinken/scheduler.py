@@ -239,6 +239,7 @@ class Scheduler(object):
         except Exception, exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
+
     def dump_config(self):
         d = tempfile.gettempdir()
         p = os.path.join(d, 'scheduler-conf-dump-%d' % time.time())
@@ -835,7 +836,7 @@ class Scheduler(object):
     # We should get returns from satellites
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
-        for p in filter(lambda p: p['passive'], self.pollers.values()):
+        for p in [p for p in self.pollers.values() if p['passive']]:
             logger.debug("I will get actions from the poller %s", str(p))
             con = p['con']
             poller_tags = p['poller_tags']
@@ -865,7 +866,7 @@ class Scheduler(object):
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # We loop for our passive reactionners
-        for p in filter(lambda p: p['passive'], self.reactionners.values()):
+        for p in [p for p in self.reactionners.values() if p['passive']]:
             logger.debug("I will get actions from the reactionner %s", str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
