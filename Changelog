@@ -2,7 +2,7 @@
 Shinken ChangeLog
 ########################
 
-2.2-RC   - XX/12/2014
+2.2-RC1   - XX/12/2014
 ---------------------
 	CORE ENHANCEMENT
 	Add : Bottle - HTTP_X_FORWARDED_PROTO support (for WebUI)
@@ -24,10 +24,10 @@ Shinken ChangeLog
 	Add : Service Escalation - wildcard service_description
 	Add : Service - method  get_service_tags (for WebUI)
 	Add : Snapshots  - Feature to get more output when we have a bad state
-
+	
 	Del : Move WebUI image and template to the good repo
-	Del : Pack Distribution - causing more damage in load balancing that it solve problems
-
+	Del : Pack Distribution tuning (hosts where fixd on the same scehduler between reload) - causing more damage in load balancing that it solve problems
+	
 	Enh : Config - Module name formatting in config files
 	Enh : Config parsing - Refactoring to pythonize at object creation. Attribute have correct type very early.
 	Enh : Config parsing - Refactoring to reduce parse time, and scope code to ease future evolutions
@@ -48,6 +48,7 @@ Shinken ChangeLog
 	Enh : Tests - Code cleaning
 	Enh : Tests - Use assert function from unittest2
 	Enh : Triggers - Try except statement when executing them
+	Enh : CLI now exit with a real system return code when fail to install
 
 
 	CORE FIXES
@@ -70,6 +71,7 @@ Shinken ChangeLog
 	Fix : SchedulingItem - Up state for a host generates a recovery if necessary
 	Fix : SSL - Crash under Windows
 	Fix : Timeperiods - remove bad modulo calculation for months
+	Fix : Sub-sub-realms where not assigned to higer realms brokers/reactionners
 
 
 
