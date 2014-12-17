@@ -123,6 +123,7 @@ def publish_archive(archive):
         c.perform()
     except pycurl.error, exp:
         logger.error("There was a critical error : %s", exp)
+        sys.exit(2)
         return
     r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
@@ -137,6 +138,7 @@ def publish_archive(archive):
             logger.info(text)
         else:
             logger.error(text)
+            sys.exit(2)
 
 
 def do_publish(to_pack='.'):
@@ -328,6 +330,7 @@ def grab_package(pname):
         c.perform()
     except pycurl.error, exp:
         logger.error("There was a critical error : %s", exp)
+        sys.exit(2)
         return ''
 
     r = c.getinfo(pycurl.HTTP_CODE)
@@ -392,6 +395,7 @@ def install_package(pname, raw, update_only=False):
     logger.debug("Installing the package %s (size:%d)", pname, len(raw))
     if len(raw) == 0:
         logger.error('The package %s cannot be found', pname)
+        sys.exit(2)
         return
     tmpdir = os.path.join(tempfile.gettempdir(), pname)
     logger.debug("Unpacking the package into %s", tmpdir)
@@ -414,6 +418,7 @@ def install_package(pname, raw, update_only=False):
             continue
         if path.startswith('/') or '..' in path:
             logger.error("SECURITY: the path %s seems dangerous!", path)
+            sys.exit(2)
             return
         # Adding all files into the package_content list
         package_content.append( {'name':i.name, 'mode':i.mode, 'type':i.type, 'size':i.size} )
@@ -426,6 +431,7 @@ def install_package(pname, raw, update_only=False):
     package_json_p = os.path.join(tmpdir, 'package.json')
     if not os.path.exists(package_json_p):
         logger.error("Error : bad archive : Missing file %s", package_json_p)
+        sys.exit(2)
         return None
     package_json = read_package_json(open(package_json_p))
     logger.debug("Package.json content %s ", package_json)
@@ -441,6 +447,7 @@ def install_package(pname, raw, update_only=False):
     for d in (modules_dir, share_dir, packs_dir, doc_dir, inventory_dir):
         if not os.path.exists(d):
             logger.error("The installation directory %s is missing!", d)
+            sys.exit(2)
             return
 
     # Now install the package from $TMP$/share/* to $SHARE$/*
@@ -570,6 +577,7 @@ def do_install(pname, local, download_only):
             cprint('Download OK: %s' %  tmpf, 'green')
         except Exception, exp:
             logger.error("Package save fail: %s", exp)
+            sys.exit(2)
         return
 
     install_package(pname, raw)
