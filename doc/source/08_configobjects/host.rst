@@ -327,7 +327,7 @@ snapshot_criteria
   List of states that enable the snapshot launch. Mainly bad states.
 
 snapshot_interval
-  Minimum interval between two launch of snapshots to not hammering the host :)
+  Minimum interval between two launch of snapshots to not hammering the host, in interval_length units (by default 60s) :)
 
 trigger_name
   This options define the trigger that will be executed after a check result (passive or active).

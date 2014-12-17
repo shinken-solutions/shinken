@@ -169,7 +169,7 @@ class Service(SchedulingItem):
         'snapshot_command':        StringProp(default=''),
         'snapshot_period':         StringProp(default=''),
         'snapshot_criteria':       ListProp(default=['w','c','u'], fill_brok=['full_status'], merging='join'),
-        'snapshot_interval':       IntegerProp(default=300),
+        'snapshot_interval':       IntegerProp(default=5),
 
     })
 

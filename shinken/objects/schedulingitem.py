@@ -679,7 +679,8 @@ class SchedulingItem(Item):
         # Time based checks now, we should be in the period and not too far
         # from the last_snapshot
         now = int(time.time())
-        if self.last_snapshot > now - self.snapshot_interval: # too close
+        cls = self.__class__
+        if self.last_snapshot > now - self.snapshot_interval*cls.interval_length: # too close
             return
         
         # no period means 24x7 :)
