@@ -25,7 +25,7 @@
 from shinken_test import *
 
 
-class TestConfig(ShinkenTest):
+class TestRealms(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_realms.cfg')
 
@@ -91,6 +91,31 @@ class TestConfig(ShinkenTest):
         self.assertIsNot(in_realm2, None)
         print type(in_realm2.realm)
         self.assertTrue(isinstance(in_realm2.realm, basestring))
+
+
+    def test_sub_realms_assignations(self):
+        world = self.conf.realms.find_by_name('World')
+        self.assertIsNot(world, None)
+        europe = self.conf.realms.find_by_name('Europe')
+        self.assertIsNot(europe, None)
+        paris = self.conf.realms.find_by_name('Paris')
+        self.assertIsNot(paris, None)
+        # Get the broker in the realm level
+        bworld = self.conf.brokers.find_by_name('B-world')
+        self.assertIsNot(bworld, None)
+
+        world.prepare_for_satellites_conf()
+        europe.prepare_for_satellites_conf()
+        paris.prepare_for_satellites_conf()
+
+        print world.__dict__
+        # broker should be in the world level
+        self.assertIs(bworld in world.potential_brokers, True)
+        # in europe too
+        self.assertIs(bworld in europe.potential_brokers, True)
+        # and in paris too
+        self.assertIs(bworld in paris.potential_brokers, True)
+        
 
 
 if __name__ == '__main__':

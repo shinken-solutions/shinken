@@ -174,6 +174,7 @@ class Realm(Itemgroup):
             logger.debug("[realm] do not have this kind of satellites: %s", type)
             return []
 
+
     def fill_potential_satellites_by_type(self, sat_type):
         setattr(self, 'potential_%s' % sat_type, [])
         for satellite in getattr(self, sat_type):
@@ -351,8 +352,16 @@ class Realms(Itemgroups):
             p.higher_realms = []
 
         for p in self.items.values():
-            for sub_p in p.realm_members:
-                sub_p.higher_realms.append(p)
+            self.recur_higer_realms(p, p.realm_members)
+
+
+    # I add the R realm in the sons.higer_realms, and
+    # also in the son.sons and so on
+    def recur_higer_realms(self, r, sons):
+       for sub_p in sons:
+            sub_p.higher_realms.append(r)
+            # and call for our sons too
+            self.recur_higer_realms(r, sub_p.realm_members)
 
 
     # Use to fill members with hostgroup_members
