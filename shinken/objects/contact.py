@@ -264,7 +264,7 @@ class Contacts(Items):
         for c in self:
             if not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
                 continue
-            for cg in c.contactgroups.split(','):
+            for cg in c.contactgroups:
                 contactgroups.add_member(c.contact_name, cg.strip())
 
         # Now create a notification way with the simple parameter of the
