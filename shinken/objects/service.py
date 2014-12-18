@@ -1040,6 +1040,9 @@ class Service(SchedulingItem):
         else:
             return self.state
 
+    def get_downtime(self):
+        return str(self.scheduled_downtime_depth)
+
 
 # Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
