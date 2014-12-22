@@ -136,7 +136,6 @@ class TestConfig(ShinkenModulesTest):
 
     def tearDown(self):
         self.stop_nagios()
-        self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
