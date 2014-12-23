@@ -116,3 +116,54 @@ When filing a new bug, please remember to include:
 
 __ https://github.com/naparuba/shinken/issues/
 __ https://gist.github.com/
+
+
+Get Shinken dev environment
+===========================
+
+
+To setup Shinken dev environment::
+
+  virtualenv env
+  . env/bin/activate
+  python setup.py develop
+  python setup.py install_data
+
+
+Folders
+-------
+
+env/etc: Configuration folder
+
+env/var/lib/shinken/modules: Modules folder
+
+env/var/log/shinken: Logs folder
+
+env/var/run/shinken: Pid files folder
+
+Launch daemons
+--------------
+
+Arbiter::
+
+  shinken-arbiter -c env/etc/shinken/shinken.cfg
+
+Broker::
+
+  shinken-broker -c env/etc/shinken/daemons/brokerd.ini
+
+Scheduler::
+
+  shinken-scheduler -c env/etc/shinken/daemons/schedulerd.ini
+
+Poller::
+
+  shinken-poller -c env/etc/shinken/daemons/pollerd.ini
+
+Reactionner::
+
+  shinken-reactionner -c env/etc/shinken/daemons/reactionnerd.ini
+
+Receiver::
+
+  shinken-receiver -c env/etc/shinken/daemons/receiverd.ini

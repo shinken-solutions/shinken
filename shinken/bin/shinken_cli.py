@@ -211,7 +211,7 @@ class CLICommander(object):
         # update our ini with the new defaults
         if new_config_param:
             logger.info('New module parameter detected, updating the ini file')
-            write_ini_file(self.cfg, self)
+            write_ini_file(self.cfg, self, opts)
 
         logger.debug('We load the keywords %s' % self.keywords)
 
@@ -344,7 +344,7 @@ class CLICommander(object):
 
 
 
-def write_ini_file(cfg, CLI):
+def write_ini_file(cfg, CLI, opts):
         new_cfg = ConfigParserWithComments()
         modify = False
         if not cfg:
@@ -377,7 +377,7 @@ def write_ini_file(cfg, CLI):
                 new_cfg.write(configfile)
 
 
-def main():
+def main(custom_args=None):
     parser = optparse.OptionParser(
         '',
         version="%prog " + VERSION,
@@ -403,7 +403,7 @@ def main():
     # errors, because we only want to see the -D -v things
     old_error = parser.error
     parser.error = lambda x: 1
-    opts, args = parser.parse_args()
+    opts, args = parser.parse_args(custom_args)
     # reenable the errors for later use
     parser.error = old_error
 
@@ -465,7 +465,7 @@ def main():
     command_args = hack_sys_argv()
 
     # Global command parsing, with the error enabled this time
-    opts, args = parser.parse_args()
+    opts, args = parser.parse_args(custom_args)
 
     if opts.do_help:
         if len(command_args) == 0:
@@ -512,7 +512,7 @@ def main():
         sys.exit(0)
 
     if opts.do_init:
-        write_ini_file(cfg, CLI)
+        write_ini_file(cfg, CLI, opts)
         sys.exit(0)
 
     # if just call shinken, we must open a prompt, but will be for another version
