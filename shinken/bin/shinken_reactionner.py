@@ -22,20 +22,33 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
- This class is the application that launches checks
- The poller listens to the Arbiter for the configuration sent through
+ This class is an application that launches actions like
+ notifications or event handlers
+ The reactionner listens to the Arbiter for the configuration sent through
  the given port as first argument.
  The configuration sent by the arbiter specifies from which schedulers the
- poller will take its checks.
- When the poller is already launched and has its own conf, it keeps on
- listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the poller forget its old
- schedulers (and the associated checks) and take the new ones instead.
+ will take actions.
+ When the reactionner is already launched and has its own conf, it keeps
+ on listening the arbiter (one a timeout)
+ In case the arbiter has a new conf to send, the reactionner forget its old
+ schedulers (and the associated actions) and take the new ones instead.
 '''
 
 import sys
 import os
 import optparse
+
+# Try to see if we are in an android device or not
+is_android = True
+try:
+    import android
+    # Add our main script dir
+    if os.path.exists('/sdcard/sl4a/scripts/'):
+        sys.path.append('/sdcard/sl4a/scripts/')
+        os.chdir('/sdcard/sl4a/scripts/')
+except ImportError:
+    is_android = False
+
 
 try:
     from shinken.bin import VERSION
@@ -51,39 +64,39 @@ except ImportError:
     # will be able to use the shinken import without problems
     shinken_root_path = os.path.dirname(os.path.dirname(shinken.__file__))
     os.environ['PYTHONPATH'] = os.path.join(os.environ.get('PYTHONPATH', ''), shinken_root_path)
-    
-    
-from shinken.daemons.pollerdaemon import Poller
+
+
+from shinken.daemons.reactionnerdaemon import Reactionner
 from shinken.bin import VERSION
 
-parser = optparse.OptionParser(
-    "%prog [options]", version="%prog " + VERSION)
-parser.add_option('-c', '--config',
-                  dest="config_file", metavar="INI-CONFIG-FILE",
-                  help='Config file')
-parser.add_option('-d', '--daemon', action='store_true',
-                  dest="is_daemon",
-                  help="Run in daemon mode")
-parser.add_option('-r', '--replace', action='store_true',
-                  dest="do_replace",
-                  help="Replace previous running poller")
-parser.add_option('--debugfile', dest='debug_file',
-                  help=("Debug file. Default: not used "
-                        "(why debug a bug free program? :) )"))
-parser.add_option("-p", "--profile",
-                  dest="profile",
-                  help="Dump a profile file. Need the python cProfile librairy")
-
-opts, args = parser.parse_args()
-if args:
-    parser.error("Does not accept any argument.")
 
 # Protect for windows multiprocessing that will RELAUNCH all
+def main():
+    parser = optparse.OptionParser(
+        "%prog [options]", version="%prog " + VERSION)
+    parser.add_option('-c', '--config',
+                      dest="config_file", metavar="INI-CONFIG-FILE",
+                      help='Config file')
+    parser.add_option('-d', '--daemon', action='store_true',
+                      dest="is_daemon",
+                      help="Run in daemon mode")
+    parser.add_option('-r', '--replace', action='store_true',
+                      dest="do_replace",
+                      help="Replace previous running reactionner")
+    parser.add_option('--debugfile', dest='debug_file',
+                      help=("Debug file. Default: not used "
+                            "(why debug a bug free program? :) )"))
+    parser.add_option("-p", "--profile",
+                      dest="profile",
+                      help="Dump a profile file. Need the python cProfile librairy")
+
+    opts, args = parser.parse_args()
+    if args:
+        parser.error("Does not accept any argument.")
+
+    daemon = Reactionner(debug=opts.debug_file is not None, **opts.__dict__)
+    daemon.main()
+
+
 if __name__ == '__main__':
-    daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
-    if not opts.profile:
-        daemon.main()
-    else:
-        # For perf tuning:
-        import cProfile
-        cProfile.run('''daemon.main()''', opts.profile)
+    main()
