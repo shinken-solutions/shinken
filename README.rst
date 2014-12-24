@@ -152,7 +152,7 @@ Broker::
 
   shinken-broker -c env/etc/brokerd.cfg
 
-Schedulerr::
+Scheduler::
 
   shinken-scheduler -c env/etc/daemons/schedulerd.cfg
 
