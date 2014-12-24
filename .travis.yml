@@ -10,6 +10,7 @@ install:
   - "pip install coveralls"
   - "pip install nose-cov"
   - "pip install unittest2"
+  - "python setup.py develop"
 # command to run tests
 # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
 # so we must combine them in the end
