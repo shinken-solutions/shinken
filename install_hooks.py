@@ -5,6 +5,7 @@ import fileinput
 
 def main(config):
     """ function called before any actions in python setup.py install """
+    print "ASAAAAAAAAA"
     pass
 
 
