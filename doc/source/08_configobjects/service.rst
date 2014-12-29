@@ -46,7 +46,7 @@ retain_status_information                  [0/1]
 retain_nonstatus_information               [0/1]
 **notification_interval**                  **#**
 first_notification_delay                   #
-**notification_period**                    ***timeperiod_name***
+notification_period                        ***timeperiod_name***
 notification_options                       [w,u,c,r,f,s]
 notifications_enabled                      [0/1]
 **contacts**                               ***contacts***
@@ -70,8 +70,14 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+snapshot_enabled                           [0/1]
+snapshot_command                           *command_name*
+snapshot_period                            *timeperiod_name*
+snapshot_criteria                          [w,c,u]
+snapshot_interval                          #
 trigger_name                               *trigger_name*
 trigger_broker_raise_enabled               [0/1]
+
 }
 ========================================== ======================================
 
@@ -107,7 +113,7 @@ host_name
 hostgroup_name
   This directive is used to specify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the service "runs" on or is associated with. Multiple hostgroups should be separated by commas. The hostgroup_name may be used instead of, or in addition to, the host_name directive.
 
-  This is possibleto define "complex" hostgroup expression with the folowing operators :
+  This is possibleto define "complex" hostgroup expression with the following operators :
 
     * & : it's use to make an AND betweens groups
     * | : it's use to make an OR betweens groups
@@ -314,7 +320,42 @@ poller_tag
 duplicate_foreach
   This is used to generate serveral service with only one service declaration.
   Shinken understands this statement as : "Create a service for earch key in the variable".
-  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a diffrent check)
+  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a different check)
+  Moreover, one or several variables can be associated to each key. Then, values can be used in the service definition with $VALUE$ or $VALUEn$ macros.
+
+::
+
+  define host {
+    host_name    linux-server
+    ...
+    _partitions   var $(/var)$ root $(/)
+    _openvpns   vpn1  $(tun1)$$(10.8.0.1)$ vpn2 $(tun2)$$(192.168.3.254)$
+    ...
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     disk-$KEY$
+         check_command           check_disk!$VALUE$
+         ...
+         duplicate_foreach       _partitions
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     openvpn-$KEY$-check-interface
+         check_command           check_int!$VALUE1$
+         ...
+         duplicate_foreach       _openvpns
+  }
+
+  define service{
+         host_name               linux-server
+         service_description     openvpn-$KEY$-check-gateway
+         check_command           check_ping!$VALUE2$
+         ...
+         duplicate_foreach       _openvpns
+  }
 
 service_dependencies
   This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
@@ -324,7 +365,7 @@ service_dependencies
     service_dependencies    hostA,service_descriptionA,hostB,service_descriptionB
     service_dependencies    ,service_descriptionA,,service_descriptionB,hostC,service_descriptionC
 
-  By default this value is void so there is no linked dependencies. This is typically used to make a service dependant on an agent software, like an NRPE check dependant on the availability of the NRPE agent.
+  By default this value is void so there is no linked dependencies. This is typically used to make a service dependent on an agent software, like an NRPE check dependent on the availability of the NRPE agent.
 
 business_impact
   This variable is used to set the importance we gave to this service from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
@@ -356,6 +397,21 @@ business_rule_host_notification_options
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
 
+snapshot_enabled
+  This option allows to enable snapshots :ref:`snapshots <medium/snapshots>` on this element.
+
+snapshot_command
+  Command to launch when a snapshot launch occurs
+
+snapshot_period
+  Timeperiod when the snapshot call is allowed
+
+snapshot_criteria
+  List of states that enable the snapshot launch. Mainly bad states.
+
+snapshot_interval
+  Minimum interval between two launch of snapshots to not hammering the host, in interval_length units (by default 60s) :)
+
 trigger_name
   This options define the trigger that will be executed after a check result (passive or active).
   This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
@@ -364,5 +420,6 @@ trigger_broker_raise_enabled
   This option define the behavior of the defined trigger (Default 0). If set to 1, this means the trigger will modify the output / return code of the check.
   If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
   Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
+
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

@@ -5,14 +5,20 @@
 #
 
 import sys
+from sys import __stdout__
+from functools import partial
+
 import time
 import datetime
 import os
 import string
 import re
 import random
-import unittest
 import copy
+import locale
+
+import unittest2 as unittest
+
 
 # import the shinken library from the parent directory
 import __import_shinken ; del __import_shinken
@@ -66,6 +72,61 @@ class __DUMMY:
 logger.load_obj(__DUMMY())
 logger.setLevel(ERROR)
 
+#############################################################################
+
+def guess_sys_stdout_encoding():
+    ''' Return the best guessed encoding to be used for printing on sys.stdout. '''
+    return (
+           getattr(sys.stdout, 'encoding', None)
+        or getattr(__stdout__, 'encoding', None)
+        or locale.getpreferredencoding()
+        or sys.getdefaultencoding()
+        or 'ascii'
+    )
+
+
+
+def safe_print(*args, **kw):
+    """" "print" args to sys.stdout,
+    If some of the args aren't unicode then convert them first to unicode,
+        using keyword argument 'in_encoding' if provided (else default to UTF8)
+        and replacing bad encoded bytes.
+    Write to stdout using 'out_encoding' if provided else best guessed encoding,
+        doing xmlcharrefreplace on errors.
+    """
+    in_bytes_encoding = kw.pop('in_encoding', 'UTF-8')
+    out_encoding = kw.pop('out_encoding', guess_sys_stdout_encoding())
+    if kw:
+        raise ValueError('unhandled named/keyword argument(s): %r' % kw)
+    #
+    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+                                else
+                            unicode(str(a), in_bytes_encoding, 'replace')
+                        for a in args )
+
+    possible_codings = ( out_encoding, )
+    if out_encoding != 'ascii':
+        possible_codings += ( 'ascii', )
+
+    for coding in possible_codings:
+        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
+        try:
+            sys.stdout.write(data)
+            break
+        except UnicodeError as err:
+            # there might still have some problem with the underlying sys.stdout.
+            # it might be a StringIO whose content could be decoded/encoded in this same process
+            # and have encode/decode errors because we could have guessed a bad encoding with it.
+            # in such case fallback on 'ascii'
+            if coding == 'ascii':
+                raise
+            sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
+                coding, err))
+    sys.stdout.write(b'\n')
+
+
+
+#############################################################################
 
 # We overwrite the functions time() and sleep()
 # This way we can modify sleep() so that it immediately returns although
@@ -128,21 +189,25 @@ class _Unittest2CompatMixIn:
     In our case, it's better to always inherit from ShinkenTest
 
     """
-    def assertNotIn(self, member, container, msg=None):
-       self.assertTrue(member not in container)
+    if False:
+        def assertNotIn(self, member, container, msg=None):
+           self.assertTrue(member not in container, msg)
 
-    def assertIn(self, member, container, msg=None):
-        self.assertTrue(member in container)
+        def assertIn(self, member, container, msg=None):
+            self.assertTrue(member in container)
 
-    def assertIsInstance(self, obj, cls, msg=None):
-        self.assertTrue(isinstance(obj, cls))
+        def assertIsInstance(self, obj, cls, msg=None):
+            self.assertTrue(isinstance(obj, cls))
 
-    def assertRegexpMatches(self, line, pattern):
-        r = re.search(pattern, line)
-        self.assertTrue(r is not None)
+        def assertRegexpMatches(self, line, pattern):
+            r = re.search(pattern, line)
+            self.assertTrue(r is not None)
 
-    def assertIs(self, obj, cmp, msg=None):
-        self.assertTrue(obj is cmp)
+        def assertIs(self, obj, cmp, msg=None):
+            self.assertTrue(obj is cmp, msg or "%r __is not__ %r !" % (obj, cmp))
+
+        def assertIsNot(self, obj, cmp, msg=None):
+            self.assertTrue(obj is not cmp, msg or "%r __is__ %r " % (obj, cmp))
 
 
 class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
@@ -165,29 +230,24 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()
         self.conf.create_objects(raw_objects)
-        self.conf.old_properties_names_to_new()
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
         # Hack push_flavor, that is set by the dispatcher
         self.conf.push_flavor = 0
         self.conf.load_triggers()
+        #import pdb;pdb.set_trace()
         self.conf.linkify_templates()
+        #import pdb;pdb.set_trace()
         self.conf.apply_inheritance()
+        #import pdb;pdb.set_trace()
         self.conf.explode()
         #print "Aconf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
         self.conf.compute_hash()
         #print "conf.services has %d elements" % len(self.conf.services)
-        self.conf.create_reversed_list()
         self.conf.override_properties()
-        self.conf.pythonize()
-        count = self.conf.remove_exclusions()
-        if count > 0:
-            self.conf.create_reversed_list()
         self.conf.linkify()
         self.conf.apply_dependencies()
         self.conf.explode_global_conf()
@@ -197,6 +257,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
             print "The conf is not correct, I stop here"
+            self.conf.dump()
             return
         self.conf.clean()
 
@@ -321,7 +382,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
-                print "LOG:", brok.data['log'].encode("utf-8")
+                safe_print("LOG: ", brok.data['log'])
+
         print "--- logs >>>----------------------------------"
 
 
@@ -389,34 +451,52 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
             self.actions = {}
 
 
-    def log_match(self, index, pattern):
+    def assert_log_match(self, index, pattern, no_match=False):
         # log messages are counted 1...n, so index=1 for the first message
-        if index > self.count_logs():
-            return False
-        else:
-            regex = re.compile(pattern)
-            lognum = 1
-            for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
-                if brok.type == 'log':
-                    brok.prepare()
-                    if index == lognum:
-                        if re.search(regex, brok.data['log']):
-                            return True
-                    lognum += 1
-        return False
-
-    def any_log_match(self, pattern):
+        if not no_match:
+            self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
-        if hasattr(self, "sched"):
-            broks = self.sched.broks
-        else:
-            broks = self.broks
-        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
+        lognum = 1
+        broks = sorted(self.sched.broks.values(), lambda x, y: x.id - y.id)
+        for brok in broks:
+            if brok.type == 'log':
+                brok.prepare()
+                if index == lognum:
+                    if re.search(regex, brok.data['log']):
+                        return
+                lognum += 1
+        self.assertTrue(no_match, "%s found a matched log line in broks :\n"
+                               "index=%s pattern=%r\n"
+                               "broks=%r" % (
+            '*HAVE*' if no_match else 'Not',
+            index, pattern, broks
+        ))
+
+
+    def _any_log_match(self, pattern, assert_not):
+        regex = re.compile(pattern)
+        broks = getattr(self, 'sched', self).broks
+        broks = sorted(broks.values(), lambda x, y: x.id - y.id)
+        for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
                 if re.search(regex, brok.data['log']):
-                    return True
-        return False
+                    self.assertTrue(not assert_not,
+                                    "Found matching log line:\n"
+                                    "pattern = %r\nbrok log = %r" % (pattern, brok.data['log'])
+                    )
+                    return
+        self.assertTrue(assert_not,
+            "No matching log line found:\n"
+            "pattern = %r\n" "broks = %r" % (pattern, broks)
+        )
+
+    def assert_any_log_match(self, pattern):
+        self._any_log_match(pattern, assert_not=False)
+
+    def assert_no_log_match(self, pattern):
+        self._any_log_match(pattern, assert_not=True)
+
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
@@ -434,7 +514,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
     def xtest_conf_is_correct(self):
         self.print_header()
-        self.assert_(self.conf.conf_is_correct)
+        self.assertTrue(self.conf.conf_is_correct)
 
 
 

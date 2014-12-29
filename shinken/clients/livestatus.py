@@ -101,7 +101,7 @@ class LSSyncConnection:
             if code == "200":
                 try:
                     return eval(data)
-                except:
+                except Exception:
                     logger.warning("BAD VALUE RETURN (data=%s)", data)
                     return None
             else:
@@ -287,7 +287,7 @@ class LSAsynConnection(asyncore.dispatcher):
                     d = eval(data)
                     #print d
                     q.put(d)
-                except:
+                except Exception:
                     q.put(None)
             else:
                 q.put(None)

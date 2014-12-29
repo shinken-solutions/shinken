@@ -53,7 +53,7 @@ class TestNotif(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
@@ -80,7 +80,7 @@ class TestNotif(ShinkenTest):
         # notification_number is already sent. the next one has been scheduled
         # and is waiting for notification_interval to pass. so the current
         # number is 2
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         print "---------------------------------1st round with a hard"
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
@@ -89,13 +89,13 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications
         #--------------------------------------------------------------
@@ -104,7 +104,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number > cnn)
+        self.assertGreater(svc.current_notification_number, cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications (theoretically)
         # BUT: test_contact filters notifications
@@ -117,7 +117,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(svc.current_notification_number == cnn)
+        self.assertEqual(cnn, svc.current_notification_number)
         #--------------------------------------------------------------
         # again a normal cycle
         # test_contact receives his mail
@@ -130,14 +130,14 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        self.assert_(svc.current_notification_number == cnn + 1)
+        self.assertEqual(cnn + 1, svc.current_notification_number)
         #--------------------------------------------------------------
         # now recover. there must be no scheduled/inpoller notification
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
     def test_continuous_notifications_delayed(self):
         self.print_header()
@@ -163,13 +163,13 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #-----------------------------------------------------------------
         # check fails and enters soft state.
         # there must be no notification, only the event handler
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=1)
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         print time.time()
         print  svc.last_time_warning, svc.last_time_critical, svc.last_time_unknown, svc.last_time_ok
         last_time_not_ok = svc.last_time_non_ok_or_up()
@@ -183,7 +183,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #-----------------------------------------------------------------
         # repeat bad checks during the delay time
         # there is 1 action which is the scheduled notification
@@ -195,7 +195,7 @@ class TestNotif(ShinkenTest):
             self.show_and_clear_logs()
             self.show_actions()
             print deadline - time.time()
-            ###self.assert_(self.count_actions() == 1)
+            ###self.assertEqual(1, self.count_actions())
         #-----------------------------------------------------------------
         # now the delay period is over and the notification can be sent
         # with the next bad check
@@ -204,13 +204,13 @@ class TestNotif(ShinkenTest):
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=1)
         print "Counted actions", self.count_actions()
-        self.assert_(self.count_actions() == 2)
+        self.assertEqual(2, self.count_actions())
         # 1 master, 1 child
-        self.assert_(svc.current_notification_number == 1)
+        self.assertEqual(1, svc.current_notification_number)
         self.show_actions()
-        self.assert_(len(svc.notifications_in_progress) == 1)  # master is zombieand removed_from_in_progress
+        self.assertEqual(1, len(svc.notifications_in_progress))  # master is zombieand removed_from_in_progress
         self.show_logs()
-        self.assert_(self.log_match(1, 'SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assert_log_match(1, 'SERVICE NOTIFICATION.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_actions()
         #-----------------------------------------------------------------
@@ -219,14 +219,14 @@ class TestNotif(ShinkenTest):
         # current_notification_number was reset to 0
         #-----------------------------------------------------------------
         self.scheduler_loop(2, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=1)
-        self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
-        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
-        self.assert_(self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
+        self.assert_log_match(1, 'SERVICE ALERT.*;OK;')
+        self.assert_log_match(2, 'SERVICE EVENT HANDLER.*;OK;')
+        self.assert_log_match(3, 'SERVICE NOTIFICATION.*;OK;')
         # evt reap 2 loops
-        self.assert_(svc.current_notification_number == 0)
-        self.assert_(len(svc.notifications_in_progress) == 0)
-        self.assert_(len(svc.notified_contacts) == 0)
-        #self.assert_(self.count_actions() == 2)
+        self.assertEqual(0, svc.current_notification_number)
+        self.assertEqual(0, len(svc.notifications_in_progress))
+        self.assertEqual(0, len(svc.notified_contacts))
+        #self.assertEqual(2, self.count_actions())
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
@@ -250,7 +250,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #-----------------------------------------------------------------
         # check fails and enters soft state.
         # there must be no notification, only the event handler
@@ -258,7 +258,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         #-----------------------------------------------------------------
         # check fails again and enters hard state.
         # now there is a (scheduled for later) notification and an event handler
@@ -268,8 +268,8 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(self.count_actions() == 2)
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(2, self.count_actions())
+        self.assertEqual(0, svc.current_notification_number)
         #-----------------------------------------------------------------
         # repeat bad checks during the delay time
         # but only one time. we don't want to reach the deadline
@@ -278,19 +278,20 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_actions())
         #-----------------------------------------------------------------
         # relax with a successful check
         # there is 1 action, the eventhandler.
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
-        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
-        self.assert_(not self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
+        self.assert_log_match(1, 'SERVICE ALERT.*;OK;')
+        self.assert_log_match(2, 'SERVICE EVENT HANDLER.*;OK;')
+        self.assert_log_match(3, 'SERVICE NOTIFICATION.*;OK;',
+                              no_match=True)
         self.show_actions()
-        self.assert_(len(svc.notifications_in_progress) == 0)
-        self.assert_(len(svc.notified_contacts) == 0)
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(0, len(svc.notifications_in_progress))
+        self.assertEqual(0, len(svc.notified_contacts))
+        self.assertEqual(1, self.count_actions())
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
@@ -315,7 +316,7 @@ class TestNotif(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created
@@ -324,19 +325,19 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_logs()
         self.show_actions()
-        self.assert_(self.log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT'))
-        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;CRITICAL;SOFT'))
-        self.assert_(self.log_match(3, 'SERVICE ALERT.*;CRITICAL;HARD'))
-        self.assert_(self.log_match(4, 'SERVICE EVENT HANDLER.*;CRITICAL;HARD'))
-        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION.*;CRITICAL;'))
-        self.assert_(svc.current_notification_number == 1)
+        self.assert_log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT')
+        self.assert_log_match(2, 'SERVICE EVENT HANDLER.*;CRITICAL;SOFT')
+        self.assert_log_match(3, 'SERVICE ALERT.*;CRITICAL;HARD')
+        self.assert_log_match(4, 'SERVICE EVENT HANDLER.*;CRITICAL;HARD')
+        self.assert_log_match(5, 'SERVICE NOTIFICATION.*;CRITICAL;')
+        self.assertEqual(1, svc.current_notification_number)
         self.clear_logs()
         self.clear_actions()
         #--------------------------------------------------------------
         # reset host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         duration = 300
         now = time.time()
         # fixed downtime valid for the next 5 minutes
@@ -347,8 +348,8 @@ class TestNotif(ShinkenTest):
         # no notificatio
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART'))
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assert_any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
@@ -381,7 +382,7 @@ class TestNotif(ShinkenTest):
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
@@ -408,7 +409,7 @@ class TestNotif(ShinkenTest):
         # check_notification: yes (hard)
         print "---current_notification_number", svc.current_notification_number
         # The contact refuse our notification, so we are still at 0
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         print "---------------------------------1st round with a hard"
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
@@ -445,7 +446,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
-        self.assert_(svc.current_notification_number == cnn)
+        self.assertEqual(cnn, svc.current_notification_number)
         #--------------------------------------------------------------
         # again a normal cycle
         # test_contact receives his mail
@@ -458,7 +459,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
-        #self.assert_(svc.current_notification_number == cnn + 1)
+        #self.assertEqual(cnn + 1, svc.current_notification_number)
         #--------------------------------------------------------------
         # now recover. there must be no scheduled/inpoller notification
         #--------------------------------------------------------------
@@ -466,10 +467,10 @@ class TestNotif(ShinkenTest):
 
         # I do not want a notification of a recovery because
         # the user did not have the notif first!
-        self.assert_(not self.any_log_match('notify-service'))
+        self.assert_no_log_match('notify-service')
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
     def test_svc_in_dt_and_crit_and_notif_interval_0(self):
         self.print_header()
@@ -491,7 +492,7 @@ class TestNotif(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created
@@ -500,19 +501,19 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_logs()
         self.show_actions()
-        self.assert_(self.log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT'))
-        self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;CRITICAL;SOFT'))
-        self.assert_(self.log_match(3, 'SERVICE ALERT.*;CRITICAL;HARD'))
-        self.assert_(self.log_match(4, 'SERVICE EVENT HANDLER.*;CRITICAL;HARD'))
-        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION.*;CRITICAL;'))
-        self.assert_(svc.current_notification_number == 1)
+        self.assert_log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT')
+        self.assert_log_match(2, 'SERVICE EVENT HANDLER.*;CRITICAL;SOFT')
+        self.assert_log_match(3, 'SERVICE ALERT.*;CRITICAL;HARD')
+        self.assert_log_match(4, 'SERVICE EVENT HANDLER.*;CRITICAL;HARD')
+        self.assert_log_match(5, 'SERVICE NOTIFICATION.*;CRITICAL;')
+        self.assertEqual(1, svc.current_notification_number)
         self.clear_logs()
         self.clear_actions()
         #--------------------------------------------------------------
         # reset host/service state
         #--------------------------------------------------------------
         #self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
-        #self.assert_(svc.current_notification_number == 0)
+        #self.assertEqual(0, svc.current_notification_number)
         duration = 2
         now = time.time()
         # fixed downtime valid for the next 5 minutes
@@ -523,12 +524,12 @@ class TestNotif(ShinkenTest):
         # no notificatio
         #--------------------------------------------------------------
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE DOWNTIME ALERT.*;STARTED'))
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
+        self.assert_any_log_match('SERVICE DOWNTIME ALERT.*;STARTED')
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
         # To get out of the DT.
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=2)
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
-        self.assert_(svc.current_notification_number == 1)
+        self.assert_no_log_match('SERVICE NOTIFICATION.*;CRITICAL;')
+        self.assertEqual(1, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 

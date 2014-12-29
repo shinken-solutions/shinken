@@ -33,7 +33,7 @@ class TestLinkifyTemplate(ShinkenTest):
     def test_linkify_template(self):
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         b = svc.is_correct()
-        self.assert_(not b)
+        self.assertFalse(b)
 
 
 if __name__ == '__main__':

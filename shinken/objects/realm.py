@@ -27,7 +27,7 @@ import copy
 
 from item import Item
 from itemgroup import Itemgroup, Itemgroups
-from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.property import BoolProp, IntegerProp, StringProp, DictProp, ListProp
 from shinken.log import logger
 
 # It change from hostgroup Class because there is no members
@@ -41,10 +41,10 @@ class Realm(Itemgroup):
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp(fill_brok=['full_status']),
-        'realm_members': StringProp(default=''), # No status_broker_name because it put hosts, not host_name
-        'higher_realms': StringProp(default=''),
-        'default':       BoolProp(default='0'),
-        'broker_complete_links':       BoolProp(default='0'),
+        'realm_members': ListProp(default=[], split_on_coma=True), # No status_broker_name because it put hosts, not host_name
+        'higher_realms': ListProp(default=[], split_on_coma=True),
+        'default':       BoolProp(default=False),
+        'broker_complete_links':       BoolProp(default=False),
         #'alias': {'required':  True, 'fill_brok': ['full_status']},
         #'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
         #'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
@@ -53,7 +53,7 @@ class Realm(Itemgroup):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-            'serialized_confs': StringProp(default={}),
+            'serialized_confs': DictProp(default={}),
         })
 
     macros = {
@@ -76,22 +76,9 @@ class Realm(Itemgroup):
 
     def get_realm_members(self):
         if self.has('realm_members'):
-            return [r.strip() for r in self.realm_members.split(',')]
+            return [r.strip() for r in self.realm_members]
         else:
             return []
-
-    # Use to make python properties
-    # TODO: change itemgroup function pythonize?
-    def pythonize(self):
-        cls = self.__class__
-        for prop, tab in cls.properties.items():
-            try:
-                old_val = getattr(self, prop)
-                new_val = tab.pythonize(old_val)
-                #print "Changing ", old_val, "by", new_val
-                setattr(self, prop, new_val)
-            except AttributeError, exp:
-                pass  # Will be catch at the is_correct moment
 
 
     # We fillfull properties with template ones if need
@@ -186,6 +173,7 @@ class Realm(Itemgroup):
         else:
             logger.debug("[realm] do not have this kind of satellites: %s", type)
             return []
+
 
     def fill_potential_satellites_by_type(self, sat_type):
         setattr(self, 'potential_%s' % sat_type, [])
@@ -364,8 +352,16 @@ class Realms(Itemgroups):
             p.higher_realms = []
 
         for p in self.items.values():
-            for sub_p in p.realm_members:
-                sub_p.higher_realms.append(p)
+            self.recur_higer_realms(p, p.realm_members)
+
+
+    # I add the R realm in the sons.higer_realms, and
+    # also in the son.sons and so on
+    def recur_higer_realms(self, r, sons):
+       for sub_p in sons:
+            sub_p.higher_realms.append(r)
+            # and call for our sons too
+            self.recur_higer_realms(r, sub_p.realm_members)
 
 
     # Use to fill members with hostgroup_members

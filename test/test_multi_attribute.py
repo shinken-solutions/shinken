@@ -34,20 +34,21 @@ class TestMultiVuledAttributes(ShinkenTest):
     def test_multi_valued_attributes(self):
         hst1 = self.sched.hosts.find_by_name("test_host_01")
         srv1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
-        self.assert_(hst1 is not None)
-        self.assert_(srv1 is not None)
+        self.assertIsNot(hst1, None)
+        self.assertIsNot(srv1, None)
 
         # inherited parameter
-        self.assert_(hst1.active_checks_enabled is True)
-        self.assert_(srv1.active_checks_enabled is True)
+        self.assertIs(True, hst1.active_checks_enabled)
+        self.assertIs(True, srv1.active_checks_enabled)
 
         # non list parameter (only the last value set should remain)
-        self.assert_(hst1.max_check_attempts == 3)
-        self.assert_(srv1.max_check_attempts == 3)
+        self.assertEqual(3, hst1.max_check_attempts)
+        self.assertEqual(3, srv1.max_check_attempts)
 
         # list parameter (all items should appear in the order they are defined)
-        self.assert_(hst1.notification_options == ['+1', 's', 'f', 'r', 'u', 'd'])
-        self.assert_(srv1.notification_options == ['+1', 's', 'f', 'r', 'c', 'u', 'w'])
+        self.assertEqual([u'd', u'f', u'1', u's', u'r', u'u'], list(set(hst1.notification_options)))
+
+        self.assertEqual([u'c', u'f', u'1', u's', u'r', u'u', u'w'], list(set(srv1.notification_options)))
 
 
 class TestConfigBroken(ShinkenTest):
@@ -56,13 +57,13 @@ class TestConfigBroken(ShinkenTest):
         self.setup_with_file('etc/shinken_multi_attribute_broken.cfg')
 
     def test_multi_valued_attribute_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        self.assert_(len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) == 1)
+        self.assertEqual(1, len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) )
 
 
 if __name__ == '__main__':

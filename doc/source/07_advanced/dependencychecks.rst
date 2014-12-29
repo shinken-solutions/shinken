@@ -32,7 +32,7 @@ You will also notice that *Switch2* is depending on *Monitor1* and *File1* for e
 
 That's how predictive dependency checks work. Simple, eh?
 
-Predictive service dependency checks work in a similiar manner to what is described above. Except, of course, they deal with services instead of hosts.
+Predictive service dependency checks work in a similar manner to what is described above. Except, of course, they deal with services instead of hosts.
 
 
 Enabling Predictive Checks 

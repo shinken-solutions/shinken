@@ -9,7 +9,7 @@ Simple use of the discovery tool
 ================================
 
 
-When Shinken is installed, the discovery script shinken-discovery can help you start your new monitoring tool and integrate  a large number of hosts. This does not not replace extracting data from an authoritative CMDB/IT reference for provisioning known hosts. It can be used to supplement the data from the authoritative references.
+When Shinken is installed, the discovery script shinken-discovery can help you start your new monitoring tool and integrate a large number of hosts. This does not replace extracting data from an authoritative CMDB/IT reference for provisioning known hosts. It can be used to supplement the data from the authoritative references.
 
 At this time, two "discovery" modules are available:
   * Network based discovery using nmap

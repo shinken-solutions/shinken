@@ -26,7 +26,7 @@
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
-from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger, naglog_result
 
 _special_properties = ('service_notification_commands', 'host_notification_commands',
@@ -48,16 +48,16 @@ class Contact(Item):
     properties.update({
         'contact_name':     StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='none', fill_brok=['full_status']),
-        'contactgroups':    StringProp(default='', fill_brok=['full_status']),
-        'host_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'contactgroups':    ListProp(default=[], fill_brok=['full_status']),
+        'host_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
         'host_notification_period': StringProp(fill_brok=['full_status']),
         'service_notification_period': StringProp(fill_brok=['full_status']),
-        'host_notification_options': StringProp(fill_brok=['full_status']),
-        'service_notification_options': StringProp(fill_brok=['full_status']),
+        'host_notification_options': ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
+        'service_notification_options': ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
         'host_notification_commands': StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_business_impact':    IntegerProp(default='0', fill_brok=['full_status']),
+        'min_business_impact':    IntegerProp(default=0, fill_brok=['full_status']),
         'email':            StringProp(default='none', fill_brok=['full_status']),
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
@@ -66,9 +66,10 @@ class Contact(Item):
         'address4':         StringProp(default='none', fill_brok=['full_status']),
         'address5':         StringProp(default='none', fill_brok=['full_status']),
         'address6':         StringProp(default='none', fill_brok=['full_status']),
-        'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
-        'is_admin':         BoolProp(default='0', fill_brok=['full_status']),
-        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
+        'can_submit_commands': BoolProp(default=False, fill_brok=['full_status']),
+        'is_admin':         BoolProp(default=False, fill_brok=['full_status']),
+        'expert':           BoolProp(default=False, fill_brok=['full_status']),        
+        'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
         'password':        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
@@ -261,33 +262,31 @@ class Contacts(Items):
 
         # Register ourself into the contactsgroups we are in
         for c in self:
-            if c.is_tpl() or not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
+            if not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
                 continue
-            for cg in c.contactgroups.split(','):
+            for cg in c.contactgroups:
                 contactgroups.add_member(c.contact_name, cg.strip())
 
         # Now create a notification way with the simple parameter of the
         # contacts
         for c in self:
-            if not c.is_tpl():
-                need_notificationway = False
-                params = {}
-                for p in _simple_way_parameters:
-                    if hasattr(c, p):
-                        need_notificationway = True
-                        params[p] = getattr(c, p)
-                    else:  # put a default text value
-                        # Remove the value and put a default value
-                        setattr(c, p, '')
+            need_notificationway = False
+            params = {}
+            for p in _simple_way_parameters:
+                if hasattr(c, p):
+                    need_notificationway = True
+                    params[p] = getattr(c, p)
+                else:  # put a default text value
+                    # Remove the value and put a default value
+                    setattr(c, p, c.properties[p].default)
 
+            if need_notificationway:
+                #print "Create notif way with", params
+                cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
+                nw_name = cname + '_inner_notificationway'
+                notificationways.new_inner_member(nw_name, params)
 
-                if need_notificationway:
-                    #print "Create notif way with", params
-                    cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
-                    nw_name = cname + '_inner_notificationway'
-                    notificationways.new_inner_member(nw_name, params)
-
-                    if not hasattr(c, 'notificationways'):
-                        c.notificationways = nw_name
-                    else:
-                        c.notificationways = c.notificationways + ',' + nw_name
+                if not hasattr(c, 'notificationways'):
+                    c.notificationways = nw_name
+                else:
+                    c.notificationways = c.notificationways + ',' + nw_name

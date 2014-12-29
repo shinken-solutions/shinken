@@ -43,7 +43,6 @@ elif python_version >= (3,):
 
 
 
-
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
 def read(fname):
@@ -325,12 +324,12 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     data_files = [
         (
             '/usr/local/etc/rc.d',
-            ['bin/rc.d/shinken_arbiter',
-             'bin/rc.d/shinken_broker',
-             'bin/rc.d/shinken_receiver',
-             'bin/rc.d/shinken_poller',
-             'bin/rc.d/shinken_reactionner',
-             'bin/rc.d/shinken_scheduler',
+            ['bin/rc.d/shinken-arbiter',
+             'bin/rc.d/shinken-broker',
+             'bin/rc.d/shinken-receiver',
+             'bin/rc.d/shinken-poller',
+             'bin/rc.d/shinken-reactionner',
+             'bin/rc.d/shinken-scheduler',
              ]
             )
         ]
@@ -431,7 +430,7 @@ for o in not_allowed_options:
 required_pkgs = ['HTML']
 setup(
     name="Shinken",
-    version="2.0.3",
+    version="2.2-RC1",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",

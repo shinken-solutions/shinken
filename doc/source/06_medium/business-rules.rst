@@ -290,9 +290,9 @@ t     Services which are holding tag               t:http        web-srv1,HTTP &
 
 It is possible to combine both **host** and **service** expansion expression to build complex business rules.
 
-.. note:: A business rule expression always has to to be made of an host expression (selector if you prefer)
+.. note:: A business rule expression always has to be made of a host expression (selector if you prefer)
           AND a service expression (still selector) separated by a coma when looking at service status.
-          If not so, there is no mean to distinguish an host status from a service status in the expression.
+          If not so, there is no mean to distinguish a host status from a service status in the expression.
           In servicegroup flag case, as you do not want to apply any filter on the host (you want ALL services which are member of the XXX service group, whichever host they are bound to),
           you may use the * host selector expression. The correct expression syntax should be:
           ``bp_rule!*,g:my-servicegroup``
@@ -332,7 +332,7 @@ As of any host or service check, a business rule having its state in a non ``OK`
 
 This may be what you need, but what if you want the business rule to stop sending notifications ?
 
-Imagine your business rule is composed of all your site's web front ends. If an host fails, you want to know it, but once someone starts to fix the issue, you don't want to be notified anymore. A possible solution is to acknowledge the business rule itself. But if you do so, any other failing host won't get notified. Another solution is to enable *smart notification* on the business rule check.
+Imagine your business rule is composed of all your site's web front ends. If a host fails, you want to know it, but once someone starts to fix the issue, you don't want to be notified anymore. A possible solution is to acknowledge the business rule itself. But if you do so, any other failing host won't get notified. Another solution is to enable *smart notification* on the business rule check.
 
 *Smart notifications* is a way to disable notifications on a business rule having all its problems acknowledged. If a new problem occurs, notifications will be enabled back while it has not been acknowledged.
 
@@ -392,7 +392,7 @@ Example:
 
 In the previous example, HTTP/HTTPS services come from the ``http`` pack. If one or more http servers fail, a single notification would be sent, rather than one per failing service.
 
-.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independant failure. Take care to explain this to people in charge of the operations.
+.. warning:: It would be very tempting in this situation to acknowledge the consolidated service if a notification is sent. Never do so, as any, as any new failure would not be reported. You still have to acknowledge each independent failure. Take care to explain this to people in charge of the operations.
 
 
 
@@ -461,6 +461,10 @@ To do so, you may set the ``business_rule_output_template`` option on the host o
 
   * All macros **between** the ``$(`` and ``)$`` sequences are expanded for each underlying problem using its attributes.
 
+All macros defined on hosts or services composing or holding the business rule may be used in the outer or inner part of the template respectively.
+
+To ease writing output template for business rules made of both hosts and services, 3 convinience macros having the same meaning for each type may be used: ``STATUS``, ``SHORTSTATUS``, and ``FULLNAME``, which expand respectively to the host or service status, its status abreviated form and its full name (``host_name`` for hosts, or ``host_name/service_description`` for services).
+
 Example:
 
 Imagine you want to build a consolidated service which notifications contain links to the underlying problems in the WebUI, allowing to acknowledge them without having to search. You may use a template looking like:
@@ -471,11 +475,12 @@ Imagine you want to build a consolidated service which notifications contain lin
          host_name meta
          service_description            Web cluster
          check_command                  bp_rule!$_HOSTXOF_WEB$ g:web,g:HTTPS?
-         business_rule_output_template  Down web services: $(<a href='http://webui.url/service/$HOST_NAME$/$SERVICE_DESCRIPTION$'>$HOST_NAME$</a> )$
+         business_rule_output_template  Down web services: $(<a href='http://webui.url/service/$HOSTNAME$/$SERVICEDESC$'>($SHORTSTATUS$) $HOSTNAME$</a> )$
          ...
          }
 
 
 The resulting output would look like ``Down web services: link1 link2 link3 ...`` where ``linkN`` are urls leading to the problem in the WebUI.
+
 
 .. _ticket: https://github.com/naparuba/shinken/issues/509

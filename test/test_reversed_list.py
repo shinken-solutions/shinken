@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import unittest
 
-import __import_shinken
 from shinken.misc.regenerator import Regenerator
 from shinken.brok import Brok
-from shinken_test import ShinkenTest
+
+from shinken_test import ShinkenTest, unittest
 
 
 class TestReversedList(ShinkenTest):
@@ -20,11 +19,8 @@ class TestReversedList(ShinkenTest):
         servicegroups definition
         """
 
-        for service in self.sched.servicegroups:
-            assert(service.servicegroup_name in self.sched.servicegroups.reversed_list.keys())
-            assert(service.id == self.sched.servicegroups.reversed_list[service.servicegroup_name])
-
-        prev_id = self.sched.servicegroups.reversed_list['servicegroup_01']
+        sg = self.sched.servicegroups.find_by_name('servicegroup_01')
+        prev_id = sg.id
 
         reg = Regenerator()
         data = {"instance_id": 0}
@@ -38,16 +34,18 @@ class TestReversedList(ShinkenTest):
 
         reg.all_done_linking(0)
 
-        for service in self.sched.servicegroups:
-            assert(service.servicegroup_name in self.sched.servicegroups.reversed_list.keys())
-            assert(service.id == self.sched.servicegroups.reversed_list[service.servicegroup_name])
+        #for service in self.sched.servicegroups:
+        #    assert(service.servicegroup_name in self.sched.servicegroups.reversed_list.keys())
+        #    assert(service.id == self.sched.servicegroups.reversed_list[service.servicegroup_name])
 
-        assert(prev_id != self.sched.servicegroups.reversed_list['servicegroup_01'])
+        sg = self.sched.servicegroups.find_by_name('servicegroup_01')
+        assert(prev_id != sg.id)
 
         for sname in [u'servicegroup_01', u'ok', u'flap', u'unknown', u'random',
                       u'servicegroup_02', u'servicegroup_03', u'warning', u'critical',
                       u'servicegroup_04', u'servicegroup_05', u'pending', u'mynewgroup']:
-            assert(sname in self.sched.servicegroups.reversed_list.keys())
+            sg = self.sched.servicegroups.find_by_name(sname)
+            assert(sname is not None)
 
 
 

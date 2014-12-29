@@ -45,17 +45,17 @@ class TestMaintPeriod(ShinkenTest):
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_nobody", "test_ok_0")
 
         # Standard links
-        self.assert_(test_router_0.maintenance_period == a_24_7)
-        self.assert_(test_host_0.maintenance_period is None)
-        self.assert_(test_nobody.maintenance_period is None)
+        self.assertEqual(a_24_7, test_router_0.maintenance_period)
+        self.assertIs(None, test_host_0.maintenance_period)
+        self.assertIs(None, test_nobody.maintenance_period)
 
         # Now inplicit inheritance
         # This one is defined in the service conf
-        self.assert_(svc1.maintenance_period == a_24_7)
+        self.assertEqual(a_24_7, svc1.maintenance_period)
         # And others are implicitly inherited
-        self.assert_(svc2.maintenance_period is a_24_7)
+        self.assertIs(a_24_7, svc2.maintenance_period)
         # This one got nothing :)
-        self.assert_(svc3.maintenance_period is None)
+        self.assertIs(None, svc3.maintenance_period)
 
     def test_check_enter_downtime(self):
         test_router_0 = self.sched.hosts.find_by_name("test_router_0")
@@ -98,7 +98,7 @@ class TestMaintPeriod(ShinkenTest):
         print "planned stop ", time.asctime(time.localtime(t_next))
         svc3.maintenance_period = t
 
-        self.assert_(not svc3.in_maintenance)
+        self.assertFalse(svc3.in_maintenance)
         #
         # now let the scheduler run and wait until the maintenance period begins
         # it is now 10 seconds before the full minute. run for 30 seconds
@@ -108,23 +108,23 @@ class TestMaintPeriod(ShinkenTest):
         self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
         print "scheduler_loop end  ", time.asctime()
 
-        self.assert_(hasattr(svc3, 'in_maintenance'))
-        self.assert_(len(self.sched.downtimes) == 1)
+        self.assertTrue(hasattr(svc3, 'in_maintenance'))
+        self.assertEqual(1, len(self.sched.downtimes))
         try:
             print "........................................."
             print self.sched.downtimes[1]
             print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
             print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
-        except:
+        except Exception:
             print "looks like there is no downtime"
             pass
-        self.assert_(len(svc3.downtimes) == 1)
-        self.assert_(svc3.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc3.in_scheduled_downtime)
-        self.assert_(svc3.downtimes[0].fixed)
-        self.assert_(svc3.downtimes[0].is_in_effect)
-        self.assert_(not svc3.downtimes[0].can_be_deleted)
-        self.assert_(svc3.in_maintenance == svc3.downtimes[0].id)
+        self.assertEqual(1, len(svc3.downtimes))
+        self.assertIn(svc3.downtimes[0], self.sched.downtimes.values())
+        self.assertTrue(svc3.in_scheduled_downtime)
+        self.assertTrue(svc3.downtimes[0].fixed)
+        self.assertTrue(svc3.downtimes[0].is_in_effect)
+        self.assertFalse(svc3.downtimes[0].can_be_deleted)
+        self.assertEqual(svc3.downtimes[0].id, svc3.in_maintenance)
 
         #
         # now the downtime should expire...
@@ -133,10 +133,10 @@ class TestMaintPeriod(ShinkenTest):
         # run the remaining 100 seconds plus 5 seconds just to be sure
         self.scheduler_loop(105, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
 
-        self.assert_(len(self.sched.downtimes) == 0)
-        self.assert_(len(svc3.downtimes) == 0)
-        self.assert_(not svc3.in_scheduled_downtime)
-        self.assert_(svc3.in_maintenance is None)
+        self.assertEqual(0, len(self.sched.downtimes))
+        self.assertEqual(0, len(svc3.downtimes))
+        self.assertFalse(svc3.in_scheduled_downtime)
+        self.assertIs(None, svc3.in_maintenance)
 
 
 

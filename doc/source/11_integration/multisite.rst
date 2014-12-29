@@ -49,7 +49,7 @@ Check_MK install quick guide
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-  - Install check_mk: Detailed `instructions`_ there. Shell driven install with a lot of questions related with Check_mk install paths and integration with Apache and existing "Nagios". For Shinken some default answers must be changed to accomodate Shinken install.
+  - Install check_mk: Detailed `instructions`_ there. Shell driven install with a lot of questions related with Check_mk install paths and integration with Apache and existing "Nagios". For Shinken some default answers must be changed to accommodate Shinken install.
   - Edit config file ''multisite.mk'', usually in ''/etc/check_mk'', to insert a new site pointing to Shinken and write Livestatus socket address as declared at :ref:`Shinken's Livestatus module <enable_livestatus_module>`. Socket may also be an unix socket ("unix:/some/other/path").
   - Restart Apache.
 

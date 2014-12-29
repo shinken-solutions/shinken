@@ -1,2 +1,4 @@
 python >= 2.6
 pycurl
+importlib
+mock # only used for livestatus test

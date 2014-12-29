@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -38,47 +37,47 @@ import logging
 import inspect
 
 # Try to see if we are in an android device or not
-is_android = True
 try:
     import android
+    is_android = True
 except ImportError:
     is_android = False
-
-if not is_android:
-    from multiprocessing import Queue, Manager, active_children, cpu_count
     from multiprocessing.managers import SyncManager
-else:
-    from multiprocessing import active_children
 
-import http_daemon
+
+import shinken.http_daemon
 from shinken.http_daemon import HTTPDaemon, InvalidWorkDir
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
+from shinken.misc.common import setproctitle
 
 
 try:
     import pwd, grp
     from pwd import getpwnam
-    from grp import getgrnam
-
+    from grp import getgrnam, getgrall
 
     def get_cur_user():
         return pwd.getpwuid(os.getuid()).pw_name
 
-
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
+
+    def get_all_groups():
+        return getgrall()
 except ImportError, exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
         return "shinken"
 
-
     def get_cur_group():
         return "shinken"
+
+    def get_all_groups():
+        return []
 
 
 ##########################   DAEMON PART    ###############################
@@ -98,7 +97,11 @@ class Interface(object):
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
         self.app = app
-        self.running_id = "%d.%d" % (time.time(), random.random())
+        self.start_time = int(time.time())
+
+        self.running_id = "%d.%d" % (
+            self.start_time, random.randint(0, 100000000)
+        )
 
     
     doc = 'Test the connexion to the daemon. Returns: pong'
@@ -107,6 +110,9 @@ class Interface(object):
     ping.need_lock = False
     ping.doc = doc
 
+    doc = 'Get the start time of the daemon'
+    def get_start_time(self):
+        return self.start_time
 
     doc = 'Get the current running id of the daemon (scheduler)'
     def get_running_id(self):
@@ -208,18 +214,18 @@ class Daemon(object):
         'host':          StringProp(default='0.0.0.0'),
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
-        'use_ssl':       BoolProp(default='0'),
+        'use_ssl':       BoolProp(default=False),
         'server_key':     StringProp(default='etc/certs/server.key'),
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.cert'),
-        'use_local_log': BoolProp(default='1'),
+        'use_local_log': BoolProp(default=True),
         'log_level':     LogLevelProp(default='WARNING'),
-        'hard_ssl_name_check':    BoolProp(default='0'),
-        'idontcareaboutsecurity': BoolProp(default='0'),
-        'daemon_enabled':BoolProp(default='1'),
-        'spare':         BoolProp(default='0'),
+        'hard_ssl_name_check':    BoolProp(default=False),
+        'idontcareaboutsecurity': BoolProp(default=False),
+        'daemon_enabled':BoolProp(default=True),
+        'spare':         BoolProp(default=False),
         'max_queue_size': IntegerProp(default='0'),
-        'daemon_thread_pool_size': IntegerProp(default='8'),
+        'daemon_thread_pool_size': IntegerProp(default=8),
         'http_backend':  StringProp(default='auto'),
     }
 
@@ -289,7 +295,7 @@ class Daemon(object):
             # Release the lock so the daemon can shutdown without problem
             try:
                 self.http_daemon.lock.release()
-            except:
+            except Exception:
                 pass
             self.http_daemon.shutdown()
 
@@ -298,7 +304,7 @@ class Daemon(object):
         self.unlink()
         self.do_stop()
         # Brok facilities are no longer available simply print the message to STDOUT
-        print ("Stopping daemon. Exiting", )
+        print("Stopping daemon. Exiting")
         sys.exit(0)
 
 
@@ -360,6 +366,8 @@ class Daemon(object):
 
 
     def load_modules_manager(self):
+        if not modulesctx.get_modulesdir():
+            modulesctx.set_modulesdir(self.find_modules_path())
         self.modules_manager = ModulesManager(self.name, self.find_modules_path(), [])
         # Set the modules watchdogs
         # TOFIX: Beware, the arbiter do not have the max_queue_size property
@@ -556,10 +564,39 @@ class Daemon(object):
         self.pid = os.getpid()
         self.debug_output.append("We are now fully daemonized :) pid=%d" % self.pid)
         # We can now output some previously silenced debug output
-        logger.warning("Printing stored debug messages prior to our daemonization")
+        logger.info("Printing stored debug messages prior to our daemonization")
         for s in self.debug_output:
-            logger.debug(s)
+            logger.info(s)
         del self.debug_output
+        self.set_proctitle()
+
+
+    if is_android:
+        def _create_manager(self):
+            pass
+    else:
+        # The Manager is a sub-process, so we must be sure it won't have
+        # a socket of your http server alive
+        def _create_manager(self):
+            manager = SyncManager(('127.0.0.1', 0))
+            def close_http_daemon(daemon):
+                try:
+                    # Be sure to release the lock so there won't be lock in shutdown phase
+                    daemon.lock.release()
+                except Exception, exp:
+                    pass
+                daemon.shutdown()
+            # Some multiprocessing lib got problems with start() that cannot take args
+            # so we must look at it before
+            startargs = inspect.getargspec(manager.start)
+            # startargs[0] will be ['self'] if old multiprocessing lib
+            # and ['self', 'initializer', 'initargs'] in newer ones
+            # note: windows do not like pickle http_daemon...
+            if os.name != 'nt' and len(startargs[0]) > 1:
+                manager.start(close_http_daemon, initargs=(self.http_daemon,))
+            else:
+                manager.start()
+            return manager
 
 
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
@@ -594,31 +631,7 @@ class Daemon(object):
 
         # Now we can start our Manager
         # interprocess things. It's important!
-        if is_android:
-            self.manager = None
-        else:
-            # The Manager is a sub-process, so we must be sure it won't have
-            # a socket of your http server alive
-            self.manager = SyncManager(('127.0.0.1',0))
-            def close_http_daemon(daemon):
-                try:
-                    # Be sure to release the lock so there won't be lock in shutdown phase
-                    daemon.lock.release()
-                except Exception, exp:
-                    pass
-                daemon.shutdown()
-            # Some multiprocessing lib got problems with start() that cannot take args
-            # so we must look at it before
-            startargs = inspect.getargspec(self.manager.start)
-            # startargs[0] will be ['self'] if old multiprocessing lib
-            # and ['self', 'initializer', 'initargs'] in newer ones
-            # note: windows do not like pickle http_daemon...
-            if os.name != 'nt' and len(startargs[0]) > 1:
-                self.manager.start(close_http_daemon, initargs=(self.http_daemon,))
-            else:
-                self.manager.start()
-            # Keep this daemon in the http_daemn module
-        # Will be add to the modules manager later
+        self.manager = self._create_manager()
 
         # We can start our stats thread but after the double fork() call and if we are not in
         # a test launch (time.time() is hooked and will do BIG problems there)
@@ -665,8 +678,10 @@ class Daemon(object):
                 logger.info("Enabling hard SSL server name verification")
 
         # Let's create the HTTPDaemon, it will be exec after
-        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
-        http_daemon.daemon_inst = self.http_daemon
+        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key,
+                                      ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
+        # TODO: fix this "hack" :
+        shinken.http_daemon.daemon_inst = self.http_daemon
 
     # Global loop part
     def get_socks_activity(self, socks, timeout):
@@ -684,29 +699,26 @@ class Daemon(object):
             raise
         return ins
 
-
     # Find the absolute path of the shinken module directory and returns it.
     # If the directory do not exist, we must exit!
     def find_modules_path(self):
-        if not hasattr(self, 'modules_dir') or not self.modules_dir:
-            logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
-            self.modules_dir = '/var/lib/shinken/modules'
-        self.modules_dir = os.path.abspath(self.modules_dir)
-        logger.info("Modules directory: %s", self.modules_dir)
-        if not os.path.exists(self.modules_dir):
-            logger.error("The modules directory '%s' is missing! Bailing out. Please fix your configuration", self.modules_dir)
-            raise Exception("The modules directory '%s' is missing! Bailing out. Please fix your configuration" % self.modules_dir)
-
-        # Ok remember to populate the modulesctx object
-        modulesctx.set_modulesdir(self.modules_dir)
-
-        return self.modules_dir
+        modules_dir = getattr(self, 'modules_dir', None)
+        if not modules_dir:
+            modules_dir = modulesctx.get_modulesdir()
+            if not modules_dir:
+                logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
+                modules_dir = '/var/lib/shinken/modules'
+                modulesctx.set_modulesdir(modules_dir)
+            self.modules_dir = modules_dir
+        logger.info("Modules directory: %s", modules_dir)
+        if not os.path.exists(modules_dir):
+            raise RuntimeError("The modules directory '%s' is missing! Bailing out. Please fix your configuration", modules_dir)
+        return modules_dir
 
 
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
-        act = active_children()
         self.modules_manager.check_alive_instances()
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
@@ -766,6 +778,12 @@ class Daemon(object):
                 os.initgroups(self.user, gid)
             except OSError, e:
                 logger.warning('Cannot call the additional groups setting with initgroups (%s)', e.strerror)
+        elif hasattr(os, 'setgroups'):
+            groups = [gid] + [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
+            try:
+                os.setgroups(groups)
+            except OSError, e:
+                logger.warning('Cannot call the additional groups setting with setgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
@@ -844,6 +862,8 @@ class Daemon(object):
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)
 
+    def set_proctitle(self):
+        setproctitle("shinken-%s" % self.name)
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
@@ -867,7 +887,6 @@ class Daemon(object):
         # The main thing is to have a pool of X concurrent requests for the http_daemon,
         # so "no_lock" calls can always be directly answer without having a "locked" version to
         # finish
-        print "GO FOR IT"
         try:
             self.http_daemon.run()
         except Exception, exp:

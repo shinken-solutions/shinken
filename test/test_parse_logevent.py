@@ -29,14 +29,14 @@ class TestParseLogEvent(ShinkenTest):
         log = '[1402515279] SERVICE NOTIFICATION: admin;localhost;check-ssh;CRITICAL;notify-service-by-email;Connection refused'
         expected = {
             'hostname': 'localhost',
-            'acknownledgement': None,
             'event_type': 'NOTIFICATION',
             'service_desc': 'check-ssh',
             'state': 'CRITICAL',
             'contact': 'admin',
             'time': 1402515279,
             'notification_method': 'notify-service-by-email',
-            'notification_type': 'SERVICE'
+            'notification_type': 'SERVICE',
+            'output': 'Connection refused',
         }
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
@@ -45,14 +45,14 @@ class TestParseLogEvent(ShinkenTest):
         log = '[1402515279] HOST NOTIFICATION: admin;localhost;CRITICAL;notify-service-by-email;Connection refused'
         expected = {
             'hostname': 'localhost',
-            'acknownledgement': None,
             'event_type': 'NOTIFICATION',
             'service_desc': None,
             'state': 'CRITICAL',
             'contact': 'admin',
             'time': 1402515279,
             'notification_method': 'notify-service-by-email',
-            'notification_type': 'HOST'
+            'notification_type': 'HOST',
+            'output': 'Connection refused',
         }
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
@@ -102,6 +102,33 @@ class TestParseLogEvent(ShinkenTest):
         event = LogEvent(log)
         self.assertEqual(event.data, expected)
 
+    def test_host_flapping(self):
+        log = '[1375301662] SERVICE FLAPPING ALERT: testhost;check_ssh;STARTED; Service appears to have started flapping (24.2% change >= 20.0% threshold)'
+        expected = {
+            'alert_type': 'SERVICE',
+            'event_type': 'FLAPPING',
+            'hostname': 'testhost',
+            'output': ' Service appears to have started flapping (24.2% change >= 20.0% threshold)',
+            'service_desc': 'check_ssh',
+            'state': 'STARTED',
+            'time': 1375301662
+        }
+        event = LogEvent(log)
+        self.assertEqual(event.data, expected)
+
+    def test_service_flapping(self):
+        log = '[1375301662] HOST FLAPPING ALERT: hostbw;STARTED; Host appears to have started flapping (20.1% change > 20.0% threshold)'
+        expected = {
+            'alert_type': 'HOST',
+            'event_type': 'FLAPPING',
+            'hostname': 'hostbw',
+            'output': ' Host appears to have started flapping (20.1% change > 20.0% threshold)',
+            'service_desc': None,
+            'state': 'STARTED',
+            'time': 1375301662
+        }
+        event = LogEvent(log)
+        self.assertEqual(event.data, expected)
 
 if __name__ == '__main__':
     unittest.main()

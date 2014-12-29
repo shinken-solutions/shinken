@@ -41,7 +41,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         #
         print "Get the hosts and services"
         svc = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
-        self.assert_(len(svc.act_depend_of_me),2)
+        self.assertEqual(len(svc.act_depend_of_me), 2)
 
         service_dependencies = []
         service_dependency_postfix = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "POSTFIX")
@@ -50,8 +50,11 @@ class TestServiceDepAndGroups(ShinkenTest):
         service_dependencies.append(service_dependency_cpu)
 
         # Is service correctly depend of first one
-        self.assert_(service_dependency_postfix in s for s in svc.act_depend_of_me)
-        self.assert_(service_dependency_cpu in s for s in svc.act_depend_of_me)
+        all_services = []
+        for services in svc.act_depend_of_me:
+            all_services.extend(services)
+        self.assertIn(service_dependency_postfix, all_services)
+        self.assertIn(service_dependency_cpu, all_services)
 
 if __name__ == '__main__':
     unittest.main()

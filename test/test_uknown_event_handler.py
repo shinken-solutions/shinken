@@ -31,7 +31,7 @@ class TestUnknownEventHandler(ShinkenTest):
         self.setup_with_file('etc/shinken_uknown_event_handler.cfg')
 
     def test_dummy(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
 if __name__ == '__main__':
     unittest.main()

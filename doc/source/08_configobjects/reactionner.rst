@@ -62,7 +62,7 @@ reactionner_name
   This variable is used to identify the *short name* of the reactionner which the data is associated with.
 
 address
-  This directive is used to define the adress from where the main arbier can reach this reactionner. This can be a DNS name or a IP adress.
+  This directive is used to define the address from where the main arbier can reach this reactionner. This can be a DNS name or a IP address.
 
 port
   This directive is used to define the TCP port used bu the daemon. The default value is *7772*.
@@ -77,7 +77,7 @@ manage_sub_realms
   This variable is used to define if the poller will take jobs from scheduler from the sub-realms of it's realm. The default value is *1*.
 
 modules
-  This variable is used to define all modules that the scheduler will load.
+  This variable is used to define all modules that the reactionner will load.
 
 reactionner_tags
   This variable is used to define the checks the reactionner can take. If no reactionner_tags is defined, reactionner  will take all untagued notifications and event handlers. If at least one tag is defined, it will take only the checks that are also taggued like it.

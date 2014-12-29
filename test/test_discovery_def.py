@@ -32,63 +32,63 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
-        self.assert_(genhttp != None)
-        self.assert_(genhttp.creation_type == 'service')
-        self.assert_(genhttp.matches['openports'] == '80,443')
-        self.assert_(genhttp.matches['os'] == 'windows')
+        self.assertIsNotNone(genhttp)
+        self.assertEqual('service', genhttp.creation_type)
+        self.assertEqual('80,443', genhttp.matches['openports'])
+        self.assertEqual('windows', genhttp.matches['os'])
 
         key = 'osversion'
         value = '2003'
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'windows'}
         # should match this
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # Match this one too
         l = {'openports': '80', 'os': 'windows', 'super': 'man'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # But not this one
         l = {'openports': '80'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == False)
+        self.assertEqual(False, genhttp.is_matching_disco_datas(l))
 
         # Now search the NOT rule
         genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
 
         # Should manage this
         l = {'openports': '80', 'os': 'linux'}
-        self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttpnowin.is_matching_disco_datas(l))
 
         # But NOT this one
         l = {'openports': '80', 'os': 'windows'}
         print "Should NOT match"
-        self.assert_(genhttpnowin.is_matching_disco_datas(l) == False)
+        self.assertEqual(False, genhttpnowin.is_matching_disco_datas(l))
 
         # Now look for strict rule application
         genhttpstrict = self.sched.conf.discoveryrules.find_by_name('GenHttpStrict')
-        self.assert_(genhttpstrict is not None)
+        self.assertIsNot(genhttpstrict, None)
         key = 'openports'
         value = '80,443'
-        self.assert_(genhttpstrict.is_matching(key, value) == True)
+        self.assertEqual(True, genhttpstrict.is_matching(key, value) )
 
         # But NOT this one
         key = 'openports'
         value = '800'
-        self.assert_(genhttpstrict.is_matching(key, value) == False)
+        self.assertEqual(False, genhttpstrict.is_matching(key, value) )
 
 
     # Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
-        self.assert_(nmap != None)
+        self.assertIsNotNone(nmap)
         nmapcmd = self.sched.conf.commands.find_by_name('nmap_runner')
-        self.assert_(nmapcmd != None)
-        self.assert_(nmap.discoveryrun_command != None)
+        self.assertIsNotNone(nmapcmd)
+        self.assertIsNotNone(nmap.discoveryrun_command)
         # Launch it
         nmap.launch()
         for i in xrange(1, 5):
@@ -103,29 +103,29 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_host_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
-        self.assert_(genhttp != None)
-        self.assert_(genhttp.creation_type == 'host')
-        self.assert_(genhttp.matches['openports'] == '^80$')
+        self.assertIsNotNone(genhttp)
+        self.assertEqual('host', genhttp.creation_type)
+        self.assertEqual('^80$', genhttp.matches['openports'])
 
         key = 'osversion'
         value = '2003'
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'windows'}
         # should match this
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # Match this one too
         l = {'openports': '80', 'os': 'windows', 'super': 'man'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # And this last one
         l = {'openports': '80'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
 
         print "Writing properties"
         print genhttp.writing_properties
@@ -135,31 +135,31 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_look_for_host_discorule_and_delete(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHostRemoveLinux')
-        self.assert_(genhttp != None)
-        self.assert_(genhttp.creation_type == 'host')
-        self.assert_(genhttp.matches['openports'] == '^80$')
+        self.assertIsNotNone(genhttp)
+        self.assertEqual('host', genhttp.creation_type)
+        self.assertEqual('^80$', genhttp.matches['openports'])
 
         key = 'os'
         value = 'linux'
 
         # Should not match this
-        self.assert_(genhttp.is_matching(key, value) == False)
+        self.assertEqual(False, genhttp.is_matching(key, value) )
         
         # But should match this one
         key = 'openports'
         value = '80'
-        self.assert_(genhttp.is_matching(key, value) == True)
+        self.assertEqual(True, genhttp.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'linux'}
         # should match this
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # Match this one too
         l = {'openports': '80', 'os': 'linux', 'super': 'man'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
         # And this last one
         l = {'openports': '80'}
-        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, genhttp.is_matching_disco_datas(l))
 
         print "Writing properties"
         print genhttp.writing_properties
@@ -169,24 +169,24 @@ class TestDiscoveryConf(ShinkenTest):
 
     def test_discorun_matches(self):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
-        self.assert_(linux != None)
+        self.assertIsNotNone(linux)
         print linux.__dict__
-        self.assert_(linux.matches == {u'osvendor': u'linux'})
+        self.assertEqual({u'osvendor': u'linux'}, linux.matches)
 
         key = 'osvendor'
         value = 'microsoft'
         # Should not match this
-        self.assert_(linux.is_matching(key, value) == False)
+        self.assertEqual(False, linux.is_matching(key, value) )
 
         key = 'osvendor'
         value = 'linux'
         # Should match this
-        self.assert_(linux.is_matching(key, value) == True)
+        self.assertEqual(True, linux.is_matching(key, value) )
 
         # Low look for a list of matchings
         l = {'openports': '80', 'osvendor': 'linux'}
         # should match this
-        self.assert_(linux.is_matching_disco_datas(l) == True)
+        self.assertEqual(True, linux.is_matching_disco_datas(l))
 
 
     

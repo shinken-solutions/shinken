@@ -24,15 +24,20 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import imp
 import os
 import sys
+import imp
+import traceback
+from os.path import abspath, join, exists
+
 
 from shinken.log import logger
+from shinken.misc import importlib
+
 
 class ModulesContext(object):
     def __init__(self):
-        pass
+        self.modules_dir = None
 
     def set_modulesdir(self, modulesdir):
         self.modules_dir = modulesdir
@@ -40,24 +45,16 @@ class ModulesContext(object):
     def get_modulesdir(self):
         return self.modules_dir
 
-
     # Useful for a module to load another one, and get a handler to it
-    def get_module(self, name):
-        mod_dir  = os.path.abspath(os.path.join(self.modules_dir, name))
-        if not mod_dir in sys.path:
-            sys.path.append(mod_dir)
-        mod_path = os.path.join(self.modules_dir, name, 'module.py')
-        if not os.path.exists(mod_path):
-            mod_path = os.path.join(self.modules_dir, name, 'module.pyc')
+    def get_module(self, mod_name):
+        if self.modules_dir and self.modules_dir not in sys.path:
+            sys.path.append(self.modules_dir)
         try:
-            if mod_path.endswith('.py'):
-                r = imp.load_source(name, mod_path)
-            else:
-                r = imp.load_compiled(name, mod_path)
-        except:
-            logger.warning('The module %s cannot be founded or load', mod_path)
+            return importlib.import_module('.module', mod_name)
+        except Exception as err:
+            logger.warning('Cannot import %s as a package (%s) ; trying as bare module..',
+                           mod_name, err)
             raise
-        return r
 
 
 modulesctx = ModulesContext()

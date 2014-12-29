@@ -25,14 +25,14 @@
 
 import re
 from shinken.util import filter_any, filter_none
-from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group, filter_host_by_template
+from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group, filter_host_by_tag
 from shinken.util import filter_service_by_name
 from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_regex_host_name
 from shinken.util import filter_service_by_host_name
 from shinken.util import filter_service_by_bp_rule_label
 from shinken.util import filter_service_by_hostgroup_name
-from shinken.util import filter_service_by_host_template_name
+from shinken.util import filter_service_by_host_tag_name
 from shinken.util import filter_service_by_servicegroup_name
 from shinken.util import filter_host_by_bp_rule_label
 from shinken.util import filter_service_by_host_bp_rule_label
@@ -283,7 +283,7 @@ class DependencyNodeFactory(object):
 
         # Look if it's a complex pattern (with rule) or
         # if it's a leaf ofit, like a host/service
-        for m in '()+&|':
+        for m in '()&|':
             if m in pattern:
                 complex_node = True
 
@@ -566,7 +566,7 @@ class DependencyNodeFactory(object):
         if expr == "*":
             return [filter_any]
         match = re.search(r"^([%s]+):(.*)" % self.host_flags, expr)
-        
+
         if match is None:
             return [filter_host_by_name(expr)]
         flags, expr = match.groups()
@@ -577,7 +577,7 @@ class DependencyNodeFactory(object):
         elif "l" in flags:
             return [filter_host_by_bp_rule_label(expr)]
         elif "t" in flags:
-            return [filter_host_by_template(expr)]
+            return [filter_host_by_tag(expr)]
         else:
             return [filter_none]
 
@@ -598,7 +598,7 @@ class DependencyNodeFactory(object):
         elif "l" in flags:
             return [filter_service_by_host_bp_rule_label(expr)]
         elif "t" in flags:
-            return [filter_service_by_host_template_name(expr)]
+            return [filter_service_by_host_tag_name(expr)]
         else:
             return [filter_none]
 

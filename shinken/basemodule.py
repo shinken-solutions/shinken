@@ -33,7 +33,9 @@ import time
 from re import compile
 from multiprocessing import Queue, Process
 
+import shinken.http_daemon
 from shinken.log import logger
+from shinken.misc.common import setproctitle
 
 # TODO: use a class for defining the module "properties" instead of
 # plain dict??  Like:
@@ -171,7 +173,7 @@ class BaseModule(object):
         # start
         try:
             del self.properties['process']
-        except:
+        except KeyError:
             pass
 
         p.start()
@@ -200,13 +202,19 @@ class BaseModule(object):
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
-            logger.info("I'm stopping module '%s' process pid:%s ", 
+            logger.info("I'm stopping module %r (pid=%s)",
                        self.get_name(), self.process.pid)
             self.process.terminate()
             self.process.join(timeout=1)
             if self.process.is_alive():
-                logger.info("The process is still alive, I help it to die")
+                logger.warning("%r is still alive normal kill, I help it to die",
+                            self.get_name())
                 self.__kill()
+                self.process.join(1)
+                if self.process.is_alive():
+                    logger.error("%r still alive after brutal kill, I leave it.",
+                                 self.get_name())
+
             self.process = None
 
 
@@ -265,19 +273,15 @@ class BaseModule(object):
         raise NotImplementedError()
 
     def set_proctitle(self, name):
-        try:
-            from setproctitle import setproctitle
-            setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
-        except:
-            pass
+        setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
 
     def _main(self):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
 
-        from http_daemon import daemon_inst
-        if daemon_inst:
-            daemon_inst.shutdown()
+        # TODO: fix this hack:
+        if shinken.http_daemon.daemon_inst:
+            shinken.http_daemon.daemon_inst.shutdown()
         
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
@@ -285,6 +289,7 @@ class BaseModule(object):
         self.main()
         self.do_stop()
         logger.info("[%s]: exiting now..", self.name)
+
 
     # TODO: apparently some modules would uses "work" as the main method??
     work = _main

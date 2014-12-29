@@ -35,7 +35,6 @@ class TestConfig(ShinkenTest):
         creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0',
                         'port': '9999', 'check_interval': '1', 'realm': 'Default', 'use_ssl': '0', 'hard_ssl_name_check': '0'}
         s = SchedulerLink(creation_tab)
-        s.pythonize()
         s.last_check = time.time() - 100
         s.timeout = 3
         s.check_interval = 1
@@ -48,40 +47,40 @@ class TestConfig(ShinkenTest):
         print s.__dict__
 
         # Should be attempt = 0
-        self.assert_(s.attempt == 0)
+        self.assertEqual(0, s.attempt)
         # Now make bad ping, sould be unreach and dead (but not dead
         s.ping()
-        self.assert_(s.attempt == 1)
-        self.assert_(s.alive == True)
-        self.assert_(s.reachable == False)
+        self.assertEqual(1, s.attempt)
+        self.assertEqual(True, s.alive)
+        self.assertEqual(False, s.reachable)
 
         # Now make bad ping, sould be unreach and dead (but not dead
         s.last_check = time.time() - 100
         s.ping()
-        self.assert_(s.attempt == 2)
-        self.assert_(s.alive == True)
-        self.assert_(s.reachable == False)
+        self.assertEqual(2, s.attempt)
+        self.assertEqual(True, s.alive)
+        self.assertEqual(False, s.reachable)
 
         # Now make bad ping, sould be unreach and dead (but not dead
         s.last_check = time.time() - 100
         s.ping()
-        self.assert_(s.attempt == 3)
-        self.assert_(s.alive == True)
-        self.assert_(s.reachable == False)
+        self.assertEqual(3, s.attempt)
+        self.assertEqual(True, s.alive)
+        self.assertEqual(False, s.reachable)
 
         # Ok, this time we go DEAD!
         s.last_check = time.time() - 100
         s.ping()
-        self.assert_(s.attempt == 4)
-        self.assert_(s.alive == False)
-        self.assert_(s.reachable == False)
+        self.assertEqual(4, s.attempt)
+        self.assertEqual(False, s.alive)
+        self.assertEqual(False, s.reachable)
 
         # Now set a OK ping (false because we won't open the port here...)
         s.last_check = time.time() - 100
         s.set_alive()
-        self.assert_(s.attempt == 0)
-        self.assert_(s.alive == True)
-        self.assert_(s.reachable == True)
+        self.assertEqual(0, s.attempt)
+        self.assertEqual(True, s.alive)
+        self.assertEqual(True, s.reachable)
 
 
 

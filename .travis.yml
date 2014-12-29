@@ -1,9 +1,23 @@
 language: python
 python:
+  - "2.6"
   - "2.7"
+  
 # command to install dependencies
+# some are only used for travis/coveralls so we are installing them here only
 install:
   - "pip install -r shinken/dependencies"
+  - "pip install coveralls"
+  - "pip install nose-cov"
+  - "pip install unittest2"
   - "./bin/preparedev"
 # command to run tests
-script: cd test && nosetests -x -s -v --process-restartworker --processes=1 --process-timeout=999999999
+# notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
+# so we must combine them in the end
+script:
+  - cd test
+  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken
+  - coverage combine
+# specific call to launch coverage data into coveralls.io
+after_success:
+  coveralls

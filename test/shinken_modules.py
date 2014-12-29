@@ -1,12 +1,30 @@
 #!/usr/bin/env python
 
+import os
+import re
+import copy
+import time
+import subprocess
+import shutil
+import datetime # not used but "sub-"imported by livestatus test.. (to be corrected..)
+import sys # not here used but "sub-"imported by livestatus test.. (to be corrected..)
 
 #
-from  shinken_test import *
-import shutil
+from shinken.modulesctx import modulesctx
+from shinken.objects.module import Module
+from shinken.modulesmanager import ModulesManager
+from shinken.misc.datamanager import datamgr
+from shinken.log import logger
 
-#define_modules_dir("../modules")
+#
+from  shinken_test import (
+    modules_dir,
+    ShinkenTest,
+    time_hacker, # not used here but "sub"-imported by lvestatus test (to be corrected)
+)
+
 modulesctx.set_modulesdir(modules_dir)
+
 
 # Special Livestatus module opening since the module rename
 #from shinken.modules.livestatus import module as livestatus_broker
@@ -20,12 +38,12 @@ Logline = livestatus_broker.Logline
 LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore-mongodb').LiveStatusLogStoreMongoDB
 LiveStatusLogStoreSqlite = modulesctx.get_module('logstore-sqlite').LiveStatusLogStoreSqlite
 
-from shinken.misc.datamanager import datamgr
-
 livestatus_modconf = Module()
 livestatus_modconf.module_name = "livestatus"
 livestatus_modconf.module_type = livestatus_broker.properties['type']
 livestatus_modconf.properties = livestatus_broker.properties.copy()
+
+
 
 class ShinkenModulesTest(ShinkenTest):
 
@@ -109,6 +127,8 @@ class ShinkenModulesTest(ShinkenTest):
 
         #--- livestatus_broker.do_main
         self.livestatus_broker.db.open()
+        if hasattr(self.livestatus_broker.db, 'prepare_log_db_table'):
+            self.livestatus_broker.db.prepare_log_db_table()
         #--- livestatus_broker.do_main
 
 
@@ -116,7 +136,6 @@ class TestConfig(ShinkenModulesTest):
 
     def tearDown(self):
         self.stop_nagios()
-        self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
@@ -131,6 +150,8 @@ class TestConfig(ShinkenModulesTest):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
+
+
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
         for line in text.splitlines():

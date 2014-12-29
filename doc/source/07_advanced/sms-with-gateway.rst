@@ -33,7 +33,7 @@ Then you need to add this at the end of the contacts.cfg
   
   define notificationway{
        notificationway_name            SMS           // Here you need to put the name of the notifications ways you write up
-       service_notification_period     24x7          // Here I will receive ams all the time, If you wanna receive them for only the night replace 24x7 by night. 
+       service_notification_period     24x7          // Here I will receive ams all the time, If you want to receive them for only the night replace 24x7 by night.
        host_notification_period        24x7          // Same as above
        service_notification_options    w,c,r         // It tell that I want receive a sms for the hosts who are in warning / critical / recovery
       host_notification_options         d,r          // It tell that I want receive a sms for the services who are down and recovery
@@ -54,14 +54,14 @@ And add these line at the end.
   # Notify Service by SMS-OVH
   define command {
     command_name        notify-service-by-ovhsms     // Should be the same as in the contacts.cfg
-    command_line        $PLUGINSDIR$/ovhsms.sh  $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SE$ // Tell wich script shinken as to use to send sms. We will create it after. 
+    command_line        $PLUGINSDIR$/ovhsms.sh  $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SE$ // Tell which script shinken as to use to send sms. We will create it after. 
   }
   
 
   # Notify host by SMS-OVH
   define command {
     command_name        notify-host-by-ovhsms      * * Should be the same as in the contacts.cfg
-    command_line        $PLUGINSDIR$/ovhsms.sh $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SER$ // Tell wich script shinken as to use to send sms. We will create it after.
+    command_line        $PLUGINSDIR$/ovhsms.sh $CONTACTPAGER$ $NOTIFICATIONTYPE$ $SERVICEDESC$ $HOSTNAME$ $SER$ // Tell which script shinken as to use to send sms. We will create it after.
   }
 
 
@@ -86,7 +86,7 @@ and then create and edit your new script with the name you set above :  nano -w 
   SERVICEDESC=$4
   SERVICESTATE=$5
   textesms="**"$NOTIFICATIONTYPE" alerte - "$HOSTALIAS"/"$SERVICEDESC" is "$SERVICESTATE" **" // This is the message who will be send. You can add something if you want. 
-  wget -o ~/logenvoisms -O ~/reponse "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-XXXXXXXX-1&login=XXXXXXXX&password=XXXXXXXX&from=XXXXXXXXXXX&to=$1&contentType=text/xml&message=$textesms"     // This is the command who will send the sms. You need to adapt it with you gateway settings. 
+  wget -o ~/logenvoisms -O ~/response "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-XXXXXXXX-1&login=XXXXXXXX&password=XXXXXXXX&from=XXXXXXXXXXX&to=$1&contentType=text/xml&message=$textesms"     // This is the command who will send the sms. You need to adapt it with you gateway settings. 
   
   exit 0
 

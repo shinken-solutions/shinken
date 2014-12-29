@@ -39,15 +39,15 @@ class NotificationWay(Item):
     properties = Item.properties.copy()
     properties.update({
         'notificationway_name':          StringProp(fill_brok=['full_status']),
-        'host_notifications_enabled':    BoolProp(default='1', fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'host_notifications_enabled':    BoolProp(default=True, fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
         'host_notification_period':      StringProp(fill_brok=['full_status']),
         'service_notification_period':   StringProp(fill_brok=['full_status']),
-        'host_notification_options':     ListProp(fill_brok=['full_status']),
-        'service_notification_options':  ListProp(fill_brok=['full_status']),
+        'host_notification_options':     ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
+        'service_notification_options':  ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
         'host_notification_commands':    StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_business_impact':           IntegerProp(default='0', fill_brok=['full_status']),
+        'min_business_impact':           IntegerProp(default=0, fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -238,4 +238,4 @@ class NotificationWays(Items):
         params['notificationway_name'] = name
         #print "Asking a new inner notificationway from name %s with params %s" % (name, params)
         nw = NotificationWay(params)
-        self.items[nw.id] = nw
+        self.add_item(nw)

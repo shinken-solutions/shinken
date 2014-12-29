@@ -210,7 +210,7 @@ class Shinken(BaseSatellite):
     properties = BaseSatellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='schedulerd.pid'),
-        'port':      IntegerProp(default='7768'),
+        'port':      IntegerProp(default=7768),
         'local_log': PathProp(default='schedulerd.log'),
     })
 
@@ -353,9 +353,16 @@ class Shinken(BaseSatellite):
         accept_passive_unknown_check_results = pk['accept_passive_unknown_check_results']
         api_key = pk['api_key']
         secret = pk['secret']
+        http_proxy = pk['http_proxy']
+        statsd_host = pk['statsd_host']
+        statsd_port = pk['statsd_port']
+        statsd_prefix = pk['statsd_prefix']
+        statsd_enabled = pk['statsd_enabled']
         
         # horay, we got a name, we can set it in our stats objects
-        statsmgr.register(self.sched, instance_name, 'scheduler', api_key=api_key, secret=secret)
+        statsmgr.register(self.sched, instance_name, 'scheduler', 
+                          api_key=api_key, secret=secret, http_proxy=http_proxy,
+                          statsd_host=statsd_host, statsd_port=statsd_port, statsd_prefix=statsd_prefix, statsd_enabled=statsd_enabled)
         
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
@@ -481,6 +488,12 @@ class Shinken(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
+            # Setting log level
+            logger.setLevel(self.log_level)
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()

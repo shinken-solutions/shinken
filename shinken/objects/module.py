@@ -38,7 +38,7 @@ class Module(Item):
     properties.update({
         'module_name': StringProp(),
         'module_type': StringProp(),
-        'modules': ListProp(default=''),
+        'modules': ListProp(default=[''], split_on_coma=True),
     })
 
     macros = {}
@@ -46,6 +46,9 @@ class Module(Item):
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.module_name
+
+    def __repr__(self):
+        return '<module name=%s />' % self.get_name()
 
 
 class Modules(Items):
@@ -58,8 +61,7 @@ class Modules(Items):
     def linkify_s_by_plug(self):
         for s in self:
             new_modules = []
-            mods = s.modules.split(',')
-            mods = strip_and_uniq(mods)
+            mods = strip_and_uniq(s.modules)
             for plug_name in mods:
                 plug_name = plug_name.strip()
 

@@ -1,1 +1,0 @@
-${uri}render/?width=586&height=308&target=legendValue(alias(color(scale(${host}.${service}.ram_used%2C1024)%2C%22%23FF0000%22)%2C%22RAM%22)%2C%22last%22)&target=color(legendValue(alias(scale(${host}.${service}.swap_used%2C1024)%2C%22Swap%22)%2C%22last%22)%2C%22%230000FF%22)&fgcolor=000000&bgcolor=FFFFFF

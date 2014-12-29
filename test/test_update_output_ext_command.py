@@ -45,7 +45,7 @@ class TestUpdateOutputExtCommand(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.scheduler_loop(2, [])
         print svc.perf_data
-        self.assert_(svc.perf_data == 'toto=30%')
+        self.assertEqual('toto=30%', svc.perf_data)
 
 if __name__ == '__main__':
     unittest.main()

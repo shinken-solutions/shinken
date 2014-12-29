@@ -49,24 +49,24 @@ class TestConfig(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
 
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % time.time()
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.output == 'Bob is not happy')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('Bob is not happy', host.output)
 
         # Now with performance data
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999' % time.time()
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.output == 'Bob is not happy')
-        self.assert_(host.perf_data == 'rtt=9999')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('Bob is not happy', host.output)
+        self.assertEqual('rtt=9999', host.perf_data)
 
         # Now with full-blown performance data. Here we have to watch out:
         # Is a ";" a separator for the external command or is it
@@ -75,52 +75,52 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.output == 'Bob is not happy')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual('Bob is not happy', host.output)
         print "perf (%s)" % host.perf_data
-        self.assert_(host.perf_data == 'rtt=9999;5;10;0;10000')
+        self.assertEqual('rtt=9999;5;10;0;10000', host.perf_data)
 
         # The same with a service
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(svc.state == 'WARNING')
-        self.assert_(svc.output == 'Bobby is not happy')
+        self.assertEqual('WARNING', svc.state)
+        self.assertEqual('Bobby is not happy', svc.output)
         print "perf (%s)" % svc.perf_data
-        self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
+        self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
         # ACK SERVICE
         excmd = '[%d] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;Big brother;Acknowledge service' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(svc.state == 'WARNING')
-        self.assert_(svc.problem_has_been_acknowledged == True)
+        self.assertEqual('WARNING', svc.state)
+        self.assertEqual(True, svc.problem_has_been_acknowledged)
 
         excmd = '[%d] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(svc.state == 'WARNING')
-        self.assert_(svc.problem_has_been_acknowledged == False)
+        self.assertEqual('WARNING', svc.state)
+        self.assertEqual(False, svc.problem_has_been_acknowledged)
 
         # Service is going ok ...
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;0;Bobby is happy now!|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(svc.state == 'OK')
-        self.assert_(svc.output == 'Bobby is happy now!')
-        self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
+        self.assertEqual('OK', svc.state)
+        self.assertEqual('Bobby is happy now!', svc.output)
+        self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
         # Host is going up ...
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;0;Bob is also happy now!' % time.time()
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(host.state == 'UP')
-        self.assert_(host.output == 'Bob is also happy now!')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('Bob is also happy now!', host.output)
 
         # Clean the command_file
         #try:
@@ -135,12 +135,12 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(router.state == 'DOWN')
-        self.assert_(router.output == 'Bob is not happy')
+        self.assertEqual('DOWN', router.state)
+        self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
-        self.assert_(router.perf_data == 'rtt=9999;5;10;0;10000')
+        self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print "Is the last check agree?", past, router.last_chk
-        self.assert_(past == router.last_chk)
+        self.assertEqual(router.last_chk, past)
 
         # Now an even earlier check, should NOT be take
         very_past = int(time.time() - 3600)
@@ -148,51 +148,51 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
-        self.assert_(router.state == 'DOWN')
-        self.assert_(router.output == 'Bob is not happy')
+        self.assertEqual('DOWN', router.state)
+        self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
-        self.assert_(router.perf_data == 'rtt=9999;5;10;0;10000')
+        self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print "Is the last check agree?", very_past, router.last_chk
-        self.assert_(past == router.last_chk)
+        self.assertEqual(router.last_chk, past)
 
         # Now with crappy characters, like é
         host = self.sched.hosts.find_by_name("test_router_0")
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob got a crappy character  é   and so is not not happy|rtt=9999' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
-        self.assert_(host.perf_data == 'rtt=9999')
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual(u'Bob got a crappy character  é   and so is not not happy', host.output)
+        self.assertEqual('rtt=9999', host.perf_data)
 
         # ACK HOST
         excmd = '[%d] ACKNOWLEDGE_HOST_PROBLEM;test_router_0;2;1;1;Big brother;test' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
         print "Host state", host.state, host.problem_has_been_acknowledged
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.problem_has_been_acknowledged == True)
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual(True, host.problem_has_been_acknowledged)
         
         # REMOVE ACK HOST
         excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
         print "Host state", host.state, host.problem_has_been_acknowledged
-        self.assert_(host.state == 'DOWN')
-        self.assert_(host.problem_has_been_acknowledged == False)
+        self.assertEqual('DOWN', host.state)
+        self.assertEqual(False, host.problem_has_been_acknowledged)
 
         # RESTART_PROGRAM
         excmd = '[%d] RESTART_PROGRAM' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        self.assert_(self.any_log_match('RESTART') == True)
-        self.assert_(self.any_log_match('I awoke after sleeping 3 seconds') == True)
+        self.assert_any_log_match('RESTART')
+        self.assert_any_log_match('I awoke after sleeping 3 seconds')
 
         # RELOAD_CONFIG
         excmd = '[%d] RELOAD_CONFIG' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        self.assert_(self.any_log_match('RELOAD') == True)
-        self.assert_(self.any_log_match('I awoke after sleeping 2 seconds') == True)
+        self.assert_any_log_match('RELOAD')
+        self.assert_any_log_match('I awoke after sleeping 2 seconds')
         
         # Show recent logs
         self.show_logs()
@@ -232,9 +232,9 @@ class TestConfig(ShinkenTest):
         self.sched.run_external_command(excmd)
         broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
         self.assertTrue(len(broks) == 0)
-        log_found = self.log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
+        self.assert_log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
         self.clear_logs()
-        self.assertTrue(log_found)
+
 
     #Tests sending passive check results for unconfigured hosts to a receiver
     def test_unknown_check_result_command_receiver(self):
@@ -292,8 +292,8 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        self.assert_(svc.modified_attributes == 1)
-        self.assert_(not getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
+        self.assertEqual(1, svc.modified_attributes)
+        self.assertFalse(getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
 
 if __name__ == '__main__':
     unittest.main()

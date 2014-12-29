@@ -30,7 +30,7 @@
 from item import Item, Items
 
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, ListProp, ToGuessProp
 from shinken.log import logger
 
 
@@ -41,21 +41,32 @@ class Itemgroup(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'members': StringProp(fill_brok=['full_status']),
+        'members': ListProp(fill_brok=['full_status'], default=None, split_on_coma=True),
         # Shinken specific
-        'unknown_members': StringProp(default=None),
+        'unknown_members': ListProp(default=None),
     })
 
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
-
+        cls = self.__class__
         self.init_running_properties()
 
         for key in params:
-            # delistify attributes if there is only one value
-            params[key] = self.compact_unique_attr_value(params[key])
-            setattr(self, key, params[key])
+
+            if key in self.properties:
+                val = self.properties[key].pythonize(params[key])
+            elif key in self.running_properties:
+                warning = "using a the running property %s in a config file" % key
+                self.configuration_warnings.append(warning)
+                val = self.running_properties[key].pythonize(params[key])
+            else:
+                warning = "Guessing the property %s type because it is not in %s object properties" % \
+                          (key, cls.__name__)
+                self.configuration_warnings.append(warning)
+                val = ToGuessProp.pythonize(params[key])
+
+            setattr(self, key, val)
 
 
     # Copy the groups properties EXCEPT the members
@@ -77,19 +88,6 @@ class Itemgroup(Item):
         new_i.members = []
         return new_i
 
-    # Change the members like item1 ,item2 to ['item1' , 'item2']
-    # so a python list :)
-    # We also strip elements because spaces Stinks!
-    def pythonize(self):
-        v =  getattr(self, 'members', '')
-        # Maybe it's a multi-property like multi hostgroups entries
-        # if so "flatten" it
-        if isinstance(v, list):
-            v = ','.join(v)
-        self.members = [mbr for mbr in
-                            (m.strip() for m in v.split(','))
-                        if mbr != '']
-
     def replace_members(self, members):
         self.members = members
 
@@ -102,16 +100,16 @@ class Itemgroup(Item):
                 setattr(self, prop, value)
 
     def add_string_member(self, member):
-        if hasattr(self, 'members'):
-            self.members += ',' + member
-        else:
-            self.members = member
+        add_fun = list.extend if isinstance(member, list) else list.append
+        if not hasattr(self, "members"):
+            self.members = []
+        add_fun(self.members, member)
 
     def add_string_unknown_member(self, member):
-        if self.unknown_members:
-            self.unknown_members.append(member)
-        else:
-            self.unknown_members = [member]
+        add_fun = list.extend if isinstance(member, list) else list.append
+        if not self.unknown_members:
+            self.unknown_members = []
+        add_fun(self.unknown_members, member)
 
     def __str__(self):
         return str(self.__dict__) + '\n'
@@ -175,7 +173,7 @@ class Itemgroups(Items):
 
 
     def add(self, ig):
-        self.items[ig.id] = ig
+        self.add_item(ig)
 
 
     def get_members_by_name(self, gname):

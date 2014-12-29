@@ -33,10 +33,10 @@ class TestHostGroupWithSpace(ShinkenTest):
 
     def test_hostgroup_with_space(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_With Spaces")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", 'test_With anoter Spaces')
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
 if __name__ == '__main__':
     unittest.main()

@@ -49,46 +49,46 @@ class TestPlusInInheritance(ShinkenTest):
         # WARNING, it's a string, not the real objects!
         self._dump(host0)
 
-        self.assert_("test_contact_1" in [c .get_name() for c in host0.contacts])
-        self.assert_("test_contact_2" in [c .get_name() for c in host0.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host0.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in host0.contacts])
 
         host2 = self.sched.hosts.find_by_name("test_host_2")
         self._dump(host2)
-        self.assert_("test_contact_1" in [c .get_name() for c in host2.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host2.contacts])
 
         host3 = self.sched.hosts.find_by_name("test_host_3")
         self._dump(host3)
-        self.assert_("test_contact_1" in [c .get_name() for c in host3.contacts])
-        self.assert_("test_contact_2" in [c .get_name() for c in host3.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host3.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in host3.contacts])
 
         host4 = self.sched.hosts.find_by_name("test_host_4")
         self._dump(host4)
-        self.assert_("test_contact_1" in [c .get_name() for c in host4.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host4.contacts])
 
         host5 = self.sched.hosts.find_by_name("test_host_5")
         self._dump(host5)
-        self.assert_("test_contact_1" in [c .get_name() for c in host5.contacts])
-        self.assert_("test_contact_2" in [c .get_name() for c in host5.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host5.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in host5.contacts])
 
         
         host6 = self.sched.hosts.find_by_name("test_host_6")
         self._dump(host6)
-        self.assert_("test_contact_1" in [c .get_name() for c in host6.contacts])
-        self.assert_("test_contact_2" in [c .get_name() for c in host6.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in host6.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in host6.contacts])
 
         # Now Let's check service inheritance
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplA")
         self._dump_svc(svc1)
-        self.assert_("test_contact_1" in [c .get_name() for c in svc1.contacts])
+        self.assertIn("test_contact_1", [c .get_name() for c in svc1.contacts])
 
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplB")
         self._dump_svc(svc2)
-        self.assert_("test_contact_2" in [c .get_name() for c in svc2.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in svc2.contacts])
 
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "svc_tmplA_tmplB")
-        self.assert_("test_contact_1" in [c .get_name() for c in svc3.contacts])
-        self.assert_("test_contact_2" in [c .get_name() for c in svc3.contacts])
+        self.assertIn("test_contact_1",  [c .get_name() for c in svc3.contacts])
+        self.assertIn("test_contact_2", [c .get_name() for c in svc3.contacts])
         self._dump_svc(svc3)
 
 if __name__ == '__main__':

@@ -30,6 +30,7 @@ scheduling/consume check smart things :)
 """
 
 import time
+import itertools
 
 from item import Items
 from schedulingitem import SchedulingItem
@@ -69,36 +70,36 @@ class Host(SchedulingItem):
         'alias':                StringProp(fill_brok=['full_status']),
         'display_name':         StringProp(default='', fill_brok=['full_status']),
         'address':              StringProp(fill_brok=['full_status']),
-        'parents':              ListProp(brok_transformation=to_hostnames_list, default='', fill_brok=['full_status'], merging='join'),
-        'hostgroups':           StringProp(brok_transformation=to_list_string_of_names, default='', fill_brok=['full_status'], merging='join'),
+        'parents':              ListProp(brok_transformation=to_hostnames_list, default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'hostgroups':           ListProp(brok_transformation=to_list_string_of_names, default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'check_command':        StringProp(default='_internal_host_up', fill_brok=['full_status']),
         'initial_state':        CharProp(default='u', fill_brok=['full_status']),
-        'max_check_attempts':   IntegerProp(default='1',fill_brok=['full_status']),
-        'check_interval':       IntegerProp(default='0', fill_brok=['full_status']),
-        'retry_interval':       IntegerProp(default='0', fill_brok=['full_status']),
-        'active_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'max_check_attempts':   IntegerProp(default=1,fill_brok=['full_status']),
+        'check_interval':       IntegerProp(default=0, fill_brok=['full_status', 'check_result']),
+        'retry_interval':       IntegerProp(default=0, fill_brok=['full_status', 'check_result']),
+        'active_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'check_period':         StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
-        'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
+        'obsess_over_host':     BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'check_freshness':      BoolProp(default=False, fill_brok=['full_status']),
+        'freshness_threshold':  IntegerProp(default=0, fill_brok=['full_status']),
         'event_handler':        StringProp(default='', fill_brok=['full_status']),
-        'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
-        'low_flap_threshold':   IntegerProp(default='25', fill_brok=['full_status']),
-        'high_flap_threshold':  IntegerProp(default='50', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'flap_detection_options': ListProp(default='o,d,u', fill_brok=['full_status'], merging='join'),
-        'process_perf_data':    BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
-        'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
-        'contacts':             StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
-        'contact_groups':       StringProp(default='', fill_brok=['full_status'], merging='join'),
-        'notification_interval': IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
+        'event_handler_enabled': BoolProp(default=False, fill_brok=['full_status']),
+        'low_flap_threshold':   IntegerProp(default=25, fill_brok=['full_status']),
+        'high_flap_threshold':  IntegerProp(default=50, fill_brok=['full_status']),
+        'flap_detection_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'flap_detection_options': ListProp(default=['o','d','u'], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'process_perf_data':    BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
+        'retain_nonstatus_information': BoolProp(default=True, fill_brok=['full_status']),
+        'contacts':             ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'contact_groups':       ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'notification_interval': IntegerProp(default=60, fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(default=0, fill_brok=['full_status']),
         'notification_period':  StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options': ListProp(default='d,u,r,f', fill_brok=['full_status'], merging='join'),
-        'notifications_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'stalking_options':     ListProp(default='', fill_brok=['full_status']),
+        'notification_options': ListProp(default=['d','u','r','f'], fill_brok=['full_status'], merging='join',split_on_coma=True),
+        'notifications_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'stalking_options':     ListProp(default=[''], fill_brok=['full_status']),
         'notes':                StringProp(default='', fill_brok=['full_status']),
         'notes_url':            StringProp(default='', fill_brok=['full_status']),
         'action_url':           StringProp(default='', fill_brok=['full_status']),
@@ -112,7 +113,7 @@ class Host(SchedulingItem):
         # it's stupid!
         '2d_coords':            StringProp(default='', fill_brok=['full_status'], no_slots=True),
         '3d_coords':            StringProp(default='', fill_brok=['full_status'], no_slots=True),
-        'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
+        'failure_prediction_enabled': BoolProp(default=False, fill_brok=['full_status']),
 
         ### New to shinken
         # 'fill_brok' is ok because in scheduler it's already
@@ -120,43 +121,50 @@ class Host(SchedulingItem):
         'realm':                StringProp(default=None, fill_brok=['full_status'], conf_send_preparation=get_obj_name),
         'poller_tag':           StringProp(default='None'),
         'reactionner_tag':      StringProp(default='None'),
-        'resultmodulations':    StringProp(default='', merging='join'),
-        'business_impact_modulations': StringProp(default='', merging='join'),
-        'escalations':          StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'resultmodulations':    ListProp(default=[], merging='join'),
+        'business_impact_modulations': ListProp(default=[], merging='join'),
+        'escalations':          ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
-        'service_overrides':    ListProp(default='', merging='duplicate', split_on_coma=False),
-        'service_excludes':     ListProp(default='', merging='duplicate'),
-        'labels':               ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'time_to_orphanage':    IntegerProp(default=300, fill_brok=['full_status']),
+        'service_overrides':    ListProp(default=[], merging='duplicate', split_on_coma=False),
+        'service_excludes':     ListProp(default=[], merging='duplicate', split_on_coma=True),
+        'labels':               StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
         'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
         # Business rules notifications mode
-        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_smart_notifications': BoolProp(default=False, fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
-        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
-        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
-        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
+        'business_rule_host_notification_options':    ListProp(default=[''], fill_brok=['full_status']),
+        'business_rule_service_notification_options': ListProp(default=[''], fill_brok=['full_status']),
 
         # Business impact value
-        'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':      IntegerProp(default=2, fill_brok=['full_status']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
-        'trigger_name':    ListProp(default=''),
-        'trigger_broker_raise_enabled': BoolProp(default='0'),
+        'trigger_name':    StringProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default=False),
 
         # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'trending_policies':    ListProp(default=[], fill_brok=['full_status'], merging='join'),
 
         # Our modulations. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status'], merging='join'),
-        'macromodulations':       ListProp(default='', merging='join'),
+        'checkmodulations':       ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'macromodulations':       ListProp(default=[], merging='join'),
 
         # Custom views
-        'custom_views'     :    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'custom_views'     :    ListProp(default=[], fill_brok=['full_status'], merging='join'),
+
+        # Snapshot part
+        'snapshot_enabled':        BoolProp(default=False),
+        'snapshot_command':        StringProp(default=''),
+        'snapshot_period':         StringProp(default=''),
+        'snapshot_criteria':       ListProp(default=['d','u'], fill_brok=['full_status'], merging='join'),
+        'snapshot_interval':       IntegerProp(default=5),
     })
 
     # properties set only for running purpose
@@ -193,16 +201,16 @@ class Host(SchedulingItem):
         'flapping_comment_id':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         # No broks for _depend_of because of to much links to hosts/services
         # dependencies for actions like notif of event handler, so AFTER check return
-        'act_depend_of':        StringProp(default=[]),
+        'act_depend_of':        ListProp(default=[]),
 
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of':        StringProp(default=[]),
+        'chk_depend_of':        ListProp(default=[]),
 
         # elements that depend of me, so the reverse than just upper
-        'act_depend_of_me':     StringProp(default=[]),
+        'act_depend_of_me':     ListProp(default=[]),
 
         # elements that depend of me
-        'chk_depend_of_me':     StringProp(default=[]),
+        'chk_depend_of_me':     ListProp(default=[]),
         'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
         # no brok ,to much links
@@ -217,7 +225,7 @@ class Host(SchedulingItem):
         'comments':             StringProp(default=[], fill_brok=['full_status'], retention=True),
         'flapping_changes':     StringProp(default=[], fill_brok=['full_status'], retention=True),
         'percent_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
-        'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
         'acknowledgement':      StringProp(default=None, retention=True),
         'acknowledgement_type': IntegerProp(default=1, fill_brok=['full_status', 'check_result'], retention=True),
         'check_type':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -249,7 +257,7 @@ class Host(SchedulingItem):
         # them when we load it.
         'notified_contacts':    StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
-        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
 
         # put here checks and notif raised
@@ -317,10 +325,12 @@ class Host(SchedulingItem):
 
         # Trigger list
         'triggers':  StringProp(default=[]),
+
+        # snapshots part
+        'last_snapshot':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         
         # Keep the string of the last command launched for this element
         'last_check_command': StringProp(default=''),
-        
     })
 
     # Hosts macros and prop that give the information
@@ -372,7 +382,11 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
         'TOTALHOSTSERVICESUNKNOWN': 'get_total_services_unknown',
         'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical',
-        'HOSTBUSINESSIMPACT':  'business_impact'
+        'HOSTBUSINESSIMPACT':  'business_impact',
+        # Business rules output formatting related macros
+        'STATUS':            'get_status',
+        'SHORTSTATUS':       'get_short_status',
+        'FULLNAME':          'get_full_name',
     }
 
     # Manage ADDRESSX macros by adding them dynamically
@@ -408,6 +422,7 @@ class Host(SchedulingItem):
             self.address = self.host_name
         if hasattr(self, 'host_name') and not hasattr(self, 'alias'):
             self.alias = self.host_name
+
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -484,6 +499,7 @@ class Host(SchedulingItem):
 
         return state
 
+
     # Search in my service if I've got the service
     def find_service_by_name(self, service_description):
         for s in self.services:
@@ -491,9 +507,11 @@ class Host(SchedulingItem):
                 return s
         return None
 
+
     # Return all of the services on a host
     def get_services(self):
         return self.services
+
 
     # For get a nice name
     def get_name(self):
@@ -508,6 +526,7 @@ class Host(SchedulingItem):
             except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
+
     def get_groupname(self):
         groupname = ''
         for hg in self.hostgroups:
@@ -515,6 +534,7 @@ class Host(SchedulingItem):
             # groupname = "%s [%s]" % (hg.alias, hg.get_name())
             groupname = "%s" % (hg.alias)
         return groupname
+
 
     def get_groupnames(self):
         groupnames = ''
@@ -526,23 +546,29 @@ class Host(SchedulingItem):
                 groupnames = "%s, %s" % (groupnames, hg.get_name())
         return groupnames
 
+
     # For debugging purpose only
     def get_dbg_name(self):
         return self.host_name
+
 
     # Same but for clean call, no debug
     def get_full_name(self):
         return self.host_name
 
+
     # Get our realm
     def get_realm(self):
         return self.realm
 
+
     def get_hostgroups(self):
         return self.hostgroups
 
+
     def get_host_tags(self):
         return self.tags
+
 
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):
@@ -550,6 +576,7 @@ class Host(SchedulingItem):
             if h == other:
                 return True
         return False
+
 
     # Delete all links in the act_depend_of list of self and other
     def del_host_act_dependency(self, other):
@@ -575,6 +602,7 @@ class Host(SchedulingItem):
         # and father list in mine
         self.parent_dependencies.remove(other)
 
+
     # Add a dependency for action event handler, notification, etc)
     # and add ourself in it's dep list
     def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
@@ -585,6 +613,7 @@ class Host(SchedulingItem):
 
         # And the parent/child dep lists too
         h.register_son_in_parent_child_dependencies(self)
+
 
     # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -610,6 +639,7 @@ class Host(SchedulingItem):
         # And we fill parent/childs dep for brok purpose
         # Here self depend on h
         h.register_son_in_parent_child_dependencies(self)
+
 
     # Add one of our service to services (at linkify)
     def add_service_link(self, service):
@@ -638,6 +668,7 @@ class Host(SchedulingItem):
         self.state = 'UNREACHABLE'
         self.last_time_unreachable = int(now)
 
+
     # We just go an impact, so we go unreachable
     # But only if we enable this state change in the conf
     def set_impact_state(self):
@@ -652,6 +683,7 @@ class Host(SchedulingItem):
             self.state = 'UNREACHABLE'  # exit code UNDETERMINED
             self.state_id = 2
 
+
     # Ok, we are no more an impact, if no news checks
     # override the impact state, we came back to old
     # states
@@ -662,12 +694,12 @@ class Host(SchedulingItem):
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
 
+
     # set the state in UP, DOWN, or UNDETERMINED
     # with the status of a check. Also update last_state
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
-
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
         # we can take current state. But if it's the case, the
@@ -679,13 +711,14 @@ class Host(SchedulingItem):
             self.last_state = self.state_before_impact
         else:
             self.last_state = self.state
-
-        if status == 0 or (status == 1 and cls.use_aggressive_host_checking == 0):
+        # There is no 1 case because it should have been managed by the caller for an host
+        # like the schedulingitem::consume method.
+        if status == 0:
             self.state = 'UP'
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
             state_code = 'u'
-        elif status in (2, 3) or (status == 1 and cls.use_aggressive_host_checking == 1):
+        elif status in (2, 3):
             self.state = 'DOWN'
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
@@ -701,6 +734,7 @@ class Host(SchedulingItem):
             self.last_state_change = self.last_state_update
         self.duration_sec = now - self.last_state_change
 
+
     # See if status is status. Can be low of high format (o/UP, d/DOWN, ...)
     def is_state(self, status):
         if status == self.state:
@@ -714,6 +748,7 @@ class Host(SchedulingItem):
             return True
         return False
 
+
     # The last time when the state was not UP
     def last_time_non_ok_or_up(self):
         if self.last_time_down > self.last_time_up:
@@ -721,6 +756,7 @@ class Host(SchedulingItem):
         else:
             last_time_non_up = 0
         return last_time_non_up
+
 
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
@@ -730,6 +766,7 @@ class Host(SchedulingItem):
                                self.state, self.state_type,
                                self.attempt, self.output))
 
+
     # If the configuration allow it, raise an initial log like
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
@@ -738,6 +775,7 @@ class Host(SchedulingItem):
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, self.output))
+
 
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
@@ -749,6 +787,7 @@ class Host(SchedulingItem):
                         self.get_name(),
                           format_t_into_dhms_format(t_stale_by),
                           format_t_into_dhms_format(t_threshold))
+
 
     # Raise a log entry with a Notification alert like
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
@@ -766,14 +805,26 @@ class Host(SchedulingItem):
                                 % (contact.get_name(), self.get_name(),
                                    state, command.get_name(), self.output))
 
+
     # Raise a log entry with a Eventhandler alert like
-    # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
+    # HOST EVENT HANDLER: superadmin;server;UP;notify-by-rss;no output
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
             naglog_result('critical', "HOST EVENT HANDLER: %s;%s;%s;%s;%s"
                                 % (self.get_name(),
                                    self.state, self.state_type,
                                    self.attempt, command.get_name()))
+
+
+    # Raise a log entry with a Snapshot alert like
+    # HOST SNAPSHOT: superadmin;server;UP;notify-by-rss;no output
+    def raise_snapshot_log_entry(self, command):
+        if self.__class__.log_event_handlers:
+            naglog_result('critical', "HOST SNAPSHOT: %s;%s;%s;%s;%s"
+                          % (self.get_name(),
+                             self.state, self.state_type,
+                             self.attempt, command.get_name()))
+
 
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
@@ -783,6 +834,7 @@ class Host(SchedulingItem):
                             "(%.1f%% change >= %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
 
+
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
@@ -791,11 +843,13 @@ class Host(SchedulingItem):
                             "(%.1f%% change < %.1f%% threshold)"
                             % (self.get_name(), change_ratio, threshold))
 
+
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the host '%s' "
                        "because there is not future valid time",
                         self.get_name())
+
 
     # Raise a log entry when a downtime begins
     # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
@@ -804,6 +858,7 @@ class Host(SchedulingItem):
                             "Host has entered a period of scheduled downtime"
                             % (self.get_name()))
 
+
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
@@ -811,12 +866,14 @@ class Host(SchedulingItem):
                             "exited from a period of scheduled downtime"
                             % (self.get_name()))
 
+
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
         naglog_result('critical', "HOST DOWNTIME ALERT: %s;CANCELLED; "
                             "Scheduled downtime for host has been cancelled."
                             % (self.get_name()))
+
 
     # Is stalking?
     # Launch if check is waitconsume==first time
@@ -837,6 +894,7 @@ class Host(SchedulingItem):
         if need_stalk:
             logger.info("Stalking %s: %s", self.get_name(), self.output)
 
+
     # fill act_depend_of with my parents (so network dep)
     # and say parents they impact me, no timeperiod and follow parents of course
     def fill_parents_dependency(self):
@@ -851,6 +909,7 @@ class Host(SchedulingItem):
                 # And add the parent/child dep filling too, for broking
                 parent.register_son_in_parent_child_dependencies(self)
 
+
     # Register a child in our lists
     def register_child(self, child):
         # We've got 2 list: a list for our child
@@ -859,30 +918,37 @@ class Host(SchedulingItem):
         self.childs.append(child)
         self.act_depend_of_me.append((child, ['d', 'u', 's', 'f'], 'network_dep', None, True))
 
+
     # Give data for checks's macros
     def get_data_for_checks(self):
         return [self]
+
 
     # Give data for event handler's macro
     def get_data_for_event_handler(self):
         return [self]
 
+
     # Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self, contact, n]
+
 
     # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
         return not contact.want_host_notification(self.last_chk, self.state, n.type, self.business_impact, n.command_call)
 
+
     # MACRO PART
     def get_duration_sec(self):
         return str(int(self.duration_sec))
+
 
     def get_duration(self):
         m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
+
 
     # Check if a notification for this host is suppressed at this time
     # This is a check at the host level. Do not look at contacts here
@@ -966,6 +1032,7 @@ class Host(SchedulingItem):
 
         return False
 
+
     # Get a oc*p command if item has obsess_over_*
     # command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
@@ -981,34 +1048,64 @@ class Host(SchedulingItem):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
+
     # Macro part
     def get_total_services(self):
         return str(len(self.services))
 
+
     def get_total_services_ok(self):
         return str(len([s for s in self.services if s.state_id == 0]))
+
 
     def get_total_services_warning(self):
         return str(len([s for s in self.services if s.state_id == 1]))
 
+
     def get_total_services_critical(self):
         return str(len([s for s in self.services if s.state_id == 2]))
 
+
     def get_total_services_unknown(self):
         return str(len([s for s in self.services if s.state_id == 3]))
+
 
     def get_ack_author_name(self):
         if self.acknowledgement is None:
             return ''
         return self.acknowledgement.author
 
+
     def get_ack_comment(self):
         if self.acknowledgement is None:
             return ''
         return self.acknowledgement.comment
 
+
     def get_check_command(self):
         return self.check_command.get_name()
+
+    def get_short_status(self):
+        mapping = {
+            0: "U",
+            1: "D",
+            2: "N",
+        }
+        if self.got_business_rule:
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return mapping.get(self.state_id, "n/a")
+
+    def get_status(self):
+        if self.got_business_rule:
+            mapping = {
+                0: "UP",
+                1: "DOWN",
+                2: "UNREACHABLE",
+            }
+            return mapping.get(self.business_rule.get_state(), "n/a")
+        else:
+            return self.state
 
 
 # CLass for the hosts lists. It's mainly for configuration
@@ -1027,10 +1124,12 @@ class Hosts(Items):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
+        self.linkify_with_timeperiods(timeperiods, 'snapshot_period')
         self.linkify_h_by_h()
         self.linkify_h_by_hg(hostgroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
+        self.linkify_one_command_with_commands(commands, 'snapshot_command')
 
         self.linkify_with_contacts(contacts)
         self.linkify_h_by_realms(realms)
@@ -1090,24 +1189,22 @@ class Hosts(Items):
                 h.got_default_realm = True
 
 
-    # We look for hostgroups property in hosts and
-    # link them
+    # We look for hostgroups property in hosts and link them
     def linkify_h_by_hg(self, hostgroups):
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl():
-                new_hostgroups = []
-                if hasattr(h, 'hostgroups') and h.hostgroups != '':
-                    hgs = h.hostgroups.split(',')
-                    for hg_name in hgs:
-                        hg_name = hg_name.strip()
-                        hg = hostgroups.find_by_name(hg_name)
-                        if hg is not None:
-                            new_hostgroups.append(hg)
-                        else:
-                            err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
-                            h.configuration_errors.append(err)
-                h.hostgroups = new_hostgroups
+            new_hostgroups = []
+            if hasattr(h, 'hostgroups') and h.hostgroups != []:
+                hgs = [n.strip() for n in h.hostgroups if n.strip()]
+                for hg_name in hgs:
+                    # TODO: should an unknown hostgroup raise an error ?
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is not None:
+                        new_hostgroups.append(hg)
+                    else:
+                        err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
+                        h.configuration_errors.append(err)
+            h.hostgroups = new_hostgroups
 
 
     # We look for hostgroups property in hosts and
@@ -1116,26 +1213,27 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        for t in self.templates.itervalues():
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+
         # Register host in the hostgroups
         for h in self:
-            if not h.is_tpl() and hasattr(h, 'host_name'):
-                hname = h.host_name
-                if hasattr(h, 'hostgroups'):
-                    if isinstance(h.hostgroups, list):
-                        h.hostgroups = ','.join(h.hostgroups)
-                    hgs = h.hostgroups.split(',')
-                    for hg in hgs:
-                        hostgroups.add_member(hname, hg.strip())
+            # items::explode_contact_groups_into_contacts
+            # take all contacts from our contact_groups into our contact property
+            self.explode_contact_groups_into_contacts(h, contactgroups)
 
-        # items::explode_contact_groups_into_contacts
-        # take all contacts from our contact_groups into our contact property
-        self.explode_contact_groups_into_contacts(contactgroups)
+            if hasattr(h, 'host_name') and hasattr(h, 'hostgroups'):
+                hname = h.host_name
+                for hg in h.hostgroups:
+                    hostgroups.add_member(hname, hg.strip())
 
 
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_h_by_commands(self, commands):
-        props = ['check_command', 'event_handler']
+        props = ['check_command', 'event_handler', 'snapshot_command']
         for h in self:
             for prop in props:
                 cc = getattr(h, prop, None)
@@ -1158,52 +1256,7 @@ class Hosts(Items):
     # that got the template with name=tpl_name or inherit from
     # a template that use it
     def find_hosts_that_use_template(self, tpl_name):
-        res = set()
-        tpl_name = tpl_name.strip()
-
-        # First find the template
-        tpl = None
-        for h in self:
-            # Look for template with the good name
-            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name:
-                tpl = h
-
-        # If we find none, we should manually lookup all hosts to find this 'tag'
-        if tpl is None:
-            for h in self:
-                if not hasattr(h, 'host_name') or h.is_tpl():
-                    continue
-                # Manually lookup for the templates defines in use
-                tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
-                if tpl_name in tnames:
-                    res.add(h.host_name)
-
-            return list(res)
-
-        # Ok, we find the tpl. We should find its father template too
-        for t in self.templates.values():
-            t.dfs_loop_status = 'DFS_UNCHECKED'
-        all_tpl_searched = self.templates_graph.dfs_get_all_childs(tpl)
-        # Clean the search tag
-        # TODO: better way?
-        for t in self.templates.values():
-            del t.dfs_loop_status
-
-        # Now we got all the templates we are looking for (so the template
-        # and all its own templates too, we search for the hosts that are
-        # using them
-        for h in self:
-            # If the host is a not valid one, skip it
-            if not hasattr(h, 'host_name'):
-                continue
-            # look if there is a match between host templates
-            # and the ones we are looking for
-            for t in h.templates:
-                if t in all_tpl_searched:
-                    res.add(h.host_name)
-                    continue
-
-        return list(res)
+        return [h.host_name for h in self if tpl_name in h.tags if hasattr(h, "host_name")]
 
     # Will create all business tree for the
     # services

@@ -33,10 +33,10 @@ def main(argv):
                 try:
                     exec("import " + a)
                     print "OK"
-                except:
+                except Exception:
                     print "KO"
                     ret = 2
-    except:
+    except Exception:
         ret = 1
     sys.exit(ret)
 

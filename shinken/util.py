@@ -139,6 +139,8 @@ def jsonify_r(obj):
         try:
             if isinstance(v, set):
                 v = list(v)
+            if isinstance(v, list):
+                v = sorted(v)
             json.dumps(v)
             res[prop] = v
         except Exception, exp:
@@ -149,26 +151,27 @@ def jsonify_r(obj):
                     if t == 'CommandCall':
                         try:
                             lst.append(_t.call)
-                        except:
+                        except Exception:
                             pass
                         continue
                     if t and hasattr(_t, t+'_name'):
                         lst.append(getattr(_t, t+'_name'))
                     else:
-                        print "CANNOT MANAGE OBJECT", _t, type(_t), t
+                        pass
+                        #print "CANNOT MANAGE OBJECT", _t, type(_t), t
                 res[prop] = lst
             else:
                 t = getattr(v.__class__, 'my_type', '')
                 if t == 'CommandCall':
                     try:
                         res[prop] = v.call
-                    except:
+                    except Exception:
                         pass
                     continue
                 if t and hasattr(v, t+'_name'):
                     res[prop] = getattr(v, t+'_name')
-                else:
-                    print "CANNOT MANAGE OBJECT", v, type(v), t
+                #else:
+                #    print "CANNOT MANAGE OBJECT", v, type(v), t
     return res
 
 ################################### TIME ##################################
@@ -248,6 +251,15 @@ def to_split(val, split_on_coma=True):
     if val == ['']:
         val = []
     return val
+
+
+def list_split(val, split_on_coma=True):
+    if not split_on_coma:
+        return val
+    new_val = []
+    for x in val:
+        new_val.extend(x.split(','))
+    return new_val
 
 
 def to_best_int_float(val):
@@ -699,7 +711,7 @@ def expect_file_dirs(root, path):
         if not os.path.exists(_d):
             try:
                 os.mkdir(_d)
-            except:
+            except Exception:
                 return False
         tmp_dir = _d
     return True
@@ -757,12 +769,12 @@ def filter_host_by_group(group):
     return inner_filter
 
 
-def filter_host_by_template(tpl):
+def filter_host_by_tag(tpl):
 
     def inner_filter(host):
         if host is None:
             return False
-        return tpl in [t.strip() for t in host.use]
+        return tpl in [t.strip() for t in host.tags]
 
     return inner_filter
 
@@ -820,13 +832,12 @@ def filter_service_by_hostgroup_name(group):
     return inner_filter
 
 
-def filter_service_by_host_template_name(tpl):
+def filter_service_by_host_tag_name(tpl):
 
     def inner_filter(service):
         if service is None or service.host is None:
             return False
-        return tpl in [t.strip() for t in service.host.use]
-        
+        return tpl in [t.strip() for t in service.host.tags]
 
     return inner_filter
 
@@ -868,3 +879,10 @@ def filter_service_by_bp_rule_label(label):
         return label in service.labels
 
     return inner_filter
+
+
+def is_complex_expr(expr):
+    for m in '()&|!*':
+        if m in expr:
+            return True
+    return False

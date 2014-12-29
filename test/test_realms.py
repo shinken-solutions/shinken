@@ -25,7 +25,7 @@
 from shinken_test import *
 
 
-class TestConfig(ShinkenTest):
+class TestRealms(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_realms.cfg')
 
@@ -38,15 +38,15 @@ class TestConfig(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         realm1 = self.conf.realms.find_by_name('realm1')
-        self.assert_(realm1 is not None)
+        self.assertIsNot(realm1, None)
         realm2 = self.conf.realms.find_by_name('realm2')
-        self.assert_(realm2 is not None)
+        self.assertIsNot(realm2, None)
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
-        self.assert_(test_host_realm1 is not None)
-        self.assert_(test_host_realm1.realm == realm1.get_name())
+        self.assertIsNot(test_host_realm1, None)
+        self.assertEqual(realm1.get_name(), test_host_realm1.realm)
         test_host_realm2 = self.sched.hosts.find_by_name("test_host_realm2")
-        self.assert_(test_host_realm2 is not None)
-        self.assert_(test_host_realm2.realm == realm2.get_name())
+        self.assertIsNot(test_host_realm2, None)
+        self.assertEqual(realm2.get_name(), test_host_realm2.realm)
 
     # We check for each host, if they are in the good realm
     # but when they are apply in a hostgroup link
@@ -59,38 +59,63 @@ class TestConfig(ShinkenTest):
         now = time.time()
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         realm1 = self.conf.realms.find_by_name('realm1')
-        self.assert_(realm1 is not None)
+        self.assertIsNot(realm1, None)
         realm2 = self.conf.realms.find_by_name('realm2')
-        self.assert_(realm2 is not None)
+        self.assertIsNot(realm2, None)
         # 1 and 2 are link to realm2 because they are in the hostgroup in_realm2
         test_host1_hg_realm2 = self.sched.hosts.find_by_name("test_host1_hg_realm2")
-        self.assert_(test_host1_hg_realm2 is not None)
-        self.assert_(test_host1_hg_realm2.realm == realm2.get_name())
-        self.assert_(in_realm2 in test_host1_hg_realm2.hostgroups)
+        self.assertIsNot(test_host1_hg_realm2, None)
+        self.assertEqual(realm2.get_name(), test_host1_hg_realm2.realm)
+        self.assertIn(in_realm2, test_host1_hg_realm2.hostgroups)
 
         test_host2_hg_realm2 = self.sched.hosts.find_by_name("test_host2_hg_realm2")
-        self.assert_(test_host2_hg_realm2 is not None)
-        self.assert_(test_host2_hg_realm2.realm == realm2.get_name())
-        self.assert_(in_realm2 in test_host2_hg_realm2.hostgroups)
+        self.assertIsNot(test_host2_hg_realm2, None)
+        self.assertEqual(realm2.get_name(), test_host2_hg_realm2.realm)
+        self.assertIn(in_realm2, test_host2_hg_realm2.hostgroups)
 
         test_host3_hg_realm2 = self.sched.hosts.find_by_name("test_host3_hg_realm2")
-        self.assert_(test_host3_hg_realm2 is not None)
-        self.assert_(test_host3_hg_realm2.realm == realm1.get_name())
-        self.assert_(in_realm2 in test_host3_hg_realm2.hostgroups)
+        self.assertIsNot(test_host3_hg_realm2, None)
+        self.assertEqual(realm1.get_name(), test_host3_hg_realm2.realm)
+        self.assertIn(in_realm2, test_host3_hg_realm2.hostgroups)
 
 
     # Realms should be stripped when linking to hosts and hostgroups
     # so we don't pickle the whole object, but just a name
     def test_realm_stripping_before_sending(self):
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
-        self.assert_(test_host_realm1 is not None)
+        self.assertIsNot(test_host_realm1, None)
         print type(test_host_realm1.realm)
-        self.assert_(isinstance(test_host_realm1.realm, basestring))
+        self.assertTrue(isinstance(test_host_realm1.realm, basestring))
 
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
-        self.assert_(in_realm2 is not None)
+        self.assertIsNot(in_realm2, None)
         print type(in_realm2.realm)
-        self.assert_(isinstance(in_realm2.realm, basestring))
+        self.assertTrue(isinstance(in_realm2.realm, basestring))
+
+
+    def test_sub_realms_assignations(self):
+        world = self.conf.realms.find_by_name('World')
+        self.assertIsNot(world, None)
+        europe = self.conf.realms.find_by_name('Europe')
+        self.assertIsNot(europe, None)
+        paris = self.conf.realms.find_by_name('Paris')
+        self.assertIsNot(paris, None)
+        # Get the broker in the realm level
+        bworld = self.conf.brokers.find_by_name('B-world')
+        self.assertIsNot(bworld, None)
+
+        world.prepare_for_satellites_conf()
+        europe.prepare_for_satellites_conf()
+        paris.prepare_for_satellites_conf()
+
+        print world.__dict__
+        # broker should be in the world level
+        self.assertIs(bworld in world.potential_brokers, True)
+        # in europe too
+        self.assertIs(bworld in europe.potential_brokers, True)
+        # and in paris too
+        self.assertIs(bworld in paris.potential_brokers, True)
+        
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@
 
 import time
 from shinken_test import unittest, ShinkenTest, time_hacker
+from shinken.macroresolver import MacroResolver
 
 
 class TestBusinesscorrelOutput(ShinkenTest):
@@ -31,26 +32,16 @@ class TestBusinesscorrelOutput(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_business_correlator_output.cfg')
 
-    def test_service_shorten_status(self):
-        svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "empty_bp_rule_output")
-        self.assert_(svc_cor.status_to_short_status("OK") == "O")
-        self.assert_(svc_cor.status_to_short_status("WARNING") == "W")
-        self.assert_(svc_cor.status_to_short_status("CRITICAL") == "C")
-        self.assert_(svc_cor.status_to_short_status("UNKNOWN") == "U")
-        self.assert_(svc_cor.status_to_short_status("UP") == "U")
-        self.assert_(svc_cor.status_to_short_status("DOWN") == "D")
-        self.assert_(svc_cor.status_to_short_status("FAKE") == "FAKE")
-
     def test_bprule_empty_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "empty_bp_rule_output")
-        self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
-        self.assert_(svc_cor.get_business_rule_output() == "")
+        self.assertIs(True, svc_cor.got_business_rule)
+        self.assertIsNot(svc_cor.business_rule, None)
+        self.assertEqual("", svc_cor.get_business_rule_output())
 
     def test_bprule_expand_template_macros(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_output")
-        self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
+        self.assertIs(True, svc_cor.got_business_rule)
+        self.assertIsNot(svc_cor.business_rule, None)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -69,23 +60,29 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.sched.consume_results()
 
         # Performs checks
-        template = "$STATUS$,$SHORT_STATUS$,$HOST_NAME$,$SERVICE_DESCRIPTION$,$FULL_NAME$"
-        output = svc_cor.expand_business_rule_item_macros(template, svc1)
-        self.assert_(output == "OK,O,test_host_01,srv1,test_host_01/srv1")
-        output = svc_cor.expand_business_rule_item_macros(template, svc2)
-        self.assert_(output == "WARNING,W,test_host_02,srv2,test_host_02/srv2")
-        output = svc_cor.expand_business_rule_item_macros(template, svc3)
-        self.assert_(output == "CRITICAL,C,test_host_03,srv3,test_host_03/srv3")
-        output = svc_cor.expand_business_rule_item_macros(template, hst4)
-        self.assert_(output == "DOWN,D,test_host_04,,test_host_04")
-        output = svc_cor.expand_business_rule_item_macros(template, svc_cor)
-        self.assert_(output == "CRITICAL,C,dummy,formatted_bp_rule_output,dummy/formatted_bp_rule_output")
+        m = MacroResolver()
+        template = "$STATUS$,$SHORTSTATUS$,$HOSTNAME$,$SERVICEDESC$,$FULLNAME$"
+        data = svc1.get_data_for_checks()
+        output = m.resolve_simple_macros_in_string(template, data)
+        self.assertEqual("OK,O,test_host_01,srv1,test_host_01/srv1", output)
+        data = svc2.get_data_for_checks()
+        output = m.resolve_simple_macros_in_string(template, data)
+        self.assertEqual("WARNING,W,test_host_02,srv2,test_host_02/srv2", output)
+        data = svc3.get_data_for_checks()
+        output = m.resolve_simple_macros_in_string(template, data)
+        self.assertEqual("CRITICAL,C,test_host_03,srv3,test_host_03/srv3", output)
+        data = hst4.get_data_for_checks()
+        output = m.resolve_simple_macros_in_string(template, data)
+        self.assertEqual("DOWN,D,test_host_04,,test_host_04", output)
+        data = svc_cor.get_data_for_checks()
+        output = m.resolve_simple_macros_in_string(template, data)
+        self.assertEqual("CRITICAL,C,dummy,formatted_bp_rule_output,dummy/formatted_bp_rule_output", output)
 
     def test_bprule_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_output")
-        self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULL_NAME$] )$")
+        self.assertIs(True, svc_cor.got_business_rule)
+        self.assertIsNot(svc_cor.business_rule, None)
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -105,18 +102,18 @@ class TestBusinesscorrelOutput(ShinkenTest):
 
         # Performs checks
         output = svc_cor.output
-        self.assert_(output.find("[WARNING: test_host_02/srv2]") > 0)
-        self.assert_(output.find("[CRITICAL: test_host_03/srv3]") > 0)
-        self.assert_(output.find("[DOWN: test_host_04]") > 0)
+        self.assertGreater(output.find("[WARNING: test_host_02/srv2]"), 0)
+        self.assertGreater(output.find("[CRITICAL: test_host_03/srv3]"), 0)
+        self.assertGreater(output.find("[DOWN: test_host_04]"), 0)
         # Should not display OK state checks
-        self.assert_(output.find("[OK: test_host_01/srv1]") == -1)
-        self.assert_(output.startswith("CRITICAL"))
+        self.assertEqual(-1, output.find("[OK: test_host_01/srv1]") )
+        self.assertTrue(output.startswith("CRITICAL"))
 
     def test_bprule_xof_one_critical_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
-        self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULL_NAME$] )$")
+        self.assertIs(True, svc_cor.got_business_rule)
+        self.assertIsNot(svc_cor.business_rule, None)
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -135,14 +132,14 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.sched.consume_results()
 
         # Performs checks
-        self.assert_(svc_cor.business_rule.get_state() == 0)
-        self.assert_(svc_cor.output == "OK [CRITICAL: test_host_03/srv3]")
+        self.assertEqual(0, svc_cor.business_rule.get_state())
+        self.assertEqual("OK [CRITICAL: test_host_03/srv3]", svc_cor.output)
 
     def test_bprule_xof_all_ok_output(self):
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("dummy", "formatted_bp_rule_xof_output")
-        self.assert_(svc_cor.got_business_rule is True)
-        self.assert_(svc_cor.business_rule is not None)
-        self.assert_(svc_cor.business_rule_output_template == "$STATUS$ $([$STATUS$: $FULL_NAME$] )$")
+        self.assertIs(True, svc_cor.got_business_rule)
+        self.assertIsNot(svc_cor.business_rule, None)
+        self.assertEqual("$STATUS$ $([$STATUS$: $FULLNAME$] )$", svc_cor.business_rule_output_template)
 
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv1")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv2")
@@ -161,8 +158,8 @@ class TestBusinesscorrelOutput(ShinkenTest):
         self.sched.consume_results()
 
         # Performs checks
-        self.assert_(svc_cor.business_rule.get_state() == 0)
-        self.assert_(svc_cor.output == "OK all checks were successful.")
+        self.assertEqual(0, svc_cor.business_rule.get_state())
+        self.assertEqual("OK all checks were successful.", svc_cor.output)
 
 
 if __name__ == '__main__':

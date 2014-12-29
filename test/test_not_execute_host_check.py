@@ -40,11 +40,11 @@ class TestNoHostCheck(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         print host.checks_in_progress
-        self.assert_(len(host.checks_in_progress) == 0)
+        self.assertEqual(0, len(host.checks_in_progress))
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.checks_in_progress
-        self.assert_(len(svc.checks_in_progress) != 0)
+        self.assertNotEqual(len(svc.checks_in_progress), 0)
 
         # Now launch passive checks
         cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;test_host_0;1;bobo" % now
@@ -53,7 +53,7 @@ class TestNoHostCheck(ShinkenTest):
         self.scheduler_loop(2, [])
 
         print "Output", host.output
-        self.assert_(host.output == 'bobo')
+        self.assertEqual('bobo', host.output)
 
         # Now disable passive host check
         cmd = "[%lu] STOP_ACCEPTING_PASSIVE_HOST_CHECKS" % now
@@ -67,7 +67,7 @@ class TestNoHostCheck(ShinkenTest):
 
         # This should NOT change this time
         print "Output", host.output
-        self.assert_(host.output == 'bobo')
+        self.assertEqual('bobo', host.output)
 
 
 

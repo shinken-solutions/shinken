@@ -1,2 +1,0 @@
-${uri}render/?width=586&height=308&fgcolor=000000&bgcolor=FFFFFF&title=HTTP%20Response%20time&vtitle=Time%20s&target=legendValue(alias(${host}.${service}.time%2C"Time")%2C"last")
-${uri}render/?width=586&height=308&fgcolor=000000&bgcolor=FFFFFF&title=HTTP%20Response%20size&vtitle=Size%20B&target=legendValue(alias(${host}.${service}.size%2C"Size")%2C"last")

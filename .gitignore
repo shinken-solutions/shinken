@@ -38,3 +38,7 @@ test/tmp/*dat
 docs/build
 docs/tools/media/
 docs/tools/pages/
+
+
+# test and coverage
+test/tmp/.cov*

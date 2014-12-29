@@ -45,31 +45,31 @@ class SatelliteLink(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'address':         StringProp(fill_brok=['full_status']),
-        'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
-        'check_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'spare':              BoolProp(default='0', fill_brok=['full_status']),
-        'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
-        'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
-        'modules':            ListProp(default='', to_send=True),
-        'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
+        'address':         StringProp(default='localhost', fill_brok=['full_status']),
+        'timeout':         IntegerProp(default=3, fill_brok=['full_status']),
+        'data_timeout':    IntegerProp(default=120, fill_brok=['full_status']),
+        'check_interval':  IntegerProp(default=60, fill_brok=['full_status']),
+        'max_check_attempts': IntegerProp(default=3, fill_brok=['full_status']),
+        'spare':              BoolProp(default=False, fill_brok=['full_status']),
+        'manage_sub_realms':  BoolProp(default=1, fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp(default=0, fill_brok=['full_status'], to_send=True),
+        'modules':            ListProp(default=[''], to_send=True, split_on_coma=True),
+        'polling_interval':   IntegerProp(default=1, fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp(default='NOTSET', to_send=True),
         'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
-        'satellitemap':       DictProp(default=None, elts_prop=AddrProp, to_send=True, override=True),
-        'use_ssl':            BoolProp(default='0', fill_brok=['full_status']),
-        'hard_ssl_name_check':BoolProp(default='0', fill_brok=['full_status']),
-        'passive':            BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'satellitemap':       DictProp(default={}, elts_prop=AddrProp, to_send=True, override=True),
+        'use_ssl':            BoolProp(default=False, fill_brok=['full_status']),
+        'hard_ssl_name_check':BoolProp(default=True, fill_brok=['full_status']),
+        'passive':            BoolProp(default=True, fill_brok=['full_status'], to_send=True),
     })
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'con':                  StringProp(default=None),
-        'alive':                StringProp(default=True, fill_brok=['full_status']),
+        'alive':                BoolProp(default=True, fill_brok=['full_status']),
         'broks':                StringProp(default=[]),
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
-        'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+        'reachable':            BoolProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
         'managed_confs':        StringProp(default={}),
     })
@@ -83,7 +83,7 @@ class SatelliteLink(Item):
         if hasattr(self, 'port'):
             try:
                 self.arb_satmap['port'] = int(self.port)
-            except:
+            except Exception:
                 pass
 
     
@@ -393,9 +393,15 @@ class SatelliteLink(Item):
         for prop, entry in properties.items():
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
+        cls = self.__class__
         # Also add global values
-        self.cfg['global']['api_key'] = self.__class__.api_key
-        self.cfg['global']['secret']  = self.__class__.secret
+        self.cfg['global']['api_key'] = cls.api_key
+        self.cfg['global']['secret']  = cls.secret
+        self.cfg['global']['http_proxy']  = cls.http_proxy
+        self.cfg['global']['statsd_host']  = cls.statsd_host
+        self.cfg['global']['statsd_port']  = cls.statsd_port
+        self.cfg['global']['statsd_prefix']  = cls.statsd_prefix
+        self.cfg['global']['statsd_enabled']  = cls.statsd_enabled
 
 
     # Some parameters for satellites are not defined in the satellites conf

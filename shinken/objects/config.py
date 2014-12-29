@@ -38,6 +38,7 @@ import itertools
 import time
 import random
 import cPickle
+import tempfile
 from StringIO import StringIO
 from multiprocessing import Process, Manager
 
@@ -78,8 +79,10 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
-from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp, ToGuessProp
 from shinken.daemon import get_cur_user, get_cur_group
+from shinken.util import jsonify_r
+import json
 
 no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
 not_interresting_txt = 'We do not think such an option is interesting to manage.'
@@ -105,7 +108,7 @@ class Config(Item):
         'workdir':                  StringProp(default='/var/run/shinken/'),
         'config_base_dir':          StringProp(default=''), # will be set when we will load a file
         'modules_dir':               StringProp(default='/var/lib/shinken/modules'),
-        'use_local_log':            BoolProp(default='1'),
+        'use_local_log':            BoolProp(default=True),
         'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='/var/log/shinken/arbiterd.log'),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
@@ -117,15 +120,15 @@ class Config(Item):
         'status_update_interval':   UnusedProp(text=no_longer_used_txt),
         'shinken_user':             StringProp(default=get_cur_user()),
         'shinken_group':            StringProp(default=get_cur_group()),
-        'enable_notifications':     BoolProp(default='1', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'execute_service_checks':   BoolProp(default='1', class_inherit=[(Service, 'execute_checks')]),
-        'accept_passive_service_checks': BoolProp(default='1', class_inherit=[(Service, 'accept_passive_checks')]),
-        'execute_host_checks':      BoolProp(default='1', class_inherit=[(Host, 'execute_checks')]),
-        'accept_passive_host_checks': BoolProp(default='1', class_inherit=[(Host, 'accept_passive_checks')]),
-        'enable_event_handlers':    BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'enable_notifications':     BoolProp(default=True, class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'execute_service_checks':   BoolProp(default=True, class_inherit=[(Service, 'execute_checks')]),
+        'accept_passive_service_checks': BoolProp(default=True, class_inherit=[(Service, 'accept_passive_checks')]),
+        'execute_host_checks':      BoolProp(default=True, class_inherit=[(Host, 'execute_checks')]),
+        'accept_passive_host_checks': BoolProp(default=True, class_inherit=[(Host, 'accept_passive_checks')]),
+        'enable_event_handlers':    BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
         'log_rotation_method':      CharProp(default='d'),
         'log_archive_path':         StringProp(default='/usr/local/shinken/var/archives'),
-        'check_external_commands':  BoolProp(default='1'),
+        'check_external_commands':  BoolProp(default=True),
         'command_check_interval':   UnusedProp(text='another value than look always the file is useless, so we fix it.'),
         'command_file':             StringProp(default=''),
         'external_command_buffer_slots': UnusedProp(text='We do not limit the external command slot.'),
@@ -134,7 +137,7 @@ class Config(Item):
         'lock_file':                StringProp(default='/var/run/shinken/arbiterd.pid'),
         'retain_state_information': UnusedProp(text='sorry, retain state information will not be implemented because it is useless.'),
         'state_retention_file':     StringProp(default=''),
-        'retention_update_interval': IntegerProp(default='60'),
+        'retention_update_interval': IntegerProp(default=60),
         'use_retained_program_state': UnusedProp(text=not_interresting_txt),
         'use_retained_scheduling_info': UnusedProp(text=not_interresting_txt),
         'retained_host_attribute_mask': UnusedProp(text=not_interresting_txt),
@@ -143,19 +146,19 @@ class Config(Item):
         'retained_process_service_attribute_mask': UnusedProp(text=not_interresting_txt),
         'retained_contact_host_attribute_mask': UnusedProp(text=not_interresting_txt),
         'retained_contact_service_attribute_mask': UnusedProp(text=not_interresting_txt),
-        'use_syslog':               BoolProp(default='0'),
-        'log_notifications':        BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'log_service_retries':      BoolProp(default='1', class_inherit=[(Service, 'log_retries')]),
-        'log_host_retries':         BoolProp(default='1', class_inherit=[(Host, 'log_retries')]),
-        'log_event_handlers':       BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'log_initial_states':       BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'log_external_commands':    BoolProp(default='1'),
-        'log_passive_checks':       BoolProp(default='1'),
+        'use_syslog':               BoolProp(default=False),
+        'log_notifications':        BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
+        'log_service_retries':      BoolProp(default=True, class_inherit=[(Service, 'log_retries')]),
+        'log_host_retries':         BoolProp(default=True, class_inherit=[(Host, 'log_retries')]),
+        'log_event_handlers':       BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
+        'log_initial_states':       BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
+        'log_external_commands':    BoolProp(default=True),
+        'log_passive_checks':       BoolProp(default=True),
         'global_host_event_handler': StringProp(default='', class_inherit=[(Host, 'global_event_handler')]),
         'global_service_event_handler': StringProp(default='', class_inherit=[(Service, 'global_event_handler')]),
         'sleep_time':               UnusedProp(text='this deprecated option is useless in the shinken way of doing.'),
         'service_inter_check_delay_method': UnusedProp(text='This option is useless in the Shinken scheduling. The only way is the smart way.'),
-        'max_service_check_spread': IntegerProp(default='30', class_inherit=[(Service, 'max_check_spread')]),
+        'max_service_check_spread': IntegerProp(default=30, class_inherit=[(Service, 'max_check_spread')]),
         'service_interleave_factor': UnusedProp(text='This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'),
         'max_concurrent_checks':    UnusedProp(text='Limiting the max concurrent checks is not helpful to got a good running monitoring server.'),
         'check_result_reaper_frequency': UnusedProp(text='Shinken do not use reaper process.'),
@@ -163,41 +166,41 @@ class Config(Item):
         'check_result_path':        UnusedProp(text='Shinken use in memory returns, not check results on flat file.'),
         'max_check_result_file_age': UnusedProp(text='Shinken do not use flat file check resultfiles.'),
         'host_inter_check_delay_method': UnusedProp(text='This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'),
-        'max_host_check_spread':    IntegerProp(default='30', class_inherit=[(Host, 'max_check_spread')]),
-        'interval_length':          IntegerProp(default='60', class_inherit=[(Host, None), (Service, None)]),
-        'auto_reschedule_checks':   BoolProp(managed=False, default='1'),
-        'auto_rescheduling_interval': IntegerProp(managed=False, default='1'),
-        'auto_rescheduling_window': IntegerProp(managed=False, default='180'),
-        'use_aggressive_host_checking': BoolProp(default='0', class_inherit=[(Host, None)]),
-        'translate_passive_host_checks': BoolProp(managed=False, default='1'),
-        'passive_host_checks_are_soft': BoolProp(managed=False, default='1'),
-        'enable_predictive_host_dependency_checks': BoolProp(managed=False, default='1', class_inherit=[(Host, 'enable_predictive_dependency_checks')]),
-        'enable_predictive_service_dependency_checks': StringProp(managed=False, default='1'),
-        'cached_host_check_horizon': IntegerProp(default='0', class_inherit=[(Host, 'cached_check_horizon')]),
-        'cached_service_check_horizon': IntegerProp(default='0', class_inherit=[(Service, 'cached_check_horizon')]),
+        'max_host_check_spread':    IntegerProp(default=30, class_inherit=[(Host, 'max_check_spread')]),
+        'interval_length':          IntegerProp(default=60, class_inherit=[(Host, None), (Service, None)]),
+        'auto_reschedule_checks':   BoolProp(managed=False, default=True),
+        'auto_rescheduling_interval': IntegerProp(managed=False, default=1),
+        'auto_rescheduling_window': IntegerProp(managed=False, default=180),
+        'use_aggressive_host_checking': BoolProp(default=False, class_inherit=[(Host, None)]),
+        'translate_passive_host_checks': BoolProp(managed=False, default=True),
+        'passive_host_checks_are_soft': BoolProp(managed=False, default=True),
+        'enable_predictive_host_dependency_checks': BoolProp(managed=False, default=True, class_inherit=[(Host, 'enable_predictive_dependency_checks')]),
+        'enable_predictive_service_dependency_checks': BoolProp(managed=False, default=True),
+        'cached_host_check_horizon': IntegerProp(default=0, class_inherit=[(Host, 'cached_check_horizon')]),
+        'cached_service_check_horizon': IntegerProp(default=0, class_inherit=[(Service, 'cached_check_horizon')]),
         'use_large_installation_tweaks': UnusedProp(text='this option is deprecated because in shinken it is just an alias for enable_environment_macros=0'),
         'free_child_process_memory': UnusedProp(text='this option is automatic in Python processes'),
         'child_processes_fork_twice': UnusedProp(text='fork twice is not use.'),
-        'enable_environment_macros': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'enable_flap_detection':    BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'low_service_flap_threshold': IntegerProp(default='20', class_inherit=[(Service, 'global_low_flap_threshold')]),
-        'high_service_flap_threshold': IntegerProp(default='30', class_inherit=[(Service, 'global_high_flap_threshold')]),
-        'low_host_flap_threshold':  IntegerProp(default='20', class_inherit=[(Host, 'global_low_flap_threshold')]),
-        'high_host_flap_threshold': IntegerProp(default='30', class_inherit=[(Host, 'global_high_flap_threshold')]),
-        'soft_state_dependencies':  BoolProp(managed=False, default='0'),
-        'service_check_timeout':    IntegerProp(default='60', class_inherit=[(Service, 'check_timeout')]),
-        'host_check_timeout':       IntegerProp(default='30', class_inherit=[(Host, 'check_timeout')]),
-        'timeout_exit_status':      IntegerProp(default='2'),
-        'event_handler_timeout':    IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
-        'notification_timeout':     IntegerProp(default='30', class_inherit=[(Host, None), (Service, None)]),
-        'ocsp_timeout':             IntegerProp(default='15', class_inherit=[(Service, None)]),
-        'ochp_timeout':             IntegerProp(default='15', class_inherit=[(Host, None)]),
-        'perfdata_timeout':         IntegerProp(default='5', class_inherit=[(Host, None), (Service, None)]),
-        'obsess_over_services':     BoolProp(default='0', class_inherit=[(Service, 'obsess_over')]),
+        'enable_environment_macros': BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
+        'enable_flap_detection':    BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
+        'low_service_flap_threshold': IntegerProp(default=20, class_inherit=[(Service, 'global_low_flap_threshold')]),
+        'high_service_flap_threshold': IntegerProp(default=30, class_inherit=[(Service, 'global_high_flap_threshold')]),
+        'low_host_flap_threshold':  IntegerProp(default=20, class_inherit=[(Host, 'global_low_flap_threshold')]),
+        'high_host_flap_threshold': IntegerProp(default=30, class_inherit=[(Host, 'global_high_flap_threshold')]),
+        'soft_state_dependencies':  BoolProp(managed=False, default=False),
+        'service_check_timeout':    IntegerProp(default=60, class_inherit=[(Service, 'check_timeout')]),
+        'host_check_timeout':       IntegerProp(default=30, class_inherit=[(Host, 'check_timeout')]),
+        'timeout_exit_status':      IntegerProp(default=2),
+        'event_handler_timeout':    IntegerProp(default=30, class_inherit=[(Host, None), (Service, None)]),
+        'notification_timeout':     IntegerProp(default=30, class_inherit=[(Host, None), (Service, None)]),
+        'ocsp_timeout':             IntegerProp(default=15, class_inherit=[(Service, None)]),
+        'ochp_timeout':             IntegerProp(default=15, class_inherit=[(Host, None)]),
+        'perfdata_timeout':         IntegerProp(default=5, class_inherit=[(Host, None), (Service, None)]),
+        'obsess_over_services':     BoolProp(default=False, class_inherit=[(Service, 'obsess_over')]),
         'ocsp_command':             StringProp(default='', class_inherit=[(Service, None)]),
-        'obsess_over_hosts':        BoolProp(default='0', class_inherit=[(Host, 'obsess_over')]),
+        'obsess_over_hosts':        BoolProp(default=False, class_inherit=[(Host, 'obsess_over')]),
         'ochp_command':             StringProp(default='', class_inherit=[(Host, None)]),
-        'process_performance_data': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'process_performance_data': BoolProp(default=True, class_inherit=[(Host, None), (Service, None)]),
         'host_perfdata_command':    StringProp(default='', class_inherit=[(Host, 'perfdata_command')]),
         'service_perfdata_command': StringProp(default='', class_inherit=[(Service, 'perfdata_command')]),
         'host_perfdata_file':       StringProp(default='', class_inherit=[(Host, 'perfdata_file')]),
@@ -206,24 +209,24 @@ class Config(Item):
         'service_perfdata_file_template': StringProp(default='/tmp/host.perf', class_inherit=[(Service, 'perfdata_file_template')]),
         'host_perfdata_file_mode':  CharProp(default='a', class_inherit=[(Host, 'perfdata_file_mode')]),
         'service_perfdata_file_mode': CharProp(default='a', class_inherit=[(Service, 'perfdata_file_mode')]),
-        'host_perfdata_file_processing_interval': IntegerProp(managed=False, default='15'),
-        'service_perfdata_file_processing_interval': IntegerProp(managed=False, default='15'),
+        'host_perfdata_file_processing_interval': IntegerProp(managed=False, default=15),
+        'service_perfdata_file_processing_interval': IntegerProp(managed=False, default=15),
         'host_perfdata_file_processing_command': StringProp(managed=False, default='', class_inherit=[(Host, 'perfdata_file_processing_command')]),
         'service_perfdata_file_processing_command': StringProp(managed=False, default=None),
-        'check_for_orphaned_services': BoolProp(default='1', class_inherit=[(Service, 'check_for_orphaned')]),
-        'check_for_orphaned_hosts': BoolProp(default='1', class_inherit=[(Host, 'check_for_orphaned')]),
-        'check_service_freshness': BoolProp(default='1', class_inherit=[(Service, 'global_check_freshness')]),
-        'service_freshness_check_interval': IntegerProp(default='60'),
-        'check_host_freshness': BoolProp(default='1', class_inherit=[(Host, 'global_check_freshness')]),
-        'host_freshness_check_interval': IntegerProp(default='60'),
-        'additional_freshness_latency': IntegerProp(default='15', class_inherit=[(Host, None), (Service, None)]),
-        'enable_embedded_perl': BoolProp(managed=False, default='1', help='It will surely never be managed, but it should not be useful with poller performances.'),
-        'use_embedded_perl_implicitly': BoolProp(managed=False, default='0'),
+        'check_for_orphaned_services': BoolProp(default=True, class_inherit=[(Service, 'check_for_orphaned')]),
+        'check_for_orphaned_hosts': BoolProp(default=True, class_inherit=[(Host, 'check_for_orphaned')]),
+        'check_service_freshness': BoolProp(default=True, class_inherit=[(Service, 'global_check_freshness')]),
+        'service_freshness_check_interval': IntegerProp(default=60),
+        'check_host_freshness': BoolProp(default=True, class_inherit=[(Host, 'global_check_freshness')]),
+        'host_freshness_check_interval': IntegerProp(default=60),
+        'additional_freshness_latency': IntegerProp(default=15, class_inherit=[(Host, None), (Service, None)]),
+        'enable_embedded_perl': BoolProp(managed=False, default=True, help='It will surely never be managed, but it should not be useful with poller performances.'),
+        'use_embedded_perl_implicitly': BoolProp(managed=False, default=False),
         'date_format':          StringProp(managed=False, default=None),
         'use_timezone':         StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
         'illegal_object_name_chars': StringProp(default="""`~!$%^&*"|'<>?,()=""", class_inherit=[(Host, None), (Service, None), (Contact, None), (HostExtInfo, None)]),
         'illegal_macro_output_chars': StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'use_regexp_matching':  BoolProp(managed=False, default='0', help=' if you go some host or service definition like prod*, it will surely failed from now, sorry.'),
+        'use_regexp_matching':  BoolProp(managed=False, default=False, help=' if you go some host or service definition like prod*, it will surely failed from now, sorry.'),
         'use_true_regexp_matching': BoolProp(managed=False, default=None),
         'admin_email':          UnusedProp(text='sorry, not yet implemented.'),
         'admin_pager':          UnusedProp(text='sorry, not yet implemented.'),
@@ -237,41 +240,41 @@ class Config(Item):
         #'$USERn$: {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
-        'idontcareaboutsecurity': BoolProp(default='0'),
-        'daemon_enabled'        : BoolProp(default='1'), # Put to 0 to disable the arbiter to run
-        'daemon_thread_pool_size' : IntegerProp(default='8'),
-        'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
-        'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
-        'no_event_handlers_during_downtimes': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+        'idontcareaboutsecurity': BoolProp(default=False),
+        'daemon_enabled'        : BoolProp(default=True), # Put to 0 to disable the arbiter to run
+        'daemon_thread_pool_size' : IntegerProp(default=8),
+        'flap_history': IntegerProp(default=20, class_inherit=[(Host, None), (Service, None)]),
+        'max_plugins_output_length': IntegerProp(default=8192, class_inherit=[(Host, None), (Service, None)]),
+        'no_event_handlers_during_downtimes': BoolProp(default=False, class_inherit=[(Host, None), (Service, None)]),
 
         # Interval between cleaning queues pass
-        'cleaning_queues_interval': IntegerProp(default='900'),
+        'cleaning_queues_interval': IntegerProp(default=900),
 
         # Enable or not the notice about old Nagios parameters
-        'disable_old_nagios_parameters_whining': BoolProp(default='0'),
+        'disable_old_nagios_parameters_whining': BoolProp(default=False),
 
         # Now for problem/impact states changes
-        'enable_problem_impacts_states_change': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+        'enable_problem_impacts_states_change': BoolProp(default=False, class_inherit=[(Host, None), (Service, None)]),
 
         # More a running value in fact
         'resource_macros_names': ListProp(default=[]),
 
         # SSL PART
         # global boolean for know if we use ssl or not
-        'use_ssl':               BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+        'use_ssl':               BoolProp(default=False, class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                                                 (BrokerLink, None), (PollerLink, None), \
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
         'server_cert':           StringProp(default='etc/certs/server.cert'),
         'server_key':           StringProp(default='etc/certs/server.key'),
-        'hard_ssl_name_check':   BoolProp(default='0'),
+        'hard_ssl_name_check':   BoolProp(default=False),
 
         # Log format
-        'human_timestamp_log':   BoolProp(default='0'),
+        'human_timestamp_log':   BoolProp(default=False),
 
         ## Discovery part
-        'strip_idname_fqdn':    BoolProp(default='1'),
-        'runners_timeout':    IntegerProp(default='3600'),
+        'strip_idname_fqdn':    BoolProp(default=True),
+        'runners_timeout':    IntegerProp(default=3600),
 
         # pack_distribution_file is for keeping a distribution history
         # of the host distribution in the several "packs" so a same
@@ -280,19 +283,44 @@ class Config(Item):
 
         ## WEBUI part
         'webui_lock_file':    StringProp(default='webui.pid'),
-        'webui_port':    IntegerProp(default='8080'),
+        'webui_port':    IntegerProp(default=8080),
         'webui_host':    StringProp(default='0.0.0.0'),
 
         # Large env tweacks
-        'use_multiprocesses_serializer':  BoolProp(default='0'),
+        'use_multiprocesses_serializer':  BoolProp(default=False),
 
         # About shinken.io part
-        'api_key':  StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                                          (BrokerLink, None), (PollerLink, None),
-                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
-        'secret':   StringProp(default='', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                                          (BrokerLink, None), (PollerLink, None),
-                                                          (ReceiverLink, None),  (ArbiterLink, None)]),
+        'api_key':  StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'secret':   StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'http_proxy':   StringProp(default='', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        
+        # and local statsd one
+        'statsd_host':   StringProp(default='localhost', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_port':   IntegerProp(default=8125, class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_prefix': StringProp(default='shinken', class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_enabled': BoolProp(default=False, class_inherit=[
+            (SchedulerLink, None), (ReactionnerLink, None),
+            (BrokerLink, None), (PollerLink, None),
+            (ReceiverLink, None),  (ArbiterLink, None)]),        
+
     }
 
     macros = {
@@ -319,36 +347,36 @@ class Config(Item):
     # Type: 'name in objects': {Class of object, Class of objects,
     # 'property for self for the objects(config)'
     types_creations = {
-        'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods'),
-        'service':          (Service, Services, 'services'),
-        'servicegroup':     (Servicegroup, Servicegroups, 'servicegroups'),
-        'command':          (Command, Commands, 'commands'),
-        'host':             (Host, Hosts, 'hosts'),
-        'hostgroup':        (Hostgroup, Hostgroups, 'hostgroups'),
-        'contact':          (Contact, Contacts, 'contacts'),
-        'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups'),
-        'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
-        'checkmodulation':  (CheckModulation, CheckModulations, 'checkmodulations'),
-        'macromodulation':  (MacroModulation, MacroModulations, 'macromodulations'),
-        'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
-        'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
-        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters'),
-        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulers'),
-        'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners'),
-        'broker':           (BrokerLink, BrokerLinks, 'brokers'),
-        'receiver':         (ReceiverLink, ReceiverLinks, 'receivers'),
-        'poller':           (PollerLink, PollerLinks, 'pollers'),
-        'realm':            (Realm, Realms, 'realms'),
-        'module':           (Module, Modules, 'modules'),
-        'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations'),
-        'businessimpactmodulation': (Businessimpactmodulation, Businessimpactmodulations, 'businessimpactmodulations'),
-        'escalation':       (Escalation, Escalations, 'escalations'),
-        'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
-        'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
-        'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules'),
-        'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns'),
-        'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo'),
-        'serviceextinfo':   (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo'),
+        'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods', True),
+        'service':          (Service, Services, 'services', False),
+        'servicegroup':     (Servicegroup, Servicegroups, 'servicegroups', True),
+        'command':          (Command, Commands, 'commands', True),
+        'host':             (Host, Hosts, 'hosts', True),
+        'hostgroup':        (Hostgroup, Hostgroups, 'hostgroups', True),
+        'contact':          (Contact, Contacts, 'contacts', True),
+        'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups', True),
+        'notificationway':  (NotificationWay, NotificationWays, 'notificationways', True),
+        'checkmodulation':  (CheckModulation, CheckModulations, 'checkmodulations', True),
+        'macromodulation':  (MacroModulation, MacroModulations, 'macromodulations', True),
+        'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies', True),
+        'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies', True),
+        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters', True),
+        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulers', True),
+        'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners', True),
+        'broker':           (BrokerLink, BrokerLinks, 'brokers', True),
+        'receiver':         (ReceiverLink, ReceiverLinks, 'receivers', True),
+        'poller':           (PollerLink, PollerLinks, 'pollers', True),
+        'realm':            (Realm, Realms, 'realms', True),
+        'module':           (Module, Modules, 'modules', True),
+        'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations', True),
+        'businessimpactmodulation': (Businessimpactmodulation, Businessimpactmodulations, 'businessimpactmodulations', True),
+        'escalation':       (Escalation, Escalations, 'escalations', True),
+        'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations', False),
+        'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations', False),
+        'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules', True),
+        'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns', True),
+        'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo', True),
+        'serviceextinfo':   (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -401,21 +429,48 @@ class Config(Item):
             properties['$' + macro_name + '$'] = StringProp(default='')
             macros[macro_name] = '$' + macro_name + '$'
 
-    def load_params(self, params):
+    def clean_params(self, params):
+        clean_p = {}
         for elt in params:
             elts = elt.split('=', 1)
             if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
                 logger.error("[config] the parameter %s is malformed! (no = sign)", elts[0])
+            elif elts[1] == '':
+                self.conf_is_correct = False
+                logger.error("[config] the parameter %s is malformed! (no value after =)", elts[0])
             else:
-                self.params[elts[0]] = elts[1]
-                setattr(self, elts[0], elts[1])
-                # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
-                # so look at the first character. If it's a $, it's a variable
-                # and if it's end like it too
-                if elts[0][0] == '$' and elts[0][-1] == '$':
-                    macro_name = elts[0][1:-1]
-                    self.resource_macros_names.append(macro_name)
+                clean_p[elts[0]] = elts[1]
+
+        return clean_p
+
+
+    def load_params(self, params):
+        clean_params = self.clean_params(params)
+        #self.params = Item.pythonize(Config, var)
+
+        for key, value in clean_params.items():
+
+            if key in self.properties:
+                val = self.properties[key].pythonize(clean_params[key])
+            elif key in self.running_properties:
+                logger.warning("using a the running property %s in a config file", key)
+                val = self.running_properties[key].pythonize(clean_params[key])
+            else:
+                logger.warning("Guessing the property %s type because it is not in %s object properties",
+                               key, self.__class__.__name__)
+                val = ToGuessProp.pythonize(clean_params[key])
+
+            setattr(self, key, val)
+            # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
+            # so look at the first character. If it's a $, it's a variable
+            # and if it's end like it too
+            if key[0] == '$' and key[-1] == '$':
+                macro_name = key[1:-1]
+                self.resource_macros_names.append(macro_name)
+
+        # Change Nagios2 names to Nagios3 ones (before using them)
+        self.old_properties_names_to_new()
 
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
@@ -674,15 +729,17 @@ class Config(Item):
         #    timeperiods.append(t)
         # self.timeperiods = Timeperiods(timeperiods)
 
-        (cls, clss, prop) = types_creations[t]
+        (cls, clss, prop, initial_index) = types_creations[t]
         # List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
             # We create the object
             o = cls(obj_cfg)
+            # Change Nagios2 names to Nagios3 ones (before using them)
+            o.old_properties_names_to_new()
             lst.append(o)
         # we create the objects Class and we set it in prop
-        setattr(self, prop, clss(lst))
+        setattr(self, prop, clss(lst, initial_index))
 
 
     # Here arbiter and modules objects should be prepare and link
@@ -692,8 +749,6 @@ class Config(Item):
 
         # Should look at hacking command_file module first
         self.hack_old_nagios_parameters_for_arbiter()
-
-        self.modules.create_reversed_list()
 
         if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770")
@@ -707,8 +762,6 @@ class Config(Item):
         self.arbiters.fill_default()
         self.modules.fill_default()
 
-        #print "****************** Pythonize ******************"
-        self.arbiters.pythonize()
 
         #print "****************** Linkify ******************"
         self.arbiters.linkify(self.modules)
@@ -731,6 +784,8 @@ class Config(Item):
     def linkify(self):
         """ Make 'links' between elements, like a host got a services list
         with all it's services in it """
+
+        self.services.optimize_service_search(self.hosts)
 
         # First linkify myself like for some global commands
         self.linkify_one_command_with_commands(self.commands, 'ocsp_command')
@@ -797,7 +852,6 @@ class Config(Item):
 
         #print "Hostdependency"
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
-
         #print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
 
@@ -960,30 +1014,8 @@ class Config(Item):
             self.whole_conf_pack = whole_queue.pop()
             logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
 
-            print "TOTAL serializing iin", time.time() - t2
             # Shutdown the manager, the sub-process should be gone now
             m.shutdown()
-
-
-    def dump(self):
-        print "Slots", Service.__slots__
-        print 'Hosts:'
-        for h in self.hosts:
-            print '\t', h.get_name(), h.contacts
-        print 'Services:'
-        for s in self.services:
-            print '\t', s.get_name(), s.contacts
-
-
-    # It's used to change Nagios2 names to Nagios3 ones
-    # For hosts and services
-    def old_properties_names_to_new(self):
-        super(Config, self).old_properties_names_to_new()
-        self.hosts.old_properties_names_to_new()
-        self.services.old_properties_names_to_new()
-        self.notificationways.old_properties_names_to_new()
-        self.contacts.old_properties_names_to_new()
-
 
     # It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
@@ -1030,6 +1062,7 @@ class Config(Item):
 
         #print "Hosts"
         self.hosts.explode(self.hostgroups, self.contactgroups, self.triggers)
+
         #print "Hostgroups"
         self.hostgroups.explode()
 
@@ -1059,15 +1092,6 @@ class Config(Item):
         # Now the architecture part
         #print "Realms"
         self.realms.explode()
-
-    # Remove elements will the same name, so twins :)
-    # In fact only services should be acceptable with twins
-    def remove_twins(self):
-        #self.hosts.remove_twins()
-        self.services.remove_twins()
-        #self.contacts.remove_twins()
-        #self.timeperiods.remove_twins()
-
 
     # Dependencies are important for scheduling
     # This function create dependencies linked between elements.
@@ -1434,33 +1458,6 @@ class Config(Item):
         self.serviceescalations.linkify_templates()
         self.hostescalations.linkify_templates()
 
-    # Reversed list is a dist with name for quick search by name
-    def create_reversed_list(self):
-        """ Create quick search lists for objects """
-        self.hosts.create_reversed_list()
-        self.hostgroups.create_reversed_list()
-        self.contacts.create_reversed_list()
-        self.contactgroups.create_reversed_list()
-        self.notificationways.create_reversed_list()
-        self.checkmodulations.create_reversed_list()
-        self.macromodulations.create_reversed_list()
-        self.services.create_reversed_list()
-        self.servicegroups.create_reversed_list()
-        self.timeperiods.create_reversed_list()
-        #self.modules.create_reversed_list()
-        self.resultmodulations.create_reversed_list()
-        self.businessimpactmodulations.create_reversed_list()
-        self.escalations.create_reversed_list()
-        self.discoveryrules.create_reversed_list()
-        self.discoveryruns.create_reversed_list()
-        self.commands.create_reversed_list()
-        self.triggers.create_reversed_list()
-
-        # For services it's a special case
-        # we search for hosts, then for services
-        # it's quicker than search in all services
-        self.services.optimize_service_search(self.hosts)
-
     # Some parameters are just not managed like O*HP commands
     # and regexp capabilities
     # True: OK
@@ -1517,7 +1514,7 @@ class Config(Item):
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try:
                 cur = getattr(self, x)
-            except:
+            except AttributeError:
                 continue
             if self.read_config_silent == 0:
                 logger.info('Checking %s...', x)
@@ -1584,35 +1581,6 @@ class Config(Item):
         self.conf_is_correct = r
 
 
-    # We've got strings (like 1) but we want python elements, like True
-    def pythonize(self):
-        # call item pythonize for parameters
-        super(Config, self).pythonize()
-        self.hosts.pythonize()
-        self.hostgroups.pythonize()
-        self.hostdependencies.pythonize()
-        self.contactgroups.pythonize()
-        self.contacts.pythonize()
-        self.notificationways.pythonize()
-        self.checkmodulations.pythonize()
-        self.macromodulations.pythonize()
-        self.servicegroups.pythonize()
-        self.services.pythonize()
-        self.servicedependencies.pythonize()
-        self.resultmodulations.pythonize()
-        self.businessimpactmodulations.pythonize()
-        self.escalations.pythonize()
-        self.discoveryrules.pythonize()
-        self.discoveryruns.pythonize()
-        # The arbiters are already done
-        # self.arbiters.pythonize()
-        self.schedulers.pythonize()
-        self.realms.pythonize()
-        self.reactionners.pythonize()
-        self.pollers.pythonize()
-        self.brokers.pythonize()
-        self.receivers.pythonize()
-
     # Explode parameters like cached_service_check_horizon in the
     # Service class in a cached_check_horizon manner, o*hp commands
     # , etc
@@ -1638,15 +1606,6 @@ class Config(Item):
     # if they changed or not between the restart
     def compute_hash(self):
         self.hosts.compute_hash()
-        self.contacts.pythonize()
-        self.notificationways.pythonize()
-        self.checkmodulations.pythonize()
-        self.services.pythonize()
-        self.resultmodulations.pythonize()
-        self.businessimpactmodulations.pythonize()
-        self.escalations.pythonize()
-        self.discoveryrules.pythonize()
-        self.discoveryruns.pythonize()
 
     # Add an error in the configuration error list so we can print them
     # all in one place
@@ -1818,16 +1777,6 @@ class Config(Item):
             # Try to load the history association dict so we will try to
             # send the hosts in the same "pack"
             assoc = {}
-            if os.path.exists(self.pack_distribution_file):
-                logger.debug('Trying to open the distribution file %s',
-                                     self.pack_distribution_file)
-                try:
-                    f = open(self.pack_distribution_file, 'rb')
-                    assoc = cPickle.load(f)
-                    f.close()
-                except Exception, exp:
-                    logger.warning('Warning: cannot open the distribution file %s: %s', self.pack_distribution_file, str(exp))
-
 
             # Now we explode the numerous packs into nb_packs reals packs:
             # we 'load balance' them in a roundrobin way
@@ -1867,14 +1816,6 @@ class Config(Item):
                     #print 'We got the element', elt.get_full_name(), ' in pack', i, packindices
                     packs[packindices[i]].append(elt)
                     assoc[elt.get_name()] = i
-
-            try:
-                logger.info('Saving the distribution file %s', self.pack_distribution_file)
-                f = open(self.pack_distribution_file, 'wb')
-                cPickle.dump(assoc, f)
-                f.close()
-            except Exception, exp:
-                logger.warning('Could not save the distribution file %s: %s', self.pack_distribution_file, str(exp))
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
@@ -1980,9 +1921,7 @@ class Config(Item):
 
             # Create ours classes
             cfg.hosts = Hosts(cfg.hosts)
-            cfg.hosts.create_reversed_list()
             cfg.services = Services(cfg.services)
-            cfg.services.create_reversed_list()
             # Fill host groups
             for ori_hg in self.hostgroups:
                 hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
@@ -2018,6 +1957,56 @@ class Config(Item):
             self.confs[i].instance_id = i
             random.seed(time.time())
 
+    def dump(self, f=None):
+        dmp = {}
+
+        for category in (
+                "hosts",
+                "hostgroups",
+                "hostdependencies",
+                "contactgroups",
+                "contacts",
+                "notificationways",
+                "checkmodulations",
+                "macromodulations",
+                "servicegroups",
+                "services",
+                "servicedependencies",
+                "resultmodulations",
+                "businessimpactmodulations",
+                "escalations",
+                "discoveryrules",
+                "discoveryruns",
+                "schedulers",
+                "realms",
+                ):
+            objs = [jsonify_r(i) for i in getattr(self, category)]
+            container = getattr(self, category)
+            if category == "services":
+                objs = sorted(objs, key=lambda o: "%s/%s" %
+                              (o["host_name"], o["service_description"]))
+            elif hasattr(container, "name_property"):
+                np = container.name_property
+                objs = sorted(objs, key=lambda o: getattr(o, np, ''))
+            dmp[category] = objs
+
+        if f is None:
+            d = tempfile.gettempdir()
+            p = os.path.join(d, 'shinken-config-dump-%d' % time.time())
+            f = open(p, "wb")
+            close = True
+        else:
+            close = False
+        f.write(
+            json.dumps(
+                dmp,
+                indent=4,
+                separators=(',', ': '),
+                sort_keys=True
+            )
+        )
+        if close is True:
+            f.close()
 
 # ...
 def lazy():

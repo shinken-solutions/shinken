@@ -49,9 +49,9 @@ class Hostdependency(Item):
         'dependent_hostgroup_name':      StringProp(default=''),
         'host_name':                     StringProp(),
         'hostgroup_name':                StringProp(default=''),
-        'inherits_parent':               BoolProp(default='0'),
-        'execution_failure_criteria':    ListProp(default='n'),
-        'notification_failure_criteria': ListProp(default='n'),
+        'inherits_parent':               BoolProp(default=False),
+        'execution_failure_criteria':    ListProp(default=['n'], split_on_coma=True),
+        'notification_failure_criteria': ListProp(default=['n'], split_on_coma=True),
         'dependency_period':             StringProp(default='')
     })
 
@@ -68,6 +68,8 @@ class Hostdependency(Item):
 
 
 class Hostdependencies(Items):
+    inner_class = Hostdependency  # use for know what is in items
+
     def delete_hostsdep_by_id(self, ids):
         for id in ids:
             del self[id]
@@ -83,40 +85,35 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if hd.is_tpl():  # Exploding template is useless
-                continue
-
             # We explode first the dependent (son) part
             dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
-                dephg_names = hd.dependent_hostgroup_name.split(',')
-                dephg_names = [hg_name.strip() for hg_name in dephg_names]
+                dephg_names = [n.strip() for n in hd.dependent_hostgroup_name.split(',')]
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
                         err = "ERROR: the hostdependency got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
-                    dephnames.extend(dephg.members.split(','))
+                    dephnames.extend([m.strip() for m in dephg.members])
 
             if hasattr(hd, 'dependent_host_name'):
-                dephnames.extend(hd.dependent_host_name.split(','))
+                dephnames.extend([n.strip() for n in hd.dependent_host_name.split(',')])
 
             # Ok, and now the father part :)
             hnames = []
             if hasattr(hd, 'hostgroup_name'):
-                hg_names = hd.hostgroup_name.split(',')
-                hg_names = [hg_name.strip() for hg_name in hg_names]
+                hg_names = [n.strip() for n in hd.hostgroup_name.split(',')]
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
                         err = "ERROR: the hostdependency got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
-                    hnames.extend(hg.members.split(','))
+                    hnames.extend([m.strip() for m in hg.members])
 
             if hasattr(hd, 'host_name'):
-                hnames.extend(hd.host_name.split(','))
+                hnames.extend([n.strip() for n in hd.host_name.split(',')])
 
             # Loop over all sons and fathers to get S*F host deps
             for dephname in dephnames:
@@ -125,7 +122,7 @@ class Hostdependencies(Items):
                     new_hd = hd.copy()
                     new_hd.dependent_host_name = dephname
                     new_hd.host_name = hname
-                    self.items[new_hd.id] = new_hd
+                    self.add_item(new_hd)
             hstdep_to_remove.append(id)
 
         self.delete_hostsdep_by_id(hstdep_to_remove)
@@ -168,9 +165,6 @@ class Hostdependencies(Items):
     # We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
         for hd in self:
-            # Link template is useless
-            if hd.is_tpl():
-                continue
             # if the host dep conf is bad, pass this one
             if getattr(hd, 'host_name', None) is None or getattr(hd, 'dependent_host_name', None) is None:
                 continue
@@ -190,7 +184,7 @@ class Hostdependencies(Items):
         # Then implicit inheritance
         # self.apply_implicit_inheritance(hosts)
         for h in self:
-            h.get_customs_properties_by_inheritance(self)
+            h.get_customs_properties_by_inheritance()
 
     def is_correct(self):
         r = super(Hostdependencies, self).is_correct()

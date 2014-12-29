@@ -35,51 +35,37 @@ class TestPropertyOverride(ShinkenTest):
         hst1 = self.sched.hosts.find_by_name("test_host_01")
         hst2 = self.sched.hosts.find_by_name("test_host_02")
 
-        self.assert_(hst1.service_excludes == [])
-        self.assert_(hst2.service_excludes == ["srv-svc11", "srv-svc21", "proc proc1"])
+        self.assertEqual([], hst1.service_excludes)
+        self.assertEqual(["srv-svc11", "srv-svc21", "proc proc1"], hst2.service_excludes)
 
         # All services should exist for test_host_01
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc11")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc12")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc21")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc22")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc1")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc2")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
         # Half the services only should exist for test_host_02
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc11")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc12")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc21")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc22")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc1")
-        self.assert_(svc is None)
+        self.assertIs(None, svc)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc2")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
 
-
-class TestConfigBroken(ShinkenTest):
-
-    def setUp(self):
-        self.setup_with_file('etc/shinken_exclude_services_broken.cfg')
-
-    def test_exclude_services_errors(self):
-        self.assert_(not self.conf.conf_is_correct)
-
-        # Get the arbiter's log broks
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
-
-        self.assert_(len([log for log in logs if re.search('Error: exclusion contains an undefined service: fake', log)]) == 1)
 
 
 if __name__ == '__main__':

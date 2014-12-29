@@ -123,6 +123,7 @@ def publish_archive(archive):
         c.perform()
     except pycurl.error, exp:
         logger.error("There was a critical error : %s", exp)
+        sys.exit(2)
         return
     r = c.getinfo(pycurl.HTTP_CODE)
     c.close()
@@ -137,6 +138,7 @@ def publish_archive(archive):
             logger.info(text)
         else:
             logger.error(text)
+            sys.exit(2)
 
 
 def do_publish(to_pack='.'):
@@ -328,6 +330,7 @@ def grab_package(pname):
         c.perform()
     except pycurl.error, exp:
         logger.error("There was a critical error : %s", exp)
+        sys.exit(2)
         return ''
 
     r = c.getinfo(pycurl.HTTP_CODE)
@@ -386,10 +389,13 @@ def grab_local(d):
 
 
 
-def install_package(pname, raw):
+def install_package(pname, raw, update_only=False):
+    if update_only:
+        logger.debug('UPDATE ONLY ENABLED')
     logger.debug("Installing the package %s (size:%d)", pname, len(raw))
     if len(raw) == 0:
         logger.error('The package %s cannot be found', pname)
+        sys.exit(2)
         return
     tmpdir = os.path.join(tempfile.gettempdir(), pname)
     logger.debug("Unpacking the package into %s", tmpdir)
@@ -412,6 +418,7 @@ def install_package(pname, raw):
             continue
         if path.startswith('/') or '..' in path:
             logger.error("SECURITY: the path %s seems dangerous!", path)
+            sys.exit(2)
             return
         # Adding all files into the package_content list
         package_content.append( {'name':i.name, 'mode':i.mode, 'type':i.type, 'size':i.size} )
@@ -424,6 +431,7 @@ def install_package(pname, raw):
     package_json_p = os.path.join(tmpdir, 'package.json')
     if not os.path.exists(package_json_p):
         logger.error("Error : bad archive : Missing file %s", package_json_p)
+        sys.exit(2)
         return None
     package_json = read_package_json(open(package_json_p))
     logger.debug("Package.json content %s ", package_json)
@@ -439,6 +447,7 @@ def install_package(pname, raw):
     for d in (modules_dir, share_dir, packs_dir, doc_dir, inventory_dir):
         if not os.path.exists(d):
             logger.error("The installation directory %s is missing!", d)
+            sys.exit(2)
             return
 
     # Now install the package from $TMP$/share/* to $SHARE$/*
@@ -480,28 +489,28 @@ def install_package(pname, raw):
         shutil.copytree(p_doc, doc_dest)
         logger.info("Copy done in the doc directory %s", doc_dest)
 
+        
+    if not update_only:
+        # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
+        p_pack = os.path.join(tmpdir, 'pack')
+        if os.path.exists(p_pack):
+            logger.info("Installing the pack package data")
+            pack_dest = os.path.join(packs_dir, pname)
+            if os.path.exists(pack_dest):
+                logger.info("Removing previous pack install at %s", pack_dest)
+                shutil.rmtree(pack_dest)
+            # shutil will do the create dir
+            shutil.copytree(p_pack, pack_dest)
+            logger.info("Copy done in the pack directory %s", pack_dest)
 
-    # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
-    p_pack = os.path.join(tmpdir, 'pack')
-    if os.path.exists(p_pack):
-        logger.info("Installing the pack package data")
-        pack_dest = os.path.join(packs_dir, pname)
-        if os.path.exists(pack_dest):
-            logger.info("Removing previous pack install at %s", pack_dest)
-            shutil.rmtree(pack_dest)
-        # shutil will do the create dir
-        shutil.copytree(p_pack, pack_dest)
-        logger.info("Copy done in the pack directory %s", pack_dest)
-
-    # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
-    p_etc = os.path.join(tmpdir, 'etc')
-    if os.path.exists(p_etc):
-        logger.info("Merging the etc package data into your etc directory")
-        # We don't use shutils because it NEED etc_dir to be non existant...
-        # Come one guys..... cp is not as terrible as this...
-        _copytree(p_etc, etc_dir)
-        logger.info("Copy done in the etc directory %s", etc_dir)
-
+        # Now install the etc from $TMP$/etc/* to $ETC$/etc/*
+        p_etc = os.path.join(tmpdir, 'etc')
+        if os.path.exists(p_etc):
+            logger.info("Merging the etc package data into your etc directory")
+            # We don't use shutils because it NEED etc_dir to be non existant...
+            # Come one guys..... cp is not as terrible as this...
+            _copytree(p_etc, etc_dir)
+            logger.info("Copy done in the etc directory %s", etc_dir)
 
     # Now install the tests from $TMP$/tests/* to $TESTS$/tests/*
     # if the last one is specified on the configuration file (optionnal)
@@ -568,9 +577,21 @@ def do_install(pname, local, download_only):
             cprint('Download OK: %s' %  tmpf, 'green')
         except Exception, exp:
             logger.error("Package save fail: %s", exp)
+            sys.exit(2)
         return
 
     install_package(pname, raw)
+
+
+def do_update(pname, local):
+    raw = ''
+    if local:
+        pname, raw = grab_local(pname)
+
+    if not local:
+        raw = grab_package(pname)
+
+    install_package(pname, raw, update_only=True)
 
 
 
@@ -596,6 +617,14 @@ exports = {
             {'name' : '--download-only', 'description':'Only download the package', 'type': 'bool'},
             ],
         'description' : 'Grab and install a package from shinken.io'
+        },
+    do_update : {
+        'keywords': ['update'],
+        'args': [
+            {'name' : 'pname', 'description':'Package to update)'},
+            {'name' : '--local', 'description':'Use a local directory instead of the shinken.io version', 'type': 'bool'},
+            ],
+        'description' : 'Grab and update a package from shinken.io. Only the code and doc, NOT the configuration part! Do not update an not installed package.'
         },
     do_inventory  : {'keywords': ['inventory'], 'args': [],
        'description': 'List locally installed packages'

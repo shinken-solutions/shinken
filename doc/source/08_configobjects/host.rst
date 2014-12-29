@@ -32,7 +32,7 @@ check_interval                             #
 retry_interval                             #
 active_checks_enabled                      [0/1]
 passive_checks_enabled                     [0/1]
-**check_period**                           ***timeperiod_name***
+check_period                               *timeperiod_name*
 obsess_over_host                           [0/1]
 check_freshness                            [0/1]
 freshness_threshold                        #
@@ -49,7 +49,7 @@ retain_nonstatus_information               [0/1]
 **contact_groups**                         ***contact_groups***
 **notification_interval**                  **#**
 first_notification_delay                   #
-**notification_period**                    ***timeperiod_name***
+notification_period                        ***timeperiod_name***
 notification_options                       [d,u,r,f,s]
 notifications_enabled                      [0/1]
 stalking_options                           [o,d,u]
@@ -68,7 +68,7 @@ business_impact                            [0/1/2/3/4/5]
 resultmodulations                          *resultmodulations*
 escalations                                *escalations names*
 business_impact_modulations                *business_impact_modulations names*
-icon_set                                   [database/disk/network_service/server]
+icon_set                                   [database/disk/network_service/server/...]
 maintenance_period                         *timeperiod_name*
 service_overrides                          *service_description,directive value*
 service_excludes                           *service_description,...*
@@ -78,6 +78,11 @@ business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
+snapshot_enabled                           [0/1]
+snapshot_command                           *command_name*
+snapshot_period                            *timeperiod_name*
+snapshot_criteria                          [d,u]
+snapshot_interval                          #
 trigger_name                               *trigger_name*
 trigger_broker_raise_enabled               [0/1]
 }
@@ -244,7 +249,7 @@ icon_image_alt
   This variable is used to define an optional string that is used in the ALT tag of the image specified by the *<icon_image>* argument.
 
 vrml_image
-  This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this host. This image will be used as the texture map for the specified host in the statuswrl CGI. Unlike the image you use for the *<icon_image>* variable, this one should probably *not* have any transparency. If it does, the host object will look a bit wierd. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory.
+  This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this host. This image will be used as the texture map for the specified host in the statuswrl CGI. Unlike the image you use for the *<icon_image>* variable, this one should probably *not* have any transparency. If it does, the host object will look a bit weird. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory.
 
 statusmap_image
   This variable is used to define the name of an image that should be associated with this host in the statusmap CGI. You can specify a JPEG, PNG, and GIF image if you want, although I would strongly suggest using a GD2 format image, as other image formats will result in a lot of wasted CPU time when the statusmap image is generated. GD2 images can be created from PNG images by using the **pngtogd2** utility supplied with Thomas Boutell's `gd library`_. The GD2 images should be created in *uncompressed* format in order to minimize CPU load when the statusmap CGI is generating the network map image. The image will look best if it is 40x40 pixels in size. You can leave these option blank if you are not using the statusmap CGI. Images for hosts are assumed to be in the **logos/** subdirectory in your HTML images directory.
@@ -309,6 +314,21 @@ business_rule_host_notification_options
 business_rule_service_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying services notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.
 
+snapshot_enabled
+  This option allows to enable snapshots :ref:`snapshots <medium/snapshots>` on this element.
+
+snapshot_command
+  Command to launch when a snapshot launch occurs
+
+snapshot_period
+  Timeperiod when the snapshot call is allowed
+
+snapshot_criteria
+  List of states that enable the snapshot launch. Mainly bad states.
+
+snapshot_interval
+  Minimum interval between two launch of snapshots to not hammering the host, in interval_length units (by default 60s) :)
+
 trigger_name
   This options define the trigger that will be executed after a check result (passive or active).
   This file *trigger_name*.trig has to exist in the :ref:`trigger directory <configuration/configmain-advanced#triggers_dir>` or sub-directories.
@@ -317,6 +337,7 @@ trigger_broker_raise_enabled
   This option define the behavior of the defined trigger (Default 0). If set to 1, this means the trigger will modify the output / return code of the check.
   If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
   Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
+
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html
 .. _gd library: http://www.boutell.com/gd/

@@ -36,7 +36,7 @@ class Poller(Satellite):
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='pollerd.pid'),
-        'port':      IntegerProp(default='7771'),
+        'port':      IntegerProp(default=7771),
         'local_log': PathProp(default='pollerd.log'),
     })
 

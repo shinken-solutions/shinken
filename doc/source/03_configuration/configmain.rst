@@ -310,26 +310,6 @@ References:
   * https://github.com/naparuba/shinken/commit/9ce28d80857c137e5b915b39bbb8c1baecc821f9
 
 
-.. _configuration/configmain#pack_distribution_file:
-
-Pack Distribution File
------------------------
-
-Format:
-
-::
-
-  pack_distribution_file=<filename>
-
-Default:
-
-::
-
-  pack_distribution_file=pack_distribution.dat
-
-A pack distribution file is a local file near the arbiter that will keep host pack id association, and so push same host on the same scheduler if possible between restarts.
-
-
 
 Arbiter daemon part
 ====================

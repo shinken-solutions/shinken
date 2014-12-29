@@ -43,14 +43,13 @@ from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import jsonify_r
 from shinken.property import BoolProp
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
-    
+
     doc = 'Does the daemon got a configuration (internal)'
     def have_conf(self, magic_hash):
         # Beware, we got an str in entry, not an int
@@ -62,7 +61,7 @@ class IForArbiter(Interface):
             return False
     have_conf.doc = doc
 
-    
+
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
@@ -120,7 +119,7 @@ class IForArbiter(Interface):
     what_i_managed.need_lock = False
     what_i_managed.doc = doc
 
-    
+
     doc = 'Return all the data of the satellites'
     # We will try to export all data from our satellites, but only the json-able fields
     def get_all_states(self):
@@ -142,13 +141,12 @@ class IForArbiter(Interface):
                                 json.dumps(v)
                                 e[prop] = v
                             except Exception, exp:
-                                print exp
+                                logger.debug('%s', exp)
                     lst.append(e)
-                        
         return res
     get_all_states.doc = doc
-    
-    
+
+
     # Try to give some properties of our objects
     doc = 'Dump all objects of the type in [hosts, services, contacts, commands, hostgroups, servicegroups]'
     def get_objects_properties(self, table):
@@ -295,7 +293,15 @@ class Arbiter(Daemon):
                 # export this data to our statsmgr object :)
                 api_key = getattr(self.conf, 'api_key', '')
                 secret = getattr(self.conf, 'secret', '')
-                statsmgr.register(self, arb.get_name(), 'arbiter', api_key=api_key, secret=secret)
+                http_proxy = getattr(self.conf, 'http_proxy', '')
+                statsd_host = getattr(self.conf, 'statsd_host', 'localhost')
+                statsd_port = getattr(self.conf, 'statsd_port', 8125)
+                statsd_prefix = getattr(self.conf, 'statsd_prefix', 'shinken')
+                statsd_enabled = getattr(self.conf, 'statsd_enabled', False)
+                statsmgr.register(self, arb.get_name(), 'arbiter', 
+                                  api_key=api_key, secret=secret, http_proxy=http_proxy,
+                                  statsd_host=statsd_host, statsd_port=statsd_port, statsd_prefix=statsd_prefix, statsd_enabled=statsd_enabled)
+
                 # Set myself as alive ;)
                 self.me.alive = True
             else:  # not me
@@ -341,7 +347,7 @@ class Arbiter(Daemon):
                 statsmgr.incr('hook.get-objects', time.time() - _t)
                 types_creations = self.conf.types_creations
                 for k in types_creations:
-                    (cls, clss, prop) = types_creations[k]
+                    (cls, clss, prop, dummy) = types_creations[k]
                     if prop in r:
                         for x in r[prop]:
                             # test if raw_objects[k] are already set - if not, add empty array
@@ -358,15 +364,12 @@ class Arbiter(Daemon):
         if not self.conf.conf_is_correct:
             sys.exit("***> One or more problems was encountered while processing the config files...")
 
-        # Change Nagios2 names to Nagios3 ones
-        self.conf.old_properties_names_to_new()
-
         # Manage all post-conf modules
         self.hook_point('early_configuration')
 
         # Ok here maybe we should stop because we are in a pure migration run
         if self.migrate:
-            print "Migration MODE. Early exiting from configuration relinking phase"
+            logger.info("Migration MODE. Early exiting from configuration relinking phase")
             return
 
         # Load all file triggers
@@ -381,12 +384,6 @@ class Arbiter(Daemon):
         # Explode between types
         self.conf.explode()
 
-        # Create Name reversed list for searching list
-        self.conf.create_reversed_list()
-
-        # Cleaning Twins objects
-        self.conf.remove_twins()
-
         # Implicit inheritance for services
         self.conf.apply_implicit_inheritance()
 
@@ -399,23 +396,8 @@ class Arbiter(Daemon):
         # We compute simple item hash
         self.conf.compute_hash()
 
-        # We removed templates, and so we must recompute the
-        # search lists
-        self.conf.create_reversed_list()
-
-        # Overrides specific service instances properties
+        # Overrides sepecific service instaces properties
         self.conf.override_properties()
-
-        # Pythonize values
-        self.conf.pythonize()
-
-        # Removes service exceptions based on host configuration
-        count = self.conf.remove_exclusions()
-
-        if count > 0:
-            # We removed excluded services, and so we must recompute the
-            # search lists
-            self.conf.create_reversed_list()
 
         # Linkify objects to each other
         self.conf.linkify()
@@ -595,12 +577,18 @@ class Arbiter(Daemon):
     # Main loop function
     def main(self):
         try:
+            # Setting log level
+            logger.setLevel('INFO')
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             # Log will be broks
             for line in self.get_header():
                 logger.info(line)
 
             self.load_config_file()
-
+            logger.setLevel(self.log_level)
             # Maybe we are in a migration phase. If so, we will bailout here
             if self.migrate:
                 self.go_migrate()
@@ -608,8 +596,8 @@ class Arbiter(Daemon):
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
-
-            self.uri_arb = self.http_daemon.register(self.interface)#, "ForArbiter")
+            
+            self.uri_arb = self.http_daemon.register(self.interface)
 
             # ok we are now fully daemonized (if requested)
             # now we can start our "external" modules (if any):
@@ -808,17 +796,17 @@ class Arbiter(Daemon):
             _t = time.time()
             self.dispatcher.check_alive()
             statsmgr.incr('core.check-alive', time.time() - _t)
-            
+
             _t = time.time()
             self.dispatcher.check_dispatch()
             statsmgr.incr('core.check-dispatch', time.time() - _t)
-            
+
             # REF: doc/shinken-conf-dispatching.png (3)
-            _t = time.time()            
+            _t = time.time()
             self.dispatcher.dispatch()
             statsmgr.incr('core.dispatch', time.time() - _t)
-            
-            _t = time.time()                        
+
+            _t = time.time()
             self.dispatcher.check_bad_dispatch()
             statsmgr.incr('core.check-bad-dispatch', time.time() - _t)
 
@@ -884,9 +872,9 @@ class Arbiter(Daemon):
         res.update( {'name':self.me.get_name(), 'type':'arbiter'} )
         res['hosts'] = len(self.conf.hosts)
         res['services'] = len(self.conf.services)
-        metrics = res['metrics']                
+        metrics = res['metrics']
         # metrics specific
         metrics.append( 'arbiter.%s.external-commands.queue %d %d' % (self.me.get_name(), len(self.external_commands), now) )
-        
+
         return res
-    
+

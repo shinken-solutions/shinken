@@ -144,7 +144,7 @@ class template_Daemon_Bad_Start():
         d1.do_stop()
         try:
             os.unlink(d1.pidfile)
-        except:
+        except Exception:
             pass
         if hasattr(d1, 'local_log'):
             os.unlink(os.path.join(d1.workdir, d1.local_log))

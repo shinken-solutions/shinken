@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -30,8 +29,14 @@ import traceback
 import cStringIO
 import imp
 
+
+from os.path import join, isdir, abspath, dirname
+from os import listdir
+
 from shinken.basemodule import BaseModule
 from shinken.log import logger
+from shinken.misc import importlib
+
 
 # We need to manage pre-2.0 module types with _ into the new 2.0 - mode
 def uniform_module_type(s):
@@ -76,65 +81,43 @@ class ModulesManager(object):
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
     def load(self):
-        now = int(time.time())
-        # We get all modules file with .py
-        modules_files = []#fname[:-3] for fname in os.listdir(self.modules_path)
-                         #if fname.endswith(".py")]
-
-        # And directories
-        modules_files.extend([fname for fname in os.listdir(self.modules_path)
-                               if os.path.isdir(os.path.join(self.modules_path, fname))])
-
-        # Now we try to load them
-        # So first we add their dir into the sys.path
-        if not self.modules_path in sys.path:
+        if self.modules_path not in sys.path:
             sys.path.append(self.modules_path)
 
-        # We try to import them, but we keep only the one of
-        # our type
+        modules_files = [ fname
+                          for fname in listdir(self.modules_path)
+                          if isdir(join(self.modules_path, fname)) ]
+
         del self.imported_modules[:]
-        for fname in modules_files:
+        for mod_name in modules_files:
+            mod_file = abspath(join(self.modules_path, mod_name, 'module.py'))
+
             try:
-                # Then we load the module.py inside this directory
-                mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.py'))
-                mod_dir  =  os.path.dirname(mod_file)
-                # We add this dir to sys.path so the module can load local files too
-                sys.path.append(mod_dir)
-                if not os.path.exists(mod_file):
-                    mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.pyc'))
-                m = None
-                if mod_file.endswith('.py'):
-                    # important, equivalent to import fname from module.py
-                    m = imp.load_source(fname, mod_file)
-                else:
-                    m = imp.load_compiled(fname, mod_file)
-                m_dir = os.path.abspath(os.path.dirname(m.__file__))
-                
-                # Look if it's a valid module
-                if not hasattr(m, 'properties'):
-                    logger.warning('Bad module file for %s : missing properties dict', mod_file)
-                    continue
-                
-                # We want to keep only the modules of our type
-                if self.modules_type in m.properties['daemons']:
-                    self.imported_modules.append(m)
-            except Exception, exp:
-                # Oups, somethign went wrong here...
-                logger.warning("Importing module %s: %s", fname, exp)
+                mod = importlib.import_module('.module', mod_name)
+            except Exception as err:
+                logger.warning('Cannot load %s as a package (%s), trying as module..',
+                               mod_name, err)
+                continue
+            try:
+                is_our_type = self.modules_type in mod.properties['daemons']
+            except Exception as err:
+                logger.warning("Bad module file for %s : cannot check its properties['daemons'] attribute : %s",
+                               mod_file, err)
+            else: # We want to keep only the modules of our type
+                if is_our_type:
+                    self.imported_modules.append(mod)
 
         # Now we want to find in theses modules the ones we are looking for
         del self.modules_assoc[:]
         for mod_conf in self.modules:
             module_type = uniform_module_type(mod_conf.module_type)
-            is_find = False
             for module in self.imported_modules:
                 if uniform_module_type(module.properties['type']) == module_type:
                     self.modules_assoc.append((mod_conf, module))
-                    is_find = True
                     break
-            if not is_find:
-                # No module is suitable, we Raise a Warning
-                logger.warning("The module type %s for %s was not found in modules!", module_type, mod_conf.get_name())
+            else: # No module is suitable, we emit a Warning
+                logger.warning("The module type %s for %s was not found in modules!",
+                               module_type, mod_conf.get_name())
 
 
     # Try to "init" the given module instance.
@@ -186,25 +169,19 @@ class ModulesManager(object):
     def get_instances(self):
         self.clear_instances()
         for (mod_conf, module) in self.modules_assoc:
+            mod_conf.properties = module.properties.copy()
             try:
-                mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
+                if not isinstance(inst, BaseModule):
+                    raise TypeError('Returned instance is not of type BaseModule (%s) !' % type(inst))
+            except Exception as err:
+                logger.error("The module %s raised an exception %s, I remove it! traceback=%s",
+                             mod_conf.get_name(), err, traceback.format_exc())
+            else:
                 # Give the module the data to which module it is load from
                 inst.set_loaded_into(self.modules_type)
-                if inst is None:  # None = Bad thing happened :)
-                    logger.info("get_instance for module %s returned None!", mod_conf.get_name())
-                    continue
-                assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
-            except Exception, exp:
-                s = str(exp)
-                if isinstance(s, str):
-                    s = s.decode('UTF-8', 'replace')
-                logger.error("The module %s raised an exception %s, I remove it!", mod_conf.get_name(), s)
-                output = cStringIO.StringIO()
-                traceback.print_exc(file=output)
-                logger.error("Back trace of this remove: %s", output.getvalue())
-                output.close()
+
 
         for inst in self.instances:
             # External are not init now, but only when they are started

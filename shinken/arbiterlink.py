@@ -38,7 +38,7 @@ class ArbiterLink(SatelliteLink):
     properties.update({
         'arbiter_name':    StringProp(),
         'host_name':       StringProp(default=socket.gethostname()),
-        'port':            IntegerProp(default='7770'),
+        'port':            IntegerProp(default=7770),
     })
 
     def get_name(self):

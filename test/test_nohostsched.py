@@ -40,25 +40,25 @@ class TestHostspecialSched(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("moncul")
-        self.assert_(host is not None)
+        self.assertIsNot(host, None)
         print "check", host.next_chk
         print "Check in", host.next_chk - now
-        self.assert_(host.next_chk - now < 301)
+        self.assertLess(host.next_chk - now, 301)
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
         print "Loop"
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        self.assertEqual('UP', host.state)
+        self.assertEqual('HARD', host.state_type)
         # Reschedule the host as a normal way
         host.schedule()
         print "Final", host.next_chk, host.in_checking
         print "Next check?", host.next_chk - now
         print "Next check should be still < 300", host.next_chk - now
-        self.assert_(host.next_chk - now < 301)
+        self.assertLess(host.next_chk - now, 301)
         # but in 5min in fact, so more than 290,
         # something like 299.0
-        self.assert_(host.next_chk - now > 290)
+        self.assertGreater(host.next_chk - now, 290)
 
 
 

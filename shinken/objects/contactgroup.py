@@ -51,14 +51,17 @@ class Contactgroup(Itemgroup):
     }
 
     def get_contacts(self):
-        return getattr(self, 'members', '')
+        if getattr(self, 'members', None) is not None:
+            return [m.strip() for m in self.members]
+        else:
+            return []
 
     def get_name(self):
         return getattr(self, 'contactgroup_name', 'UNNAMED-CONTACTGROUP')
 
     def get_contactgroup_members(self):
         if self.has('contactgroup_members'):
-            return self.contactgroup_members.split(',')
+            return [m.strip() for m in self.contactgroup_members.split(',')]
         else:
             return []
 
@@ -107,7 +110,7 @@ class Contactgroups(Itemgroups):
         return cg.get_contacts()
 
     def add_contactgroup(self, cg):
-        self.items[cg.id] = cg
+        self.add_item(cg)
 
     def linkify(self, contacts):
         self.linkify_cg_by_cont(contacts)

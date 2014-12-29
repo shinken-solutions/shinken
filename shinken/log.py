@@ -72,7 +72,7 @@ class BrokHandler(Handler):
             msg = self.format(record)
             brok = Brok('log', {'log': msg + '\n'})
             self._broker.add(brok)
-        except:
+        except Exception:
             self.handleError(record)
 
 
@@ -84,7 +84,7 @@ class ColorStreamHandler(StreamHandler):
             cprint(msg, colors[record.levelname])
         except UnicodeEncodeError:
             print msg.encode('ascii', 'ignore')
-        except:
+        except Exception:
             self.handleError(record)
 
 
@@ -94,8 +94,11 @@ class Log(logging.Logger):
     See : https://docs.python.org/2/howto/logging.html#logging-flow for more detail about
     how log are handled"""
 
-    def __init__(self, name="Shinken", level=NOTSET):
+    def __init__(self, name="Shinken", level=NOTSET, log_set=False):
         logging.Logger.__init__(self, name, level)
+        self.pre_log_buffer = []
+        self.log_set = log_set
+        
 
     def setLevel(self, level):
         """ Set level of logger and handlers.
@@ -112,6 +115,7 @@ class Log(logging.Logger):
             if isinstance(handler, BrokHandler):
                 continue
             handler.setLevel(level)
+
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -130,7 +134,8 @@ class Log(logging.Logger):
             _brokhandler_.setFormatter(defaultFormatter)
         self.addHandler(_brokhandler_)
 
-    def register_local_log(self, path, level=None):
+
+    def register_local_log(self, path, level=None, purge_buffer=True):
         """The shinken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
         close it.
@@ -139,6 +144,7 @@ class Log(logging.Logger):
 
         The file will be rotated once a day
         """
+        self.log_set = True
         # Todo : Create a config var for backup count
         if os.path.exists(path) and not stat.S_ISREG(os.stat(path).st_mode):
             # We don't have a regular file here. Rotate may fail
@@ -154,8 +160,13 @@ class Log(logging.Logger):
             handler.setFormatter(defaultFormatter)
         self.addHandler(handler)
 
+        # Ok now unstack all previous logs
+        if purge_buffer:
+            self._destack()
+
         # Todo : Do we need this now we use logging?
         return handler.stream.fileno()
+
 
     def set_human_format(self, on=True):
         """
@@ -176,6 +187,50 @@ class Log(logging.Logger):
                 handler.setFormatter(human_timestamp_log and humanFormatter_named or defaultFormatter_named)
             else:
                 handler.setFormatter(human_timestamp_log and humanFormatter or defaultFormatter)
+
+
+    # Stack logs if we don't open a log file so we will be able to flush them
+    # Stack max 500 logs (no memory leak please...)
+    def _stack(self, level, args, kwargs):
+        if self.log_set:
+            return
+        self.pre_log_buffer.append( (level, args, kwargs) )
+        if len(self.pre_log_buffer) > 500:
+            self.pre_log_buffer = self.pre_log_buffer[2:]
+
+
+    # Ok, we are opening a log file, flush all the logs now
+    def _destack(self):
+        for (level, args, kwargs) in self.pre_log_buffer:
+            f = getattr(logging.Logger, level, None)
+            if f is None:
+                self.warning('Missing level for a log? %s', level)
+                continue
+            f(self, *args, **kwargs)
+        
+
+    def debug(self, *args, **kwargs):
+        self._stack('debug', args, kwargs)
+        logging.Logger.debug(self, *args, **kwargs)
+
+    
+    def info(self, *args, **kwargs):
+        self._stack('info', args, kwargs)
+        #super(logging.Logger, self).info(*args, **kwargs)
+        logging.Logger.info(self, *args, **kwargs)
+    
+
+
+    def warning(self, *args, **kwargs):
+        self._stack('warning', args, kwargs)
+        logging.Logger.warning(self, *args, **kwargs)
+
+
+    def error(self, *args, **kwargs):
+        self._stack('error', args, kwargs)
+        logging.Logger.error(self, *args, **kwargs)
+
+
 
 
 #--- create the main logger ---
@@ -203,6 +258,7 @@ def naglog_result(level, result, *args):
         handler.setFormatter(nagFormatter)
 
     log_fun = getattr(logger, level)
+    
     if log_fun:
         log_fun(result)
 

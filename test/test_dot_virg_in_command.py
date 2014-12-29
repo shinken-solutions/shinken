@@ -47,7 +47,7 @@ class TestConfig(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         print svc.event_handler.args
-        self.assert_('sudo -s pkill toto ; cd /my/path && ./toto' in svc.event_handler.args)
+        self.assertIn('sudo -s pkill toto ; cd /my/path && ./toto', svc.event_handler.args)
 
 
 if __name__ == '__main__':

@@ -33,9 +33,9 @@ class TestConfig(ShinkenTest):
     def test_bad_timeperiod(self):
         print "Get the bad timeperiod"
         tp = self.conf.timeperiods.find_by_name("24x7")
-        self.assert_(tp.is_correct() == True)
+        self.assertEqual(True, tp.is_correct())
         tp = self.conf.timeperiods.find_by_name("24x7_bad")
-        self.assert_(tp.is_correct() == False)
+        self.assertEqual(False, tp.is_correct())
 
 
 if __name__ == '__main__':

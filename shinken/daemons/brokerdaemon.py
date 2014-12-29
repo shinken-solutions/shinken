@@ -51,7 +51,7 @@ class IStats(Interface):
     doc = 'Get raw stats from the daemon'
     def get_raw_stats(self):
         app = self.app
-        res = {}
+        res = []
 
         insts = [inst for inst in app.modules_manager.instances if inst.is_external]
         for inst in insts:
@@ -399,9 +399,17 @@ class Broker(BaseSatellite):
         self.name = name
         self.api_key = g_conf['api_key']
         self.secret = g_conf['secret']
+        self.http_proxy = g_conf['http_proxy']
+        self.statsd_host = g_conf['statsd_host']
+        self.statsd_port = g_conf['statsd_port']
+        self.statsd_prefix = g_conf['statsd_prefix']
+        self.statsd_enabled = g_conf['statsd_enabled']
+
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
-        statsmgr.register(self, name, 'broker', api_key=self.api_key, secret=self.secret)
+        statsmgr.register(self, name, 'broker', 
+                          api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
+                          statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
 
         logger.debug("[%s] Sending us configuration %s", self.name, conf)
         # If we've got something in the schedulers, we do not
@@ -702,11 +710,23 @@ class Broker(BaseSatellite):
         # We put to external queues broks that was not already send
         t0 = time.time()
         # We are sending broks as a big list, more efficient than one by one
-        queues = self.modules_manager.get_external_to_queues()
+        ext_modules = self.modules_manager.get_external_instances()
         to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
 
-        for q in queues:
-            q.put(to_send)
+        # Send our pack to all external modules to_q queue so they can get the wole packet
+        # beware, the sub-process/queue can be die/close, so we put to restart the whole module
+        # instead of killing ourself :)
+        for mod in ext_modules:
+            try:
+                mod.to_q.put(to_send)
+            except Exception, exp:
+                # first we must find the modules
+                logger.debug(str(exp.__dict__))
+                logger.warning("The mod %s queue raise an exception: %s, I'm tagging it to restart later", mod.get_name(), str(exp))
+                logger.warning("Exception type: %s", type(exp))
+                logger.warning("Back trace of this kill: %s", traceback.format_exc())
+                self.modules_manager.set_to_restart(mod)
+
 
         # No more need to send them
         for b in to_send:
@@ -769,7 +789,13 @@ class Broker(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
-
+            
+            # Setting log level
+            logger.setLevel(self.log_level)
+            # Force the debug level if the daemon is said to start with such level
+            if self.debug:
+                logger.setLevel('DEBUG')
+            
             for line in self.get_header():
                 logger.info(line)
 

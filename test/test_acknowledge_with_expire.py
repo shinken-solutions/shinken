@@ -46,7 +46,7 @@ class TestAcksWithExpire(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP']])
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.assert_(svc.current_notification_number == 0)
+        self.assertEqual(0, svc.current_notification_number)
 
         #--------------------------------------------------------------
         # first check the normal behavior
@@ -56,9 +56,9 @@ class TestAcksWithExpire(ShinkenTest):
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
-        self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3)
-        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
+        self.assertEqual(1, svc.current_notification_number)
+        self.assertEqual(3, self.count_actions())
+        self.assert_log_match(5, 'SERVICE NOTIFICATION')
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -75,16 +75,16 @@ class TestAcksWithExpire(ShinkenTest):
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
         #--------------------------------------------------------------
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;test_host_0;test_ok_0;1;1;0;%d;lausser;blablub" % (now, int(now) + 5)
         self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [], do_sleep=False)
-        self.assert_(svc.problem_has_been_acknowledged)
-        self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
+        self.assertTrue(svc.problem_has_been_acknowledged)
+        self.assert_log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)')
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
-        self.assert_(self.count_logs() == 1)
-        self.assert_(self.count_actions() == 1)
+        self.assertEqual(1, self.count_logs())
+        self.assertEqual(1, self.count_actions())
         self.show_and_clear_logs()
         self.show_actions()
 
@@ -95,7 +95,7 @@ class TestAcksWithExpire(ShinkenTest):
         time.sleep(5)
         # Wait a bit
         self.sched.check_for_expire_acknowledge()
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
 
         #now = time.time()
         #cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
@@ -105,7 +105,7 @@ class TestAcksWithExpire(ShinkenTest):
         self.show_logs()
         self.show_actions()
         # the contact notification was sent immediately (t_to_go)
-        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assertFalse(svc.problem_has_been_acknowledged)
         self.show_logs()
         self.show_actions()
 

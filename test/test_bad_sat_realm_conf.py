@@ -31,7 +31,7 @@ class TestBadSatRealmConf(ShinkenTest):
         self.setup_with_file('etc/shinken_bad_sat_realm_conf.cfg')
 
     def test_badconf(self):
-        self.assert_(not self.conf.conf_is_correct)
+        self.assertFalse(self.conf.conf_is_correct)
 
 
 if __name__ == '__main__':

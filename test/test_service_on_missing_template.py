@@ -36,7 +36,8 @@ class TestSrvOnMissingTemplate(ShinkenTest):
         # in the main config file
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "ZE-SERVICE")
-        self.assert_(svc is not None)
+        self.assertIsNot(svc, None)
+
 
 
 if __name__ == '__main__':

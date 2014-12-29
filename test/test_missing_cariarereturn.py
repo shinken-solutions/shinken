@@ -38,10 +38,10 @@ class TestConfig(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
-        self.assert_(svc is not None)
-        self.assert_(len(svc.checks_in_progress) >= 1)
+        self.assertIsNot(svc, None)
+        self.assertGreaterEqual(len(svc.checks_in_progress), 1)
         print svc.checks_in_progress[0].command
-        self.assert_(svc.checks_in_progress[0].command == 'plugins/nothing BLABLA')
+        self.assertEqual('plugins/nothing BLABLA', svc.checks_in_progress[0].command)
 
 
 if __name__ == '__main__':

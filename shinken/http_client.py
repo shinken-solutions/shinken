@@ -51,7 +51,7 @@ class FileReader:
 
 
 class HTTPClient(object):
-    def __init__(self, address='', port=0, use_ssl=False, timeout=3, data_timeout=120, uri='', strong_ssl=False):
+    def __init__(self, address='', port=0, use_ssl=False, timeout=3, data_timeout=120, uri='', strong_ssl=False, proxy=''):
         self.address = address
         self.port    = port
         self.timeout = timeout
@@ -75,7 +75,10 @@ class HTTPClient(object):
         self.con.setopt(pycurl.FAILONERROR, True)
         self.con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
         self.con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
-        
+
+        if proxy:
+            self.con.setopt(pycurl.PROXY, proxy)
+
 
         # Also set the SSL options to do not look at the certificates too much
         # unless the admin asked for it
@@ -85,7 +88,14 @@ class HTTPClient(object):
         else:
             self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
             self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
+
             
+    def set_proxy(self, proxy):
+        if proxy:
+            logger.debug('PROXY SETTING PROXY %s', proxy)
+            self.con.setopt(pycurl.PROXY, proxy)
+
+
 
     
     # Try to get an URI path
