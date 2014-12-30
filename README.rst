@@ -146,24 +146,24 @@ Launch daemons
 
 Arbiter::
 
-  shinken-arbiter -c env/etc/shinken.cfg
+  shinken-arbiter -c env/etc/shinken/shinken.cfg
 
 Broker::
 
-  shinken-broker -c env/etc/brokerd.cfg
+  shinken-broker -c env/etc/shinken/daemons/brokerd.ini
 
 Scheduler::
 
-  shinken-scheduler -c env/etc/daemons/schedulerd.cfg
+  shinken-scheduler -c env/etc/shinken/daemons/schedulerd.ini
 
 Poller::
 
-  shinken-poller -c env/etc/pollerd.cfg
+  shinken-poller -c env/etc/shinken/daemons/pollerd.ini
 
 Reactionner::
 
-  shinken-reactionner -c env/etc/reactionnerd.cfg
+  shinken-reactionner -c env/etc/shinken/daemons/reactionnerd.ini
 
 Receiver::
 
-  shinken-receiver -c env/etc/receivererd.cfg
+  shinken-receiver -c env/etc/shinken/daemons/receiverd.ini
