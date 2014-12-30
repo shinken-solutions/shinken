@@ -29,7 +29,7 @@ def fix_shinken_cfg(config):
         pattern = "|".join(default_values.keys())
         changing_attr = re.compile("^(%s) *= *" % pattern)
         # Fix shinken.cfg
-        shinken_cfg_path = os.path.join(config.install_dir, "etc", "shinken.cfg")
+        shinken_cfg_path = os.path.join(config.install_dir, "etc", "shinken", "shinken.cfg")
         for line in fileinput.input(shinken_cfg_path, inplace=True):
             line = line.strip()
             attr_name = changing_attr.match(line)
@@ -49,7 +49,7 @@ def fix_shinken_cfg(config):
             pattern = "|".join(default_values.keys())
             changing_attr = re.compile("^(%s) *= *" % pattern)
             # Fix ini file
-            shinken_cfg_path = os.path.join(config.install_dir, "etc", "daemons", ini_file)
+            shinken_cfg_path = os.path.join(config.install_dir, "etc", "shinken", "daemons", ini_file)
             for line in fileinput.input(shinken_cfg_path, inplace=True):
                 line = line.strip()
                 attr_name = changing_attr.match(line)
