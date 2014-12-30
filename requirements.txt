@@ -1,4 +1,3 @@
-python >= 2.6
 CherryPy
 pycurl
 importlib
