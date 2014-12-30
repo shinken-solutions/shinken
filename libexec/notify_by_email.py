@@ -34,7 +34,7 @@ from shinken.objects.config import Config
 
 # Global var
 shinken_image_dir = '/var/lib/shinken/share/images'
-shinken_customer_logo = 'customer_logo.png'
+shinken_customer_logo = 'customer_logo.jpg'
 webui_config_file = '/etc/shinken/modules/webui.cfg'
 
 
@@ -57,7 +57,7 @@ def overload_test_variable():
             'Service duration': '00h 00min 10s'
         },
         'host': {
-            'Host alias': 'Shinken monitoring solution: Test host',
+            'Hostname': 'Shinken monitoring solution: Test host',
             'Host state': 'TEST PROBLEM',
             'Host duration': '00h 00h 20s'
         }
@@ -102,7 +102,7 @@ mail_format = { 'html': MIMEMultipart(), 'txt': MIMEMultipart('alternative') }
 
 # Construct mail subject field based on which object we notify
 def get_mail_subject(object):
-    mail_subject = { 'host': 'Host %s alert for %s since %s' % (shinken_notification_object_var['host']['Host state'], shinken_var['Hostname'], shinken_notification_object_var['host']['Host duration']), 'service': '%s on Host: %s about service %s since %s' % (shinken_notification_object_var['service']['Service state'], shinken_notification_object_var['host']['Host alias'], shinken_notification_object_var['service']['Service description'], shinken_notification_object_var['service']['Service duration'])}
+    mail_subject = { 'host': 'Host %s alert for %s since %s' % (shinken_notification_object_var['host']['Host state'], shinken_var['Hostname'], shinken_notification_object_var['host']['Host duration']), 'service': '%s on Host: %s about service %s since %s' % (shinken_notification_object_var['service']['Service state'], shinken_var['Hostname'], shinken_notification_object_var['service']['Service description'], shinken_notification_object_var['service']['Service duration'])}
 
     return mail_subject[object]
 
@@ -162,11 +162,14 @@ def create_txt_message(msg):
 # Process customer logo into mail message so it can be referenced in it later
 def add_image2mail(img, mail):
     fp = open(img, 'rb')
-    msgLogo = MIMEImage(fp.read())
-    fp.close()
-    msgLogo.add_header('Content-ID', '<customer_logo>')
-    mail.attach(msgLogo)
+    try:
+        msgLogo = MIMEImage(fp.read())
+        msgLogo.add_header('Content-ID', '<customer_logo>')
+        mail.attach(msgLogo)
+    except:
+        pass
 
+    fp.close()
     return mail
 
 def create_html_message(msg):
@@ -246,9 +249,9 @@ if __name__ == "__main__":
     group_shinken.add_option('-c', '--commonmacros', dest='commonmacros',
                       help='Double comma separated shinken macros in this order : "NOTIFICATIONTYPE$,,$HOSTNAME$,,$HOSTADDRESS$,,$LONGDATETIME$".')
     group_shinken.add_option('-o', '--objectmacros', dest='objectmacros',
-                      help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTALIAS$,,$HOSTSTATE$,,$HOSTDURATION$" with host object')
+                      help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTSTATE$,,$HOSTDURATION$" with host object')
     group_shinken_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
-                      help='Specify $_SERVICEDETAILLEDDESC$ custom macros')
+                      nhelp='Specify $_SERVICEDETAILLEDDESC$ custom macros')
     group_shinken_details.add_option('-i', '--impact', dest='impact',
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_shinken_details.add_option('-a', '--action', dest='fixaction',
@@ -297,7 +300,6 @@ if __name__ == "__main__":
                 'Service duration': os.getenv('NAGIOS_SERVICEDURATION') 
             },
             'host': {
-                'Host alias': os.getenv('NAGIOS_HOSTALIAS'),
                 'Host state': os.getenv('NAGIOS_HOSTSTATE'), 
                 'Host duration': os.getenv('NAGIOS_HOSTDURATION') 
             }
@@ -311,14 +313,23 @@ if __name__ == "__main__":
                     'Service state': macros[1],
                     'Service output': macros[2],
                     'Service duration': macros[3]
-                }
+                },
+                'host': {
+                    'Host state': '', 
+                    'Host duration': '' 
+            }
+
             }
         else:
             shinken_notification_object_var = { 
-                'host': {
-                    'Host alias': macros[0],
-                    'Host state': macros[1], 
-                    'Host duration': macros[2] 
+                 'service': {
+                    'Service description': '',
+                    'Service state': '',
+                    'Service output': '',
+                    'Service duration': ''
+                },'host': {
+                    'Host state': macros[0],
+                    'Host duration': macros[1] 
                 }
             }
 
