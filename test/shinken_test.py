@@ -59,7 +59,7 @@ from logging import ERROR
 myself = os.path.abspath(__file__)
 
 global modules_dir
-modules_dir = "modules"
+modules_dir = "var/lib/shinken/modules"
 
 def define_modules_dir(val):
     global modules_dir

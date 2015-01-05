@@ -35,7 +35,6 @@ import sys
 import optparse
 
 
-
 # We try to raise up recursion limit on
 # but we don't have resource module on windows
 if os.name != 'nt':
@@ -67,52 +66,52 @@ except ImportError:
     shinken_root_path = os.path.dirname(os.path.dirname(shinken.__file__))
     os.environ['PYTHONPATH'] = os.path.join(os.environ.get('PYTHONPATH', ''), shinken_root_path)
 
-
 from shinken.bin import VERSION
 from shinken.daemons.arbiterdaemon import Arbiter
 
-parser = optparse.OptionParser(
-    "%prog [options] -c configfile [-c additional_config_file]",
-    version="%prog: " + VERSION)
-parser.add_option('-c', '--config', action='append',
-                  dest="config_files", metavar="CONFIG-FILE",
-                  help=('Config file (your nagios.cfg). Multiple -c can be '
-                        'used, it will be like if all files was just one'))
-parser.add_option('-d', '--daemon', action='store_true',
-                  dest="is_daemon",
-                  help="Run in daemon mode")
-parser.add_option('-r', '--replace', action='store_true',
-                  dest="do_replace",
-                  help="Replace previous running arbiter")
-parser.add_option('--debugfile', dest='debug_file',
-                  help=("Debug file. Default: not used "
-                        "(why debug a bug free program? :) )"))
-parser.add_option("-v", "--verify-config",
-                  dest="verify_only", action="store_true",
-                  help="Verify config file and exit")
-parser.add_option("-p", "--profile",
-                  dest="profile",
-                  help="Dump a profile file. Need the python cProfile librairy")
-parser.add_option("-a", "--analyse",
-                  dest="analyse",
-                  help="Dump an analyse statistics file, for support")
-parser.add_option("-m", "--migrate",
-                  dest="migrate",
-                  help="Migrate the raw configuration read from the arbiter to another module. --> VERY EXPERIMENTAL!")
-parser.add_option("-n", "--name",
-                  dest="arb_name",
-                  help="Give the arbiter name to use. Optionnal, will use the hostaddress if not provide to find it.")
 
-opts, args = parser.parse_args()
+def main():
+    parser = optparse.OptionParser(
+        "%prog [options] -c configfile [-c additional_config_file]",
+        version="%prog: " + VERSION)
+    parser.add_option('-c', '--config', action='append',
+                      dest="config_files", metavar="CONFIG-FILE",
+                      help=('Config file (your nagios.cfg). Multiple -c can be '
+                            'used, it will be like if all files was just one'))
+    parser.add_option('-d', '--daemon', action='store_true',
+                      dest="is_daemon",
+                      help="Run in daemon mode")
+    parser.add_option('-r', '--replace', action='store_true',
+                      dest="do_replace",
+                      help="Replace previous running arbiter")
+    parser.add_option('--debugfile', dest='debug_file',
+                      help=("Debug file. Default: not used "
+                            "(why debug a bug free program? :) )"))
+    parser.add_option("-v", "--verify-config",
+                      dest="verify_only", action="store_true",
+                      help="Verify config file and exit")
+    parser.add_option("-p", "--profile",
+                      dest="profile",
+                      help="Dump a profile file. Need the python cProfile librairy")
+    parser.add_option("-a", "--analyse",
+                      dest="analyse",
+                      help="Dump an analyse statistics file, for support")
+    parser.add_option("-m", "--migrate",
+                      dest="migrate",
+                      help="Migrate the raw configuration read from the arbiter to another module. --> VERY EXPERIMENTAL!")
+    parser.add_option("-n", "--name",
+                      dest="arb_name",
+                      help="Give the arbiter name to use. Optionnal, will use the hostaddress if not provide to find it.")
+
+    opts, args = parser.parse_args()
 
 
-if not opts.config_files:
-    parser.error("Requires at least one config file (option -c/--config")
-if args:
-    parser.error("Does not accept any argument. Use option -c/--config")
+    if not opts.config_files:
+        parser.error("Requires at least one config file (option -c/--config")
+    if args:
+        parser.error("Does not accept any argument. Use option -c/--config")
 
-# Protect for windows multiprocessing that will RELAUNCH all
-if __name__ == '__main__':
+    # Protect for windows multiprocessing that will RELAUNCH all
     daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
     if not opts.profile:
         daemon.main()
@@ -120,3 +119,7 @@ if __name__ == '__main__':
         # For perf tuning:
         import cProfile
         cProfile.run('''daemon.main()''', opts.profile)
+
+
+if __name__ == '__main__':
+    main()

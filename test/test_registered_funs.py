@@ -65,7 +65,7 @@ class testRegisteredFunctions(ShinkenTest):
                          'run_external_commands', 'set_log_level', 'wait_new_conf', 'what_i_managed']
         for fun in expected_list:
             assert(fun in reg_list)
-        subprocess.Popen(["../bin/shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
+        subprocess.Popen(["shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)
         if not d.new_conf:

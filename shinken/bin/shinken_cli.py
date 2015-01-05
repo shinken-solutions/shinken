@@ -377,7 +377,7 @@ def write_ini_file(cfg, CLI):
                 new_cfg.write(configfile)
 
 
-if __name__ == '__main__':
+def main():
     parser = optparse.OptionParser(
         '',
         version="%prog " + VERSION,
@@ -522,3 +522,7 @@ if __name__ == '__main__':
 
     # If it's just a one call shot, do it!
     CLI.one_loop(command_args)
+
+
+if __name__ == '__main__':
+    main()
