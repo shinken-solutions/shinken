@@ -134,7 +134,8 @@ class Broker(BaseSatellite):
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
                     source = elt.source
-                    logger.info('The module %s is asking me to get all initial data from the scheduler %d', source, c_id)
+                    logger.info('The module %s is asking me to get all initial data from the scheduler %d',
+                                source, c_id)
                     # so we just reset the connection and the running_id, it will just get all new things
                     try:
                         self.schedulers[c_id]['con'] = None
@@ -151,15 +152,15 @@ class Broker(BaseSatellite):
 
 
     # Get the good tabs for links by the kind. If unknown, return None
-    def get_links_from_type(self, type):
+    def get_links_from_type(self, d_type):
         t = {'scheduler': self.schedulers,
              'arbiter': self.arbiters,
              'poller': self.pollers,
              'reactionner': self.reactionners,
              'receiver': self.receivers
              }
-        if type in t:
-            return t[type]
+        if d_type in t:
+            return t[d_type]
         return None
 
 
@@ -169,7 +170,7 @@ class Broker(BaseSatellite):
         now = time.time()
         last_connection = elt['last_connection']
         if now - last_connection < 5:
-            return  True
+            return True
         return False
 
 
@@ -217,7 +218,8 @@ class Broker(BaseSatellite):
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
         try:
-            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'], timeout=timeout, data_timeout=data_timeout)
+            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'],
+                                                timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
@@ -236,13 +238,14 @@ class Broker(BaseSatellite):
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
             if new_run_id != running_id:
-                logger.debug("[%s] New running id for the %s %s: %s (was %s)", self.name, type, links[id]['name'], new_run_id, running_id)
+                logger.debug("[%s] New running id for the %s %s: %s (was %s)",
+                             self.name, type, links[id]['name'], new_run_id, running_id)
                 links[id]['broks'].clear()
                 # we must ask for a new full broks if
                 # it's a scheduler
                 if type == 'scheduler':
                     logger.debug("[%s] I ask for a broks generation to the scheduler %s", self.name, links[id]['name'])
-                    con.get('fill_initial_broks', {'bname':self.name}, wait='long')
+                    con.get('fill_initial_broks', {'bname': self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except HTTPExceptions, exp:
@@ -268,7 +271,8 @@ class Broker(BaseSatellite):
                 mod.manage_brok(b)
             except Exception, exp:
                 logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later", mod.get_name(), str(exp))
+                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later",
+                               mod.get_name(), str(exp))
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 self.modules_manager.set_to_restart(mod)
@@ -332,7 +336,7 @@ class Broker(BaseSatellite):
                     t0 = time.time()
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    tmp_broks = con.get('get_broks', {'bname':self.name}, wait='long')
+                    tmp_broks = con.get('get_broks', {'bname': self.name}, wait='long')
                     try:
                         _t = base64.b64decode(tmp_broks)
                         _t = zlib.decompress(_t)
@@ -409,7 +413,8 @@ class Broker(BaseSatellite):
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker', 
                           api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
-                          statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+                          statsd_host=self.statsd_host, statsd_port=self.statsd_port,
+                          statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
 
         logger.debug("[%s] Sending us configuration %s", self.name, conf)
         # If we've got something in the schedulers, we do not
@@ -444,7 +449,7 @@ class Broker(BaseSatellite):
                 s.update(g_conf['satellitemap'][s['name']])
             proto = 'http'
             if s['use_ssl']:
-                 proto = 'https'
+                proto = 'https'
             uri = '%s://%s:%s/' % (proto, s['address'], s['port'])
             self.schedulers[sched_id]['uri'] = uri
 
@@ -476,7 +481,7 @@ class Broker(BaseSatellite):
 
             proto = 'http'
             if a['use_ssl']:
-                 proto = 'https'
+                proto = 'https'
             uri = '%s://%s:%s/' % (proto, a['address'], a['port'])
             self.arbiters[arb_id]['uri'] = uri
 
@@ -509,7 +514,7 @@ class Broker(BaseSatellite):
 
             proto = 'http'
             if p['use_ssl']:
-                 proto = 'https'
+                proto = 'https'
 
             uri = '%s://%s:%s/' % (proto, p['address'], p['port'])
             self.pollers[pol_id]['uri'] = uri
@@ -545,7 +550,7 @@ class Broker(BaseSatellite):
 
             proto = 'http'
             if r['use_ssl']:
-                 proto = 'https'
+                proto = 'https'
             uri = '%s://%s:%s/' % (proto, r['address'], r['port'])
             self.reactionners[rea_id]['uri'] = uri
 
@@ -580,7 +585,7 @@ class Broker(BaseSatellite):
 
             proto = 'http'
             if r['use_ssl']:
-                 proto = 'https'
+                proto = 'https'
             uri = '%s://%s:%s/' % (proto, r['address'], r['port'])
             self.receivers[rec_id]['uri'] = uri
 
@@ -644,11 +649,11 @@ class Broker(BaseSatellite):
         now = int(time.time())
         # call the daemon one
         res = super(Broker, self).get_stats_struct()
-        res.update( {'name':self.name, 'type': 'broker'} )
+        res.update({'name': self.name, 'type': 'broker'})
         metrics = res['metrics']      
         # metrics specific
-        metrics.append( 'broker.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now) )
-        metrics.append( 'broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now) )
+        metrics.append('broker.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now))
+        metrics.append('broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now))
         
         return res
 
@@ -722,7 +727,8 @@ class Broker(BaseSatellite):
             except Exception, exp:
                 # first we must find the modules
                 logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s queue raise an exception: %s, I'm tagging it to restart later", mod.get_name(), str(exp))
+                logger.warning("The mod %s queue raise an exception: %s, I'm tagging it to restart later",
+                               mod.get_name(), str(exp))
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 self.modules_manager.set_to_restart(mod)
@@ -806,7 +812,7 @@ class Broker(BaseSatellite):
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             
-            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)
             logger.debug("The Arbiter uri it at %s", self.uri2)
 
             self.uri3 = self.http_daemon.register(self.istats)
