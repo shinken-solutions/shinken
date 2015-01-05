@@ -70,7 +70,7 @@ class Broker(BaseSatellite):
     properties = BaseSatellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='brokerd.pid'),
-        'port':      IntegerProp(default='7772'),
+        'port':      IntegerProp(default=7772),
         'local_log': PathProp(default='brokerd.log'),
     })
 

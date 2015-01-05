@@ -74,7 +74,7 @@ class Receiver(Satellite):
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='receiverd.pid'),
-        'port':      IntegerProp(default='7773'),
+        'port':      IntegerProp(default=7773),
         'local_log': PathProp(default='receiverd.log'),
     })
 

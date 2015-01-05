@@ -75,7 +75,7 @@ class Notification(Action):
         'worker':              StringProp(default='none'),
         'reactionner_tag':     StringProp(default='None'),
         'creation_time':       IntegerProp(default=0),
-        'enable_environment_macros': BoolProp(default=0),
+        'enable_environment_macros': BoolProp(default=False),
         # Keep a list of currently active escalations
         'already_start_escalations':  StringProp(default=set()),
 

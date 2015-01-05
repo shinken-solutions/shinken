@@ -49,7 +49,7 @@ class Reactionner(Satellite):
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='reactionnerd.pid'),
-        'port':      IntegerProp(default='7769'),
+        'port':      IntegerProp(default=7769),
         'local_log': PathProp(default='reactionnerd.log'),
     })
 

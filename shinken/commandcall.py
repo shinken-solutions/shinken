@@ -56,9 +56,9 @@ class CommandCall(DummyCommandCall):
         'module_type':     StringProp(default='fork'),
         'valid':           BoolProp(default=False),
         'args':            StringProp(default=[]),
-        'timeout':         IntegerProp(default='-1'),
+        'timeout':         IntegerProp(default=-1),
         'late_relink_done':BoolProp(default=False),
-        'enable_environment_macros': BoolProp(default=0),
+        'enable_environment_macros': BoolProp(default=False),
     }
 
     def __init__(self, commands, call, poller_tag='None',

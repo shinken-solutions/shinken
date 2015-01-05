@@ -224,7 +224,7 @@ class Daemon(object):
         'idontcareaboutsecurity': BoolProp(default=False),
         'daemon_enabled':BoolProp(default=True),
         'spare':         BoolProp(default=False),
-        'max_queue_size': IntegerProp(default='0'),
+        'max_queue_size': IntegerProp(default=0),
         'daemon_thread_pool_size': IntegerProp(default=8),
         'http_backend':  StringProp(default='auto'),
     }
