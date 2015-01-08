@@ -162,7 +162,7 @@ class TestService(ShinkenTest):
         self.assertIsNot(sg, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.assertIn(svc, sg.members)
-        self.assertIn(sg, svc.servicegroups)
+        self.assertIn(sg.get_name(), [sg.get_name() for sg in svc.servicegroups])
 
     # Look at the good of the last_hard_state_change
     def test_service_last_hard_state(self):
