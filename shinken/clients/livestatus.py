@@ -397,6 +397,7 @@ class LSConnectionPool(object):
                 r = q.result
                 logger.debug(str(r))
                 res.extend(r)
+            c.handle_close()
         return res
 
 
