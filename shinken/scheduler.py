@@ -846,7 +846,19 @@ class Scheduler(object):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id':self.instance_id}, wait='long')
-                    results = cPickle.loads(str(results))
+                    try:
+                        results = str(results)
+                    except UnicodeEncodeError: # ascii not working, switch to utf8 so
+                        results = results.encode("utf8", 'ignore') # if not eally utf8 will be a real problem
+                        # and data will be invalid, socatch by the pickle.
+                    
+                    # now go the cpickle pass, and catch possible errors from it
+                    try:
+                        results = cPickle.loads(results)
+                    except Exception, exp:
+                        logger.error('Cannot load passive results from satellite %s : %s' % (p['name'], str(exp)))
+                        continue
+
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results", nb_received)
@@ -857,11 +869,11 @@ class Scheduler(object):
                 except HTTPExceptions, exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
-                    return
+                    continue
                 except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
-                    return
+                    continue
             else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
