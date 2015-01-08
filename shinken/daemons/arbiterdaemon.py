@@ -696,6 +696,9 @@ class Arbiter(Daemon):
             now = time.time()
             if now - self.last_master_speack > master_timeout:
                 logger.info("Arbiter Master is dead. The arbiter %s take the lead", self.me.get_name())
+                for arb in self.conf.arbiters:
+                    if not arb.spare:
+                        arb.alive = False                
                 self.must_run = True
                 break
 
