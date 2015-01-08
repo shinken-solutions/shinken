@@ -49,15 +49,15 @@ class TestInheritanceAndPlus(ShinkenTest):
         # HOST 1 is lin-servers,dmz, so should be in linux AND DMZ group
         for hg in host1.hostgroups:
             print hg.get_name()
-        self.assertIn(linux, host1.hostgroups)
-        self.assertIn(dmz, host1.hostgroups)
+        self.assertIn(linux.get_name(), [hg.get_name() for hg in host1.hostgroups])
+        self.assertIn(dmz.get_name(), [hg.get_name() for hg in host1.hostgroups])
 
         # HOST2 is in lin-servers,dmz and +mysql, so all three of them
         for hg in host2.hostgroups:
             print hg.get_name()
-        self.assertIn(linux, host2.hostgroups)
-        self.assertIn(dmz, host2.hostgroups)
-        self.assertIn(mysql, host2.hostgroups)
+        self.assertIn(linux.get_name(), [hg.get_name() for hg in host2.hostgroups])
+        self.assertIn(dmz.get_name(), [hg.get_name() for hg in host2.hostgroups])
+        self.assertIn(mysql.get_name(), [hg.get_name() for hg in host2.hostgroups])
 
 
 
