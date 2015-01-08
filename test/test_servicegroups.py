@@ -47,10 +47,10 @@ class TestServicegroup(ShinkenTest):
         self.assertIn(svc4, sgs[2].members)
         self.assertIn(svc4, sgs[3].members)
 
-        self.assertIn(sgs[0], svc3.servicegroups)
-        self.assertIn(sgs[1], svc3.servicegroups)
-        self.assertIn(sgs[2], svc4.servicegroups)
-        self.assertIn(sgs[3], svc4.servicegroups)
+        self.assertIn(sgs[0].get_name(), [sg.get_name() for sg in svc3.servicegroups])
+        self.assertIn(sgs[1].get_name(), [sg.get_name() for sg in svc3.servicegroups])
+        self.assertIn(sgs[2].get_name(), [sg.get_name() for sg in svc4.servicegroups])
+        self.assertIn(sgs[3].get_name(), [sg.get_name() for sg in svc4.servicegroups])
 
 
 if __name__ == '__main__':

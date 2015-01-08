@@ -66,17 +66,17 @@ class TestRealms(ShinkenTest):
         test_host1_hg_realm2 = self.sched.hosts.find_by_name("test_host1_hg_realm2")
         self.assertIsNot(test_host1_hg_realm2, None)
         self.assertEqual(realm2.get_name(), test_host1_hg_realm2.realm)
-        self.assertIn(in_realm2, test_host1_hg_realm2.hostgroups)
+        self.assertIn(in_realm2.get_name(), [hg.get_name() for hg in test_host1_hg_realm2.hostgroups])
 
         test_host2_hg_realm2 = self.sched.hosts.find_by_name("test_host2_hg_realm2")
         self.assertIsNot(test_host2_hg_realm2, None)
         self.assertEqual(realm2.get_name(), test_host2_hg_realm2.realm)
-        self.assertIn(in_realm2, test_host2_hg_realm2.hostgroups)
+        self.assertIn(in_realm2.get_name(), [hg.get_name() for hg in test_host2_hg_realm2.hostgroups])
 
         test_host3_hg_realm2 = self.sched.hosts.find_by_name("test_host3_hg_realm2")
         self.assertIsNot(test_host3_hg_realm2, None)
         self.assertEqual(realm1.get_name(), test_host3_hg_realm2.realm)
-        self.assertIn(in_realm2, test_host3_hg_realm2.hostgroups)
+        self.assertIn(in_realm2.get_name(), [hg.get_name() for hg in test_host3_hg_realm2.hostgroups])
 
 
     # Realms should be stripped when linking to hosts and hostgroups
