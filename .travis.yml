@@ -6,11 +6,9 @@ python:
 # command to install dependencies
 # some are only used for travis/coveralls so we are installing them here only
 install:
-  - "pip install -r shinken/dependencies"
-  - "pip install coveralls"
-  - "pip install nose-cov"
-  - "pip install unittest2"
-  - "./bin/preparedev"
+  - ./test/setup_test.sh
+  - ./bin/preparedev
+
 # command to run tests
 # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
 # so we must combine them in the end
