@@ -35,6 +35,7 @@ VERSION = "2.2-RC1"
 
 
 # Make sure people are using Python 2.6 or higher
+# This is the canonical python version check
 if sys.version_info < (2, 6):
     sys.exit("Shinken requires as a minimum Python 2.6.x, sorry")
 elif sys.version_info >= (3,):
