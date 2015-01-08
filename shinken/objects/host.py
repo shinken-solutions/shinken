@@ -1107,6 +1107,9 @@ class Host(SchedulingItem):
         else:
             return self.state
 
+    def get_downtime(self):
+        return str(self.scheduled_downtime_depth)
+
 
 # CLass for the hosts lists. It's mainly for configuration
 # part
