@@ -1,0 +1,6 @@
+# this is the requirements dedicated to tests.
+
+unittest2
+mock
+coveralls
+nose-cov
