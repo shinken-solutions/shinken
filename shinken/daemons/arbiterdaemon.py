@@ -132,17 +132,21 @@ class IForArbiter(Interface):
                 cls = d.__class__
                 e = {}
                 ds = [cls.properties, cls.running_properties]
+
                 for _d in ds:
                     for prop in _d:
                         if hasattr(d, prop):
                             v = getattr(d, prop)
+                            if prop == "realm":
+                                if hasattr(v,"realm_name"):
+                                    e[prop] = v.realm_name
                             # give a try to a json able object
                             try:
                                 json.dumps(v)
                                 e[prop] = v
                             except Exception, exp:
                                 logger.debug('%s', exp)
-                    lst.append(e)
+                lst.append(e)
         return res
     get_all_states.doc = doc
 
