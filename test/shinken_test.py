@@ -82,14 +82,14 @@ def my_time_time():
     return now
 
 original_time_time = time.time
-time.time = my_time_time
+#time.time = my_time_time
 
 
 def my_time_sleep(delay):
     time.my_offset += delay
 
 original_time_sleep = time.sleep
-time.sleep = my_time_sleep
+#time.sleep = my_time_sleep
 
 
 def time_warp(duration):
