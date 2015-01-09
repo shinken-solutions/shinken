@@ -1,6 +1,8 @@
 language: python
 python:
   - "2.7"
+  - "2.6"
+
 # command to install dependencies
 install:
   - pip install -r shinken/dependencies || pip install -r requirements.txt
