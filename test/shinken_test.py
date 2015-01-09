@@ -12,10 +12,15 @@ import os
 import string
 import re
 import random
-import unittest
+
+if sys.version_info[:2] <= (2,6):
+    import unittest2 as unittest
+else:
+    import unittest
 
 # import the shinken library from the parent directory
-import __import_shinken ;
+import __import_shinken
+
 from shinken.modules.livestatus_broker.livestatus_client_thread import LiveStatusClientThread
 from mock_livestatus import mocked_livestatus_client_thread_handle_request
 from mock_livestatus import mocked_livestatus_client_thread_send_data
