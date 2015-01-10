@@ -92,13 +92,13 @@ You are done. Your zip pack is done and available in /tmp/linux.zip Congrats! :)
 How to share the zip pack to the community website? 
 ====================================================
 
-The community website is available at `community.shinken-monitoring.org`_. You will need an account to share your zip packs or retrive some new from others community members.
+The community website is available at `shinken.io`_. You will need an account to share your zip packs or retrive some new from others community members.
 
 
 Register on the community website and retrieve your API key 
 ------------------------------------------------------------
 
-You can register online at `community.shinken-monitoring.org/register`_ or you can also do it in a CLI way with your shinken-packs command.
+You can register online at `shinken.io/register`_ or you can also do it in a CLI way with your shinken-packs command.
 
 .. tip::  You only need to register once. All your packs will be pushed with the same account.
 
@@ -135,6 +135,6 @@ Now you got your can push your /tmp/linux.zip pack and make it available for the
   
 Then it's done! You can go to the community website and look at your new shared zip pack. Thanks a lot for sharing :)
 
-.. _community.shinken-monitoring.org: http://community.shinken-monitoring.org
-.. _community.shinken-monitoring.org/register: http://community.shinken-monitoring.org/register
-.. _Shinken community website: http://community.shinken-monitoring.org
+.. _shinken.io: http://shinken.io
+.. _shinken.io/register: http://shinken.io/signup
+.. _Shinken community website: http://shinken.io
