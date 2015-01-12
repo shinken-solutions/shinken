@@ -31,7 +31,7 @@ from shinken_test import *
 
 class TestBadServiceDependencies(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_bad_servicedependencies.cfg')
+        self.setup_with_file('etc/nagios_bad_servicedependencies.cfg', raise_on_bad_config=False)
 
     def test_bad_conf(self):
         #

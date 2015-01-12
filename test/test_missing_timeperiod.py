@@ -28,7 +28,7 @@ from shinken_test import *
 class TestMissingTimeperiod(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_missing_timeperiod.cfg')
+        self.setup_with_file('etc/nagios_missing_timeperiod.cfg', raise_on_bad_config=False)
 
     def test_dummy(self):
         self.assert_(not self.conf.conf_is_correct)

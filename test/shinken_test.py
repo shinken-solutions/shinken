@@ -216,7 +216,7 @@ class ShinkenTest(unittest.TestCase):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    def setup_with_file(self, path):
+    def setup_with_file(self, path, raise_on_bad_config=True):
         # i am arbiter-like
         self.broks = {}
         self.me = None
@@ -257,7 +257,10 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
-            print "The conf is not correct, I stop here"
+            msg = "The conf is not correct, I stop here"
+            if raise_on_bad_config:
+                raise RuntimeError(msg)
+            print(msg)
             return
 
         self.confs = self.conf.cut_into_parts()

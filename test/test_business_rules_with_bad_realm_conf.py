@@ -28,7 +28,7 @@ from shinken_test import *
 class TestBusinessRulesBadRealmConf(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_rules_bad_realm_conf.cfg')
+        self.setup_with_file('etc/nagios_business_rules_bad_realm_conf.cfg', raise_on_bad_config=False)
 
     def test_bad_conf(self):
         self.assert_(not self.conf.conf_is_correct)

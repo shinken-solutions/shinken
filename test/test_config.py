@@ -27,7 +27,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/nagios_broken_1.cfg')
+        self.setup_with_file('etc/nagios_broken_1.cfg', raise_on_bad_config=False)
 
     def test_conf_is_correct(self):
         #

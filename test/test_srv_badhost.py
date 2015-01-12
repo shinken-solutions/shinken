@@ -27,10 +27,7 @@ from shinken_test import *
 
 class TestServiceWhithBadHost(ShinkenTest):
     def setUp(self):
-        try:
-            self.setup_with_file('etc/nagios_srv_badhost.cfg')
-        except AttributeError:
-            pass
+        self.setup_with_file('etc/nagios_srv_badhost.cfg', raise_on_bad_config=False)
 
     # Nagios allow service with no host to exist, it will just drop them
     def test_ServiceWhitNoHost(self):
