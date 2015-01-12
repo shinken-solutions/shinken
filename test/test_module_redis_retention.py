@@ -35,6 +35,7 @@ modconf.module_type = redis_retention_scheduler.properties['type']
 modconf.properties = redis_retention_scheduler.properties.copy()
 
 
+@unittest.skip('Disabled: not used by us in 1.4')
 class TestRedis(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
