@@ -30,6 +30,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.modules.status_dat_broker import get_instance
 
 
+@unittest.skip('disabled for 1.4 ; not used by us.')
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
