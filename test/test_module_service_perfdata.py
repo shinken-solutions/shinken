@@ -26,7 +26,7 @@
 import os
 import time
 
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, safe_print
 
 from shinken.modules.service_perfdata_broker import get_instance
 
@@ -100,7 +100,7 @@ class TestModSRVPErfdata(ShinkenTest):
 
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
-        print fd.read()
+        safe_print(fd.read())
 
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0' + u'\xf6', 'CRITICAL')
 
@@ -126,7 +126,7 @@ class TestModSRVPErfdata(ShinkenTest):
 
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
-        print fd.read()
+        safe_print(fd.read())
 
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'CRITICAL', 'CRITICAL', 'value1=0 value2=0' + u'\xf6')
         #print "BUF", buf
