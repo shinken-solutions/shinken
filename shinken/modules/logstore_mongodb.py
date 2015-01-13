@@ -160,7 +160,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             # If there is a replica_set, but the host is a simple standalone one
             # we get a "No suitable hosts found" here.
             # But other reasons are possible too.
-            logger.error("[LogStoreMongoDB] Could not open the database" % exp)
+            logger.error("[LogStoreMongoDB] Could not open the database: %s" % exp)
             raise LiveStatusLogStoreError
 
     def close(self):

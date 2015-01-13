@@ -36,7 +36,14 @@ modconf.database = 'test'
 modconf.module_type = mongodb_retention.properties['type']
 modconf.properties = mongodb_retention.properties.copy()
 
+try:
+    import pymongo
+    pymongo_import_err = ''
+except ImportError as pymongo_import_err:
+    pymongo = None
 
+@unittest.skip('Disabled, not used anymore in 1.4 by us.')
+@unittest.skipUnless(pymongo, "without pymongo that won't make it: %s" % pymongo_import_err)
 class TestMongodbRetention(ShinkenTest):
     # setUp is inherited from ShinkenTest
 

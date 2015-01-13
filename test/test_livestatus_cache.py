@@ -1,11 +1,16 @@
 
+import os
+import sys
+import random
 import copy
 import datetime
 import shutil
 
 
-import unittest
-from shinken_test import *
+from shinken_test import (
+    unittest, ShinkenTest, time, time_warp,
+    original_time_time, original_time_sleep
+)
 
 
 from mock_livestatus import mock_livestatus_handle_request
@@ -17,27 +22,24 @@ def set_to_midnight(dt):
     return datetime.datetime.combine(dt.date(), midnight)
 
 
-@unittest.skip('to be investigated')
 @mock_livestatus_handle_request
 class TestConfig(ShinkenTest):
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
+            brok.prepare()
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
-
-    pass
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
 
-@unittest.skip('to be investigated')
 @mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
     def setUp(self):
@@ -49,7 +51,6 @@ class TestConfigBig(TestConfig):
         print "Cleaning old broks?"
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
-
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -347,9 +348,9 @@ OutputFormat: json"""
         print "elapsed2", elapsed2
         print "elapsed3", elapsed3
         print "elapsed4", elapsed4
-        self.assert_(elapsed2 < elapsed1 / 10)
+        self.assert_(elapsed2 < elapsed1)
         self.assert_(elapsed3 < elapsed1)
-        self.assert_(elapsed4 < elapsed3 / 2)
+        self.assert_(elapsed4 < elapsed3)
 
         #time.time = fake_time_time
         #time.sleep = fake_time_sleep

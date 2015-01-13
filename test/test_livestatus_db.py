@@ -25,25 +25,35 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_test import *
+
 import os
 import sys
 import re
-import subprocess
+import datetime
 import shutil
 import time
 import random
 import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.objects.service import Service
 from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.livestatus_broker.livestatus_broker import LiveStatus_broker
+from shinken.modules.livestatus_broker.livestatus import LiveStatus
+from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
+from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.comment import Comment
+from shinken.modulesmanager import ModulesManager
+from shinken.log import logger
 
 from mock_livestatus import mock_livestatus_handle_request
+from shinken_test import (
+    ShinkenTest,
+    time_hacker,
+    unittest,
+    datamgr,
+)
 
 sys.setcheckinterval(10000)
 
@@ -156,7 +166,7 @@ ResponseHeader: fixed16
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
-        time_warp(-3600)
+        time_hacker.time_warp(-3600)
         num_logs = 0
         host.state = 'DOWN'
         host.state_type = 'SOFT'
@@ -200,7 +210,7 @@ Columns: time type options state host_name"""
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
-        time_warp(-1 * 3600 * 24 * 7)
+        time_hacker.time_warp(-1 * 3600 * 24 * 7)
         num_logs = 0
         while time.time() < now:
             host.state = 'DOWN'
@@ -261,7 +271,7 @@ Columns: time type options state host_name"""
         back4days_noon = int(time.mktime(back4days_noon.timetuple()))
         back4days_morning = int(time.mktime(back4days_morning.timetuple()))
         now = time.time()
-        time_warp(-1 * (now - back4days_noon))
+        time_hacker.time_warp(-1 * (now - back4days_noon))
         now = time.time()
         print "4t is", time.asctime(time.localtime(int(now)))
         logs = 0
@@ -373,7 +383,7 @@ Columns: time type options state host_name"""
         print "expect", logs
 
         # now warp to the time when we entered this test
-        time_warp(-1 * (time.time() - save_now))
+        time_hacker.time_warp(-1 * (time.time() - save_now))
         # and now start the same logging
         today = datetime.datetime.fromtimestamp(time.time())
         today_noon = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
@@ -389,7 +399,7 @@ Columns: time type options state host_name"""
         back4days_noon = int(time.mktime(back4days_noon.timetuple()))
         back4days_morning = int(time.mktime(back4days_morning.timetuple()))
         now = time.time()
-        time_warp(-1 * (now - back4days_noon))
+        time_hacker.time_warp(-1 * (now - back4days_noon))
         now = time.time()
         time.sleep(5)
         print "4t is", time.asctime(time.localtime(int(now)))
@@ -446,29 +456,6 @@ Columns: time type options state host_name"""
         print "lengths is", lengths
         self.assert_(lengths == [12, 28, 44, 60])
 
-    def xtest_david_database(self):
-        #os.removedirs("var/archives")
-        self.print_header()
-        lengths = []
-        dbh = LiveStatusDb("tmp/livestatus.db", "tmp/archives", 3600)
-        numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
-        lengths.append(numlogs[0][0])
-        print "db main entries", numlogs
-        dbh.close()
-        start = time.time()
-        os.system("date")
-        dbh = LiveStatusDb("tmp/livestatus.db", "tmp/archives", 3600)
-        dbh.log_db_do_archive()
-        dbh.close()
-        os.system("date")
-        stop = time.time()
-        for db in sorted(os.listdir("tmp/archives")):
-            dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
-            numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
-            lengths.append(numlogs[0][0])
-            print "db entries", db, numlogs
-            dbh.close()
-        print "lengths is", lengths
 
     def test_archives_path(self):
         #os.removedirs("var/archives")
@@ -598,7 +585,7 @@ class TestConfigBig(TestConfig):
         #                       events which will be read from db
         #
         loops = int(86400 / 192)
-        time_warp(-1 * days * 86400)
+        time_hacker.time_warp(-1 * days * 86400)
         print "warp back to", time.ctime(time.time())
         # run silently
         old_stdout = sys.stdout
@@ -707,15 +694,11 @@ Filter: service_description = test_ok_01
 And: 5
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
-        fake_time_time = time.time
-        fake_time_sleep = time.sleep
-        time.time = original_time_time
-        time.sleep = original_time_sleep
+        time_hacker.set_real_time()
+
         print request
         print "query 1 --------------------------------------------------"
-        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        tac = time.time()
         pyresponse = eval(response)
         print "number of records with test_ok_01", len(pyresponse)
         self.assert_(len(pyresponse) == should_be)
@@ -768,9 +751,7 @@ OutputFormat: json"""
         # the numlogs above only counts records in the currently attached db
         numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" % (int(query_start), int(query_end)))
         print "numlogs is", numlogs
-
-        time.time = fake_time_time
-        time.sleep = fake_time_sleep
+        time_hacker.set_my_time()
 
 
 @mock_livestatus_handle_request
