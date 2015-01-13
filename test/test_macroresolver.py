@@ -210,9 +210,12 @@ class TestMacroResolver(ShinkenTest):
         data = hst.get_data_for_checks()
 
         # Get the 18 of December 2014 at 15:00, thursday
-        dec_the_18 = time.mktime(time.strptime("18 Dec 2014 15:00:00", "%d %b %Y %H:%M:%S"))
+        dec_the_18_15h = int(time.mktime(time.strptime("18 Dec 2014 15:00:00", "%d %b %Y %H:%M:%S")))
         # Get the 18 of December 2014 at 20:00, thursday
-        dec_the_18_20h = time.mktime(time.strptime("18 Dec 2014 20:00:00", "%d %b %Y %H:%M:%S"))
+        dec_the_18_20h = int(time.mktime(time.strptime("18 Dec 2014 20:00:00", "%d %b %Y %H:%M:%S")))
+        # Get the 18 of December 2014 at 09:00, friday
+        dec_the_19_9h = int(time.mktime(time.strptime("19 Dec 2014 09:00:00", "%d %b %Y %H:%M:%S")))
+
 
         #with a 24x7 timeperiod
         data = svc.get_data_for_checks()
@@ -224,7 +227,7 @@ class TestMacroResolver(ShinkenTest):
 
         #with workhours timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
         data = svc.get_data_for_checks()
-        dummy_call = "special_macro!$ISVALIDTIME:workhours:1418911200$"
+        dummy_call = "special_macro!$ISVALIDTIME:workhours:{0}$".format(dec_the_18_15h)
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
@@ -232,7 +235,7 @@ class TestMacroResolver(ShinkenTest):
 
         #with a timestamp off workhours (equals to 18 Dec 2014 20:00:00)
         data = svc.get_data_for_checks()
-        dummy_call = "special_macro!$ISVALIDTIME:workhours:1418929200$"
+        dummy_call = "special_macro!$ISVALIDTIME:workhours:{0}$".format(dec_the_18_20h)
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
@@ -249,29 +252,29 @@ class TestMacroResolver(ShinkenTest):
         # with a 24x7 timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
         # Next validtime will be equal to the timestamp
         data = svc.get_data_for_checks()
-        dummy_call = "special_macro!$NEXTVALIDTIME:24x7:1418911200$"
+        dummy_call = "special_macro!$NEXTVALIDTIME:24x7:{0}$".format(dec_the_18_15h)
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assertEqual('plugins/nothing 1418911200', com)
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_18_15h), com)
 
         # with workhours timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
         # Next validtime will be equal to the timestamp
         data = svc.get_data_for_checks()
-        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:1418911200$"
+        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:{0}$".format(dec_the_18_15h)
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assertEqual('plugins/nothing 1418911200', com)
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_18_15h), com)
 
         # with a timestamp off workhours (equals to 18 Dec 2014 20:00:00)
-        # Next valid time will be 1418976000 (19 Dec 2014 08:00:00)
+        # Next valid time will be 1418976000 (19 Dec 2014 09:00:00)
         data = svc.get_data_for_checks()
-        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:1418929200$"
+        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:{0}$".format(dec_the_18_20h)
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print com
-        self.assertEqual('plugins/nothing 1418976000', com)
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_19_9h), com)
 
         # with bad timestamp
         data = svc.get_data_for_checks()
