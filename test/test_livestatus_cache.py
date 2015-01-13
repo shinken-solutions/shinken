@@ -348,12 +348,11 @@ OutputFormat: json"""
         print "elapsed2", elapsed2
         print "elapsed3", elapsed3
         print "elapsed4", elapsed4
-        self.assert_(elapsed2 < elapsed1)
-        self.assert_(elapsed3 < elapsed1)
-        self.assert_(elapsed4 < elapsed3)
+        not_sure = "This highly depends on the system load, you may relaunch this test and it would succeed."
+        self.assertLess(elapsed2, elapsed1, not_sure)
+        self.assertLess(elapsed3, elapsed1, not_sure)
+        self.assertLess(elapsed4, elapsed3, not_sure)
 
-        #time.time = fake_time_time
-        #time.sleep = fake_time_sleep
 
 
 
