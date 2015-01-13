@@ -194,10 +194,12 @@ class TestService(ShinkenTest):
         self.assertEqual('OK', svc.last_hard_state)
 
         # now go hard!
+        time.sleep(2)
         now = int(time.time())
+        self.assertLess(svc.last_hard_state_change, now)
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
-        self.assertEqual(now, svc.last_hard_state_change)
+        self.assertGreaterEqual(svc.last_hard_state_change, now)
         self.assertEqual('CRITICAL', svc.last_hard_state)
         print "Last hard state id", svc.last_hard_state_id
         self.assertEqual(2, svc.last_hard_state_id)
