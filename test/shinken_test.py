@@ -100,6 +100,56 @@ def time_warp(duration):
 # time.time = original_time_time
 # time.sleep = original_time_sleep
 
+
+#############################################################################
+
+# We overwrite the functions time() and sleep()
+# This way we can modify sleep() so that it immediately returns although
+# for a following time() it looks like thee was actually a delay.
+# This massively speeds up the tests.
+class TimeHacker(object):
+
+    def __init__(self):
+        self.my_offset = 0
+        self.my_starttime = time.time()
+        self.my_oldtime = time.time
+        self.original_time_time = time.time
+        self.original_time_sleep = time.sleep
+        self.in_real_time = True
+
+    def my_time_time(self):
+        return self.my_oldtime() + self.my_offset
+
+    def my_time_sleep(self, delay):
+        self.my_offset += delay
+
+    def time_warp(self, duration):
+        self.my_offset += duration
+
+    def set_my_time(self):
+        if self.in_real_time:
+            time.time = self.my_time_time
+            time.sleep = self.my_time_sleep
+            self.in_real_time = False
+
+# If external processes or time stamps for files are involved, we must
+# revert the fake timing routines, because these externals cannot be fooled.
+# They get their times from the operating system.
+    def set_real_time(self):
+        if not self.in_real_time:
+            time.time = self.original_time_time
+            time.sleep = self.original_time_sleep
+            self.in_real_time = True
+
+
+#Time hacking for every test!
+time_hacker = TimeHacker()
+time_hacker.set_my_time()
+
+
+
+
+
 class Pluginconf(object):
     pass
 
