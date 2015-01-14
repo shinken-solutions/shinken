@@ -1586,6 +1586,9 @@ class Scheduler(object):
         for p_id in self.pollers:
             self.pynag_con_init(p_id, type='poller')
 
+        for r_id in self.reactionners:
+            self.pynag_con_init(r_id, type='reactionner')
+
         # Ticks are for recurrent function call like consume
         # del zombies etc
         ticks = 0

@@ -403,6 +403,25 @@ class Shinken(BaseSatellite):
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
 
+        # Now We create our reactionners
+        for reac_id in satellites['reactionners']:
+            # Must look if we already have it
+            already_got = reac_id in self.reactionners
+            reac = satellites['reactionners'][reac_id]
+            self.reactionners[reac_id] = reac
+
+            if reac['name'] in override_conf['satellitemap']:
+                reac = dict(reac)  # make a copy
+                reac.update(override_conf['satellitemap'][reac['name']])
+
+            proto = 'http'
+            if p['use_ssl']:
+                proto = 'https'
+            uri = '%s://%s:%s/' % (proto, reac['address'], reac['port'])
+            self.reactionners[reac_id]['uri'] = uri
+            self.reactionners[reac_id]['last_connection'] = 0
+
+
         # First mix conf and override_conf to have our definitive conf
         for prop in self.override_conf:
             #print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
