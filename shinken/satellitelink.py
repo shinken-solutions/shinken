@@ -60,7 +60,7 @@ class SatelliteLink(Item):
         'satellitemap':       DictProp(default={}, elts_prop=AddrProp, to_send=True, override=True),
         'use_ssl':            BoolProp(default=False, fill_brok=['full_status']),
         'hard_ssl_name_check':BoolProp(default=True, fill_brok=['full_status']),
-        'passive':            BoolProp(default=True, fill_brok=['full_status'], to_send=True),
+        'passive':            BoolProp(default=False, fill_brok=['full_status'], to_send=True),
     })
 
     running_properties = Item.running_properties.copy()
