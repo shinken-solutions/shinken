@@ -148,9 +148,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
 
 
     def close(self):
-        self.dbconn.commit()
-        self.dbconn.close()
-        self.dbconn = None
+        if self.dbconn:
+            self.dbconn.commit()
+            self.dbconn.close()
+            self.dbconn = None
         if self.max_logs_age == 0:
             # Again, if max_logs_age is 0, we don't care for archives.
             # If max_logs_age was manually set to 0, we know that we don't
