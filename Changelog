@@ -2,8 +2,8 @@
 Shinken ChangeLog
 ########################
 
-2.2-RC1   - XX/12/2014
----------------------
+2.2   - XX/01/2015
+-------------------
 	CORE ENHANCEMENT
 	Add : Bottle - HTTP_X_FORWARDED_PROTO support (for WebUI)
 	Add : BpRules - Expands bp_rules t flag from tags
@@ -20,6 +20,8 @@ Shinken ChangeLog
 	Add : LogEvent - Output key to properties dict
 	Add : LogEvent - Pattern for FLAPPING events
 	Add : Receiver - Accept passive results from host or service not in configuration
+	Add : Realms - Handle properly multi level of realms
+	Add : SchedulingItem - callbacks for HOSTDOWNTIME and SERVICEDOWNTIME macros
 	Add : SchedulingItem - Parameter to remove host-service dependency
 	Add : Service Escalation - wildcard service_description
 	Add : Service - method  get_service_tags (for WebUI)
@@ -27,7 +29,8 @@ Shinken ChangeLog
 	
 	Del : Move WebUI image and template to the good repo
 	Del : Pack Distribution tuning (hosts where fixd on the same scehduler between reload) - causing more damage in load balancing that it solve problems
-	
+
+	Enh : CLI now exit with a real system return code when fail to install
 	Enh : Config - Module name formatting in config files
 	Enh : Config parsing - Refactoring to pythonize at object creation. Attribute have correct type very early.
 	Enh : Config parsing - Refactoring to reduce parse time, and scope code to ease future evolutions
@@ -44,11 +47,11 @@ Shinken ChangeLog
 	Enh : Perfdata - Better internal parsing
 	Enh : Realm - Code refactoring
 	Enh : Scheduler - use a lock to acces put_result
+	Enh : SchedulingItem - use return_code attribute to remember plugin return code so that it is available in broks.
 	Enh : Tests - better Jenkins and Travis integration and Coverall support
 	Enh : Tests - Code cleaning
 	Enh : Tests - Use assert function from unittest2
 	Enh : Triggers - Try except statement when executing them
-	Enh : CLI now exit with a real system return code when fail to install
 
 
 	CORE FIXES
@@ -61,10 +64,13 @@ Shinken ChangeLog
 	Fix : Datamanager -  Service totals and host totals computation
 	Fix : Discovery - Linux hosts with recent nmap versions
 	Fix : HTTP API - Code stabilization
+	Fix : HTTP API - Realm not displayed in get-all-states call
 	Fix : Init scripts - Use last python version
 	Fix : Logs - Manage pre-daemon logs.
 	Fix : Macroresolver - Move output_macros definition to avoid error in WebUI (eltdetail template)
 	Fix : Notifications - Master notifications must not be sent to reactionner so that we scatter them.
+	Fix : Passive reactionners are now working
+	Fix : Scheduler - Pack size for multi-schedulers environnements. Reduce memory consumption and boot time in big setup.
 	Fix : Scheduler - Segfault with circular service dependency loop
 	Fix : Scheduler - Skip compensate if daemon is not init
 	Fix : SchedulingItem - Bad behavior for use_aggressive_host_checking.
