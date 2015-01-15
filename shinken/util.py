@@ -37,13 +37,7 @@ except ImportError:
 from shinken.macroresolver import MacroResolver
 from shinken.log import logger
 
-#from memoized import memoized
-try:
-    stdout_encoding = sys.stdout.encoding
-    safe_stdout = (stdout_encoding == 'UTF-8')
-except Exception, exp:
-    logger.error('Encoding detection error= %s' % (exp))
-    safe_stdout = False
+safe_stdout = 'UTF-8' == getattr(sys.stdout, 'encoding', None)
 
 
 ########### Strings #############

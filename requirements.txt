@@ -1,1 +1,4 @@
 Pyro==3.14
+# for python2.6:
+unittest2
+

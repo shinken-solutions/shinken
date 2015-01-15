@@ -243,7 +243,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()]))
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
-        logger.debug("[Livestatus Regenerator] Id by Hostname heap: %s" % str(self.services._id_by_host_name_heap))
+        #logger.debug("[Livestatus Regenerator] Id by Hostname heap: %s" % str(self.services._id_by_host_name_heap))
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 

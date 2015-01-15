@@ -23,6 +23,13 @@
 Test memcache retention.
 """
 
+try:
+    import memcache
+    memcache_import_err = ''
+except ImportError as memcache_import_err:
+    memcache = None
+
+
 from shinken_test import unittest, ShinkenTest
 
 from shinken.objects.module import Module
@@ -35,6 +42,7 @@ modconf.module_type = memcache_retention_scheduler.properties['type']
 modconf.properties = memcache_retention_scheduler.properties.copy()
 
 
+@unittest.skipUnless(memcache, 'Could not import memcache: %s' % memcache_import_err)
 class TestMemcacheRetention(ShinkenTest):
     # setUp is inherited from ShinkenTest
 

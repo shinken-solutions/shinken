@@ -29,10 +29,6 @@ import time
 import random
 import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
-from shinken.comment import Comment
 
 from mock_livestatus import mock_livestatus_handle_request
 
@@ -43,24 +39,24 @@ class PerfTest(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
 
 @mock_livestatus_handle_request
 class TestConfigBig(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_10r_1000h_20000s.cfg')
+        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
         # ...test_router_09
         # ...test_host_0999
         self.testid = str(os.getpid() + random.randint(1, 1000))
@@ -69,7 +65,6 @@ class TestConfigBig(PerfTest):
         self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
-
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
@@ -142,16 +137,10 @@ KeepAlive: on
 """ % range
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == real_services)
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == real_services)
@@ -185,13 +174,11 @@ KeepAlive: on
 """ % range
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == range * self.services_per_host)
 
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == range * self.services_per_host)
@@ -223,18 +210,13 @@ OutputFormat:json
 KeepAlive: on
 """
 #ResponseHeader: fixed16
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == self.services_per_host)
 
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == self.services_per_host)
@@ -256,8 +238,7 @@ KeepAlive: on
         sys.stdout = old_stdout
 
         range = int(len(self.sched.hosts) / 2)
-        request = """
-GET hosts
+        request = """GET hosts
 """
         request += """Filter: host_name = %s
 """ % (self.host_format % range,)
@@ -265,14 +246,13 @@ GET hosts
 KeepAlive: on
 """
 #ResponseHeader: fixed16
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 1)
 
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 1)
@@ -302,18 +282,12 @@ KeepAlive: on
 #ResponseHeader: fixed16
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         print len(pyresponse)
         self.assert_(len(pyresponse) == 2 * self.services_per_host)
 
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         print len(pyresponse)
@@ -342,18 +316,12 @@ KeepAlive: on
 """
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 2)
 
         request += """Filter: host_name !=
 """
         print request
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 2)
@@ -385,18 +353,12 @@ KeepAlive: on
 """
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups * self.services_per_host)
 
         request += """Filter: host_name !=
 """
         print request
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups * self.services_per_host)
@@ -425,17 +387,11 @@ KeepAlive: on
 """
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups)
 
         request += """Filter: host_name !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups)
@@ -465,17 +421,11 @@ KeepAlive: on
 #ResponseHeader: fixed16
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 2)
 
         request += """Filter: service_description !=
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 2)
@@ -507,18 +457,12 @@ KeepAlive: on
 #ResponseHeader: fixed16
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups)
 
         request += """Filter: service_description !=
 """
         print request
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == allgroups)
@@ -534,6 +478,7 @@ Stats
 
 """
 
+@unittest.skip('Too heavy ..')
 @mock_livestatus_handle_request
 class TestConfigCrazy(TestConfigBig):
     def setUp(self):
@@ -555,33 +500,8 @@ class TestConfigCrazy(TestConfigBig):
         super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
 
-@mock_livestatus_handle_request
-class TestConfigSmall(TestConfigBig):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        self.adjust_object_prefixes()
-
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfigSmall, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-
 
 if __name__ == '__main__':
-    #import cProfile
+
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
-
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
-    #unittest.TextTestRunner(verbosity=2).run(allsuite)

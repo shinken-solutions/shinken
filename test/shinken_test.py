@@ -8,14 +8,72 @@ from functools import partial
 import sys
 import time
 import datetime
+import locale
 import os
 import string
 import re
 import random
-import unittest
+
+if sys.version_info[:2] <= (2,6):
+    import unittest2 as unittest
+else:
+    import unittest
+
+
+def guess_sys_stdout_encoding():
+    ''' Return the best guessed encoding to be used for printing on sys.stdout. '''
+    return (
+           getattr(sys.stdout, 'encoding', None)
+        or getattr(sys.__stdout__, 'encoding', None)
+        or locale.getpreferredencoding()
+        or sys.getdefaultencoding()
+        or 'ascii'
+    )
+
+
+
+def safe_print(*args, **kw):
+    """" "print" args to sys.stdout,
+    If some of the args aren't unicode then convert them first to unicode,
+        using keyword argument 'in_encoding' if provided (else default to UTF8)
+        and replacing bad encoded bytes.
+    Write to stdout using 'out_encoding' if provided else best guessed encoding,
+        doing xmlcharrefreplace on errors.
+    """
+    in_bytes_encoding = kw.pop('in_encoding', 'UTF-8')
+    out_encoding = kw.pop('out_encoding', guess_sys_stdout_encoding())
+    if kw:
+        raise ValueError('unhandled named/keyword argument(s): %r' % kw)
+    #
+    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+                                else
+                            unicode(str(a), in_bytes_encoding, 'replace')
+                        for a in args )
+
+    possible_codings = ( out_encoding, )
+    if out_encoding != 'ascii':
+        possible_codings += ( 'ascii', )
+
+    for coding in possible_codings:
+        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
+        try:
+            sys.stdout.write(data)
+            break
+        except UnicodeError as err:
+            # there might still have some problem with the underlying sys.stdout.
+            # it might be a StringIO whose content could be decoded/encoded in this same process
+            # and have encode/decode errors because we could have guessed a bad encoding with it.
+            # in such case fallback on 'ascii'
+            if coding == 'ascii':
+                raise
+            sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
+                coding, err))
+    sys.stdout.write(b'\n')
+
 
 # import the shinken library from the parent directory
-import __import_shinken ;
+import __import_shinken
+
 from shinken.modules.livestatus_broker.livestatus_client_thread import LiveStatusClientThread
 from mock_livestatus import mocked_livestatus_client_thread_handle_request
 from mock_livestatus import mocked_livestatus_client_thread_send_data
@@ -77,14 +135,14 @@ def my_time_time():
     return now
 
 original_time_time = time.time
-time.time = my_time_time
+#time.time = my_time_time
 
 
 def my_time_sleep(delay):
     time.my_offset += delay
 
 original_time_sleep = time.sleep
-time.sleep = my_time_sleep
+#time.sleep = my_time_sleep
 
 
 def time_warp(duration):
@@ -100,6 +158,56 @@ def time_warp(duration):
 # time.time = original_time_time
 # time.sleep = original_time_sleep
 
+
+#############################################################################
+
+# We overwrite the functions time() and sleep()
+# This way we can modify sleep() so that it immediately returns although
+# for a following time() it looks like thee was actually a delay.
+# This massively speeds up the tests.
+class TimeHacker(object):
+
+    def __init__(self):
+        self.my_offset = 0
+        self.my_starttime = time.time()
+        self.my_oldtime = time.time
+        self.original_time_time = time.time
+        self.original_time_sleep = time.sleep
+        self.in_real_time = True
+
+    def my_time_time(self):
+        return self.my_oldtime() + self.my_offset
+
+    def my_time_sleep(self, delay):
+        self.my_offset += delay
+
+    def time_warp(self, duration):
+        self.my_offset += duration
+
+    def set_my_time(self):
+        if self.in_real_time:
+            time.time = self.my_time_time
+            time.sleep = self.my_time_sleep
+            self.in_real_time = False
+
+# If external processes or time stamps for files are involved, we must
+# revert the fake timing routines, because these externals cannot be fooled.
+# They get their times from the operating system.
+    def set_real_time(self):
+        if not self.in_real_time:
+            time.time = self.original_time_time
+            time.sleep = self.original_time_sleep
+            self.in_real_time = True
+
+
+#Time hacking for every test!
+time_hacker = TimeHacker()
+time_hacker.set_my_time()
+
+
+
+
+
 class Pluginconf(object):
     pass
 
@@ -108,7 +216,7 @@ class ShinkenTest(unittest.TestCase):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    def setup_with_file(self, path):
+    def setup_with_file(self, path, raise_on_bad_config=True):
         # i am arbiter-like
         self.broks = {}
         self.me = None
@@ -149,7 +257,10 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
-            print "The conf is not correct, I stop here"
+            msg = "The conf is not correct, I stop here"
+            if raise_on_bad_config:
+                raise RuntimeError(msg)
+            print(msg)
             return
 
         self.confs = self.conf.cut_into_parts()

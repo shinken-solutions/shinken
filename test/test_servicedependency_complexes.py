@@ -22,7 +22,7 @@
 # This file is used to test reading and processing of config files
 #
 
-from shinken_test import *
+from shinken_test import ShinkenTest, unittest
 
 
 class TestConfig(ShinkenTest):

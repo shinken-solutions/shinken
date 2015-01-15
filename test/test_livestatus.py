@@ -447,12 +447,8 @@ Columns: name state
 Filter: localhost
 ResponseHeader: fixed16
 """
-        goodresponse = """452         106
-Completely invalid GET request 'GET hosts
-Columns: name state
-Filter: localhost
-ResponseHeader: fixed16
-'
+        goodresponse = """452          55
+Completely invalid GET request \'invalid Filter header\'
 """
         response, keepalive = self.livestatus_client.handle_request(request)
         print response
@@ -1238,8 +1234,8 @@ And: 2
 Or: 3"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-        self.assert_(self.contains_line(response, 'SERVICE DOWNTIME ALERT;test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime'))
+        print('response=%r' % response)
+        self.assert_(self.contains_line(response, 'SERVICE DOWNTIME ALERT;"test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime"'))
 
     def test_thruk_logs_alerts_summary(self):
         self.print_header()

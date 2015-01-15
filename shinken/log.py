@@ -177,8 +177,9 @@ class Log:
         # DEBUG level logs are logged by the daemon locally
         # and must not be forwarded to other satellites, or risk overloading them.
         if level != logging.DEBUG:
-            b = Brok('log', {'log': s})
-            obj.add(b)
+            if obj: # obj can be still None if not yet initialized by load_obj().
+                b = Brok('log', {'log': s})
+                obj.add(b)
 
         # If local logging is enabled, log to the defined handler, file.
         if local_log is not None:

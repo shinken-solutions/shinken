@@ -26,8 +26,8 @@
 from types import GeneratorType
 from collections import namedtuple
 
-from shinken.log import logger
-from livestatus_broker_common import LiveStatusQueryError
+import csv
+from StringIO import StringIO
 
 try:
     from ujson import dumps, loads
@@ -44,9 +44,15 @@ except ImportError:
         JSONEncoder.item_separator = ','
         JSONEncoder.key_separator = ':'
 
+#############################################################################
+
+from shinken.log import logger
+from livestatus_broker_common import LiveStatusQueryError
+
+#############################################################################
 
 Separators = namedtuple('Separators',
-                        ('line', 'field', 'list', 'pipe')) # pipe is used within livestatus_broker.mapping 
+                        ('line', 'field', 'list', 'pipe')) # pipe is used within livestatus_broker.mapping
 
 
 class LiveStatusListResponse(list):
@@ -165,15 +171,29 @@ class LiveStatusResponse:
                 return ''
 
     def _csv_end_row(self, row, line_nr=0):
+        f = StringIO()
+        writer = csv.writer(f, delimiter=self.separators.field, lineterminator=self.separators.line)
+        writer.writerow(row)
+        res = f.getvalue()[:-1]
         return '%s%s' % (
             self.separators.line if line_nr else '',
-            self.separators.field.join(row))
+            res)
 
     def _json_end_row(self, row, line_nr=0):
         return (',' if line_nr else '') + dumps(row)
 
     def _python_end_row(self, row, line_nr=0):
-        return (',' if line_nr else '') + str(row)
+        ret = [',' if line_nr else '']
+        ret.append('[')
+        for item in row:
+            if isinstance(item, unicode):
+                item = item.encode('UTF-8')
+            ret.append(repr(item))
+            ret.append(', ')
+        if row:
+            del ret[-1] # skip last ','
+        ret.append(']')
+        return ''.join(ret)
 
     _format_2_value_handler = {
         'csv':      (_csv_end_row, _format_csv_value),
@@ -205,10 +225,14 @@ class LiveStatusResponse:
         except StopIteration:
             has_no_item = True
 
-        showheader = (
+        if self.outputformat != 'csv':
+            showheader = self.columnheaders == 'on'
+        else: # csv has a somehow more complicated showheader rule than json or python..
+            showheader = (
             (has_no_item and self.columnheaders == 'on')
-            or (not has_no_item and (self.columnheaders != 'off'
+                or (not has_no_item and (self.columnheaders != 'off'
                                      or not query_with_columns)))
+
         line_nr = 0
         if showheader:
             yield headers

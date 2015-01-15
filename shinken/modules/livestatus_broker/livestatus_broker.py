@@ -124,6 +124,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
         self.client_connections = {} # keys will be socket of client, values are LiveStatusClientThread instances
         self.db = None
+        self.listeners = []
         self._listening_thread = threading.Thread(target=self._listening_thread_run)
 
     def add_compatibility_sqlite_module(self):
@@ -383,8 +384,6 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def do_stop(self):
         logger.info("[Livestatus Broker] So I quit")
-        for s in self.input:
-            full_safe_close(s)
         # client threads could be stopped and joined by the listening_thread..
         for client in self.client_connections.values():
             assert isinstance(client, LiveStatusClientThread)
@@ -394,16 +393,17 @@ class LiveStatus_broker(BaseModule, Daemon):
             client.join()
         if self._listening_thread:
             self._listening_thread.join()
+        # inputs must be closed after listening_thread
+        for s in self.listeners:
+            full_safe_close(s)
         try:
             self.db.close()
-            pass
         except Exception as err:
             logger.warning('Error on db close: %s' % err)
 
 
     def create_listeners(self):
         backlog = 5
-        self.listeners = []
         if self.port:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setblocking(0)
@@ -425,13 +425,12 @@ class LiveStatus_broker(BaseModule, Daemon):
             sock.listen(backlog)
             self.listeners.append(sock)
             logger.info("[Livestatus Broker] listening on unix socket: %s" % str(self.socket))
-        self.input = self.listeners[:]
 
 
     def _listening_thread_run(self):
         while not self.interrupted:
             # Check for pending livestatus requests
-            inputready, _, exceptready = select.select(self.input, [], [], 1)
+            inputready, _, exceptready = select.select(self.listeners, [], [], 1)
 
             if len(exceptready) > 0:
                 pass
@@ -480,6 +479,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # while updating
     def manage_lql_thread(self):
         logger.info("[Livestatus Broker] Livestatus query thread started")
+        self.db.open() # make sure to open the db in this thread..
         # This is the main object of this broker where the action takes place
         self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
         self.create_listeners()
@@ -521,10 +521,12 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.db.commit_and_rotate_log_db()
 
         # end: while not self.interrupted:
-
         self.do_stop()
 
-    def write_protocol(self, request, response):
+    def write_protocol(self, request=None, response=None, sent=0):
         if self.debug_queries:
-            print "REQUEST>>>>>\n" + request + "\n\n"
-            #print "RESPONSE<<<<\n" + response + "\n\n"
+            if request is not None:
+                print "REQUEST>>>>>\n" + request + "\n\n"
+            if response is not None:
+                print "RESPONSE<<<<\n" + response + "\n"
+                print "RESPONSE SENT<<<<\n %s \n\n" % sent

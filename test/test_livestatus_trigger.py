@@ -47,6 +47,20 @@ time.sleep = original_time_sleep
 
 
 class TestConfig(ShinkenTest):
+
+    def setUp(self):
+        super(TestConfig, self).setUp()
+        self.init_livestatus()
+        self.sched.conf.skip_initial_broks = False
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+        self.adjust_object_prefixes()
+
+
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
         for line in text.splitlines():
@@ -61,17 +75,17 @@ class TestConfig(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.broks.keys()
+        ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            # print "Managing a brok type", brok.type, "of id", brok_id
-            # if brok.type == 'update_service_status':
+            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
+        self.sched.brokers['Default-Broker']['broks'] = {}
 
     def lines_equal(self, text1, text2):
         # gets two multiline strings and compares the contents
@@ -417,6 +431,7 @@ ColumnHeaders: off
         print response
         response.format_live_data(result, query.columns, query.aliases)
         output, keepalive = response.respond()
+        output = ''.join(output) # response.respond() now return a LiveStatusListResponse instance..
         self.assert_(output.strip())
 
     def test_multiple_externals(self):

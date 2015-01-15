@@ -11,6 +11,7 @@ import copy
 import traceback
 
 from shinken.log import logger
+
 from .livestatus import LiveStatus
 from .livestatus_response import LiveStatusListResponse
 from .livestatus_broker_common import LiveStatusQueryError
@@ -64,21 +65,35 @@ class LiveStatusClientThread(threading.Thread):
         self.write_timeout = self.read_timeout = 90  # TODO: use parameters from somewhere..
         self.logger = logger
         self.last_query_time = None
+        self.n_requests = 0 # number of requests received
 
-    def _has_query(self):
-        ''' Check if we have a valid query inside our buffer. For this we just looks if buffer ends with 2 CR ('\n') or its Windows form ('\r\n').
-        :return: True if yes, False otherwise.
+    def __str__(self):
+        return 'livestatus-th-%s nr=%s' % (self.ident, self.n_requests)
+
+    def get_request(self):
+        ''' Try to get the next request available in our input buffer.
+        If there is one:
+            -> returns it (with its ending \n\n) and clear the input buffer of it.
+        If none is yet fully available:
+            -> returns None.
         '''
-        last_bytes = b''
-        idx = len(self.buffer_list) - 1
-        while idx >= 0:
-            last_bytes = self.buffer_list[idx] + last_bytes
-            if len(last_bytes) > 1 and last_bytes[-2:] == b'\n\n':
-                return True
-            if len(last_bytes) > 3:
-                return last_bytes[-4:] == b'\r\n\r\n'
-            idx -= 1
-        return False
+        buf = b''
+        for idx, data in enumerate(self.buffer_list):
+            buf += data
+            endline = buf.find('\n\n')
+            sz = 2
+            if endline < 0:
+                endline = buf.find('\r\n\r\n')
+                sz = 4
+            if endline >= 0:
+                for di in range(idx):
+                    del self.buffer_list[0]
+                self.buffer_list[0] = self.buffer_list[0][endline+sz:]
+                if not self.buffer_list[0]:
+                    del self.buffer_list[0]
+                self.n_requests += 1
+                return buf[:endline+sz]
+        return None
 
     def _read(self, size=RECV_SIZE):
         '''Read at most `size´ bytes of data.
@@ -88,7 +103,7 @@ class LiveStatusClientThread(threading.Thread):
             data = self.client_sock.recv(size)
         except socket.error as err:
             if err.args[0] == errno.EWOULDBLOCK: # but should not happen as we are in non-blocking mode..
-                return
+                return b''
             else:
                 raise Error.ClientReadError('Could not read from client: %s' % err)
         if not data:
@@ -104,20 +119,35 @@ class LiveStatusClientThread(threading.Thread):
         fds = [ self.client_sock ]
         timeout_time = time.time() + self.read_timeout
 
+        request = self.get_request() # there can be already buffered request
+        if request is not None:
+            return request
+
         while not self.stop_requested:
             inputready, _, exceptready = select.select(fds, [], [], 1)
             if exceptready:
                 raise Error.client_error
             if inputready:
-                data = self._read()
-                if data:
-                    self.buffer_list.append(data)
-                    if self._has_query():
-                        self.last_query_time = time.time()
-                        full_request = b''.join(self.buffer_list)
+                try:
+                    data = self._read()
+                except Error.ClientLeft:
+                    # very special case : if we already got some data,
+                    # AND it ends by a '\n' :
+                    if self.buffer_list and self.buffer_list[-1] and self.buffer_list[-1][-1] == '\n':
+                        # then try to consider it as a valid query
+                        self.logger.warn("Have a query not fully terminated but input closed by remote side.. "
+                                        "Let's consider this as a valid query and try process it..")
+                        ret = b''.join(self.buffer_list)
                         del self.buffer_list[:]
-                        return full_request
-                    continue
+                        return ret
+                    raise # otherwise simply let the ClientLeft propagate.
+
+                self.buffer_list.append(data)
+                request = self.get_request()
+                if request is not None:
+                    self.last_query_time = time.time()
+                    return request
+                continue
             if time.time() > timeout_time:
                 raise Error.ClientTimeout('Timeout reading full request from client')
             timeout_time += self.read_timeout
@@ -125,6 +155,8 @@ class LiveStatusClientThread(threading.Thread):
         raise Error.Interrupted('We have been interrupted')
 
     def _send_data(self, data):
+        if not data:
+            return
         fds = [ self.client_sock ]
         total_sent = 0
         len_data = len(data)
@@ -164,10 +196,30 @@ class LiveStatusClientThread(threading.Thread):
     def request_stop(self):
         self.stop_requested = True
 
+    def handle_wait_query(self, wait, query):
+        while not self.stop_requested:
+            if wait.condition_fulfilled():
+                break
+            elif wait.wait_timeout:
+                now = time.time()
+                if now - wait.wait_start > wait.wait_timeout:
+                    break
+            time.sleep(1)
+        else:
+            raise Error.Interrupted
+        output, _ = query.process_query()
+        return output
+
+
     def handle_request(self, request_data):
         response, _ = self.livestatus.handle_request(request_data)
+
         try:
-            self.send_response(response)
+            if not isinstance(response, (LiveStatusListResponse, type(b''))):
+                # must be a wait query..
+                response = self.handle_wait_query(*response)
+            if response:
+                self.send_response(response)
         except LiveStatusQueryError as err:
             code, detail = err.args
             response = LiveStatusResponse()

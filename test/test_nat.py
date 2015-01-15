@@ -33,7 +33,6 @@ import time
 import glob
 import shutil
 import os.path
-import unittest
 import subprocess
 
 SVC_CMD = "cd /hostlab && ./bin/shinken-#svc# -d -r -c ./test/etc/netkit/basic/#svc#d.ini\n"
@@ -58,6 +57,8 @@ logs = {
     'scheduler': LOGFILE,
 }
 
+from shinken_test import unittest
+
 
 def cleanup():
     rootdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "..")
@@ -68,9 +69,22 @@ def cleanup():
             os.remove(f)
 
 
+@unittest.skip("""disabled: lstart: no such file or directory
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/unittest/case.py", line 331, in run
+    testMethod()
+  File "/home/gstarck/work/work/SFL/Supervision/shinken_v1/test/test_nat.py", line 154, in test_01_failed_broker
+    'pc2': ['broker']
+  File "/home/gstarck/work/work/SFL/Supervision/shinken_v1/test/test_nat.py", line 133, in init_and_start_vms
+    subprocess.Popen(["lstart", "-d", os.path.join(self.testdir, ".."), "-f"], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
+  File "/usr/lib/python2.7/subprocess.py", line 710, in __init__
+    errread, errwrite)
+  File "/usr/lib/python2.7/subprocess.py", line 1327, in _execute_child
+    raise child_exception
+OSError: [Errno 2] No such file or directory""")
 class TestNat(unittest.TestCase):
     def setUp(self):
-        self.testdir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        self.testdir = os.path.dirname(os.path.abspath(__file__))
         self.files = dict()
 
         # copying netkit configuration file to project root directory

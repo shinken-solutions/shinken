@@ -1398,7 +1398,7 @@ class TestConfigBroken(ShinkenTest):
     """A class with a broken configuration, where business rules reference unknown hosts/services"""
 
     def setUp(self):
-        self.setup_with_file('etc/nagios_business_correlator_broken.cfg')
+        self.setup_with_file('etc/nagios_business_correlator_broken.cfg', raise_on_bad_config=False)
 
     def test_conf_is_correct(self):
         #

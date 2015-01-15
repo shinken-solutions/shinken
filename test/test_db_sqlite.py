@@ -22,10 +22,11 @@
 # This file is used to test reading and processing of config files
 #
 
-from shinken_test import *
+from shinken_test import ShinkenTest, unittest
 from shinken.db_sqlite import DBSqlite
 
 
+@unittest.skip("don't use absolute path (even more in privileged path) for tests")
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
