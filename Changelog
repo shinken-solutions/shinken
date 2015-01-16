@@ -78,7 +78,7 @@ Shinken ChangeLog
 	Fix : SSL - Crash under Windows
 	Fix : Timeperiods - remove bad modulo calculation for months
 	Fix : Sub-sub-realms where not assigned to higer realms brokers/reactionners
-
+	Fix : Add callbacks for HOSTDOWNTIME and SERVICEDOWNTIME macros
 
 
 
