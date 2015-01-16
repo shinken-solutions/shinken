@@ -100,6 +100,18 @@ class Item(object):
                     val = self.running_properties[key].pythonize(params[key])
                 elif hasattr(self, 'old_properties') and key in self.old_properties:
                     val = self.properties[self.old_properties[key]].pythonize(params[key])
+                elif key.startswith('_'): # custom macro, not need to detect something here
+                    _t = params[key]
+                    # If it's a string, directly use this
+                    if isinstance(_t, basestring):
+                        val = _t
+                    # aa list for a custom macro is not managed (conceptually invalid)
+                    # so take the first defined
+                    elif isinstance(_t, list) and len(_t) > 0:
+                        val = _t[0]
+                    # not a list of void? just put void string so
+                    else:
+                        val = ''
                 else:
                     warning = "Guessing the property %s type because it is not in %s object properties" % \
                               (key, cls.__name__)

@@ -259,6 +259,8 @@ class Config(Item):
         # More a running value in fact
         'resource_macros_names': ListProp(default=[]),
 
+        'http_backend': StringProp(default='auto'),
+
         # SSL PART
         # global boolean for know if we use ssl or not
         'use_ssl':               BoolProp(default=False, class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
@@ -447,7 +449,6 @@ class Config(Item):
 
     def load_params(self, params):
         clean_params = self.clean_params(params)
-        #self.params = Item.pythonize(Config, var)
 
         for key, value in clean_params.items():
 
@@ -456,6 +457,8 @@ class Config(Item):
             elif key in self.running_properties:
                 logger.warning("using a the running property %s in a config file", key)
                 val = self.running_properties[key].pythonize(clean_params[key])
+            elif key.startswith('$') or key in ['cfg_file', 'cfg_dir']: # it's a macro or a useless now param, we don't touch this
+                val = value
             else:
                 logger.warning("Guessing the property %s type because it is not in %s object properties",
                                key, self.__class__.__name__)

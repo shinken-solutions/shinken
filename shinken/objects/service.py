@@ -1062,7 +1062,7 @@ class Services(Items):
         hname = getattr(tpl, 'host_name', '')
         if not name and not hname:
             mesg = "a %s template has been defined without name nor " \
-                   "host_name%s" % (objcls, tpl.get_source())
+                   "host_name%s" % (objcls, self.get_source(tpl))
             tpl.configuration_errors.append(mesg)
         elif name:
             tpl = self.index_template(tpl)

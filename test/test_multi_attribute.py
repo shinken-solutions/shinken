@@ -51,20 +51,6 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assertEqual([u'c', u'f', u'1', u's', u'r', u'u', u'w'], list(set(srv1.notification_options)))
 
 
-class TestConfigBroken(ShinkenTest):
-
-    def setUp(self):
-        self.setup_with_file('etc/shinken_multi_attribute_broken.cfg')
-
-    def test_multi_valued_attribute_errors(self):
-        self.assertFalse(self.conf.conf_is_correct)
-
-        # Get the arbiter's log broks
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
-
-        self.assertEqual(1, len([log for log in logs if re.search(r'no support for _ syntax in multiple valued attributes', log)]) )
-
 
 if __name__ == '__main__':
     unittest.main()
