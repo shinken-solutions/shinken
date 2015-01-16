@@ -31,7 +31,7 @@ Shinken.
 
 import sys
 
-VERSION = "2.2-RC1"
+VERSION = "2.2"
 
 
 # Make sure people are using Python 2.6 or higher
