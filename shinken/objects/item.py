@@ -709,6 +709,14 @@ Like temporary attributes such as "imported_from", etc.. """
                 dmp[prop] = getattr(self, prop)
         return dmp
 
+    def _get_name(self):
+        if hasattr(self, 'get_name'):
+            return self.get_name()
+        name = getattr(self, 'name', None)
+        host_name = getattr(self, 'host_name', None)
+        return '%s(host_name=%s)' % (name or 'no-name', host_name or '')
+
+
 
 class Items(object):
     def __init__(self, items, index_items=True):
@@ -992,6 +1000,7 @@ class Items(object):
             all_tags.extend(self.get_all_tags(t))
         return list(set(all_tags))
 
+
     def linkify_item_templates(self, item):
         tpls = []
         tpl_names = item.get_templates()
@@ -1002,13 +1011,13 @@ class Items(object):
                 # TODO: Check if this should not be better to report as an error ?
                 self.configuration_warnings.append(
                     "%s %r use/inherit from an unknown template (%r) ! Imported from: %s" % (
-                        type(item).__name__, item.name, name, item.imported_from                                                                                              )
-                )
+                        type(item).__name__, item._get_name(), name, item.imported_from
+                ))
             else:
                 if t is item:
                     self.configuration_errors.append(
                         '%s %r use/inherits from itself ! Imported from: %s' % (
-                            type(item).__name__, item.name, item.imported_from
+                            type(item).__name__, item._get_name(), item.imported_from
                     ))
                 else:
                     tpls.append(t)
