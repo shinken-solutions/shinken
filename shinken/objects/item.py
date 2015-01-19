@@ -999,7 +999,13 @@ class Items(object):
         for name in tpl_names:
             t = self.find_tpl_by_name(name)
             if t is not None:
-                tpls.append(t)
+                if t is item:
+                    self.configuration_errors.append(
+                        '%s %r use/inherits from itself ! Imported from: %s' % (
+                            type(item).__name__, item.name, item.imported_from
+                    ))
+                else:
+                    tpls.append(t)
         item.templates = tpls
 
     # We will link all templates, and create the template
