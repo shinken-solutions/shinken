@@ -36,12 +36,12 @@ from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
 from shinken.check import Check
 from shinken.message import Message
-from shinken.arbiterlink import ArbiterLink
-from shinken.schedulerlink import SchedulerLink
-from shinken.pollerlink import PollerLink
-from shinken.reactionnerlink import ReactionnerLink
-from shinken.brokerlink import BrokerLink
-from shinken.satellitelink import SatelliteLink
+from shinken.objects.arbiterlink import ArbiterLink
+from shinken.objects.schedulerlink import SchedulerLink
+from shinken.objects.pollerlink import PollerLink
+from shinken.objects.reactionnerlink import ReactionnerLink
+from shinken.objects.brokerlink import BrokerLink
+from shinken.objects.satellitelink import SatelliteLink
 from shinken.notification import Notification
 from shinken.modulesmanager import ModulesManager
 from shinken.basemodule import BaseModule

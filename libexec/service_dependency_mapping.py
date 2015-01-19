@@ -28,6 +28,7 @@ definition to hosts.
 """
 
 
+from shinken.objects.arbiterlink import ArbiterLink
 import os, sys, optparse, cPickle, shutil
 import shinken.daemons.arbiterdaemon
 from shinken.arbiterlink import ArbiterLink
