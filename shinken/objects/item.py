@@ -998,7 +998,13 @@ class Items(object):
 
         for name in tpl_names:
             t = self.find_tpl_by_name(name)
-            if t is not None:
+            if t is None:
+                # TODO: Check if this should not be better to report as an error ?
+                self.configuration_warnings.append(
+                    "%s %r use/inherit from an unknown template (%r) ! Imported from: %s" % (
+                        type(item).__name__, item.name, name, item.imported_from                                                                                              )
+                )
+            else:
                 if t is item:
                     self.configuration_errors.append(
                         '%s %r use/inherits from itself ! Imported from: %s' % (
