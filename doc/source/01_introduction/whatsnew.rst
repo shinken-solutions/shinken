@@ -1,4 +1,4 @@
-.. _about/whatsnew:
+.. _introduction/whatsnew:
 
 ===============================================
  Feature comparison between Shinken and Nagios 

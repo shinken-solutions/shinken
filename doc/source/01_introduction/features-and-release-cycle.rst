@@ -1,4 +1,4 @@
-.. _about/features-and-release-cycle:
+.. _introduction/features-and-release-cycle:
 
 ====================================
 Feature selection and release cycle 
