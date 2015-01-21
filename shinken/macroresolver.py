@@ -35,7 +35,7 @@ import re
 import time
 
 from shinken.borg import Borg
-
+from shinken.objects.timeperiod import Timeperiod
 
 class MacroResolver(Borg):
     """Please Add a Docstring to describe the class here"""
@@ -80,8 +80,8 @@ class MacroResolver(Borg):
     ]
 
     validtime_macros = {
-        'ISVALIDTIME': ('','is_time_valid'),
-        'NEXTVALIDTIME': ('0', 'get_next_valid_time_from_t')
+        'ISVALIDTIME': ('', Timeperiod.is_time_valid),
+        'NEXTVALIDTIME': ('0', Timeperiod.get_next_valid_time_from_t)
     }
 
     # This must be called ONCE. It just put links for elements
@@ -334,10 +334,11 @@ class MacroResolver(Borg):
         macro_name = elts[0]
 
         # Look first for the special validtime macros
-        if macro_name in self.validtime_macros.keys():
+        validtime_macro = self.validtime_macros.get(macro_name)
+        if validtime_macro:
             # Get the right infos
-            failed_output = self.validtime_macros[macro_name][0]
-            func_to_call = self.validtime_macros[macro_name][1]
+            failed_output = validtime_macro[0]
+            func_to_call = validtime_macro[1]
 
             timeperiod_arg = elts[1]
             timestamp = time.time()
@@ -350,12 +351,7 @@ class MacroResolver(Borg):
 
             for timeperiod in self.timeperiods:
                 if timeperiod.get_name() == timeperiod_arg:
-                    # Get the right function to call
-                    try:
-                        func = getattr(timeperiod, func_to_call)
-                    except AttributeError:
-                        return failed_output
-                    return str(int(func(timestamp)))
+                    return str(int(func_to_call(timeperiod, timestamp)))
             return failed_output
         # Len 3 == service, 2 = all others types...
         elif nb_parts == 3:
