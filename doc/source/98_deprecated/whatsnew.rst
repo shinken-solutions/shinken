@@ -1,4 +1,4 @@
-.. _introduction/whatsnew:
+.. _deprecated/whatsnew:
 
 ===============================================
  Feature comparison between Shinken and Nagios 

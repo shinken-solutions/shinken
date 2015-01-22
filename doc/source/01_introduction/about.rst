@@ -8,7 +8,7 @@ About Shinken
 Shinken is an open source monitoring framework written in Python under the terms of the `GNU Affero General Public License`_ .
 It was created in 2009 as a simple proof of concept of a `Nagios`_ patch. The first release of Shinken was the December 1st of 2009 as simple monitoring tool.
 Since the 2.0 version (April 2014) Shinken is described as a monitoring framework due to its high number of modules.
-For the same reason, module are now in separated repositories. You can find some in the `shinken-monitoring organization's page`_ on Github
+For the same reason, modules are now in separated repositories. You can find some in the `shinken-monitoring organization's page`_ on Github
 
 
 
@@ -35,48 +35,73 @@ This is basically what Shinken is made of. Maybe add the "keep it simple" Linux 
 Features
 =========
 
-.. note:: This list should be enhanced to be more readable.
-
 
 Shinken has a lot of features, we started to list some of them in the last paragraph. Let's go into details :
 
-  * Shinken is a true distributed applications which splits the different roles into separate daemons
-  * Shinken permits the use of modules to extend and enrich the various Shinken daemons
-  * Shinken is 100% python, from its API, frontend, back-end, discovery engine and high performance poller modules
-  * Scalability
+  * Role separated daemons : we want a daemon to do one thing but doing it good. There are 6 of them but one is not compulsory.
+  * Great flexibility : you didn't got that already? Shinken modules allow it to talk to almost everything you can imagine.
 
-    * Shinken has a powerful scheduler for supervising tens of thousands of devices
-    * Shinken can supervise multiple independent environments/customers
+  Those to points involve all the following :
 
-  * Graphical and statistical analysis :  Shinken provides integration with the modern time series database, Graphite
+  * Data export to databases :
+      * Graphite
+      * InfluxDB
+      * RRD
+      * GLPI
+      * CouchDB
+      * Livestatus  (MK_Livestatus reimplementation)
+      * Socket write for other purpose (Splunk, Logstash, Elastic Search)
+      * MySQL (NDO reimplementation)
+      * Oracle (NDO reimplementation)
 
-  * Correlation
+  * Integration with web user interface :
 
-    * Shinken differentiates the business impact of a critical alert on a toaster versus the web store
-    * Shinken supports efficient correlation between parent-child relationship and business process rules
+      * WebUI (Shinken own UI)
+      * Thruk
+      * Adagios
+      * Multisite
+      * Nagvis
+      * PNP4Nagios
+      * NConf
+      * Centreon (With NDO, not fully working, not recommended)
 
-  * Use Shinken and Graphite seamlessly in the Shinken WebUI.  v1.2
-  * Export data from Shinken to Graphite and manipulate the data point names with PRE, POST, and SOURCE variables
-  * Buffered output to Graphite.
-  * Multiple Graphite destination servers.
-  * Use check_graphite to poll graphite and generate alerts.
-  * Use wildcards in checks against Graphite.
-  * Auto-detection, logging and semi-automatic registration of new passive checks. Planned for v1.4
-  * Mix and match frontends(Multisite, Nagvis), plugins, alerting(Pagerduty), analysis (Splunk, Logstash, Elastic Search, Kibana)
-  * Modern, Scalable, HA and distributed out of the box.
-  * Business rules, business impacts levels integrated in the core.
-  * The code is approachable for sys admins to improve and customize the core and manage additions using modules.
-  * Supervision packs(templates+commands+etc) and community
-  * A powerful and efficient dependency model that does event suppression. Not as flexible as the great Zabbix calculated items, but suffers from much less false positives, which is the whole point, especially at 3am.
-  * Uses the Graphite time-series database, which is hands-down one of the most modern, easy to use, fast, powerful  and flexible time-series databases. None of the slooowness associated with scaling a SQL based storage for time-series.
-  * The code is approachable for sys admins to improve and customize the core and using modules.
-  * The new SNMP poller is more intelligent and efficient in its collection against remote devices. Zabbix collects each metric as it is scheduled, so IN/OUT stats of the same interface could be collected at two different times, errr, say what!
-  * A working dependency model that does good and efficient event suppression and correlation.
-  * 100% open-source...
-  * Can you say Graphite integration, MongoDB, distributed architecture and seamless HA.
+
+  * Import config from databases :
+
+      * GLPI
+      * Amazon EC2
+      * MySQL
+      * MongoDB
+      * Canonical Landscape
+
+
+  * Shinken provide sets of configuration, named packs, for a huge number of services :
+
+      * Databases (Mysql, Oracle, MSSQL, memcached, mongodb, influxdb etc.)
+      * Routers, Switches (Cisco, Nortel, Procurve etc.)
+      * OS (Linux, windows, Aix, HP-UX etc.)
+      * Hypervisors (VMWare, Vsphere)
+      * Protocols (HTTP, SSH, LDAP, DNS, IMAP, FTP, etc.)
+      * Application (Weblogic, Exchange, Active Directory, Tomcat, Asterisk, etc.)
+      * Storage (IBM-DS, Safekit, Hacmp, etc.)
+
+  * Smart SNMP polling : The SNMP Booster module is a must have if you have a huge infrastructe of routers and switches.
+
+  * Scalability : no server overloading, you just have to install new daemons on another server and load balancing is done.
+
+
+  But Shinken is even more :
+
+  * Realm concept : you can monitor independent environments / customer
+  * DMZ monitroing : some daemon have passive facilities so that firewall don't block monitoring.
+  * Business impact : Shinken can differentiate impact of a critical alert on a toaster versus the web store
+  * Efficient correlation between parent-child relationship and business process rules
+  * High availability : daemons can have spare ones.
+  * Business rules :  For a higher level of monitoring. Shinken can notify you only if 3 out 5 of your server are down
+  * Very open-minded team : help is always welcome, there is job for everyone.
 
 
 
 .. _Nagios: http://www.nagios.org
 .. _GNU Affero General Public License: http://www.gnu.org/licenses/agpl.txt
-.. _Shiken-Monitoring' page: https://github.com/shinken-monitoring
+.. _shinken-monitoring organization's page: https://github.com/shinken-monitoring

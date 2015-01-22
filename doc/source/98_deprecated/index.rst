@@ -17,6 +17,5 @@ The following content is deprecated in this Shinken version and may be completel
    :maxdepth: 2
 
 
-   install-script
-   redhat-thruk-pnp4nagios-howto
+   whatsnew
 
