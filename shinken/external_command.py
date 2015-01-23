@@ -33,7 +33,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.commandcall import CommandCall
 from shinken.log import logger, naglog_result
-from shinken.pollerlink import PollerLink
+from shinken.objects.pollerlink import PollerLink
 from shinken.eventhandler import EventHandler
 from shinken.brok import Brok
 from shinken.misc.common import DICT_MODATTR
