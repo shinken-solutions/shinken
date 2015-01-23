@@ -1,3 +1,0 @@
-mock
-unittest2 # for python2.6
-
