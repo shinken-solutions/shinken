@@ -35,8 +35,7 @@ This is basically what Shinken is made of. Maybe add the "keep it simple" Linux 
 Features
 =========
 
-
-Shinken has a lot of features, we started to list some of them in the last paragraph. Let's go into details :
+Shinken has a lot of features, we started to list some of them in the last paragraph. Let's go into details:
 
   * Role separated daemons : we want a daemon to do one thing but doing it good. There are 6 of them but one is not compulsory.
   * Great flexibility : you didn't got that already? Shinken modules allow it to talk to almost everything you can imagine.
@@ -44,6 +43,7 @@ Shinken has a lot of features, we started to list some of them in the last parag
   Those to points involve all the following :
 
   * Data export to databases :
+
       * Graphite
       * InfluxDB
       * RRD
@@ -85,7 +85,7 @@ Shinken has a lot of features, we started to list some of them in the last parag
       * Application (Weblogic, Exchange, Active Directory, Tomcat, Asterisk, etc.)
       * Storage (IBM-DS, Safekit, Hacmp, etc.)
 
-  * Smart SNMP polling : The SNMP Booster module is a must have if you have a huge infrastructe of routers and switches.
+  * Smart SNMP polling : The SNMP Booster module is a must have if you have a huge infrastructure of routers and switches.
 
   * Scalability : no server overloading, you just have to install new daemons on another server and load balancing is done.
 
@@ -101,7 +101,23 @@ Shinken has a lot of features, we started to list some of them in the last parag
   * Very open-minded team : help is always welcome, there is job for everyone.
 
 
+Release cycle
+==============
+
+
+Shinken team is trying to setup a new release cycle with an objective of 4 release per year.
+Each release is divided into three part :  re-factoring (few weeks), features (one month), freezing (one month).
+Roadmap is available in a `specific Github issue`_, feature addition can be discussed there.
+Technical point of view about a specific feature are discussed in a separated issue.
+
+
+Release code names
+===================
+
+I (Jean Gabès) keep the right to name the code name of each release. That's the only thing I will keep for me in this project as its founder. :)
+
 
 .. _Nagios: http://www.nagios.org
 .. _GNU Affero General Public License: http://www.gnu.org/licenses/agpl.txt
 .. _shinken-monitoring organization's page: https://github.com/shinken-monitoring
+.. _specific Github issue: https://github.com/naparuba/shinken/labels/CURRENT%20ROADMAP

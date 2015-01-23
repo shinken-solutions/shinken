@@ -15,4 +15,3 @@ About
    :maxdepth: 2
 
    about
-   features-and-release-cycle
