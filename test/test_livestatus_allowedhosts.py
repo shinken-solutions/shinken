@@ -26,141 +26,117 @@
 # This file is used to test *allowed_hosts* parameter of Livestatus module
 #
 
-from shinken_test import *
+import sys
 import time
-import random
 import socket
 import threading
-import shutil
+
 
 from mock_livestatus import mock_livestatus_handle_request
 
+from shinken_test import unittest, time_hacker
 
 from shinken.objects.module import Module
-from shinken.comment import Comment
-from test_livestatus import TestConfig
+from test_livestatus import LiveStatus_Template
+
 
 sys.setcheckinterval(10000)
 
+
 @mock_livestatus_handle_request
-class TestConfigAuth(TestConfig):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
+class TestConfigAuth_Template(LiveStatus_Template):
+
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
+
+    def setUp(self, dbmodconf=None, raise_on_bad_config=None):
+        super(TestConfigAuth_Template, self).setUp(dbmodconf=dbmodconf, raise_on_bad_config=raise_on_bad_config)
 
     def tearDown(self):
         # stop thread
         self.livestatus_broker.interrupted = True
         self.lql_thread.join()
         # /
+        super(TestConfigAuth_Template, self).tearDown()
 
-        self.stop_nagios()
-        #self.livestatus_broker.db.commit()
-        #self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
-
-    def init_livestatus(self, conf):
-        super(TestConfigAuth, self).init_livestatus(conf)
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
-
-        # NOTE: function is blocking, so must be launched in a thread
-        #self.livestatus_broker.do_main()
-        self.lql_thread = threading.Thread(None, self.livestatus_broker.manage_lql_thread, 'lqlthread')
+    def init_livestatus(self, *a, **kw):
+        super(TestConfigAuth_Template, self).init_livestatus(*a, **kw)
+        # execute the livestatus by starting a dedicated thread to run the manage_lql_thread function:
+        self.lql_thread = threading.Thread(target=self.livestatus_broker.manage_lql_thread, name='lqlthread')
         self.lql_thread.start()
-        # wait for thread to init
-        original_time_sleep(3)
+        time_hacker.set_real_time()
+        t0 = time.time()
+        # give some time for the thread to init and creates its listener socket(s) :
+        while True:
+            if self.livestatus_broker.listeners:
+                break # but as soon as listeners is truth(== non-empty), we can continue,
+                # the listening thread has created the input socket so we can connect to it.
+            elif time.time() - t0 > 10:
+                self.livestatus_broker.interrupted = True
+                raise RuntimeError('Livestatus listening thread should have created its input socket(s) quite quickly !!')
+            time.sleep(0.5)
+        time_hacker.set_my_time()
 
-    def query_livestatus(self, ip, port, data):
-        print "Query livestatus on %s:%d" % (ip, port)
+    def query_livestatus(self, data, ip=None, port=None, timeout=60):
+        if ip is None:
+            ip = self.modconf.host
+        if port is None:
+            port = self.modconf.port
+        port = int(port)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(10)
+            s.settimeout(timeout)
             s.connect((ip, port))
             s.send(data)
-
-            res = s.recv(16)
-        except Exception, e:
-            print "Query livestatus failed: ", e
-            return False
-        else:
+            try:
+                s.shutdown(socket.SHUT_WR)
+            except socket.error as err:
+                print('query_livestatus: shutdown failed: %s ; that might be normal..' % err)
+            ret = []
+            while True:
+                data = s.recv(1024)
+                #print("received: %r" % data)
+                if not data:
+                    return b''.join(ret)
+                ret.append(data)
+        except Exception as err:
+            print('query_livestatus: got an exception: %s')
+        finally:
             s.close()
 
-        print "received:", res
-        # when connection refused, livestatus server returns empty string
-        return len(res) > 0
+
+
+class TestConfigAuth(TestConfigAuth_Template):
 
     def test_01_default(self):
-        modconf = Module({'module_name': 'LiveStatus',
-            'module_type': 'livestatus',
-            'port': str(random.randint(50000, 65534)),
-            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
-            'host': '127.0.0.1',
-            'name': 'test',
-            'modules': ''
-        })
-        self.init_livestatus(modconf)
-
         # test livestatus connection
-        self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
+        self.assertTrue(self.query_livestatus("GET hosts\n\n"))
 
     def test_02_allow_localhost(self):
+        # test livestatus connection
+        self.assertTrue(self.query_livestatus("GET hosts\n\n"))
+
+
+
+class TestConfigAuth_DontAllow(TestConfigAuth_Template):
+
+    def init_livestatus(self, *a, **kw):
         modconf = Module({'module_name': 'LiveStatus',
             'module_type': 'livestatus',
-            'port': str(random.randint(50000, 65534)),
+            'port': str(self.get_free_port()),
             'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
             'host': '127.0.0.1',
             'name': 'test',
             'modules': '',
-            'allowed_hosts': '127.0.0.1'
+            'allowed_hosts': '127.0.0.2' # must be different than 'host'
         })
-        self.init_livestatus(modconf)
+        super(TestConfigAuth_DontAllow, self).init_livestatus(*a, modconf=modconf, **kw)
 
+    def test_dont_allow_host(self):
         # test livestatus connection
-        self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
+        self.assertFalse(self.query_livestatus("GET hosts\n\n"))
 
-    def test_03_dont_allow_localhost(self):
-        modconf = Module({'module_name': 'LiveStatus',
-            'module_type': 'livestatus',
-            'port': str(random.randint(50000, 65534)),
-            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
-            'host': '127.0.0.1',
-            'name': 'test',
-            'modules': '',
-            'allowed_hosts': '192.168.0.1'
-        })
-        self.init_livestatus(modconf)
-
-        # test livestatus connection
-        self.assertFalse(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
 if __name__ == '__main__':
-    #import cProfile
+
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
-
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
-    #unittest.TextTestRunner(verbosity=2).run(allsuite)

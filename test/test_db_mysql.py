@@ -33,6 +33,8 @@ except ImportError:
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
+
     def create_db(self):
         self.db = DBMysql(host='localhost', user='root', password='root', database='merlin', character_set='utf8')
 

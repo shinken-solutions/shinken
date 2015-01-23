@@ -38,27 +38,35 @@ import shutil
 import time
 import random
 import copy
-import unittest
+
+
+from shinken_test import unittest
+
+try:
+    import pymongo
+
+    pymongo_import_err = ''
+except ImportError as pymongo_import_err:
+    pymongo = None
+    pymongo_import_err = "Could not import pymongo : %s" % pymongo_import_err
+else:
+    from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
+
+
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 
-from shinken_test import ShinkenTest, logger, datamgr
-from shinken_test import time_hacker, LiveStatus_broker
-from shinken_test import time_warp, original_time_time, original_time_sleep
 
+from shinken_test import time_hacker
 
 from shinken.objects.module import Module
 from shinken.objects.service import Service
 from shinken.modules.livestatus_broker.mapping import Logline
-from shinken.modules.logstore_mongodb import LiveStatusLogStoreMongoDB
-from shinken.comment import Comment
-from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modulesmanager import ModulesManager
-from shinken.modules.livestatus_broker.livestatus import LiveStatus
-from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
+
 
 
 from mock_livestatus import mock_livestatus_handle_request
+from test_livestatus import LiveStatus_Template
 
 
 sys.setcheckinterval(10000)
@@ -71,17 +79,14 @@ _mongo_tmp_path = "./tmp/mongo"
 _mongo_db = os.path.join(_mongo_tmp_path, 'db')
 _mongo_log = os.path.join(_mongo_tmp_path, 'log.txt')
 
-try:
-    import pymongo
-    pymongo_import_err = ''
-except ImportError as pymongo_import_err:
-    pymongo = None
 
 
-
-@unittest.skipUnless(pymongo, "without pymongo that won't make it: %s" % pymongo_import_err)
+@unittest.skipIf(not pymongo, pymongo_import_err)
 @mock_livestatus_handle_request
-class TestConfig(ShinkenTest):
+class TestConfig(LiveStatus_Template):
+
+    # NB
+    # subclasses must define _setup_config_file
 
     # how much seconds give to mongod be fully started
     # == listening on its input socket/port.
@@ -89,16 +94,15 @@ class TestConfig(ShinkenTest):
 
     @classmethod
     def setUpClass(cls):
+        if not pymongo:
+            return
         os.system('/bin/rm -rf "%s"' % _mongo_tmp_path)
         os.makedirs(_mongo_db)
         print('Starting embedded mongo daemon..')
-        sock = socket.socket()
-        sock.bind(('127.0.0.1', 0))
-        port = sock.getsockname()[1]
-        sock.close()
+        port = cls.get_free_port()
         cls.mongo_db_uri = "mongodb://127.0.0.1:%s" % port
         mp = cls._mongo_proc = subprocess.Popen(
-            (['/usr/bin/mongod', '--dbpath', _mongo_db, '--port', str(port), '--logpath', _mongo_log]),
+            (['/usr/bin/mongod', '--dbpath', _mongo_db, '--port', str(port), '--logpath', _mongo_log,  '--smallfiles']),
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False
         )
         print('Giving it some secs to correctly start..')
@@ -129,6 +133,8 @@ class TestConfig(ShinkenTest):
 
     @classmethod
     def tearDownClass(cls):
+        if not pymongo:
+            return
         mp = cls._mongo_proc
         mp.terminate()
         print('Waiting mongod server to exit ..')
@@ -143,103 +149,16 @@ class TestConfig(ShinkenTest):
         mp.wait()
         os.system('/bin/rm -rf "%s"' % _mongo_tmp_path)
 
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                print("cleanup", db)
-                os.remove(os.path.join("tmp/archives", db))
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
+    def setUp(self):
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'mongodb_uri': self.mongo_db_uri,
+            'database': 'testtest' + self.testid,
+        })
+        super(TestConfig, self).setUp(dbmodconf=dbmodconf)
 
 
-    def init_livestatus(self, modconf=None, dbmodconf=None, needcache=False):
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-
-        if modconf is None:
-            modconf = Module({'module_name': 'LiveStatus',
-                'module_type': 'livestatus',
-                'port': str(50000 + os.getpid()),
-                'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
-                'host': '127.0.0.1',
-                'socket': 'live',
-                'name': 'test', #?
-            })
-
-        if dbmodconf is None:
-            dbmodconf = Module({'module_name': 'LogStore',
-                'module_type': 'logstore_sqlite',
-                'use_aggressive_sql': "0",
-                'database_file': self.livelogs,
-                'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
-            })
-
-        modconf.modules = [dbmodconf]
-        self.livestatus_broker = LiveStatus_broker(modconf)
-        self.livestatus_broker.create_queues()
-
-        #--- livestatus_broker.main
-        self.livestatus_broker.log = logger
-        # this seems to damage the logger so that the scheduler can't use it
-        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
-        self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', '../shinken/modules', [])
-        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
-        # We can now output some previouly silented debug ouput
-        self.livestatus_broker.do_load_modules()
-        for inst in self.livestatus_broker.modules_manager.instances:
-            if inst.properties["type"].startswith('logstore'):
-                f = getattr(inst, 'load', None)
-                if f and callable(f):
-                    f(self.livestatus_broker)  # !!! NOT self here !!!!
-                break
-        for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
-        del self.livestatus_broker.debug_output
-        self.livestatus_broker.rg = LiveStatusRegenerator()
-        self.livestatus_broker.datamgr = datamgr
-        datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        if not needcache:
-            self.livestatus_broker.query_cache.disable()
-        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
-        #--- livestatus_broker.main
-
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-
-        #--- livestatus_broker.do_main
-        self.livestatus_broker.db.open()
-        if hasattr(self.livestatus_broker.db, 'prepare_log_db_table'):
-            self.livestatus_broker.db.prepare_log_db_table()
-        #--- livestatus_broker.do_main
-
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            brok.prepare()
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.brokers['Default-Broker']['broks'] = {}
 
     def add(self, b):
         # ho boy..
@@ -252,36 +171,11 @@ class TestConfig(ShinkenTest):
             self.sched.run_external_command(b.cmd_line)
 
 
-
 @mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
-    def setUp(self):
-        super(TestConfigSmall, self).setUp()
-        self.setup_with_file('etc/shinken_1r_1h_1s.cfg', raise_on_bad_config=False)
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
 
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_mongodb',
-            'mongodb_uri': self.mongo_db_uri,
-            'database': 'testtest' + self.testid,
-        })
-
-        self.init_livestatus(dbmodconf=dbmodconf)
-        print("Cleaning old broks?")
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
-
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
+    _setup_raise_on_bad_config = False
 
     def test_one_log(self):
         self.print_header()
@@ -318,44 +212,20 @@ Columns: time type options state host_name"""
         name = 'testtest' + self.testid
         numlogs = self.livestatus_broker.db.conn[name].logs.find().count()
         print(numlogs)
-        self.assert_(numlogs == 2)
+        self.assertEqual(2, numlogs)
         curs = self.livestatus_broker.db.conn[name].logs.find()
-        self.assert_(curs[0]['state_type'] == 'SOFT')
-        self.assert_(curs[1]['state_type'] == 'HARD')
+        self.assertEqual('SOFT', curs[0]['state_type'])
+        self.assertEqual('HARD', curs[1]['state_type'])
 
 
 @mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
-    def setUp(self):
-        super(TestConfigBig, self).setUp()
-        start_setUp = time.time()
-        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
 
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_mongodb',
-            'mongodb_uri': self.mongo_db_uri,
-            'database': 'testtest' + self.testid,
-        })
-
-        self.init_livestatus(dbmodconf=dbmodconf)
-        print("Cleaning old broks?")
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-
-        self.update_broker()
-        print("************* Overall Setup:", time.time() - start_setUp)
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_000")
-        host.__class__.use_aggressive_host_checking = 1
+    _setup_config_file = 'etc/shinken_5r_100h_2000s.cfg'
 
 
     def count_log_broks(self):
         return len([brok for brok in self.sched.broks.values() if brok.type == 'log'])
-
 
     def test_a_long_history(self):
         # copied from test_livestatus_cache
@@ -514,7 +384,7 @@ OutputFormat: json"""
         pyresponse = eval(response)
         print(response)
         print("number of records with test_ok_01", len(pyresponse))
-        self.assert_(len(pyresponse) == should_be)
+        self.assertEqual(should_be, len(pyresponse))
 
         # and now test Negate:
         request = """GET log
@@ -559,7 +429,7 @@ OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         allpyresponse = eval(response)
         print("all records", len(allpyresponse))
-        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+        self.assertEqual(len(allpyresponse), len(notpyresponse) + len(pyresponse))
 
 
         # Now a pure class check query
@@ -571,7 +441,7 @@ OutputFormat: json"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         allpyresponse = eval(response)
         print("all records", len(allpyresponse))
-        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+        self.assertEqual(len(allpyresponse), len(notpyresponse) + len(pyresponse))
 
         # now delete too old entries from the database (> 14days)
         # that's the job of commit_and_rotate_log_db()
@@ -633,7 +503,5 @@ OutputFormat: json"""
 
 
 if __name__ == '__main__':
-    #import cProfile
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
