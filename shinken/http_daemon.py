@@ -242,6 +242,7 @@ class HTTPDaemon(object):
         def __init__(self, host, port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
             self.port = port
             self.host = host
+            self.srv = None
             # Port = 0 means "I don't want HTTP server"
             if self.port == 0:
                 return
@@ -408,8 +409,9 @@ class HTTPDaemon(object):
         # Close all sockets and delete the server object to be sure
         # no one is still alive
         def shutdown(self):
-            self.srv.stop()
-            self.srv = None
+            if self.srv is not None:
+                self.srv.stop()
+                self.srv = None
 
 
         def get_socks_activity(self, timeout):
