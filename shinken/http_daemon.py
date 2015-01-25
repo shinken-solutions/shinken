@@ -210,8 +210,8 @@ class WSGIREFBackend(object):
             free_slots = 0
             while free_slots <= 0:
                 to_del = [t for t in threads if not t.is_alive()]
-                _ = [t.join() for t in to_del]
                 for t in to_del:
+                    t.join()
                     threads.remove(t)
                 free_slots = nb_threads - len(threads)
                 if free_slots <= 0:
