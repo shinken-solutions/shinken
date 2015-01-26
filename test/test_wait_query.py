@@ -57,6 +57,14 @@ class TestFull_WaitQuery(LiveStatus_Template):
 
     _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
 
+    def setUp(self):
+        super(TestFull_WaitQuery, self).setUp()
+        # otherwise this can make test_wait_query_1() to fail from time to time
+        # (on data = self.livestatus_broker.from_q.get(block=False)),
+        # because the queue (from_q) isn't yet filled while it should be if we had
+        # not hacked on time module..
+        time_hacker.set_real_time()
+
     def tearDown(self):
         # stop thread
         self.livestatus_broker.interrupted = True
