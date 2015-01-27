@@ -25,7 +25,7 @@
 
 from shinken.util import safe_print
 from shinken.misc.sorter import hst_srv_sort, last_state_change_earlier
-from shinken.misc.filter  import only_related_to
+from shinken.misc.filter import only_related_to
 
 class DataManager(object):
     def __init__(self):
@@ -76,10 +76,12 @@ class DataManager(object):
         r = []
         selected = selected.strip()
 
-        hg_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) > 0 and hg.get_name() != selected]
+        hg_names = [hg.get_name() for hg in self.rg.hostgroups
+                    if len(hg.members) > 0 and hg.get_name() != selected]
         hg_names.sort()
         hgs = [self.rg.hostgroups.find_by_name(n) for n in hg_names]
-        hgvoid_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) == 0 and hg.get_name() != selected]
+        hgvoid_names = [hg.get_name() for hg in self.rg.hostgroups
+                        if len(hg.members) == 0 and hg.get_name() != selected]
         hgvoid_names.sort()
         hgvoids = [self.rg.hostgroups.find_by_name(n) for n in hgvoid_names]
 
@@ -169,11 +171,18 @@ class DataManager(object):
     def get_all_problems(self, to_sort=True, get_acknowledged=False):
         res = []
         if not get_acknowledged:
-            res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact and not s.problem_has_been_acknowledged and not s.host.problem_has_been_acknowledged])
-            res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact and not h.problem_has_been_acknowledged])
+            res.extend([s for s in self.rg.services
+                        if s.state not in ['OK', 'PENDING'] and
+                        not s.is_impact and not s.problem_has_been_acknowledged and
+                        not s.host.problem_has_been_acknowledged])
+            res.extend([h for h in self.rg.hosts
+                        if h.state not in ['UP', 'PENDING'] and
+                        not h.is_impact and not h.problem_has_been_acknowledged])
         else:
-            res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
-            res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+            res.extend([s for s in self.rg.services
+                        if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+            res.extend([h for h in self.rg.hosts
+                        if h.state not in ['UP', 'PENDING'] and not h.is_impact])
 
         if to_sort:
             res.sort(hst_srv_sort)
@@ -211,11 +220,13 @@ class DataManager(object):
         return len(self.get_all_problems(to_sort=False))
 
     # Get the number of all problems, even the ack ones
-    def get_nb_all_problems(self,user):
+    def get_nb_all_problems(self, user):
         res = []
-        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
-        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
-        return len(only_related_to(res,user))
+        res.extend([s for s in self.rg.services
+                    if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([h for h in self.rg.hosts
+                    if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+        return len(only_related_to(res, user))
 
     # Return the number of impacts
     def get_nb_impacts(self):
@@ -228,8 +239,10 @@ class DataManager(object):
         res = []
         # We want REALLY important things, so business_impact > 2, but not just IT elements that are
         # root problems, so we look only for config defined my_own_business_impact value too
-        res.extend([s for s in self.rg.services if (s.business_impact > 2 and not 0 <= s.my_own_business_impact <= 2)])
-        res.extend([h for h in self.rg.hosts if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)])
+        res.extend([s for s in self.rg.services
+                    if (s.business_impact > 2 and not 0 <= s.my_own_business_impact <= 2)])
+        res.extend([h for h in self.rg.hosts
+                    if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)])
         print "DUMP IMPORTANT"
         for i in res:
             safe_print(i.get_full_name(), i.business_impact, i.my_own_business_impact)
@@ -238,8 +251,10 @@ class DataManager(object):
     # For all business impacting elements, and give the worse state
     # if warning or critical
     def get_overall_state(self):
-        h_states = [h.state_id for h in self.rg.hosts if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
-        s_states = [s.state_id for s in self.rg.services if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
+        h_states = [h.state_id for h in self.rg.hosts
+                    if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
+        s_states = [s.state_id for s in self.rg.services
+                    if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
         print "get_overall_state:: hosts and services business problems", h_states, s_states
         if len(h_states) == 0:
             h_state = 0
@@ -271,30 +286,33 @@ class DataManager(object):
     def get_per_service_state(self):
         all_services = self.rg.services
         problem_services = []
-        problem_services.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        problem_services.extend([s for s in self.rg.services
+                                 if s.state not in ['OK', 'PENDING'] and not s.is_impact])
         if len(all_services) == 0:
             res = 0
         else:
-            res = int(100-(len(problem_services) *100)/float(len(all_services)))
+            res = int(100 - (len(problem_services) * 100) / float(len(all_services)))
         return res
-              
+
     # Get percent of all Hosts
     def get_per_hosts_state(self):
         all_hosts = self.rg.hosts
         problem_hosts = []
-        problem_hosts.extend([s for s in self.rg.hosts if s.state not in ['UP', 'PENDING'] and not s.is_impact])
+        problem_hosts.extend([s for s in self.rg.hosts
+                              if s.state not in ['UP', 'PENDING'] and not s.is_impact])
         if len(all_hosts) == 0:
             res = 0
         else:
-            res = int(100-(len(problem_hosts) *100)/float(len(all_hosts)))
+            res = int(100 - (len(problem_hosts) * 100) / float(len(all_hosts)))
         return res
-              
 
     # For all business impacting elements, and give the worse state
     # if warning or critical
     def get_len_overall_state(self):
-        h_states = [h.state_id for h in self.rg.hosts if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
-        s_states = [s.state_id for s in self.rg.services if  s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
+        h_states = [h.state_id for h in self.rg.hosts
+                    if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
+        s_states = [s.state_id for s in self.rg.services
+                    if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
         print "get_len_overall_state:: hosts and services business problems", h_states, s_states
         # Just return the number of impacting elements
         return len(h_states) + len(s_states)
@@ -302,8 +320,8 @@ class DataManager(object):
     # Return a tree of {'elt': Host, 'fathers': [{}, {}]}
     def get_business_parents(self, obj, levels=3):
         res = {'node': obj, 'fathers': []}
-        ## if levels == 0:
-        ##     return res
+        # if levels == 0:
+        #     return res
 
         for i in obj.parent_dependencies:
             # We want to get the levels deep for all elements, but
