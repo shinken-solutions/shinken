@@ -44,23 +44,23 @@ ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 from hashlib import md5
 
 
-def to64 (v, n):
+def to64(v, n):
     ret = ''
-    while (n - 1 >= 0):
+    while n - 1 >= 0:
         n = n - 1
         ret = ret + ITOA64[v & 0x3f]
         v = v >> 6
     return ret
 
 
-def apache_md5_crypt (pw, salt):
+def apache_md5_crypt(pw, salt):
     # change the Magic string to match the one used by Apache
     return unix_md5_crypt(pw, salt, '$apr1$')
 
 
 def unix_md5_crypt(pw, salt, magic=None):
 
-    if magic == None:
+    if magic is None:
         magic = MAGIC
 
     # Take care of the magic string if present
@@ -122,30 +122,30 @@ def unix_md5_crypt(pw, salt, magic=None):
     passwd = ''
 
     passwd = passwd + to64((int(ord(final[0])) << 16)
-                           |(int(ord(final[6])) << 8)
-                           |(int(ord(final[12]))), 4)
+                           | (int(ord(final[6])) << 8)
+                           | (int(ord(final[12]))), 4)
 
     passwd = passwd + to64((int(ord(final[1])) << 16)
-                           |(int(ord(final[7])) << 8)
-                           |(int(ord(final[13]))), 4)
+                           | (int(ord(final[7])) << 8)
+                           | (int(ord(final[13]))), 4)
 
     passwd = passwd + to64((int(ord(final[2])) << 16)
-                           |(int(ord(final[8])) << 8)
-                           |(int(ord(final[14]))), 4)
+                           | (int(ord(final[8])) << 8)
+                           | (int(ord(final[14]))), 4)
 
     passwd = passwd + to64((int(ord(final[3])) << 16)
-                           |(int(ord(final[9])) << 8)
-                           |(int(ord(final[15]))), 4)
+                           | (int(ord(final[9])) << 8)
+                           | (int(ord(final[15]))), 4)
 
     passwd = passwd + to64((int(ord(final[4])) << 16)
-                           |(int(ord(final[10])) << 8)
-                           |(int(ord(final[5]))), 4)
+                           | (int(ord(final[10])) << 8)
+                           | (int(ord(final[5]))), 4)
 
     passwd = passwd + to64((int(ord(final[11]))), 2)
 
     return magic + salt + '$' + passwd
 
-## assign a wrapper function:
+# assign a wrapper function:
 md5crypt = unix_md5_crypt
 
 if __name__ == "__main__":
