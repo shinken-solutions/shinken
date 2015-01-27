@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -44,10 +43,10 @@ from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.daemon import Daemon, Interface
 
 class IStats(Interface):
-    """ 
+    """
     Interface for various stats about broker activity
     """
-    
+
     doc = 'Get raw stats from the daemon'
     def get_raw_stats(self):
         app = self.app
@@ -56,10 +55,10 @@ class IStats(Interface):
         insts = [inst for inst in app.modules_manager.instances if inst.is_external]
         for inst in insts:
             try:
-                res.append( {'module_name':inst.get_name(), 'queue_size':inst.to_q.qsize()})
+                res.append({'module_name': inst.get_name(), 'queue_size': inst.to_q.qsize()})
             except Exception, exp:
-                res.append( {'module_name':inst.get_name(), 'queue_size':0})
-        
+                res.append({'module_name': inst.get_name(), 'queue_size': 0})
+
         return res
     get_raw_stats.doc = doc
 
@@ -76,7 +75,8 @@ class Broker(BaseSatellite):
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
 
-        super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug,
+                                     debug_file)
 
         # Our arbiters
         self.arbiters = {}
@@ -105,7 +105,7 @@ class Broker(BaseSatellite):
         self.timeout = 1.0
 
         self.istats = IStats(self)
-        
+
 
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
@@ -134,18 +134,22 @@ class Broker(BaseSatellite):
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
                     source = elt.source
-                    logger.info('The module %s is asking me to get all initial data from the scheduler %d',
+                    logger.info('The module %s is asking me to get all initial data '
+                                'from the scheduler %d',
                                 source, c_id)
-                    # so we just reset the connection and the running_id, it will just get all new things
+                    # so we just reset the connection and the running_id,
+                    # it will just get all new things
                     try:
                         self.schedulers[c_id]['con'] = None
                         self.schedulers[c_id]['running_id'] = 0
                     except KeyError:  # maybe this instance was not known, forget it
-                        logger.warning("the module %s ask me a full_instance_id for an unknown ID (%d)!", source, c_id)
+                        logger.warning("the module %s ask me a full_instance_id "
+                                       "for an unknown ID (%d)!", source, c_id)
             # Maybe a module tells me that it's dead, I must log it's last words...
             if elt.get_type() == 'ICrash':
                 data = elt.get_data()
-                logger.error('the module %s just crash! Please look at the traceback:', data['name'])
+                logger.error('the module %s just crash! Please look at the traceback:',
+                             data['name'])
                 logger.error(data['trace'])
 
                 # The module death will be looked for elsewhere and restarted.
@@ -191,11 +195,11 @@ class Broker(BaseSatellite):
         if links is None:
             logger.debug('Type unknown for connection! %s', type)
             return
-        
+
         # default timeout for daemons like pollers/reactionners/...
         timeout = 3
         data_timeout = 120
-        
+
         if type == 'scheduler':
             # If sched is not active, I do not try to init
             # it is just useless
@@ -218,7 +222,8 @@ class Broker(BaseSatellite):
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
         try:
-            con = links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'],
+            con = links[id]['con'] = HTTPClient(uri=uri,
+                                                strong_ssl=links[id]['hard_ssl_name_check'],
                                                 timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions, exp:
             # But the multiprocessing module is not compatible with it!
@@ -244,7 +249,8 @@ class Broker(BaseSatellite):
                 # we must ask for a new full broks if
                 # it's a scheduler
                 if type == 'scheduler':
-                    logger.debug("[%s] I ask for a broks generation to the scheduler %s", self.name, links[id]['name'])
+                    logger.debug("[%s] I ask for a broks generation to the scheduler %s",
+                                 self.name, links[id]['name'])
                     con.get('fill_initial_broks', {'bname': self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
@@ -342,7 +348,8 @@ class Broker(BaseSatellite):
                         _t = zlib.decompress(_t)
                         tmp_broks = cPickle.loads(_t)
                     except (TypeError, zlib.error, cPickle.PickleError), exp:
-                        logger.error('Cannot load broks data from %s : %s', links[sched_id]['name'], exp)
+                        logger.error('Cannot load broks data from %s : %s',
+                                     links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
                         continue
                     logger.debug("%s Broks get in %s", len(tmp_broks), time.time() - t0)
@@ -358,11 +365,13 @@ class Broker(BaseSatellite):
                 logger.debug("Key error for get_broks : %s", str(exp))
                 self.pynag_con_init(sched_id, type=type)
             except HTTPExceptions, exp:
-                logger.warning("Connection problem to the %s %s: %s", type, links[sched_id]['name'], str(exp))
+                logger.warning("Connection problem to the %s %s: %s",
+                               type, links[sched_id]['name'], str(exp))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError, exp:
-                logger.warning("The %s %s should not be initialized: %s", type, links[sched_id]['name'], str(exp))
+                logger.warning("The %s %s should not be initialized: %s",
+                               type, links[sched_id]['name'], str(exp))
             # scheduler must not have checks
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
@@ -411,7 +420,7 @@ class Broker(BaseSatellite):
 
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
-        statsmgr.register(self, name, 'broker', 
+        statsmgr.register(self, name, 'broker',
                           api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
                           statsd_host=self.statsd_host, statsd_port=self.statsd_port,
                           statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
@@ -566,7 +575,7 @@ class Broker(BaseSatellite):
 
         # Now receivers
         for rec_id in conf['receivers']:
-            #Must look if we already have it
+            # Must look if we already have it
             already_got = rec_id in self.receivers
             if already_got:
                 broks = self.receivers[rec_id]['broks']
@@ -650,11 +659,12 @@ class Broker(BaseSatellite):
         # call the daemon one
         res = super(Broker, self).get_stats_struct()
         res.update({'name': self.name, 'type': 'broker'})
-        metrics = res['metrics']      
+        metrics = res['metrics']
         # metrics specific
-        metrics.append('broker.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now))
+        metrics.append('broker.%s.external-commands.queue %d %d' % (
+            self.name, len(self.external_commands), now))
         metrics.append('broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now))
-        
+
         return res
 
 
@@ -698,7 +708,7 @@ class Broker(BaseSatellite):
         self.interger_internal_broks()
         # Also reap broks sent from the arbiters
         self.interger_arbiter_broks()
-        
+
         # Main job, go get broks in our distants daemons
         types = ['scheduler', 'poller', 'reactionner', 'receiver']
         for _type in types:
@@ -727,7 +737,8 @@ class Broker(BaseSatellite):
             except Exception, exp:
                 # first we must find the modules
                 logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s queue raise an exception: %s, I'm tagging it to restart later",
+                logger.warning("The mod %s queue raise an exception: %s, "
+                               "I'm tagging it to restart later",
                                mod.get_name(), str(exp))
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
@@ -750,7 +761,7 @@ class Broker(BaseSatellite):
             # every 1s
             if now - start > 1:
                 break
-            
+
             b = self.broks.pop()
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
@@ -795,13 +806,13 @@ class Broker(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
-            
+
             # Setting log level
             logger.setLevel(self.log_level)
             # Force the debug level if the daemon is said to start with such level
             if self.debug:
                 logger.setLevel('DEBUG')
-            
+
             for line in self.get_header():
                 logger.info(line)
 
@@ -811,7 +822,7 @@ class Broker(BaseSatellite):
             self.look_for_early_exit()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
-            
+
             self.uri2 = self.http_daemon.register(self.interface)
             logger.debug("The Arbiter uri it at %s", self.uri2)
 
@@ -824,7 +835,7 @@ class Broker(BaseSatellite):
 
             self.setup_new_conf()
 
-            
+
             # Do the modules part, we have our modules in self.modules
             # REF: doc/broker-modules.png (1)
             self.hook_point('load_retention')
