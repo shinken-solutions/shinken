@@ -49,7 +49,7 @@ class ReactionnerLink(SatelliteLink):
         self.realm.reactionners.append(self)
 
 
-class ReactionnerLinks(SatelliteLinks): # (Items):
+class ReactionnerLinks(SatelliteLinks):  # (Items):
     """Please Add a Docstring to describe the class here"""
 
     name_property = "reactionner_name"
