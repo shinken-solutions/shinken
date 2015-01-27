@@ -63,8 +63,8 @@ class EventHandler(Action):
     }
 
     # id = 0  #Is common to Actions
-    def __init__(self, command, id=None, ref=None, timeout=10, env={}, \
-                     module_type='fork', reactionner_tag='None', is_snapshot=False):
+    def __init__(self, command, id=None, ref=None, timeout=10, env={},
+                 module_type='fork', reactionner_tag='None', is_snapshot=False):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -106,7 +106,7 @@ class EventHandler(Action):
         self.execution_time = getattr(e, 'execution_time', 0.0)
         self.perf_data = getattr(e, 'perf_data', '')
 
-    
+
     def get_outputs(self, out, max_plugins_output_length):
         self.output = out
 
