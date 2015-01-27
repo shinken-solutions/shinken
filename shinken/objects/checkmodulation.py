@@ -36,9 +36,12 @@ class CheckModulation(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'checkmodulation_name':          StringProp(fill_brok=['full_status']),
-        'check_command':          StringProp(fill_brok=['full_status']),
-        'check_period' :          StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
+        'checkmodulation_name':
+            StringProp(fill_brok=['full_status']),
+        'check_command':
+            StringProp(fill_brok=['full_status']),
+        'check_period':
+            StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -73,13 +76,15 @@ class CheckModulation(Item):
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[checkmodulation::%s] %s property not set", self.get_name(), prop)
+                    logger.warning("[checkmodulation::%s] %s property not set",
+                                   self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'check_command'):
-            logger.warning("[checkmodulation::%s] do not have any check_command defined", self.get_name())
+            logger.warning("[checkmodulation::%s] do not have any check_command defined",
+                           self.get_name())
             state = False
         else:
             if self.check_command is None:
@@ -117,6 +122,6 @@ class CheckModulations(Items):
         if name is None:
             name = CheckModulation.id
         params['checkmodulation_name'] = name
-        #print "Asking a new inner checkmodulation from name %s with params %s" % (name, params)
+        # print "Asking a new inner checkmodulation from name %s with params %s" % (name, params)
         cw = CheckModulation(params)
         self.add_item(cw)
