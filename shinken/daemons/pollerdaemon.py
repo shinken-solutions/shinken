@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -32,7 +31,7 @@ class Poller(Satellite):
     do_checks = True    # I do checks
     do_actions = False  # but no actions
     my_type = 'poller'
-    
+
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='pollerd.pid'),
@@ -41,4 +40,5 @@ class Poller(Satellite):
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile):
-        super(Poller, self).__init__('poller', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Poller, self).__init__('poller', config_file, is_daemon, do_replace, debug,
+                                     debug_file)
