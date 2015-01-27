@@ -123,7 +123,7 @@ def run(url, requests, concurrency, qg):
                 # Store query duration to compute stats
                 q = c.results.pop()
                 duration = q.duration
-                if (not queries_durations.has_key(q.query_class)):
+                if q.query_class not in queries_durations:
                     queries_durations[q.query_class] = []
                 queries_durations[q.query_class].append(q.duration)
                 sys.stdout.flush()
@@ -148,7 +148,9 @@ def run(url, requests, concurrency, qg):
     print "Running time is %04f s" % running_time
     print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations), min(durations), max(durations), mean(durations), median(durations))
+        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations),
+                                               min(durations), max(durations), mean(durations),
+                                               median(durations))
 
 
 def main(argv):
