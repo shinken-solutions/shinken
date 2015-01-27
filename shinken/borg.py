@@ -31,5 +31,5 @@ class Borg(object):
     __shared_state = {}
 
     def __init__(self):
-        #print "Init Borg", self.__dict__, self.__class__.__shared_state
+        # print "Init Borg", self.__dict__, self.__class__.__shared_state
         self.__dict__ = self.__class__.__shared_state
