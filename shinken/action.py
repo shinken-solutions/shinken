@@ -121,11 +121,10 @@ class __Action(object):
         self.stdoutdata = ''
         self.stderrdata = ''
 
-        return self.execute__()  ## OS specific part
+        return self.execute__()  # OS specific part
 
 
     def get_outputs(self, out, max_plugins_output_length):
-        #print "Get only," , max_plugins_output_length, "bytes"
         # Squeeze all output after max_plugins_output_length
         out = out[:max_plugins_output_length]
         # manage escaped pipes
@@ -170,7 +169,6 @@ class __Action(object):
         _, _, child_utime, child_stime, _ = os.times()
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time * 2, 0.1)
-            #time.sleep(wait_time)
             now = time.time()
 
             # If the fcntl is available (unix) we try to read in a
@@ -183,8 +181,6 @@ class __Action(object):
 
             if (now - self.check_time) > self.timeout:
                 self.kill__()
-                #print "Kill for timeout", self.process.pid,
-                #print self.command, now - self.check_time
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
@@ -261,10 +257,10 @@ class __Action(object):
         return False
 
 
-###
-### OS specific "execute__" & "kill__" are defined by "Action" class
-### definition:
-###
+#
+# OS specific "execute__" & "kill__" are defined by "Action" class
+# definition:
+#
 
 if os.name != 'nt':
 
@@ -294,9 +290,6 @@ if os.name != 'nt':
                     return
 
 
-            #safe_print("Launching", cmd)
-            #safe_print("With env", self.local_env)
-
             # Now: GO for launch!
             # logger.debug("Launching: %s" % (self.command.encode('utf8', 'ignore')))
 
@@ -311,10 +304,10 @@ if os.name != 'nt':
                     preexec_fn=os.setsid)
             except OSError, exp:
                 logger.error("Fail launching command: %s %s %s",
-                              self.command, exp, force_shell)
+                             self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
                 if (not force_shell and exp.errno == 8
-                    and exp.strerror == 'Exec format error'):
+                   and exp.strerror == 'Exec format error'):
                     return self.execute__(True)
                 self.output = exp.__str__()
                 self.exit_status = 2
