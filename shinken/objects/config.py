@@ -504,7 +504,7 @@ class Config(Item):
             UnusedProp(text='sorry, not yet implemented.'),
 
         'admin_pager':
-            UnusedProp(text='sorry, not yet implemented.')
+            UnusedProp(text='sorry, not yet implemented.'),
 
         'event_broker_options':
             UnusedProp(text='event broker are replaced by modules '
