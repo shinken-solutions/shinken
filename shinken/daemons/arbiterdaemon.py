@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -84,7 +83,8 @@ class IForArbiter(Interface):
     def do_not_run(self):
         # If I'm the master, ignore the command
         if self.app.is_master:
-            logger.debug("Received message to not run. I am the Master, ignore and continue to run.")
+            logger.debug("Received message to not run. "
+                         "I am the Master, ignore and continue to run.")
         # Else, I'm just a spare, so I listen to my master
         else:
             logger.debug("Received message to not run. I am the spare, stopping.")
@@ -139,7 +139,7 @@ class IForArbiter(Interface):
                         if hasattr(d, prop):
                             v = getattr(d, prop)
                             if prop == "realm":
-                                if hasattr(v,"realm_name"):
+                                if hasattr(v, "realm_name"):
                                     e[prop] = v.realm_name
                             # give a try to a json able object
                             try:
@@ -153,7 +153,8 @@ class IForArbiter(Interface):
 
 
     # Try to give some properties of our objects
-    doc = 'Dump all objects of the type in [hosts, services, contacts, commands, hostgroups, servicegroups]'
+    doc = 'Dump all objects of the type in [hosts, services, contacts, ' \
+          'commands, hostgroups, servicegroups]'
     def get_objects_properties(self, table):
         logger.debug('ASK:: table= %s', str(table))
         objs = getattr(self.app.conf, table, None)
@@ -174,7 +175,8 @@ class Arbiter(Daemon):
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug,
                  debug_file, profile=None, analyse=None, migrate=None, arb_name=''):
 
-        super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
+        super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace,
+                                      debug, debug_file)
 
         self.config_files = config_files
         self.verify_only = verify_only
@@ -371,7 +373,8 @@ class Arbiter(Daemon):
 
         # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
-            sys.exit("***> One or more problems was encountered while processing the config files...")
+            sys.exit("***> One or more problems was encountered "
+                     "while processing the config files...")
 
         # Manage all post-conf modules
         self.hook_point('early_configuration')
@@ -463,7 +466,8 @@ class Arbiter(Daemon):
             logger.error(err)
             sys.exit(err)
 
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+        logger.info('Things look okay - No serious problems were detected '
+                    'during the pre-flight check')
 
         # Clean objects of temporary/unnecessary attributes for live work:
         self.conf.clean()
@@ -650,7 +654,7 @@ class Arbiter(Daemon):
     # It can be used to get external commands for example
     def get_objects_from_from_queues(self):
         for f in self.modules_manager.get_external_from_queues():
-            #print "Groking from module instance %s" % f
+            # print "Groking from module instance %s" % f
             while True:
                 try:
                     o = f.get(block=False)
@@ -698,10 +702,11 @@ class Arbiter(Daemon):
             # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > master_timeout:
-                logger.info("Arbiter Master is dead. The arbiter %s take the lead", self.me.get_name())
+                logger.info("Arbiter Master is dead. The arbiter %s take the lead",
+                            self.me.get_name())
                 for arb in self.conf.arbiters:
                     if not arb.spare:
-                        arb.alive = False                
+                        arb.alive = False
                 self.must_run = True
                 break
 
@@ -826,7 +831,7 @@ class Arbiter(Daemon):
             # we must give him our broks
             self.push_broks_to_broker()
             self.get_external_commands_from_satellites()
-            #self.get_external_commands_from_receivers()
+            # self.get_external_commands_from_receivers()
             # send_conf_to_schedulers()
 
             if self.nb_broks_send != 0:
