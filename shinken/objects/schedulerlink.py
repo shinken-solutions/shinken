@@ -25,8 +25,9 @@
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp
-from shinken.log  import logger
+from shinken.log import logger
 from shinken.http_client import HTTPExceptions
+
 
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
@@ -53,10 +54,8 @@ class SchedulerLink(SatelliteLink):
         'push_flavor': IntegerProp(default=0),
     })
 
-
     def get_name(self):
         return self.scheduler_name
-
 
     def run_external_commands(self, commands):
         if self.con is None:
@@ -65,23 +64,21 @@ class SchedulerLink(SatelliteLink):
             return None
         logger.debug("[SchedulerLink] Sending %d commands", len(commands))
         try:
-            self.con.post('run_external_commands', {'cmds' : commands})
+            self.con.post('run_external_commands', {'cmds': commands})
         except HTTPExceptions, exp:
             self.con = None
             logger.debug(exp)
             return False
 
-
     def register_to_my_realm(self):
         self.realm.schedulers.append(self)
 
-
     def give_satellite_cfg(self):
-        return {'port': self.port, 'address': self.address, 'name': self.scheduler_name, 'instance_id': self.id,
+        return {'port': self.port, 'address': self.address,
+                'name': self.scheduler_name, 'instance_id': self.id,
                 'active': self.conf is not None, 'push_flavor': self.push_flavor,
                 'timeout': self.timeout, 'data_timeout': self.data_timeout,
-                'use_ssl':self.use_ssl, 'hard_ssl_name_check':self.hard_ssl_name_check}
-
+                'use_ssl': self.use_ssl, 'hard_ssl_name_check': self.hard_ssl_name_check}
 
     # Some parameters can give as 'overridden parameters' like use_timezone
     # so they will be mixed (in the scheduler) with the standard conf sent by the arbiter
