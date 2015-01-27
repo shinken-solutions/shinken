@@ -991,7 +991,7 @@ class Config(Item):
                 in_define = False
 
             # { alone in a line can mean start object reading
-            if re.search("^\s*{\s*$", line) is not None and almost_in_define:
+            if re.search("^\s*\{\s*$", line) is not None and almost_in_define:
                 almost_in_define = False
                 in_define = True
                 continue
