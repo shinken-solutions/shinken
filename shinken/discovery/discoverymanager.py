@@ -56,12 +56,14 @@ def get_uuid(self):
     if uuid:
         return uuid.uuid1().hex
     # Ok for old python like 2.4, we will lie here :)
-    return int(random.random()*sys.maxint)
+    return int(random.random() * sys.maxint)
 
 
 # Look if the name is a IPV4 address or not
 def is_ipv4_addr(name):
-    p = r"^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$"
+    p = r"^([01]?\d\d?|2[0-4]\d|25[0-5])" \
+        r"\.([01]?\d\d?|2[0-4]\d|25[0-5])" \
+        r"\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$"
     return (re.match(p, name) is not None)
 
 
@@ -75,11 +77,11 @@ def by_order(r1, r2):
         return -1
 
 class DiscoveredHost(object):
-    my_type = 'host' # we fake our type for the macro resolving
+    my_type = 'host'  # we fake our type for the macro resolving
 
     macros = {
         'HOSTNAME':          'name',
-        }
+    }
 
     def __init__(self, name, rules, runners, merge=False, first_level_only=False):
         self.name = name
@@ -101,7 +103,7 @@ class DiscoveredHost(object):
     def update_properties(self, final_phase=False):
         d = {}
         if final_phase:
-            for (k,v) in self.data.iteritems():
+            for (k, v) in self.data.iteritems():
                 if k.startswith('_'):
                     d[k] = v
         else:
@@ -109,75 +111,75 @@ class DiscoveredHost(object):
 
         d['host_name'] = self.name
         # Set address directive if an ip exists
-        if self.data.has_key('ip'):
+        if 'ip' in self.data:
             d['address'] = self.data['ip']
 
         self.matched_rules.sort(by_order)
 
         for r in self.matched_rules:
-            for k,v in r.writing_properties.iteritems():
+            for k, v in r.writing_properties.iteritems():
                 # If it's a + (add) property, append
                 if k.startswith('+'):
                     kprop = k[1:]
                     # If the d do not already have this prop,
                     # create list
-                    if not kprop in d:
-                        print 'New prop',kprop
-                        d[kprop]=[]
-                
+                    if kprop not in d:
+                        print 'New prop', kprop
+                        d[kprop] = []
+
                 elif not k.startswith('-'):
                     kprop = k
-                    if not kprop in d:
-                        print 'New prop',kprop
+                    if kprop not in d:
+                        print 'New prop', kprop
                     else:
-                        print 'Prop',kprop,'reset with new value'
-                    d[kprop]=[]
+                        print 'Prop', kprop, 'reset with new value'
+                    d[kprop] = []
 
-                for prop in string.split(v,','):
-                    prop=prop.strip()
-                    #checks that prop does not already exist and adds
-                    if not prop in d[kprop]:
+                for prop in string.split(v, ','):
+                    prop = prop.strip()
+                    # checks that prop does not already exist and adds
+                    if prop not in d[kprop]:
                         if len(d[kprop]) > 0:
                             print 'Already got', ','.join(d[kprop]), 'add', prop
                         else:
-                            print 'Add',prop
+                            print 'Add', prop
                         d[kprop].append(prop)
 
             # Now look for - (rem) property
-            for k,v in r.writing_properties.iteritems():
+            for k, v in r.writing_properties.iteritems():
                 if k.startswith('-'):
                     kprop = k[1:]
                     if kprop in d:
-                        for prop in string.split(v,','):
+                        for prop in string.split(v, ','):
                             prop = prop.strip()
                             if prop in d[kprop]:
                                 print 'Already got', ','.join(d[kprop]), 'rem', prop
                                 d[kprop].remove(prop)
- 
+
         # Change join prop list in string with a ',' separator
-        for (k,v) in d.iteritems():
-            if type(d[k]).__name__=='list':
-                d[k]=','.join(d[k])
+        for (k, v) in d.iteritems():
+            if isinstance(d[k], 'list'):
+                d[k] = ','.join(d[k])
 
         self.properties = d
         print 'Update our properties', self.name, d
-        
+
         # For macro-resolving, we should have our macros too
         self.customs = {}
-        for (k,v) in self.properties.iteritems():
-            self.customs['_'+k.upper()] = v
+        for (k, v) in self.properties.iteritems():
+            self.customs['_' + k.upper()] = v
 
-            
+
     # Manager ask us our properties for the configuration, so
     # we keep only rules properties and _ ones
     def get_final_properties(self):
         self.update_properties(final_phase=True)
         return self.properties
-            
+
 
     def get_to_run(self):
         self.in_progress_runners = []
-        
+
         if self.first_level_only:
             return
 
@@ -194,12 +196,12 @@ class DiscoveredHost(object):
             print 'Is ', r.get_name(), 'matching??', r.is_matching_disco_datas(self.properties)
             if r.is_matching_disco_datas(self.properties):
                 self.in_progress_runners.append(r)
-            
+
 
 
     def need_to_run(self):
         return len(self.in_progress_runners) != 0
-    
+
 
 
     # Now we try to match all our hosts with the rules
@@ -221,24 +223,24 @@ class DiscoveredHost(object):
     def read_disco_buf(self, buf):
         print 'Read buf in', self.name
         for l in buf.split('\n'):
-            #print ""
+            # print ""
             # If it's not a disco line, bypass it
             if not re.search('::', l):
                 continue
-            #print "line", l
+            # print "line", l
             elts = l.split('::', 1)
             if len(elts) <= 1:
-                #print "Bad discovery data"
+                # print "Bad discovery data"
                 continue
             name = elts[0].strip()
 
             # We can choose to keep only the basename
             # of the nameid, so strip the fqdn
             # But not if it's a plain ipv4 addr
-            #TODO : gt this! if self.conf.strip_idname_fqdn:
+            # TODO : gt this! if self.conf.strip_idname_fqdn:
             if not is_ipv4_addr(name):
                 name = name.split('.', 1)[0]
-            
+
             data = '::'.join(elts[1:])
 
             # Maybe it's not me?
@@ -251,7 +253,7 @@ class DiscoveredHost(object):
                     self.name = name
 
             # Now get key,values
-            if not '=' in data:
+            if '=' not in data:
                 continue
 
             elts = data.split('=', 1)
@@ -278,11 +280,11 @@ class DiscoveredHost(object):
             all_ok = True
             for r in self.in_progress_runners:
                 if not r.is_finished():
-                    #print "Check finished of", r.get_name()
+                    # print "Check finished of", r.get_name()
                     r.check_finished()
                 b = r.is_finished()
                 if not b:
-                    #print r.get_name(), "is not finished"
+                    # print r.get_name(), "is not finished"
                     all_ok = False
             time.sleep(0.1)
 
@@ -293,7 +295,8 @@ class DiscoveredHost(object):
                 print'Get output', self.name, r.discoveryrun_name, r.current_launch
                 if r.current_launch.exit_status != 0:
                     print "Error on run"
-        raw_disco_data = '\n'.join(r.get_output() for r in self.in_progress_runners if r.is_finished())
+        raw_disco_data = '\n'.join(r.get_output() for r in self.in_progress_runners
+                                   if r.is_finished())
         if len(raw_disco_data) != 0:
             print "Got Raw disco data", raw_disco_data
         else:
@@ -305,7 +308,9 @@ class DiscoveredHost(object):
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', merge=False, conf=None, first_level_only=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None,
+                 dbmod='', db_direct_insert=False, only_new_hosts=False,
+                 backend=None, modules_path='', merge=False, conf=None, first_level_only=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -315,7 +320,7 @@ class DiscoveryManager:
         self.db_direct_insert = db_direct_insert
         self.only_new_hosts = only_new_hosts
         self.log.load_obj(self)
-        self.merge= merge
+        self.merge = merge
         self.config_files = [path]
         # For specific backend, to override the classic file/db behavior
         self.backend = backend
@@ -325,9 +330,9 @@ class DiscoveryManager:
         if not conf:
             self.conf = Config()
 
-            
+
             buf = self.conf.read_config(self.config_files)
-        
+
             # Add macros on the end of the buf so they will
             # overwrite the resource.cfg ones
             for (m, v) in macros:
@@ -341,12 +346,9 @@ class DiscoveryManager:
             self.conf.linkify_templates()
             self.conf.apply_inheritance()
             self.conf.explode()
-            #self.conf.create_reversed_list()
-            #self.conf.remove_twins()
             self.conf.apply_implicit_inheritance()
             self.conf.fill_default()
             self.conf.remove_templates()
-            #self.conf.pythonize()
             self.conf.linkify()
             self.conf.apply_dependencies()
             self.conf.is_correct()
@@ -355,10 +357,10 @@ class DiscoveryManager:
 
         self.discoveryrules = self.conf.discoveryrules
         self.discoveryruns = self.conf.discoveryruns
-        
+
         m = MacroResolver()
         m.init(self.conf)
-        
+
         # Hash = name, and in it (key, value)
         self.disco_data = {}
         # Hash = name, and in it rules that apply
@@ -423,7 +425,7 @@ class DiscoveryManager:
         while still_loop:
             i += 1
             print '\n'
-            print 'LOOP'*10, i
+            print 'LOOP' * 10, i
             still_loop = False
             for (name, dh) in self.disco_data.iteritems():
                 dh.update_properties()
@@ -441,14 +443,14 @@ class DiscoveryManager:
     def read_disco_buf(self):
         buf = self.raw_disco_data
         for l in buf.split('\n'):
-            #print ""
+            # print ""
             # If it's not a disco line, bypass it
             if not re.search('::', l):
                 continue
-            #print "line", l
+            # print "line", l
             elts = l.split('::', 1)
             if len(elts) <= 1:
-                #print "Bad discovery data"
+                # print "Bad discovery data"
                 continue
             name = elts[0].strip()
 
@@ -458,18 +460,22 @@ class DiscoveryManager:
             if self.conf.strip_idname_fqdn:
                 if not is_ipv4_addr(name):
                     name = name.split('.', 1)[0]
-            
+
             data = '::'.join(elts[1:])
-            
+
             # Register the name
-            if not name in self.disco_data:
-                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, merge=self.merge, first_level_only=self.first_level_only)
+            if name not in self.disco_data:
+                self.disco_data[name] = DiscoveredHost(name,
+                                                       self.discoveryrules,
+                                                       self.discoveryruns,
+                                                       merge=self.merge,
+                                                       first_level_only=self.first_level_only)
 
             # Now get key,values
-            if not '=' in data:
+            if '=' not in data:
                 continue
 
-            elts = data.split('=',1)
+            elts = data.split('=', 1)
             if len(elts) <= 1:
                 continue
 
@@ -504,11 +510,11 @@ class DiscoveryManager:
         if '*' in self.runners:
             return True
 
-        #print self.runners
-        #If we match the name, ok
+        # print self.runners
+        # If we match the name, ok
         for r in self.runners:
             r_name = r.strip()
-            #print "Look", r_name, name
+            # print "Look", r_name, name
             if r_name == name:
                 return True
 
@@ -528,7 +534,8 @@ class DiscoveryManager:
             return
 
         for r in allowed_runners:
-            print "I'm launching", r.get_name(), "with a %d seconds timeout" % self.conf.runners_timeout
+            print "I'm launching %s with a %d seconds timeout" % \
+                  (r.get_name(), self.conf.runners_timeout)
             r.launch(timeout=self.conf.runners_timeout)
 
 
@@ -554,14 +561,14 @@ class DiscoveryManager:
         all_ok = True
         for r in self.allowed_runners():
             if not r.is_finished():
-                #print "Check finished of", r.get_name()
+                # print "Check finished of", r.get_name()
                 r.check_finished()
             b = r.is_finished()
             if not b:
-                #print r.get_name(), "is not finished"
+                # print r.get_name(), "is not finished"
                 all_ok = False
         return all_ok
-        
+
 
     def get_runners_outputs(self):
         for r in self.allowed_runners():
@@ -569,7 +576,8 @@ class DiscoveryManager:
                 print r.discoveryrun_name, r.current_launch
                 if r.current_launch.exit_status != 0:
                     print "Error on run"
-        self.raw_disco_data = '\n'.join(r.get_output() for r in self.allowed_runners() if r.is_finished())
+        self.raw_disco_data = '\n'.join(r.get_output() for r in self.allowed_runners()
+                                        if r.is_finished())
         if len(self.raw_disco_data) != 0:
             print "Got Raw disco data", self.raw_disco_data
         else:
@@ -583,7 +591,7 @@ class DiscoveryManager:
         # Store host to del in a separate array to remove them after look over items
         items_to_del = []
         still_duplicate_items = True
-        managed_element =True
+        managed_element = True
         while still_duplicate_items:
             # If we didn't work in the last loop, bail out
             if not managed_element:
@@ -601,21 +609,22 @@ class DiscoveryManager:
                     dhb = self.disco_data[oname]
                     # When same host but different properties are detected
                     if dha.name == dhb.name and dha.properties != dhb.properties:
-                        for (k,v) in dhb.properties.iteritems():
+                        for (k, v) in dhb.properties.iteritems():
                             # Merge host macros if their properties are different
-                            if k.startswith('_') and dha.properties.has_key(k) and dha.properties[k] != dhb.properties[k]:
+                            if k.startswith('_') and \
+                                    k in dha.properties and dha.properties[k] != dhb.properties[k]:
                                 dha.data[k] = dha.properties[k] + ',' + v
                                 print('Merged host macro:', k, dha.properties[k])
                                 items_to_del.append(oname)
 
-                        print('Merged '+ oname + ' in ' + name)
+                        print('Merged ' + oname + ' in ' + name)
                         dha.update_properties()
                     else:
                         still_duplicate_items = False
-                        
+
         # Removing merged element
         for item in items_to_del:
-            print('Deleting '+item)
+            print('Deleting ' + item)
             del self.disco_data[item]
 
         # New loop to reflect changes in self.disco_data since it isn't possible
@@ -643,11 +652,9 @@ class DiscoveryManager:
         if self.db:
             self.write_host_config_to_db(final_host, d)
 
-        
         if self.backend:
             self.backend.write_host_config_to_db(final_host, d)
-            
-        
+
     # Will wrote all properties/values of d for the host
     # in the file
     def write_host_config_to_file(self, host, d):
@@ -660,7 +667,7 @@ class DiscoveryManager:
             if not exp.errno != '17':
                 print "Cannot create the directory '%s' : '%s'" % (p, exp)
                 return
-        cfg_p = os.path.join(p, host+'.cfg')
+        cfg_p = os.path.join(p, host + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
             print "The file '%s' already exists" % cfg_p
             return
@@ -685,14 +692,14 @@ class DiscoveryManager:
             if r.creation_type == 'service':
                 if 'service_description' in r.writing_properties:
                     desc = r.writing_properties['service_description']
-                    if not desc in srv_rules:
+                    if desc not in srv_rules:
                         srv_rules[desc] = []
                     srv_rules[desc].append(r)
 
-        #print "Generate services for", host
-        #print srv_rules
+        # print "Generate services for", host
+        # print srv_rules
         for (desc, rules) in srv_rules.items():
-            d = {'service_description' : desc, 'host_name' : host}
+            d = {'service_description': desc, 'host_name': host}
             for r in rules:
                 d.update(r.writing_properties)
             print "Generating", desc, d
@@ -709,12 +716,12 @@ class DiscoveryManager:
         p = os.path.join(self.output_dir, host)
 
         # The host conf should already exist
-        cfg_host_p = os.path.join(p, host+'.cfg')
+        cfg_host_p = os.path.join(p, host + '.cfg')
         if not os.path.exists(cfg_host_p):
             print "No host configuration available, I bail out"
             return
 
-        cfg_p = os.path.join(p, desc+'.cfg')
+        cfg_p = os.path.join(p, desc + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
             print "The file '%s' already exists" % cfg_p
             return
@@ -730,7 +737,7 @@ class DiscoveryManager:
             print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
             return
 
-            
+
     # Create a define t { } with data in d
     def get_cfg_bufer(self, d, t):
         tab = ['define %s {' % t]
@@ -738,7 +745,7 @@ class DiscoveryManager:
             tab.append('  %s   %s' % (key, value))
         tab.append('}\n')
         return '\n'.join(tab)
-        
+
 
     # Will wrote all properties/values of d for the host
     # in the database
@@ -757,14 +764,14 @@ class DiscoveryManager:
             print "The host '%s' already exists in the database table %s" % (host, table)
             return
 
-        #It can be the same check if db_direct_insert but whatever
+        # It can be the same check if db_direct_insert but whatever
         if self.only_new_hosts:
             for t in [self.db.hosts, self.db.discovered_hosts]:
                 r = table.find({'_id': host})
                 if r.count() > 0:
                     print "This is not a new host on", self.db.hosts
                     return
-                
+
         print "Saving in database", d
         d['_id'] = host
         d['_discovery_state'] = 'discovered'
