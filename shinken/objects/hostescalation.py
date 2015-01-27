@@ -39,9 +39,9 @@ class Hostescalation(Item):
         'hostgroup_name':        StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
-        'notification_interval': IntegerProp(default=30), # like Nagios value
+        'notification_interval': IntegerProp(default=30),  # like Nagios value
         'escalation_period':     StringProp(default=''),
-        'escalation_options':    ListProp(default=['d','u','r','w','c']),
+        'escalation_options':    ListProp(default=['d', 'u', 'r', 'w', 'c']),
         'contacts':              StringProp(),
         'contact_groups':        StringProp(),
         'first_notification_time': IntegerProp(),
@@ -70,6 +70,6 @@ class Hostescalations(Items):
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
 
-        #print "All escalations"
-        #for es in escalations:
+        # print "All escalations"
+        # for es in escalations:
         #    print es
