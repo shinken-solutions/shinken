@@ -2476,7 +2476,7 @@ class Jinja2Template(BaseTemplate):
         from jinja2 import Environment, FunctionLoader
         if 'prefix' in kwargs:  # TODO: to be removed after a while
             raise RuntimeError('The keyword argument `prefix` has been removed. '
-                               'Use the full jinja2 environment name line_statement_prefix''
+                               'Use the full jinja2 environment name line_statement_prefix'
                                'instead.')
         self.env = Environment(loader=FunctionLoader(self.loader), **kwargs)
         if filters:
