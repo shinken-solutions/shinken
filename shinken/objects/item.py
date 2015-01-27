@@ -39,7 +39,8 @@ except ImportError:
 from copy import copy
 
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp, PythonizeError
+from shinken.property import (StringProp, ListProp, BoolProp,
+                              IntegerProp, ToGuessProp, PythonizeError)
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq, is_complex_expr
 from shinken.acknowledge import Acknowledge
@@ -100,7 +101,7 @@ class Item(object):
                     val = self.running_properties[key].pythonize(params[key])
                 elif hasattr(self, 'old_properties') and key in self.old_properties:
                     val = self.properties[self.old_properties[key]].pythonize(params[key])
-                elif key.startswith('_'): # custom macro, not need to detect something here
+                elif key.startswith('_'):  # custom macro, not need to detect something here
                     _t = params[key]
                     # If it's a string, directly use this
                     if isinstance(_t, basestring):
@@ -124,12 +125,16 @@ class Item(object):
 
             # checks for attribute value special syntax (+ or _)
             # we can have '+param' or ['+template1' , 'template2']
-            if (isinstance(val, str) and len(val) >= 1 and val[0] == '+') :
+            if isinstance(val, str) and len(val) >= 1 and val[0] == '+':
                 err = "A + value for a single string is not handled"
                 self.configuration_errors.append(err)
                 continue
 
-            if (isinstance(val, list) and len(val) >= 1 and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
+            if (isinstance(val, list) and
+                    len(val) >= 1 and
+                    isinstance(val[0], unicode) and
+                    len(val[0]) >= 1 and
+                    val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 val[0] = val[0][1:]
@@ -308,7 +313,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         new_val = list(getattr(self, prop))
                         new_val.extend(value[1:])
                         value = new_val
-                    else: # If not, se should keep the + sign of need
+                    else:  # If not, se should keep the + sign of need
                         new_val = list(getattr(self, prop))
                         new_val.extend(value)
                         value = new_val
@@ -372,7 +377,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         value = self.customs[prop]
                     if self.has_plus(prop):
                         value.insert(0, self.get_plus_and_delete(prop))
-                        #value = self.get_plus_and_delete(prop) + ',' + value
+                        # value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
@@ -450,13 +455,13 @@ Like temporary attributes such as "imported_from", etc.. """
         r = {}
         properties = self.__class__.properties.keys()
         # Register is not by default in the properties
-        if not 'register' in properties:
+        if 'register' not in properties:
             properties.append('register')
 
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                #print prop, ":", v
+                # print prop, ":", v
                 r[prop] = v
         return r
 
@@ -508,14 +513,18 @@ Like temporary attributes such as "imported_from", etc.. """
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
-        if self.acknowledgement and self.acknowledgement.end_time != 0 and self.acknowledgement.end_time < time.time():
+        if (self.acknowledgement and
+                self.acknowledgement.end_time != 0 and
+                self.acknowledgement.end_time < time.time()):
             self.unacknowledge_problem()
 
     #  Delete the acknowledgement object and reset the flag
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            logger.debug("[item::%s] deleting acknowledge of %s", self.get_name(), self.get_dbg_name())
+            logger.debug("[item::%s] deleting acknowledge of %s",
+                         self.get_name(),
+                         self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -548,7 +557,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         if hasattr(cls, 'running_properties'):
             for prop, entry in cls.running_properties.items():
-            # Is this property need preparation for sending?
+                # Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
                     if f is not None:
@@ -584,7 +593,7 @@ Like temporary attributes such as "imported_from", etc.. """
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
             for prop, entry in cls.running_properties.items():
-                #if 'fill_brok' in cls.running_properties[prop]:
+                # if 'fill_brok' in cls.running_properties[prop]:
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
@@ -640,11 +649,13 @@ Like temporary attributes such as "imported_from", etc.. """
         my_type = cls.my_type
         now = int(time.time())
 
-        data = {'snapshot_output':snap_output, 'snapshot_time':now, 'snapshot_exit_status':exit_status}
+        data = {'snapshot_output': snap_output,
+                'snapshot_time': now,
+                'snapshot_exit_status': exit_status}
         self.fill_data_brok_from(data, 'check_result')
         b = Brok(my_type + '_snapshot', data)
         return b
-        
+
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -671,7 +682,8 @@ Like temporary attributes such as "imported_from", etc.. """
         if src:
             # Change on the fly the characters
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
-            t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
+            t = triggers.create_trigger(src,
+                                        'inner-trigger-' + self.__class__.my_type + str(self.id))
             if t:
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
@@ -682,7 +694,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
         self.triggers.extend([self.trigger_name])
-        #print "I am linking my triggers", self.get_full_name(), self.triggers
+        # print "I am linking my triggers", self.get_full_name(), self.triggers
         new_triggers = []
         for tname in self.triggers:
             if tname == '':
@@ -692,7 +704,10 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
                 new_triggers.append(t)
             else:
-                self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
+                self.configuration_errors.append('the %s %s does have a unknown trigger_name '
+                                                 '"%s"' % (self.__class__.my_type,
+                                                           self.get_full_name(),
+                                                           tname))
         self.triggers = new_triggers
 
     def dump(self):
@@ -1009,16 +1024,19 @@ class Items(object):
             t = self.find_tpl_by_name(name)
             if t is None:
                 # TODO: Check if this should not be better to report as an error ?
-                self.configuration_warnings.append(
-                    "%s %r use/inherit from an unknown template (%r) ! Imported from: %s" % (
-                        type(item).__name__, item._get_name(), name, item.imported_from
-                ))
+                self.configuration_warnings.append("%s %r use/inherit from an unknown template "
+                                                   "(%r) ! Imported from: "
+                                                   "%s" % (type(item).__name__,
+                                                           item._get_name(),
+                                                           name,
+                                                           item.imported_from))
             else:
                 if t is item:
                     self.configuration_errors.append(
-                        '%s %r use/inherits from itself ! Imported from: %s' % (
-                            type(item).__name__, item._get_name(), item.imported_from
-                    ))
+                        '%s %r use/inherits from itself ! Imported from: '
+                        '%s' % (type(item).__name__,
+                                item._get_name(),
+                                item.imported_from))
                 else:
                     tpls.append(t)
         item.templates = tpls
@@ -1043,8 +1061,10 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.warning("[items] %s.%s is duplicated from %s", \
-                    i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source"))
+                logger.warning("[items] %s.%s is duplicated from %s",
+                               i.__class__.my_type,
+                               i.get_name(),
+                               getattr(i, 'imported_from', "unknown source"))
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -1073,7 +1093,9 @@ class Items(object):
         return r
 
     def remove_templates(self):
-        """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
+        """ Remove useless templates (& properties) of our items
+            otherwise we could get errors on config.is_correct()
+        """
         del self.templates
 
     def clean(self):
@@ -1131,7 +1153,8 @@ class Items(object):
                         # Else: Add in the errors tab.
                         # will be raised at is_correct
                         else:
-                            err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
+                            err = "the contact '%s' defined for '%s' is unknown" % (c_name,
+                                                                                    i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
@@ -1147,7 +1170,8 @@ class Items(object):
                     if es is not None:
                         new_escalations.append(es)
                     else:  # Escalation not find, not good!
-                        err = "the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
+                        err = "the escalation '%s' defined for '%s' is unknown" % (es_name,
+                                                                                   i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
 
@@ -1162,7 +1186,8 @@ class Items(object):
                     if rm is not None:
                         new_resultmodulations.append(rm)
                     else:
-                        err = "the result modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = ("the result modulation '%s' defined on the %s "
+                               "'%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name()))
                         i.configuration_warnings.append(err)
                         continue
                 i.resultmodulations = new_resultmodulations
@@ -1178,7 +1203,8 @@ class Items(object):
                     if rm is not None:
                         new_business_impact_modulations.append(rm)
                     else:
-                        err = "the business impact modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = ("the business impact modulation '%s' defined on the %s "
+                               "'%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name()))
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
@@ -1224,21 +1250,22 @@ class Items(object):
                 tp = timeperiods.find_by_name(tpname)
                 # If not found, it's an error
                 if tp is None:
-                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname)
+                    err = ("The %s of the %s '%s' named "
+                           "'%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname))
                     i.configuration_errors.append(err)
                     continue
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
-    def create_commandcall(self,prop, commands, command):
+    def create_commandcall(self, prop, commands, command):
         comandcall = dict(commands=commands, call=command)
         if hasattr(prop, 'enable_environment_macros'):
             comandcall['enable_environment_macros'] = prop.enable_environment_macros
 
         if hasattr(prop, 'poller_tag'):
-            comandcall['poller_tag']=prop.poller_tag
+            comandcall['poller_tag'] = prop.poller_tag
         elif hasattr(prop, 'reactionner_tag'):
-            comandcall['reactionner_tag']=prop.reactionner_tag
+            comandcall['reactionner_tag'] = prop.reactionner_tag
 
         return CommandCall(**comandcall)
 
@@ -1290,7 +1317,8 @@ class Items(object):
                 if cw is not None:
                     new_checkmodulations.append(cw)
                 else:
-                    err = "The checkmodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    err = ("The checkmodulations of the %s '%s' named "
+                           "'%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name))
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.checkmodulations = new_checkmodulations
@@ -1308,7 +1336,8 @@ class Items(object):
                 if cw is not None:
                     new_macromodulations.append(cw)
                 else:
-                    err = "The macromodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    err = ("The macromodulations of the %s '%s' named "
+                           "'%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name))
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.macromodulations = new_macromodulations
@@ -1333,23 +1362,23 @@ class Items(object):
             s.modules = new_modules
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
-        #print "\n"*10, "looking for expression", expr
+        # print "\n"*10, "looking for expression", expr
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        #print "\n"*10, "looking for expression", expr
-        if look_in=='hostgroups':
+        # print "\n"*10, "looking for expression", expr
+        if look_in == 'hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
-        else: # templates
+        else:  # templates
             f = ComplexExpressionFactory(look_in, hosts, hosts)
         expr_tree = f.eval_cor_pattern(expr)
 
-        #print "RES of ComplexExpressionFactory"
-        #print expr_tree
+        # print "RES of ComplexExpressionFactory"
+        # print expr_tree
 
-        #print "Try to resolve the Tree"
+        # print "Try to resolve the Tree"
         set_res = expr_tree.resolve_elements()
-        #print "R2d2 final is", set_res
+        # print "R2d2 final is", set_res
 
         # HOOK DBG
         return list(set_res)
@@ -1421,9 +1450,12 @@ class Items(object):
     def no_loop_in_parents(self, attr1, attr2):
         """ Find loop in dependencies.
         For now, used with the following attributes :
-        :(self, parents):                                      host dependencies from host object
-        :(host_name, dependent_host_name):                     host dependencies from hostdependencies object
-        :(service_description, dependent_service_description): service dependencies from servicedependencies object
+        :(self, parents):
+            host dependencies from host object
+        :(host_name, dependent_host_name):\
+            host dependencies from hostdependencies object
+        :(service_description, dependent_service_description):
+            service dependencies from servicedependencies object
         """
 
         # Ok, we say "from now, no loop :) "
@@ -1473,7 +1505,9 @@ class Items(object):
 
         # and raise errors about it
         for item in items_in_loops:
-            logger.error("The %s object '%s'  is part of a circular parent/child chain!", item.my_type, item.get_name())
+            logger.error("The %s object '%s'  is part of a circular parent/child chain!",
+                         item.my_type,
+                         item.get_name())
             r = False
 
         return r
