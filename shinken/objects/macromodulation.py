@@ -37,8 +37,9 @@ class MacroModulation(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'macromodulation_name':       StringProp(fill_brok=['full_status']),
-        'modulation_period' :         StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
+        'macromodulation_name': StringProp(fill_brok=['full_status']),
+        'modulation_period': StringProp(brok_transformation=to_name_if_possible,
+                                        fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -51,14 +52,12 @@ class MacroModulation(Item):
     def get_name(self):
         return self.macromodulation_name
 
-
     # Will say if we are active or not
     def is_active(self):
         now = int(time.time())
         if not self.modulation_period or self.modulation_period.is_time_valid(now):
             return True
         return False
-
 
     # Should have all properties, or a void macro_period
     def is_correct(self):
@@ -74,7 +73,9 @@ class MacroModulation(Item):
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[macromodulation::%s] %s property not set", self.get_name(), prop)
+                    logger.warning(
+                        "[macromodulation::%s] %s property not set", self.get_name(), prop
+                    )
                     state = False  # Bad boy...
 
         # Ok just put None as modulation_period, means 24x7
@@ -84,12 +85,9 @@ class MacroModulation(Item):
         return state
 
 
-
 class MacroModulations(Items):
     name_property = "macromodulation_name"
     inner_class = MacroModulation
 
-
     def linkify(self, timeperiods):
         self.linkify_with_timeperiods(timeperiods, 'modulation_period')
-
