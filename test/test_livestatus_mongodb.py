@@ -77,9 +77,15 @@ try:
 except ImportError as pymongo_import_err:
     pymongo = None
 
+
+
 @unittest.skipUnless(pymongo, "without pymongo that won't make it: %s" % pymongo_import_err)
 @mock_livestatus_handle_request
 class TestConfig(ShinkenTest):
+
+    # how much seconds give to mongod be fully started
+    # == listening on its input socket/port.
+    mongod_start_timeout = 60
 
     @classmethod
     def setUpClass(cls):
@@ -99,7 +105,7 @@ class TestConfig(ShinkenTest):
         time_hacker.set_real_time()
         # mongo takes some time to startup as it creates freshly new database files
         # so we need a relatively big timeout:
-        timeout = time.time() + 30
+        timeout = time.time() + cls.mongod_start_timeout
         while time.time() < timeout:
             time.sleep(1)
             mp.poll()
