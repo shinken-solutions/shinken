@@ -2,7 +2,7 @@
 
     \newpage
 
-.. _about/index:
+.. _introduction/index:
 
 About 
 =====
@@ -15,7 +15,3 @@ About
    :maxdepth: 2
 
    about
-   whatsnew
-   shinken-innovative-features
-   the-project-vision
-   features-and-release-cycle

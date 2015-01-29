@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -36,11 +35,11 @@ from shinken.objects.notificationway import NotificationWay, NotificationWays
 from shinken.objects.timeperiod import Timeperiod, Timeperiods
 from shinken.objects.command import Command, Commands
 from shinken.objects.config import Config
-from shinken.schedulerlink import SchedulerLink, SchedulerLinks
-from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
-from shinken.pollerlink import PollerLink, PollerLinks
-from shinken.brokerlink import BrokerLink, BrokerLinks
-from shinken.receiverlink import ReceiverLink, ReceiverLinks
+from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
+from shinken.objects.reactionnerlink import ReactionnerLink, ReactionnerLinks
+from shinken.objects.pollerlink import PollerLink, PollerLinks
+from shinken.objects.brokerlink import BrokerLink, BrokerLinks
+from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.util import safe_print
 from shinken.message import Message
 
