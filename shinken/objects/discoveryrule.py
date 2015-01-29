@@ -47,6 +47,7 @@ class Discoveryrule(MatchingItem):
     })
 
     running_properties = {
+        'configuration_warnings':   ListProp(default=[]),
         'configuration_errors': ListProp(default=[]),
         }
 
