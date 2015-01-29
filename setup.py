@@ -71,7 +71,7 @@ def generate_default_shinken_file():
     # Read the template file
     f = open(templatefile)
     buf = f.read()
-    f.close
+    f.close()
     # substitute
     buf = buf.replace("$ETC$", default_paths['etc'])
     buf = buf.replace("$VAR$", default_paths['var'])
