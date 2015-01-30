@@ -1304,7 +1304,8 @@ class Config(Item):
             # Now pickle the whole conf, for easy and quick spare send
             t0 = time.time()
             whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
-            logger.debug("[config] time to serialize the global conf : %s (size:%s)", time.time() - t0, len(whole_conf_pack))
+            logger.debug("[config] time to serialize the global conf : %s (size:%s)", 
+                         time.time() - t0, len(whole_conf_pack))
             self.whole_conf_pack = whole_conf_pack
             print "TOTAL serializing in", time.time() - t1
 
