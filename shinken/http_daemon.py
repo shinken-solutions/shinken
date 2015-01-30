@@ -42,6 +42,19 @@ try:
     from cherrypy import wsgiserver as cheery_wsgiserver
 except ImportError:
     cheery_wsgiserver = None
+try:
+    from OpenSSL import SSL
+    from cherrypy.wsgiserver.ssl_pyopenssl import pyOpenSSLAdapter
+    # Create 'safe' SSL adapter by disabling SSLv2/SSLv3 connections
+    class pyOpenSSLAdapterSafe(pyOpenSSLAdapter):
+        def get_context(self):
+            c = pyOpenSSLAdapter.get_context(self)
+            c.set_options(SSL.OP_NO_SSLv2 |
+                          SSL.OP_NO_SSLv3)
+            return c
+except ImportError:
+    SSL = None
+    pyOpenSSLAdapterSafe = None
 
 from wsgiref import simple_server
 
@@ -79,7 +92,8 @@ class CherryPyServer(bottle.ServerAdapter):
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
-
+        if SSL and pyOpenSSLAdapterSafe and use_ssl:
+            server.ssl_adapter = pyOpenSSLAdapterSafe(ssl_cert, ssl_key, ca_cert)
         if use_ssl:
             server.ssl_certificate = ssl_cert
             server.ssl_private_key = ssl_key
