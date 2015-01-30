@@ -84,9 +84,9 @@ class ModulesManager(object):
         if self.modules_path not in sys.path:
             sys.path.append(self.modules_path)
 
-        modules_files = [ fname
-                          for fname in listdir(self.modules_path)
-                          if isdir(join(self.modules_path, fname)) ]
+        modules_files = [fname
+                         for fname in listdir(self.modules_path)
+                         if isdir(join(self.modules_path, fname))]
 
         del self.imported_modules[:]
         for mod_name in modules_files:
@@ -101,9 +101,9 @@ class ModulesManager(object):
             try:
                 is_our_type = self.modules_type in mod.properties['daemons']
             except Exception as err:
-                logger.warning("Bad module file for %s : cannot check its properties['daemons'] attribute : %s",
-                               mod_file, err)
-            else: # We want to keep only the modules of our type
+                logger.warning("Bad module file for %s : cannot check its properties['daemons']"
+                               "attribute : %s", mod_file, err)
+            else:  # We want to keep only the modules of our type
                 if is_our_type:
                     self.imported_modules.append(mod)
 
@@ -115,7 +115,7 @@ class ModulesManager(object):
                 if uniform_module_type(module.properties['type']) == module_type:
                     self.modules_assoc.append((mod_conf, module))
                     break
-            else: # No module is suitable, we emit a Warning
+            else:  # No module is suitable, we emit a Warning
                 logger.warning("The module type %s for %s was not found in modules!",
                                module_type, mod_conf.get_name())
 
@@ -140,7 +140,8 @@ class ModulesManager(object):
 
             inst.init()
         except Exception, e:
-            logger.error("The instance %s raised an exception %s, I remove it!", inst.get_name(), str(e))
+            logger.error("The instance %s raised an exception %s, I remove it!",
+                         inst.get_name(), str(e))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this remove: %s", output.getvalue())
@@ -173,7 +174,8 @@ class ModulesManager(object):
             try:
                 inst = module.get_instance(mod_conf)
                 if not isinstance(inst, BaseModule):
-                    raise TypeError('Returned instance is not of type BaseModule (%s) !' % type(inst))
+                    raise TypeError('Returned instance is not of type BaseModule (%s) !'
+                                    % type(inst))
             except Exception as err:
                 logger.error("The module %s raised an exception %s, I remove it! traceback=%s",
                              mod_conf.get_name(), err, traceback.format_exc())
@@ -187,7 +189,8 @@ class ModulesManager(object):
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
-                logger.warning("The module '%s' failed to init, I will try to restart it later", inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later",
+                               inst.get_name())
                 self.to_restart.append(inst)
 
         return self.instances
@@ -198,7 +201,8 @@ class ModulesManager(object):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
             if not self.try_instance_init(inst, late_start=late_start):
-                logger.warning("The module '%s' failed to init, I will try to restart it later", inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later",
+                               inst.get_name())
                 self.to_restart.append(inst)
                 continue
 
@@ -225,7 +229,7 @@ class ModulesManager(object):
     def check_alive_instances(self):
         # Only for external
         for inst in self.instances:
-            if not inst in self.to_restart:
+            if inst not in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
                     logger.error("The external module %s goes down unexpectedly!", inst.get_name())
                     logger.info("Setting the module %s to restart", inst.get_name())
@@ -247,7 +251,8 @@ class ModulesManager(object):
                 except Exception, exp:
                     pass
                 if queue_size > self.max_queue_size:
-                    logger.error("The external module %s got a too high brok queue size (%s > %s)!", inst.get_name(), queue_size, self.max_queue_size)
+                    logger.error("The external module %s got a too high brok queue size (%s > %s)!",
+                                 inst.get_name(), queue_size, self.max_queue_size)
                     logger.info("Setting the module %s to restart", inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
@@ -271,19 +276,29 @@ class ModulesManager(object):
 
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
-        return [inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
+        return [inst
+                for inst in self.instances
+                if not inst.is_external and phase in inst.phases
+                and inst not in self.to_restart]
 
 
     def get_external_instances(self, phase=None):
-        return [inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
+        return [inst
+                for inst in self.instances
+                if inst.is_external and phase in inst.phases
+                and inst not in self.to_restart]
 
 
     def get_external_to_queues(self):
-        return [inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
+        return [inst.to_q
+                for inst in self.instances
+                if inst.is_external and inst not in self.to_restart]
 
 
     def get_external_from_queues(self):
-        return [inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
+        return [inst.from_q
+                for inst in self.instances
+                if inst.is_external and inst not in self.to_restart]
 
 
     def stop_all(self):

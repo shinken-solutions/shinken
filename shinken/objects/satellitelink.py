@@ -33,7 +33,7 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictPr
 from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPExceptions
 
-        
+
 
 
 class SatelliteLink(Item):
@@ -56,11 +56,12 @@ class SatelliteLink(Item):
         'modules':            ListProp(default=[''], to_send=True, split_on_coma=True),
         'polling_interval':   IntegerProp(default=1, fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp(default='NOTSET', to_send=True),
-        'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'realm':              StringProp(default='', fill_brok=['full_status'],
+                                         brok_transformation=get_obj_name_two_args_and_void),
         'satellitemap':       DictProp(default={}, elts_prop=AddrProp, to_send=True, override=True),
-        'use_ssl':            BoolProp(default=False, fill_brok=['full_status']),
-        'hard_ssl_name_check':BoolProp(default=True, fill_brok=['full_status']),
-        'passive':            BoolProp(default=False, fill_brok=['full_status'], to_send=True),
+        'use_ssl':             BoolProp(default=False, fill_brok=['full_status']),
+        'hard_ssl_name_check': BoolProp(default=True, fill_brok=['full_status']),
+        'passive':             BoolProp(default=False, fill_brok=['full_status'], to_send=True),
     })
 
     running_properties = Item.running_properties.copy()
@@ -68,15 +69,19 @@ class SatelliteLink(Item):
         'con':                  StringProp(default=None),
         'alive':                BoolProp(default=True, fill_brok=['full_status']),
         'broks':                StringProp(default=[]),
-        'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
-        'reachable':            BoolProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+
+        # the number of failed attempt
+        'attempt':              StringProp(default=0, fill_brok=['full_status']),
+
+        # can be network ask or not (dead or check in timeout or error)
+        'reachable':            BoolProp(default=False, fill_brok=['full_status']),
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
         'managed_confs':        StringProp(default={}),
     })
-    
+
     def __init__(self, *args, **kwargs):
         super(SatelliteLink, self).__init__(*args, **kwargs)
-        
+
         self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
         if hasattr(self, 'address'):
             self.arb_satmap['address'] = self.address
@@ -86,25 +91,28 @@ class SatelliteLink(Item):
             except Exception:
                 pass
 
-    
+
     def set_arbiter_satellitemap(self, satellitemap):
         """
             arb_satmap is the satellitemap in current context:
                 - A SatelliteLink is owned by an Arbiter
-                - satellitemap attribute of SatelliteLink is the map defined IN THE satellite configuration
+                - satellitemap attribute of SatelliteLink is the map
+                  defined IN THE satellite configuration
                   but for creating connections, we need the have the satellitemap of the Arbiter
         """
-        self.arb_satmap = {'address': self.address, 'port': self.port, 'use_ssl':self.use_ssl, 'hard_ssl_name_check':self.hard_ssl_name_check}
+        self.arb_satmap = {'address': self.address, 'port': self.port, 'use_ssl': self.use_ssl,
+                           'hard_ssl_name_check': self.hard_ssl_name_check}
         self.arb_satmap.update(satellitemap)
 
 
     def create_connection(self):
         self.con = HTTPClient(address=self.arb_satmap['address'], port=self.arb_satmap['port'],
-                              timeout=self.timeout, data_timeout=self.data_timeout, use_ssl=self.use_ssl,
+                              timeout=self.timeout, data_timeout=self.data_timeout,
+                              use_ssl=self.use_ssl,
                               strong_ssl=self.hard_ssl_name_check
                               )
         self.uri = self.con.uri
-        
+
 
     def put_conf(self, conf):
         if self.con is None:
@@ -116,14 +124,14 @@ class SatelliteLink(Item):
 
         try:
             self.con.get('ping')
-            self.con.post('put_conf', {'conf':conf}, wait='long')
+            self.con.post('put_conf', {'conf': conf}, wait='long')
             print "PUT CONF SUCESS", self.get_name()
             return True
         except HTTPExceptions, exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
             return False
-            
+
 
     # Get and clean all of our broks
     def get_all_broks(self):
@@ -168,13 +176,14 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            logger.warning("Add failed attempt to %s (%d/%d) %s", self.get_name(), self.attempt, self.max_check_attempts, reason)
+            logger.warning("Add failed attempt to %s (%d/%d) %s",
+                           self.get_name(), self.attempt, self.max_check_attempts, reason)
 
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
 
-    
+
     # Update satellite info each self.check_interval seconds
     # so we smooth arbiter actions for just useful actions
     # and not cry for a little timeout
@@ -213,7 +222,7 @@ class SatelliteLink(Item):
             if self.con is None:
                 self.add_failed_check_attempt()
                 return
-            
+
             r = self.con.get('ping')
 
             # Should return us pong string
@@ -234,7 +243,7 @@ class SatelliteLink(Item):
         except HTTPExceptions, exp:
             self.con = None
             return False
-        
+
 
     # To know if the satellite have a conf (magic_hash = None)
     # OR to know if the satellite have THIS conf (magic_hash != None)
@@ -251,7 +260,7 @@ class SatelliteLink(Item):
             if magic_hash is None:
                 r = self.con.get('have_conf')
             else:
-                r = self.con.get('have_conf', {'magic_hash':magic_hash})
+                r = self.con.get('have_conf', {'magic_hash': magic_hash})
             print "have_conf RAW CALL", r, type(r)
             if not isinstance(r, bool):
                 return False
@@ -290,7 +299,7 @@ class SatelliteLink(Item):
             return
 
         try:
-            self.con.get('remove_from_conf', {'sched_id':sched_id})
+            self.con.get('remove_from_conf', {'sched_id': sched_id})
             return True
         except HTTPExceptions, exp:
             self.con = None
@@ -312,33 +321,36 @@ class SatelliteLink(Item):
 
             # Protect against bad return
             if not isinstance(tab, dict):
-                print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
+                print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
+                      self.get_name(), tab
                 self.con = None
                 self.managed_confs = {}
                 return
 
             # Ok protect against json that is chaning keys as string instead of int
             tab_cleaned = {}
-            for (k,v) in tab.iteritems():
+            for (k, v) in tab.iteritems():
                 try:
                     tab_cleaned[int(k)] = v
                 except ValueError:
-                    print "[%s]What i managed: Got exception: bad what_i_managed returns" % self.get_name(), tab
+                    print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
+                          self.get_name(), tab
             # We can update our list now
             self.managed_confs = tab_cleaned
         except HTTPExceptions, exp:
             print "EXCEPTION INwhat_i_managed", str(exp)
             # A timeout is not a crime, put this case aside
-            #TODO : fix the timeout part?
+            # TODO : fix the timeout part?
             self.con = None
-            print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            print "[%s]What i managed: Got exception: %s %s %s" % \
+                  (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
 
     # Return True if the satellite said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
         # If not even the cfg_id in the managed_conf, bail out
-        if not cfg_id in self.managed_confs:
+        if cfg_id not in self.managed_confs:
             return False
         # maybe it's in but with a false push_flavor. check it :)
         return self.managed_confs[cfg_id] == push_flavor
@@ -355,12 +367,12 @@ class SatelliteLink(Item):
         try:
             # Always do a simple ping to avoid a LOOOONG lock
             self.con.get('ping')
-            self.con.post('push_broks', {'broks':broks}, wait='long')
+            self.con.post('push_broks', {'broks': broks}, wait='long')
             return True
         except HTTPExceptions, exp:
             self.con = None
             return False
-            
+
 
     def get_external_commands(self):
         if self.con is None:
@@ -396,12 +408,12 @@ class SatelliteLink(Item):
         cls = self.__class__
         # Also add global values
         self.cfg['global']['api_key'] = cls.api_key
-        self.cfg['global']['secret']  = cls.secret
-        self.cfg['global']['http_proxy']  = cls.http_proxy
-        self.cfg['global']['statsd_host']  = cls.statsd_host
-        self.cfg['global']['statsd_port']  = cls.statsd_port
-        self.cfg['global']['statsd_prefix']  = cls.statsd_prefix
-        self.cfg['global']['statsd_enabled']  = cls.statsd_enabled
+        self.cfg['global']['secret'] = cls.secret
+        self.cfg['global']['http_proxy'] = cls.http_proxy
+        self.cfg['global']['statsd_host'] = cls.statsd_host
+        self.cfg['global']['statsd_port'] = cls.statsd_port
+        self.cfg['global']['statsd_prefix'] = cls.statsd_prefix
+        self.cfg['global']['statsd_enabled'] = cls.statsd_enabled
 
 
     # Some parameters for satellites are not defined in the satellites conf
@@ -420,8 +432,8 @@ class SatelliteLink(Item):
     def give_satellite_cfg(self):
         return {'port': self.port,
                 'address': self.address,
-                'use_ssl':self.use_ssl,
-                'hard_ssl_name_check':self.hard_ssl_name_check,
+                'use_ssl': self.use_ssl,
+                'hard_ssl_name_check': self.hard_ssl_name_check,
                 'name': self.get_name(),
                 'instance_id': self.id,
                 'active': True,
@@ -489,6 +501,6 @@ class SatelliteLinks(Items):
             if p is not None:
                 s.register_to_my_realm()
             else:
-                err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
+                err = "The %s %s got a unknown realm '%s'" % \
+                      (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
-

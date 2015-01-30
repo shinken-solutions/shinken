@@ -70,7 +70,10 @@ class PortNotFree(Exception):
 class CherryPyServer(bottle.ServerAdapter):
     def run(self, handler):  # pragma: no cover
         daemon_thread_pool_size = self.options['daemon_thread_pool_size']
-        server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port), handler, numthreads=daemon_thread_pool_size, shutdown_timeout=1)
+        server = cheery_wsgiserver.CherryPyWSGIServer((self.host, self.port),
+                                                      handler,
+                                                      numthreads=daemon_thread_pool_size,
+                                                      shutdown_timeout=1)
         logger.info('Initializing a CherryPy backend with %d threads', daemon_thread_pool_size)
         use_ssl = self.options['use_ssl']
         ca_cert = self.options['ca_cert']
@@ -85,11 +88,15 @@ class CherryPyServer(bottle.ServerAdapter):
 
 
 class CherryPyBackend(object):
-    def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+    def __init__(self, host, port, use_ssl, ca_cert, ssl_key,
+                 ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
         self.port = port
         self.use_ssl = use_ssl
         try:
-            self.srv = bottle.run(host=host, port=port, server=CherryPyServer, quiet=False, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
+            self.srv = bottle.run(host=host, port=port,
+                                  server=CherryPyServer, quiet=False, use_ssl=use_ssl,
+                                  ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert,
+                                  daemon_thread_pool_size=daemon_thread_pool_size)
         except socket.error, exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
             raise PortNotFree(msg)
@@ -105,7 +112,7 @@ class CherryPyBackend(object):
 
     # We stop our processing, but also try to hard close our socket as cherrypy is not doing it...
     def stop(self):
-        #TODO: find why, but in ssl mode the stop() is locking, so bailout before
+        # TODO: find why, but in ssl mode the stop() is locking, so bailout before
         if self.use_ssl:
             return
         try:
@@ -128,16 +135,18 @@ class CherryPyBackend(object):
                 pass
 
 
-# WSGIRef is the default HTTP server, it CAN manage HTTPS, but at a Huge cost for the client, because it's only HTTP1.0
+# WSGIRef is the default HTTP server, it CAN manage HTTPS, but at a Huge cost for the client,
+# because it's only HTTP1.0
 # so no Keep-Alive, and in HTTPS it's just a nightmare
 class WSGIREFAdapter (bottle.ServerAdapter):
-    def run (self, handler):
+    def run(self, handler):
         daemon_thread_pool_size = self.options['daemon_thread_pool_size']
         from wsgiref.simple_server import WSGIRequestHandler
         LoggerHandler = WSGIRequestHandler
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
-                def log_request(*args, **kw): pass
+                def log_request(*args, **kw):
+                    pass
             LoggerHandler = QuietHandler
 
         srv = simple_server.make_server(self.host, self.port, handler, handler_class=LoggerHandler)
@@ -149,18 +158,24 @@ class WSGIREFAdapter (bottle.ServerAdapter):
 
         if use_ssl:
             if not ssl:
-                logger.error("Missing python-openssl librairy, please install it to open a https backend")
-                raise Exception("Missing python-openssl librairy, please install it to open a https backend")
+                logger.error("Missing python-openssl librairy,"
+                             "please install it to open a https backend")
+                raise Exception("Missing python-openssl librairy, "
+                                "please install it to open a https backend")
             srv.socket = ssl.wrap_socket(srv.socket,
                                          keyfile=ssl_key, certfile=ssl_cert, server_side=True)
         return srv
 
 
 class WSGIREFBackend(object):
-    def __init__(self, host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+    def __init__(self, host, port, use_ssl, ca_cert, ssl_key,
+                 ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
         self.daemon_thread_pool_size = daemon_thread_pool_size
         try:
-            self.srv = bottle.run(host=host, port=port, server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl, ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert, daemon_thread_pool_size=daemon_thread_pool_size)
+            self.srv = bottle.run(host=host, port=port,
+                                  server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl,
+                                  ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert,
+                                  daemon_thread_pool_size=daemon_thread_pool_size)
         except socket.error, exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
             raise PortNotFree(msg)
@@ -226,7 +241,8 @@ class WSGIREFBackend(object):
             for sock in socks:
                 if sock in ins:
                     # GO!
-                    t = threading.Thread(None, target=self.handle_one_request_thread, name='http-request', args=(sock,))
+                    t = threading.Thread(None, target=self.handle_one_request_thread,
+                                         name='http-request', args=(sock,))
                     # We don't want to hang the master thread just because this one is still alive
                     t.daemon = True
                     t.start()
@@ -239,7 +255,8 @@ class WSGIREFBackend(object):
 
 
 class HTTPDaemon(object):
-        def __init__(self, host, port, http_backend, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+        def __init__(self, host, port, http_backend, use_ssl, ca_cert,
+                     ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
             self.port = port
             self.host = host
             self.srv = None
@@ -248,7 +265,7 @@ class HTTPDaemon(object):
                 return
 
             self.use_ssl = use_ssl
-            
+
             self.registered_fun = {}
             self.registered_fun_names = []
             self.registered_fun_defaults = {}
@@ -260,20 +277,17 @@ class HTTPDaemon(object):
             logger.info("Opening HTTP socket at %s", self.uri)
 
             # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
-            __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = lambda x:x.client_address[0]
+            __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = \
+                lambda x: x.client_address[0]
 
             if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
-                self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+                self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
+                                           ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
             else:
-                self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+                self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
+                                          ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
 
             self.lock = threading.RLock()
-
-            #@bottle.error(code=500)
-            #def error500(err):
-            #    print err.__dict__
-            #    return 'FUCKING ERROR 500', str(err)
-
 
 
         # Get the server socket but not if disabled or closed
@@ -289,9 +303,10 @@ class HTTPDaemon(object):
 
         def register(self, obj):
             methods = inspect.getmembers(obj, predicate=inspect.ismethod)
-            merge = [fname for (fname, f) in methods if fname in self.registered_fun_names ]
+            merge = [fname for (fname, f) in methods if fname in self.registered_fun_names]
             if merge != []:
-                methods_in = [m.__name__ for m in obj.__class__.__dict__.values() if inspect.isfunction(m)]
+                methods_in = [m.__name__ for m in obj.__class__.__dict__.values()
+                              if inspect.isfunction(m)]
                 methods = [m for m in methods if m[0] in methods_in]
                 print "picking only bound methods of class and not parents"
             print "List to register :%s" % methods
@@ -307,7 +322,7 @@ class HTTPDaemon(object):
                 # If we got some defauts, save arg=value so we can lookup
                 # for them after
                 if defaults:
-                    default_args = zip(argspec.args[-len(argspec.defaults):],argspec.defaults)
+                    default_args = zip(argspec.args[-len(argspec.defaults):], argspec.defaults)
                     _d = {}
                     for (argname, defavalue) in default_args:
                         _d[argname] = defavalue
@@ -344,7 +359,7 @@ class HTTPDaemon(object):
                             if v is None:
                                 # Maybe we got a default value?
                                 default_args = self.registered_fun_defaults.get(fname, {})
-                                if not aname in default_args:
+                                if aname not in default_args:
                                     raise Exception('Missing argument %s' % aname)
                                 v = default_args[aname]
                             d[aname] = v
@@ -358,7 +373,7 @@ class HTTPDaemon(object):
 
                         t2 = time.time()
                         aqu_lock_time = t2 - t1
-                        
+
                         try:
                             ret = f(**d)
                         # Always call the lock release if need
@@ -372,24 +387,30 @@ class HTTPDaemon(object):
 
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
-                        t4 = time.time() 
+                        t4 = time.time()
                         json_time = t4 - t3
-                      
-                        global_time = t4 - t0 
-                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s] [calling:%s] [json:%s] [global:%s]", 
-                                fname, args_time, aqu_lock_time, calling_time, json_time, global_time )
-                        lst = [('args',args_time), ('aqulock',aqu_lock_time), ('calling',calling_time), ('json',json_time), ('global',global_time)]
+
+                        global_time = t4 - t0
+                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s]"
+                                     "[calling:%s] [json:%s] [global:%s]",
+                                     fname, args_time, aqu_lock_time, calling_time, json_time,
+                                     global_time)
+                        lst = [('args', args_time), ('aqulock', aqu_lock_time),
+                               ('calling', calling_time), ('json', json_time),
+                               ('global', global_time)]
                         # increase the stats timers
                         for (k, _t) in lst:
                             statsmgr.incr('http.%s.%s' % (fname, k), _t)
-                        
+
                         return j
                     # Ok now really put the route in place
-                    bottle.route('/'+fname, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
+                    bottle.route('/' + fname, callback=f_wrapper,
+                                 method=getattr(f, 'method', 'get').upper())
                     # and the name with - instead of _ if need
                     fname_dash = fname.replace('_', '-')
                     if fname_dash != fname:
-                        bottle.route('/'+fname_dash, callback=f_wrapper, method=getattr(f, 'method', 'get').upper())
+                        bottle.route('/' + fname_dash, callback=f_wrapper,
+                                     method=getattr(f, 'method', 'get').upper())
                 register_callback(fname, args, f, obj, self.lock)
 
             # Add a simple / page

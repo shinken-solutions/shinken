@@ -70,11 +70,14 @@ class Trigger(Item):
             exec code in dict(locals())
         except Exception as err:
             set_value(self, "UNKNOWN: Trigger error: %s" % err, "", 3)
-            logger.error('%s Trigger %s failed: %s ; %s' % (self.host_name, myself.trigger_name, err, traceback.format_exc()))
+            logger.error('%s Trigger %s failed: %s ; '
+                         '%s' % (self.host_name, myself.trigger_name, err, traceback.format_exc()))
 
 
     def __getstate__(self):
-        return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
+        return {'trigger_name': self.trigger_name,
+                'code_src': self.code_src,
+                'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']

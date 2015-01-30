@@ -64,7 +64,9 @@ class Worker:
     _timeout = None
     _c = None
 
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None, loaded_into='unknown', http_daemon=None):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300,
+                 max_plugins_output_length=8192, target=None, loaded_into='unknown',
+                 http_daemon=None):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -85,9 +87,8 @@ class Worker:
         self.loaded_into = loaded_into
         if os.name != 'nt':
             self.http_daemon = http_daemon
-        else: #windows forker do not like pickle http/lock
+        else:  # windows forker do not like pickle http/lock
             self.http_daemon = None
-        
 
     def is_mortal(self):
         return self._mortal
@@ -142,11 +143,11 @@ class Worker:
     def get_new_checks(self):
         try:
             while(len(self.checks) < self.processes_by_worker):
-                #print "I", self.id, "wait for a message"
+                # print "I", self.id, "wait for a message"
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                #print "I", self.id, "I've got a message!"
+                # print "I", self.id, "I've got a message!"
         except Empty, exp:
             if len(self.checks) == 0:
                 self._idletime = self._idletime + 1
@@ -188,7 +189,7 @@ class Worker:
             if action.status in ('done', 'timeout'):
                 to_del.append(action)
                 # We answer to the master
-                #msg = Message(id=self.id, type='Result', data=action)
+                # msg = Message(id=self.id, type='Result', data=action)
                 try:
                     self.returns_queue.put(action)
                 except IOError, exp:
@@ -228,7 +229,8 @@ class Worker:
         except Exception, exp:
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Worker '%d' exit with an unmanaged exception : %s", self.id, output.getvalue())
+            logger.error("Worker '%d' exit with an unmanaged exception : %s",
+                         self.id, output.getvalue())
             output.close()
             # Ok I die now
             raise
@@ -240,7 +242,7 @@ class Worker:
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
     def do_work(self, s, returns_queue, c):
-        ## restore default signal handler for the workers:
+        # restore default signal handler for the workers:
         # but on android, we are a thread, so don't do it
         if not is_android:
             signal.signal(signal.SIGTERM, signal.SIG_DFL)
@@ -284,7 +286,8 @@ class Worker:
             # if so, we really die, our master poller will launch a new
             # worker because we were too weak to manage our job :(
             if len(self.checks) == 0 and self.i_am_dying:
-                logger.warning("[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please.", self.id)
+                logger.warning("[%d] I DIE because I cannot do my job as I should"
+                               "(too many open files?)... forgot me please.", self.id)
                 break
 
             # Manage a possible time change (our avant will be change with the diff)
@@ -297,4 +300,3 @@ class Worker:
 
     def set_proctitle(self):
         setproctitle("shinken-%s worker" % self.loaded_into)
-

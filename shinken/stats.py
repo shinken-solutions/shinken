@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -41,14 +40,14 @@ from shinken.http_client import HTTPClient, HTTPException
 
 
 BLOCK_SIZE = 16
- 
 
-def pad (data):
+
+def pad(data):
     pad = BLOCK_SIZE - len(data) % BLOCK_SIZE
     return data + pad * chr(pad)
 
- 
-def unpad (padded):
+
+def unpad(padded):
     pad = ord(padded[-1])
     return padded[:-pad]
 
@@ -69,7 +68,7 @@ class Stats(object):
         # then the statsd one
         self.statsd_sock = None
         self.statsd_addr = None
-        
+
 
     def launch_reaper_thread(self):
         self.reaper_thread = threading.Thread(None, target=self.reaper, name='stats-reaper')
@@ -77,7 +76,9 @@ class Stats(object):
         self.reaper_thread.start()
 
 
-    def register(self, app, name, _type, api_key='', secret='', http_proxy='', statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken', statsd_enabled=False):
+    def register(self, app, name, _type, api_key='', secret='', http_proxy='',
+                 statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken',
+                 statsd_enabled=False):
         self.app = app
         self.name = name
         self.type = _type
@@ -92,7 +93,8 @@ class Stats(object):
         self.statsd_enabled = statsd_enabled
 
         if self.statsd_enabled:
-            logger.debug('Loading statsd communication with %s:%s.%s', self.statsd_host, self.statsd_port, self.statsd_prefix)
+            logger.debug('Loading statsd communication with %s:%s.%s',
+                         self.statsd_host, self.statsd_port, self.statsd_prefix)
             self.load_statsd()
 
         # Also load the proxy if need
@@ -105,7 +107,7 @@ class Stats(object):
     def load_statsd(self):
         try:
             self.statsd_addr = (socket.gethostbyname(self.statsd_host), self.statsd_port)
-            self.statsd_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)            
+            self.statsd_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except (socket.error, socket.gaierror), exp:
             logger.error('Cannot create statsd socket: %s' % exp)
             return
@@ -125,11 +127,11 @@ class Stats(object):
         # Manage local statd part
         if self.statsd_sock and self.name:
             # beware, we are sending ms here, v is in s
-            packet = '%s.%s.%s: %d|ms' % (self.statsd_prefix, self.name, k, v*1000)
+            packet = '%s.%s.%s: %d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
             try:
                 self.statsd_sock.sendto(packet, self.statsd_addr)
             except (socket.error, socket.gaierror), exp:
-                pass # cannot send? ok not a huge problem here and cannot
+                pass  # cannot send? ok not a huge problem here and cannot
                 # log because it will be far too verbose :p
 
 
@@ -137,15 +139,15 @@ class Stats(object):
         m = hashlib.md5()
         m.update(self.secret)
         key = m.hexdigest()
-        
+
         m = hashlib.md5()
         m.update(self.secret + key)
         iv = m.hexdigest()
-        
+
         data = pad(data)
-        
+
         aes = AES.new(key, AES.MODE_CBC, iv[:16])
-        
+
         encrypted = aes.encrypt(data)
         return base64.urlsafe_b64encode(encrypted)
 
@@ -158,7 +160,7 @@ class Stats(object):
             self.stats = {}
 
             if len(stats) != 0:
-                s = ', '.join(['%s:%s' % (k,v) for (k,v) in stats.iteritems()])
+                s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
             if not self.name or not self.api_key or not self.secret:
@@ -166,7 +168,7 @@ class Stats(object):
                 continue
 
             metrics = []
-            for (k,e) in stats.iteritems():
+            for (k, e) in stats.iteritems():
                 nk = '%s.%s.%s' % (self.type, self.name, k)
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
@@ -180,14 +182,15 @@ class Stats(object):
                 s = '%s.count %f %d' % (nk, nb, now)
                 metrics.append(s)
 
-            #logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
+            # logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
             # get the inner data for the daemon
             struct = self.app.get_stats_struct()
             struct['metrics'].extend(metrics)
-            #logger.debug('REAPER whole struct %s' % struct)
+            # logger.debug('REAPER whole struct %s' % struct)
             j = json.dumps(struct)
             if AES is not None and self.secret != '':
-                logger.debug('Stats PUT to kernel.shinken.io/api/v1/put/ with %s %s' % (self.api_key, self.secret))
+                logger.debug('Stats PUT to kernel.shinken.io/api/v1/put/ with %s %s' % (
+                    self.api_key, self.secret))
 
                 # assume a %16 length messagexs
                 encrypted_text = self._encrypt(j)

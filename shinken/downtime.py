@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,7 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime, time
+import datetime
+import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.brok import Brok
@@ -64,12 +64,12 @@ class Downtime:
         # TODO: find a very good way to handle the downtime "ref".
         # ref must effectively not be in properties because it points
         # onto a real object.
-        #'ref': None
+        # 'ref': None
     }
 
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         now = datetime.datetime.now()
-        self.id = int(time.mktime(now.timetuple())*1e6 + now.microsecond)
+        self.id = int(time.mktime(now.timetuple()) * 1e6 + now.microsecond)
         self.__class__.id = self.id + 1
         self.ref = ref  # pointer to srv or host we are apply
         self.activate_me = []  # The other downtimes i need to activate
@@ -93,21 +93,25 @@ class Downtime:
         self.real_end_time = end_time
         self.author = author
         self.comment = comment
-        self.is_in_effect = False    # fixed: start_time has been reached, flexible: non-ok checkresult
+        self.is_in_effect = False
+        # fixed: start_time has been reached,
+        # flexible: non-ok checkresult
+
         self.has_been_triggered = False  # another downtime has triggered me
         self.can_be_deleted = False
         self.add_automatic_comment()
 
     def __str__(self):
-        if self.is_in_effect == True:
+        if self.is_in_effect is True:
             active = "active"
         else:
             active = "inactive"
-        if self.fixed == True:
+        if self.fixed is True:
             type = "fixed"
         else:
             type = "flexible"
-        return "%s %s Downtime id=%d %s - %s" % (active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
+        return "%s %s Downtime id=%d %s - %s" % (
+            active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
 
     def trigger_me(self, other_downtime):
         self.activate_me.append(other_downtime)
@@ -120,7 +124,7 @@ class Downtime:
     def enter(self):
         res = []
         self.is_in_effect = True
-        if self.fixed == False:
+        if self.fixed is False:
             now = time.time()
             self.real_end_time = now + self.duration
         if self.ref.scheduled_downtime_depth == 0:
@@ -135,7 +139,7 @@ class Downtime:
     # The end of the downtime was reached.
     def exit(self):
         res = []
-        if self.is_in_effect == True:
+        if self.is_in_effect is True:
             # This was a fixed or a flexible+triggered downtime
             self.is_in_effect = False
             self.ref.scheduled_downtime_depth -= 1
@@ -168,7 +172,7 @@ class Downtime:
         self.can_be_deleted = True
         self.ref.in_scheduled_downtime_during_last_check = True
         # Nagios does not notify on canceled downtimes
-        #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
+        # res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
         # Also cancel other downtimes triggered by me
         for dt in self.activate_me:
             res.extend(dt.cancel())
@@ -176,12 +180,26 @@ class Downtime:
 
     # Scheduling a downtime creates a comment automatically
     def add_automatic_comment(self):
-        if self.fixed == True:
-            text = "This %s has been scheduled for fixed downtime from %s to %s. Notifications for the %s will not be sent out during that time period." % (self.ref.my_type, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)), self.ref.my_type)
+        if self.fixed is True:
+            text = (
+                "This %s has been scheduled for fixed downtime from %s to %s. "
+                "Notifications for the %s will not be sent out during that time period." % (
+                    self.ref.my_type,
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)),
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)),
+                    self.ref.my_type)
+            )
         else:
             hours, remainder = divmod(self.duration, 3600)
             minutes, seconds = divmod(remainder, 60)
-            text = "This %s has been scheduled for flexible downtime starting between %s and %s and lasting for a period of %d hours and %d minutes.  Notifications for the %s will not be sent out during that time period." % (self.ref.my_type, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)), hours, minutes, self.ref.my_type)
+            text = ("This %s has been scheduled for flexible downtime starting between %s and %s "
+                    "and lasting for a period of %d hours and %d minutes. "
+                    "Notifications for the %s will not be sent out during that time period." % (
+                        self.ref.my_type,
+                        time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)),
+                        time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)),
+                        hours, minutes, self.ref.my_type)
+                    )
         if self.ref.my_type == 'host':
             comment_type = 1
         else:
@@ -196,7 +214,7 @@ class Downtime:
         # TODO: remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
-        #self.ref.del_comment(self.comment_id)
+        # self.ref.del_comment(self.comment_id)
 
 
     # Fill data with info of item by looking at brok_type

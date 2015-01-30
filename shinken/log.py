@@ -40,8 +40,8 @@ except (SyntaxError, ImportError), exp:
         print s
 
 
-#obj = None
-#name = None
+# obj = None
+# name = None
 human_timestamp_log = False
 
 _brokhandler_ = None
@@ -50,7 +50,8 @@ _brokhandler_ = None
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 defaultFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s', '%a %b %d %H:%M:%S %Y')
-humanFormatter_named = Formatter('[%(asctime)s] %(levelname)s: [%(name)s] %(message)s', '%a %b %d %H:%M:%S %Y')
+humanFormatter_named = Formatter('[%(asctime)s] %(levelname)s: [%(name)s] %(message)s',
+                                 '%a %b %d %H:%M:%S %Y')
 nagFormatter = Formatter('[%(created)i] %(message)s')
 
 class BrokHandler(Handler):
@@ -80,7 +81,8 @@ class ColorStreamHandler(StreamHandler):
     def emit(self, record):
         try:
             msg = self.format(record)
-            colors = {'DEBUG': 'cyan', 'INFO': 'magenta', 'WARNING': 'yellow', 'CRITICAL': 'magenta', 'ERROR': 'red'}
+            colors = {'DEBUG': 'cyan', 'INFO': 'magenta',
+                      'WARNING': 'yellow', 'CRITICAL': 'magenta', 'ERROR': 'red'}
             cprint(msg, colors[record.levelname])
         except UnicodeEncodeError:
             print msg.encode('ascii', 'ignore')
@@ -98,7 +100,7 @@ class Log(logging.Logger):
         logging.Logger.__init__(self, name, level)
         self.pre_log_buffer = []
         self.log_set = log_set
-        
+
 
     def setLevel(self, level):
         """ Set level of logger and handlers.
@@ -184,7 +186,8 @@ class Log(logging.Logger):
                 continue
 
             if self.name is not None:
-                handler.setFormatter(human_timestamp_log and humanFormatter_named or defaultFormatter_named)
+                handler.setFormatter(human_timestamp_log and humanFormatter_named or
+                                     defaultFormatter_named)
             else:
                 handler.setFormatter(human_timestamp_log and humanFormatter or defaultFormatter)
 
@@ -194,7 +197,7 @@ class Log(logging.Logger):
     def _stack(self, level, args, kwargs):
         if self.log_set:
             return
-        self.pre_log_buffer.append( (level, args, kwargs) )
+        self.pre_log_buffer.append((level, args, kwargs))
         if len(self.pre_log_buffer) > 500:
             self.pre_log_buffer = self.pre_log_buffer[2:]
 
@@ -207,18 +210,18 @@ class Log(logging.Logger):
                 self.warning('Missing level for a log? %s', level)
                 continue
             f(self, *args, **kwargs)
-        
+
 
     def debug(self, *args, **kwargs):
         self._stack('debug', args, kwargs)
         logging.Logger.debug(self, *args, **kwargs)
 
-    
+
     def info(self, *args, **kwargs):
         self._stack('info', args, kwargs)
-        #super(logging.Logger, self).info(*args, **kwargs)
+        # super(logging.Logger, self).info(*args, **kwargs)
         logging.Logger.info(self, *args, **kwargs)
-    
+
 
 
     def warning(self, *args, **kwargs):
@@ -233,7 +236,7 @@ class Log(logging.Logger):
 
 
 
-#--- create the main logger ---
+# --- create the main logger ---
 logging.setLoggerClass(Log)
 logger = logging.getLogger('Shinken')
 if hasattr(sys.stdout, 'isatty'):
@@ -258,7 +261,7 @@ def naglog_result(level, result, *args):
         handler.setFormatter(nagFormatter)
 
     log_fun = getattr(logger, level)
-    
+
     if log_fun:
         log_fun(result)
 

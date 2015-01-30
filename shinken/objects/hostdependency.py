@@ -60,7 +60,9 @@ class Hostdependency(Item):
     def get_name(self):
         dependent_host_name = 'unknown'
         if getattr(self, 'dependent_host_name', None):
-            dependent_host_name = getattr(getattr(self, 'dependent_host_name'), 'host_name', 'unknown')
+            dependent_host_name = getattr(
+                getattr(self, 'dependent_host_name'), 'host_name', 'unknown'
+            )
         host_name = 'unknown'
         if getattr(self, 'host_name', None):
             host_name = getattr(getattr(self, 'host_name'), 'host_name', 'unknown')
@@ -92,7 +94,8 @@ class Hostdependencies(Items):
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
-                        err = "ERROR: the hostdependency got an unknown dependent_hostgroup_name '%s'" % dephg_name
+                        err = "ERROR: the hostdependency got " \
+                              "an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
                     dephnames.extend([m.strip() for m in dephg.members])
@@ -107,7 +110,8 @@ class Hostdependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the hostdependency got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the hostdependency got" \
+                              " an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
                     hnames.extend([m.strip() for m in hg.members])
@@ -143,7 +147,8 @@ class Hostdependencies(Items):
                     hd.configuration_errors.append(err)
                 dh = hosts.find_by_name(dh_name)
                 if dh is None:
-                    err = "Error: the host dependency got a bad dependent_host_name definition '%s'" % dh_name
+                    err = "Error: the host dependency got " \
+                          "a bad dependent_host_name definition '%s'" % dh_name
                     hd.configuration_errors.append(err)
                 hd.host_name = h
                 hd.dependent_host_name = dh
@@ -166,13 +171,18 @@ class Hostdependencies(Items):
     def linkify_h_by_hd(self):
         for hd in self:
             # if the host dep conf is bad, pass this one
-            if getattr(hd, 'host_name', None) is None or getattr(hd, 'dependent_host_name', None) is None:
+            if getattr(hd, 'host_name', None) is None or\
+                    getattr(hd, 'dependent_host_name', None) is None:
                 continue
             # Ok, link!
             depdt_hname = hd.dependent_host_name
             dp = getattr(hd, 'dependency_period', None)
-            depdt_hname.add_host_act_dependency(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
-            depdt_hname.add_host_chk_dependency(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
+            depdt_hname.add_host_act_dependency(
+                hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent
+            )
+            depdt_hname.add_host_chk_dependency(
+                hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent
+            )
 
     # Apply inheritance for all properties
     def apply_inheritance(self):

@@ -44,14 +44,15 @@ class Comment:
         # TODO: find a very good way to handle the downtime "ref".
         # ref must effectively not be in properties because it points
         # onto a real object.
-        #'ref':  None
+        # 'ref':  None
     }
 
     # Adds a comment to a particular service. If the "persistent" field
     # is set to zero (0), the comment will be deleted the next time
     # Shinken is restarted. Otherwise, the comment will persist
     # across program restarts until it is deleted manually.
-    def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
+    def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires,
+                 expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.ref = ref  # pointer to srv or host we are apply

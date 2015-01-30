@@ -57,7 +57,7 @@ class Command(Item):
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
-        #self.id = self.__class__.id
+        # self.id = self.__class__.id
         self.__class__.id += 1
 
         self.init_running_properties()
@@ -114,13 +114,12 @@ class Command(Item):
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for broking?
-            #if 'fill_brok' in entry[prop]:
+            # if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                #elif 'default' in entry[prop]:
+                # elif 'default' in entry[prop]:
                 #    data[prop] = entry.default
-
 
 
     # Call by pickle to dataify the comment

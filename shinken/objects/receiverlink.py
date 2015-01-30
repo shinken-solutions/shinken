@@ -42,17 +42,15 @@ class ReceiverLink(SatelliteLink):
         'manage_sub_realms':  BoolProp(default=True, fill_brok=['full_status']),
         'manage_arbiters':    BoolProp(default=False, fill_brok=['full_status'], to_send=True),
         'direct_routing':     BoolProp(default=False, fill_brok=['full_status'], to_send=True),
-        'accept_passive_unknown_check_results': BoolProp(default=False, fill_brok=['full_status'], to_send=True),
+        'accept_passive_unknown_check_results': BoolProp(default=False,
+                                                         fill_brok=['full_status'], to_send=True),
     })
-
 
     def get_name(self):
         return self.receiver_name
 
-
     def register_to_my_realm(self):
         self.realm.receivers.append(self)
-
 
     def push_host_names(self, sched_id, hnames):
         try:
@@ -65,12 +63,11 @@ class ReceiverLink(SatelliteLink):
                 self.add_failed_check_attempt()
                 return
 
-            #r = self.con.push_host_names(sched_id, hnames)
+            # r = self.con.push_host_names(sched_id, hnames)
             self.con.get('ping')
-            self.con.post('push_host_names', {'sched_id':sched_id, 'hnames':hnames}, wait='long')
+            self.con.post('push_host_names', {'sched_id': sched_id, 'hnames': hnames}, wait='long')
         except HTTPExceptions, exp:
             self.add_failed_check_attempt(reason=str(exp))
-
 
 
 class ReceiverLinks(SatelliteLinks):

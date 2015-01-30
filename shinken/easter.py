@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -61,11 +60,12 @@ def naheulbeuk():
     else:
         screen = aalib.AnsiScreen
     screen = screen(width=128, height=128)
-    fp = StringIO(urllib2.urlopen('http://www.penofchaos.com/warham/bd/images/NBK-win7portrait-Nain02.JPG').read())
+    fp = StringIO(urllib2.urlopen(
+        'http://www.penofchaos.com/warham/bd/images/NBK-win7portrait-Nain02.JPG').read())
     image = Image.open(fp).convert('L').resize(screen.virtual_size)
     screen.put_image((0, 0), image)
     logger.info(screen.render())
-                    
+
 
 
 def dark():
@@ -126,4 +126,3 @@ def get_coffee():
 
 """
     logger.info(get_coffee.__doc__)
-

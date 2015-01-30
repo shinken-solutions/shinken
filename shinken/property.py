@@ -25,7 +25,7 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split, strip_and_uniq
+from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
 import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
@@ -176,7 +176,6 @@ class BoolProp(Property):
 class IntegerProp(Property):
     """Please Add a Docstring to describe the class here"""
 
-    #@staticmethod
     def pythonize(self, val):
         val = unique_value(val)
         return to_int(val)
@@ -185,7 +184,6 @@ class IntegerProp(Property):
 class FloatProp(Property):
     """Please Add a Docstring to describe the class here"""
 
-    #@staticmethod
     def pythonize(self, val):
         val = unique_value(val)
         return to_float(val)
@@ -194,7 +192,6 @@ class FloatProp(Property):
 class CharProp(Property):
     """Please Add a Docstring to describe the class here"""
 
-    #@staticmethod
     def pythonize(self, val):
         val = unique_value(val)
         return to_char(val)
@@ -203,7 +200,6 @@ class CharProp(Property):
 class StringProp(Property):
     """Please Add a Docstring to describe the class here"""
 
-    #@staticmethod
     def pythonize(self, val):
         val = unique_value(val)
         return val
@@ -220,7 +216,6 @@ class ConfigPathProp(StringProp):
 class ListProp(Property):
     """Please Add a Docstring to describe the class here"""
 
-    #@staticmethod
     def pythonize(self, val):
         if isinstance(val, list):
             return [s.strip() for s in list_split(val, self.split_on_coma)]
@@ -246,14 +241,14 @@ class DictProp(Property):
         """
         super(DictProp, self).__init__(*args, **kwargs)
 
-        if not elts_prop is None and not issubclass(elts_prop, Property):
-            raise TypeError("DictProp constructor only accept Property sub-classes as elts_prop parameter")
+        if elts_prop is not None and not issubclass(elts_prop, Property):
+            raise TypeError("DictProp constructor only accept Property"
+                            "sub-classes as elts_prop parameter")
         if elts_prop is not None:
             self.elts_prop = elts_prop()
 
     def pythonize(self, val):
         val = unique_value(val)
-        #import traceback; traceback.print_stack()
         def split(kv):
             m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
             if m is None:
@@ -261,7 +256,8 @@ class DictProp(Property):
 
             return (
                 m.group(1),
-                # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None else self.elts_prop.pythonize(m.group(2))
+                # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None
+                # else self.elts_prop.pythonize(m.group(2))
                 (self.elts_prop.pythonize(m.group(2)), m.group(2))[self.elts_prop is None]
             )
 
@@ -321,4 +317,3 @@ class IntListProp(ListProp):
 
 class PythonizeError(Exception):
     pass
-

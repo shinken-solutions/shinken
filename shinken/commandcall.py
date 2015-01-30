@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -43,8 +42,8 @@ class CommandCall(DummyCommandCall):
     # running_properties names
     __metaclass__ = AutoSlots
 
-    #__slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
-    #             'reactionner_tag', 'module_type', '__dict__')
+    # __slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
+    #              'reactionner_tag', 'module_type', '__dict__')
     id = 0
     my_type = 'CommandCall'
 
@@ -57,7 +56,7 @@ class CommandCall(DummyCommandCall):
         'valid':           BoolProp(default=False),
         'args':            StringProp(default=[]),
         'timeout':         IntegerProp(default=-1),
-        'late_relink_done':BoolProp(default=False),
+        'late_relink_done': BoolProp(default=False),
         'enable_environment_macros': BoolProp(default=False),
     }
 

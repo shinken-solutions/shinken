@@ -72,17 +72,24 @@ class DBOracle(DB):
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an integrity error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an integrity error: %s, %s",
+                           query, exp)
         except ProgrammingError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a programming error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a programming error: %s, %s",
+                           query, exp)
         except DatabaseError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a database error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a database error: %s, %s",
+                           query, exp)
         except InternalError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an internal error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an internal error: %s, %s",
+                           query, exp)
         except DataError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise a data error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a data error: %s, %s",
+                           query, exp)
         except OperationalError_exp, exp:
-            logger.warning("[DBOracle] Warning: a query raise an operational error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an operational error: %s, %s",
+                           query, exp)
         except Exception, exp:
-            logger.warning("[DBOracle] Warning: a query raise an unknown error: %s, %s", query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an unknown error: %s, %s",
+                           query, exp)
             logger.warning(exp.__dict__)

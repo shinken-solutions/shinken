@@ -40,7 +40,7 @@ class declared(object):
         self.f = f
         global functions
         n = f.func_name
-        #logger.debug("Initializing function %s %s" % (n, f))
+        # logger.debug("Initializing function %s %s" % (n, f))
         trigger_functions[n] = f
 
     def __call__(self, *args):
@@ -101,10 +101,11 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     if return_code is None:
         return_code = obj.state_id
 
-    logger.debug("[trigger] Setting %s %s %s for object %s", output,
-                                                               perfdata,
-                                                               return_code,
-                                                               obj.get_full_name())
+    logger.debug("[trigger] Setting %s %s %s for object %s",
+                 output,
+                 perfdata,
+                 return_code,
+                 obj.get_full_name())
 
     if perfdata:
         output = output + ' | ' + perfdata
@@ -187,7 +188,7 @@ def get_object(ref):
 
     # Ok it's a string
     name = ref
-    if not '/' in name:
+    if '/' not in name:
         return objs['hosts'].find_by_name(name)
     else:
         elts = name.split('/', 1)
@@ -205,13 +206,13 @@ def get_objects(ref):
 
     name = ref
     # Maybe there is no '*'? if so, it's one element
-    if not '*' in name:
+    if '*' not in name:
         return get_object(name)
 
     # Ok we look for spliting the host or service thing
     hname = ''
     sdesc = ''
-    if not '/' in name:
+    if '/' not in name:
         hname = name
     else:
         elts = name.split('/', 1)
@@ -223,7 +224,7 @@ def get_objects(ref):
     services = []
 
     # Look for host, and if need, look for service
-    if not '*' in hname:
+    if '*' not in hname:
         h = objs['hosts'].find_by_name(hname)
         if h:
             hosts.append(h)
@@ -240,7 +241,7 @@ def get_objects(ref):
         return hosts
 
     for h in hosts:
-        if not '*' in sdesc:
+        if '*' not in sdesc:
             s = h.find_service_by_name(sdesc)
             if s:
                 services.append(s)

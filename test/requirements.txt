@@ -4,3 +4,4 @@ unittest2
 mock
 coveralls
 nose-cov
+pep8==1.5.7
