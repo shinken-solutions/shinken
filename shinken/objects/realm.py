@@ -41,45 +41,41 @@ class Realm(Itemgroup):
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp(fill_brok=['full_status']),
-        'realm_members': ListProp(default=[], split_on_coma=True), # No status_broker_name because it put hosts, not host_name
+        # No status_broker_name because it put hosts, not host_name
+        'realm_members': ListProp(default=[], split_on_coma=True),
         'higher_realms': ListProp(default=[], split_on_coma=True),
         'default':       BoolProp(default=False),
         'broker_complete_links':       BoolProp(default=False),
-        #'alias': {'required':  True, 'fill_brok': ['full_status']},
-        #'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
-        #'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
-        #'action_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        # 'alias': {'required':  True, 'fill_brok': ['full_status']},
+        # 'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        # 'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        # 'action_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
     })
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-            'serialized_confs': DictProp(default={}),
-        })
+        'serialized_confs': DictProp(default={}),
+    })
 
     macros = {
         'REALMNAME': 'realm_name',
         'REALMMEMBERS': 'members',
     }
 
-
     def get_name(self):
         return self.realm_name
-
 
     def get_realms(self):
         return self.realm_members
 
-
     def add_string_member(self, member):
         self.realm_members += ',' + member
-
 
     def get_realm_members(self):
         if self.has('realm_members'):
             return [r.strip() for r in self.realm_members]
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members
@@ -303,7 +299,7 @@ class Realm(Itemgroup):
             c = r.give_satellite_cfg()
             cfg['reactionners'][r.id] = c
 
-        #print "***** Preparing a satellites conf for a scheduler", cfg
+        # print "***** Preparing a satellites conf for a scheduler", cfg
         return cfg
 
 
@@ -358,7 +354,7 @@ class Realms(Itemgroups):
     # I add the R realm in the sons.higer_realms, and
     # also in the son.sons and so on
     def recur_higer_realms(self, r, sons):
-       for sub_p in sons:
+        for sub_p in sons:
             sub_p.higher_realms.append(r)
             # and call for our sons too
             self.recur_higer_realms(r, sub_p.realm_members)

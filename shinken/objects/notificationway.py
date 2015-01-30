@@ -29,7 +29,7 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
 _special_properties = ('service_notification_commands', 'host_notification_commands',
-                        'service_notification_period', 'host_notification_period')
+                       'service_notification_period', 'host_notification_period')
 
 
 class NotificationWay(Item):
@@ -38,16 +38,26 @@ class NotificationWay(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'notificationway_name':          StringProp(fill_brok=['full_status']),
-        'host_notifications_enabled':    BoolProp(default=True, fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
-        'host_notification_period':      StringProp(fill_brok=['full_status']),
-        'service_notification_period':   StringProp(fill_brok=['full_status']),
-        'host_notification_options':     ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
-        'service_notification_options':  ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
-        'host_notification_commands':    StringProp(fill_brok=['full_status']),
-        'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_business_impact':           IntegerProp(default=0, fill_brok=['full_status']),
+        'notificationway_name':
+            StringProp(fill_brok=['full_status']),
+        'host_notifications_enabled':
+            BoolProp(default=True, fill_brok=['full_status']),
+        'service_notifications_enabled':
+            BoolProp(default=True, fill_brok=['full_status']),
+        'host_notification_period':
+            StringProp(fill_brok=['full_status']),
+        'service_notification_period':
+            StringProp(fill_brok=['full_status']),
+        'host_notification_options':
+            ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
+        'service_notification_options':
+            ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
+        'host_notification_commands':
+            StringProp(fill_brok=['full_status']),
+        'service_notification_commands':
+            StringProp(fill_brok=['full_status']),
+        'min_business_impact':
+            IntegerProp(default=0, fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -73,7 +83,7 @@ class NotificationWay(Item):
 
         # Maybe the command we ask for are not for us, but for another notification ways
         # on the same contact. If so, bail out
-        if cmd and not cmd in self.service_notification_commands:
+        if cmd and cmd not in self.service_notification_commands:
             return False
 
         # If the business_impact is not high enough, we bail out
@@ -115,7 +125,7 @@ class NotificationWay(Item):
 
         # Maybe the command we ask for are not for us, but for another notification ways
         # on the same contact. If so, bail out
-        if cmd and not cmd in self.host_notification_commands:
+        if cmd and cmd not in self.host_notification_commands:
             return False
 
         b = self.host_notification_period.is_time_valid(t)
@@ -162,50 +172,61 @@ class NotificationWay(Item):
 
         # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
-        if hasattr(self, 'service_notification_options') and self.service_notification_options == ['n']:
-            if hasattr(self, 'host_notification_options') and self.host_notification_options == ['n']:
+        if (hasattr(self, 'service_notification_options') and
+                self.service_notification_options == ['n']):
+            if (hasattr(self, 'host_notification_options') and
+                    self.host_notification_options == ['n']):
                 is_null_notifway = True
                 return True
 
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[notificationway::%s] %s property not set", self.get_name(), prop)
+                    logger.warning("[notificationway::%s] %s property not set",
+                                   self.get_name(), prop)
                     state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'service_notification_commands'):
-            logger.warning("[notificationway::%s] do not have any service_notification_commands defined", self.get_name())
+            logger.warning("[notificationway::%s] do not have any "
+                           "service_notification_commands defined", self.get_name())
             state = False
         else:
             for cmd in self.service_notification_commands:
                 if cmd is None:
-                    logger.warning("[notificationway::%s] a service_notification_command is missing", self.get_name())
+                    logger.warning("[notificationway::%s] a "
+                                   "service_notification_command is missing", self.get_name())
                     state = False
                 if not cmd.is_valid():
-                    logger.warning("[notificationway::%s] a service_notification_command is invalid", self.get_name())
+                    logger.warning("[notificationway::%s] a "
+                                   "service_notification_command is invalid", self.get_name())
                     state = False
 
         if getattr(self, 'service_notification_period', None) is None:
-            logger.warning("[notificationway::%s] the service_notification_period is invalid", self.get_name())
+            logger.warning("[notificationway::%s] the "
+                           "service_notification_period is invalid", self.get_name())
             state = False
 
         # Now host part
         if not hasattr(self, 'host_notification_commands'):
-            logger.warning("[notificationway::%s] do not have any host_notification_commands defined", self.get_name())
+            logger.warning("[notificationway::%s] do not have any "
+                           "host_notification_commands defined", self.get_name())
             state = False
         else:
             for cmd in self.host_notification_commands:
                 if cmd is None:
-                    logger.warning("[notificationway::%s] a host_notification_command is missing", self.get_name())
+                    logger.warning("[notificationway::%s] a "
+                                   "host_notification_command is missing", self.get_name())
                     state = False
                 if not cmd.is_valid():
-                    logger.warning("[notificationway::%s] a host_notification_command is invalid (%s)", cmd.get_name(), str(cmd.__dict__))
+                    logger.warning("[notificationway::%s] a host_notification_command "
+                                   "is invalid (%s)", cmd.get_name(), str(cmd.__dict__))
                     state = False
 
         if getattr(self, 'host_notification_period', None) is None:
-            logger.warning("[notificationway::%s] the host_notification_period is invalid", self.get_name())
+            logger.warning("[notificationway::%s] the host_notification_period "
+                           "is invalid", self.get_name())
             state = False
 
         return state
@@ -236,6 +257,6 @@ class NotificationWays(Items):
         if name is None:
             name = NotificationWay.id
         params['notificationway_name'] = name
-        #print "Asking a new inner notificationway from name %s with params %s" % (name, params)
+        # print "Asking a new inner notificationway from name %s with params %s" % (name, params)
         nw = NotificationWay(params)
         self.add_item(nw)

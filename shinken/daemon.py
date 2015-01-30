@@ -51,12 +51,14 @@ from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.modulesctx import modulesctx
 from shinken.modulesmanager import ModulesManager
-from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
+from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp,\
+    LogLevelProp
 from shinken.misc.common import setproctitle
 
 
 try:
-    import pwd, grp
+    import pwd
+    import grp
     from pwd import getpwnam
     from grp import getgrnam, getgrall
 
@@ -80,7 +82,7 @@ except ImportError, exp:  # Like in nt system or Android
         return []
 
 
-##########################   DAEMON PART    ###############################
+# #########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
@@ -88,7 +90,8 @@ UMASK = 027
 from shinken.bin import VERSION
 
 """ TODO: Add some comment about this class for the doc"""
-class InvalidPidFile(Exception): pass
+class InvalidPidFile(Exception):
+    pass
 
 
 """ Interface for Inter satellites communications """
@@ -103,7 +106,7 @@ class Interface(object):
             self.start_time, random.randint(0, 100000000)
         )
 
-    
+
     doc = 'Test the connexion to the daemon. Returns: pong'
     def ping(self):
         return "pong"
@@ -141,7 +144,7 @@ class Interface(object):
     have_conf.need_lock = False
     have_conf.doc = doc
 
-    
+
     doc = 'Set the current log level in [NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, UNKNOWN]'
     def set_log_level(self, loglevel):
         return logger.setLevel(loglevel)
@@ -150,9 +153,12 @@ class Interface(object):
 
     doc = 'Get the current log level in [NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, UNKNOWN]'
     def get_log_level(self):
-        return {logging.NOTSET: 'NOTSET', logging.DEBUG:'DEBUG',
-                logging.INFO: 'INFO', logging.WARNING: 'WARNING',
-                logging.ERROR : 'ERROR', logging.CRITICAL : 'CRITICAL'}.get(logger._level, 'UNKNOWN')
+        return {logging.NOTSET: 'NOTSET',
+                logging.DEBUG: 'DEBUG',
+                logging.INFO: 'INFO',
+                logging.WARNING: 'WARNING',
+                logging.ERROR: 'ERROR',
+                logging.CRITICAL: 'CRITICAL'}.get(logger._level, 'UNKNOWN')
     get_log_level.doc = doc
 
     doc = 'List the methods available on the daemon'
@@ -172,12 +178,12 @@ class Interface(object):
             e = {}
             # Get a string about the args and co
             _s_nondef_args = ', '.join([a for a in args if a not in defaults])
-            _s_def_args = ', '.join( ['%s=%s' % (k,v) for (k,v) in defaults.iteritems()] )
+            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.iteritems()])
             _s_args = ''
             if _s_nondef_args:
-                _s_args +=_s_nondef_args
+                _s_args += _s_nondef_args
             if _s_def_args:
-                _s_args += ', '+_s_def_args
+                _s_args += ', ' + _s_def_args
             e['proto'] = '%s(%s)' % (fclean, _s_args)
             e['need_lock'] = getattr(f, 'need_lock', True)
             e['method'] = getattr(f, 'method', 'GET').upper()
@@ -193,10 +199,10 @@ class Interface(object):
 # If we are under android, we can't give parameters
 if is_android:
     DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
-    DEFAULT_LIB_DIR  = DEFAULT_WORK_DIR
+    DEFAULT_LIB_DIR = DEFAULT_WORK_DIR
 else:
     DEFAULT_WORK_DIR = '/var/run/shinken/'
-    DEFAULT_LIB_DIR  = '/var/lib/shinken/'
+    DEFAULT_LIB_DIR = '/var/lib/shinken/'
 
 
 class Daemon(object):
@@ -222,7 +228,7 @@ class Daemon(object):
         'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default=False),
         'idontcareaboutsecurity': BoolProp(default=False),
-        'daemon_enabled':BoolProp(default=True),
+        'daemon_enabled': BoolProp(default=True),
         'spare':         BoolProp(default=False),
         'max_queue_size': IntegerProp(default=0),
         'daemon_thread_pool_size': IntegerProp(default=8),
@@ -250,8 +256,8 @@ class Daemon(object):
         self.http_daemon = None
 
         # Log init
-        #self.log = logger
-        #self.log.load_obj(self)
+        # self.log = logger
+        # self.log.load_obj(self)
         logger.load_obj(self)
 
         self.new_conf = None  # used by controller to push conf
@@ -339,7 +345,8 @@ class Daemon(object):
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        logger.info("I correctly loaded the modules: [%s]", ','.join([inst.get_name() for inst in self.modules_manager.instances]))
+        logger.info("I correctly loaded the modules: [%s]",
+                    ','.join([inst.get_name() for inst in self.modules_manager.instances]))
 
 
     # Dummy method for adding broker to this daemon
@@ -399,7 +406,7 @@ class Daemon(object):
         # The arbiter doesn't have such attribute
         if hasattr(self, 'use_local_log') and self.use_local_log:
             try:
-                #self.local_log_fd = self.log.register_local_log(self.local_log)
+                # self.local_log_fd = self.log.register_local_log(self.local_log)
                 self.local_log_fd = logger.register_local_log(self.local_log)
             except IOError, exp:
                 logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
@@ -415,16 +422,18 @@ class Daemon(object):
             # We get the access rights, and we check them
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                logger.critical("The directory %s is not writable or readable. Please make it read writable: %s", shm_path, shm_path)
+                logger.critical("The directory %s is not writable or readable."
+                                "Please make it read writable: %s", shm_path, shm_path)
                 sys.exit(2)
 
 
     def __open_pidfile(self, write=False):
-        ## if problem on opening or creating file it'll be raised to the caller:
+        # if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
             self.debug_output.append("Opening pid file: %s" % p)
-            # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
+            # Windows do not manage the rw+ mode,
+            # so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
             else:  # If it doesn't exist too, we create it as void
@@ -452,15 +461,16 @@ class Daemon(object):
 
         try:
             os.kill(pid, 0)
-        except Exception as err: # consider any exception as a stale pidfile.
+        except Exception as err:  # consider any exception as a stale pidfile.
             # this includes :
-            #  * PermissionError when a process with same pid exists but is executed by another user.
-            #  * ProcessLookupError: [Errno 3] No such process.
+            #  * PermissionError when a process with same pid exists but is executed by another user
+            #  * ProcessLookupError: [Errno 3] No such process
             logger.info("Stale pidfile exists (%s), Reusing it.", err)
             return
 
         if not self.do_replace:
-            raise SystemExit("valid pidfile exists (pid=%s) and not forced to replace. Exiting." % pid)
+            raise SystemExit("valid pidfile exists (pid=%s) and not forced to replace. Exiting."
+                             % pid)
 
         self.debug_output.append("Replacing previous instance %d" % pid)
         try:
@@ -471,7 +481,7 @@ class Daemon(object):
                 raise
 
         self.fpid.close()
-        ## TODO: give some time to wait that previous instance finishes?
+        # TODO: give some time to wait that previous instance finishes?
         time.sleep(1)
         # we must also reopen the pid file in write mode
         # because the previous instance should have deleted it!!
@@ -485,7 +495,7 @@ class Daemon(object):
         self.fpid.truncate()
         self.fpid.write("%d" % (pid))
         self.fpid.close()
-        del self.fpid  ## no longer needed
+        del self.fpid  # no longer needed
 
 
     # Close all the process file descriptors. Skip the descriptors
@@ -520,7 +530,7 @@ class Daemon(object):
         else:
             fdtemp = os.open(REDIRECT_TO, os.O_RDWR)
 
-        ## We close all fd but what we need:
+        # We close all fd but what we need:
         self.close_fds(skip_close_fds + (self.fpid.fileno(), fdtemp))
 
         os.dup2(fdtemp, 1)  # standard output (1)
@@ -530,18 +540,21 @@ class Daemon(object):
         try:
             pid = os.fork()
         except OSError, e:
-            raise Exception, "%s [%d]" % (e.strerror, e.errno)
+            raise Exception("%s [%d]" % (e.strerror, e.errno))
+
         if pid != 0:
             # In the father: we check if our child exit correctly
             # it has to write the pid of our future little child..
             def do_exit(sig, frame):
-                logger.error("Timeout waiting child while it should have quickly returned ; something weird happened")
+                logger.error("Timeout waiting child while it should have quickly returned ;"
+                             "something weird happened")
                 os.kill(pid, 9)
                 sys.exit(1)
             # wait the child process to check its return status:
             signal.signal(signal.SIGALRM, do_exit)
             signal.alarm(3)  # forking & writing a pid in a file should be rather quick..
-            # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
+            # if it's not then something wrong can already be on the way so let's wait max
+            # 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
                 logger.error("Something weird happened with/during second fork: status= %s", status)
@@ -551,8 +564,8 @@ class Daemon(object):
         os.setsid()
         try:
             pid = os.fork()
-        except OSError, e:
-            raise Exception, "%s [%d]" % (e.strerror, e.errno)
+        except OSError as e:
+            raise Exception("%s [%d]" % (e.strerror, e.errno))
         if pid != 0:
             # we are the last step and the real daemon is actually correctly created at least.
             # we have still the last responsibility to write the pid of the daemon itself.
@@ -615,7 +628,7 @@ class Daemon(object):
         # Force the debug level if the daemon is said to start with such level
         if self.debug:
             logger.setLevel('DEBUG')
-        
+
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
@@ -664,13 +677,15 @@ class Daemon(object):
         if use_ssl:
             ssl_cert = os.path.abspath(str(ssl_conf.server_cert))
             if not os.path.exists(ssl_cert):
-                logger.error('Error : the SSL certificate %s is missing (server_cert). Please fix it in your configuration', ssl_cert)
+                logger.error('Error : the SSL certificate %s is missing (server_cert).'
+                             'Please fix it in your configuration', ssl_cert)
                 sys.exit(2)
             ca_cert = os.path.abspath(str(ssl_conf.ca_cert))
             logger.info("Using ssl ca cert file: %s", ca_cert)
             ssl_key = os.path.abspath(str(ssl_conf.server_key))
             if not os.path.exists(ssl_key):
-                logger.error('Error : the SSL key %s is missing (server_key). Please fix it in your configuration', ssl_key)
+                logger.error('Error : the SSL key %s is missing (server_key).'
+                             'Please fix it in your configuration', ssl_key)
                 sys.exit(2)
             logger.info("Using ssl server cert/key files: %s/%s", ssl_cert, ssl_key)
 
@@ -678,8 +693,10 @@ class Daemon(object):
                 logger.info("Enabling hard SSL server name verification")
 
         # Let's create the HTTPDaemon, it will be exec after
-        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend, use_ssl, ca_cert, ssl_key,
-                                      ssl_cert, ssl_conf.hard_ssl_name_check, self.daemon_thread_pool_size)
+        self.http_daemon = HTTPDaemon(self.host, self.port, http_backend,
+                                      use_ssl, ca_cert, ssl_key,
+                                      ssl_cert, ssl_conf.hard_ssl_name_check,
+                                      self.daemon_thread_pool_size)
         # TODO: fix this "hack" :
         shinken.http_daemon.daemon_inst = self.http_daemon
 
@@ -706,13 +723,15 @@ class Daemon(object):
         if not modules_dir:
             modules_dir = modulesctx.get_modulesdir()
             if not modules_dir:
-                logger.error("Your configuration is missing the path to the modules (modules_dir). I set it by default to /var/lib/shinken/modules. Please configure it")
+                logger.error("Your configuration is missing the path to the modules (modules_dir). "
+                             "I set it by default to /var/lib/shinken/modules. Please configure it")
                 modules_dir = '/var/lib/shinken/modules'
                 modulesctx.set_modulesdir(modules_dir)
             self.modules_dir = modules_dir
         logger.info("Modules directory: %s", modules_dir)
         if not os.path.exists(modules_dir):
-            raise RuntimeError("The modules directory '%s' is missing! Bailing out. Please fix your configuration", modules_dir)
+            raise RuntimeError("The modules directory '%s' is missing! Bailing out."
+                               "Please fix your configuration", modules_dir)
         return modules_dir
 
 
@@ -777,19 +796,23 @@ class Daemon(object):
             try:
                 os.initgroups(self.user, gid)
             except OSError, e:
-                logger.warning('Cannot call the additional groups setting with initgroups (%s)', e.strerror)
+                logger.warning('Cannot call the additional groups setting with initgroups (%s)',
+                               e.strerror)
         elif hasattr(os, 'setgroups'):
-            groups = [gid] + [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
+            groups = [gid] + \
+                     [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
             try:
                 os.setgroups(groups)
             except OSError, e:
-                logger.warning('Cannot call the additional groups setting with setgroups (%s)', e.strerror)
+                logger.warning('Cannot call the additional groups setting with setgroups (%s)',
+                               e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
         except OSError, e:
-            logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting", self.user, self.group, e.strerror, e.errno)
+            logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting",
+                         self.user, self.group, e.strerror, e.errno)
             sys.exit(2)
 
 
@@ -812,7 +835,8 @@ class Daemon(object):
             except ConfigParser.InterpolationMissingOptionError, e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
-                logger.error("Incorrect or missing variable '%s' in config file : %s", wrong_variable, self.config_file)
+                logger.error("Incorrect or missing variable '%s' in config file : %s",
+                             wrong_variable, self.config_file)
                 sys.exit(2)
         else:
             logger.warning("No config file specified, use defaults parameters")
@@ -826,24 +850,24 @@ class Daemon(object):
     # Some paths can be relatives. We must have a full path by taking
     # the config file by reference
     def relative_paths_to_full(self, reference_path):
-        #print "Create relative paths with", reference_path
+        # print "Create relative paths with", reference_path
         properties = self.__class__.properties
         for prop, entry in properties.items():
             if isinstance(entry, ConfigPathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     new_path = os.path.join(reference_path, path)
-                    #print "DBG: changing", entry, "from", path, "to", new_path
+                    # print "DBG: changing", entry, "from", path, "to", new_path
                     path = new_path
                 setattr(self, prop, path)
-                #print "Setting %s for %s" % (path, prop)
+                # print "Setting %s for %s" % (path, prop)
 
 
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s", os.getpid(), str(sig))
         if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
-        elif sig == signal.SIGUSR2: # if USR2, ask objects dump
+        elif sig == signal.SIGUSR2:  # if USR2, ask objects dump
             self.need_objects_dump = True
         else:  # Ok, really ask us to die :)
             self.interrupted = True
@@ -930,7 +954,7 @@ class Daemon(object):
         if len(ins) == 0:  # trivial case: no fd activity:
             return 0, [], tcdiff
         # HERE WAS THE HTTP, but now it's managed in an other thread
-        #for sock in socks:
+        # for sock in socks:
         #    if sock in ins and sock not in suppl_socks:
         #        ins.remove(sock)
         # Track in elapsed the WHOLE time, even with handling requests
@@ -941,7 +965,8 @@ class Daemon(object):
 
 
     # Check for a possible system time change and act correspondingly.
-    # If such a change is detected then we return the number of seconds that changed. 0 if no time change was detected.
+    # If such a change is detected then we return the number of seconds that changed.
+    # 0 if no time change was detected.
     # Time change can be positive or negative:
     # positive when we have been sent in the future and negative if we have been sent in the past.
     def check_for_system_time_change(self):
@@ -993,8 +1018,9 @@ class Daemon(object):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
-                except Exception, exp:
-                    logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later', inst.get_name(), str(exp))
+                except Exception as exp:
+                    logger.warning('The instance %s raised an exception %s. I disabled it,'
+                                   'and set it to restart later', inst.get_name(), str(exp))
                     self.modules_manager.set_to_restart(inst)
         statsmgr.incr('core.hook.%s' % hook_name, time.time() - _t)
 
@@ -1012,20 +1038,21 @@ class Daemon(object):
 
     # Dummy function for having the stats main structure before sending somewhere
     def get_stats_struct(self):
-        r = {'metrics':[], 'version':VERSION, 'name':'', 'type':'', 'modules': {'internal':{}, 'external':{}} }
+        r = {'metrics': [], 'version': VERSION, 'name': '', 'type': '', 'modules':
+             {'internal': {}, 'external': {}}}
         modules = r['modules']
-        
+
         # first get data for all internal modules
         for mod in self.modules_manager.get_internal_instances():
             mname = mod.get_name()
-            state = {True:'ok', False:'stopped'}[(mod not in self.modules_manager.to_restart)]
-            e = {'name':mname, 'state':state}
+            state = {True: 'ok', False: 'stopped'}[(mod not in self.modules_manager.to_restart)]
+            e = {'name': mname, 'state': state}
             modules['internal'][mname] = e
         # Same but for external ones
         for mod in self.modules_manager.get_external_instances():
             mname = mod.get_name()
-            state = {True:'ok', False:'stopped'}[(mod not in self.modules_manager.to_restart)]
-            e = {'name':mname, 'state':state}
+            state = {True: 'ok', False: 'stopped'}[(mod not in self.modules_manager.to_restart)]
+            e = {'name': mname, 'state': state}
             modules['external'][mname] = e
 
         return r
@@ -1034,6 +1061,6 @@ class Daemon(object):
     def print_unrecoverable(trace):
         logger.critical("I got an unrecoverable error. I have to exit.")
         logger.critical("You can get help at https://github.com/naparuba/shinken")
-        logger.critical("If you think this is a bug, create a new ticket including details mentioned in the README")
+        logger.critical("If you think this is a bug, create a new ticket including"
+                        "details mentioned in the README")
         logger.critical("Back trace of the error: %s", trace)
-

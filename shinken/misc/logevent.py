@@ -21,10 +21,16 @@
 
 import re
 
-event_type_pattern = re.compile('^\[[0-9]{10}] (?:HOST|SERVICE) (ALERT|NOTIFICATION|FLAPPING|DOWNTIME)(?: ALERT)?:.*')
+event_type_pattern = \
+    re.compile(
+        '^\[[0-9]{10}] (?:HOST|SERVICE) (ALERT|NOTIFICATION|FLAPPING|DOWNTIME)(?: ALERT)?:.*'
+    )
 event_types = {
-    'NOTIFICATION': {  # ex: "[1402515279] SERVICE NOTIFICATION: admin;localhost;check-ssh;CRITICAL;notify-service-by-email;Connection refused"
-        'pattern': '\[([0-9]{10})\] (HOST|SERVICE) (NOTIFICATION): ([^\;]*);([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);([^\;]*)',
+    'NOTIFICATION': {
+        # ex: "[1402515279] SERVICE NOTIFICATION:
+        # admin;localhost;check-ssh;CRITICAL;notify-service-by-email;Connection refused"
+        'pattern': '\[([0-9]{10})\] (HOST|SERVICE) (NOTIFICATION): '
+        '([^\;]*);([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);([^\;]*)',
         'properties': [
             'time',
             'notification_type',  # 'SERVICE' (or could be 'HOST')
@@ -37,8 +43,11 @@ event_types = {
             'output',  # 'Connection refused'
         ]
     },
-    'ALERT': {  # ex: "[1329144231] SERVICE ALERT: dfw01-is02-006;cpu load maui;WARNING;HARD;4;WARNING - load average: 5.04, 4.67, 5.04"
-        'pattern': '^\[([0-9]{10})] (HOST|SERVICE) (ALERT): ([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);([^\;]*);([^\;]*)',
+    'ALERT': {
+        # ex: "[1329144231] SERVICE ALERT:
+        #  dfw01-is02-006;cpu load maui;WARNING;HARD;4;WARNING - load average: 5.04, 4.67, 5.04"
+        'pattern': '^\[([0-9]{10})] (HOST|SERVICE) (ALERT): '
+                   '([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*);([^\;]*);([^\;]*)',
         'properties': [
             'time',
             'alert_type',  # 'SERVICE' (or could be 'HOST')
@@ -51,8 +60,11 @@ event_types = {
             'output',  # 'WARNING - load average: 5.04, 4.67, 5.04'
         ]
     },
-    'DOWNTIME': {  # ex: "[1279250211] HOST DOWNTIME ALERT: maast64;STARTED; Host has entered a period of scheduled downtime"
-        'pattern': '^\[([0-9]{10})\] (HOST|SERVICE) (DOWNTIME) ALERT: ([^\;]*);(STARTED|STOPPED|CANCELLED);(.*)',
+    'DOWNTIME': {
+        # ex: "[1279250211] HOST DOWNTIME ALERT:
+        # maast64;STARTED; Host has entered a period of scheduled downtime"
+        'pattern': '^\[([0-9]{10})\] (HOST|SERVICE) (DOWNTIME) ALERT: '
+        '([^\;]*);(STARTED|STOPPED|CANCELLED);(.*)',
         'properties': [
             'time',
             'downtime_type',  # '(SERVICE or could be 'HOST')
@@ -62,17 +74,23 @@ event_types = {
             'output',  # 'Host has entered a period of scheduled downtime'
         ]
     },
-    'FLAPPING': {  # service flapping ex: "[1375301662] SERVICE FLAPPING ALERT: testhost;check_ssh;STARTED; Service appears to have started flapping (24.2% change >= 20.0% threshold)"
-                   # host flapping ex: "[1375301662] HOST FLAPPING ALERT: hostbw;STARTED; Host appears to have started flapping (20.1% change > 20.0% threshold)"
-        'pattern': '^\[([0-9]{10})] (HOST|SERVICE) (FLAPPING) ALERT: ([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*)',
+    'FLAPPING': {
+        # service flapping ex: "[1375301662] SERVICE FLAPPING ALERT:
+        # testhost;check_ssh;STARTED;
+        # Service appears to have started flapping (24.2% change >= 20.0% threshold)"
+
+        # host flapping ex: "[1375301662] HOST FLAPPING ALERT:
+        # hostbw;STARTED; Host appears to have started flapping (20.1% change > 20.0% threshold)"
+        'pattern': '^\[([0-9]{10})] (HOST|SERVICE) (FLAPPING) ALERT: '
+        '([^\;]*);(?:([^\;]*);)?([^\;]*);([^\;]*)',
         'properties': [
             'time',
             'alert_type',  # 'SERVICE' or 'HOST'
-            'event_type', # 'FLAPPING'
-            'hostname', # The hostname
-            'service_desc', # The service description or None
-            'state', # 'STOPPED' or 'STARTED'
-            'output', # example: 'Service appears to have started flapping (24.2% change >= 20.0% threshold)'
+            'event_type',  # 'FLAPPING'
+            'hostname',  # The hostname
+            'service_desc',  # The service description or None
+            'state',  # 'STOPPED' or 'STARTED'
+            'output',  # 'Service appears to have started flapping (24% change >= 20.0% threshold)'
         ]
     }
 }
@@ -85,18 +103,18 @@ class LogEvent:
     def __init__(self, log):
         self.data = {}
 
-        #Find the type of event
+        # Find the type of event
         event_type_match = event_type_pattern.match(log)
 
         if event_type_match:
-            #parse it with it's pattern
+            # parse it with it's pattern
             event_type = event_types[event_type_match.group(1)]
             properties_match = re.match(event_type['pattern'], log)
 
             if properties_match:
                 # Populate self.data with the event's properties
                 for i, p in enumerate(event_type['properties']):
-                    self.data[p] = properties_match.group(i+1)
+                    self.data[p] = properties_match.group(i + 1)
 
                 # Convert the time to int
                 self.data['time'] = int(self.data['time'])

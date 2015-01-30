@@ -33,37 +33,37 @@ class Check(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
 
-    ###FIXME : reenable AutoSlots if possible
-    #__metaclass__ = AutoSlots
+    # FIXME : reenable AutoSlots if possible
+    # __metaclass__ = AutoSlots
 
     my_type = 'check'
 
     properties = {
-        'is_a':         StringProp(default='check'),
-        'type':         StringProp(default=''),
-        '_in_timeout':  BoolProp(default=False),
-        'status':       StringProp(default=''),
-        'exit_status':  IntegerProp(default=3),
-        'state':        IntegerProp(default=0),
-        'output':       StringProp(default=''),
-        'long_output':  StringProp(default=''),
-        'ref':          IntegerProp(default=-1),
-        't_to_go':      IntegerProp(default=0),
-        'depend_on':    StringProp(default=[]),
-        'dep_check':    StringProp(default=[]),
-        'check_time':   IntegerProp(default=0),
-        'execution_time': FloatProp(default=0.0),
-        'u_time':       FloatProp(default=0.0),
-        's_time':       FloatProp(default=0.0),
-        'perf_data':    StringProp(default=''),
-        'check_type':   IntegerProp(default=0),
-        'poller_tag':   StringProp(default='None'),
+        'is_a':             StringProp(default='check'),
+        'type':             StringProp(default=''),
+        '_in_timeout':      BoolProp(default=False),
+        'status':           StringProp(default=''),
+        'exit_status':      IntegerProp(default=3),
+        'state':            IntegerProp(default=0),
+        'output':           StringProp(default=''),
+        'long_output':      StringProp(default=''),
+        'ref':              IntegerProp(default=-1),
+        't_to_go':          IntegerProp(default=0),
+        'depend_on':        StringProp(default=[]),
+        'dep_check':        StringProp(default=[]),
+        'check_time':       IntegerProp(default=0),
+        'execution_time':   FloatProp(default=0.0),
+        'u_time':           FloatProp(default=0.0),
+        's_time':           FloatProp(default=0.0),
+        'perf_data':        StringProp(default=''),
+        'check_type':       IntegerProp(default=0),
+        'poller_tag':       StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
-        'env':          StringProp(default={}),
-        'internal':     BoolProp(default=False),
-        'module_type':  StringProp(default='fork'),
-        'worker':       StringProp(default='none'),
-        'from_trigger': BoolProp(default=False),
+        'env':              StringProp(default={}),
+        'internal':         BoolProp(default=False),
+        'module_type':      StringProp(default='fork'),
+        'worker':           StringProp(default='none'),
+        'from_trigger':     BoolProp(default=False),
     }
 
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None,
@@ -83,7 +83,7 @@ class Check(Action):
         self.output = ''
         self.long_output = ''
         self.ref = ref
-        #self.ref_type = ref_type
+        # self.ref_type = ref_type
         self.t_to_go = t_to_go
         self.depend_on = []
         if dep_check is None:

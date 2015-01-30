@@ -83,7 +83,7 @@ class Packs(Items):
         # Ok, go compile the code
         try:
             d = json.loads(buf)
-            if not 'name' in d:
+            if 'name' not in d:
                 logger.error("[Pack] no name in the pack '%s'", name)
                 return
             p = Pack({})
