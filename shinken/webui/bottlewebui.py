@@ -769,7 +769,7 @@ class Bottle(object):
         """ The bottle WSGI-interface. """
         try:
             environ['bottle.app'] = self
-            if environ in 'HTTP_X_FORWARDED_PROTO':
+            if 'HTTP_X_FORWARDED_PROTO' in environ:
                 environ['wsgi.url_scheme'] = environ['HTTP_X_FORWARDED_PROTO']
             request.bind(environ)
             response.bind()
