@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -54,6 +53,12 @@ class Host(SchedulingItem):
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
+
+    # if Host(or more generally Item) instances were created with all properties
+    # having a default value set in the instance then we wouldn't need this:
+    service_includes = service_excludes = []
+    # though, as these 2 attributes are to be relatively low used it's not
+    # that bad to have the default be defined only once here at the class level.
 
     # properties defined by configuration
     # *required: is required in conf
@@ -193,6 +198,8 @@ class Host(SchedulingItem):
         'service_overrides':
             ListProp(default=[], merging='duplicate', split_on_coma=False),
         'service_excludes':
+            ListProp(default=[], merging='duplicate', split_on_coma=True),
+        'service_includes':
             ListProp(default=[], merging='duplicate', split_on_coma=True),
         'labels':
             StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
@@ -873,6 +880,31 @@ class Host(SchedulingItem):
     # Add one of our service to services (at linkify)
     def add_service_link(self, service):
         self.services.append(service)
+
+
+    def __repr__(self):
+        return '<Host host_name=%r name=%r use=%r />' % (
+            getattr(self, 'host_name', None),
+            getattr(self, 'name', None),
+            getattr(self, 'use', None))
+
+    __str__ = __repr__
+
+    def is_excluded_for(self, svc):
+        ''' Check whether this host should have the passed service be "excluded" or "not included".
+
+        An host can define service_includes and/or service_excludes directive to either
+        white-list-only or black-list some services from itself.
+
+        :type svc: shinken.objects.service.Service
+        '''
+
+        sdescr = svc.service_description
+        if not svc.is_tpl() and self.service_includes:
+            return sdescr not in self.service_includes
+        if self.service_excludes:
+            return sdescr in self.service_excludes
+        return False
 
 #####
 #                         _

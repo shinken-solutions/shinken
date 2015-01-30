@@ -110,7 +110,7 @@ class TestService(ShinkenTest):
         svc = self.get_svc()
         print 'Display name', svc.display_name, 'toto'
         print 'Full name', svc.get_full_name()
-        self.assertEqual('test_ok_0', svc.display_name)
+        self.assertEqual((u'test_host_0', u'test_ok_0'), svc.display_name)
 
     def test_states_from_exit_status(self):
         svc = self.get_svc()
