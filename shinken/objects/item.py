@@ -600,7 +600,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Get a brok with initial status
     def get_initial_status_brok(self):
-        data = { 'id': self.id }
+        data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
         return Brok('initial_' + self.my_type + '_status', data)
 
