@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,10 +22,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
-from shinken.graph import Graph
+
+from .item import Item, Items
+from .service import Service
 
 
 class Servicedependency(Item):
@@ -213,6 +214,9 @@ class Servicedependencies(Items):
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
     def linkify_sd_by_s(self, hosts, services):
+        to_del = []
+        errors = self.configuration_errors
+        warns = self.configuration_warnings
         for sd in self:
             try:
                 s_name = sd.dependent_service_description
@@ -221,8 +225,15 @@ class Servicedependencies(Items):
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 if s is None:
-                    self.configuration_errors.append("Service %s not found for host %s"
-                                                     % (s_name, hst_name))
+                    host = hosts.find_by_name(hst_name)
+                    if not (host and host.is_excluded_for_sdesc(s_name)):
+                        errors.append("Service %s not found for host %s" % (s_name, hst_name))
+                    elif host:
+                        warns.append("Service %s is excluded from host %s ; "
+                                     "removing this servicedependency as it's unusuable."
+                                     % (s_name, hst_name))
+                    to_del.append(sd)
+                    continue
                 sd.dependent_service_description = s
 
                 s_name = sd.service_description
@@ -231,12 +242,23 @@ class Servicedependencies(Items):
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 if s is None:
-                    self.configuration_errors.append("Service %s not found for host %s"
-                                                     % (s_name, hst_name))
+                    host = hosts.find_by_name(hst_name)
+                    if not (host and host.is_excluded_for_sdesc(s_name)):
+                        errors.append("Service %s not found for host %s" % (s_name, hst_name))
+                    elif host:
+                        warns.append("Service %s is excluded from host %s ; "
+                                     "removing this servicedependency as it's unusuable."
+                                     % (s_name, hst_name))
+                    to_del.append(sd)
+                    continue
                 sd.service_description = s
 
-            except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, exp)
+            except AttributeError as err:
+                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, err)
+                to_del.append(sd)
+
+        for sd in to_del:
+            self.remove_item(sd)
 
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
