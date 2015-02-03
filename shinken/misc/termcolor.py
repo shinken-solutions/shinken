@@ -80,7 +80,7 @@ COLORS = dict(
             'cyan',
             'white',
         ],
-            list(range(30, 38))
+            list(range(90, 98))
         )
     )
 )
