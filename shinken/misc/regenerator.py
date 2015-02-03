@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -36,11 +35,11 @@ from shinken.objects.notificationway import NotificationWay, NotificationWays
 from shinken.objects.timeperiod import Timeperiod, Timeperiods
 from shinken.objects.command import Command, Commands
 from shinken.objects.config import Config
-from shinken.schedulerlink import SchedulerLink, SchedulerLinks
-from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
-from shinken.pollerlink import PollerLink, PollerLinks
-from shinken.brokerlink import BrokerLink, BrokerLinks
-from shinken.receiverlink import ReceiverLink, ReceiverLinks
+from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
+from shinken.objects.reactionnerlink import ReactionnerLink, ReactionnerLinks
+from shinken.objects.pollerlink import PollerLink, PollerLinks
+from shinken.objects.brokerlink import BrokerLink, BrokerLinks
+from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.util import safe_print
 from shinken.message import Message
 
@@ -129,14 +128,14 @@ class Regenerator(object):
     # we will skip them
     def want_brok(self, brok):
         if self.in_scheduler_mode:
-            return not brok.type in ['program_status', 'initial_host_status',
-                             'initial_hostgroup_status', 'initial_service_status',
-                             'initial_servicegroup_status', 'initial_contact_status',
-                             'initial_contactgroup_status', 'initial_timeperiod_status',
-                             'initial_command_status']
-        # Ok you are wondering why we don't add initial_broks_done? It's because the LiveSTatus modules
-        # need this part to do internal things. But don't worry, the vanilla regenerator
-        # will just skip it in all_done_linking :D
+            return brok.type not in ['program_status', 'initial_host_status',
+                                     'initial_hostgroup_status', 'initial_service_status',
+                                     'initial_servicegroup_status', 'initial_contact_status',
+                                     'initial_contactgroup_status', 'initial_timeperiod_status',
+                                     'initial_command_status']
+        # Ok you are wondering why we don't add initial_broks_done?
+        # It's because the LiveSTatus modules need this part to do internal things.
+        # But don't worry, the vanilla regenerator will just skip it in all_done_linking :D
 
         # Not in don't want? so want! :)
         return True
@@ -160,14 +159,15 @@ class Regenerator(object):
 
         # In a scheduler we are already "linked" so we can skip this
         if self.in_scheduler_mode:
-            safe_print("Regenerator: We skip the all_done_linking phase because we are in a scheduler")
+            safe_print("Regenerator: We skip the all_done_linking phase "
+                       "because we are in a scheduler")
             return
 
         start = time.time()
         safe_print("In ALL Done linking phase for instance", inst_id)
         # check if the instance is really defined, so got ALL the
         # init phase
-        if not inst_id in self.configs.keys():
+        if inst_id not in self.configs.keys():
             safe_print("Warning: the instance %d is not fully given, bailout" % inst_id)
             return
 
@@ -205,7 +205,7 @@ class Regenerator(object):
 
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
-            #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            # print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
                 hgname = hgname.strip()
@@ -228,7 +228,7 @@ class Regenerator(object):
 
             # Linkify tags
             for t in h.tags:
-                if not t in self.tags:
+                if t not in self.tags:
                     self.tags[t] = 0
                 self.tags[t] += 1
 
@@ -287,7 +287,7 @@ class Regenerator(object):
 
             # Linkify services tags
             for t in s.tags:
-                if not t in self.services_tags:
+                if t not in self.services_tags:
                     self.services_tags[t] = 0
                 self.services_tags[t] += 1
 
@@ -349,7 +349,7 @@ class Regenerator(object):
             else:  # else take the new one
                 self.contactgroups.add_item(inpcg)
 
-        safe_print("ALL LINKING TIME"*10, time.time() - start)
+        safe_print("ALL LINKING TIME" * 10, time.time() - start)
 
         # clean old objects
         del self.inp_hosts[inst_id]
@@ -428,7 +428,7 @@ class Regenerator(object):
             setattr(o, prop, [])
 
         new_v = []
-        #print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        # print "Linkify Dict SRV/Host", v, o.get_name(), prop
         for name in v['services']:
             elts = name.split('/')
             hname = elts[0]
@@ -455,7 +455,9 @@ class Regenerator(object):
                 new_v.append(h)
         setattr(o, prop, new_v)
 
-############### Brok management part
+###############
+# Brok management part
+###############
 
     def before_after_hook(self, brok, obj):
         """
@@ -466,7 +468,9 @@ class Regenerator(object):
         """
         pass
 
-####### INITIAL PART
+#######
+# INITIAL PART
+#######
 
     def manage_program_status_brok(self, b):
         data = b.data
@@ -488,7 +492,7 @@ class Regenerator(object):
         # And we save it
         self.configs[c_id] = c
 
-        ## Clean the old "hard" objects
+        # Clean the old "hard" objects
 
         # We should clean all previously added hosts and services
         safe_print("Clean hosts/service of", c_id)
@@ -529,7 +533,7 @@ class Regenerator(object):
         except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
-        #safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
+        # safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
 
         h = Host({})
         self.update_element(h, data)
@@ -581,7 +585,7 @@ class Regenerator(object):
         except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
-        #safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
+        # safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
 
         s = Service({})
         self.update_element(s, data)
@@ -707,7 +711,7 @@ class Regenerator(object):
     # if not: create it and declare it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        #print "Creating timeperiod", data
+        # print "Creating timeperiod", data
         tpname = data['timeperiod_name']
 
         tp = self.timeperiods.find_by_name(tpname)
@@ -715,7 +719,7 @@ class Regenerator(object):
             # print "Already existing timeperiod", tpname
             self.update_element(tp, data)
         else:
-            #print "Creating Timeperiod:", tpname
+            # print "Creating Timeperiod:", tpname
             tp = Timeperiod({})
             self.update_element(tp, data)
             self.timeperiods.add_item(tp)
@@ -730,10 +734,10 @@ class Regenerator(object):
 
         c = self.commands.find_by_name(cname)
         if c:
-            #print "Already existing command", cname, "updating it"
+            # print "Already existing command", cname, "updating it"
             self.update_element(c, data)
         else:
-            #print "Creating a new command", cname
+            # print "Creating a new command", cname
             c = Command({})
             self.update_element(c, data)
             self.commands.add_item(c)
@@ -747,7 +751,7 @@ class Regenerator(object):
         print "Created a new scheduler", sched
         self.update_element(sched, data)
         print "Updated scheduler"
-        #print "CMD:", c
+        # print "CMD:", c
         self.schedulers[scheduler_name] = sched
         print "scheduler added"
 
@@ -760,7 +764,7 @@ class Regenerator(object):
         print "Created a new poller", poller
         self.update_element(poller, data)
         print "Updated poller"
-        #print "CMD:", c
+        # print "CMD:", c
         self.pollers[poller_name] = poller
         print "poller added"
 
@@ -773,7 +777,7 @@ class Regenerator(object):
         print "Created a new reactionner", reac
         self.update_element(reac, data)
         print "Updated reactionner"
-        #print "CMD:", c
+        # print "CMD:", c
         self.reactionners[reactionner_name] = reac
         print "reactionner added"
 
@@ -786,7 +790,7 @@ class Regenerator(object):
         print "Created a new broker", broker
         self.update_element(broker, data)
         print "Updated broker"
-        #print "CMD:", c
+        # print "CMD:", c
         self.brokers[broker_name] = broker
         print "broker added"
 
@@ -799,7 +803,7 @@ class Regenerator(object):
         print "Created a new receiver", receiver
         self.update_element(receiver, data)
         print "Updated receiver"
-        #print "CMD:", c
+        # print "CMD:", c
         self.receivers[receiver_name] = receiver
         print "receiver added"
 
@@ -813,7 +817,9 @@ class Regenerator(object):
         self.all_done_linking(inst_id)
 
 
-################# Status Update part
+#################
+# Status Update part
+#################
 
 # A scheduler send us a "I'm alive" brok. If we never
 # heard about this one, we got some problem and we
@@ -824,7 +830,7 @@ class Regenerator(object):
 
         # If we got an update about an unknown instance, cry and ask for a full
         # version!
-        if not c_id in self.configs.keys():
+        if c_id not in self.configs.keys():
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
@@ -968,12 +974,14 @@ class Regenerator(object):
         try:
             s = self.schedulers[scheduler_name]
             self.update_element(s, data)
-            #print "S:", s
+            # print "S:", s
         except Exception:
             pass
 
 
-################# Check result and schedule part
+#################
+# Check result and schedule part
+#################
     def manage_host_check_result_brok(self, b):
         data = b.data
         hname = data['host_name']

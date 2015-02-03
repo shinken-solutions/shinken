@@ -95,7 +95,8 @@ class Resultmodulations(Items):
             mtp = timeperiods.find_by_name(mtp_name)
 
             if mtp_name != '' and mtp is None:
-                err = "Error: the result modulation '%s' got an unknown modulation_period '%s'" % (rm.get_name(), mtp_name)
+                err = "Error: the result modulation '%s' got an unknown modulation_period '%s'" % \
+                      (rm.get_name(), mtp_name)
                 rm.configuration_errors.append(err)
 
             rm.modulation_period = mtp

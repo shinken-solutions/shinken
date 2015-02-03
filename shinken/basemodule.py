@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2014:
@@ -62,7 +61,7 @@ properties = {
 
     # Possible configuration phases where the module is involved:
     'phases': ['configuration', 'late_configuration', 'running', 'retention'],
-    }
+}
 
 
 class ModulePhases:
@@ -153,7 +152,7 @@ class BaseModule(object):
             if not manager:
                 q.close()
                 q.join_thread()
-            #else:
+            # else:
             #    q._callmethod('close')
             #    q._callmethod('join_thread')
         self.to_q = self.from_q = None
@@ -203,12 +202,12 @@ class BaseModule(object):
         """Request the module process to stop and release it"""
         if self.process:
             logger.info("I'm stopping module %r (pid=%s)",
-                       self.get_name(), self.process.pid)
+                        self.get_name(), self.process.pid)
             self.process.terminate()
             self.process.join(timeout=1)
             if self.process.is_alive():
                 logger.warning("%r is still alive normal kill, I help it to die",
-                            self.get_name())
+                               self.get_name())
                 self.__kill()
                 self.process.join(1)
                 if self.process.is_alive():
@@ -218,10 +217,9 @@ class BaseModule(object):
             self.process = None
 
 
-    ## TODO: are these 2 methods really needed?
+    # TODO: are these 2 methods really needed?
     def get_name(self):
         return self.name
-
 
     def has(self, prop):
         """The classic has: do we have a prop or not?"""
@@ -282,7 +280,7 @@ class BaseModule(object):
         # TODO: fix this hack:
         if shinken.http_daemon.daemon_inst:
             shinken.http_daemon.daemon_inst.shutdown()
-        
+
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
         # Will block here!

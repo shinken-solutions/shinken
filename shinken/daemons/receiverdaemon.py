@@ -44,7 +44,7 @@ from shinken.daemon import Interface
 from shinken.stats import statsmgr
 
 class IStats(Interface):
-    """ 
+    """
     Interface for various stats about broker activity
     """
 
@@ -59,7 +59,8 @@ class IStats(Interface):
 
 class IBroks(Interface):
     """ Interface for Brokers:
-They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE update...) """
+They connect here and get all broks (data for brokers). Data must be ORDERED!
+(initial status BEFORE update...) """
 
     # A broker ask us broks
     def get_broks(self, bname):
@@ -70,7 +71,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED! (i
 # Our main APP class
 class Receiver(Satellite):
     my_type = 'receiver'
-    
+
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='receiverd.pid'),
@@ -80,7 +81,8 @@ class Receiver(Satellite):
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 
-        super(Receiver, self).__init__('receiver', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Receiver, self).__init__(
+            'receiver', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Our arbiters
         self.arbiters = {}
@@ -149,7 +151,8 @@ class Receiver(Satellite):
             try:
                 mod.manage_brok(b)
             except Exception, exp:
-                logger.warning("The mod %s raise an exception: %s, I kill it", mod.get_name(), str(exp))
+                logger.warning("The mod %s raise an exception: %s, I kill it",
+                               mod.get_name(), str(exp))
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 to_del.append(mod)
@@ -197,13 +200,15 @@ class Receiver(Satellite):
         self.statsd_port = conf['global']['statsd_port']
         self.statsd_prefix = conf['global']['statsd_prefix']
         self.statsd_enabled = conf['global']['statsd_enabled']
-        
-        statsmgr.register(self, self.name, 'receiver', 
+
+        statsmgr.register(self, self.name, 'receiver',
                           api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
-                          statsd_host=self.statsd_host, statsd_port=self.statsd_port, statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+                          statsd_host=self.statsd_host, statsd_port=self.statsd_port,
+                          statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
-        self.accept_passive_unknown_check_results = conf['global']['accept_passive_unknown_check_results']
+        self.accept_passive_unknown_check_results = \
+            conf['global']['accept_passive_unknown_check_results']
 
         g_conf = conf['global']
 
@@ -223,7 +228,8 @@ class Receiver(Satellite):
                     already_got = True
 
             if already_got:
-                logger.info("[%s] We already got the conf %d (%s)", self.name, sched_id, conf['schedulers'][sched_id]['name'])
+                logger.info("[%s] We already got the conf %d (%s)",
+                            self.name, sched_id, conf['schedulers'][sched_id]['name'])
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
                 external_commands = self.schedulers[sched_id]['external_commands']
@@ -255,7 +261,7 @@ class Receiver(Satellite):
             self.schedulers[sched_id]['active'] = s['active']
             self.schedulers[sched_id]['timeout'] = s['timeout']
             self.schedulers[sched_id]['data_timeout'] = s['data_timeout']
-            
+
             # Do not connect if we are a passive satellite
             if self.direct_routing and not already_got:
                 # And then we connect to it :)
@@ -295,7 +301,7 @@ class Receiver(Satellite):
         # good schedulers
         for ext_cmd in commands_to_process:
             self.external_command.resolve_command(ext_cmd)
-        
+
         # Now for all alive schedulers, send the commands
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
@@ -307,13 +313,13 @@ class Receiver(Satellite):
                 logger.warning("The scheduler is not connected %s", sched)
                 self.pynag_con_init(sched_id)
                 con = sched.get('con', None)
-            
+
             # If there are commands and the scheduler is alive
             if len(cmds) > 0 and con:
                 logger.debug("Sending %d commands to scheduler %s", len(cmds), sched)
                 try:
-                    #con.run_external_commands(cmds)
-                    con.post('run_external_commands', {'cmds':cmds})
+                    # con.run_external_commands(cmds)
+                    con.post('run_external_commands', {'cmds': cmds})
                     sent = True
                 # Not connected or sched is gone
                 except (HTTPExceptions, KeyError), exp:
@@ -366,13 +372,13 @@ class Receiver(Satellite):
     def main(self):
         try:
             self.load_config_file()
-            
+
             # Setting log level
             logger.setLevel(self.log_level)
             # Force the debug level if the daemon is said to start with such level
             if self.debug:
                 logger.setLevel('DEBUG')
-            
+
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
 
@@ -385,7 +391,7 @@ class Receiver(Satellite):
 
             self.load_modules_manager()
 
-            self.uri2 = self.http_daemon.register(self.interface)#, "ForArbiter")
+            self.uri2 = self.http_daemon.register(self.interface)
             logger.debug("The Arbiter uri it at %s", self.uri2)
 
             self.uri3 = self.http_daemon.register(self.istats)
@@ -424,11 +430,11 @@ class Receiver(Satellite):
         now = int(time.time())
         # call the daemon one
         res = super(Receiver, self).get_stats_struct()
-        res.update( {'name':self.name, 'type':'receiver',
-                     'direct_routing':self.direct_routing} )
-        metrics = res['metrics']      
+        res.update({'name': self.name, 'type': 'receiver',
+                    'direct_routing': self.direct_routing})
+        metrics = res['metrics']
         # metrics specific
-        metrics.append( 'receiver.%s.external-commands.queue %d %d' % (self.name, len(self.external_commands), now) )
-        
+        metrics.append('receiver.%s.external-commands.queue %d %d' % (
+            self.name, len(self.external_commands), now))
+
         return res
-    

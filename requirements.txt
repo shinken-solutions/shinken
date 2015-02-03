@@ -2,6 +2,6 @@ python >= 2.6
 CherryPy
 pycurl
 importlib
-mock # only used for livestatus test
+mock  # only used for livestatus test
 unittest2
 pbr

@@ -35,6 +35,18 @@ Ensuring stability is a top priority. Whenever a piece of code is edit, test sho
 
 Please try to stick to that when contributing to Shinken. We will be happy to merge your work.
 
+Best Practices
+===============
+
+.. note:: This was move from the about section. Should be reworked
+
+  * "value first priority"
+  * Major changes are handled in github forks by each developer
+  * Very open to user submitted patches
+  * Comprehensive automated QA to enable a fast release cycle without sacrificing stability
+  * Tagging experimental unfinished features in the documentation
+  * Release soon and release often mentality
+
 How is Shinken's code organized 
 ================================
 

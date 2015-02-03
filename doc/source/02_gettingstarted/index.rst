@@ -15,7 +15,6 @@ Getting Started
    :maxdepth: 2
 
    beginners
-   quickstart
    installations/index
    upgrading-shinken
 

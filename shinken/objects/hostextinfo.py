@@ -48,7 +48,9 @@ class HostExtInfo(Item):
     # *required: is required in conf
     # *default: default value if no set in conf
     # *pythonize: function to call when transforming string to python object
-    # *fill_brok: if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    # *fill_brok: if set, send to broker.
+    #             there are two categories:
+    #                   full_status for initial and update status, check_result for check results
     # *no_slots: do not take this property for __slots__
     #  Only for the initial call
     # conf_send_preparation: if set, will pass the property to this function. It's used to "flatten"
@@ -137,7 +139,12 @@ class HostsExtInfo(Items):
                 self.merge_extinfo(h, ei)
 
     def merge_extinfo(self, host, extinfo):
-        properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt', 'vrml_image', 'statusmap_image']
+        properties = ['notes',
+                      'notes_url',
+                      'icon_image',
+                      'icon_image_alt',
+                      'vrml_image',
+                      'statusmap_image']
         # host properties have precedence over hostextinfo properties
         for p in properties:
             if getattr(host, p) == '' and getattr(extinfo, p) != '':

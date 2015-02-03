@@ -228,7 +228,7 @@ class build_config(Command):
             # Read the template file
             f = open(templatefile)
             buf = f.read()
-            f.close
+            f.close()
             # substitute
             buf = buf.replace("$ETC$", self.etc_path)
             buf = buf.replace("$VAR$", self.var_path)

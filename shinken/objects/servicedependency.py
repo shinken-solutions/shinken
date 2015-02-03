@@ -61,7 +61,10 @@ class Servicedependency(Item):
     # Give a nice name output, for debugging purpose
     # (Yes, debugging CAN happen...)
     def get_name(self):
-        return getattr(self, 'dependent_host_name', '') + '/' + getattr(self, 'dependent_service_description', '') + '..' + getattr(self, 'host_name', '') + '/' + getattr(self, 'service_description', '')
+        return getattr(self, 'dependent_host_name', '') + '/'\
+            + getattr(self, 'dependent_service_description', '') \
+            + '..' + getattr(self, 'host_name', '') + '/' \
+            + getattr(self, 'service_description', '')
 
 
 class Servicedependencies(Items):
@@ -72,7 +75,8 @@ class Servicedependencies(Items):
             del self[id]
 
     # Add a simple service dep from another (dep -> par)
-    def add_service_dependency(self, dep_host_name, dep_service_description, par_host_name, par_service_description):
+    def add_service_dependency(self, dep_host_name, dep_service_description,
+                               par_host_name, par_service_description):
         # We create a "standard" service_dep
         prop = {
             'dependent_host_name':           dep_host_name,
@@ -85,7 +89,8 @@ class Servicedependencies(Items):
         sd = Servicedependency(prop)
         self.add_item(sd)
 
-    # If we have explode_hostgroup parameter we have to create a service dependency for each host of the hostgroup
+    # If we have explode_hostgroup parameter we have to create a
+    # service dependency for each host of the hostgroup
     def explode_hostgroup(self, sd, hostgroups):
         # We will create a service dependency for each host part of the host group
 
@@ -141,7 +146,8 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an" \
+                              " unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     hnames.extend([m.strip() for m in hg.members])
@@ -168,7 +174,8 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an " \
+                              "unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     dep_hnames.extend([m.strip() for m in hg.members])
@@ -249,8 +256,10 @@ class Servicedependencies(Items):
             sdval = sd.service_description
             if dsc is not None and sdval is not None:
                 dp = getattr(sd, 'dependency_period', None)
-                dsc.add_service_act_dependency(sdval, sd.notification_failure_criteria, dp, sd.inherits_parent)
-                dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria, dp, sd.inherits_parent)
+                dsc.add_service_act_dependency(sdval, sd.notification_failure_criteria,
+                                               dp, sd.inherits_parent)
+                dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria,
+                                               dp, sd.inherits_parent)
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):

@@ -10,7 +10,7 @@ Welcome to Shinken's documentation!
 .. toctree::
     :maxdepth: 2
 
-    01_about/index
+    01_introduction/index
     02_gettingstarted/index
     03_configuration/index
     04_runningshinken/index
