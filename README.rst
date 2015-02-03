@@ -118,6 +118,22 @@ __ https://github.com/naparuba/shinken/issues/
 __ https://gist.github.com/
 
 
+Install Shinken as python lib
+=============================
+
+In  avirtualenv ::
+
+  virtualenv env
+  source env/bin/activate
+  python setup.py install_lib
+  python -c 'from shinken.bin import VERSION; print(VERSION)'
+
+Or directly on your system::
+
+  sudo python setup.py install_lib
+  python -c 'from shinken.bin import VERSION; print(VERSION)'
+
+
 Get Shinken dev environment
 ===========================
 
@@ -125,9 +141,13 @@ Get Shinken dev environment
 To setup Shinken dev environment::
 
   virtualenv env
-  . env/bin/activate
+  source env/bin/activate
   python setup.py develop
   python setup.py install_data
+
+If you want to use init scripts in your virtualenv you have to REsource ``activate``::
+
+  source env/bin/activate
 
 
 Folders
@@ -143,6 +163,9 @@ env/var/run/shinken: Pid files folder
 
 Launch daemons
 --------------
+
+With binaries
+~~~~~~~~~~~~~
 
 Arbiter::
 
@@ -167,3 +190,31 @@ Reactionner::
 Receiver::
 
   shinken-receiver -c env/etc/shinken/daemons/receiverd.ini
+
+
+With init scripts
+~~~~~~~~~~~~~~~~~
+
+Arbiter::
+
+  env/etc/init.d/shinken-arbiter start
+
+Broker::
+
+  env/etc/init.d/shinken-broker start
+
+Scheduler::
+
+  env/etc/init.d/shinken-scheduler start
+
+Poller::
+
+  env/etc/init.d/shinken-poller start
+
+Reactionner::
+
+  env/etc/init.d/shinken-reactionner start
+
+Receiver::
+
+  env/etc/init.d/shinken-receiver start
