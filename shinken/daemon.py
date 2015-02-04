@@ -696,7 +696,7 @@ class Daemon(object):
         self.http_daemon = HTTPDaemon(self.host, self.port, http_backend,
                                       use_ssl, ca_cert, ssl_key,
                                       ssl_cert, ssl_conf.hard_ssl_name_check,
-                                      self.daemon_thread_pool_size)
+                                      self.daemon_thread_pool_size, self)
         # TODO: fix this "hack" :
         shinken.http_daemon.daemon_inst = self.http_daemon
 

@@ -183,8 +183,10 @@ class WSGIREFAdapter (bottle.ServerAdapter):
 
 class WSGIREFBackend(object):
     def __init__(self, host, port, use_ssl, ca_cert, ssl_key,
-                 ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+                 ssl_cert, hard_ssl_name_check, daemon_thread_pool_size,
+                 satellite_daemon):
         self.daemon_thread_pool_size = daemon_thread_pool_size
+        self.satellite_daemon = satellite_daemon
         try:
             self.srv = bottle.run(host=host, port=port,
                                   server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl,
@@ -233,11 +235,11 @@ class WSGIREFBackend(object):
         # Keep a list of our running threads
         threads = []
         logger.info('Using a %d http pool size', nb_threads)
-        while True:
+        while not self.satellite_daemon.interrupted:
             # We must not run too much threads, so we will loop until
             # we got at least one free slot available
             free_slots = 0
-            while free_slots <= 0:
+            while free_slots <= 0 and not self.satellite_daemon.interrupted:
                 to_del = [t for t in threads if not t.is_alive()]
                 for t in to_del:
                     t.join()
@@ -262,6 +264,8 @@ class WSGIREFBackend(object):
                     t.start()
                     threads.append(t)
 
+        for t in threads:
+            t.join()
 
     def handle_one_request_thread(self, sock):
         self.srv.handle_request()
@@ -270,7 +274,8 @@ class WSGIREFBackend(object):
 
 class HTTPDaemon(object):
         def __init__(self, host, port, http_backend, use_ssl, ca_cert,
-                     ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
+                     ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size,
+                     satellite_daemon):
             self.port = port
             self.host = host
             self.srv = None
@@ -294,14 +299,18 @@ class HTTPDaemon(object):
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = \
                 lambda x: x.client_address[0]
 
+            self.lock = threading.RLock()
+            self.satellite_daemon = satellite_daemon
+
             if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
                 self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
                                            ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
             else:
                 self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
-                                          ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+                                          ssl_cert, hard_ssl_name_check,
+                                          daemon_thread_pool_size, satellite_daemon)
 
-            self.lock = threading.RLock()
+
 
 
         # Get the server socket but not if disabled or closed
