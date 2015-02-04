@@ -99,16 +99,6 @@ class Command(Item):
     def __str__(self):
         return str(self.__dict__)
 
-    # Get a brok with initial status
-    def get_initial_status_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-        data = {'id': self.id}
-
-        self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_' + my_type + '_status', data)
-        return b
-
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties

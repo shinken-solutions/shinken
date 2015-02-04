@@ -771,15 +771,6 @@ class Timeperiod(Item):
                 elif entry.has_default:
                     data[prop] = entry.default
 
-    # Get a brok with initial status
-    def get_initial_status_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-        data = {'id': self.id}
-
-        self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_' + my_type + '_status', data)
-        return b
 
 
 class Timeperiods(Items):
