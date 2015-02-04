@@ -57,7 +57,12 @@ except ImportError:
     # or parent directory to support running without installation.
     # Submodules will then be loaded from there, too.
     import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    imp.load_module('shinken',
+                    *imp.find_module('shinken',
+                                     [os.path.realpath("."),
+                                      os.path.realpath(".."),
+                                      os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])),
+                                                   "..")]))
     import shinken
     # Ok we should add the shinken root directory to our sys.path so our sons
     # will be able to use the shinken import without problems
@@ -96,10 +101,12 @@ def main():
                       help="Dump an analyse statistics file, for support")
     parser.add_option("-m", "--migrate",
                       dest="migrate",
-                      help="Migrate the raw configuration read from the arbiter to another module. --> VERY EXPERIMENTAL!")
+                      help="Migrate the raw configuration read from the arbiter to another "
+                           "module. --> VERY EXPERIMENTAL!")
     parser.add_option("-n", "--name",
                       dest="arb_name",
-                      help="Give the arbiter name to use. Optionnal, will use the hostaddress if not provide to find it.")
+                      help="Give the arbiter name to use. Optionnal, will use the hostaddress "
+                           "if not provide to find it.")
 
     opts, args = parser.parse_args()
 

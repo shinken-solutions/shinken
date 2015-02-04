@@ -48,7 +48,12 @@ except ImportError:
     # or parent directory to support running without installation.
     # Submodules will then be loaded from there, too.
     import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    imp.load_module('shinken',
+                    *imp.find_module('shinken',
+                                     [os.path.realpath("."),
+                                      os.path.realpath(".."),
+                                      os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])),
+                                                   "..")]))
     from shinken.bin import VERSION
 
 from shinken.log import logger, cprint, nagFormatter
@@ -92,7 +97,7 @@ else:
 class ConfigParserWithComments(ConfigParser.RawConfigParser):
     def add_comment(self, section, comment):
         if not comment.startswith('#'):
-            comment = '#'+comment
+            comment = '#' + comment
         self.set(section, ';%s' % (comment,), None)
 
     def write(self, fp):
@@ -118,22 +123,24 @@ class ConfigParserWithComments(ConfigParser.RawConfigParser):
 # Commander is the main class for managing the CLI session and behavior
 class CLICommander(object):
 
-    ini_defaults = {'paths': {
-            'comment' : ''' # Set the paths according to your setup. Defaults follow
-# the Linux Standard Base''',
-            'values'  : [('etc', '/etc/shinken'), ('lib','/var/lib/shinken'),
-                         ('share', '%(lib)s/share'), ('cli','%(lib)s/cli'),
-                         ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
-                         ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
-                         ('libexec', '%(lib)s/libexec'),
-                         ]}
-                    ,
-                    'shinken.io':{
-            'comment': '''# Options for connection to the shinken.io website.
-# proxy: curl style, should look as http://user:password@server:3128
-# api_key: useful for publishing packages or earn XP after each install. Create an account at http://shinken.io and go to http://shinken.io/~
-''',
-            'values'  : [('proxy',''), ('api_key','')]}
+    ini_defaults = {'paths': {'comment': ''' # Set the paths according to your setup. '''
+                                         '''Defaults follow # the Linux Standard Base''',
+                              'values': [('etc', '/etc/shinken'), ('lib', '/var/lib/shinken'),
+                                         ('share', '%(lib)s/share'), ('cli', '%(lib)s/cli'),
+                                         ('packs', '%(etc)s/packs'), ('modules', '%(lib)s/modules'),
+                                         ('doc', '%(lib)s/doc'), ('inventory', '%(lib)s/inventory'),
+                                         ('libexec', '%(lib)s/libexec'),
+                                         ]
+                              },
+                    'shinken.io': {'comment': '''# Options for connection to the shinken.io '''
+                                              '''website.  # proxy: curl style, should look as '''
+                                              '''http://user:password@server:3128 # api_key: '''
+                                              '''useful for publishing packages or earn XP '''
+                                              '''after each install. Create an account at '''
+                                              '''http://shinken.io and go to '''
+                                              '''http://shinken.io/~''',
+                                   'values': [('proxy', ''), ('api_key', '')]
+                                   }
                     }
 
     def __init__(self, config, cfg, opts):
@@ -151,7 +158,7 @@ class CLICommander(object):
     def load_cli_mods(self, opts):
         # Main list of keywords for the first parameter
         self.keywords = {}
-        if not 'paths' in self.config or not 'cli' in self.config.get('paths', []):
+        if 'paths' not in self.config or 'cli' not in self.config.get('paths', []):
             # We are dign the init, so bail out
             if opts.do_init:
                 return
@@ -162,7 +169,8 @@ class CLICommander(object):
 
         cli_mods_dir = os.path.abspath(self.config['paths']['cli'])
         logger.debug("WILL LOAD THE CLI DIR %s" % cli_mods_dir)
-        cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir) if os.path.isdir(os.path.join(cli_mods_dir, d))]
+        cli_mods_dirs = [os.path.join(cli_mods_dir, d) for d in os.listdir(cli_mods_dir)
+                         if os.path.isdir(os.path.join(cli_mods_dir, d))]
 
         new_config_param = False
         for d in cli_mods_dirs:
@@ -188,9 +196,9 @@ class CLICommander(object):
 
                 # And now the configuration part
                 mconfig = getattr(m, 'configurations', {})
-                for (p,e) in mconfig.iteritems():
-                    #print p, e
-                    #print p in self.config
+                for (p, e) in mconfig.iteritems():
+                    # print p, e
+                    # print p in self.config
                     if p not in self.config:
                         self.ini_defaults[p] = e
                         new_config_param = True
@@ -199,13 +207,13 @@ class CLICommander(object):
                     # config
                     if p not in self.ini_defaults:
                         self.ini_defaults[p] = e
-                    #print "CONFIG P",p, self.config[p]
+                    # print "CONFIG P",p, self.config[p]
                     cvalues = self.config[p]
                     ini_defaults_values = self.ini_defaults[p]['values']
                     mvalues = e.get('values', [])
                     for (prop, v) in mvalues:
                         if prop not in cvalues:
-                            ini_defaults_values.append( (prop, v) )
+                            ini_defaults_values.append((prop, v))
                             new_config_param = True
 
         # update our ini with the new defaults
@@ -304,24 +312,26 @@ class CLICommander(object):
 
         cmd_opts, cmd_args = command_parser.parse_args(command_args)
         f = mod.get('f', None)
-        logger.debug("CALLING" + str(f) + "WITH" + str(cmd_args) + "and" + str(cmd_opts) + str(type(cmd_opts)) + str(dir(cmd_opts)))
+        logger.debug("CALLING" + str(f) + "WITH" + str(cmd_args) + "and" +
+                     str(cmd_opts) + str(type(cmd_opts)) + str(dir(cmd_opts)))
         f(*cmd_args, **cmd_opts.__dict__)
 
 
-    # Complete is a bit strange in readline. It will call it as it do not answser None, by increasing the
+    # Complete is a bit strange in readline.
+    # It will call it as it do not answser None, by increasing the
     # state int for each call. So don't loop forever!
     def complete(self, text, state):
-        #print "STATE?", text, state
+        # print "STATE?", text, state
 
         # New completion call
         if state == 0:
             self.completion_matches = []
 
-        #print "TRY TO COMPLETE", text
+        # print "TRY TO COMPLETE", text
         text = text.strip()
 
         args = shlex.split(text.encode('utf8', 'ignore'))
-        #print "ARGS", args
+        # print "ARGS", args
         if len(args) == 0:
             args = ['']
         keyword = args[0]
@@ -337,7 +347,7 @@ class CLICommander(object):
         except IndexError:
             response = None
 
-        #print "CALL", text, "state", state, response
+        # print "CALL", text, "state", state, response
         return response
 
 
@@ -370,7 +380,7 @@ def write_ini_file(cfg, CLI, opts):
                 if not cfg.has_option(s, k):
                     new_cfg.set(s, k, v)
                     modify = True
-                #print new_cfg.items(s)
+                # print new_cfg.items(s)
         if modify:
             print "Saving the new configuration file", opts.iniconfig
             with open(opts.iniconfig, 'wb') as configfile:
@@ -385,11 +395,14 @@ def main(custom_args=None):
     parser.add_option('--proxy', dest="proxy",
                       help="""Proxy URI. Like http://user:password@proxy-server:3128""")
     parser.add_option('-A', '--api-key',
-                      dest="api_key", help=("Your API key for uploading the package to the Shinken.io website. If you don't have one, please go to your account page"))
+                      dest="api_key", help=("Your API key for uploading the package to the "
+                                            "Shinken.io website. If you don't have one, "
+                                            "please go to your account page"))
     parser.add_option('-l', '--list', action='store_true',
                       dest="do_list", help=("List available commands"))
     parser.add_option('--init', action='store_true',
-                      dest="do_init", help=("Initialize/refill your shinken.ini file (default to %s)" % DEFAULT_CFG))
+                      dest="do_init", help=("Initialize/refill your shinken.ini file "
+                                            "(default to %s)" % DEFAULT_CFG))
     parser.add_option('-D', action='store_true',
                       dest="do_debug", help=("Enable the debug mode"))
     parser.add_option('-c', '--config', dest="iniconfig", default=DEFAULT_CFG,
@@ -425,7 +438,7 @@ def main(custom_args=None):
         cfg = ConfigParser.ConfigParser()
         cfg.read(opts.iniconfig)
         for section in cfg.sections():
-            if not section in CONFIG:
+            if section not in CONFIG:
                 CONFIG[section] = {}
             for (key, value) in cfg.items(section):
                 CONFIG[section][key] = value
@@ -446,7 +459,7 @@ def main(custom_args=None):
     def hack_sys_argv():
         command_values = []
         internal_values = []
-        #print "RARGS", parser.rargs
+        # print "RARGS", parser.rargs
         founded = False
         for arg in sys.argv:
             if arg in CLI.keywords:
@@ -506,7 +519,7 @@ def main(custom_args=None):
             d = all_from[mod_name]
             print '%s:' % mod_name
             d.sort(key=lambda e: e[0])
-            for (k,m) in d:
+            for (k, m) in d:
                 cprint('\t%s ' % k, 'green', end='')
                 cprint(': %s' % m['description'])
         sys.exit(0)
