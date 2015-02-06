@@ -275,15 +275,17 @@ class BaseModule(object):
     def _main(self):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
+        self.set_signal_handler()
 
         # TODO: fix this hack:
         if shinken.http_daemon.daemon_inst:
             shinken.http_daemon.daemon_inst.shutdown()
 
-        self.set_signal_handler()
         logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
-        # Will block here!
-        self.main()
+        try:
+            self.main()
+        except Exception as err:
+            logger.exception('%s: unexepected error: %s', self.get_name(), err)
         self.do_stop()
         logger.info("[%s]: exiting now..", self.name)
 
