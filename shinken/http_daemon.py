@@ -187,6 +187,7 @@ class WSGIREFBackend(object):
                  satellite_daemon):
         self.daemon_thread_pool_size = daemon_thread_pool_size
         self.satellite_daemon = satellite_daemon
+        self.max_requests_per_thread = 200  # could be TODO: use a config parameter
         try:
             self.srv = bottle.run(host=host, port=port,
                                   server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl,
@@ -257,7 +258,7 @@ class WSGIREFBackend(object):
             for sock in socks:
                 if sock in ins:
                     # GO!
-                    t = threading.Thread(None, target=self.handle_one_request_thread,
+                    t = threading.Thread(None, target=self.handle_request_thread,
                                          name='http-request', args=(sock,))
                     # We don't want to hang the master thread just because this one is still alive
                     t.daemon = True
@@ -267,9 +268,14 @@ class WSGIREFBackend(object):
         for t in threads:
             t.join()
 
-    def handle_one_request_thread(self, sock):
-        self.srv.handle_request()
-
+    def handle_request_thread(self, sock):
+        done = 0
+        while (
+            not self.satellite_daemon.interrupted
+            and done < self.max_requests_per_thread
+        ):
+            self.srv.handle_request()
+            done += 1
 
 
 class HTTPDaemon(object):
