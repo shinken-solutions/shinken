@@ -21,6 +21,7 @@
 #
 # This file is used to test object properties overriding.
 #
+from functools import partial
 
 import re
 from shinken_test import unittest, ShinkenTest
@@ -29,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 class TestPropertyOverride(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/shinken_exclude_services.cfg')
+        self.setup_with_file('etc/exclude_include_services.cfg')
 
     def test_exclude_services(self):
         hst1 = self.sched.hosts.find_by_name("test_host_01")
@@ -38,34 +39,35 @@ class TestPropertyOverride(ShinkenTest):
         self.assertEqual([], hst1.service_excludes)
         self.assertEqual(["srv-svc11", "srv-svc21", "proc proc1"], hst2.service_excludes)
 
+        Find = self.sched.services.find_srv_by_name_and_hostname
+
         # All services should exist for test_host_01
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc11")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc12")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc21")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "srv-svc22")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc1")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_01", "proc proc2")
-        self.assertIsNot(svc, None)
+        find = partial(Find, 'test_host_01')
+        for svc in (
+            'srv-svc11', 'srv-svc12',
+            'srv-svc21', 'srv-svc22',
+            'proc proc1', 'proc proc2',
+        ):
+            self.assertIsNotNone(find(svc))
 
         # Half the services only should exist for test_host_02
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc11")
-        self.assertIs(None, svc)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc12")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc21")
-        self.assertIs(None, svc)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "srv-svc22")
-        self.assertIsNot(svc, None)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc1")
-        self.assertIs(None, svc)
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_02", "proc proc2")
-        self.assertIsNot(svc, None)
+        find = partial(Find, 'test_host_02')
+        for svc in ('srv-svc12', 'srv-svc22', 'proc proc2', ):
+            self.assertIsNotNone(find(svc))
 
+        for svc in ('srv-svc11', 'srv-svc21', 'proc proc1', ):
+            self.assertIsNone(find(svc))
+
+
+    def test_service_includes(self):
+        Find = self.sched.services.find_srv_by_name_and_hostname
+        find = partial(Find, 'test_host_03')
+
+        for svc in ('srv-svc11', 'proc proc2', 'srv-svc22'):
+            self.assertIsNotNone(find(svc))
+
+        for svc in ('srv-svc12', 'srv-svc21', 'proc proc1'):
+            self.assertIsNone(find(svc))
 
 
 if __name__ == '__main__':

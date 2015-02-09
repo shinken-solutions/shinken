@@ -820,7 +820,7 @@ class Items(object):
 
     def remove_template(self, tpl):
         """
-        Removes and unindexes a template from the `templates` container.
+        Removes and unindex a template from the `templates` container.
 
         :param tpl: The template to remove
         """
@@ -843,9 +843,7 @@ class Items(object):
             pass
 
     def add_item(self, item, index=True):
-        """
-        Adds a template into the `items` container, and index it depending
-        on the `index` flag.
+        """Adds an item into our containers, and index it depending on the `index` flag.
 
         :param item:    The item to add
         :param index:   Flag indicating if the item should be indexed
@@ -855,24 +853,39 @@ class Items(object):
             item = self.index_item(item)
         self.items[item.id] = item
 
-    def index_item(self, item, name=None):
+    def remove_item(self, item):
+        """Removes (and un-index) an item from our containers.
+
+        :param item: The item to be removed.
+        :type item:  Item  # or subclass of
         """
-        Indexes a template by `name` into the `name_to_template` dictionnary.
+        self.unindex_item(item)
+        self.items.pop(item.id, None)
 
-        If an object holding the same name already exists in the index, the
-        conflict is managed by the `manage_conflict` method.
-
-        An optional `name` may be given to force the name under which the
-        object should be indexed.
+    def index_item(self, item):
+        """ Indexes an item into our `name_to_item` dictionary.
+        If an object holding the same item's name/key already exists in the index
+        then the conflict is managed by the `manage_conflict` method.
 
         :param item: The item to index
         :param name: The optional name to use to index the item
         """
+        # TODO: simplify this function (along with its opposite: unindex_item)
+        # it's too complex for what it does.
+        # more over:
+        # There are cases (in unindex_item) where some item is tried to be removed
+        # from name_to_item while it's not present in it !
+        # so either it wasn't added or it was added with another key or the item key changed
+        # between the index and unindex calls..
+        #  -> We should simply not have to call unindex_item() with a non-indexed item !
         name_property = getattr(self.__class__, "name_property", None)
-        objcls = self.inner_class.my_type
-        if name is None and name_property:
-            name = getattr(item, name_property, '')
+        # if there is no 'name_property' set(it is None), then the following getattr() will
+        # "hopefully" evaluates to '',
+        # unless some(thing|one) have setattr(item, None, 'with_something'),
+        # which would be rather odd :
+        name = getattr(item, name_property, '')
         if not name:
+            objcls = self.inner_class.my_type
             mesg = "a %s item has been defined without %s%s" % \
                    (objcls, name_property, self.get_source(item))
             item.configuration_errors.append(mesg)
@@ -881,37 +894,14 @@ class Items(object):
         self.name_to_item[name] = item
         return item
 
-    def remove_item(self, item):
-        """
-        Removes and unindexes an item from the `items` container.
-
-        :param item: The item to remove
-        """
-        name_property = getattr(self.__class__, "name_property", None)
-        if name_property:
-            self.unindex_item(item)
-        try:
-            del self.items[item.id]
-        except KeyError:
-            pass
-
-    def unindex_item(self, item, name=None):
-        """
-        Unindexes an item from the `items` container.
-
-        An optional `name` may be given to indicate the mame under which the
-        object was indexed.
-
+    def unindex_item(self, item):
+        """ Unindex an item from our name_to_item dict.
         :param item:    The item to unindex
-        :param name:    The name under which the item has been indexed.
         """
         name_property = getattr(self.__class__, "name_property", None)
-        if name is None and name_property:
-            name = getattr(item, name_property, '')
-        try:
-            del self.name_to_item[name]
-        except KeyError:
-            pass
+        if name_property is None:
+            return
+        self.name_to_item.pop(getattr(item, name_property, ''), None)
 
     def __iter__(self):
         return self.items.itervalues()
