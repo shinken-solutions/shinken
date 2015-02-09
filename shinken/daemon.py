@@ -35,6 +35,7 @@ import traceback
 import cStringIO
 import logging
 import inspect
+from Queue import Empty
 
 # Try to see if we are in an android device or not
 try:
@@ -1064,3 +1065,21 @@ class Daemon(object):
         logger.critical("If you think this is a bug, create a new ticket including"
                         "details mentioned in the README")
         logger.critical("Back trace of the error: %s", trace)
+
+    def get_objects_from_from_queues(self):
+        ''' Get objects from "from" queues and add them.
+        :return: True if we got some objects, False otherwise.
+        '''
+        had_some_objects = False
+        for queue in self.modules_manager.get_external_from_queues():
+            while True:
+                try:
+                    o = queue.get(block=False)
+                except (Empty, IOError, EOFError) as err:
+                    if not isinstance(err, Empty):
+                        logger.error("An external module queue got a problem '%s'", str(exp))
+                    break
+                else:
+                    had_some_objects = True
+                    self.add(o)
+        return had_some_objects
