@@ -1189,7 +1189,7 @@ class Config(Item):
 
         # print "Service groups"
         # link servicegroups members with services
-        self.servicegroups.linkify(self.services)
+        self.servicegroups.linkify(self.hosts, self.services)
 
         # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)

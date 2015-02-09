@@ -890,20 +890,25 @@ class Host(SchedulingItem):
 
     __str__ = __repr__
 
-    def is_excluded_for(self, svc):
+
+    def is_excluded_for(self, service):
         ''' Check whether this host should have the passed service be "excluded" or "not included".
 
         An host can define service_includes and/or service_excludes directive to either
         white-list-only or black-list some services from itself.
 
-        :type svc: shinken.objects.service.Service
+        :type service: shinken.objects.service.Service
         '''
+        return self.is_excluded_for_sdesc(service.service_description, service.is_tpl())
 
-        sdescr = svc.service_description
-        if not svc.is_tpl() and self.service_includes:
-            return sdescr not in self.service_includes
+    def is_excluded_for_sdesc(self, sdesc, is_tpl=False):
+        ''' Check whether this host should have the passed service *description*
+            be "excluded" or "not included".
+        '''
+        if not is_tpl and self.service_includes:
+            return sdesc not in self.service_includes
         if self.service_excludes:
-            return sdescr in self.service_excludes
+            return sdesc in self.service_excludes
         return False
 
 #####
