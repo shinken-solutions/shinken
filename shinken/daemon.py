@@ -998,12 +998,7 @@ class Daemon(object):
         cur_timeout = timeout
         # Arbiter do not already set our have_conf param
         while not self.new_conf and not self.interrupted:
-            elapsed, _, _ = self.handleRequests(cur_timeout)
-            if elapsed:
-                cur_timeout -= elapsed
-                if cur_timeout > 0:
-                    continue
-                cur_timeout = timeout
+            self.handleRequests(cur_timeout)
             sys.stdout.write(".")
             sys.stdout.flush()
 

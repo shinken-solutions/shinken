@@ -424,17 +424,17 @@ def alive_then_spare_then_deads(x, y):
     if x.alive and not y.alive:
         return -1
     if y.alive and not x.alive:
-        return 0
+        return 1
     # if not alive both, I really don't care...
     if not x.alive and not y.alive:
         return -1
     # Ok, both are alive... now spare after no spare
     if not x.spare:
         return -1
-    # x is a spare, so y must be before, even if
-    # y is a spare
+    # x is a spare, so y must be before
     if not y.spare:
         return 1
+    # if both x and y are spare, I really don't care...
     return 0
 
 

@@ -689,11 +689,6 @@ class Arbiter(Daemon):
                 self.setup_new_conf()
             if tcdiff:
                 self.last_master_speack += tcdiff
-            if elapsed:
-                self.last_master_speack = time.time()
-                timeout -= elapsed
-                if timeout > 0:
-                    continue
 
             timeout = 1.0
             sys.stdout.write(".")
@@ -764,6 +759,10 @@ class Arbiter(Daemon):
         e.load_arbiter(self)
         self.external_command = e
 
+        self.fifo = self.external_command.open()
+        if self.fifo is not None:
+            suppl_socks = [self.fifo]
+
         logger.debug("Run baby, run...")
         timeout = 1.0
 
@@ -777,12 +776,6 @@ class Arbiter(Daemon):
                 if ext_cmds:
                     for ext_cmd in ext_cmds:
                         self.external_commands.append(ext_cmd)
-                else:
-                    self.fifo = self.external_command.open()
-                    if self.fifo is not None:
-                        suppl_socks = [self.fifo]
-                    else:
-                        suppl_socks = None
                 elapsed += time.time() - now
 
             if elapsed or ins:
