@@ -54,73 +54,17 @@ from shinken_test import (
     unittest,
     datamgr,
 )
+from test_livestatus import LiveStatus_Template
 
 sys.setcheckinterval(10000)
 
 
-class TestConfig(ShinkenTest):
-    def contains_line(self, text, pattern):
-        regex = re.compile(pattern)
-        for line in text.splitlines():
-            if re.search(regex, line):
-                return True
-        return False
-
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            brok.prepare()
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.brokers['Default-Broker']['broks'] = {}
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                print "cleanup", db
-                os.remove(os.path.join("tmp/archives", db))
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
 
 
 @mock_livestatus_handle_request
-class TestConfigSmall(TestConfig):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
+class TestConfigSmall(LiveStatus_Template):
 
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
 
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
@@ -320,7 +264,7 @@ Columns: time type options state host_name"""
         print "Raw pyresponse", pyresponse
         print "pyresponse", len(pyresponse)
         print "expect", logs
-        self.assert_(len(pyresponse) == logs)
+        self.assertEqual(logs, len(pyresponse))
 
         self.livestatus_broker.db.log_db_do_archive()
         self.assert_(os.path.exists("tmp/archives"))
@@ -528,25 +472,9 @@ ResponseHeader: fixed16
 
 
 @mock_livestatus_handle_request
-class TestConfigBig(TestConfig):
+class TestConfigBig(LiveStatus_Template):
 
-    def setUp(self):
-        start_setUp = time.time()
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-
-        self.update_broker()
-        print "************* Overall Setup:", time.time() - start_setUp
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_000")
-        host.__class__.use_aggressive_host_checking = 1
+    _setup_config_file = 'etc/nagios_5r_100h_2000s.cfg'
 
     def test_a_long_history(self):
         #return
@@ -755,103 +683,14 @@ OutputFormat: json"""
 
 
 @mock_livestatus_handle_request
-class TestConfigNoLogstore(TestConfig):
+class TestConfigNoLogstore(LiveStatus_Template):
 
-    def setUp(self):
-        start_setUp = time.time()
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        print "************* Overall Setup:", time.time() - start_setUp
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
 
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
-
-    def init_livestatus(self):
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name': 'LiveStatus',
-            'module_type': 'livestatus',
-            'port': str(50000 + os.getpid()),
-            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
-            'host': '127.0.0.1',
-            'socket': 'live',
-            'name': 'test', #?
-            'database_file': self.livelogs,
-        })
-
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_sqlite',
-            'use_aggressive_sql': "0",
-            'database_file': self.livelogs,
-            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
-        })
-        ####################################
-        # !NOT! modconf.modules = [dbmodconf]
-        ####################################
-        self.livestatus_broker = LiveStatus_broker(modconf)
-        self.livestatus_broker.create_queues()
-
-        self.livestatus_broker.init()
-
-        #--- livestatus_broker.main
-        self.livestatus_broker.log = logger
-        # this seems to damage the logger so that the scheduler can't use it
-        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
-        self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
-        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
-        # We can now output some previouly silented debug ouput
-        self.livestatus_broker.do_load_modules()
-        for inst in self.livestatus_broker.modules_manager.instances:
-            if inst.properties["type"].startswith('logstore'):
-                f = getattr(inst, 'load', None)
-                if f and callable(f):
-                    f(self.livestatus_broker)  # !!! NOT self here !!!!
-                break
-        for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
-        del self.livestatus_broker.debug_output
-        self.livestatus_broker.add_compatibility_sqlite_module()
-        self.livestatus_broker.rg = LiveStatusRegenerator()
-        self.livestatus_broker.datamgr = datamgr
-        datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.query_cache = LiveStatusQueryCache()
-        self.livestatus_broker.query_cache.disable()
-        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
-        #--- livestatus_broker.main
-
-        #--- livestatus_broker.do_main
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.db.open()
-        #--- livestatus_broker.do_main
-
-        #--- livestatus_broker.manage_lql_thread
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-        #--- livestatus_broker.manage_lql_thread
+    # nb:
+    # there was an def init_livestatus() previously where the livestatus modconf
+    # had not its modules set to dbmodconf ; see regular init_livestatus for more infos.
+    #
 
     def test_has_implicit_module(self):
         self.assert_(self.livestatus_broker.modules_manager.instances[0].properties['type'] == 'logstore_sqlite')
@@ -860,7 +699,5 @@ class TestConfigNoLogstore(TestConfig):
 
 
 if __name__ == '__main__':
-    #import cProfile
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )

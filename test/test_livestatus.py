@@ -25,20 +25,25 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_test import *
+
 import os
+import sys
 import re
-import subprocess
 import shutil
 import time
 import random
 import copy
+from shinken.objects.host import Host
 
+from shinken_test import ShinkenTest, unittest
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
 from shinken.comment import Comment
 from shinken.util import from_bool_to_int
+from shinken.schedulerlink import SchedulerLink
+from shinken.reactionnerlink import ReactionnerLink
+from shinken.brokerlink import BrokerLink
+from shinken.pollerlink import PollerLink
 
 
 from mock_livestatus import mock_livestatus_handle_request
@@ -46,8 +51,51 @@ from mock_livestatus import mock_livestatus_handle_request
 
 sys.setcheckinterval(10000)
 
+
 @mock_livestatus_handle_request
-class TestConfig(ShinkenTest):
+class LiveStatus_Template(ShinkenTest):
+    ''' This template class is used by all livestatus tests !!
+    '''
+
+    def setUp(self, dbmodconf=None, raise_on_bad_config=None):
+        self.setup_with_file(self._setup_config_file, raise_on_bad_config=raise_on_bad_config)
+        Comment.id = 1
+        if not hasattr(self, 'testid'):
+            self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.init_livestatus(dbmodconf=dbmodconf)
+        print "Cleaning old broks?"
+        self.sched.conf.skip_initial_broks = False
+        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.fill_initial_broks('Default-Broker')
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        # this is actually required for some tests to pass..
+        Host.use_aggressive_host_checking = 1
+
+    def tearDown(self):
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists(self.livestatus_broker.pnp_path):
+            shutil.rmtree(self.livestatus_broker.pnp_path)
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        #self.livestatus_broker = None
+
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
         for line in text.splitlines():
@@ -55,20 +103,12 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-        if self.nagios_installed() and hasattr(self, 'nagios_started'):
-            self.nagios_loop(1, reflist)
-
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
         ids = self.sched.brokers['Default-Broker']['broks'].keys()
         ids.sort()
         for brok_id in ids:
             brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             brok.prepare()
@@ -124,196 +164,12 @@ class TestConfig(ShinkenTest):
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-    def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
-        return False
-        raise
-        if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
-            self.nagios_path = path
-            self.livestatus_path = livestatus
-            return True
-        else:
-            return False
-
-    # shinkenize_nagios_config('nagios_1r_1h_1s')
-    # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects
-    def unshinkenize_config(self, configname):
-        new_configname = configname + '_' + str(os.getpid())
-        config = open('etc/nagios_' + configname + '.cfg')
-        text = config.readlines()
-        config.close()
-
-        newconfig = open('etc/nagios_' + new_configname + '.cfg', 'w')
-        for line in text:
-            if re.search('^resource_file=', line):
-                newconfig.write("resource_file=etc/resource.cfg\n")
-            elif re.search('shinken\-specific\.cfg', line):
-                pass
-            elif re.search('enable_problem_impacts_states_change', line):
-                pass
-            elif re.search('cfg_dir=', line):
-                newconfig.write(re.sub(configname, new_configname, line))
-            elif re.search('cfg_file=', line):
-                newconfig.write(re.sub(configname, new_configname, line))
-            elif re.search('execute_host_checks=', line):
-                newconfig.write("execute_host_checks=0\n")
-            elif re.search('execute_service_checks=', line):
-                newconfig.write("execute_service_checks=0\n")
-            elif re.search('^debug_level=', line):
-                newconfig.write("debug_level=0\n")
-            elif re.search('^debug_verbosity=', line):
-                newconfig.write("debug_verbosity=0\n")
-            elif re.search('^status_update_interval=', line):
-                newconfig.write("status_update_interval=30\n")
-            elif re.search('^command_file=', line):
-                newconfig.write("command_file=var/nagios.cmd\n")
-            elif re.search('^command_check_interval=', line):
-                newconfig.write("command_check_interval=1s\n")
-            else:
-                newconfig.write(line)
-        newconfig.write('broker_module=/usr/local/nagios/lib/mk-livestatus/livestatus.o var/live' + "\n")
-        newconfig.close()
-        for dirfile in os.walk('etc/' + configname):
-            dirpath, dirlist, filelist = dirfile
-            newdirpath = re.sub(configname, new_configname, dirpath)
-            os.mkdir(newdirpath)
-            for file in [f for f in filelist if re.search('\.cfg$', f)]:
-                config = open(dirpath + '/' + file)
-                text = config.readlines()
-                config.close()
-                newconfig = open(newdirpath + '/' + file, 'w')
-                for line in text:
-                    if re.search('^\s*criticity', line):
-                        pass
-                    elif re.search('^\s*business_impact', line):
-                        pass
-                    elif re.search('enable_problem_impacts_states_change', line):
-                        pass
-                    else:
-                        newconfig.write(line)
-                newconfig.close()
-        return new_configname
-
-    def start_nagios(self, config):
-        if os.path.exists('var/spool/checkresults'):
-            # Cleanup leftover checkresults
-            shutil.rmtree('var/spool/checkresults')
-        for dir in ['tmp', 'var/tmp', 'var/spool', 'var/spool/checkresults', 'var/archives']:
-            if not os.path.exists(dir):
-                os.mkdir(dir)
-        self.nagios_config = self.unshinkenize_config(config)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.nagios_proc = subprocess.Popen([self.nagios_path, 'etc/nagios_' + self.nagios_config + '.cfg'], close_fds=True)
-        self.nagios_started = time.time()
-        time.sleep(2)
-
-    def stop_nagios(self):
-        if self.nagios_installed():
-            print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            time.sleep(5)
-            if hasattr(self, 'nagios_proc'):
-                attempt = 1
-                while self.nagios_proc.poll() is None and attempt < 4:
-                    self.nagios_proc.terminate()
-                    attempt += 1
-                    time.sleep(1)
-                if self.nagios_proc.poll() is None:
-                    self.nagios_proc.kill()
-                if os.path.exists('etc/' + self.nagios_config):
-                    shutil.rmtree('etc/' + self.nagios_config)
-                if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
-                    os.remove('etc/nagios_' + self.nagios_config + '.cfg')
-
-    def ask_nagios(self, request):
-        if time.time() - self.nagios_started < 2:
-            time.sleep(1)
-        if not request.endswith("\n"):
-            request = request + "\n"
-        unixcat = subprocess.Popen([os.path.dirname(self.nagios_path) + '/' + 'unixcat', 'var/live'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        tic = time.clock()
-        out, err = unixcat.communicate(request)
-        tac = time.clock()
-        print "mklivestatus duration %f" % (tac - tic)
-        attempt = 1
-        while unixcat.poll() is None and attempt < 4:
-            unixcat.terminate()
-            attempt += 1
-            time.sleep(1)
-        if unixcat.poll() is None:
-            unixcat.kill()
-        print "unixcat says", out
-        return out
-
-    def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        now = time.time()
-        buffer = open('var/pipebuffer', 'w')
-        for ref in reflist:
-            (obj, exit_status, output) = ref
-            if obj.my_type == 'service':
-                cmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (now, obj.host_name, obj.service_description, exit_status, output)
-                print cmd
-                buffer.write(cmd)
-            else:
-                cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (now, obj.host_name, exit_status, output)
-                buffer.write(cmd)
-        buffer.close()
-        print "open pipe", self.conf.command_file
-        fifo = open('var/nagios.cmd', 'w')
-        cmd = "[%lu] PROCESS_FILE;%s;0\n" % (now, 'var/pipebuffer')
-        fifo.write(cmd)
-        fifo.flush()
-        fifo.close()
-        time.sleep(5)
-
-    def nagios_extcmd(self, cmd):
-        fifo = open('var/nagios.cmd', 'w')
-        fifo.write(cmd)
-        fifo.flush()
-        fifo.close()
-        time.sleep(5)
 
 
 @mock_livestatus_handle_request
-class TestConfigSmall(TestConfig):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
+class TestConfigSmall(LiveStatus_Template):
 
-    def tearDown(self):
-        self.stop_nagios()
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        #self.livestatus_broker = None
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
 
     def test_check_type(self):
         self.print_header()
@@ -366,8 +222,6 @@ OutputFormat: csv
         self.assert_(response == goodresponse)
 
     def test_childs(self):
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -386,11 +240,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
@@ -400,11 +250,6 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_nonsense(self):
         self.print_header()
@@ -502,8 +347,6 @@ ResponseHeader: off
         self.assert_(response == good_response)
 
     def test_servicesbyhostgroup(self):
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -522,11 +365,6 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         # Again, but without filter
         request = """GET servicesbyhostgroup
@@ -537,16 +375,9 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_hostsbygroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -566,16 +397,9 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_delegate_to_host(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -614,8 +438,6 @@ Filter: host_state != 0
 
     def test_status(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -634,12 +456,6 @@ Filter: host_state != 0
         request = 'GET hosts'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # todo 1 != 1.0000000000e+00
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # get only the host names and addresses
@@ -647,11 +463,6 @@ Filter: host_state != 0
         request = 'GET hosts\nColumns: name address groups\nColumnHeaders: on'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_1
@@ -659,14 +470,6 @@ Filter: host_state != 0
         request = 'GET contacts'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_1_______________\n%s\n%s\n' % (request, response)
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # There are some sick columns in the livestatus response like
-            # modified_attributes;modified_attributes_list
-            # These are not implemented in shinken-livestatus (never, i think)
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_2
@@ -674,11 +477,6 @@ Filter: host_state != 0
         request = 'GET contacts\nColumns: name alias'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_2_______________\n%s\n%s\n' % (request, response)
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_3
@@ -743,13 +541,6 @@ Filter: host_state != 0
         self.assert_(isinstance(pyresponse[0][1], list))
         self.assert_(isinstance(pyresponse[0][0][0], basestring))
         self.assert_(isinstance(pyresponse[0][1][0], basestring))
-
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO looks like a timing problem with nagios
-            #self.assert_(self.lines_equal(response, nagresponse))
 
     def test_modified_attributes(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -817,8 +608,6 @@ Filter: description = test_ok_0
 
     def test_thruk(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -910,23 +699,12 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO timing problem?
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET comments
 Columns: host_name source type author comment entry_time entry_type expire_time
 Filter: service_description ="""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET hosts
 Columns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output
@@ -940,13 +718,9 @@ ResponseHeader: fixed16"""
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_warning_00;%d;%d;0;0;%d;lausser;blablubsvc" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
-        if self.nagios_installed():
-            self.nagios_extcmd(cmd)
         cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;0;0;%d;lausser;blablubhost" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
-        if self.nagios_installed():
-            self.nagios_extcmd(cmd)
         self.update_broker()
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.update_broker()
@@ -960,14 +734,6 @@ Separators: 10 59 44 124"""
         print response
         good_response = "lausser;blablubhost;"
         self.assertEquals(good_response, response[:len(good_response)])
-        if self.nagios_installed():
-            #time.sleep(10)
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO the entry_times are different. find a way to round the numbers
-            # so that they are equal
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET comments
 Filter: service_description =
@@ -976,12 +742,6 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            time.sleep(10)
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET services
 Filter: has_been_checked = 1
@@ -1015,30 +775,14 @@ ResponseHeader: fixed16"""
         request = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO members_with_state
-            #self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         request = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -1066,8 +810,6 @@ ResponseHeader: fixed16"""
 
     def test_thruk_config(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -1428,8 +1170,6 @@ And: 2"""
 
     def test_thruk_tac_svc(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.update_broker()
 
         start = time.time()
@@ -1484,11 +1224,6 @@ Stats: max execution_time"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        # nagios comparison makes no sense, because the latencies/execution times will surely differ
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-        #    print nagresponse
-        #    self.assert_(self.lines_equal(response, nagresponse))
 
     def test_columns(self):
         self.print_header()
@@ -1777,8 +1512,6 @@ test_host_0/test_ok_0,test_host_0;test_router_0
 
     def test_limit(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         self.update_broker()
         #---------------------------------------------------------------
@@ -1800,11 +1533,6 @@ test_router_0
         # it must be test_host_0 because with Limit: the output is
         # alphabetically ordered
         self.assertEquals(response, good_response)
-        # TODO look whats wrong
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-        #    print nagresponse
-        #    self.assert_(self.lines_equal(response, nagresponse))
 
     def test_problem_impact_in_host_service(self):
         self.print_header()
@@ -2534,42 +2262,9 @@ Columns: description host_name display_name"""
 
 
 @mock_livestatus_handle_request
-class TestConfigBig(TestConfig):
-    def setUp(self):
-        start_setUp = time.time()
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
+class TestConfigBig(LiveStatus_Template):
 
-        self.update_broker()
-        print "************* Overall Setup:", time.time() - start_setUp
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_000")
-        host.__class__.use_aggressive_host_checking = 1
-
-    def tearDown(self):
-        self.stop_nagios()
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
+    _setup_config_file = 'etc/nagios_5r_100h_2000s.cfg'
 
     def test_negate(self):
         # test_host_005 is in hostgroup_01
@@ -2708,8 +2403,6 @@ OutputFormat: python
 
     def test_stats(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -2744,15 +2437,8 @@ Stats: state = 3"""
         print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assertEquals(response, '2000;1993;3;3;1\n')
 
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
-
     def test_statsgroupby(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -2794,15 +2480,9 @@ StatsGroupBy: state
         self.assert_(self.contains_line(response, '1;3'))
         self.assert_(self.contains_line(response, '2;3'))
         self.assert_(self.contains_line(response, '3;1'))
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_hostsbygroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -2821,15 +2501,9 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_servicesbyhostgroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -2908,10 +2582,6 @@ ResponseHeader: fixed16
         tac = time.clock()
         print "livestatus duration %f" % (tac - tic)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
         # Again, without Filter:
         request = """GET servicesbyhostgroup
@@ -2980,14 +2650,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_childs(self):
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -3006,11 +2670,6 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
@@ -3020,11 +2679,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+
 
     def test_thruk_servicegroup(self):
         self.print_header()
@@ -3062,8 +2717,6 @@ OutputFormat: csv
 
     def test_sorted_limit(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -3717,36 +3370,9 @@ Columns: description host_name display_name"""
 
 
 @mock_livestatus_handle_request
-class TestConfigComplex(TestConfig):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_problem_impact.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
+class TestConfigComplex(LiveStatus_Template):
 
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
-        host.__class__.use_aggressive_host_checking = 1
-
-    def tearDown(self):
-        self.stop_nagios()
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        self.livestatus_broker = None
+    _setup_config_file = 'etc/nagios_problem_impact.cfg'
 
     #  test_host_0  has parents test_router_0,test_router_1
     def test_thruk_parents(self):

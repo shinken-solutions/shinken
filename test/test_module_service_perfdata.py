@@ -34,6 +34,8 @@ from shinken.modules.service_perfdata_broker import get_instance
 class TestModSRVPErfdata(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
+    _setup_config_file = 'etc/nagios_1r_1h_1s.cfg'
+
     def test_service_perfdata(self):
         print self.conf.modules
         # get our modules

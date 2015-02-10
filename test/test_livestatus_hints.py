@@ -20,55 +20,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken_test import *
+
 import os
-import re
-import subprocess
-import shutil
+import sys
 import time
 import random
 import copy
 
 
+from shinken_test import unittest
+
+
 from mock_livestatus import mock_livestatus_handle_request
+from test_livestatus import LiveStatus_Template
 
 sys.setcheckinterval(10000)
 
 
-class PerfTest(ShinkenTest):
-
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.brokers['Default-Broker']['broks'] = {}
-
-
 @mock_livestatus_handle_request
-class TestConfigBig(PerfTest):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
-        # ...test_router_09
-        # ...test_host_0999
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
+class TestConfigBig(LiveStatus_Template):
 
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
+    _setup_config_file = 'etc/shinken_5r_100h_2000s.cfg'
+
+    def setUp(self):
+        super(TestConfigBig, self).setUp()
         self.adjust_object_prefixes()
 
     def adjust_object_prefixes(self):
@@ -481,23 +456,9 @@ Stats
 @unittest.skip('Too heavy ..')
 @mock_livestatus_handle_request
 class TestConfigCrazy(TestConfigBig):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_50r_5000h_30000s.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
 
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        self.adjust_object_prefixes()
+    _setup_config_file = 'etc/nagios_50r_5000h_30000s.cfg'
 
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
 
 

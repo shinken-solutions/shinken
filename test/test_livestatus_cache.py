@@ -8,13 +8,13 @@ import shutil
 
 
 from shinken_test import (
-    unittest, ShinkenTest, time, time_warp,
+    unittest, time, time_warp,
     original_time_time, original_time_sleep
 )
 
 
 from mock_livestatus import mock_livestatus_handle_request
-
+from test_livestatus import LiveStatus_Template
 
 
 def set_to_midnight(dt):
@@ -23,59 +23,9 @@ def set_to_midnight(dt):
 
 
 @mock_livestatus_handle_request
-class TestConfig(ShinkenTest):
-    def update_broker(self, dodeepcopy=False):
-        # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            brok.prepare()
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.brokers['Default-Broker']['broks'] = {}
+class TestConfigBig(LiveStatus_Template):
 
-
-@mock_livestatus_handle_request
-class TestConfigBig(TestConfig):
-    def setUp(self):
-        start_setUp = time.time()
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        self.livestatus_broker.query_cache.enabled = True
-        print "Cleaning old broks?"
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
-        self.update_broker()
-        print "************* Overall Setup:", time.time() - start_setUp
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_000")
-        host.__class__.use_aggressive_host_checking = 1
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        for arch in os.listdir('tmp/archives'):
-            os.remove('tmp/archives/' + arch)
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
+    _setup_config_file = 'etc/nagios_5r_100h_2000s.cfg'
 
     def test_stats(self):
         self.print_header()
@@ -349,18 +299,15 @@ OutputFormat: json"""
         print "elapsed3", elapsed3
         print "elapsed4", elapsed4
         not_sure = "This highly depends on the system load, you may relaunch this test and it would succeed."
-        self.assertLess(elapsed2, elapsed1, not_sure)
-        self.assertLess(elapsed3, elapsed1, not_sure)
-        self.assertLess(elapsed4, elapsed3, not_sure)
+        self.assertLess(elapsed2*0.75, elapsed1, not_sure)
+        self.assertLess(elapsed3*0.75, elapsed1, not_sure)
+        self.assertLess(elapsed4*0.75, elapsed3, not_sure)
 
 
 
 
 if __name__ == '__main__':
-    #import cProfile
+
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
 
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
-    #unittest.TextTestRunner(verbosity=2).run(allsuite)

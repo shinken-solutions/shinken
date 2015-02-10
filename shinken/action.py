@@ -218,7 +218,7 @@ class __Action(object):
         elif ('sh: -c: line 0: unexpected EOF while looking for matching'
               in self.stderrdata
               or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
-              or 'sh: Syntax error: Unterminated quoted string'
+              or 'Syntax error: Unterminated quoted string'
               in self.stderrdata):
             # Very, very ugly. But subprocess._handle_exitstatus does
             # not see a difference between a regular "exit 1" and a

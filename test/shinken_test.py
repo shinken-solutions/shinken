@@ -13,6 +13,7 @@ import os
 import string
 import re
 import random
+import socket
 
 if sys.version_info[:2] <= (2,6):
     import unittest2 as unittest
@@ -213,16 +214,39 @@ class Pluginconf(object):
 
 
 class ShinkenTest(unittest.TestCase):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    def setup_with_file(self, path, raise_on_bad_config=True):
+    _setup_config_file = None
+    _setup_raise_on_bad_config = True
+
+    @classmethod
+    def get_free_port(cls):
+        sock = socket.socket()
+        try:
+            sock.bind(('127.0.0.1', 0))
+            return sock.getsockname()[1]
+        finally:
+            sock.close()
+
+    def setUp(self, config_file=None):
+        if not hasattr(self, 'testid'):
+            self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.setup_with_file(config_file=config_file)
+
+    def setup_with_file(self, config_file=None, raise_on_bad_config=None):
+        if not config_file:
+            config_file = self._setup_config_file
+        if not config_file:
+            config_file = 'etc/nagios_1r_1h_1s.cfg'
+            print('Warning: using default config file: %r' % config_file)
+            #raise RuntimeError('Your subclass must define the _setup_config_file value to a configuration file.')
+        if raise_on_bad_config is None:
+            raise_on_bad_config = self._setup_raise_on_bad_config
         # i am arbiter-like
         self.broks = {}
         self.me = None
         self.log = logger
         self.log.load_obj(self)
-        self.config_files = [path]
+        self.config_files = [config_file]
         self.conf = Config()
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
@@ -469,25 +493,29 @@ class ShinkenTest(unittest.TestCase):
         self.modules_manager.load_and_init()
         self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
-    def init_livestatus(self, modconf=None):
+    def init_livestatus(self, modconf=None, dbmodconf=None):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
             modconf = Module({'module_name': 'LiveStatus',
                 'module_type': 'livestatus',
-                'port': str(50000 + os.getpid()),
+                'port':     str(self.get_free_port()),
                 'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
                 'host': '127.0.0.1',
-                'socket': 'live',
+                'socket': 'tmp/live.sock',
                 'name': 'test', #?
             })
+        self.modconf = modconf
 
-        dbmodconf = Module({'module_name': 'LogStore',
-            'module_type': 'logstore_sqlite',
-            'use_aggressive_sql': "0",
-            'database_file': self.livelogs,
-            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
-        })
+        if dbmodconf is None:
+            dbmodconf = Module({'module_name': 'LogStore',
+                'module_type': 'logstore_sqlite',
+                'use_aggressive_sql': "0",
+                'database_file': self.livelogs,
+                'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
+            })
+        self.dbmodconf = dbmodconf
+
         modconf.modules = [dbmodconf]
         LS = self.livestatus_broker = LiveStatus_broker(modconf)
         LS.create_queues()
@@ -524,7 +552,8 @@ class ShinkenTest(unittest.TestCase):
 
         #--- livestatus_broker.do_main
         LS.db.open()
-        LS.db.prepare_log_db_table()
+        if hasattr(LS.db, 'prepare_log_db_table'):
+            LS.db.prepare_log_db_table()
         #--- livestatus_broker.do_main
 
         self.livestatus_client = LiveStatusClientThread(None, None, LS)

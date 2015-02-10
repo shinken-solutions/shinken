@@ -25,60 +25,24 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_test import *
-import os
-import re
-import subprocess
-import shutil
-import time
-import random
-import copy
 
-from shinken.comment import Comment
+import sys
+import time
+
+
+from test_livestatus import LiveStatus_Template
+
 from mock_livestatus import mock_livestatus_handle_request
-from test_livestatus import TestConfig
+
+
 
 sys.setcheckinterval(10000)
 
 
 @mock_livestatus_handle_request
-class TestConfigAuth(TestConfig):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_livestatus_authuser.cfg')
-        Comment.id = 1
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
-        print "Cleaning old broks?"
-        self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
-        self.sched.fill_initial_broks('Default-Broker')
+class TestConfigAuth(LiveStatus_Template):
 
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("dbsrv1")
-        host.__class__.use_aggressive_host_checking = 1
-
-    def tearDown(self):
-        self.stop_nagios()
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
+    _setup_config_file = 'etc/nagios_livestatus_authuser.cfg'
 
     """
 dbsrv1  adm(adm1,adm2,adm3)
