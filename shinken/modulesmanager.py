@@ -105,9 +105,9 @@ class ModulesManager(object):
             "by adding its path to sys.path. This can be (very) bad in case "
             "of name conflicts within the files part of %s and others "
             "top-level python modules; I'll try to limit that.",
-                # by removing the mod_dir from sys.path after while.
+            # by removing the mod_dir from sys.path after while.
             mod_dir, mod_dir
-            )
+        )
         sys.path.insert(0, mod_dir)
         try:
             return importlib.import_module('module')
