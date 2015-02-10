@@ -58,12 +58,8 @@ from logging import ERROR
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
 
-global modules_dir
-modules_dir = "modules"
+modules_dir = os.environ.get('SHINKEN_MODULES_DIR', "modules")
 
-def define_modules_dir(val):
-    global modules_dir
-    modules_dir = val
 
 class __DUMMY:
     def add(self, obj):
