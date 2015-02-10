@@ -556,6 +556,17 @@ class Service(SchedulingItem):
     def unique_key(self):  # actually only used for (un)indexitem() via name_property..
         return (self.host_name, self.service_description)
 
+    @property
+    def display_name(self):
+        display_name = getattr(self, '_display_name', None)
+        if not display_name:
+            return self.service_description
+        return display_name
+
+    @display_name.setter
+    def display_name(self, display_name):
+        self._display_name = display_name
+
     # Give a nice name output
     def get_name(self):
         if hasattr(self, 'service_description'):
