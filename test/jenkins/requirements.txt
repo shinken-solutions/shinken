@@ -1,0 +1,2 @@
+# this is the requirements dedicated to Jenkins (or nose+coverage) tests !
+-r ../requirements.txt
