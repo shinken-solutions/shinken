@@ -42,7 +42,7 @@ try:
     import shinken.pyro_wrapper as pyro
 except ImportError:
     sys.exit("Shinken require the Python Pyro module. Please install it.")
-from shinken.arbiterlink import ArbiterLink
+from shinken.objects.arbiterlink import ArbiterLink
 Pyro = pyro.Pyro
 
 
@@ -223,12 +223,12 @@ class ShinkenAdmin(cmd.Cmd):
         '''
         from shinken.objects.config import Config
 
-        from shinken.arbiterlink import ArbiterLink
-        from shinken.schedulerlink import SchedulerLink
-        from shinken.pollerlink import PollerLink
-        from shinken.reactionnerlink import ReactionnerLink
-        from shinken.brokerlink import BrokerLink
-        from shinken.receiverlink import ReceiverLink
+        from shinken.objects.arbiterlink import ArbiterLink
+        from shinken.objects.schedulerlink import SchedulerLink
+        from shinken.objects.pollerlink import PollerLink
+        from shinken.objects.reactionnerlink import ReactionnerLink
+        from shinken.objects.brokerlink import BrokerLink
+        from shinken.objects.receiverlink import ReceiverLink
 
 
         if line == "help" or line == "":

@@ -39,7 +39,8 @@ except ImportError:
 from copy import copy
 
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp, PythonizeError
+from shinken.property import (StringProp, ListProp, BoolProp,
+                              IntegerProp, ToGuessProp, PythonizeError)
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq, is_complex_expr
 from shinken.acknowledge import Acknowledge
@@ -100,6 +101,18 @@ class Item(object):
                     val = self.running_properties[key].pythonize(params[key])
                 elif hasattr(self, 'old_properties') and key in self.old_properties:
                     val = self.properties[self.old_properties[key]].pythonize(params[key])
+                elif key.startswith('_'):  # custom macro, not need to detect something here
+                    _t = params[key]
+                    # If it's a string, directly use this
+                    if isinstance(_t, basestring):
+                        val = _t
+                    # aa list for a custom macro is not managed (conceptually invalid)
+                    # so take the first defined
+                    elif isinstance(_t, list) and len(_t) > 0:
+                        val = _t[0]
+                    # not a list of void? just put void string so
+                    else:
+                        val = ''
                 else:
                     warning = "Guessing the property %s type because it is not in %s object properties" % \
                               (key, cls.__name__)
@@ -112,12 +125,16 @@ class Item(object):
 
             # checks for attribute value special syntax (+ or _)
             # we can have '+param' or ['+template1' , 'template2']
-            if (isinstance(val, str) and len(val) >= 1 and val[0] == '+') :
+            if isinstance(val, str) and len(val) >= 1 and val[0] == '+':
                 err = "A + value for a single string is not handled"
                 self.configuration_errors.append(err)
                 continue
 
-            if (isinstance(val, list) and len(val) >= 1 and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
+            if (isinstance(val, list) and
+                    len(val) >= 1 and
+                    isinstance(val[0], unicode) and
+                    len(val[0]) >= 1 and
+                    val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 val[0] = val[0][1:]
@@ -296,7 +313,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         new_val = list(getattr(self, prop))
                         new_val.extend(value[1:])
                         value = new_val
-                    else: # If not, se should keep the + sign of need
+                    else:  # If not, se should keep the + sign of need
                         new_val = list(getattr(self, prop))
                         new_val.extend(value)
                         value = new_val
@@ -360,7 +377,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         value = self.customs[prop]
                     if self.has_plus(prop):
                         value.insert(0, self.get_plus_and_delete(prop))
-                        #value = self.get_plus_and_delete(prop) + ',' + value
+                        # value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
@@ -438,13 +455,13 @@ Like temporary attributes such as "imported_from", etc.. """
         r = {}
         properties = self.__class__.properties.keys()
         # Register is not by default in the properties
-        if not 'register' in properties:
+        if 'register' not in properties:
             properties.append('register')
 
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                #print prop, ":", v
+                # print prop, ":", v
                 r[prop] = v
         return r
 
@@ -496,14 +513,18 @@ Like temporary attributes such as "imported_from", etc.. """
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
-        if self.acknowledgement and self.acknowledgement.end_time != 0 and self.acknowledgement.end_time < time.time():
+        if (self.acknowledgement and
+                self.acknowledgement.end_time != 0 and
+                self.acknowledgement.end_time < time.time()):
             self.unacknowledge_problem()
 
     #  Delete the acknowledgement object and reset the flag
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            logger.debug("[item::%s] deleting acknowledge of %s", self.get_name(), self.get_dbg_name())
+            logger.debug("[item::%s] deleting acknowledge of %s",
+                         self.get_name(),
+                         self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -536,7 +557,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         if hasattr(cls, 'running_properties'):
             for prop, entry in cls.running_properties.items():
-            # Is this property need preparation for sending?
+                # Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
                     if f is not None:
@@ -572,67 +593,46 @@ Like temporary attributes such as "imported_from", etc.. """
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
             for prop, entry in cls.running_properties.items():
-                #if 'fill_brok' in cls.running_properties[prop]:
+                # if 'fill_brok' in cls.running_properties[prop]:
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
 
     # Get a brok with initial status
     def get_initial_status_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
         data = {'id': self.id}
-
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_' + my_type + '_status', data)
-        return b
+        return Brok('initial_' + self.my_type + '_status', data)
 
 
     # Get a brok with update item status
     def get_update_status_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-
         data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('update_' + my_type + '_status', data)
-        return b
-
+        return Brok('update_' + self.my_type + '_status', data)
 
     # Get a brok with check_result
     def get_check_result_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-
         data = {}
         self.fill_data_brok_from(data, 'check_result')
-        b = Brok(my_type + '_check_result', data)
-        return b
-
+        return Brok(self.my_type + '_check_result', data)
 
     # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-
         data = {}
         self.fill_data_brok_from(data, 'next_schedule')
-        b = Brok(my_type + '_next_schedule', data)
-        return b
-
+        return Brok(self.my_type + '_next_schedule', data)
 
     # A snapshot brok is alike a check_result, with also a
     # output from the snapshot command
     def get_snapshot_brok(self, snap_output, exit_status):
-        cls = self.__class__
-        my_type = cls.my_type
-        now = int(time.time())
-
-        data = {'snapshot_output':snap_output, 'snapshot_time':now, 'snapshot_exit_status':exit_status}
+        data = {
+            'snapshot_output':      snap_output,
+            'snapshot_time':        int(time.time()),
+            'snapshot_exit_status': exit_status,
+        }
         self.fill_data_brok_from(data, 'check_result')
-        b = Brok(my_type + '_snapshot', data)
-        return b
-        
+        return Brok(self.my_type + '_snapshot', data)
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -659,7 +659,8 @@ Like temporary attributes such as "imported_from", etc.. """
         if src:
             # Change on the fly the characters
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
-            t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
+            t = triggers.create_trigger(src,
+                                        'inner-trigger-' + self.__class__.my_type + str(self.id))
             if t:
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
@@ -670,7 +671,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
         self.triggers.extend([self.trigger_name])
-        #print "I am linking my triggers", self.get_full_name(), self.triggers
+        # print "I am linking my triggers", self.get_full_name(), self.triggers
         new_triggers = []
         for tname in self.triggers:
             if tname == '':
@@ -680,7 +681,10 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
                 new_triggers.append(t)
             else:
-                self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
+                self.configuration_errors.append('the %s %s does have a unknown trigger_name '
+                                                 '"%s"' % (self.__class__.my_type,
+                                                           self.get_full_name(),
+                                                           tname))
         self.triggers = new_triggers
 
     def dump(self):
@@ -696,6 +700,14 @@ Like temporary attributes such as "imported_from", etc.. """
             elif attr:
                 dmp[prop] = getattr(self, prop)
         return dmp
+
+    def _get_name(self):
+        if hasattr(self, 'get_name'):
+            return self.get_name()
+        name = getattr(self, 'name', None)
+        host_name = getattr(self, 'host_name', None)
+        return '%s(host_name=%s)' % (name or 'no-name', host_name or '')
+
 
 
 class Items(object):
@@ -808,7 +820,7 @@ class Items(object):
 
     def remove_template(self, tpl):
         """
-        Removes and unindexes a template from the `templates` container.
+        Removes and unindex a template from the `templates` container.
 
         :param tpl: The template to remove
         """
@@ -831,9 +843,7 @@ class Items(object):
             pass
 
     def add_item(self, item, index=True):
-        """
-        Adds a template into the `items` container, and index it depending
-        on the `index` flag.
+        """Adds an item into our containers, and index it depending on the `index` flag.
 
         :param item:    The item to add
         :param index:   Flag indicating if the item should be indexed
@@ -843,24 +853,39 @@ class Items(object):
             item = self.index_item(item)
         self.items[item.id] = item
 
-    def index_item(self, item, name=None):
+    def remove_item(self, item):
+        """Removes (and un-index) an item from our containers.
+
+        :param item: The item to be removed.
+        :type item:  Item  # or subclass of
         """
-        Indexes a template by `name` into the `name_to_template` dictionnary.
+        self.unindex_item(item)
+        self.items.pop(item.id, None)
 
-        If an object holding the same name already exists in the index, the
-        conflict is managed by the `manage_conflict` method.
-
-        An optional `name` may be given to force the name under which the
-        object should be indexed.
+    def index_item(self, item):
+        """ Indexes an item into our `name_to_item` dictionary.
+        If an object holding the same item's name/key already exists in the index
+        then the conflict is managed by the `manage_conflict` method.
 
         :param item: The item to index
         :param name: The optional name to use to index the item
         """
+        # TODO: simplify this function (along with its opposite: unindex_item)
+        # it's too complex for what it does.
+        # more over:
+        # There are cases (in unindex_item) where some item is tried to be removed
+        # from name_to_item while it's not present in it !
+        # so either it wasn't added or it was added with another key or the item key changed
+        # between the index and unindex calls..
+        #  -> We should simply not have to call unindex_item() with a non-indexed item !
         name_property = getattr(self.__class__, "name_property", None)
-        objcls = self.inner_class.my_type
-        if name is None and name_property:
-            name = getattr(item, name_property, '')
+        # if there is no 'name_property' set(it is None), then the following getattr() will
+        # "hopefully" evaluates to '',
+        # unless some(thing|one) have setattr(item, None, 'with_something'),
+        # which would be rather odd :
+        name = getattr(item, name_property, '')
         if not name:
+            objcls = self.inner_class.my_type
             mesg = "a %s item has been defined without %s%s" % \
                    (objcls, name_property, self.get_source(item))
             item.configuration_errors.append(mesg)
@@ -869,37 +894,14 @@ class Items(object):
         self.name_to_item[name] = item
         return item
 
-    def remove_item(self, item):
-        """
-        Removes and unindexes an item from the `items` container.
-
-        :param item: The item to remove
-        """
-        name_property = getattr(self.__class__, "name_property", None)
-        if name_property:
-            self.unindex_item(item)
-        try:
-            del self.items[item.id]
-        except KeyError:
-            pass
-
-    def unindex_item(self, item, name=None):
-        """
-        Unindexes an item from the `items` container.
-
-        An optional `name` may be given to indicate the mame under which the
-        object was indexed.
-
+    def unindex_item(self, item):
+        """ Unindex an item from our name_to_item dict.
         :param item:    The item to unindex
-        :param name:    The name under which the item has been indexed.
         """
         name_property = getattr(self.__class__, "name_property", None)
-        if name is None and name_property:
-            name = getattr(item, name_property, '')
-        try:
-            del self.name_to_item[name]
-        except KeyError:
-            pass
+        if name_property is None:
+            return
+        self.name_to_item.pop(getattr(item, name_property, ''), None)
 
     def __iter__(self):
         return self.items.itervalues()
@@ -980,14 +982,30 @@ class Items(object):
             all_tags.extend(self.get_all_tags(t))
         return list(set(all_tags))
 
+
     def linkify_item_templates(self, item):
         tpls = []
         tpl_names = item.get_templates()
 
         for name in tpl_names:
             t = self.find_tpl_by_name(name)
-            if t is not None:
-                tpls.append(t)
+            if t is None:
+                # TODO: Check if this should not be better to report as an error ?
+                self.configuration_warnings.append("%s %r use/inherit from an unknown template "
+                                                   "(%r) ! Imported from: "
+                                                   "%s" % (type(item).__name__,
+                                                           item._get_name(),
+                                                           name,
+                                                           item.imported_from))
+            else:
+                if t is item:
+                    self.configuration_errors.append(
+                        '%s %r use/inherits from itself ! Imported from: '
+                        '%s' % (type(item).__name__,
+                                item._get_name(),
+                                item.imported_from))
+                else:
+                    tpls.append(t)
         item.templates = tpls
 
     # We will link all templates, and create the template
@@ -1010,8 +1028,10 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.warning("[items] %s.%s is duplicated from %s", \
-                    i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source"))
+                logger.warning("[items] %s.%s is duplicated from %s",
+                               i.__class__.my_type,
+                               i.get_name(),
+                               getattr(i, 'imported_from', "unknown source"))
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -1040,7 +1060,9 @@ class Items(object):
         return r
 
     def remove_templates(self):
-        """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
+        """ Remove useless templates (& properties) of our items
+            otherwise we could get errors on config.is_correct()
+        """
         del self.templates
 
     def clean(self):
@@ -1098,7 +1120,8 @@ class Items(object):
                         # Else: Add in the errors tab.
                         # will be raised at is_correct
                         else:
-                            err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
+                            err = "the contact '%s' defined for '%s' is unknown" % (c_name,
+                                                                                    i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
@@ -1114,7 +1137,8 @@ class Items(object):
                     if es is not None:
                         new_escalations.append(es)
                     else:  # Escalation not find, not good!
-                        err = "the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
+                        err = "the escalation '%s' defined for '%s' is unknown" % (es_name,
+                                                                                   i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
 
@@ -1129,7 +1153,8 @@ class Items(object):
                     if rm is not None:
                         new_resultmodulations.append(rm)
                     else:
-                        err = "the result modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = ("the result modulation '%s' defined on the %s "
+                               "'%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name()))
                         i.configuration_warnings.append(err)
                         continue
                 i.resultmodulations = new_resultmodulations
@@ -1145,7 +1170,8 @@ class Items(object):
                     if rm is not None:
                         new_business_impact_modulations.append(rm)
                     else:
-                        err = "the business impact modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = ("the business impact modulation '%s' defined on the %s "
+                               "'%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name()))
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
@@ -1191,21 +1217,22 @@ class Items(object):
                 tp = timeperiods.find_by_name(tpname)
                 # If not found, it's an error
                 if tp is None:
-                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname)
+                    err = ("The %s of the %s '%s' named "
+                           "'%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname))
                     i.configuration_errors.append(err)
                     continue
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
-    def create_commandcall(self,prop, commands, command):
+    def create_commandcall(self, prop, commands, command):
         comandcall = dict(commands=commands, call=command)
         if hasattr(prop, 'enable_environment_macros'):
             comandcall['enable_environment_macros'] = prop.enable_environment_macros
 
         if hasattr(prop, 'poller_tag'):
-            comandcall['poller_tag']=prop.poller_tag
+            comandcall['poller_tag'] = prop.poller_tag
         elif hasattr(prop, 'reactionner_tag'):
-            comandcall['reactionner_tag']=prop.reactionner_tag
+            comandcall['reactionner_tag'] = prop.reactionner_tag
 
         return CommandCall(**comandcall)
 
@@ -1257,7 +1284,8 @@ class Items(object):
                 if cw is not None:
                     new_checkmodulations.append(cw)
                 else:
-                    err = "The checkmodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    err = ("The checkmodulations of the %s '%s' named "
+                           "'%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name))
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.checkmodulations = new_checkmodulations
@@ -1275,7 +1303,8 @@ class Items(object):
                 if cw is not None:
                     new_macromodulations.append(cw)
                 else:
-                    err = "The macromodulations of the %s '%s' named '%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name)
+                    err = ("The macromodulations of the %s '%s' named "
+                           "'%s' is unknown!" % (i.__class__.my_type, i.get_name(), cw_name))
                     i.configuration_errors.append(err)
             # Get the list, but first make elements uniq
             i.macromodulations = new_macromodulations
@@ -1300,23 +1329,23 @@ class Items(object):
             s.modules = new_modules
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
-        #print "\n"*10, "looking for expression", expr
+        # print "\n"*10, "looking for expression", expr
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        #print "\n"*10, "looking for expression", expr
-        if look_in=='hostgroups':
+        # print "\n"*10, "looking for expression", expr
+        if look_in == 'hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
-        else: # templates
+        else:  # templates
             f = ComplexExpressionFactory(look_in, hosts, hosts)
         expr_tree = f.eval_cor_pattern(expr)
 
-        #print "RES of ComplexExpressionFactory"
-        #print expr_tree
+        # print "RES of ComplexExpressionFactory"
+        # print expr_tree
 
-        #print "Try to resolve the Tree"
+        # print "Try to resolve the Tree"
         set_res = expr_tree.resolve_elements()
-        #print "R2d2 final is", set_res
+        # print "R2d2 final is", set_res
 
         # HOOK DBG
         return list(set_res)
@@ -1388,9 +1417,12 @@ class Items(object):
     def no_loop_in_parents(self, attr1, attr2):
         """ Find loop in dependencies.
         For now, used with the following attributes :
-        :(self, parents):                                      host dependencies from host object
-        :(host_name, dependent_host_name):                     host dependencies from hostdependencies object
-        :(service_description, dependent_service_description): service dependencies from servicedependencies object
+        :(self, parents):
+            host dependencies from host object
+        :(host_name, dependent_host_name):\
+            host dependencies from hostdependencies object
+        :(service_description, dependent_service_description):
+            service dependencies from servicedependencies object
         """
 
         # Ok, we say "from now, no loop :) "
@@ -1440,7 +1472,9 @@ class Items(object):
 
         # and raise errors about it
         for item in items_in_loops:
-            logger.error("The %s object '%s'  is part of a circular parent/child chain!", item.my_type, item.get_name())
+            logger.error("The %s object '%s'  is part of a circular parent/child chain!",
+                         item.my_type,
+                         item.get_name())
             r = False
 
         return r

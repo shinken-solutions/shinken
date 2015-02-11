@@ -1,4 +1,3 @@
-    #!/usr/bin/env python
 # Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -24,10 +23,13 @@ Test shinken.property
 """
 
 
+import __import_shinken
 
+import shinken
 from shinken.property import none_object
 
-from shinken_test import *
+from shinken_test import ShinkenTest, unittest
+
 
 
 class PropertyTests:

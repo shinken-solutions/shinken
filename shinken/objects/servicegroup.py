@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,10 +22,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
+
+from .itemgroup import Itemgroup, Itemgroups
+from .service import Service
 
 
 class Servicegroup(Itemgroup):
@@ -79,7 +80,8 @@ class Servicegroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            logger.error("[servicegroup::%s] got a loop in servicegroup definition", self.get_name())
+            logger.error("[servicegroup::%s] got a loop in servicegroup definition",
+                         self.get_name())
             if self.has('members'):
                 return self.members
             else:
@@ -105,14 +107,14 @@ class Servicegroups(Itemgroups):
     name_property = "servicegroup_name"  # is used for finding servicegroup
     inner_class = Servicegroup
 
-    def linkify(self, services):
-        self.linkify_sg_by_srv(services)
+    def linkify(self, hosts, services):
+        self.linkify_sg_by_srv(hosts, services)
 
     # We just search for each host the id of the host
     # and replace the name by the id
     # TODO: very slow for hight services, so search with host list,
     # not service one
-    def linkify_sg_by_srv(self, services):
+    def linkify_sg_by_srv(self, hosts, services):
         for sg in self:
             mbrs = sg.get_services()
             # The new member list, in id
@@ -131,7 +133,14 @@ class Servicegroups(Itemgroups):
                     if find is not None:
                         new_mbrs.append(find)
                     else:
-                        sg.add_string_unknown_member('%s,%s' % (host_name, service_desc))
+                        host = hosts.find_by_name(host_name)
+                        if not (host and host.is_excluded_for_sdesc(service_desc)):
+                            sg.add_string_unknown_member('%s,%s' % (host_name, service_desc))
+                        elif host:
+                            self.configuration_warnings.append(
+                                'servicegroup %r : %s is excluded from the services of the host %s'
+                                % (sg, service_desc, host_name)
+                            )
                 seek += 1
 
             # Make members uniq

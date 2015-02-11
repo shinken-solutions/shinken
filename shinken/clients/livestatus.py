@@ -25,7 +25,6 @@
 
 import socket
 import asyncore
-import time
 from log import logger
 
 
@@ -147,7 +146,7 @@ class Query(object):
         self.return_code = '500'
 
     def get(self):
-        #print "Someone ask my query", self.q
+        # print "Someone ask my query", self.q
         self.state = 'PICKUP'
         self.duration = time.time()
         return self.q
@@ -156,7 +155,7 @@ class Query(object):
         self.result = r
         self.state = 'DONE'
         self.duration = time.time() - self.duration
-        #print "Got a result", r
+        # print "Got a result", r
 
 
 class LSAsynConnection(asyncore.dispatcher):
@@ -183,7 +182,7 @@ class LSAsynConnection(asyncore.dispatcher):
         self.do_connect()
 
         # And our queries
-        #q = Query('GET hosts\nColumns name\n')
+        # q = Query('GET hosts\nColumns name\n')
         self.queries = []
         self.results = []
 
@@ -239,7 +238,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
     def handle_connect(self):
         pass
-        #print "In handle_connect"
+        # print "In handle_connect"
 
     def handle_close(self):
         logger.debug("Closing connection")
@@ -265,13 +264,13 @@ class LSAsynConnection(asyncore.dispatcher):
     # finished. Maybe it's just a SSL handshake continuation, if so
     # we continue it and wait for handshake finish
     def handle_read(self):
-        #print "Handle read"
+        # print "Handle read"
 
         q = self.current
         # get a read but no current query? Not normal!
 
         if not q:
-            #print "WARNING: got LS read while no current query in progress. I return"
+            # print "WARNING: got LS read while no current query in progress. I return"
             return
 
         try:
@@ -285,7 +284,7 @@ class LSAsynConnection(asyncore.dispatcher):
             if code == "200":
                 try:
                     d = eval(data)
-                    #print d
+                    # print d
                     q.put(d)
                 except Exception:
                     q.put(None)
@@ -304,12 +303,12 @@ class LSAsynConnection(asyncore.dispatcher):
     # Did we finished our job?
     def writable(self):
         b = (len(self.queries) != 0 and not self.current)
-        #print "Is writable?", b
+        # print "Is writable?", b
         return b
 
     def readable(self):
         b = self.current is not None
-        #print "Readable", b
+        # print "Readable", b
         return True
 
     # We can write to the socket. If we are in the ssl handshake phase
@@ -320,7 +319,7 @@ class LSAsynConnection(asyncore.dispatcher):
             logger.debug("Not writable, I bail out")
             return
 
-        #print "handle write"
+        # print "handle write"
         try:
             q = self.get_query()
             sent = self.send(q.get())
@@ -328,14 +327,14 @@ class LSAsynConnection(asyncore.dispatcher):
             logger.debug("Write fail: %s", str(exp))
             return
 
-        #print "Sent", sent, "data"
+        # print "Sent", sent, "data"
 
 
     # We are finished only if we got no pending queries and
     # no in progress query too
     def is_finished(self):
-        #print "State:", self.current, len(self.queries)
-        return self.current == None and len(self.queries) == 0
+        # print "State:", self.current, len(self.queries)
+        return self.current is None and len(self.queries) == 0
 
     # Will loop over the time until all returns are back
     def wait_returns(self):
@@ -353,7 +352,10 @@ class LSAsynConnection(asyncore.dispatcher):
             return None
 
         if not self.is_finished():
-            logger.debug("Try to launch a new query in a normal mode but the connection already got async queries in progress")
+            logger.debug(
+                "Try to launch a new query in a normal mode"
+                " but the connection already got async queries in progress"
+            )
             return None
 
         q = Query(query)
@@ -397,6 +399,7 @@ class LSConnectionPool(object):
                 r = q.result
                 logger.debug(str(r))
                 res.extend(r)
+            c.handle_close()
         return res
 
 
@@ -406,26 +409,26 @@ if __name__ == "__main__":
     t = time.time()
 
     q = Query('GET hosts\nColumns name\n')
-    #c.stack_query(q)
-    #q2 = Query('GET hosts\nColumns name\n')
-    #c.stack_query(q)
+    # c.stack_query(q)
+    # q2 = Query('GET hosts\nColumns name\n')
+    # c.stack_query(q)
 
-    #print "Start to wait"
-    #c.wait_returns()
-    #print "End to wait"
-    #print "Results", c.get_returns()
-    #while time.time() - t < 1:
+    # print "Start to wait"
+    # c.wait_returns()
+    # print "End to wait"
+    # print "Results", c.get_returns()
+    # while time.time() - t < 1:
     #    asyncore.poll()
 
 
-    #while time.time() - t < 1:
+    # while time.time() - t < 1:
     #    asyncore.poll()
-    #print c.launch_query('GET hosts\nColumns name')
-    #print c.__dict__
+    # print c.launch_query('GET hosts\nColumns name')
+    # print c.__dict__
 
-    #print "Launch raw query"
-    #r = c.launch_raw_query('GET hosts\nColumns name\n')
-    #print "Result", r
+    # print "Launch raw query"
+    # r = c.launch_raw_query('GET hosts\nColumns name\n')
+    # print "Result", r
 
     cp = LSConnectionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
     r = cp.launch_raw_query('GET hosts\nColumns name last_check\n')

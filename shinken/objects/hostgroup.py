@@ -42,7 +42,8 @@ class Hostgroup(Itemgroup):
         'notes':          StringProp(default='', fill_brok=['full_status']),
         'notes_url':      StringProp(default='', fill_brok=['full_status']),
         'action_url':     StringProp(default='', fill_brok=['full_status']),
-        'realm':          StringProp(default='', fill_brok=['full_status'], conf_send_preparation=get_obj_name),
+        'realm':          StringProp(default='', fill_brok=['full_status'],
+                                     conf_send_preparation=get_obj_name),
     })
 
     macros = {
@@ -172,13 +173,13 @@ class Hostgroups(Itemgroups):
                 if h is None:
                     continue
                 if h.realm is None or h.got_default_realm:  # default value not hasattr(h, 'realm'):
-                    logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)",  \
-                        hg.realm.get_name(), h.get_name(), hg.get_name())
+                    logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup "
+                                 "rule (%s)", hg.realm.get_name(), h.get_name(), hg.get_name())
                     h.realm = hg.realm
                 else:
                     if h.realm != hg.realm:
-                        logger.warning("[hostgroups] host %s it not in the same realm than it's hostgroup %s",  \
-                            h.get_name(), hg.get_name())
+                        logger.warning("[hostgroups] host %s it not in the same realm than it's "
+                                       "hostgroup %s", h.get_name(), hg.get_name())
 
     # Add a host string to a hostgroup member
     # if the host group do not exist, create it

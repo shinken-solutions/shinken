@@ -12,8 +12,7 @@ def _resolve_name(name, package, level):
         try:
             dot = package.rindex('.', 0, dot)
         except ValueError:
-            raise ValueError("attempted relative import beyond top-level "
-                              "package")
+            raise ValueError("attempted relative import beyond top-level package")
     return "%s.%s" % (package[:dot], name)
 
 

@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,10 +22,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
-from shinken.graph import Graph
+
+from .item import Item, Items
+from .service import Service
 
 
 class Servicedependency(Item):
@@ -61,7 +62,10 @@ class Servicedependency(Item):
     # Give a nice name output, for debugging purpose
     # (Yes, debugging CAN happen...)
     def get_name(self):
-        return getattr(self, 'dependent_host_name', '') + '/' + getattr(self, 'dependent_service_description', '') + '..' + getattr(self, 'host_name', '') + '/' + getattr(self, 'service_description', '')
+        return getattr(self, 'dependent_host_name', '') + '/'\
+            + getattr(self, 'dependent_service_description', '') \
+            + '..' + getattr(self, 'host_name', '') + '/' \
+            + getattr(self, 'service_description', '')
 
 
 class Servicedependencies(Items):
@@ -72,7 +76,8 @@ class Servicedependencies(Items):
             del self[id]
 
     # Add a simple service dep from another (dep -> par)
-    def add_service_dependency(self, dep_host_name, dep_service_description, par_host_name, par_service_description):
+    def add_service_dependency(self, dep_host_name, dep_service_description,
+                               par_host_name, par_service_description):
         # We create a "standard" service_dep
         prop = {
             'dependent_host_name':           dep_host_name,
@@ -85,7 +90,8 @@ class Servicedependencies(Items):
         sd = Servicedependency(prop)
         self.add_item(sd)
 
-    # If we have explode_hostgroup parameter we have to create a service dependency for each host of the hostgroup
+    # If we have explode_hostgroup parameter we have to create a
+    # service dependency for each host of the hostgroup
     def explode_hostgroup(self, sd, hostgroups):
         # We will create a service dependency for each host part of the host group
 
@@ -141,7 +147,8 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an" \
+                              " unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     hnames.extend([m.strip() for m in hg.members])
@@ -168,7 +175,8 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an " \
+                              "unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     dep_hnames.extend([m.strip() for m in hg.members])
@@ -206,6 +214,9 @@ class Servicedependencies(Items):
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
     def linkify_sd_by_s(self, hosts, services):
+        to_del = []
+        errors = self.configuration_errors
+        warns = self.configuration_warnings
         for sd in self:
             try:
                 s_name = sd.dependent_service_description
@@ -214,8 +225,15 @@ class Servicedependencies(Items):
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 if s is None:
-                    self.configuration_errors.append("Service %s not found for host %s"
-                                                     % (s_name, hst_name))
+                    host = hosts.find_by_name(hst_name)
+                    if not (host and host.is_excluded_for_sdesc(s_name)):
+                        errors.append("Service %s not found for host %s" % (s_name, hst_name))
+                    elif host:
+                        warns.append("Service %s is excluded from host %s ; "
+                                     "removing this servicedependency as it's unusuable."
+                                     % (s_name, hst_name))
+                    to_del.append(sd)
+                    continue
                 sd.dependent_service_description = s
 
                 s_name = sd.service_description
@@ -224,12 +242,23 @@ class Servicedependencies(Items):
                 # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 if s is None:
-                    self.configuration_errors.append("Service %s not found for host %s"
-                                                     % (s_name, hst_name))
+                    host = hosts.find_by_name(hst_name)
+                    if not (host and host.is_excluded_for_sdesc(s_name)):
+                        errors.append("Service %s not found for host %s" % (s_name, hst_name))
+                    elif host:
+                        warns.append("Service %s is excluded from host %s ; "
+                                     "removing this servicedependency as it's unusuable."
+                                     % (s_name, hst_name))
+                    to_del.append(sd)
+                    continue
                 sd.service_description = s
 
-            except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, exp)
+            except AttributeError as err:
+                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, err)
+                to_del.append(sd)
+
+        for sd in to_del:
+            self.remove_item(sd)
 
     # We just search for each srvdep the id of the srv
     # and replace the name by the id
@@ -249,8 +278,10 @@ class Servicedependencies(Items):
             sdval = sd.service_description
             if dsc is not None and sdval is not None:
                 dp = getattr(sd, 'dependency_period', None)
-                dsc.add_service_act_dependency(sdval, sd.notification_failure_criteria, dp, sd.inherits_parent)
-                dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria, dp, sd.inherits_parent)
+                dsc.add_service_act_dependency(sdval, sd.notification_failure_criteria,
+                                               dp, sd.inherits_parent)
+                dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria,
+                                               dp, sd.inherits_parent)
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):

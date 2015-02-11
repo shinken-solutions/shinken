@@ -214,6 +214,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('ca_cert', 'etc/certs/ca.pem'),
         ('server_cert', 'etc/certs/server.cert'),
         ('hard_ssl_name_check', False),
+        ('http_backend', 'auto'),
 
         ('human_timestamp_log', False),
 
@@ -580,6 +581,7 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('custom_views', []),
         ('service_overrides', []),
         ('service_excludes', []),
+        ('service_includes', []),
         ('business_rule_output_template', ''),
         ('business_rule_smart_notifications', False),
         ('business_rule_downtime_as_ack', False),

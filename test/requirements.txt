@@ -1,0 +1,10 @@
+# this is the requirements dedicated to tests.
+-r ../requirements.txt
+unittest2
+mock
+coveralls==0.5
+nose-cov==1.6
+coverage==3.7.1
+nose==1.3.4
+pylint==1.4.1
+pep8==1.5.7

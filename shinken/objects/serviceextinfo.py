@@ -47,7 +47,8 @@ class ServiceExtInfo(Item):
     # *required: is required in conf
     # *default: default value if no set in conf
     # *pythonize: function to call when transforming string to python object
-    # *fill_brok: if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    # *fill_brok: if set, send to broker. there are two categories:
+    #   full_status for initial and update status, check_result for check results
     # *no_slots: do not take this property for __slots__
     #  Only for the initial call
     # conf_send_preparation: if set, will pass the property to this function. It's used to "flatten"
@@ -124,7 +125,7 @@ class ServicesExtInfo(Items):
     # Merge extended host information into host
     def merge(self, services):
         for ei in self:
-            if hasattr(ei, 'register') and not getattr(ei, 'register') :
+            if hasattr(ei, 'register') and not getattr(ei, 'register'):
                 # We don't have to merge template
                 continue
             hosts_names = ei.get_name().split(",")

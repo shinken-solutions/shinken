@@ -71,7 +71,7 @@ def generate_default_shinken_file():
     # Read the template file
     f = open(templatefile)
     buf = f.read()
-    f.close
+    f.close()
     # substitute
     buf = buf.replace("$ETC$", default_paths['etc'])
     buf = buf.replace("$VAR$", default_paths['var'])
@@ -430,7 +430,7 @@ for o in not_allowed_options:
 required_pkgs = ['HTML']
 setup(
     name="Shinken",
-    version="2.2-RC1",
+    version="2.2",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",

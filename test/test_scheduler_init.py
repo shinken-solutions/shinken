@@ -34,12 +34,12 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.arbiterdaemon import Arbiter
 
 daemons_config = {
-    Shinken:      "etc/test_registered_funs/schedulerd.ini",
-    Arbiter:    ["etc/test_registered_funs/shinken.cfg"]
+    Shinken:      "etc/test_scheduler_init/schedulerd.ini",
+    Arbiter:    ["etc/test_scheduler_init/shinken.cfg"]
 }
 
 
-class testRegisteredFunctions(ShinkenTest):
+class testSchedulerInit(ShinkenTest):
     def setUp(self):
         time_hacker.set_real_time()
 
@@ -47,8 +47,7 @@ class testRegisteredFunctions(ShinkenTest):
         cls = Shinken
         return cls(daemons_config[cls], False, True, False, None, '')
 
-    def test_registered(self):
-        logger.info("Testing register funs")
+    def test_scheduler_init(self):
 
         shinken_log.local_log = None  # otherwise get some "trashs" logs..
         d = self.create_daemon()
@@ -58,6 +57,8 @@ class testRegisteredFunctions(ShinkenTest):
         d.http_backend = 'wsgiref'
         d.do_daemon_init_and_start(fake=True)
         d.load_modules_manager()
+
+        # Test registered function list
         d.http_daemon.register(d.interface)
         reg_list = d.http_daemon.registered_fun
         expected_list = ['get_external_commands', 'get_running_id', 'got_conf', 'have_conf',
@@ -65,18 +66,18 @@ class testRegisteredFunctions(ShinkenTest):
                          'run_external_commands', 'set_log_level', 'wait_new_conf', 'what_i_managed']
         for fun in expected_list:
             assert(fun in reg_list)
+
+        # Launch an arbiter so that the scheduler get a conf and init
         subprocess.Popen(["../bin/shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
+
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)
         if not d.new_conf:
             return
-        logger.info("New configuration received")
-        d.setup_new_conf()
-        if d.pollers[0]['use_ssl']:
-            assert d.pollers[0]['uri'] == 'https://localhost:7771/'
-        else:
-            assert d.pollers[0]['uri'] == 'http://localhost:7771/'
 
+        d.setup_new_conf()
+
+        # Test registered function list again, so that there is no overriden functions
         reg_list = d.http_daemon.registered_fun
         expected_list = ['get_external_commands', 'get_running_id', 'got_conf', 'have_conf',
                          'ping', 'push_broks', 'push_host_names', 'put_conf', 'remove_from_conf',
@@ -85,6 +86,28 @@ class testRegisteredFunctions(ShinkenTest):
         for fun in expected_list:
             assert(fun in reg_list)
 
+
+        # Test that use_ssl parameter generates the good uri
+        if d.pollers[0]['use_ssl']:
+            assert d.pollers[0]['uri'] == 'https://localhost:7771/'
+        else:
+            assert d.pollers[0]['uri'] == 'http://localhost:7771/'
+
+
+        # Test receivers are init like pollers
+        assert d.reactionners != {}  # Previously this was {} for ever
+        assert d.reactionners[0]['uri'] == 'http://localhost:7769/' # Test dummy value
+
+        # I want a simple init
+        d.must_run = False
+        d.sched.must_run = False
+        d.sched.run()
+
+        # Test con key is missing or not. Passive daemon should have one
+        assert 'con' not in d.pollers[0] # Ensure con key is not here, deamon is not passive so we did not try to connect
+        assert d.reactionners[0]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
+
+        # "Clean" shutdown
         sleep(2)
         pid = int(file("tmp/arbiterd.pid").read())
         print ("KILLING %d" % pid)*50

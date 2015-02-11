@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -49,9 +48,10 @@ class Reactionner(Satellite):
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='reactionnerd.pid'),
-        'port':      IntegerProp(default='7769'),
+        'port':      IntegerProp(default=7769),
         'local_log': PathProp(default='reactionnerd.log'),
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
-        super(Reactionner, self).__init__('reactionner', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Reactionner, self).__init__('reactionner', config_file, is_daemon, do_replace, debug,
+                                          debug_file)

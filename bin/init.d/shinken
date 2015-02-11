@@ -283,7 +283,7 @@ do_start() {
     mod=$1
     modfilepath="$BIN/shinken-${mod}"
     [ -e "$modfilepath" ] || {
-        log_failure_msg "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
+        log_failure_msg "FAILED: did not find $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
         return 5
     }
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")

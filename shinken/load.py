@@ -26,10 +26,6 @@
 import time
 import math
 
-# From advanced load average's code (another of my projects :) )
-#def calc_load_load(load, exp,n):
-#        load = n + exp*(load - n)
-#        return (load, exp)
 
 class Load:
     """This class is for having a easy Load calculation
@@ -47,7 +43,7 @@ class Load:
         self.last_update = 0  # last update of the value
         self.val = initial_value  # first value
 
-    # 
+
     def update_load(self, new_val, forced_interval=None):
         # The first call do not change the value, just tag
         # the beginning of last_update

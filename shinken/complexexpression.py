@@ -40,32 +40,30 @@ class ComplexExpressionNode(object):
         # that are selected with this node
         self.leaf = False
         self.content = None
-        
-        
-        
+
     def __str__(self):
         if not self.leaf:
-            return "Op:'%s' Leaf:%s Sons:'[%s] IsNot:%s'" % (self.operand, self.leaf, ','.join([str(s) for s in self.sons]), self.not_value)
+            return "Op:'%s' Leaf:%s Sons:'[%s] IsNot:%s'" % \
+                   (self.operand, self.leaf, ','.join([str(s) for s in self.sons]), self.not_value)
         else:
             return 'IS LEAF %s' % self.content
-
 
     def resolve_elements(self):
         # If it's a leaf, we just need to dump a set with the content of the node
         if self.leaf:
-            #print "Is a leaf", self.content
+            # print "Is a leaf", self.content
             if not self.content:
                 return set()
 
             return set(self.content)
-        
-        
+
+
         # first got the not ones in a list, and the other in the other list
         not_nodes = [s for s in self.sons if s.not_value]
-        positiv_nodes = [s for s in self.sons if not s.not_value] # ok a not not is hard to read...
+        positiv_nodes = [s for s in self.sons if not s.not_value]  # ok a not not is hard to read..
 
-        #print "Not nodes", not_nodes
-        #print "Positiv nodes", positiv_nodes
+        # print "Not nodes", not_nodes
+        # print "Positiv nodes", positiv_nodes
 
         # By default we are using a OR rule
         if not self.operand:
@@ -73,17 +71,17 @@ class ComplexExpressionNode(object):
 
         res = set()
 
-        #print "Will now merge all of this", self.operand
+        # print "Will now merge all of this", self.operand
 
         # The operand will change the positiv loop only
         i = 0
         for n in positiv_nodes:
             node_members = n.resolve_elements()
             if self.operand == '|':
-                #print "OR rule", node_members
+                # print "OR rule", node_members
                 res = res.union(node_members)
             elif self.operand == '&':
-                #print "AND RULE", node_members
+                # print "AND RULE", node_members
                 # The first elements of an AND rule should be used
                 if i == 0:
                     res = node_members
@@ -95,9 +93,7 @@ class ComplexExpressionNode(object):
         for n in not_nodes:
             node_members = n.resolve_elements()
             res = res.difference(node_members)
-        
         return res
-    
 
     # Check for empty (= not found) leaf nodes
     def is_valid(self):
@@ -120,12 +116,11 @@ class ComplexExpressionFactory(object):
         self.ctx = ctx
         self.grps = grps
         self.all_elements = all_elements
-        
 
     # the () will be eval in a recursiv way, only one level of ()
     def eval_cor_pattern(self, pattern):
         pattern = pattern.strip()
-        #print "eval_cor_pattern::", pattern
+        # print "eval_cor_pattern::", pattern
         complex_node = False
 
         # Look if it's a complex pattern (with rule) or
@@ -135,8 +130,8 @@ class ComplexExpressionFactory(object):
                 complex_node = True
 
         node = ComplexExpressionNode()
-        #print "Is so complex?", complex_node, pattern, node
-        
+        # print "Is so complex?", complex_node, pattern, node
+
         # if it's a single expression like !linux or production
         # we will get the objects from it and return a leaf node
         if not complex_node:
@@ -145,7 +140,7 @@ class ComplexExpressionFactory(object):
             if pattern.startswith('!'):
                 node.not_value = True
                 pattern = pattern[1:]
-            
+
             node.operand = self.ctx
             node.leaf = True
             obj, error = self.find_object(pattern)
@@ -159,19 +154,19 @@ class ComplexExpressionFactory(object):
         tmp = ''
         stacked_par = 0
         for c in pattern:
-            #print "MATCHING", c
+            # print "MATCHING", c
             if c == ',' or c == '|':
                 # Maybe we are in a par, if so, just stack it
                 if in_par:
-                    #print ", in a par, just staking it"
+                    # print ", in a par, just staking it"
                     tmp += c
                 else:
                     # Oh we got a real cut in an expression, if so, cut it
-                    #print "REAL , for cutting"
+                    # print "REAL , for cutting"
                     tmp = tmp.strip()
                     node.operand = '|'
                     if tmp != '':
-                        #print "Will analyse the current str", tmp
+                        # print "Will analyse the current str", tmp
                         o = self.eval_cor_pattern(tmp)
                         node.sons.append(o)
                     tmp = ''
@@ -179,29 +174,29 @@ class ComplexExpressionFactory(object):
             elif c == '&' or c == '+':
                 # Maybe we are in a par, if so, just stack it
                 if in_par:
-                    #print " & in a par, just staking it"
+                    # print " & in a par, just staking it"
                     tmp += c
                 else:
                     # Oh we got a real cut in an expression, if so, cut it
-                    #print "REAL & for cutting"
+                    # print "REAL & for cutting"
                     tmp = tmp.strip()
                     node.operand = '&'
                     if tmp != '':
-                        #print "Will analyse the current str", tmp
+                        # print "Will analyse the current str", tmp
                         o = self.eval_cor_pattern(tmp)
                         node.sons.append(o)
                     tmp = ''
-            
+
             elif c == '(':
                 stacked_par += 1
-                #print "INCREASING STACK TO", stacked_par
-                
+                # print "INCREASING STACK TO", stacked_par
+
                 in_par = True
                 tmp = tmp.strip()
                 # Maybe we just start a par, but we got some things in tmp
                 # that should not be good in fact !
                 if stacked_par == 1 and tmp != '':
-                    #TODO : real error
+                    # TODO : real error
                     print "ERROR : bad expression near", tmp
                     continue
 
@@ -209,21 +204,21 @@ class ComplexExpressionFactory(object):
                 # but not if it's the first one so
                 if stacked_par > 1:
                     tmp += c
-                    #o = self.eval_cor_pattern(tmp)
-                    #print "1( I've %s got new sons" % pattern , o
-                    #node.sons.append(o)
-                    
+                    # o = self.eval_cor_pattern(tmp)
+                    # print "1( I've %s got new sons" % pattern , o
+                    # node.sons.append(o)
+
             elif c == ')':
-                #print "Need closeing a sub expression?", tmp
+                # print "Need closeing a sub expression?", tmp
                 stacked_par -= 1
 
                 if stacked_par < 0:
                     # TODO : real error
                     print "Error : bad expression near", tmp, "too much ')'"
                     continue
-                
+
                 if stacked_par == 0:
-                    #print "THIS is closing a sub compress expression", tmp
+                    # print "THIS is closing a sub compress expression", tmp
                     tmp = tmp.strip()
                     o = self.eval_cor_pattern(tmp)
                     node.sons.append(o)
@@ -241,15 +236,14 @@ class ComplexExpressionFactory(object):
         # Be sure to manage the trainling part when the line is done
         tmp = tmp.strip()
         if tmp != '':
-            #print "Managing trainling part", tmp
+            # print "Managing trainling part", tmp
             o = self.eval_cor_pattern(tmp)
-            #print "4end I've %s got new sons" % pattern , o
+            # print "4end I've %s got new sons" % pattern , o
             node.sons.append(o)
 
-        #print "End, tmp", tmp
-        #print "R %s:" % pattern, node
+        # print "End, tmp", tmp
+        # print "R %s:" % pattern, node
         return node
-
 
     # We've got an object, like super-grp, so we should link th group here
     def find_object(self, pattern):
@@ -257,17 +251,16 @@ class ComplexExpressionFactory(object):
         error = None
         pattern = pattern.strip()
 
-        
         if pattern == '*':
             obj = [h.host_name for h in self.all_elements.items.values()
                    if getattr(h, 'host_name', '') != '' and not h.is_tpl()]
             return obj, error
 
-        
+
         # Ok a more classic way
 
-        #print "GRPS", self.grps
-        
+        # print "GRPS", self.grps
+
         if self.ctx == 'hostgroups':
             # Ok try to find this hostgroup
             hg = self.grps.find_by_name(pattern)
@@ -286,10 +279,8 @@ class ComplexExpressionFactory(object):
                 # And remove this strange hostname too :)
                 elts.remove('*')
             return elts, error
-                
-        else: #templates
-            obj = self.grps.find_hosts_that_use_template(pattern)
-        
-        return obj, error
 
-    
+        else:  # templates
+            obj = self.grps.find_hosts_that_use_template(pattern)
+
+        return obj, error

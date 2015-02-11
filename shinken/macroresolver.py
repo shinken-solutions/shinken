@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -103,7 +102,7 @@ class MacroResolver(Borg):
         self.illegal_macro_output_chars = conf.illegal_macro_output_chars
 
         # Try cache :)
-        #self.cache = {}
+        # self.cache = {}
 
 
     # Return all macros of a string, so cut the $
@@ -111,7 +110,7 @@ class MacroResolver(Borg):
     # val: value, not set here
     # type: type of macro, like class one, or ARGN one
     def _get_macros(self, s):
-        #if s in self.cache:
+        # if s in self.cache:
         #    return self.cache[s]
 
         p = re.compile(r'(\$)')
@@ -124,7 +123,7 @@ class MacroResolver(Borg):
             elif in_macro:
                 macros[elt] = {'val': '', 'type': 'unknown'}
 
-        #self.cache[s] = macros
+        # self.cache[s] = macros
         if '' in macros:
             del macros['']
         return macros
@@ -167,14 +166,14 @@ class MacroResolver(Borg):
                 if macro.startswith("USER"):
                     break
 
-                #print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
                 value = self._get_value_from_element(o, prop)
                 env['NAGIOS_%s' % macro] = value
             if hasattr(o, 'customs'):
                 # make NAGIOS__HOSTMACADDR from _MACADDR
                 for cmacro in o.customs:
-                    env['NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()] = o.customs[cmacro]
+                    new_env_name = 'NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()
+                    env[new_env_name] = o.customs[cmacro]
 
         return env
 
@@ -201,7 +200,7 @@ class MacroResolver(Borg):
 
             # We can get out if we do not have macros this loop
             still_got_macros = (len(macros) != 0)
-            #print "Still go macros:", still_got_macros
+            # print "Still go macros:", still_got_macros
 
             # Put in the macros the type of macro for all macros
             self._get_type_of_macro(macros, clss)
@@ -221,10 +220,11 @@ class MacroResolver(Borg):
                             # Now check if we do not have a 'output' macro. If so, we must
                             # delete all special characters that can be dangerous
                             if macro in self.output_macros:
-                                macros[macro]['val'] = self._delete_unwanted_caracters(macros[macro]['val'])
+                                macros[macro]['val'] = \
+                                    self._delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
-                    # Beware : only cut the first _HOST value, so the macro name can have it on it...
+                    # Beware : only cut the first _HOST value, so the macro name can have it on it..
                     macro_name = re.split('_' + cls_type, macro, 1)[1].upper()
                     # Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
                     # Now we get the element in data that have the type HOST
@@ -238,7 +238,8 @@ class MacroResolver(Borg):
                             # with break and such things sorry...)
                             mms = getattr(elt, 'macromodulations', [])
                             for mm in mms[::-1]:
-                                # Look if the modulation got the value, but also if it's currently active
+                                # Look if the modulation got the value,
+                                # but also if it's currently active
                                 if '_' + macro_name in mm.customs and mm.is_active():
                                     macros[macro]['val'] = mm.customs['_' + macro_name]
                 if macros[macro]['type'] == 'ONDEMAND':
@@ -246,7 +247,7 @@ class MacroResolver(Borg):
 
             # We resolved all we can, now replace the macro in the command call
             for macro in macros:
-                c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
+                c_line = c_line.replace('$' + macro + '$', macros[macro]['val'])
 
             # A $$ means we want a $, it's not a macro!
             # We replace $$ by a big dirty thing to be sure to not misinterpret it
@@ -258,7 +259,7 @@ class MacroResolver(Borg):
         # We now replace the big dirty token we made by only a simple $
         c_line = c_line.replace("DOUBLEDOLLAR", "$")
 
-        #print "Retuning c_line", c_line.strip()
+        # print "Retuning c_line", c_line.strip()
         return c_line.strip()
 
     # Resolve a command with macro by looking at data classes.macros
@@ -320,14 +321,14 @@ class MacroResolver(Borg):
 
     # Resolve on-demand macro, quite hard in fact
     def _resolve_ondemand(self, macro, data):
-        #print "\nResolving macro", macro
+        # print "\nResolving macro", macro
         elts = macro.split(':')
         nb_parts = len(elts)
         macro_name = elts[0]
         # Len 3 == service, 2 = all others types...
         if nb_parts == 3:
             val = ''
-            #print "Got a Service on demand asking...", elts
+            # print "Got a Service on demand asking...", elts
             (host_name, service_description) = (elts[1], elts[2])
             # host_name can be void, so it's the host in data
             # that is important. We use our self.host_class to
@@ -342,7 +343,7 @@ class MacroResolver(Borg):
                 cls = s.__class__
                 prop = cls.macros[macro_name]
                 val = self._get_value_from_element(s, prop)
-                #print "Got val:", val
+                # print "Got val:", val
                 return val
         # Ok, service was easy, now hard part
         else:

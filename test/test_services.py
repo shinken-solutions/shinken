@@ -110,7 +110,7 @@ class TestService(ShinkenTest):
         svc = self.get_svc()
         print 'Display name', svc.display_name, 'toto'
         print 'Full name', svc.get_full_name()
-        self.assertEqual('test_ok_0', svc.display_name)
+        self.assertEqual(u'test_ok_0', svc.display_name)
 
     def test_states_from_exit_status(self):
         svc = self.get_svc()
@@ -162,7 +162,7 @@ class TestService(ShinkenTest):
         self.assertIsNot(sg, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         self.assertIn(svc, sg.members)
-        self.assertIn(sg, svc.servicegroups)
+        self.assertIn(sg.get_name(), [sg.get_name() for sg in svc.servicegroups])
 
     # Look at the good of the last_hard_state_change
     def test_service_last_hard_state(self):
@@ -194,10 +194,12 @@ class TestService(ShinkenTest):
         self.assertEqual('OK', svc.last_hard_state)
 
         # now go hard!
+        time.sleep(2)
         now = int(time.time())
+        self.assertLess(svc.last_hard_state_change, now)
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
-        self.assertEqual(now, svc.last_hard_state_change)
+        self.assertGreaterEqual(svc.last_hard_state_change, now)
         self.assertEqual('CRITICAL', svc.last_hard_state)
         print "Last hard state id", svc.last_hard_state_id
         self.assertEqual(2, svc.last_hard_state_id)

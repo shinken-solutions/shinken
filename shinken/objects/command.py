@@ -57,7 +57,7 @@ class Command(Item):
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
-        #self.id = self.__class__.id
+        # self.id = self.__class__.id
         self.__class__.id += 1
 
         self.init_running_properties()
@@ -99,28 +99,17 @@ class Command(Item):
     def __str__(self):
         return str(self.__dict__)
 
-    # Get a brok with initial status
-    def get_initial_status_brok(self):
-        cls = self.__class__
-        my_type = cls.my_type
-        data = {'id': self.id}
-
-        self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_' + my_type + '_status', data)
-        return b
-
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for broking?
-            #if 'fill_brok' in entry[prop]:
+            # if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                #elif 'default' in entry[prop]:
+                # elif 'default' in entry[prop]:
                 #    data[prop] = entry.default
-
 
 
     # Call by pickle to dataify the comment
