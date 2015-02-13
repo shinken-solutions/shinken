@@ -585,10 +585,6 @@ class Config(Item):
         'hard_ssl_name_check':
             BoolProp(default=False),
 
-        # Log format
-        'human_timestamp_log':
-            BoolProp(default=False),
-
         # Discovery part
         'strip_idname_fqdn':
             BoolProp(default=True),
