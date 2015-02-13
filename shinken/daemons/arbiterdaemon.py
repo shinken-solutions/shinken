@@ -775,13 +775,13 @@ class Arbiter(Daemon):
                 if ext_cmds:
                     for ext_cmd in ext_cmds:
                         self.external_commands.append(ext_cmd)
-                elapsed += time.time() - now
                 else:
                     self.fifo = self.external_command.open()
                     if self.fifo is not None:
                         suppl_socks = [self.fifo]
                     else:
                         suppl_socks = None
+                elapsed += time.time() - now
 
             if elapsed or ins:
                 timeout -= elapsed
