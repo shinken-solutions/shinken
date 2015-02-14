@@ -26,13 +26,9 @@
 
 import os
 import sys
-import imp
-import traceback
-from os.path import abspath, join, exists
 
 
-from shinken.log import logger
-from shinken.misc import importlib
+from shinken.modulesmanager import ModulesManager
 
 
 class ModulesContext(object):
@@ -49,12 +45,18 @@ class ModulesContext(object):
     def get_module(self, mod_name):
         if self.modules_dir and self.modules_dir not in sys.path:
             sys.path.append(self.modules_dir)
-        try:
-            return importlib.import_module('.module', mod_name)
-        except Exception as err:
-            logger.warning('Cannot import %s as a package (%s) ; trying as bare module..',
-                           mod_name, err)
-            raise
+        if self.modules_dir:
+            mod_dir = os.path.join(self.modules_dir, mod_name)
+        else:
+            mod_dir = None
+        # to keep it back-compatible with previous Shinken module way,
+        # we first try with "import `mod_name`.module" and if we succeed
+        # then that's the one to actually use:
+        mod = ModulesManager.try_best_load('.module', mod_name)
+        if mod:
+            return mod
+        # otherwise simply try new and old style:
+        return ModulesManager.try_load(mod_name, mod_dir)
 
 
 modulesctx = ModulesContext()

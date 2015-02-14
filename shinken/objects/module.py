@@ -48,7 +48,7 @@ class Module(Item):
         return self.module_name
 
     def __repr__(self):
-        return '<module name=%s />' % self.get_name()
+        return '<module type=%s name=%s />' % (self.module_type, self.module_name)
 
 
 class Modules(Items):

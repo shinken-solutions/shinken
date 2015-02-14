@@ -42,6 +42,7 @@ from shinken.misc import importlib
 def uniform_module_type(s):
     return s.replace('_', '-')
 
+
 class ModulesManager(object):
     """This class is use to manage modules and call callback"""
 
@@ -77,6 +78,64 @@ class ModulesManager(object):
         self.load()
         self.get_instances()
 
+    @classmethod
+    def try_best_load(cls, name, package=None):
+        try:
+            mod = importlib.import_module(name, package)
+        except Exception as err:
+            logger.warning("Cannot import %s : %s",
+                           '%s.%s' % (package, name) if package else name,
+                           err)
+            return
+        # if the module have a 'properties' and a 'get_instance'
+        # then we are happy and we'll use that:
+        try:
+            mod.properties
+            mod.get_instance
+        except AttributeError:
+            return
+        return mod
+
+
+    @classmethod
+    def try_very_bad_load(cls, mod_dir):
+        prev_module = sys.modules.get('module')  # cache locally any previously imported 'module' ..
+        logger.warning(
+            "Trying to load %r as an (very-)old-style shinken \"module\" : "
+            "by adding its path to sys.path. This can be (very) bad in case "
+            "of name conflicts within the files part of %s and others "
+            "top-level python modules; I'll try to limit that.",
+            # by removing the mod_dir from sys.path after while.
+            mod_dir, mod_dir
+        )
+        sys.path.insert(0, mod_dir)
+        try:
+            return importlib.import_module('module')
+        except Exception as err:
+            logger.exception("Could not import bare 'module.py' from %s : %s", mod_dir, err)
+            return
+        finally:
+            sys.path.remove(mod_dir)
+            if prev_module is not None:  # and restore it after we have loaded our one (or not)
+                sys.modules['module'] = prev_module
+
+    @classmethod
+    def try_load(cls, mod_name, mod_dir=None):
+        msg = ''
+        mod = cls.try_best_load(mod_name)
+        if mod:
+            msg = "Correctly loaded %s as a very-new-style shinken module :)"
+        else:
+            mod = cls.try_best_load('.module', mod_name)
+            if mod:
+                msg = "Correctly loaded %s as an old-new-style shinken module :|"
+            elif mod_dir:
+                mod = cls.try_very_bad_load(mod_dir)
+                if mod:
+                    msg = "Correctly loaded %s as a very old-style shinken module :s"
+        if msg:
+            logger.info(msg, mod_name)
+        return mod
 
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
@@ -91,12 +150,9 @@ class ModulesManager(object):
         del self.imported_modules[:]
         for mod_name in modules_files:
             mod_file = abspath(join(self.modules_path, mod_name, 'module.py'))
-
-            try:
-                mod = importlib.import_module('.module', mod_name)
-            except Exception as err:
-                logger.warning('Cannot load %s as a package (%s), trying as module..',
-                               mod_name, err)
+            mod_dir = os.path.normpath(os.path.dirname(mod_file))
+            mod = self.try_load(mod_name, mod_dir)
+            if not mod:
                 continue
             try:
                 is_our_type = self.modules_type in mod.properties['daemons']
