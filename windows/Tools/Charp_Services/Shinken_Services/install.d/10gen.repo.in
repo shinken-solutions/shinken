@@ -1,4 +1,0 @@
-[10gen]
-name=10gen Repository
-baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/__ARCH__
-gpgcheck=0
