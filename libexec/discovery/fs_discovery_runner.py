@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # Copyright (C) 2009-2012:
 #    Camille, VACQUIE
 #    Romain, FORLOT, romain.forlot@sydel.fr
