@@ -14,7 +14,7 @@ Thruk
 * Screenshots: http://www.thruk.org/images/screenshots/screenshots.html
 * Description: "Thruk is an independent multibackend monitoring webinterface which currently supports Nagios, Icinga and Shinken as backend using the Livestatus addon. It is designed to be a "dropin" replacement. The target is to cover 100% of the original features plus additional enhancements for large installations."
 * License: GPL v2
-* Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,7.0.html
+* Shinken dedicated forum: http://forum.shinken-monitoring.org/forums/14-Use-with-Thruk
 
   
   
