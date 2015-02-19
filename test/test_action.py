@@ -24,9 +24,11 @@
 
 import os
 import sys
+import time
 
-from shinken_test import *
+from shinken_test import ShinkenTest, unittest, time_hacker
 from shinken.action import Action
+
 
 class TestAction(ShinkenTest):
     def setUp(self):
@@ -250,8 +252,6 @@ class TestAction(ShinkenTest):
         self.assertEqual("A"*100000, a.output)
         self.assertEqual("", a.perf_data)
 
-
-
     def test_execve_fail_with_utf8(self):
         if os.name == 'nt':
             return
@@ -267,10 +267,15 @@ class TestAction(ShinkenTest):
         #print a.output
         self.assertEqual(a.output.decode('utf8'), u"Wiadomo\u015b\u0107")
 
+    def test_non_zero_exit_status_empty_output_but_non_empty_stderr(self):
+        a = Action()
+        a.command = "echo hooo >&2 ; exit 1"
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+        a.execute()
+        self.wait_finished(a)
+        self.assertEqual(a.output, "hooo")
 
 
 if __name__ == '__main__':
-    import sys
-
-    #os.chdir(os.path.dirname(sys.argv[0]))
     unittest.main()

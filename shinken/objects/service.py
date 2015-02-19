@@ -543,6 +543,30 @@ class Service(SchedulingItem):
 #                        |___/
 ######
 
+    def __repr__(self):
+        return '<Service host_name=%r desc=%r name=%r use=%r />' % (
+            getattr(self, 'host_name', None),
+            getattr(self, 'service_description', None),
+            getattr(self, 'name', None),
+            getattr(self, 'use', None)
+        )
+    __str__ = __repr__
+
+    @property
+    def unique_key(self):  # actually only used for (un)indexitem() via name_property..
+        return (self.host_name, self.service_description)
+
+    @property
+    def display_name(self):
+        display_name = getattr(self, '_display_name', None)
+        if not display_name:
+            return self.service_description
+        return display_name
+
+    @display_name.setter
+    def display_name(self, display_name):
+        self._display_name = display_name
+
     # Give a nice name output
     def get_name(self):
         if hasattr(self, 'service_description'):
@@ -721,17 +745,18 @@ class Service(SchedulingItem):
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
 
-    # For a given host, look for all copy we must
-    # create for for_each property
     def duplicate(self, host):
-        duplicates = []
+        ''' For a given host, look for all copy we must create for for_each property
+        :type host: shinken.objects.host.Host
+        :return Service
+        '''
 
         # In macro, it's all in UPPER case
         prop = self.duplicate_foreach.strip().upper()
-
-        # If I do not have the property, we bail out
-        if prop not in host.customs:
+        if prop not in host.customs:  # If I do not have the property, we bail out
             return []
+
+        duplicates = []
 
         # Get the list entry, and the not one if there is one
         entry = host.customs[prop]
@@ -1227,6 +1252,8 @@ class Service(SchedulingItem):
 
 # Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
+
+    name_property = 'unique_key'  # only used by (un)indexitem (via 'name_property')
     inner_class = Service  # use for know what is in items
 
     def add_template(self, tpl):
@@ -1279,35 +1306,6 @@ class Services(Items):
         if index is True:
             item = self.index_item(item)
         self.items[item.id] = item
-
-    def index_item(self, item):
-        """
-        Indexes a template by `name` into the `name_to_template` dictionnary.
-
-        This implementation takes into account that a service has two naming
-        attribute: `host_name` and `service_description`.
-
-        :param item: The item to index
-        """
-        hname = getattr(item, 'host_name', '')
-        sdescr = getattr(item, 'service_description', '')
-        key = (hname, sdescr)
-        return Items.index_item(self, item, key)
-
-    def unindex_item(self, item):
-        """
-        Unindexes an item from the `items` container.
-
-        This implementation takes into account that a service has two naming
-        attribute: `host_name` and `service_description`.
-
-        :param item:    The item to unindex
-        :param name:    The name under which the item has been indexed.
-        """
-        host_name = getattr(item, 'host_name', '')
-        sdescr = getattr(item, 'service_description', '')
-        key = (host_name, sdescr)
-        Items.unindex_item(self, item, key)
 
     # Search for all of the services in a host
     def find_srvs_by_hostname(self, host_name):
@@ -1496,12 +1494,6 @@ class Services(Items):
         for sid in to_del:
             del self.items[sid]
 
-    def is_excluded_for_host(self, host, service):
-        sdescr = getattr(service, "service_description", '')
-        excludes = getattr(host, "service_excludes", '')
-        if not isinstance(excludes, list):
-            excludes = [e.strip() for e in excludes.split(',') if e.strip()]
-        return sdescr in excludes
 
     def explode_services_from_hosts(self, hosts, s, hnames):
         """
@@ -1541,45 +1533,61 @@ class Services(Items):
                 err = 'Error: The hostname %s is unknown for the ' \
                       'service %s!' % (hname, s.get_name())
                 s.configuration_errors.append(err)
-            if self.is_excluded_for_host(h, s):
+                continue
+            if h.is_excluded_for(s):
                 continue
             new_s = s.copy()
             new_s.host_name = hname
             self.add_item(new_s)
 
-    def explode_services_from_templates(self, hosts, t):
+    def _local_create_service(self, hosts, host_name, service):
+        '''Create a new service based on a host_name and service instance.
+
+        :param hosts:       The hosts items instance.
+        :type hosts:        shinken.objects.host.Hosts
+        :param host_name:   The host_name to create a new service.
+        :param service:     The service to be used as template.
+        :type service:      Service
+        :return:            The new service created.
+        :rtype:             Service
+        '''
+        h = hosts.find_by_name(host_name.strip())
+        if h.is_excluded_for(service):
+            return
+        # Creates concrete instance
+        new_s = service.copy()
+        new_s.host_name = host_name
+        new_s.register = 1
+        self.add_item(new_s)
+        return new_s
+
+
+    def explode_services_from_templates(self, hosts, service):
         """
         Explodes services from templates. All hosts holding the specified
         templates are bound the service.
 
-        :param hosts:   The hosts container
-        :param s:       The service to explode
+        :param hosts:   The hosts container.
+        :type hosts:    shinken.objects.host.Hosts
+        :param service: The service to explode.
+        :type service:  Service
         """
-        hname = getattr(t, "host_name", None)
-        if hname is None:
+        hname = getattr(service, "host_name", None)
+        if not hname:
             return
-
-        def local_create_service(name):
-            h = hosts.find_by_name(name.strip())
-            if self.is_excluded_for_host(h, t):
-                return
-            # Creates concrete instance
-            new_s = t.copy()
-            new_s.host_name = name
-            new_s.register = 1
-            self.add_item(new_s)
 
         # Now really create the services
         if is_complex_expr(hname):
             hnames = self.evaluate_hostgroup_expression(
                 hname.strip(), hosts, hosts.templates, look_in='templates')
             for name in hnames:
-                local_create_service(name)
+                self._local_create_service(hosts, name, service)
         else:
             hnames = [n.strip() for n in hname.split(',') if n.strip()]
             for hname in hnames:
                 for name in hosts.find_hosts_that_use_template(hname):
-                    local_create_service(name)
+                    self._local_create_service(hosts, name, service)
+
 
     def explode_services_duplicates(self, hosts, s):
         """
@@ -1587,7 +1595,9 @@ class Services(Items):
 
         :param hosts:   The hosts container
         :param s:       The service to explode
+        :type s:        Service
         """
+
         hname = getattr(s, "host_name", None)
         if hname is None:
             return
@@ -1604,7 +1614,7 @@ class Services(Items):
 
         # Duplicate services
         for new_s in s.duplicate(h):
-            if self.is_excluded_for_host(h, new_s):
+            if h.is_excluded_for(new_s):
                 continue
             # Adds concrete instance
             self.add_item(new_s)
@@ -1714,6 +1724,14 @@ class Services(Items):
             self.explode_services_duplicates(hosts, s)
             if not s.configuration_errors:
                 self.remove_item(s)
+
+        to_remove = []
+        for service in self:
+            host = hosts.find_by_name(service.host_name)
+            if host and host.is_excluded_for(service):
+                to_remove.append(service)
+        for service in to_remove:
+            self.remove_item(service)
 
         # Servicegroups property need to be fullfill for got the informations
         # And then just register to this service_group

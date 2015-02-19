@@ -81,7 +81,7 @@ the expanded/final command line to be executed for the service's check command w
   
 ::
 
-  /var/lib/shinken/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%
+  /var/lib/shinken/libexec/check_ping -H 192.168.1.2 -w 200.0,40% -c 400.0,80%
   
 If you need to pass bang (!) characters in your command arguments, you can do so by escaping them with a backslash (\). If you need to include backslashes in your command arguments, they should also be escaped with a backslash.
 

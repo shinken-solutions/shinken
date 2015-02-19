@@ -58,17 +58,17 @@ As the shinken account in your shinken server run:
   
 ::
 
-  wget "http://www.bashton.com/downloads/nagios-check_sip-1.2.tar.gz"
-  tar xvfz nagios-check_sip-1.2.tar.gz
-  cd nagios-check_sip-1.2/
-  cp check_sip /var/lib/nagios/plugins/
+  wget "http://www.bashton.com/downloads/nagios-check_sip-1.3.tar.gz"
+  tar xvfz nagios-check_sip-1.3.tar.gz
+  cd nagios-check_sip-1.3/
+  cp check_sip /var/lib/shinken/libexec
   chmod a+x /var/lib/nagios/plugins/check_sip
 
 
 Add the SIP user credentials 
 =============================
 
-In the file ///etc/shinken/packs/network/services/asterisk//macros you can edit the SIPUSER that you want ot use for the connection.
+In the file /etc/shinken/packs/network/services/asterisk/macros you can edit the SIPUSER that you want ot use for the connection.
 
 
 Declare your host in Shinken 

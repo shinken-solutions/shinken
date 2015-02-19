@@ -209,21 +209,23 @@ class __Action(object):
         # we should not keep the process now
         del self.process
 
-        # if the exit status is abnormal, we add stderr to the output
-        # TODO: Abnormal should be logged properly no?
-        if self.exit_status not in valid_exit_status:
-            self.stdoutdata = self.stdoutdata + self.stderrdata
-        elif ('sh: -c: line 0: unexpected EOF while looking for matching'
-              in self.stderrdata
-              or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
-              or 'Syntax error: Unterminated quoted string'
-              in self.stderrdata):
+        if (  # check for bad syntax in command line:
+            'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
+            or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
+            or 'Syntax error: Unterminated quoted string' in self.stderrdata
+        ):
             # Very, very ugly. But subprocess._handle_exitstatus does
             # not see a difference between a regular "exit 1" and a
             # bailing out shell. Strange, because strace clearly shows
             # a difference. (exit_group(1) vs. exit_group(257))
             self.stdoutdata = self.stdoutdata + self.stderrdata
             self.exit_status = 3
+
+        if self.exit_status not in valid_exit_status:
+            self.exit_status = 3
+
+        if not self.stdoutdata.strip():
+            self.stdoutdata = self.stderrdata
 
         # Now grep what we want in the output
         self.get_outputs(self.stdoutdata, max_plugins_output_length)

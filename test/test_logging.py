@@ -269,7 +269,7 @@ class TestColorConsoleLogger(NoSetup, ShinkenTest, LogCollectMixin):
             self.generic_tst(shinken_logger.info, 'Some log-message',
                              [1, 1],
                              [r'^\[.+?\] INFO: \[Shinken\] Some log-message$',
-                              r'^\x1b\[35m\[.+?\] INFO: \[Shinken\] Some log-message\x1b\[0m$'])
+                              r'^\x1b\[95m\[.+?\] INFO: \[Shinken\] Some log-message\x1b\[0m$'])
         else:
             self.generic_tst(shinken_logger.info, 'Some log-message',
                              [1, 1],
@@ -288,7 +288,7 @@ class TestColorConsoleLogger(NoSetup, ShinkenTest, LogCollectMixin):
             loglist = self.generic_tst(shinken_logger.info, 'Some log-message',
                              [1, 1],
                              [r'^\[.+?\] INFO: \[Shinken\] Some log-message$',
-                              r'^\x1b\[35m\[.+?\] INFO: \[Shinken\] Some log-message\x1b\[0m$'])
+                              r'^\x1b\[95m\[.+?\] INFO: \[Shinken\] Some log-message\x1b\[0m$'])
         else:
             loglist = self.generic_tst(shinken_logger.info, 'Some log-message',
                              [1, 1],

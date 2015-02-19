@@ -22,10 +22,18 @@
 # This file is used to test reading and processing of config files
 #
 
-from shinken_test import *
+import os
+import time
 
-time_hacker.set_real_time()
+from shinken.modulesmanager import ModulesManager
+from shinken.objects.module import Module
 
+from shinken_test import (
+    ShinkenTest, time_hacker, unittest
+)
+
+
+modules_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'modules')
 
 class TestModuleManager(ShinkenTest):
     def setUp(self):

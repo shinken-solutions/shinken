@@ -1189,7 +1189,7 @@ class Config(Item):
 
         # print "Service groups"
         # link servicegroups members with services
-        self.servicegroups.linkify(self.services)
+        self.servicegroups.linkify(self.hosts, self.services)
 
         # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)
@@ -1980,6 +1980,12 @@ class Config(Item):
                                            "realm: %s" % (e.get_full_name(), elt_r))
                             r = False
 
+        if len([realm for realm in self.realms if hasattr(realm, 'default') and realm.default]) > 1:
+            err = "Error : More than one realm are set to the default realm"
+            logger.error(err)
+            self.add_error(err)
+            r = False
+
         self.conf_is_correct = r
 
 
@@ -2097,8 +2103,7 @@ class Config(Item):
         # with it: it's a list of ours mini_packs
         tmp_packs = g.get_accessibility_packs()
 
-        # Now We find the default realm (must be unique or
-        # BAD THINGS MAY HAPPEN )
+        # Now We find the default realm
         default_realm = None
         for r in self.realms:
             if hasattr(r, 'default') and r.default:

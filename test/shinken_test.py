@@ -59,11 +59,8 @@ from logging import ERROR
 myself = os.path.abspath(__file__)
 
 global modules_dir
-modules_dir = "var/lib/shinken/modules"
+modules_dir = os.environ.get('SHINKEN_MODULES_DIR', "modules")
 
-def define_modules_dir(val):
-    global modules_dir
-    modules_dir = val
 
 class __DUMMY:
     def add(self, obj):
@@ -234,9 +231,8 @@ class ShinkenTest(unittest.TestCase):
         self.dispatcher = Dispatcher(self.conf, self.me)
 
         scheddaemon = Shinken(None, False, False, False, None, None)
-        self.sched = Scheduler(scheddaemon)
-
-        scheddaemon.sched = self.sched
+        self.scheddaemon = scheddaemon
+        self.sched = scheddaemon.sched
         scheddaemon.modules_dir = modules_dir
         scheddaemon.load_modules_manager()
         # Remember to clean the logs we just created before launching tests

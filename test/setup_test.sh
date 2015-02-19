@@ -8,5 +8,4 @@ BASE_PATH=$(dirname "$THIS_PATH")
 cd $BASE_PATH
 
 # install prog AND tests requirements :
-pip install -r requirements.txt
 pip install -r test/requirements.txt
