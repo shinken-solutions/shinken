@@ -42,7 +42,7 @@ Example Definition:
       address            node1.mydomain
       port               7772
       spare              0
-      ealm              All
+      realm              All
       ## Optional
       manage_arbiters     1   
       manage_sub_realms   1
@@ -50,7 +50,7 @@ Example Definition:
       data_timeout        120 ; Data send timeout
       max_check_attempts  3   ; If ping fails N or more, then the node is dead
       check_interval      60  ; Ping node every minutes  	       manage_sub_realms  1
-      modules             Livestatus,Simple-log,WebUI
+      modules             livestatus,simple-log,webui
   }
 
   
