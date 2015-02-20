@@ -146,7 +146,10 @@ class Scheduler(object):
                 self.broks, self.brokers:
             o.clear()
 
-
+    def iter_hosts_and_services(self):
+        for what in (self.hosts, self.services):
+            for elt in what:
+                yield elt
 
     # Load conf for future use
     # we are in_test if the data are from an arbiter object like,
@@ -509,41 +512,39 @@ class Scheduler(object):
 
     # We are looking for outdated acks, and if so, remove them
     def check_for_expire_acknowledge(self):
-        for t in [self.hosts, self.services]:
-            for i in t:
-                i.check_for_expire_acknowledge()
+        for elt in self.iter_hosts_and_services():
+            elt.check_for_expire_acknowledge()
 
 
     # We update all business_impact to look at new modulation
     # start for impacts, and so update broks status and
     # problems value too
     def update_business_values(self):
-        for t in [self.hosts, self.services]:
-            # We first update impacts and classic elements
-            for i in [i for i in t if not i.is_problem]:
-                was = i.business_impact
-                i.update_business_impact_value()
-                new = i.business_impact
+        for elt in self.iter_hosts_and_services():
+            if not elt.is_problem:
+                was = elt.business_impact
+                elt.update_business_impact_value()
+                new = elt.business_impact
                 # Ok, the business_impact change, we can update the broks
                 if new != was:
                     # print "The elements", i.get_name(), "change it's business_impact value"
-                    self.get_and_register_status_brok(i)
+                    self.get_and_register_status_brok(elt)
 
         # When all impacts and classic elements are updated,
         # we can update problems (their value depend on impacts, so
         # they must be done after)
-        for t in [self.hosts, self.services]:
+        for elt in self.iter_hosts_and_services():
             # We first update impacts and classic elements
-            for i in [i for i in t if i.is_problem]:
-                was = i.business_impact
-                i.update_business_impact_value()
-                new = i.business_impact
+            if elt.is_problem:
+                was = elt.business_impact
+                elt.update_business_impact_value()
+                new = elt.business_impact
                 # Maybe one of the impacts change it's business_impact to a high value
                 # and so ask for the problem to raise too
                 if new != was:
                     # print "The elements", i.get_name(),
                     # print "change it's business_impact value from", was, "to", new
-                    self.get_and_register_status_brok(i)
+                    self.get_and_register_status_brok(elt)
 
 
     # Each second we search for master notification that are scatterisable and we do the job
@@ -1358,7 +1359,6 @@ class Scheduler(object):
         for id in id_to_del:
             del self.actions[id]  # ZANKUSEN!
 
-
     # Check for downtimes start and stop, and register
     # them if needed
     def update_downtimes_and_comments(self):
@@ -1366,14 +1366,15 @@ class Scheduler(object):
         now = time.time()
 
         # Look for in objects comments, and look if we already got them
-        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services]]:
+        for elt in self.iter_hosts_and_services():
             for c in elt.comments:
                 if c.id not in self.comments:
                     self.comments[c.id] = c
 
         # Check maintenance periods
-        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services]
-                    if y.maintenance_period is not None]:
+        for elt in self.iter_hosts_and_services():
+            if elt.maintenance_period is None:
+                continue
 
             if elt.in_maintenance is None:
                 if elt.maintenance_period.is_time_valid(now):
@@ -1437,44 +1438,39 @@ class Scheduler(object):
     # Main schedule function to make the regular scheduling
     def schedule(self):
         # ask for service and hosts their next check
-        for type_tab in [self.services, self.hosts]:
-            for i in type_tab:
-                i.schedule()
-
+        for elt in self.iter_hosts_and_services():
+            elt.schedule()
 
     # Main actions reaper function: it get all new checks,
     # notification and event handler from hosts and services
     def get_new_actions(self):
         self.hook_point('get_new_actions')
         # ask for service and hosts their next check
-        for type_tab in [self.services, self.hosts]:
-            for i in type_tab:
-                for a in i.actions:
-                    self.add(a)
-                # We take all, we can clear it
-                i.actions = []
+        for elt in self.iter_hosts_and_services():
+            for a in elt.actions:
+                self.add(a)
+            # We take all, we can clear it
+            elt.actions = []
 
 
     # Similar as above, but for broks
     def get_new_broks(self):
         # ask for service and hosts their broks waiting
         # be eaten
-        for type_tab in [self.services, self.hosts]:
-            for i in type_tab:
-                for b in i.broks:
-                    self.add(b)
-                # We take all, we can clear it
-                i.broks = []
+        for elt in self.iter_hosts_and_services():
+            for b in elt.broks:
+                self.add(b)
+            # We take all, we can clear it
+            elt.broks = []
 
 
     # Raises checks for no fresh states for services and hosts
     def check_freshness(self):
         # print "********** Check freshness******"
-        for type_tab in [self.services, self.hosts]:
-            for i in type_tab:
-                c = i.do_check_freshness()
-                if c is not None:
-                    self.add(c)
+        for elt in self.iter_hosts_and_services():
+            c = elt.do_check_freshness()
+            if c is not None:
+                self.add(c)
 
 
     # Check for orphaned checks: checks that never returns back
@@ -1587,21 +1583,20 @@ class Scheduler(object):
 
         all_commands = {}
         # compute some stats
-        for lst in [self.hosts, self.services]:
-            for i in lst:
-                last_cmd = i.last_check_command
-                if not last_cmd:
-                    continue
-                interval = i.check_interval
-                if interval == 0:
-                    interval = 1
-                cmd = os.path.split(last_cmd.split(' ', 1)[0])[1]
-                u_time = i.u_time
-                s_time = i.s_time
-                old_u_time, old_s_time = all_commands.get(cmd, (0.0, 0.0))
-                old_u_time += u_time / interval
-                old_s_time += s_time / interval
-                all_commands[cmd] = (old_u_time, old_s_time)
+        for elt in self.iter_hosts_and_services():
+            last_cmd = elt.last_check_command
+            if not last_cmd:
+                continue
+            interval = elt.check_interval
+            if interval == 0:
+                interval = 1
+            cmd = os.path.split(last_cmd.split(' ', 1)[0])[1]
+            u_time = elt.u_time
+            s_time = elt.s_time
+            old_u_time, old_s_time = all_commands.get(cmd, (0.0, 0.0))
+            old_u_time += u_time / interval
+            old_s_time += s_time / interval
+            all_commands[cmd] = (old_u_time, old_s_time)
         # now sort it
         p = []
         for (c, e) in all_commands.iteritems():

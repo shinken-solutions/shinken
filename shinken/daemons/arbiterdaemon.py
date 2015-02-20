@@ -65,7 +65,6 @@ class IForArbiter(Interface):
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
-        conf = cPickle.loads(conf)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
@@ -627,6 +626,9 @@ class Arbiter(Daemon):
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
         conf = self.new_conf
+        if not conf:
+            return
+        conf = cPickle.loads(conf)
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf

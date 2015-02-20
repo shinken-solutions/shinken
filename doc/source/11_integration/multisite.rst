@@ -16,7 +16,7 @@ Check_MK Multisite
 * Screenshots: http://mathias-kettner.de/check_mk_multisite_screenshots.html
 * Description: "A new general purpose Nagios-plugin for retrieving data."
 * License: GPL v2
-* Shinken dedicated forum: http://www.shinken-monitoring.org/forum/index.php/board,10.0.html
+* Shinken dedicated forum: http://forum.shinken-monitoring.org/forums/17-Use-with-Multisite
 
 
 Using Shinken with Multisite 

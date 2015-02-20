@@ -55,6 +55,10 @@ class DataManager(object):
         name = name.decode('utf8', 'ignore')
         return self.rg.contacts.find_by_name(name)
 
+    def get_contactgroup(self, name):
+        name = name.decode('utf8', 'ignore')
+        return self.rg.contactgroups.find_by_name(name)
+
     def get_contacts(self):
         return self.rg.contacts
 

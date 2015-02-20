@@ -26,6 +26,7 @@
 import time
 
 from shinken_test import unittest, ShinkenTest
+from shinken_test import time_hacker
 
 
 class TestNotif(ShinkenTest):
@@ -170,10 +171,11 @@ class TestNotif(ShinkenTest):
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=1)
         self.assertEqual(1, self.count_actions())
-        print time.time()
-        print  svc.last_time_warning, svc.last_time_critical, svc.last_time_unknown, svc.last_time_ok
+        now = time.time()
+        print svc.last_time_warning, svc.last_time_critical, svc.last_time_unknown, svc.last_time_ok
         last_time_not_ok = svc.last_time_non_ok_or_up()
         deadline = svc.last_time_non_ok_or_up() + svc.first_notification_delay * svc.__class__.interval_length
+        print("deadline is in %s secs" % (deadline - now))
         #-----------------------------------------------------------------
         # check fails again and enters hard state.
         # now there is a (scheduled for later) notification and an event handler
@@ -184,18 +186,11 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         self.assertEqual(0, svc.current_notification_number)
-        #-----------------------------------------------------------------
-        # repeat bad checks during the delay time
-        # there is 1 action which is the scheduled notification
-        #-----------------------------------------------------------------
-        loop = 0
-        while deadline > time.time():
-            loop += 1
-            self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-            self.show_and_clear_logs()
-            self.show_actions()
-            print deadline - time.time()
-            ###self.assertEqual(1, self.count_actions())
+        # sleep up to deadline:
+        time_hacker.time_warp(deadline - now)
+        # even if time_hacker is used here, we still call time.sleep()
+        # to show that we must wait the necessary delay time:
+        time.sleep(deadline - now)
         #-----------------------------------------------------------------
         # now the delay period is over and the notification can be sent
         # with the next bad check
