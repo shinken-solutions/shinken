@@ -227,7 +227,7 @@ flap_detection_enabled :ref:`* <configuration/objectdefinitions#retention_notes>
     * 0 = disable service flap detection
     * 1 = enable service flap detection.
 
-  flap_detection_options
+flap_detection_options
   This directive is used to determine what service states the :ref:`flap detection logic <advanced/flapping>` will use for this service. Valid options are a combination of one or more of the following :
 
     * **o** = OK states
