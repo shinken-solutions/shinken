@@ -79,15 +79,16 @@ def read_webui_cfg():
     return webui_config['module'][0]
 
 def get_shinken_url():
-    hostname = socket.gethostname()
-    webui_config = read_webui_cfg()
-    url = 'http://%s:%s/%s/%s' % (hostname, webui_config['port'][0], opts.notification_object, urllib.quote(shinken_var['Hostname']))
+    if opts.webui:
+        hostname = socket.gethostname()
+        webui_config = read_webui_cfg()
+        url = 'http://%s:%s/%s/%s' % (hostname, webui_config['port'][0], opts.notification_object, urllib.quote(shinken_var['Hostname']))
 
-    # Append service if we notify a service object
-    if opts.notification_object == 'service':
-        url += '/%s' % (urllib.quote(shinken_notification_object_var['service']['Service description']))
+        # Append service if we notify a service object
+        if opts.notification_object == 'service':
+            url += '/%s' % (urllib.quote(shinken_notification_object_var['service']['Service description']))
 
-    return url
+        return 'More details on Shinken WebUI at : %s' % (url)
 
 # Get current process user that will be the mail sender
 def get_user():
@@ -144,11 +145,13 @@ def create_txt_message(msg):
     for k,v in sorted(shinken_var.iteritems()):
         txt_content.append(k + ': ' + v)
 
-    txt_content = '\r\n'.join(txt_content)
     
     # Add url at the end
     url = get_shinken_url()
-    txt_content = 'More details on Shinken WebUI at : %s' % (url)
+    if url != None:
+        txt_content.append(url)
+
+    txt_content = '\r\n'.join(txt_content)
 
     msgText = MIMEText(txt_content, 'text')
     msg.attach(msgText)
@@ -214,7 +217,10 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></
             odd=True
 
     html_content.append('</table>')
-    html_content.append('More details on Shinken WebUI at : <a href="%s">%s</a></body></html>' % (url, url))
+    if url != None:
+        html_content.append('More details on Shinken WebUI at : <a href="%s">%s</a></body></html>' % (url, url))
+    else:
+        html_content.append('</body></html>')
 
     # Make final string var to send and encode it to stdout encoding
     # avoiding decoding error.
@@ -242,6 +248,8 @@ if __name__ == "__main__":
                       action='store_true', help='Generate a test mail message')
     group_debug.add_option('-t', '--test', dest='test',
                       action='store_true', help='Generate a test mail message')
+    group_general.add_option('-w', '--webui', dest='webui', default=False,
+                      action='store_true', help='Include link to the problem in Shinken WebUI.')
     group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'], 
                       default='html', help='Mail format "html" or "txt". Default: html')
     group_debug.add_option('-l', '--logfile', dest='logfile',
@@ -251,7 +259,7 @@ if __name__ == "__main__":
     group_shinken.add_option('-o', '--objectmacros', dest='objectmacros',
                       help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTSTATE$,,$HOSTDURATION$" with host object')
     group_shinken_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
-                      nhelp='Specify $_SERVICEDETAILLEDDESC$ custom macros')
+                      help='Specify $_SERVICEDETAILLEDDESC$ custom macros')
     group_shinken_details.add_option('-i', '--impact', dest='impact',
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_shinken_details.add_option('-a', '--action', dest='fixaction',
@@ -259,7 +267,7 @@ if __name__ == "__main__":
     group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
-                      choices=['host', 'service'], help='Notify a service Shinken alert. Else it is an host alert.')
+                      choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. Default: localhost')
     
