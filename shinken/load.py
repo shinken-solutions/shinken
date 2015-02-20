@@ -27,7 +27,7 @@ import time
 import math
 
 
-class Load:
+class Load(object):
     """This class is for having a easy Load calculation
     without having to send value at regular interval
     (but it's more efficient if you do this :) ) and without

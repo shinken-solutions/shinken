@@ -43,7 +43,7 @@ class HTTPException(Exception):
 
 HTTPExceptions = (HTTPException,)
 
-class FileReader:
+class FileReader(object):
     def __init__(self, fp):
         self.fp = fp
     def read_callback(self, size):

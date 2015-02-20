@@ -25,10 +25,10 @@
 
 import socket
 import asyncore
-from log import logger
+from shinken.log import logger
 
 
-class LSSyncConnection:
+class LSSyncConnection(object):
     def __init__(self, addr='127.0.0.1', port=50000, path=None, timeout=10):
         self.addr = addr
         self.port = port
