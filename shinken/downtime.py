@@ -41,7 +41,7 @@ from shinken.log import logger
  specified service should not be triggered by another downtime entry.
 
 """
-class Downtime:
+class Downtime(object):
     id = 1
 
     # Just to list the properties we will send as pickle
