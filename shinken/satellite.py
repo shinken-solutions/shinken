@@ -761,21 +761,6 @@ class Satellite(BaseSatellite):
         return self.returns_queue.get()
 
 
-    # Get 'objects' from external modules
-    # from now nobody use it, but it can be useful
-    # for a module like livestatus to raise external
-    # commands for example
-    def get_objects_from_from_queues(self):
-        for f in self.modules_manager.get_external_from_queues():
-            full_queue = True
-            while full_queue:
-                try:
-                    o = f.get(block=False)
-                    self.add(o)
-                except Empty:
-                    full_queue = False
-
-
     # An arbiter ask us to wait a new conf, so we must clean
     # all the mess we did, and close modules too
     def clean_previous_run(self):

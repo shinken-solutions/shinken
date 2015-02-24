@@ -53,6 +53,9 @@ class Scheduler(object):
     """Please Add a Docstring to describe the class here"""
 
     def __init__(self, scheduler_daemon):
+        '''
+        :type scheduler_daemon: shinken.daemons.schedulerdaemon.Shinken
+        '''
         self.sched_daemon = scheduler_daemon
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True
@@ -1524,19 +1527,10 @@ class Scheduler(object):
         logger.debug("Time to send %s broks (after %d secs)", nb_sent, time.time() - t0)
 
 
-    # Get 'objects' from external modules
-    # right now on nobody uses it, but it can be useful
-    # for a module like livestatus to raise external
-    # commands for example
+    # special one for scheduler ; see Daemon.get_objects_from_from_queues()
     def get_objects_from_from_queues(self):
-        for f in self.sched_daemon.modules_manager.get_external_from_queues():
-            full_queue = True
-            while full_queue:
-                try:
-                    o = f.get(block=False)
-                    self.add(o)
-                except Empty:
-                    full_queue = False
+        ''' Same behavior than Daemon.get_objects_from_from_queues(). '''
+        return self.sched_daemon.get_objects_from_from_queues()
 
 
     # stats threads is asking us a main structure for stats
