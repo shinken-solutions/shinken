@@ -419,7 +419,7 @@ class ShinkenTest(unittest.TestCase):
             self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
         lognum = 1
-        broks = sorted(self.sched.broks.values(), lambda x, y: x.id - y.id)
+        broks = sorted(self.sched.broks.values(), key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -429,11 +429,15 @@ class ShinkenTest(unittest.TestCase):
                 lognum += 1
         self.assertTrue(no_match, "%s found a matched log line in broks :\n"
                                "index=%s pattern=%r\n"
-                               "broks=%r" % (
+                               "broks_logs=[[[\n%s\n]]]" % (
             '*HAVE*' if no_match else 'Not',
-            index, pattern, broks
+            index, pattern, '\n'.join(
+                '\t%s=%s' % (idx, b.strip())
+                for idx, b in enumerate(
+                    (b.data['log'] for b in broks if b.type == 'log'),
+                    1)
+            )
         ))
-
 
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)

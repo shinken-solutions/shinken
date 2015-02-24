@@ -48,7 +48,7 @@ import cStringIO
 from shinken.log import logger
 from shinken.misc.common import setproctitle
 
-class Worker:
+class Worker(object):
     """This class is used for poller and reactionner to work.
     The worker is a process launch by theses process and read Message in a Queue
     (self.s) (slave)

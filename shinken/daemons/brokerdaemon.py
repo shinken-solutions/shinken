@@ -31,7 +31,6 @@ import base64
 import zlib
 import threading
 from multiprocessing import active_children
-from Queue import Empty
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
@@ -307,21 +306,6 @@ class Broker(BaseSatellite):
         with self.arbiter_broks_lock:
             self.add_broks_to_queue(self.arbiter_broks)
             self.arbiter_broks = []
-
-
-    # Get 'objects' from external modules
-    # right now on nobody uses it, but it can be useful
-    # for modules like livestatus to raise external
-    # commands for example
-    def get_objects_from_from_queues(self):
-        for f in self.modules_manager.get_external_from_queues():
-            full_queue = True
-            while full_queue:
-                try:
-                    o = f.get(block=False)
-                    self.add(o)
-                except Empty:
-                    full_queue = False
 
 
     # We get new broks from schedulers

@@ -41,7 +41,7 @@ random.seed()
 
 
 # Dispatcher Class
-class Dispatcher:
+class Dispatcher(object):
 
     # Load all elements, set them as not assigned
     # and add them to elements, so loop will be easier :)

@@ -98,7 +98,7 @@ event_types = {
 
 # Class for parsing event logs
 # Populates self.data with the log type's properties
-class LogEvent:
+class LogEvent(object):
 
     def __init__(self, log):
         self.data = {}

@@ -32,7 +32,6 @@ import zlib
 import cPickle
 
 from multiprocessing import active_children
-from Queue import Empty
 
 
 from shinken.satellite import Satellite
@@ -158,21 +157,6 @@ class Receiver(Satellite):
                 to_del.append(mod)
         # Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
-
-
-    # Get 'objects' from external modules
-    # from now nobody use it, but it can be useful
-    # for a module like livestatus to raise external
-    # commands for example
-    def get_objects_from_from_queues(self):
-        for f in self.modules_manager.get_external_from_queues():
-            full_queue = True
-            while full_queue:
-                try:
-                    o = f.get(block=False)
-                    self.add(o)
-                except Empty:
-                    full_queue = False
 
 
     def do_stop(self):
