@@ -30,7 +30,6 @@ from optparse import OptionParser, OptionGroup
 from email.mime.text import MIMEText
 from email.MIMEImage import MIMEImage
 from email.mime.multipart import MIMEMultipart
-from shinken.objects.config import Config
 
 # Global var
 shinken_image_dir = '/var/lib/shinken/share/images'
@@ -71,24 +70,25 @@ def overload_test_variable():
     }
     return (shinken_notification_object_var, shinken_var)
 
-def read_webui_cfg():
-    config = Config()
-    webui_config_raw = config.read_config([webui_config_file])
-    webui_config = config.read_config_buf(webui_config_raw)
-    
-    return webui_config['module'][0]
+def get_webui_port():
+    webui_config_fh = open(webui_config_file)
+    webui_config = webui_config_fh.readlines()
+    for line in webui_config:
+        if 'port' in line:
+            port = line.rsplit('port')[1]
+    return port.strip()
 
 def get_shinken_url():
     if opts.webui:
         hostname = socket.gethostname()
-        webui_config = read_webui_cfg()
-        url = 'http://%s:%s/%s/%s' % (hostname, webui_config['port'][0], opts.notification_object, urllib.quote(shinken_var['Hostname']))
+        webui_port = get_webui_port()
+        url = 'http://%s:%s/%s/%s' % (hostname, webui_port, opts.notification_object, urllib.quote(shinken_var['Hostname']))
 
         # Append service if we notify a service object
         if opts.notification_object == 'service':
             url += '/%s' % (urllib.quote(shinken_notification_object_var['service']['Service description']))
 
-        return 'More details on Shinken WebUI at : %s' % (url)
+        return url
 
 # Get current process user that will be the mail sender
 def get_user():
@@ -149,7 +149,7 @@ def create_txt_message(msg):
     # Add url at the end
     url = get_shinken_url()
     if url != None:
-        txt_content.append(url)
+        txt_content.append('More details on : %s' % url)
 
     txt_content = '\r\n'.join(txt_content)
 
