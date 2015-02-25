@@ -9,7 +9,7 @@ INSTALLED_FILES
 .settings
 .gitignore
 modules/*
-
+.idea/*
 # Logs and databases #
 ######################
 *.log*

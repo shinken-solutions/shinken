@@ -102,7 +102,7 @@ class ExternalCommandManager(object):
         'CHANGE_NORMAL_SVC_CHECK_INTERVAL':
             {'global': False, 'args': ['service', 'to_int']},
         'CHANGE_RETRY_HOST_CHECK_INTERVAL':
-            {'global': False, 'args': ['service', 'to_int']},
+            {'global': False, 'args': ['host', 'to_int']},
         'CHANGE_RETRY_SVC_CHECK_INTERVAL':
             {'global': False, 'args': ['service', 'to_int']},
         'CHANGE_SVC_CHECK_COMMAND':
@@ -447,11 +447,11 @@ class ExternalCommandManager(object):
                 os.umask(0)
                 try:
                     os.mkfifo(self.pipe_path, 0660)
-                    open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError, exp:
-                    self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
+                    logger.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
-        self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
+        self.fifo_file = open(self.pipe_path, 'w+', os.O_NONBLOCK)
+        self.fifo = self.fifo_file.fileno()
         return self.fifo
 
 
@@ -470,10 +470,6 @@ class ExternalCommandManager(object):
         elif buflen:
             # The buffer is either half-filled or full with a '\n' at the end.
             r.extend([ExternalCommand(s) for s in buf.split('\n') if s])
-        else:
-            # The buffer is empty. We "reset" the fifo here. It will be
-            # re-opened in the main loop.
-            os.close(self.fifo)
         return r
 
 
@@ -494,10 +490,6 @@ class ExternalCommandManager(object):
             # logger.info('EXTERNAL COMMAND: ' + command.rstrip())
             naglog_result('info', 'EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command, excmd)
-
-        # If we are a receiver, bail out here
-        if self.mode == 'receiver':
-            return
 
         if r is not None:
             is_global = r['global']
@@ -644,7 +636,7 @@ class ExternalCommandManager(object):
         elts = split_semicolon(command, numargs)
 
         logger.debug("mode= %s, global= %s", self.mode, str(entry['global']))
-        if self.mode == 'dispatcher' and entry['global']:
+        if ((self.mode == 'dispatcher' or self.mode == 'receiver') and entry['global']):
             if not internal:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers", c_name)
                 return {'global': True, 'cmd': command}

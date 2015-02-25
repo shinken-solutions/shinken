@@ -42,17 +42,13 @@ except (SyntaxError, ImportError), exp:
 
 # obj = None
 # name = None
-human_timestamp_log = False
 
 _brokhandler_ = None
 
-
-defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
-defaultFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
-humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s', '%a %b %d %H:%M:%S %Y')
-humanFormatter_named = Formatter('[%(asctime)s] %(levelname)s: [%(name)s] %(message)s',
-                                 '%a %b %d %H:%M:%S %Y')
-nagFormatter = Formatter('[%(created)i] %(message)s')
+# We just use iso-8601 date format
+defaultFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+defaultFormatter_named = Formatter('[%(asctime)s] %(levelname)s: [%(name)s] %(message)s')
+nagFormatter = Formatter('[%(asctime)s] %(message)s')
 
 class BrokHandler(Handler):
     """
@@ -168,28 +164,6 @@ class Log(logging.Logger):
 
         # Todo : Do we need this now we use logging?
         return handler.stream.fileno()
-
-
-    def set_human_format(self, on=True):
-        """
-        Set the output as human format.
-
-        If the optional parameter `on` is False, the timestamps format
-        will be reset to the default format.
-        """
-        global human_timestamp_log
-        human_timestamp_log = bool(on)
-
-        # Apply/Remove the human format to all handlers except the brok one.
-        for handler in self.handlers:
-            if isinstance(handler, BrokHandler):
-                continue
-
-            if self.name is not None:
-                handler.setFormatter(human_timestamp_log and humanFormatter_named or
-                                     defaultFormatter_named)
-            else:
-                handler.setFormatter(human_timestamp_log and humanFormatter or defaultFormatter)
 
 
     # Stack logs if we don't open a log file so we will be able to flush them

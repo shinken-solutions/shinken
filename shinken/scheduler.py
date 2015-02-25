@@ -1648,11 +1648,7 @@ class Scheduler(object):
             # Ok, go to send our broks to our external modules
             # self.send_broks_to_modules()
 
-            elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
-            if elapsed:
-                timeout -= elapsed
-                if timeout > 0:
-                    continue
+            self.sched_daemon.handleRequests(timeout)
 
             self.load_one_min.update_load(self.sched_daemon.sleep_time)
 

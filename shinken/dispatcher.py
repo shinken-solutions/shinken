@@ -110,9 +110,6 @@ class Dispatcher(object):
         # Reset need_conf for all schedulers.
         for s in self.schedulers:
             s.need_conf = True
-        # Same for receivers
-        for rec in self.receivers:
-            rec.need_conf = True
 
 
     # checks alive elements
@@ -191,7 +188,7 @@ class Dispatcher(object):
                         sched.conf = None
                     # Else: ok the conf is managed by a living scheduler
 
-        # Maybe satellites are alive, but do not have a cfg yet.
+        # Maybe satelites are alive, but do not have a cfg yet.
         # I think so. It is not good. I ask a global redispatch for
         # the cfg_id I think is not correctly dispatched.
         for r in self.realms:
@@ -236,15 +233,6 @@ class Dispatcher(object):
                 # At the first pass, there is no cfg_id in to_satellites_managed_by
                 except KeyError:
                     pass
-
-        # Look for receivers. If they got conf, it's ok, if not, need a simple
-        # conf
-        for r in self.realms:
-            for rec in r.receivers:
-                # If the receiver does not have a conf, must got one :)
-                if rec.reachable and not rec.got_conf():
-                    self.dispatch_ok = False  # so we will redispatch all
-                    rec.need_conf = True
 
 
     # Imagine a world where... oh no, wait...
@@ -368,7 +356,7 @@ class Dispatcher(object):
 
                     # If there is no alive schedulers, not good...
                     if len(scheds) == 0:
-                        logger.info('[%s] but there a no alive schedulers in this realm!',
+                        logger.warn('[%s] but there a no alive schedulers in this realm!',
                                     r.get_name())
 
                     # we need to loop until the conf is assigned
@@ -380,6 +368,13 @@ class Dispatcher(object):
                             # need_loop = False
                             # The conf does not need to be dispatch
                             cfg_id = conf.id
+                            # we need to dispatch the conf, but there are no
+                            # available alive schedulers to use, this conf
+                            # will be lost and something is wrong. We must
+                            # log it!
+                            logger.warn('[%s] Conf %d do not have additional '
+                                        'alive schedulers to assign to!',
+                                        r.get_name(), conf.id)
                             for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                                 r.to_satellites[kind][cfg_id] = None
                                 r.to_satellites_need_dispatch[kind][cfg_id] = False
@@ -579,25 +574,3 @@ class Dispatcher(object):
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.info("[%s] OK, no more %s sent need", r.get_name(), kind)
                                 r.to_satellites_need_dispatch[kind][cfg_id] = False
-
-            # And now we dispatch receivers. It's easier, they need ONE conf
-            # in all their life :)
-            for r in self.realms:
-                for rec in r.receivers:
-                    if rec.need_conf:
-                        logger.info('[%s] Trying to send configuration to receiver %s',
-                                    r.get_name(), rec.get_name())
-                        is_sent = False
-                        if rec.reachable:
-                            is_sent = rec.put_conf(rec.cfg)
-                        else:
-                            logger.info('[%s] Skyping configuration sent to offline receiver %s',
-                                        r.get_name(), rec.get_name())
-                        if is_sent:
-                            rec.active = True
-                            rec.need_conf = False
-                            logger.info('[%s] Dispatch OK of configuration to receiver %s',
-                                        r.get_name(), rec.get_name())
-                        else:
-                            logger.error('[%s] Dispatching failed for receiver %s',
-                                         r.get_name(), rec.get_name())
