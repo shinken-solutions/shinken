@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # sorteddict.py
 # Sorted dictionary (implementation for Python 2.x)
