@@ -40,7 +40,7 @@ from shinken.misc.common import DICT_MODATTR
 
 
 """ TODO: Add some comment about this class for the doc"""
-class ExternalCommand(object):
+class ExternalCommand:
     my_type = 'externalcommand'
 
     def __init__(self, cmd_line):
@@ -48,7 +48,7 @@ class ExternalCommand(object):
 
 
 """ TODO: Add some comment about this class for the doc"""
-class ExternalCommandManager(object):
+class ExternalCommandManager:
 
     commands = {
         'CHANGE_CONTACT_MODSATTR':
