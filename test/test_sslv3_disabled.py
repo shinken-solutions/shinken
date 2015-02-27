@@ -64,6 +64,9 @@ class testSchedulerInit(ShinkenTest):
 
         # Launch an arbiter so that the scheduler get a conf and init
         subprocess.Popen(["../bin/shinken-arbiter", "-c", daemons_config[Arbiter][0], "-d"])
+        if not hasattr(ssl, 'SSLContext'):
+            print 'BAD ssl version for testing, bailing out'
+            return
         ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv3)
         ctx.check_hostname=False
         ctx.verify_mode=ssl.CERT_NONE

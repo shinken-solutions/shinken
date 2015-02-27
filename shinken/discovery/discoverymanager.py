@@ -642,7 +642,7 @@ class DiscoveryManager(object):
         d = dh.get_final_properties()
         final_host = dh.name
 
-        print "Will generate an host", d
+        print "Will generate a host", d
         # Maybe we do not got a directory output, but
         # a bdd one.
         if self.output_dir:

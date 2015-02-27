@@ -1399,7 +1399,7 @@ class Services(Items):
     # + inform the host we are a service of him
     def linkify_s_by_hst(self, hosts):
         for s in self:
-            # If we do not have an host_name, we set it as
+            # If we do not have a host_name, we set it as
             # a template element to delete. (like Nagios)
             if not hasattr(s, 'host_name'):
                 s.host = None

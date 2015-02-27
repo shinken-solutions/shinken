@@ -194,7 +194,7 @@ class TestMacroResolver(ShinkenTest):
         print com
         self.assertEqual('plugins/nothing you should not pass', com)
 
-        # Ok now with an host implicit way
+        # Ok now with a host implicit way
         data = svc.get_data_for_checks()
         dummy_call = "special_macro!$SERVICEOUTPUT::test_another_service$"
         cc = CommandCall(self.conf.commands, dummy_call)

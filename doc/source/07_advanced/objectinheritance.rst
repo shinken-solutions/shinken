@@ -465,7 +465,7 @@ Inheritance overriding
 =======================
 
 
-Inheritance is a core feature allowing to factorize configuration. It is possible from an host or a service template to build a very large set of checks with relatively few lines. The drawback of this approach is that it requires all hosts or services to be consistent. But if it is easy to instanciate new hosts with their own definitions attributes sets, it is generally more complicated with services, because the order of magnitude is larger (hosts * services per host), and because few attributes may come from the host. This is is especially true for packs, which is a generalization of the inheritance usage.
+Inheritance is a core feature allowing to factorize configuration. It is possible from a host or a service template to build a very large set of checks with relatively few lines. The drawback of this approach is that it requires all hosts or services to be consistent. But if it is easy to instanciate new hosts with their own definitions attributes sets, it is generally more complicated with services, because the order of magnitude is larger (hosts * services per host), and because few attributes may come from the host. This is is especially true for packs, which is a generalization of the inheritance usage.
 
 If some hosts require special directives for the services they are hosting (values that are different from those defined at template level), it is generally necessary to define new service.
 
@@ -569,7 +569,7 @@ Example:
 
 In the packs example, the web server from the front-end cluster uses the value defined in the pack, and the one from the backend cluster has its HTTP service (inherited from the HTTP pack also) enforced its ``notification_options`` directive.
 
-.. important:: The service_overrides attribute may himself be inherited from an upper host template. This is a multivalued attribute wchich syntax requires that each value is set on its own line. If you add a line on an host instance, it will not add it to the ones defined at template level, it will overlobad them. If some of the values on the template level are needed, they have to be explicitely copied.
+.. important:: The service_overrides attribute may himself be inherited from an upper host template. This is a multivalued attribute wchich syntax requires that each value is set on its own line. If you add a line on a host instance, it will not add it to the ones defined at template level, it will overlobad them. If some of the values on the template level are needed, they have to be explicitely copied.
 
 Example:
 

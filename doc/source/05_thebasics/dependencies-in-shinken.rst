@@ -123,10 +123,10 @@ In this example, Shinken will determine that Web and Router1 are both in DOWN st
 Shinken will determine that all the hosts "beneath" Router1 are all in an UNREACHABLE state because Shinken can't reach them. Router1 is DOWN and is blocking the path to those other hosts. Those hosts might be running fine, or they might be offline - Shinken doesn't know because it can't reach them. Hence Shinken considers them to be UNREACHABLE instead of DOWN, and won't send notifications about them. Such hosts and services beneath router1 are the **impacts** of the **root problem** "router1"
 
 
-What about more than one parent for an host? 
+What about more than one parent for a host? 
 ---------------------------------------------
 
-You see that there is a 's' in parents. Because you can define as many parent as you want for an host (like if you got an active/passive switch setup). **The host will be UNREACHABLE only, and only if all it's parents are down or unreachable**. If one is still alive, it will be down. See this as a big *OR* rule.
+You see that there is a 's' in parents. Because you can define as many parent as you want for a host (like if you got an active/passive switch setup). **The host will be UNREACHABLE only, and only if all it's parents are down or unreachable**. If one is still alive, it will be down. See this as a big *OR* rule.
 
 
 UNREACHABLE States and Notifications 

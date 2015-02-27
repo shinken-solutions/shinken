@@ -162,7 +162,7 @@ For a service:
   
    ACK  host_name/service_description
   
-For an host:
+For a host:
 
 ::
 

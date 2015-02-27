@@ -2076,7 +2076,7 @@ class Config(Item):
         for s in [s for s in self.services if s.got_business_rule]:
             for e in s.business_rule.list_all_elements():
                 if hasattr(e, 'host'):  # if it's a service
-                    if e.host != s.host:  # do not an host with itself
+                    if e.host != s.host:  # do not a host with itself
                         links.add((e.host, s.host))
                 else:  # it's already a host
                     if e != s.host:
