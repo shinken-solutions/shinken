@@ -23,7 +23,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class Message(object):
+class Message:
     """This is a simple message class for communications between actionners and
     workers
 

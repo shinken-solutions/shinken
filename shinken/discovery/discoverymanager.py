@@ -307,7 +307,7 @@ class DiscoveredHost(object):
         self.read_disco_buf(raw_disco_data)
 
 
-class DiscoveryManager(object):
+class DiscoveryManager:
     def __init__(self, path, macros, overwrite, runners, output_dir=None,
                  dbmod='', db_direct_insert=False, only_new_hosts=False,
                  backend=None, modules_path='', merge=False, conf=None, first_level_only=False):

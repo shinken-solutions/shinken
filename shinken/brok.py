@@ -25,7 +25,7 @@
 import cPickle
 
 
-class Brok(object):
+class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
     """
