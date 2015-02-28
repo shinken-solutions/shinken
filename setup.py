@@ -427,7 +427,7 @@ for o in not_allowed_options:
     if o in sys.argv:
         sys.argv.remove(o)
 
-required_pkgs = []
+required_pkgs = ['HTML']
 setup(
     name="Shinken",
     version="2.2",
