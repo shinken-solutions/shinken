@@ -33,13 +33,18 @@ except ImportError:
     # or parent directory to support running without installation.
     # Submodules will then be loaded from there, too.
     import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    imp.load_module('shinken',
+                    *imp.find_module('shinken',
+                                     [os.path.realpath("."),
+                                      os.path.realpath(".."),
+                                      os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])),
+                                                   "..")]))
 
 from shinken.discovery.discoverymanager import DiscoveryManager
 
 
 VERSION = '1.0.1'
-if os.name != 'nt': 
+if os.name != 'nt':
     DEFAULT_CFG = '/etc/shinken/discovery.cfg'
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\discovery.cfg'
@@ -57,31 +62,38 @@ parser.add_option('-w', '--overwrite', dest="overwrite", action='store_true',
 parser.add_option('-r', '--runners', dest="runners",
                   help="List of runners you allow to run, (like nmap,vsphere)")
 parser.add_option('-m', '--macros', dest="macros",
-                  help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
+                  help="List of macros (like NMAPTARGETS=192.168.0.0/24). "
+                       "Should be the last argument")
 parser.add_option('--db', dest="dbmod",
                   help="Optional : Name of the database module to use")
 parser.add_option('--backend', dest="backend",
-                  help="Optional : Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optional : Name of a module that will totally manage the object "
+                       "writing/update thing. If you don't know what it means, maybe you "
+                       "should not use this option :)")
 parser.add_option('--modules_path', dest="modules_path",
-                  help="Optional : Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optional : Path for the module loading. If you don't know what it "
+                       "means, maybe you should not use this option :)")
 parser.add_option('--merge', dest="merge", action='store_true',
-                  help="Optional : In multiple discovery level, it is the final host name which wins. Make possible merge of multiple IP but same final device")
+                  help="Optional : In multiple discovery level, it is the final host name "
+                       "which wins. Make possible merge of multiple IP but same final device")
 
 
 
 opts, args = parser.parse_args()
 
 raw_macros = []
-macros=[]
+macros = []
 
 if not opts.cfg_input:
     if not os.path.exists(DEFAULT_CFG):
-        parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input)")
-    else : # take the default file
+        parser.error("Requires a discovery configuration file, discovery.cfg "
+                     "(option -c/--cfg-input)")
+    else:  # take the default file
         opts.cfg_input = DEFAULT_CFG
 
 if not opts.output_dir and not opts.dbmod and not opts.backend:
-    parser.error("Requires one output directory (option -o/--dir-output) or database output (option --db)")
+    parser.error("Requires one output directory (option -o/--dir-output) or "
+                 "database output (option --db)")
 
 if not opts.overwrite:
     overwrite = False
@@ -113,7 +125,7 @@ for m in raw_macros:
     if len(elts) < 2:
         print "The macro '%s' is malformed. I bail out" % m
         sys.exit(2)
-    macros.append( (elts[0], '='.join(elts[1:])))
+    macros.append((elts[0], '='.join(elts[1:])))
 
 print "Got macros", macros
 
@@ -131,7 +143,7 @@ print "Got macros", macros
 #            if h.get_name() == parent:
 #                print "Houray, we find our parent", self.h.get_name(), "->", h.get_name()
 #                self.parents.append(h.get_name())
-        
+
 
 cfg_input = opts.cfg_input
 output_dir = opts.output_dir
@@ -141,7 +153,8 @@ modules_path = opts.modules_path or ''
 
 
 # Get the Manager for all of the discovery thing
-d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path, merge=merge)
+d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir,
+                     dbmod=dbmod, backend=backend, modules_path=modules_path, merge=merge)
 
 # #Ok, let start the plugins that will give us the data
 d.launch_runners()

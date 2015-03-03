@@ -27,11 +27,13 @@ Thumbs.db
 *.pid
 ._.*
 *~
+*.swp
 \#*#
 
 *.debug
 *pack_distribution.dat
 test/tmp/*dat
+env/
 
 # Documentation #
 #################
@@ -42,3 +44,8 @@ docs/tools/pages/
 
 # test and coverage
 test/tmp/.cov*
+
+
+# Pbr
+pbr-*.egg/
+

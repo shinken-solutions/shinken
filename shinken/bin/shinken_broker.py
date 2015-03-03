@@ -45,7 +45,12 @@ except ImportError:
     # or parent directory to support running without installation.
     # Submodules will then be loaded from there, too.
     import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    imp.load_module('shinken',
+                    *imp.find_module('shinken',
+                                     [os.path.realpath("."),
+                                      os.path.realpath(".."),
+                                      os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])),
+                                                   "..")]))
     import shinken
     # Ok we should add the shinken root directory to our sys.path so our sons
     # will be able to use the shinken import without problems
@@ -56,30 +61,30 @@ except ImportError:
 from shinken.daemons.brokerdaemon import Broker
 from shinken.bin import VERSION
 
-parser = optparse.OptionParser(
-    "%prog [options]", version="%prog " + VERSION)
-parser.add_option('-c', '--config',
-                  dest="config_file", metavar="INI-CONFIG-FILE",
-                  help='Config file')
-parser.add_option('-d', '--daemon', action='store_true',
-                  dest="is_daemon",
-                  help="Run in daemon mode")
-parser.add_option('-r', '--replace', action='store_true',
-                  dest="do_replace",
-                  help="Replace previous running broker")
-parser.add_option('--debugfile', dest='debug_file',
-                  help=("Debug file. Default: not used "
-                        "(why debug a bug free program? :) )"))
-parser.add_option("-p", "--profile",
-                  dest="profile",
-                  help="Dump a profile file. Need the python cProfile librairy")
-
-opts, args = parser.parse_args()
-if args:
-    parser.error("Does not accept any argument.")
-
 # Protect for windows multiprocessing that will RELAUNCH all
-if __name__ == '__main__':
+def main():
+    parser = optparse.OptionParser(
+        "%prog [options]", version="%prog " + VERSION)
+    parser.add_option('-c', '--config',
+                      dest="config_file", metavar="INI-CONFIG-FILE",
+                      help='Config file')
+    parser.add_option('-d', '--daemon', action='store_true',
+                      dest="is_daemon",
+                      help="Run in daemon mode")
+    parser.add_option('-r', '--replace', action='store_true',
+                      dest="do_replace",
+                      help="Replace previous running broker")
+    parser.add_option('--debugfile', dest='debug_file',
+                      help=("Debug file. Default: not used "
+                            "(why debug a bug free program? :) )"))
+    parser.add_option("-p", "--profile",
+                      dest="profile",
+                      help="Dump a profile file. Need the python cProfile librairy")
+
+    opts, args = parser.parse_args()
+    if args:
+        parser.error("Does not accept any argument.")
+
     daemon = Broker(debug=opts.debug_file is not None, **opts.__dict__)
     if not opts.profile:
         daemon.main()
@@ -87,3 +92,7 @@ if __name__ == '__main__':
         # For perf tuning:
         import cProfile
         cProfile.run('''daemon.main()''', opts.profile)
+
+
+if __name__ == '__main__':
+    main()
