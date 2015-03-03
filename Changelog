@@ -2,7 +2,14 @@
 Shinken ChangeLog
 ########################
 
-2.2   - XX/01/2015
+2.4   - 31/03/2015
+-------------------
+    CORE ENHANCEMENT
+
+    CORE FIXES
+
+
+2.2   - 16/01/2015
 -------------------
 	CORE ENHANCEMENT
 	Add : Bottle - HTTP_X_FORWARDED_PROTO support (for WebUI)
