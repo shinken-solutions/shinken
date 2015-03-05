@@ -28,7 +28,7 @@ from shinken_test import *
 class TestModuleAutogeneration(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+        self.setup_with_file('etc/shinken_module_autogeneration.cfg')
 
     def test_module_autogeneration(self):
         modules = [m.module_name for m in self.conf.arbiters[0].modules]
