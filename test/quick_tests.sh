@@ -40,7 +40,7 @@ function launch_and_assert {
 
 for ii in `ls -1 test_*py`; do launch_and_assert $ii; done
 # And create the coverage file
-coverage xml --omit=/usr/lib
+python-coverage xml --omit=/usr/lib
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"

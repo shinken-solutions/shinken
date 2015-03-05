@@ -9,3 +9,4 @@ cd $BASE_PATH
 
 # install prog AND tests requirements :
 pip install -r test/requirements.txt
+python setup.py develop

@@ -533,7 +533,7 @@ class Regenerator(object):
         except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
-        # safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
+        # safe_print("Creating a host: %s in instance %d" % (hname, inst_id))
 
         h = Host({})
         self.update_element(h, data)
@@ -546,7 +546,7 @@ class Regenerator(object):
         inp_hosts[h.id] = h
 
 
-    # From now we only create an hostgroup in the in prepare
+    # From now we only create a hostgroup in the in prepare
     # part. We will link at the end.
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -560,7 +560,7 @@ class Regenerator(object):
             print "Not good!", exp
             return
 
-        safe_print("Creating an hostgroup: %s in instance %d" % (hgname, inst_id))
+        safe_print("Creating a hostgroup: %s in instance %d" % (hgname, inst_id))
 
         # With void members
         hg = Hostgroup([])
@@ -679,7 +679,7 @@ class Regenerator(object):
         c.notificationways = new_notifways
 
 
-    # From now we only create an hostgroup with unlink data in the
+    # From now we only create a hostgroup with unlink data in the
     # in prepare list. We will link all of them at the end.
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data

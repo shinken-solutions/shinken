@@ -821,7 +821,7 @@ class SchedulingItem(Item):
             if rm is not None:
                 c.exit_status = rm.module_return(c.exit_status)
 
-        # By design modulation: if we got an host, we should look at the
+        # By design modulation: if we got a host, we should look at the
         # use_aggressive_host_checking flag we should module 1 (warning return):
         # 1 & agressive => DOWN/2
         # 1 & !agressive => UP/0
@@ -1393,7 +1393,7 @@ class SchedulingItem(Item):
             # Fred : passive only checked host dependency
             if dependent and self.my_type == 'host' and \
                     self.passive_checks_enabled and not self.active_checks_enabled:
-                logger.debug("Host check is for an host that is only passively "
+                logger.debug("Host check is for a host that is only passively "
                              "checked (%s), do not launch the check !", self.host_name)
                 return None
 

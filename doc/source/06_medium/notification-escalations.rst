@@ -34,7 +34,7 @@ Notifications are escalated if and only if one or more escalation linked to your
   }
   
   
-And then you can call it from a service (or an host):
+And then you can call it from a service (or a host):
   
 
 ::

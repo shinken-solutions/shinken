@@ -1,2 +1,4 @@
+CherryPy
 pycurl
 importlib
+pbr

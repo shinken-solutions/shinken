@@ -147,7 +147,7 @@ How it works
 -------------
 
 Runner does only detects HACMP/PowerHA and Safekit clustering solutions for the moment. It will scan OID and return cluster name or module name list, depends on Safekit or HACMP.
-For an host with two Safekit modules **test** and **prod**, runner will output :
+For a host with two Safekit modules **test** and **prod**, runner will output :
 
 ::
 

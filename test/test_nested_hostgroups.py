@@ -56,7 +56,7 @@ class TestNestedHostgroups(ShinkenTest):
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "testHostToGroup")
         self.assertIsNot(svc3, None)
 
-        # And same with an host in the low_group, should have it too
+        # And same with a host in the low_group, should have it too
         host3 = self.sched.hosts.find_by_name("test_host_3")
         self.assertIn(host3, hg_high.members)
         svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_3", "testHostToGroup")

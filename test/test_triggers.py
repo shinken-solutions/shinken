@@ -96,7 +96,7 @@ class TestTriggers(ShinkenTest):
         self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95%", svc.perf_data)
 
-        # Same with an host
+        # Same with a host
         host = self.sched.hosts.find_by_name("test_host_trigger")
         host.output = 'I am OK'
         host.perf_data = 'cpu=95%'

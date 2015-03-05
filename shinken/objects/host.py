@@ -979,7 +979,7 @@ class Host(SchedulingItem):
             self.last_state = self.state_before_impact
         else:
             self.last_state = self.state
-        # There is no 1 case because it should have been managed by the caller for an host
+        # There is no 1 case because it should have been managed by the caller for a host
         # like the schedulingitem::consume method.
         if status == 0:
             self.state = 'UP'

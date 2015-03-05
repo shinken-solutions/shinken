@@ -307,7 +307,7 @@ class DiscoveredHost(object):
         self.read_disco_buf(raw_disco_data)
 
 
-class DiscoveryManager(object):
+class DiscoveryManager:
     def __init__(self, path, macros, overwrite, runners, output_dir=None,
                  dbmod='', db_direct_insert=False, only_new_hosts=False,
                  backend=None, modules_path='', merge=False, conf=None, first_level_only=False):
@@ -642,7 +642,7 @@ class DiscoveryManager(object):
         d = dh.get_final_properties()
         final_host = dh.name
 
-        print "Will generate an host", d
+        print "Will generate a host", d
         # Maybe we do not got a directory output, but
         # a bdd one.
         if self.output_dir:

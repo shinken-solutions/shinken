@@ -161,7 +161,7 @@ For example, we want to add the "ftp" and "http" templates on the host, without 
   }
   
   
-If both ports are open, it will create an host with:
+If both ports are open, it will create a host with:
 
 ::
   
@@ -218,7 +218,7 @@ For example we want to add the "router-os" template but not the "linux" template
   }
 
 
-If both ports are open, os detected is linux and the macvendor is routerboard it will create an host with:
+If both ports are open, os detected is linux and the macvendor is routerboard it will create a host with:
 
 ::
   

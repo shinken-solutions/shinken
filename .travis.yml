@@ -7,8 +7,6 @@ python:
 # some are only used for travis/coveralls so we are installing them here only
 install:
   - ./test/setup_test.sh
-  - ./bin/preparedev
-
 # command to run tests
 # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
 # so we must combine them in the end

@@ -83,7 +83,7 @@ class DependencyNode(object):
             return self.get_complex_node_state()
 
 
-    # Returns a simple node direct state (such as an host or a service). No
+    # Returns a simple node direct state (such as a host or a service). No
     # calculation is needed
     def get_simple_node_state(self):
         state = self.sons[0].last_hard_state_id
@@ -382,7 +382,7 @@ class DependencyNodeFactory(object):
             # Until here, we're not in par
 
             # Manage the NOT for an expression. Only allow ! at the beginning
-            # of an host or an host,service expression.
+            # of a host or a host,service expression.
             elif c == '!':
                 tmp = tmp.strip()
                 if tmp and tmp[0] != '!':
@@ -437,8 +437,8 @@ class DependencyNodeFactory(object):
         return node
 
 
-    # Evaluate a simple correlation expression, such as an host, an host + a
-    # service, or expand an host or service expression.
+    # Evaluate a simple correlation expression, such as a host, a host + a
+    # service, or expand a host or service expression.
     def eval_simple_cor_pattern(self, pattern, hosts, services, running=False):
         node = DependencyNode()
         pattern = self.eval_xof_pattern(node, pattern)
@@ -529,7 +529,7 @@ class DependencyNodeFactory(object):
                 filters.extend(self.get_srv_service_filters(service_expr))
                 items = services.find_by_filter(filters)
             else:
-                # We got an host expression
+                # We got a host expression
                 host_expr = elts[0]
                 filters.extend(self.get_host_filters(host_expr))
                 items = hosts.find_by_filter(filters)

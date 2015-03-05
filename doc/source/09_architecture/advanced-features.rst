@@ -232,7 +232,7 @@ Every one? In fact no. If an administrator got a continental distributed archite
 
 That is where the site/customers management is useful. In Shinken, it's managed by the **realms**.
 
-A realm is a group of resources that will manage hosts or hostgroups. Such a link will be unique: a host cannot be in multiple realms. If you put an hostgroup in a realm, all hosts in this group will be in the realm (unless a host already has the realm set, the host value will be taken).
+A realm is a group of resources that will manage hosts or hostgroups. Such a link will be unique: a host cannot be in multiple realms. If you put a hostgroup in a realm, all hosts in this group will be in the realm (unless a host already has the realm set, the host value will be taken).
 
 A realm is:
  * at least a scheduler
