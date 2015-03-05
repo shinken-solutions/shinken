@@ -79,7 +79,7 @@ class NotWorkerMod(Exception):
 # It gives us our conf
 class IForArbiter(Interface):
 
-    doc = 'Remove a scheduler connexion (internal)'
+    doc = 'Remove a scheduler connection (internal)'
     # Arbiter ask us to do not manage a scheduler_id anymore
     # I do it and don't ask why
     def remove_from_conf(self, sched_id):

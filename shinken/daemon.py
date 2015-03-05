@@ -108,7 +108,7 @@ class Interface(object):
         )
 
 
-    doc = 'Test the connexion to the daemon. Returns: pong'
+    doc = 'Test the connection to the daemon. Returns: pong'
     def ping(self):
         return "pong"
     ping.need_lock = False

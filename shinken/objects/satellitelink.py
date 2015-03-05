@@ -118,7 +118,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # Maybe the connexion was not ok, bail out
+        # Maybe the connection was not ok, bail out
         if not self.con:
             return False
 

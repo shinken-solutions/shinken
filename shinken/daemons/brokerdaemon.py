@@ -178,7 +178,7 @@ class Broker(BaseSatellite):
 
 
     # wrapper function for the real function do_
-    # just for timing the connexion
+    # just for timing the connection
     def pynag_con_init(self, id, type='scheduler'):
         _t = time.time()
         r = self.do_pynag_con_init(id, type)
