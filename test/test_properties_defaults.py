@@ -331,7 +331,7 @@ class TestContact(PropertiesTester, ShinkenTest):
         ('is_admin', False),
         ('expert', False),
         ('retain_status_information', True),
-        ('notificationways', ''),
+        ('notificationways', []),
         ('password', 'NOPASSWORDSET'),
         ])
 
