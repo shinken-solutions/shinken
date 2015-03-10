@@ -53,9 +53,9 @@ class NotificationWay(Item):
         'service_notification_options':
             ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
         'host_notification_commands':
-            StringProp(fill_brok=['full_status']),
+            ListProp(fill_brok=['full_status']),
         'service_notification_commands':
-            StringProp(fill_brok=['full_status']),
+            ListProp(fill_brok=['full_status']),
         'min_business_impact':
             IntegerProp(default=0, fill_brok=['full_status']),
     })

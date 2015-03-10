@@ -1254,8 +1254,7 @@ class Items(object):
     def linkify_command_list_with_commands(self, commands, prop):
         for i in self:
             if hasattr(i, prop):
-                coms = getattr(i, prop).split(',')
-                coms = strip_and_uniq(coms)
+                coms = strip_and_uniq(getattr(i, prop))
                 com_list = []
                 for com in coms:
                     if com != '':
