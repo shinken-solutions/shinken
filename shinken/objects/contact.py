@@ -61,8 +61,9 @@ class Contact(Item):
                                               split_on_coma=True),
         'service_notification_options': ListProp(default=[''], fill_brok=['full_status'],
                                                  split_on_coma=True),
-        'host_notification_commands': StringProp(fill_brok=['full_status']),
-        'service_notification_commands': StringProp(fill_brok=['full_status']),
+        # To be consistent with notificationway object attributes
+        'host_notification_commands': ListProp(fill_brok=['full_status']),
+        'service_notification_commands': ListProp(fill_brok=['full_status']),
         'min_business_impact':    IntegerProp(default=0, fill_brok=['full_status']),
         'email':            StringProp(default='none', fill_brok=['full_status']),
         'pager':            StringProp(default='none', fill_brok=['full_status']),
@@ -76,7 +77,7 @@ class Contact(Item):
         'is_admin':         BoolProp(default=False, fill_brok=['full_status']),
         'expert':           BoolProp(default=False, fill_brok=['full_status']),
         'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
-        'notificationways': StringProp(default='', fill_brok=['full_status']),
+        'notificationways': ListProp(default=[], fill_brok=['full_status']),
         'password':        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
 
@@ -239,7 +240,7 @@ class Contacts(Items):
             if not hasattr(i, 'notificationways'):
                 continue
             new_notificationways = []
-            for nw_name in strip_and_uniq(i.notificationways.split(',')):
+            for nw_name in strip_and_uniq(i.notificationways):
                 nw = notificationways.find_by_name(nw_name)
                 if nw is not None:
                     new_notificationways.append(nw)
@@ -294,6 +295,6 @@ class Contacts(Items):
                 notificationways.new_inner_member(nw_name, params)
 
                 if not hasattr(c, 'notificationways'):
-                    c.notificationways = nw_name
+                    c.notificationways = [nw_name]
                 else:
-                    c.notificationways = c.notificationways + ',' + nw_name
+                    c.notificationways.append(nw_name)

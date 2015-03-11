@@ -37,6 +37,9 @@ from shinken.property import UnusedProp, StringProp, IntegerProp, \
 class TestEndParsingType(unittest.TestCase):
 
     def map_type(self, obj):
+        # TODO: Replace all str with unicode when done in property.default attribute
+        # TODO: Fix ToGuessProp as it may be a list.
+
         if isinstance(obj, ListProp):
             return list
 
@@ -120,18 +123,46 @@ class TestEndParsingType(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
 
+        # Cannot do it for all obj for now. We have to ensure unicode everywhere fist
 
-        for arb in self.conf.arbiters:
-            for prop in arb.properties:
-                if hasattr(arb, prop):
-                    value = getattr(arb, prop)
+        for objs in [self.conf.arbiters]:
+            for obj in objs:
+                #print "=== obj : %s ===" % obj.__class__
+                for prop in obj.properties:
+                    if hasattr(obj, prop):
+                        value = getattr(obj, prop)
+                        # We should get ride of None, maybe use the "neutral" value for type
+                        if value is not None:
+                            #print("TESTING %s with value %s" % (prop, value))
+                            self.assertIsInstance(value, self.map_type(obj.properties[prop]))
+                        else:
+                            print("Skipping %s " % prop)
+                #print "==="
+
+        # Manual check of several attr for self.conf.contacts
+        # because contacts contains unicode attr
+        for contact in self.conf.contacts:
+            for prop in ["notificationways", "host_notification_commands", "service_notification_commands"]:
+                if hasattr(contact, prop):
+                    value = getattr(contact, prop)
                     # We should get ride of None, maybe use the "neutral" value for type
                     if value is not None:
-                        #print("TESTING %s with value %s" % (prop, value))
-                        self.assertIsInstance(value, self.map_type(arb.properties[prop]))
+                        print("TESTING %s with value %s" % (prop, value))
+                        self.assertIsInstance(value, self.map_type(contact.properties[prop]))
                     else:
                         print("Skipping %s " % prop)
 
+        # Same here
+        for notifway in self.conf.notificationways:
+            for prop in ["host_notification_commands", "service_notification_commands"]:
+                if hasattr(notifway, prop):
+                    value = getattr(notifway, prop)
+                    # We should get ride of None, maybe use the "neutral" value for type
+                    if value is not None:
+                        print("TESTING %s with value %s" % (prop, value))
+                        self.assertIsInstance(value, self.map_type(notifway.properties[prop]))
+                    else:
+                        print("Skipping %s " % prop)
 
 if __name__ == '__main__':
     unittest.main()
