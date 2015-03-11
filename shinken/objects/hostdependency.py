@@ -184,18 +184,6 @@ class Hostdependencies(Items):
                 hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent
             )
 
-    # Apply inheritance for all properties
-    def apply_inheritance(self):
-        # We check for all Host properties if the host has it
-        # if not, it check all host templates for a value
-        for prop in Hostdependency.properties:
-            self.apply_partial_inheritance(prop)
-
-        # Then implicit inheritance
-        # self.apply_implicit_inheritance(hosts)
-        for h in self:
-            h.get_customs_properties_by_inheritance()
-
     def is_correct(self):
         r = super(Hostdependencies, self).is_correct()
         return r and self.no_loop_in_parents("host_name", "dependent_host_name")

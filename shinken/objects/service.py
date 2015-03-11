@@ -1467,18 +1467,6 @@ class Services(Items):
                     if h is not None and hasattr(h, prop):
                         setattr(s, prop, getattr(h, prop))
 
-    # Apply inheritance for all properties
-    def apply_inheritance(self, hosts):
-        # We check for all Host properties if the host has it
-        # if not, it check all host templates for a value
-        for prop in Service.properties:
-            self.apply_partial_inheritance(prop)
-
-        # Then implicit inheritance
-        # self.apply_implicit_inheritance(hosts)
-        for s in self:
-            s.get_customs_properties_by_inheritance()
-
     # Create dependencies for services (daddy ones)
     def apply_dependencies(self):
         for s in self:
