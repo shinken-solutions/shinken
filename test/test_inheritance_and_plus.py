@@ -18,10 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#
-# This file is used to test reading and processing of config files
-#
-
 from shinken_test import *
 
 
@@ -59,7 +55,18 @@ class TestInheritanceAndPlus(ShinkenTest):
         self.assertIn(dmz.get_name(), [hg.get_name() for hg in host2.hostgroups])
         self.assertIn(mysql.get_name(), [hg.get_name() for hg in host2.hostgroups])
 
+    def test_pack_like_inheritance(self):
+        # get our pack service
+        host = self.sched.hosts.find_by_name('pack-host')
+        service = host.find_service_by_name('CHECK-123')
 
+        # it should exist
+        self.assertIsNotNone(service)
+
+        # it should contain the custom variable `_CUSTOM_123` because custom
+        # variables are always stored in upper case
+        customs = service.customs
+        self.assertIn('_CUSTOM_123', customs)
 
 
 if __name__ == '__main__':
