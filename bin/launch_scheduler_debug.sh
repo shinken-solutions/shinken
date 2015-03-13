@@ -23,9 +23,9 @@
 
 
 DIR="$(cd $(dirname "$0"); pwd)"
-BIN="$DIR"/../bin
+BIN="$DIR"/../shinken/bin
 ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/scheduler.debug"
 
 echo "Launching Scheduler (that is only in charge of scheduling) in debug mode to the file $DEBUG_PATH"
-"$BIN"/shinken-scheduler -d -c "$ETC"/daemons/schedulerd.ini --debug "$DEBUG_PATH"  --profile /tmp/scheduler.profile
+"$BIN"/shinken_scheduler.py -d -c "$ETC"/daemons/schedulerd.ini --debug "$DEBUG_PATH"  --profile /tmp/scheduler.profile
