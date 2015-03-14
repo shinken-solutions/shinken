@@ -16,7 +16,7 @@ Shinken Project
 ================
 
 Shinken is now an open source monitoring *framework* but was first created to be a open source monitoring *solution*.
-This difference is important for the team, a framework does not have the same use than a all in one solution.
+This difference is important for the team, a framework does not have the same use than an all in one solution.
 The main idea when developing Shinken is the flexibility which is our definition of framework.
 Nevertheless, Shinken was first made differently and we try to keep all the good things that made it a monitoring solution :
    * Easy to install : install is mainly done with pip but some packages are available (deb / rpm) and we are planning to provide nightly build.
@@ -26,7 +26,7 @@ Nevertheless, Shinken was first made differently and we try to keep all the good
    * Multi-platform : python is available in a lot of OS. We try to write generic code to keep this possible.
    * Utf8 compliant : python is here to do that. For now Shinken is compatible with 2.6-2.7 version but python 3.X is even more character encoding friendly.
    * Independent from other monitoring solution : our goal is to provide a modular *tool* that can integrate with others through standard interfaces). Flexibility first.
-   * Flexible : in a architecture point view. It is very close to our scalability wish. Cloud computing is make architecture moving a lot, we have to fit to it.
+   * Flexible : in an architecture point view. It is very close to our scalability wish. Cloud computing is make architecture moving a lot, we have to fit to it.
    * Fun to code : python ensure good code readability. Adding code should not be a pain when developing.
 
 This is basically what Shinken is made of. Maybe add the "keep it simple" Linux principle and it's prefect. There is nothing we don't want, we consider every features / ideas.
