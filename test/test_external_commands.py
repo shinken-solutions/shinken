@@ -295,5 +295,15 @@ class TestConfig(ShinkenTest):
         self.assertEqual(1, svc.modified_attributes)
         self.assertFalse(getattr(svc, DICT_MODATTR["MODATTR_NOTIFICATIONS_ENABLED"].attribute))
 
+    def test_change_retry_host_check_interval(self):
+        excmd = '[%d] CHANGE_RETRY_HOST_CHECK_INTERVAL;test_host_0;42' % time.time()
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, [])
+        hst = self.conf.hosts.find_by_name("test_host_0")
+        self.assertEqual(2048, hst.modified_attributes)
+        self.assertEqual(getattr(hst, DICT_MODATTR["MODATTR_RETRY_CHECK_INTERVAL"].attribute), 42)
+        self.assert_no_log_match("A command was received for service.*")
+
 if __name__ == '__main__':
     unittest.main()

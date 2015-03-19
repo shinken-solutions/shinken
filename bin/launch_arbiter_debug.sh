@@ -23,7 +23,7 @@
 
 
 DIR="$(cd $(dirname "$0"); pwd)"
-BIN="$DIR"/../bin
+BIN="$DIR"/../shinken/bin
 ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/arbiter.debug"
 
@@ -34,6 +34,6 @@ cd /var/run/shinken
 echo "Launching Arbiter (which reads configuration and dispatches it) " \
     "in debug mode to the file $DEBUG_PATH"
 
-"$BIN"/shinken-arbiter -d \
+"$BIN"/shinken_arbiter.py -d \
     -c "$ETC"/shinken.cfg  -c "$ETC"/sample.cfg -c "$ETC"/dev.cfg\
     --debug "$DEBUG_PATH" -p /tmp/arbiter.profile

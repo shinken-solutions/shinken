@@ -47,20 +47,6 @@ class ArbiterLink(SatelliteLink):
     def get_config(self):
         return self.con.get('get_config')
 
-    # Check is required when prop are set:
-    # contacts OR contactgroups is need
-    def is_correct(self):
-        state = True
-        cls = self.__class__
-
-        for prop, entry in cls.properties.items():
-            if not hasattr(self, prop) and entry.required:
-                # This should raise an error afterwards?
-                # Log the issue
-                logger.warning("%s arbiterlink is missing %s property", self.get_name(), prop)
-                self.debug("%s arbiterlink is missing %s property" % (self.get_name(), prop))
-                state = False  # Bad boy...
-        return state
 
     # Look for ourself as an arbiter. If we search for a specific arbiter name, go forit
     # If not look be our fqdn name, or if not, our hostname
@@ -129,7 +115,7 @@ class ArbiterLink(SatelliteLink):
 
 
 class ArbiterLinks(SatelliteLinks):
-    name_property = "name"
+    name_property = "arbiter_name"
     inner_class = ArbiterLink
 
 

@@ -102,7 +102,7 @@ class ExternalCommandManager:
         'CHANGE_NORMAL_SVC_CHECK_INTERVAL':
             {'global': False, 'args': ['service', 'to_int']},
         'CHANGE_RETRY_HOST_CHECK_INTERVAL':
-            {'global': False, 'args': ['service', 'to_int']},
+            {'global': False, 'args': ['host', 'to_int']},
         'CHANGE_RETRY_SVC_CHECK_INTERVAL':
             {'global': False, 'args': ['service', 'to_int']},
         'CHANGE_SVC_CHECK_COMMAND':

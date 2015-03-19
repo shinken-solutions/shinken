@@ -1,10 +1,6 @@
-#!/bin/sh
-#
+#!/usr/bin/env python
 # Copyright (C) 2009-2014:
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+#    Sebastien Coavoux, s.coavoux@free.fr
 #
 # This file is part of Shinken.
 #
@@ -21,17 +17,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+#
+# This file is used to test reading and processing of config files
+#
 
-DIR="$(cd $(dirname "$0"); pwd)"
-echo "Going to dir $DIR"
+from shinken_test import *
 
-cd "$DIR"/..
 
-export LANG=us_US.UTF-8
+class TestArbiterError(ShinkenTest):
 
-"$DIR"/launch_scheduler.sh
-"$DIR"/launch_poller.sh
-"$DIR"/launch_reactionner.sh
-"$DIR"/launch_broker.sh
-"$DIR"/launch_receiver.sh
-"$DIR"/launch_arbiter.sh
+    def setUp(self):
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+
+    def test_arbiter_error(self):
+        self.assertListEqual(self.conf.arbiters[0].configuration_errors, [])
+
+
+if __name__ == '__main__':
+    unittest.main()

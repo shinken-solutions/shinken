@@ -23,8 +23,8 @@
 
 
 DIR="$(cd $(dirname "$0"); pwd)"
-BIN="$DIR"/../bin
+BIN="$DIR"/../shinken/bin
 ETC="$DIR"/../etc
 
 echo "Launching Poller (which launches checks)"
-"$BIN"/shinken-poller -d -c "$ETC"/daemons/pollerd.ini
+"$BIN"/shinken_poller.py -d -c "$ETC"/daemons/pollerd.ini
