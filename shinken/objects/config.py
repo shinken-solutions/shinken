@@ -1495,9 +1495,9 @@ class Config(Item):
         # print "Contacts"
         self.contacts.apply_inheritance()
         # print "Services"
-        self.services.apply_inheritance(self.hosts)
+        self.services.apply_inheritance()
         # print "Servicedependencies"
-        self.servicedependencies.apply_inheritance(self.hosts)
+        self.servicedependencies.apply_inheritance()
         # print "Hostdependencies"
         self.hostdependencies.apply_inheritance()
         # Also timeperiods

@@ -1096,14 +1096,17 @@ class Items(object):
                 pass
 
     def apply_inheritance(self):
+        """ For all items and templates inherite properties and custom
+            variables.
+        """
         # We check for all Class properties if the host has it
         # if not, it check all host templates for a value
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in self:
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
             i.get_customs_properties_by_inheritance()
-
 
     # We've got a contacts property with , separated contacts names
     # and we want have a list of Contacts

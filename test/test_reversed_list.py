@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-
+from shinken_test import ShinkenTest, unittest
 from shinken.misc.regenerator import Regenerator
 from shinken.brok import Brok
-
-from shinken_test import ShinkenTest, unittest
 
 
 class TestReversedList(ShinkenTest):
