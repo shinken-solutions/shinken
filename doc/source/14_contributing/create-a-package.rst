@@ -1,7 +1,7 @@
 .. _contributing/create-a-package:
 
 ==================================
-Shinken modules and Shinken packs
+Shinken modules
 ==================================
 
 
@@ -16,67 +16,18 @@ For a MODULE named ABC (ex: `github.com/shinken-monitoring/mod-ip-tag`_ )
 
 That"s ALL!
 
-For a PACK named ABC (for an example look at github.com/shinken-monitoring/pack-linux-snmp
-  
-::
-
-   pack/templates.cfg
-        /services/
-        /commands.cfg
-        […....]
-   share/images/sets/ABC/tag.png  (if need)
-        /templates/graphite/mycommand.graph
-
 
 The package.json file 
 ======================
 
-The package.json is like this for a PACK:
+The package.json is like this:
   
 ::
 
-  
-  {
-  
-::
-
-   "name": "linux-snmp",
-   "types": ["pack"],
-   "version": "1.4",
-   "homepage": "https://github.com/shinken-monitoring/pack-linux-snmp",
-   "author": "Jean Gabès",
-   "description": "Linux checks based on SNMP",
-   "contributors": [
-      {
-         "name": "Jean Gabès",
-         "email": "naparuba@gmail.com"
-      }
-   ],
-   "repository": "https://github.com/shinken-monitoring/pack-linux-snmp",
-   "keywords": [
-      "pack",
-      "linux",
-      "snmp"
-   ],
-   "dependencies": {
-      "shinken": ">=1.4"
-   },
-   "license": "AGPL"
-  }
-
-
-And for a module :
-  
-::
-
-  
-  {
-  
-::
-
+{
   "name": "ip-tag",
   "types": ["module"],
-  "version": "1.4",
+  "version": "1.4.1",
   "homepage": "http://github.com/shinken-monitoring/mod-ip-tag",
   "author": "Jean Gabès",
   "description": "Tag host by their IP ranges",
@@ -96,7 +47,7 @@ And for a module :
     "shinken": ">=1.4"
   },
   "license": "AGPL"
-  }
+}
 
 
 How to publish it 
@@ -113,9 +64,6 @@ Then you can :
 
 
 That's all :)
-=============
-
-.. note::  currently the integration process is a script on the shinken.io website, so you need to ask naparuba@gmail.com to launch it before he take time to put it on a cron :) ).
 
 .. _shinken.io/~: http://shinken.io/~
 .. _github.com/shinken-monitoring/mod-ip-tag: https://github.com/shinken-monitoring/mod-ip-tag

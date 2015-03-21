@@ -26,7 +26,7 @@ What's So Special About Volatile Services?
 Volatile services differ from “normal" services in three important ways. Each time they are checked when they are in a :ref:`hard <thebasics/statetypes>` non-OK state, and the check returns a non-OK state (i.e. no state change has occurred)...
 
   * The non-OK service state is logged
-  * Contacts are notified about the problem (if that's :ref:`what should be done <thebasics/notifications>`).Notification intervals are ignored for volatile services.
+  * Contacts are notified about the problem (if that's :ref:`what should be done <thebasics/notifications>`). Notification intervals are ignored for volatile services.
   * The :ref:`event handler <advanced/eventhandlers>` for the service is run (if one has been defined)
 
 These events normally only occur for services when they are in a non-OK state and a hard state change has just occurred. In other words, they only happen the first time that a service goes into a non-OK state. If future checks of the service result in the same non-OK state, no hard state change occurs and none of the events mentioned take place again.
