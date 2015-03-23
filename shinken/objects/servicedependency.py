@@ -283,18 +283,6 @@ class Servicedependencies(Items):
                 dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria,
                                                dp, sd.inherits_parent)
 
-    # Apply inheritance for all properties
-    def apply_inheritance(self, hosts):
-        # We check for all Host properties if the host has it
-        # if not, it check all host templates for a value
-        for prop in Servicedependency.properties:
-            self.apply_partial_inheritance(prop)
-
-        # Then implicit inheritance
-        # self.apply_implicit_inheritance(hosts)
-        for s in self:
-            s.get_customs_properties_by_inheritance()
-
     def is_correct(self):
         r = super(Servicedependencies, self).is_correct()
         return r and self.no_loop_in_parents("service_description", "dependent_service_description")
