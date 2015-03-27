@@ -1,4 +1,4 @@
-.. _contributing/create-a-package:
+.. _contributing/modules:
 
 ==================================
 Shinken modules
@@ -11,7 +11,7 @@ Packages layout
 For a MODULE named ABC (ex: `github.com/shinken-monitoring/mod-ip-tag`_ )
   * etc/modules/abc.cfg
   * module/module.py
-  *       /__init__.py
+  * /__init__.py
   * package.json
 
 That"s ALL!
@@ -23,31 +23,31 @@ The package.json file
 The package.json is like this:
   
 ::
-
-{
-  "name": "ip-tag",
-  "types": ["module"],
-  "version": "1.4.1",
-  "homepage": "http://github.com/shinken-monitoring/mod-ip-tag",
-  "author": "Jean Gabès",
-  "description": "Tag host by their IP ranges",
-  "contributors": [
+  
+  {
+    "name": "ip-tag",
+    "types": ["module"],
+    "version": "1.4.1",
+    "homepage": "http://github.com/shinken-monitoring/mod-ip-tag",
+    "author": "Jean Gabès",
+    "description": "Tag host by their IP ranges",
+    "contributors": [
     {
       "name": "Jean Gabès",
       "email": "naparuba@gmail.com"
     }
-  ],
-  "repository": "https://github.com/shinken-monitoring/mod-ip-tag",
-  "keywords": [
+    ],
+    "repository": "https://github.com/shinken-monitoring/mod-ip-tag",
+    "keywords": [
     "module",
     "arbiter",
     "ip"
-  ],
-  "dependencies": {
-    "shinken": ">=1.4"
-  },
-  "license": "AGPL"
-}
+    ],
+    "dependencies": {
+	"shinken": ">=1.4"
+    },
+    "license": "AGPL"
+  }
 
 
 How to publish it 

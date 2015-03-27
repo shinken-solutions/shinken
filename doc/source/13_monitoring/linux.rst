@@ -70,14 +70,14 @@ RedHat like:
 
 ::
 
-  #yum install snmpd
+  yum install snmpd
 
 
 Debian like:
 
 ::
 
-  #apt-get install snmpd
+  apt-get install snmpd
 
 
 Edit the /etc/snmp/snmpd.conf and comment the line:

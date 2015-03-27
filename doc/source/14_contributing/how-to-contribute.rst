@@ -11,11 +11,11 @@ Shinken resources for users (help) :
 =====================================
 
 
-    * ` Shinken documentation`_
+    * `Shinken documentation`_
     * :ref:`Shinken Troubleshooting FAQ <troubleshooting/troubleshooting-shinken>`
-    * ` Support Forums`_
-    * ` Shinken issues and bug reports`_
-    * ` Shinken Ideas`_
+    * `Support Forums`_
+    * `Shinken issues and bug reports`_
+    * `Shinken Ideas`_
 
 
 The documentation wiki contains a **Getting started** section for how-to and tutorial related information. It also hosts an official documentation that has the full in-depth details and a how to contribute section where you can learn how to help grow Shinken.
@@ -26,7 +26,7 @@ Your input and support is a precious resource. If the documentation is not clear
 Ways to contribute : 
 =====================
 
-    * help on the documentation ` Shinken documentation`_
+    * help on the documentation `Shinken documentation`_
     * help on updating this web site
     * help on tracking and fixing bugs, `Shinken is on github`_ to make it easy!
     * coding new features, modules and test cases
@@ -35,7 +35,7 @@ Ways to contribute :
     * submitting ideas to Shinken Ideas
     * responding to questions on the forums
 
-//Guidelines and resources are described for users in the first section and power users and developers in the second section.//
+.. tip::  Guidelines and resources are described for users in the first section and power users and developers in the second section.
 
 
 Shinken Guidelines for developers and power users : 
@@ -51,10 +51,10 @@ Guidelines that should be followed when contributing to the code
 
 Resources for developers and power users
 
-    * Development - Collaborative code repository on ` Shinken github`_
-    * Development - Bug tracking on ` Shinken github`_
-    * Development - Automated test and integration on ` Shinken Jenkins server`_ ` Shinken Jenkins server`_
-    * Development - The forums are also a good medium to discuss issues ` Support Forums`_
+    * Development - Collaborative code repository on `Shinken github`_
+    * Development - Bug tracking on `Shinken github`_
+    * Development - Automated test and integration on `Shinken Jenkins server`_
+    * Development - The forums are also a good medium to discuss issues `Support Forums`_
     * Development - Developer Mailing list - `Register or search the shinken-devel Mailing list`_
 
 For bug hunting and programming, you will need to look at the “How to hacking" tutorial page.
@@ -65,14 +65,12 @@ There is a development mailing list where you can join us. Come and let us know 
 
 Thank you for your help in making this software an open source success.
 
-Happy New Year to all Shinken followers, users and developers. xkilian 
-(If you find this you are lucky or tracking changes. ;-)
-
-.. _ Shinken issues and bug reports: https://github.com/naparuba/shinken/issues?sort=created&direction=desc&state=open
+.. _Shinken issues and bug reports: https://github.com/naparuba/shinken/issues?sort=created&direction=desc&state=open
 .. _Register or search the shinken-devel Mailing list: https://lists.sourceforge.net/lists/listinfo/shinken-devel
-.. _ Shinken github: https://github.com/naparuba/shinken/issues?sort=created&direction=desc&state=open
-.. _ Shinken Ideas: http://shinken.ideascale.com/
-.. _ Shinken documentation: http://shinken.readthedocs.org/
-.. _ Shinken Jenkins server: https://test.savoirfairelinux.com/view/Shinken/ 
+.. _Shinken github: https://github.com/naparuba/shinken/issues?sort=created&direction=desc&state=open
+.. _Shinken Ideas: http://shinken.ideascale.com/
+.. _Shinken documentation: http://shinken.readthedocs.org/
+.. _Shinken Jenkins server: https://test.savoirfairelinux.com/view/Shinken/ 
 .. _Shinken is on github: https://github.com/naparuba/shinken
-.. _ Support Forums: http://www.shinken-monitoring.org/forum/index.php
+.. _Support Forums: http://forum.shinken-monitoring.org/
+
