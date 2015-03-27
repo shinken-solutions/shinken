@@ -73,41 +73,27 @@ Find your host definition and edit it:
 Under Linux:
   
 ::
-
   
-  
-::
-
   linux:~ # vi /etc/shinken/hosts/srv-win-1.cfg
   
 Or Windows:
   
 ::
-
   
-  
-::
-
   c:\ wordpad   c:\shinken\etc\hosts\srv-win-1.cfg
-  
   
 All you need it to add the good template for your host. For example for a Hub Transport server:
   
 ::
 
-  
-  
-::
-
-  define host{
+  define host {
       use             iis,windows
       host_name       srv-win-1
       address         srv-win-1.mydomain.com
       }
   
-  
 
-* The use iis is the "template" line. It mean that this host will **inherits** properties from this template.
+  * The use iis is the "template" line. It mean that this host will **inherits** properties from this template.
   * the host_name is the object name of your host. It must be **unique**.
   * the address is ... the network address of your host :)
 

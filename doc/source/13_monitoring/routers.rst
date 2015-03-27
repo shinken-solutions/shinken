@@ -75,7 +75,7 @@ Remove the leading pound (#) sign from the following line in the main configurat
 
 ::
 
-  #cfg_file=/etc/shinken/objects/switch.cfg
+  cfg_file=/etc/shinken/objects/switch.cfg
   
 Save the file and exit.
 

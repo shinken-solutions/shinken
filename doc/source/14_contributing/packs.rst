@@ -1,4 +1,4 @@
-.. _contributing/create-and-push-packs:
+.. _contributing/packs:
 
 ==============
 Shinken packs
@@ -30,14 +30,14 @@ Let take a simple example with a linux pack, with CPU/Memory/Disk checks via SNM
 What does a package.json looks like? 
 ====================================
 
-It's a json file that describe your "pack". It will give it its name, where it should be installed, and if need give some macros provided by the host tags so it will be easier to configure in the SkonfUI.
+It's a json file that describe your "pack". It will give it its name, where it should be installed, and if need give some macros provided by the host tags.
 
 Let use our linux-smnp sample:
   
 ::
-
   
-{
+
+  {
     "name": "linux-snmp",
     "types": ["pack"],
     "version": "1.4",
@@ -45,26 +45,26 @@ Let use our linux-smnp sample:
     "author": "Jean Gabès",
     "description": "Linux checks based on SNMP",
     "contributors": [
-        {
-            "name": "Jean Gabès",
-            "email": "naparuba@gmail.com"
-        },
-        {
-            "name": "David Moreau Simard",
-            "email": "moi@dmsimard.com"
-        }
+    {
+    "name": "Jean Gabès",
+    "email": "naparuba@gmail.com"
+    },
+    {
+    "name": "David Moreau Simard",
+    "email": "moi@dmsimard.com"
+    }
     ],
     "repository": "https://github.com/shinken-monitoring/pack-linux-snmp",
     "keywords": [
-        "pack",
-        "linux",
-        "snmp"
+	"pack",
+	"linux",
+	"snmp"
     ],
     "dependencies": {
-        "shinken": ">=1.4"
+	"shinken": ">=1.4"
     },
     "license": "AGPL"
-}
+  }
 
 
   * name -> The name of your pack. Directory with this name will be created on your /etc/shinken/packs
@@ -73,7 +73,7 @@ Let use our linux-smnp sample:
   * homepage -> Homepage of pack, is usual a github repo
   * author -> Maintainer of package
   * contributors -> People, who makes changes in this package
-  * repository -> Sources
+  * repository -> Repo with source code
   * keywords -> Help for search via shinken CLI or shinken.io website
   * dependencies -> Describe versions of software need to all works okay. Can provide any strings, besides shinken version
 

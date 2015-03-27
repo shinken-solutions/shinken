@@ -94,15 +94,17 @@ Then restart broker :
   
 ::
 
-  # /etc/init.d/shinken-broker restart</code>
+  # /etc/init.d/shinken-broker restart
 
 
 Share users with Thruk 
 =======================
 
   
-  Edit ''/etc/httpd/conf.d/pnp4nagios.conf'' (RedHat path) and replace AuthName and AuthUserFile with:
-  <code>
+  Edit /etc/httpd/conf.d/pnp4nagios.conf (RedHat path) and replace AuthName and AuthUserFile with:
+
+::
+
   AuthName "Thruk Monitoring"
   AuthUserFile /etc/thruk/htpasswd
 
@@ -110,7 +112,6 @@ Share users with Thruk
 Then restart Apache:
   
 ::
-
   
   service httpd restart
 
@@ -166,7 +167,7 @@ Restart shinken-arbiter and you are done.
   
 ::
 
-  /etc/init.d/shinken-arbiter restart</code>
+  /etc/init.d/shinken-arbiter restart
 
 .. _PHP4Nagios installation: http://docs.pnp4nagios.org/pnp-0.6/install 
 .. _Thruk doc: http://www.thruk.org/documentation.html#_pnp4nagios_graphs
