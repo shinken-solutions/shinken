@@ -1289,7 +1289,7 @@ class SchedulingItem(Item):
     def scatter_notification(self, n):
         cls = self.__class__
         childnotifications = []
-
+        escalated = False
         if n.contact:
             # only master notifications can be split up
             return []
@@ -1307,6 +1307,7 @@ class SchedulingItem(Item):
             # Check is an escalation match. If yes, get all contacts from escalations
             if self.is_escalable(n):
                 contacts = self.get_escalable_contacts(n)
+                escalated = True
             # else take normal contacts
             else:
                 contacts = self.contacts
@@ -1327,7 +1328,8 @@ class SchedulingItem(Item):
             for cmd in notif_commands:
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
-                                       contact, n.t_to_go, timeout=cls.notification_timeout,
+                                       contact, n.t_to_go, escalated=escalated,
+                                       timeout=cls.notification_timeout,
                                        notif_nb=n.notif_nb, reactionner_tag=rt,
                                        module_type=cmd.module_type,
                                        enable_environment_macros=cmd.enable_environment_macros)
