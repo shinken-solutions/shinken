@@ -64,6 +64,7 @@ statusmap_image                            *image_file*
 3d_coords                                  *x_coord,y_coord,z_coord*
 realm                                      *realm*
 poller_tag                                 *poller_tag*
+reactionner_tag                            *reactionner_tag*
 business_impact                            [0/1/2/3/4/5]
 resultmodulations                          *resultmodulations*
 escalations                                *escalations names*
@@ -272,6 +273,10 @@ poller_tag
 
   By default the pollerag value is 'None', so all untagged pollers can take it because None is set by default for them.
 
+reactionner_tag
+  This variable is used to define the reactionner_tag of notifications_commands from this service. All of theses notifications will be taken by reactionners that have this value in their reactionner_tags parameter.
+
+  By default there is no reactionner_tag, so all untaggued reactionners can take it.
 
 business_impact
   This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
