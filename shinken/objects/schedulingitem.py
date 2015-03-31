@@ -640,9 +640,7 @@ class SchedulingItem(Item):
 
         # The external command always pass
         # if not, only if we enable them (auto launch)
-        if self.event_handler is None or \
-                ((not self.event_handler_enabled or not cls.enable_event_handlers)
-                 and not externalcmd):
+        if (not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd:
             return
 
         # If we do not force and we are in downtime, bailout
@@ -651,15 +649,22 @@ class SchedulingItem(Item):
                 not externalcmd and self.in_scheduled_downtime:
             return
 
+        if self.event_handler is not None:
+            event_handler = self.event_handler
+        elif cls.global_event_handler is not None:
+            event_handler = cls.global_event_handler
+        else:
+            return
+
         m = MacroResolver()
         data = self.get_data_for_event_handler()
-        cmd = m.resolve_command(self.event_handler, data)
-        rt = self.event_handler.reactionner_tag
+        cmd = m.resolve_command(event_handler, data)
+        rt = event_handler.reactionner_tag
         e = EventHandler(cmd, timeout=cls.event_handler_timeout,
                          ref=self, reactionner_tag=rt)
         # print "DBG: Event handler call created"
         # print "DBG: ",e.__dict__
-        self.raise_event_handler_log_entry(self.event_handler)
+        self.raise_event_handler_log_entry(event_handler)
 
         # ok we can put it in our temp action queue
         self.actions.append(e)
