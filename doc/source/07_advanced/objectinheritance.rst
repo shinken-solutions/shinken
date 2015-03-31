@@ -612,7 +612,7 @@ In this situation, there is several ways to manage the situation:
 
 None of these options are satisfying.
 
-There is a last solution that conists of exclude the corresponding service from the specified host. This may be done using the ``service_excludes directive``.
+There is a last solution that consists of excluding the corresponding service from the specified host. This may be done using the ``service_excludes directive``.
 
 Example:
 
@@ -633,3 +633,5 @@ Example:
   }
   ...
 
+
+In the case you want the opposite (exclude all except) you can use the service_includes directive
