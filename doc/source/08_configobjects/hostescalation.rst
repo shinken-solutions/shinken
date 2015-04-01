@@ -94,3 +94,6 @@ escalation_options
   
 
 If you specify **d** in this field, the escalation will only be used if the host is in a DOWN state.
+
+.. note:: You can define generic escalation with the statement "define escalation" instead of hostescalation.
+   There are less required parameter (as there is not type) but you still have to defined them to make it work
