@@ -43,7 +43,10 @@ Advanced Topics
    advanced-dependencies
    distributed-shinken
    distributed-with-realm
+   businessimpact-modulations
+   check-modulations
    macro-modulations
+   result-modulations
    sms-with-android
    sms-with-gateway
    triggers
