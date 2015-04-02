@@ -4,6 +4,44 @@ import re
 import fileinput
 import getpass
 
+#########################################################################
+# ugly
+import pwd
+import grp
+import itertools
+
+
+def recursive_chown(path, uid, gid, owner, group):
+    print("Changing owner of %s to %s:%s" % (path, owner, group))
+    os.chown(path, uid, gid)
+    if os.path.isdir(path):
+        for dirname, dirs, files in os.walk(path):
+            for path in itertools.chain(dirs, files):
+                path = os.path.join(dirname, path)
+                os.chown(path, uid, gid)
+
+def get_uid(user_name):
+    try:
+        return pwd.getpwnam(user_name)[2]
+    except KeyError, exp:
+        return None
+
+def get_gid(group_name):
+    try:
+        return grp.getgrnam(group_name)[2]
+    except KeyError, exp:
+        return None
+
+def check_user_shinken(config):
+    user = "shinken"
+    group = "shinken"
+    uid = get_uid(user)
+    gid = get_gid(group)
+    if not os.environ.get('TRAVIS', False) and getpass.getuser() == 'root' and uid is None or gid is None:
+        raise Exception("Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user,group, user))
+
+# end ugly
+###########################################################################
 
 def get_init_scripts(config):
     """ Add init scripts in data_files for install """
@@ -11,18 +49,41 @@ def get_init_scripts(config):
     if 'win' in sys.platform:
         pass
     elif 'linux' in sys.platform or 'sunos5' in sys.platform:
-        data_files = data_files + "\netc/init.d = bin/init.d/*"
-        data_files = data_files + "\netc/default = bin/default/shinken.in"
+        data_files = data_files + "\n/etc/init.d = bin/init.d/*"
+        data_files = data_files + "\n/etc/default = bin/default/shinken.in"
     elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-        data_files = data_files + "\nusr/local/etc/rc.d = bin/rc.d/*"
+        data_files = data_files + "\n/usr/local/etc/rc.d = bin/rc.d/*"
     else:
         raise "Unsupported platform, sorry"
         data_files = []
     config['files']['data_files'] = data_files
 
+def fix_data_files_path(config):
+    """ This is an ugly ugly ugly patch to handle
+    a none standard python installation
+    """
+    ## ugly
+    if getpass.getuser() == 'root' and config.root is None and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+        config.root = "/"
+    if config.root  and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+        config.install_dir = config.root
+    if not config.root and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+        config.data_files = [(os.path.join(config.install_dir, folder[0].strip("/")),
+                             folder[1]) for folder in config.data_files]
+    if 'bsd' in sys.platform or 'dragonfly' in sys.platform:
+        config.data_files = [(folder[0].strip("/"),
+                             folder[1]) for folder in config.data_files]
+    ## end ugly
 
 def fix_shinken_cfg(config):
     """ Fix paths, user and group in shinken.cfg and daemons/*.ini """
+    ## ugly
+    # This is an ugly ugly ugly patch to handle
+    # a none standard python installation
+    if config.root:
+        config.install_dir = config.root
+    ## end ugly
+
     default_paths = {
         'lock_file': '/var/run/shinken/arbiterd.pid',
         'local_log': '/var/log/shinken/arbiterd.log',
@@ -143,6 +204,12 @@ def fix_shinken_cfg(config):
             'RUN': '/var/run/shinken',
             'LOG': '/var/log/shinken',
             }
+
+        ## ugly
+        if getpass.getuser() == 'root' and config.root == "/":
+            default_paths["BIN"] = "/usr/bin"
+        ## end ugly
+
         pattern = "|".join(default_paths.keys())
         changing_path = re.compile("^(%s) *= *" % pattern)
         for line in fileinput.input(new_name,  inplace=True):
@@ -160,6 +227,16 @@ def fix_shinken_cfg(config):
 
             else:
                 print(line)
+
+        ## ugly
+        # If we are root
+        # We make some chown
+        if not os.environ.get('TRAVIS', False) and getpass.getuser() == 'root' and config.root == "/":
+            uid = get_uid(default_users['shinken_user'])
+            gid = get_gid(default_users['shinken_group'])
+            for path in default_paths.values():
+                recursive_chown(path, uid, gid, default_users['shinken_user'], default_users['shinken_group'])
+        ## end ugly
 
     # Add ENV vars only if we are in virtualenv
     # in order to get init scripts working
