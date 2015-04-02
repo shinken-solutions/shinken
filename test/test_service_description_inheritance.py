@@ -33,5 +33,12 @@ class TestServiceDescriptionInheritance(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("MYHOST", "SSH")
         self.assertIsNotNone(svc)
 
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("MYHOST2", "SSH")
+        self.assertIsNotNone(svc2)
+
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("MYHOST3", "SSH")
+        self.assertIsNotNone(svc3)
+
+
 if __name__ == '__main__':
     unittest.main()
