@@ -1157,6 +1157,8 @@ class Config(Item):
         self.linkify_one_command_with_commands(self.commands, 'ochp_command')
         self.linkify_one_command_with_commands(self.commands, 'host_perfdata_command')
         self.linkify_one_command_with_commands(self.commands, 'service_perfdata_command')
+        self.linkify_one_command_with_commands(self.commands, 'global_host_event_handler')
+        self.linkify_one_command_with_commands(self.commands, 'global_service_event_handler')
 
         # print "Hosts"
         # link hosts with timeperiods and commands
@@ -1260,7 +1262,8 @@ class Config(Item):
     # the real commands
     def late_linkify(self):
         props = ['ocsp_command', 'ochp_command',
-                 'service_perfdata_command', 'host_perfdata_command']
+                 'service_perfdata_command', 'host_perfdata_command',
+                 'global_host_event_handler', 'global_service_event_handler']
         for prop in props:
             cc = getattr(self, prop, None)
             if cc:
@@ -1495,9 +1498,9 @@ class Config(Item):
         # print "Contacts"
         self.contacts.apply_inheritance()
         # print "Services"
-        self.services.apply_inheritance(self.hosts)
+        self.services.apply_inheritance()
         # print "Servicedependencies"
-        self.servicedependencies.apply_inheritance(self.hosts)
+        self.servicedependencies.apply_inheritance()
         # print "Hostdependencies"
         self.hostdependencies.apply_inheritance()
         # Also timeperiods

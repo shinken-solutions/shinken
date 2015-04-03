@@ -111,6 +111,7 @@ class TestEscalations(ShinkenTest):
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.assertIn(True, [n.escalated for n in self.sched.actions.values()])
 
         # Now we raise the notif number of 2, so we can escalade
         self.assert_any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
@@ -122,16 +123,19 @@ class TestEscalations(ShinkenTest):
 
         # One more bad, we go 3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.assertIn(True, [n.escalated for n in self.sched.actions.values()])
         self.assert_any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
 
         # We go 4, still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.assertIn(True, [n.escalated for n in self.sched.actions.values()])
         self.assert_any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;')
         self.show_and_clear_logs()
         # We go 5! we escalade to level3
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.assertIn(True, [n.escalated for n in self.sched.actions.values()])
         self.assert_any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 

@@ -13,8 +13,7 @@ How to contribute
 
 .. toctree::
 
-    create-and-push-packs
-    create-a-package
-    help-the-project
+    packs
+    modules
     how-to-contribute
     spm

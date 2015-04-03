@@ -640,9 +640,7 @@ class SchedulingItem(Item):
 
         # The external command always pass
         # if not, only if we enable them (auto launch)
-        if self.event_handler is None or \
-                ((not self.event_handler_enabled or not cls.enable_event_handlers)
-                 and not externalcmd):
+        if (not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd:
             return
 
         # If we do not force and we are in downtime, bailout
@@ -651,15 +649,22 @@ class SchedulingItem(Item):
                 not externalcmd and self.in_scheduled_downtime:
             return
 
+        if self.event_handler is not None:
+            event_handler = self.event_handler
+        elif cls.global_event_handler is not None:
+            event_handler = cls.global_event_handler
+        else:
+            return
+
         m = MacroResolver()
         data = self.get_data_for_event_handler()
-        cmd = m.resolve_command(self.event_handler, data)
-        rt = self.event_handler.reactionner_tag
+        cmd = m.resolve_command(event_handler, data)
+        rt = event_handler.reactionner_tag
         e = EventHandler(cmd, timeout=cls.event_handler_timeout,
                          ref=self, reactionner_tag=rt)
         # print "DBG: Event handler call created"
         # print "DBG: ",e.__dict__
-        self.raise_event_handler_log_entry(self.event_handler)
+        self.raise_event_handler_log_entry(event_handler)
 
         # ok we can put it in our temp action queue
         self.actions.append(e)
@@ -1284,7 +1289,7 @@ class SchedulingItem(Item):
     def scatter_notification(self, n):
         cls = self.__class__
         childnotifications = []
-
+        escalated = False
         if n.contact:
             # only master notifications can be split up
             return []
@@ -1302,6 +1307,7 @@ class SchedulingItem(Item):
             # Check is an escalation match. If yes, get all contacts from escalations
             if self.is_escalable(n):
                 contacts = self.get_escalable_contacts(n)
+                escalated = True
             # else take normal contacts
             else:
                 contacts = self.contacts
@@ -1322,7 +1328,8 @@ class SchedulingItem(Item):
             for cmd in notif_commands:
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
-                                       contact, n.t_to_go, timeout=cls.notification_timeout,
+                                       contact, n.t_to_go, escalated=escalated,
+                                       timeout=cls.notification_timeout,
                                        notif_nb=n.notif_nb, reactionner_tag=rt,
                                        module_type=cmd.module_type,
                                        enable_environment_macros=cmd.enable_environment_macros)

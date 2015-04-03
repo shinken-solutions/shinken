@@ -98,3 +98,6 @@ escalation_options
     * **c** = escalate on a CRITICAL state
 
 If you specify **w** in this field, the escalation will only be used if the service is in a WARNING state.
+
+.. note:: You can define generic escalation with the statement "define escalation" instead of serviceescalation.
+   There are less required parameter (as there is not type) but you still have to defined them to make it work

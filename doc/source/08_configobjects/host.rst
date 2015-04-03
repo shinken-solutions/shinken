@@ -64,6 +64,7 @@ statusmap_image                            *image_file*
 3d_coords                                  *x_coord,y_coord,z_coord*
 realm                                      *realm*
 poller_tag                                 *poller_tag*
+reactionner_tag                            *reactionner_tag*
 business_impact                            [0/1/2/3/4/5]
 resultmodulations                          *resultmodulations*
 escalations                                *escalations names*
@@ -72,6 +73,7 @@ icon_set                                   [database/disk/network_service/server
 maintenance_period                         *timeperiod_name*
 service_overrides                          *service_description,directive value*
 service_excludes                           *service_description,...*
+service_includes                           *service_description,...*
 labels                                     *labels*
 business_rule_output_template              *template*
 business_rule_smart_notifications          [0/1]
@@ -271,6 +273,10 @@ poller_tag
 
   By default the pollerag value is 'None', so all untagged pollers can take it because None is set by default for them.
 
+reactionner_tag
+  This variable is used to define the reactionner_tag of notifications_commands from this service. All of theses notifications will be taken by reactionners that have this value in their reactionner_tags parameter.
+
+  By default there is no reactionner_tag, so all untaggued reactionners can take it.
 
 business_impact
   This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
@@ -295,6 +301,11 @@ service_overrides
 
 service_excludes
   This variable may be used to *exclude* a service from a host. It addresses the situations where a set of serices is inherited from a pack or attached from a hostgroup, and an identified host should **NOT** have one (or more, comma separated) services defined. This allows to manage exceptions in the service asignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
+  This will be **ignored** if there is *service_includes*
+
+service_includes
+  This variable may be used to *include only* a service from a host. It addresses the situations where a set of serices is inherited from a pack or attached from a hostgroup, and an identified host should **have only** one (or more, comma separated) services defined. This allows to manage exceptions in the service asignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
+  This variable is considered **before** *service_excludes*
 
 labels
   This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` grouping expressions.

@@ -32,16 +32,16 @@ Next, define a service in one of your :ref:`object configuration files <configur
   
 ::
 
-  define service{
-      " " " " host_name " " " " " " " " " " " firestorm
-      " " " " service_description " " " " " " TCP Wrappers
-      " " " " is_volatile " " " " " " " " " " 1
-      " " " " active_checks_enabled " " " " " 0
-      " " " " passive_checks_enabled " " " " "1
-      " " " " max_check_attempts " " " " " " "1
-      " " " " check_command " " " " " " " " " check_none
-      " " " " ...
-      " " " " }
+  define service {
+    host_name				firestorm
+    service_description			TCP Wrappers
+    is_volatile				1
+    active_checks_enabled		0
+    passive_checks_enabled		1
+    max_check_attempts			1
+    check_command			check_none
+    ...
+    }
   
 There are some important things to note about the above service definition:
 

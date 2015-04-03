@@ -58,6 +58,7 @@ action_url                                 *url*
 icon_image                                 *image_file*
 icon_image_alt                             *alt_string*
 poller_tag                                 *poller_tag*
+reactionner_tag                            *reactionner_tag*
 duplicate_foreach                          *$MACRO$*
 service_dependencies                       *host,service_description*
 business_impact                            [0/1/2/3/4/5]
@@ -316,6 +317,11 @@ poller_tag
   This variable is used to define the poller_tag of checks from this service. All of theses checks will be taken by pollers that have this value in their poller_tags parameter.
 
   By default there is no poller_tag, so all untaggued pollers can take it.
+
+reactionner_tag
+  This variable is used to define the reactionner_tag of notifications_commands from this service. All of theses notifications will be taken by reactionners that have this value in their reactionner_tags parameter.
+
+  By default there is no reactionner_tag, so all untaggued reactionners can take it.
 
 duplicate_foreach
   This is used to generate serveral service with only one service declaration.
