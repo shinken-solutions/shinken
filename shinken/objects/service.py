@@ -1290,7 +1290,7 @@ class Services(Items):
         hname = getattr(item, 'host_name', '')
         hgname = getattr(item, 'hostgroup_name', '')
         sdesc = getattr(item, 'service_description', '')
-        source = getattr(self, 'imported_from', 'unknown')
+        source = getattr(item, 'imported_from', 'unknown')
         if source:
             in_file = " in %s" % source
         else:
