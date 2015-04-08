@@ -63,14 +63,15 @@ def fix_data_files_path(config):
     a none standard python installation
     """
     ## ugly
-    if getpass.getuser() == 'root' and config.root is None and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+    if getpass.getuser() == 'root' and config.root is None:
         config.root = "/"
-    if config.root  and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+    if config.root:
         config.install_dir = config.root
-    if not config.root and 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
-        config.data_files = [(os.path.join(config.install_dir, folder[0].strip("/")),
-                             folder[1]) for folder in config.data_files]
-    if 'bsd' in sys.platform or 'dragonfly' in sys.platform:
+    if 'bsd' not in sys.platform and 'dragonfly' not in sys.platform:
+        if not config.root:
+            config.data_files = [(os.path.join(config.install_dir, folder[0].strip("/")),
+                                 folder[1]) for folder in config.data_files]
+    else:
         config.data_files = [(folder[0].strip("/"),
                              folder[1]) for folder in config.data_files]
     ## end ugly
