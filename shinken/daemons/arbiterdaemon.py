@@ -217,13 +217,24 @@ class Arbiter(Daemon):
     # TODO: better find the broker, here it can be dead?
     # or not the good one?
     def push_broks_to_broker(self):
-        for brk in self.conf.brokers:
-            # Send only if alive of course
-            if brk.manage_arbiters and brk.alive:
-                is_send = brk.push_broks(self.broks)
-                if is_send:
-                    # They are gone, we keep none!
-                    self.broks.clear()
+        # we may have less master arbiters than master schedulers, in cases 
+        # where we have many realms with many schedulers with only few brokers, 
+        # which is computed as below:
+        #   scheduler_len = 0
+        #   for r in self.realms:
+        #       scheduler_len += len(r.confs)
+        # so we may have duplicated brokers if we do not filter.
+
+        brks = set()
+        for r in self.conf.realms:
+            for cfg_id in r.confs:
+                tmp_brks = r.to_satellites_managed_by['broker'][cfg_id]
+                for tmp_brk in tmp_brks:
+                    brks.add(tmp_brk)
+        for brk in brks:
+            brk.push_broks(self.broks)
+        # They are gone, we keep none!
+        self.broks.clear()
 
     # We must take external_commands from all satellites
     # like brokers, pollers, reactionners or receivers
