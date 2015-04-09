@@ -217,8 +217,8 @@ class Arbiter(Daemon):
     # TODO: better find the broker, here it can be dead?
     # or not the good one?
     def push_broks_to_broker(self):
-        # we may have less master arbiters than master schedulers, in cases 
-        # where we have many realms with many schedulers with only few brokers, 
+        # we may have less master arbiters than master schedulers, in cases
+        # where we have many realms with many schedulers with only few brokers,
         # which is computed as below:
         #   scheduler_len = 0
         #   for r in self.realms:
