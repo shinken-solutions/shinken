@@ -105,11 +105,7 @@ class CommandCall(DummyCommandCall):
 
     # If we didn't already lately relink us, do it
     def late_linkify_with_command(self, commands):
-        if self.late_relink_done:
-            return
-        self.late_relink_done = True
-        c = commands.find_by_name(self.command)
-        self.command = c
+        pass
 
     def is_valid(self):
         return self.valid
@@ -131,17 +127,6 @@ class CommandCall(DummyCommandCall):
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
-
-        # The command is a bit special, we just put it's name
-        # or a '' if need
-        if self.command and not isinstance(self.command, basestring):
-            res['command'] = self.command.get_name()
-        # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
-        # only take the value
-        elif self.command and isinstance(self.command, basestring):
-            res['command'] = self.command
-        else:
-            res['command'] = ''
 
         return res
 
