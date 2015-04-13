@@ -76,7 +76,7 @@ Example:
 ::
 
   host_perfdata_command=process-host-perfdata
-  services_perfdata_command=process-service-perfdata
+  service_perfdata_command=process-service-perfdata
   
 This option allows you to specify a command to be run after every host/service check to process host/service :ref:`performance data <advanced/perfdata>` that may be returned from the check. The command argument is the short name of a :ref:`command definition <configobjects/command>` that you define in your object configuration file. This command is only executed if the :ref:`Performance Data Processing Option <configuration/configmain-advanced#process_performance_data>` option is enabled globally and if the "process_perf_data" directive in the :ref:`host definition <configobjects/host>` is enabled.
 
