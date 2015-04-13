@@ -68,7 +68,7 @@ class testSchedulerInit(ShinkenTest):
             assert(fun in reg_list)
 
         # Launch an arbiter so that the scheduler get a conf and init
-        subprocess.Popen(["../shinken/bin/shinken_arbiter.py", "-c", daemons_config[Arbiter][0], "-d"])
+        subprocess.Popen(["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"])
 
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)
