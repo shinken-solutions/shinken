@@ -119,14 +119,14 @@ class HTTPClient(object):
             c.perform()
         except pycurl.error, error:
             errno, errstr = error
-            raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
+            raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connexion, we want a keep alive
+        # Do NOT close the connection, we want a keep alive
 
         if r != 200:
             err = response.getvalue()
             logger.error("There was a critical error : %s", err)
-            raise Exception('Connexion error to %s : %s' % (self.uri, r))
+            raise Exception('Connection error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl
             ret = json.loads(response.getvalue().replace('\\/', '/'))
@@ -168,15 +168,15 @@ class HTTPClient(object):
             c.perform()
         except pycurl.error as error:
             errno, errstr = error
-            raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
+            raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
 
         r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connexion
+        # Do NOT close the connection
         # c.close()
         if r != 200:
             err = response.getvalue()
             logger.error("There was a critical error : %s", err)
-            raise Exception('Connexion error to %s : %s' % (self.uri, r))
+            raise Exception('Connection error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl
             # ret  = json.loads(response.getvalue().replace('\\/', '/'))
@@ -218,11 +218,11 @@ class HTTPClient(object):
         except pycurl.error, error:
             errno, errstr = error
             f.close()
-            raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
+            raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
 
         f.close()
         r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connexion
+        # Do NOT close the connection
         # c.close()
         if r != 200:
             err = response.getvalue()

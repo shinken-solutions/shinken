@@ -72,7 +72,7 @@ class ShinkenAdmin(cmd.Cmd):
         self.arb = None
 
     # If we got no connections, connect with a standard localhost one
-    def look_connexion(self):
+    def look_connection(self):
         if not self.arb:
             self.do_connect('')
         self.arb.ping()
@@ -118,7 +118,7 @@ class ShinkenAdmin(cmd.Cmd):
         without an already open arbiter connection with 'connect' it will automatically
         connect to locahost:7770.
         '''
-        self.look_connexion()
+        self.look_connection()
         if not self.arb.reachable:
             print "Cannot connect to the arbiter, bail out"
             return
@@ -180,7 +180,7 @@ class ShinkenAdmin(cmd.Cmd):
         Get the data in the arbiter for a table and some properties
         like hosts  host_name realm
         '''
-        self.look_connexion()
+        self.look_connection()
         if not self.arb.reachable:
             print "Cannot connect to the arbiter, bail out"
             return
@@ -236,7 +236,7 @@ class ShinkenAdmin(cmd.Cmd):
             print "Example: showconfig poller poller-1"
         else:
             type = line
-            self.look_connexion()
+            self.look_connection()
 
             # get properties from link classes
             if type == 'arbiter':
@@ -299,7 +299,7 @@ class ShinkenAdmin(cmd.Cmd):
 
         WARNING: the change is not permanent! loglevel are reset to configuration value when daemons are restarted
         '''
-        self.look_connexion()
+        self.look_connection()
         if not self.arb.reachable:
             print "Cannot connect to the arbiter, bail out"
             return

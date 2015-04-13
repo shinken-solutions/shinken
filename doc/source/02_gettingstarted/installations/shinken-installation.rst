@@ -53,7 +53,7 @@ GNU/Linux & Unix Installation
 Method 1: Pip
 -------------
 
-Shinken 2.2 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.2
+Shinken 2.4 is available on Pypi : https://pypi.python.org/pypi/Shinken/2.4
 You can download the tarball and execute the setup.py or just use the pip command to install it automatically.
 
 
@@ -67,7 +67,7 @@ You can download the tarball and execute the setup.py or just use the pip comman
 Method 2: Packages 
 -------------------
 
-For now the 2.2 packages are not available, but the community is working hard for it! Packages are simple, easy to update and clean.
+For now the 2.4 packages are not available, but the community is working hard for it! Packages are simple, easy to update and clean.
 Packages should be available on Debian/Ubuntu and Fedora/RH/CentOS soon (basically  *.deb* and  *.rpm*).
 
 
@@ -79,9 +79,9 @@ Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot
 ::
 
   adduser shinken
-  wget http://www.shinken-monitoring.org/pub/shinken-2.2.tar.gz
-  tar -xvzf shinken-2.2.tar.gz
-  cd shinken-2.2
+  wget http://www.shinken-monitoring.org/pub/shinken-2.4.tar.gz
+  tar -xvzf shinken-2.4.tar.gz
+  cd shinken-2.4
   python setup.py install
 
 
@@ -110,6 +110,6 @@ Steps are basically the same as on Linux (Python install etc.) but in windows en
 .. _python-pycurl: http://pycurl.sourceforge.net/
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
-.. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.2.tar.gz
+.. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.4.tar.gz
 .. _install.d/README: https://github.com/naparuba/shinken/blob/master/install.d/README
 

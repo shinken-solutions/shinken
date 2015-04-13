@@ -4,9 +4,40 @@ Shinken ChangeLog
 
 2.4   - 31/03/2015
 -------------------
-    CORE ENHANCEMENT
+	CORE ENHANCEMENT
+	Add: Hosts - Service_includes feature. Similar to service_excludes
 
-    CORE FIXES
+	Enh: Actions - Catch stderr output
+	Enh: Arbiter -  Unpickle new conf earlier. Prevent a memory issue
+	Enh: Config - Remove sudo from restart/reload commands
+	Enh: Daemon - Factorization of  get_objects_from_from_queues
+	Enh: DaemonsLinks : Move files to object directory
+	Enh: Datamanager - Function get_contactgroup
+	Enh: Doc - A lot of typo and improvements!
+	Enh: Init Scripts - use readlink to avoid failure on symlinks
+	Enh: Modulesmanager - Reworking module loading, now try to import in 3 different ways
+	Enh: Pep8 : Shinken is now pep8 compliant (enforced by Travis) excepted for 3 specific rules
+	Enh: Scheduler - Use iterator instead of list when necessary. Reduce memory consumption
+	Enh: Setup - Refactoring to be virtualenv compatible
+	Enh: Tests - Stabilization
+
+
+	Del: Check Shinken script. It has its own repository
+	Del: Windows files from 1.4 version
+
+
+	CORE FIXES
+	Fix: Config Parsing - Arbiter module auto creation
+	Fix: Config Parsing - Infinite recursion loop in template
+	Fix: Config Parsing - Inheritance of custom variable
+	Fix: Config Parsing - Raise error properly in ArbiterLink object
+	Fix: Config Parsing - Type properties in Contact, NotificationWay and Arbiter objects
+	Fix: Escalations - escalated parameter in notification object and macro $NOTIFICATIONISESCALATED$ are set correctly
+	Fix: Event Handlers - Global event handlers parsing and launching
+	Fix: External Command - Internal argument for CHANGE_RETRY_HOST_CHECK_INTERVAL command
+	Fix: Realm - Bailout when there are two default realm
+
+
 
 
 2.2   - 16/01/2015
