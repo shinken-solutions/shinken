@@ -10,6 +10,23 @@ except ImportError:
 from shinken.bin import VERSION
 os.environ['PBR_VERSION'] = VERSION
 
+
+###############
+# UGLY AS F***
+###############
+import sys
+import platform
+import re
+
+arglayout = "--install-layout=deb"
+if arglayout not in sys.argv and re.search("debian", platform.platform()):
+    sys.argv.append(arglayout)
+
+
+###############
+# END UGLY
+###############
+
 import setuptools
 
 
