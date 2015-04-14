@@ -239,7 +239,7 @@ class ShinkenTest(unittest.TestCase):
         self.clear_logs()
         m = MacroResolver()
         m.init(self.conf)
-        self.sched.load_conf(self.conf, in_test=True)
+        self.sched.load_conf(self.conf)
         e = ExternalCommandManager(self.conf, 'applyer')
         self.sched.external_command = e
         e.load_scheduler(self.sched)

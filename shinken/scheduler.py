@@ -157,7 +157,7 @@ class Scheduler(object):
     # Load conf for future use
     # we are in_test if the data are from an arbiter object like,
     # so only for tests
-    def load_conf(self, conf, in_test=False):
+    def load_conf(self, conf):
         self.program_start = int(time.time())
         self.conf = conf
         self.hostgroups = conf.hostgroups
@@ -178,14 +178,6 @@ class Scheduler(object):
         self.triggers = conf.triggers
         self.triggers.compile()
         self.triggers.load_objects(self)
-
-
-        if not in_test:
-            # Commands in the host/services/contacts are not real one
-            # we must relink them
-            t0 = time.time()
-            self.conf.late_linkify()
-            logger.debug("Late command relink in %d", time.time() - t0)
 
         # self.status_file = StatusFile(self)
         #  External status file

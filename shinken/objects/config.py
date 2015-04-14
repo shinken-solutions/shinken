@@ -1258,23 +1258,6 @@ class Config(Item):
     def clean(self):
         self.services.clean()
 
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify(self):
-        props = ['ocsp_command', 'ochp_command',
-                 'service_perfdata_command', 'host_perfdata_command',
-                 'global_host_event_handler', 'global_service_event_handler']
-        for prop in props:
-            cc = getattr(self, prop, None)
-            if cc:
-                cc.late_linkify_with_command(self.commands)
-
-        # But also other objects like hosts and services
-        self.hosts.late_linkify_h_by_commands(self.commands)
-        self.services.late_linkify_s_by_commands(self.commands)
-        self.contacts.late_linkify_c_by_commands(self.commands)
-
-
     # Some properties are dangerous to be send like that
     # like realms linked in hosts. Realms are too big to send (too linked)
     # We are also pre-serializing the confs so the sending phase will

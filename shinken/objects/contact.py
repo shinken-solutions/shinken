@@ -251,12 +251,6 @@ class Contacts(Items):
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
 
-    def late_linkify_c_by_commands(self, commands):
-        for i in self:
-            for nw in i.notificationways:
-                nw.late_linkify_nw_by_commands(commands)
-
-
     # We look for contacts property in contacts and
     def explode(self, contactgroups, notificationways):
         # Contactgroups property need to be fullfill for got the informations

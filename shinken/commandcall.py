@@ -103,10 +103,6 @@ class CommandCall(DummyCommandCall):
         self.args = [s.replace('___PROTECT_EXCLAMATION___', '!')
                      for s in tab[1:]]
 
-    # If we didn't already lately relink us, do it
-    def late_linkify_with_command(self, commands):
-        pass
-
     def is_valid(self):
         return self.valid
 
