@@ -8,7 +8,7 @@ Notification Way Definition
 Description 
 ============
 
-A notificationway definition is used to define a way a contact if notified.
+A notificationway definition is used to define the way a contact is notified.
 
 
 Definition Format 
@@ -85,7 +85,7 @@ service_notification_options
     * n = (none) : the contact will not receive any type of service notifications.
 
 min_business_impact
-  This directive is use to define the minimum business criticity level of a service/host the contact will be notified. Please see :ref:`root_problems_and_impacts <architecture/problems-and-impacts>`  for more details. 
+  This directive is used to define the minimum business criticity level of a service/host the contact will be notified. Please see :ref:`root_problems_and_impacts <architecture/problems-and-impacts>`  for more details. 
   
     * 0 = less important
     * 1 = more important than 0
