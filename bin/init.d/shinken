@@ -74,8 +74,8 @@ export PYTHONIOENCODING=utf8
 export PYTHONUNBUFFERED="0"
 export TZ=:/etc/localtime
 # also unset http proxy, because pycurl is using it and this is bad, very bad :)
-export http_proxy=
-export https_proxy=
+unset http_proxy
+unset https_proxy
 
 # We try to find the LAST possible Python VERSION
 pythonver() {
