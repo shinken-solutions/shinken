@@ -651,28 +651,28 @@ class Service(SchedulingItem):
 
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid",
+            logger.error("%s: my event_handler %s is invalid",
                         self.get_name(), self.event_handler.command)
             state = False
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s: I've got no check_command", self.get_name())
+            logger.error("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid",
+                logger.error("%s: my check_command %s is invalid",
                             self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
                     logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s: %s", self.get_name(), bperror)
+                        logger.error("%s: %s", self.get_name(), bperror)
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and self.notifications_enabled is True:
-            logger.info("%s: I've got no notification_interval but "
+            logger.error("%s: I've got no notification_interval but "
                         "I've got notifications enabled", self.get_name())
             state = False
         if not self.host_name:
@@ -687,7 +687,7 @@ class Service(SchedulingItem):
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s: My service_description got the "
+                    logger.error("%s: My service_description got the "
                                 "character %s that is not allowed.", self.get_name(), c)
                     state = False
         return state

@@ -690,17 +690,17 @@ class Host(SchedulingItem):
                            self.get_name(), source)
 
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid",
+            logger.error("%s: my event_handler %s is invalid",
                         self.get_name(), self.event_handler.command)
             state = False
 
         if getattr(self, 'check_command', None) is None:
-            logger.info("%s: I've got no check_command", self.get_name())
+            logger.error("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid",
+                logger.error("%s: my check_command %s is invalid",
                             self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
@@ -712,7 +712,7 @@ class Host(SchedulingItem):
 
         if (not hasattr(self, 'notification_interval') and
                 self.notifications_enabled is True):
-            logger.info("%s: I've got no notification_interval but "
+            logger.error("%s: I've got no notification_interval but "
                         "I've got notifications enabled", self.get_name())
             state = False
 
@@ -720,7 +720,7 @@ class Host(SchedulingItem):
         if ((getattr(self, 'active_checks_enabled', False)
                 and getattr(self, 'check_period', None) is None
                 and getattr(self, 'check_interval', 1) != 0)):
-            logger.info("%s: check_period is not correct", self.get_name())
+            logger.error("%s: check_period is not correct", self.get_name())
             state = False
 
         if not hasattr(self, 'check_period'):
@@ -729,7 +729,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.info("%s: My host_name got the character %s that is not allowed.",
+                    logger.error("%s: My host_name got the character %s that is not allowed.",
                                 self.get_name(), c)
                     state = False
 
