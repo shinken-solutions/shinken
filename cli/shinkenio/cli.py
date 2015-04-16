@@ -560,12 +560,15 @@ def install_package(pname, raw, update_only=False):
 
 
 
-def do_install(pname, local, download_only):
+def do_install(pname='', local=False, download_only=False):
     raw = ''
     if local:
         pname, raw = grab_local(pname)
 
     if not local:
+        if pname == '':
+            logger.error('Please select a package to instal')
+            return
         raw = grab_package(pname)
 
     if download_only:
