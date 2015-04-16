@@ -25,13 +25,12 @@
 import os
 import time
 
-from shinken.modulesmanager import ModulesManager
-from shinken.objects.module import Module
-
 from shinken_test import (
     ShinkenTest, time_hacker, unittest
 )
 
+from shinken.modulesmanager import ModulesManager
+from shinken.objects.module import Module
 
 modules_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'modules')
 

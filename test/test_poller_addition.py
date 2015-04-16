@@ -22,13 +22,13 @@
 # This file is used to test reading and processing of config files
 #
 import time
+from shinken_test import ShinkenTest, unittest
 from shinken.external_command import ExternalCommand
 from shinken.objects.brokerlink import BrokerLink
 from shinken.objects.arbiterlink import ArbiterLink
 from shinken.objects.pollerlink import PollerLink
 from shinken.objects.reactionnerlink import ReactionnerLink
 from shinken.objects.schedulerlink import SchedulerLink
-from shinken_test import ShinkenTest, unittest
 
 
 class GoodArbiter(ArbiterLink):
