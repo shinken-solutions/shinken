@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # Copyright (C) 2009-2014:
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Sebastien Coavoux, s.coavoux@free.fr
 #
 # This file is part of Shinken.
 #
@@ -25,27 +24,22 @@
 from shinken_test import *
 
 
-class TestServiceNoHost(ShinkenTest):
+class TestServiceDescriptionInheritance(ShinkenTest):
     def setUp(self):
-        self.setup_with_file('etc/shinken_service_nohost.cfg')
+        self.setup_with_file('etc/shinken_service_description_inheritance.cfg')
 
-    def test_service_with_no_host(self):
-        # A service that has no host to be linked to should raise on error.
-        self.assertIs(False, self.conf.conf_is_correct)
-
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+    def test_service_description_inheritance(self):
+        self.print_header()
+        svc = self.sched.services.find_srv_by_name_and_hostname("MYHOST", "SSH")
+        self.assertIsNotNone(svc)
 
 
-        self.assertLess(
-            0,
-            len( [ log
-                        for log in logs
-                        if re.search(
-                                'a service item has been defined without unique_key ',
-                                log)
-            ])
-        )
+    def test_service_description_inheritance_multihosts(self):
+        self.print_header()
+        for hname in ["MYHOST2", "MYHOST3"]:
+            svc = self.sched.services.find_srv_by_name_and_hostname(hname, "SSH")
+            self.assertIsNotNone(svc)
+
 
 
 if __name__ == '__main__':

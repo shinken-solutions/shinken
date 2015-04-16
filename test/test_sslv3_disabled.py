@@ -63,7 +63,7 @@ class testSchedulerInit(ShinkenTest):
         d.load_modules_manager()
 
         # Launch an arbiter so that the scheduler get a conf and init
-        subprocess.Popen(["../shinken/bin/shinken_arbiter.py", "-c", daemons_config[Arbiter][0], "-d"])
+        subprocess.Popen(["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"])
         if not hasattr(ssl, 'SSLContext'):
             print 'BAD ssl version for testing, bailing out'
             return

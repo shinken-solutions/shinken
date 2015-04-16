@@ -28,6 +28,7 @@ If you look at the scheduling part, look at the scheduling item class"""
 
 import time
 import re
+import itertools
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -650,28 +651,28 @@ class Service(SchedulingItem):
 
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.info("%s: my event_handler %s is invalid",
+            logger.error("%s: my event_handler %s is invalid",
                         self.get_name(), self.event_handler.command)
             state = False
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s: I've got no check_command", self.get_name())
+            logger.error("%s: I've got no check_command", self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s: my check_command %s is invalid",
+                logger.error("%s: my check_command %s is invalid",
                             self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
                     logger.error("%s: my business rule is invalid", self.get_name(),)
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s: %s", self.get_name(), bperror)
+                        logger.error("%s: %s", self.get_name(), bperror)
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and self.notifications_enabled is True:
-            logger.info("%s: I've got no notification_interval but "
+            logger.error("%s: I've got no notification_interval but "
                         "I've got notifications enabled", self.get_name())
             state = False
         if not self.host_name:
@@ -686,7 +687,7 @@ class Service(SchedulingItem):
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s: My service_description got the "
+                    logger.error("%s: My service_description got the "
                                 "character %s that is not allowed.", self.get_name(), c)
                     state = False
         return state
@@ -1256,6 +1257,11 @@ class Services(Items):
     name_property = 'unique_key'  # only used by (un)indexitem (via 'name_property')
     inner_class = Service  # use for know what is in items
 
+    def __init__(self, items, index_items=True):
+        self.partial_services = {}
+        self.name_to_partial = {}
+        super(Services, self).__init__(items, index_items)
+
     def add_template(self, tpl):
         """
         Adds and index a template into the `templates` container.
@@ -1276,7 +1282,7 @@ class Services(Items):
             tpl = self.index_template(tpl)
         self.templates[tpl.id] = tpl
 
-    def add_item(self, item, index=True):
+    def add_item(self, item, index=True, was_partial=False):
         """
         Adds and index an item into the `items` container.
 
@@ -1295,17 +1301,89 @@ class Services(Items):
             in_file = " in %s" % source
         else:
             in_file = ""
-        if not hname and not hgname:
+        if not hname and not hgname and not sdesc:
             mesg = "a %s has been defined without host_name nor " \
-                   "hostgroups%s" % (objcls, in_file)
+                   "hostgroups nor service_description%s" % (objcls, in_file)
             item.configuration_errors.append(mesg)
-        if not sdesc:
-            mesg = "a %s has been defined without service_description%s" % \
-                   (objcls, in_file)
-            item.configuration_errors.append(mesg)
+        elif not sdesc or sdesc and not hgname and not hname and not was_partial:
+            self.add_partial_service(item, index, (objcls, hname, hgname, sdesc, in_file))
+            return
+
         if index is True:
             item = self.index_item(item)
         self.items[item.id] = item
+
+    def add_partial_service(self, item, index=True, var_tuple=None):
+        if var_tuple is None:
+            return
+
+        objcls, hname, hgname, sdesc, in_file = var_tuple
+        use = getattr(item, 'use', [])
+
+
+        if use == []:
+            mesg = "a %s has been defined without host_name nor " \
+                   "hostgroups nor service_description and " \
+                   "there is no use to create a unique key%s" % (objcls, in_file)
+            item.configuration_errors.append(mesg)
+            return
+
+        use = ','.join(use)
+        if sdesc:
+            name = "::".join((sdesc, use))
+        elif hname:
+            name = "::".join((hname, use))
+        else:
+            name = "::".join((hgname, use))
+
+        if name in self.name_to_partial:
+            item = self.manage_conflict(item, name, partial=True)
+        self.name_to_partial[name] = item
+
+        self.partial_services[item.id] = item
+
+    # Inheritance for just a property
+    def apply_partial_inheritance(self, prop):
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.partial_services.itervalues(),
+                                 self.templates.itervalues()):
+            i.get_property_by_inheritance(prop)
+            # If a "null" attribute was inherited, delete it
+            try:
+                if getattr(i, prop) == 'null':
+                    delattr(i, prop)
+            except AttributeError:
+                pass
+
+    def apply_inheritance(self):
+        """ For all items and templates inherite properties and custom
+            variables.
+        """
+        # We check for all Class properties if the host has it
+        # if not, it check all host templates for a value
+        cls = self.inner_class
+        for prop in cls.properties:
+            self.apply_partial_inheritance(prop)
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.partial_services.itervalues(),
+                                 self.templates.itervalues()):
+            i.get_customs_properties_by_inheritance()
+
+        for i in self.partial_services.itervalues():
+            self.add_item(i, True, True)
+
+        del self.partial_services
+        del self.name_to_partial
+
+    def linkify_templates(self):
+        # First we create a list of all templates
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.partial_services.itervalues(),
+                                 self.templates.itervalues()):
+            self.linkify_item_templates(i)
+        for i in self:
+            i.tags = self.get_all_tags(i)
+
 
     # Search for all of the services in a host
     def find_srvs_by_hostname(self, host_name):
