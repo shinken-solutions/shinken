@@ -127,7 +127,7 @@ class Stats(object):
         # Manage local statd part
         if self.statsd_sock and self.name:
             # beware, we are sending ms here, v is in s
-            packet = '%s.%s.%s: %d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
+            packet = '%s.%s.%s:%d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
             try:
                 self.statsd_sock.sendto(packet, self.statsd_addr)
             except (socket.error, socket.gaierror), exp:
