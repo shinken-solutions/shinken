@@ -42,6 +42,10 @@ for ii in `ls -1 test_*py`; do launch_and_assert $ii; done
 # And create the coverage file
 python-coverage xml --omit=/usr/lib
 
+echo "Launchng pep8 now"
+cd ..
+pep8 --max-line-length=100 --ignore=E303,E302,E301,E241 --exclude='*.pyc' shinken/*
+
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"
 

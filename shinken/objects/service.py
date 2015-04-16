@@ -652,7 +652,7 @@ class Service(SchedulingItem):
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
             logger.error("%s: my event_handler %s is invalid",
-                        self.get_name(), self.event_handler.command)
+                         self.get_name(), self.event_handler.command)
             state = False
 
         if not hasattr(self, 'check_command'):
@@ -662,7 +662,7 @@ class Service(SchedulingItem):
         else:
             if not self.check_command.is_valid():
                 logger.error("%s: my check_command %s is invalid",
-                            self.get_name(), self.check_command.command)
+                             self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
@@ -673,7 +673,7 @@ class Service(SchedulingItem):
         if not hasattr(self, 'notification_interval') \
                 and self.notifications_enabled is True:
             logger.error("%s: I've got no notification_interval but "
-                        "I've got notifications enabled", self.get_name())
+                         "I've got notifications enabled", self.get_name())
             state = False
         if not self.host_name:
             logger.error("The service '%s' is not bound do any host.", desc)
@@ -688,7 +688,7 @@ class Service(SchedulingItem):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
                     logger.error("%s: My service_description got the "
-                                "character %s that is not allowed.", self.get_name(), c)
+                                 "character %s that is not allowed.", self.get_name(), c)
                     state = False
         return state
 

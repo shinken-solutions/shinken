@@ -691,7 +691,7 @@ class Host(SchedulingItem):
 
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
             logger.error("%s: my event_handler %s is invalid",
-                        self.get_name(), self.event_handler.command)
+                         self.get_name(), self.event_handler.command)
             state = False
 
         if getattr(self, 'check_command', None) is None:
@@ -701,7 +701,7 @@ class Host(SchedulingItem):
         else:
             if not self.check_command.is_valid():
                 logger.error("%s: my check_command %s is invalid",
-                            self.get_name(), self.check_command.command)
+                             self.get_name(), self.check_command.command)
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
@@ -713,7 +713,7 @@ class Host(SchedulingItem):
         if (not hasattr(self, 'notification_interval') and
                 self.notifications_enabled is True):
             logger.error("%s: I've got no notification_interval but "
-                        "I've got notifications enabled", self.get_name())
+                         "I've got notifications enabled", self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
@@ -730,7 +730,7 @@ class Host(SchedulingItem):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
                     logger.error("%s: My host_name got the character %s that is not allowed.",
-                                self.get_name(), c)
+                                 self.get_name(), c)
                     state = False
 
         return state
