@@ -647,10 +647,9 @@ Like temporary attributes such as "imported_from", etc.. """
                                           reactionner_tag=self.reactionner_tag)
                 else:
                     cmdCall = CommandCall(commands, command)
-                    setattr(self, prop, cmdCall)
+                setattr(self, prop, cmdCall)
             else:
                 setattr(self, prop, None)
-
 
 
     # We look at the 'trigger' prop and we create a trigger for it
