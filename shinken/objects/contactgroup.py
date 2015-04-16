@@ -125,6 +125,9 @@ class Contactgroups(Itemgroups):
             # The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
+                mbr = mbr.strip()  # protect with strip at the begining so don't care about spaces
+                if mbr == '':  # void entry, skip this
+                    continue
                 m = contacts.find_by_name(mbr)
                 # Maybe the contact is missing, if so, must be put in unknown_members
                 if m is not None:

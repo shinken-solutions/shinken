@@ -123,10 +123,13 @@ class Hostgroups(Itemgroups):
             # The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
-                if mbr == '*':
+                mbr = mbr.strip()  # protect with strip at the begining so don't care about spaces
+                if mbr == '':  # void entry, skip this
+                    continue
+                elif mbr == '*':
                     new_mbrs.extend(hosts)
                 else:
-                    h = hosts.find_by_name(mbr.strip())
+                    h = hosts.find_by_name(mbr)
                     if h is not None:
                         new_mbrs.append(h)
                     else:
