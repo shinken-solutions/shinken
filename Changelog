@@ -2,7 +2,7 @@
 Shinken ChangeLog
 ########################
 
-2.4   - 31/03/2015
+2.4   - 2X/04/2015
 -------------------
 	CORE ENHANCEMENT
 	Add: Hosts - Service_includes feature. Similar to service_excludes
@@ -36,6 +36,10 @@ Shinken ChangeLog
 	Fix: Event Handlers - Global event handlers parsing and launching
 	Fix: External Command - Internal argument for CHANGE_RETRY_HOST_CHECK_INTERVAL command
 	Fix: Realm - Bailout when there are two default realm
+	Fix: (reported by:Stéphane Loeuillet) init.d - Unset http(s)_proxy env variables in the init.d script (curl was using them by default)
+	Fix: (reported by: Arthur Lutz) CLI - manage shinken install call without arguments
+	Fix: (reported by mohierf) STATS - fix statsd format.
+	Fix: (reported by: Stéphane Loeuillet) Config Parsing - manage , case at the end of members list (hostgroups & contactgroups)
 
 
 
