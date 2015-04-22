@@ -662,7 +662,7 @@ class Host(SchedulingItem):
 
         source = getattr(self, 'imported_from', 'unknown')
 
-        special_properties = ['check_period', 'notification_interval', 'check_period',
+        special_properties = ['check_period', 'notification_interval',
                               'notification_period']
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
@@ -716,13 +716,7 @@ class Host(SchedulingItem):
                          "I've got notifications enabled", self.get_name())
             state = False
 
-        # If active check is enabled with a check_interval!=0, we must have a check_period
-        if ((getattr(self, 'active_checks_enabled', False)
-                and getattr(self, 'check_period', None) is None
-                and getattr(self, 'check_interval', 1) != 0)):
-            logger.error("%s: check_period is not correct", self.get_name())
-            state = False
-
+        # if no check_period, means 24x7, like for services
         if not hasattr(self, 'check_period'):
             self.check_period = None
 
