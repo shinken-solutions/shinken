@@ -523,7 +523,7 @@ class Arbiter(Daemon):
                  'realms']
         for t in types:
             lst = getattr(self.conf, t)
-            nb = len([i for i in lst])
+            nb = len(lst)
             stats['nb_' + t] = nb
             logger.info("Got %s for %s", nb, t)
 
