@@ -158,7 +158,7 @@ class DiscoveredHost(object):
 
         # Change join prop list in string with a ',' separator
         for (k, v) in d.iteritems():
-            if isinstance(d[k], 'list'):
+            if isinstance(d[k], list):
                 d[k] = ','.join(d[k])
 
         self.properties = d
