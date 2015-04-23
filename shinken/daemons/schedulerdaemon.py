@@ -136,11 +136,20 @@ class IStats(Interface):
 '''
     def get_raw_stats(self):
         sched = self.app.sched
-        res = {}
-        res['nb_scheduled'] = len([c for c in sched.checks.values() if c.status == 'scheduled'])
-        res['nb_inpoller'] = len([c for c in sched.checks.values() if c.status == 'inpoller'])
-        res['nb_zombies'] = len([c for c in sched.checks.values() if c.status == 'zombie'])
-        res['nb_notifications'] = len(sched.actions)
+        nb_scheduled = nb_inpoller = nb_zombies = 0
+        for chk in sched.checks.itervalues():
+            if chk.status == 'scheduled':
+                nb_scheduled += 1
+            elif chk.status == 'inpoller':
+                nb_inpoller += 1
+            elif chk.status == 'zombie':
+                nb_zombies += 1
+        res = {
+            'nb_scheduled': nb_scheduled,
+            'nb_inpoller': nb_inpoller,
+            'nb_zombies': nb_zombies,
+            'nb_notifications': len(sched.actions)
+        }
 
         # Spare scehdulers do not have such properties
         if hasattr(sched, 'services'):

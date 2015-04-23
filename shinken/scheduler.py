@@ -1684,9 +1684,14 @@ class Scheduler(object):
             self.get_actions_from_passives_satellites()
 
             # stats
-            nb_scheduled = len([c for c in self.checks.values() if c.status == 'scheduled'])
-            nb_inpoller = len([c for c in self.checks.values() if c.status == 'inpoller'])
-            nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
+            nb_scheduled = nb_inpoller = nb_zombies = 0
+            for chk in self.checks.itervalues():
+                if chk.status == 'scheduled':
+                    nb_scheduled += 1
+                elif chk.status == 'inpoller':
+                    nb_inpoller += 1
+                elif chk.status == 'zombie':
+                    nb_zombies += 1
             nb_notifications = len(self.actions)
 
             logger.debug("Checks: total %s, scheduled %s,"
