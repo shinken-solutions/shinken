@@ -272,7 +272,8 @@ class SchedulingItem(Item):
         # if it's huge than ourselves
         if len(self.impacts) != 0:
             self.business_impact = max(
-                self.business_impact, max([e.business_impact for e in self.impacts])
+                self.business_impact,
+                max(e.business_impact for e in self.impacts)
             )
             return
 

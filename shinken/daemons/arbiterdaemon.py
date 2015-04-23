@@ -527,7 +527,7 @@ class Arbiter(Daemon):
             stats['nb_' + t] = nb
             logger.info("Got %s for %s", nb, t)
 
-        max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
+        max_srv_by_host = max(len(h.services) for h in self.conf.hosts)
         logger.info("Max srv by host %s", max_srv_by_host)
         stats['max_srv_by_host'] = max_srv_by_host
 
