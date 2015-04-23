@@ -55,6 +55,11 @@ class TestInheritanceAndPlus(ShinkenTest):
         self.assertIn(dmz.get_name(), [hg.get_name() for hg in host2.hostgroups])
         self.assertIn(mysql.get_name(), [hg.get_name() for hg in host2.hostgroups])
 
+        service = self.sched.services.find_srv_by_name_and_hostname("pack-host", 'CHILDSERV')
+        sgs = [sg.get_name() for sg in service.servicegroups]
+        self.assertIn("generic-sg", sgs)
+        self.assertIn("another-sg", sgs)
+
     def test_pack_like_inheritance(self):
         # get our pack service
         host = self.sched.hosts.find_by_name('pack-host')

@@ -81,8 +81,8 @@ class Service(SchedulingItem):
         'display_name':
             StringProp(default='', fill_brok=['full_status']),
         'servicegroups':
-            StringProp(default='', fill_brok=['full_status'],
-                       brok_transformation=to_list_string_of_names, merging='join'),
+            ListProp(default=[], fill_brok=['full_status'],
+                     brok_transformation=to_list_string_of_names, merging='join'),
         'is_volatile':
             BoolProp(default=False, fill_brok=['full_status']),
         'check_command':
@@ -1504,8 +1504,7 @@ class Services(Items):
         for s in self:
             new_servicegroups = []
             if hasattr(s, 'servicegroups') and s.servicegroups != '':
-                sgs = s.servicegroups.split(',')
-                for sg_name in sgs:
+                for sg_name in s.servicegroups:
                     sg_name = sg_name.strip()
                     sg = servicegroups.find_by_name(sg_name)
                     if sg is not None:
