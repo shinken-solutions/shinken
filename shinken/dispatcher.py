@@ -208,7 +208,7 @@ class Dispatcher:
 
                             # TODO: less violent! Must only resent to who need?
                             # must be caught by satellite who sees that
-                            # it already has the conf (hash) and do nothing
+                            # it already has the conf and do nothing
                             self.dispatch_ok = False  # so we will redispatch all
                             r.to_satellites_need_dispatch[kind][cfg_id] = True
                             r.to_satellites_managed_by[kind][cfg_id] = []

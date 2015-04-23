@@ -66,7 +66,6 @@ class Item(object):
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
         'configuration_errors':     ListProp(default=[]),
-        'hash':   StringProp(default=''),
         # We save all template we asked us to load from
         'tags': ListProp(default=set(), fill_brok=['full_status']),
     }
@@ -245,21 +244,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
-
-
-    # Compute a hash of this element values. Should be launched
-    # When we got all our values, but not linked with other objects
-    def compute_hash(self):
-        # ID will always changed between runs, so we remove it
-        # for hash compute
-        i = self.id
-        del self.id
-        m = md5()
-        tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
-        m.update(tmp)
-        self.hash = m.digest()
-        # and put again our id
-        self.id = i
 
     def get_templates(self):
         use = getattr(self, 'use', '')
@@ -928,11 +912,6 @@ class Items(object):
 
     def __contains__(self, key):
         return key in self.items
-
-    def compute_hash(self):
-        for i in self:
-            i.compute_hash()
-
 
     def find_by_name(self, name):
         return self.name_to_item.get(name, None)

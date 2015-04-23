@@ -403,9 +403,6 @@ class Arbiter(Daemon):
         # Remove templates from config
         self.conf.remove_templates()
 
-        # We compute simple item hash
-        self.conf.compute_hash()
-
         # Overrides sepecific service instaces properties
         self.conf.override_properties()
 

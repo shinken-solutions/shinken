@@ -112,7 +112,6 @@ class TestEndParsingType(unittest.TestCase):
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
-        self.conf.compute_hash()
 
         self.conf.override_properties()
         self.conf.linkify()
