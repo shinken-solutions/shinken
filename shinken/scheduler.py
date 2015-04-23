@@ -363,6 +363,11 @@ class Scheduler(object):
         if f:
             # print("found action for %s: %s" % (elt.__class__.__name__, f.__name__))
             f(self, elt)
+        else:
+            logger.warning(
+                "self.add(): Unmanaged object class: %s (object=%r)",
+                elt.__class__, elt
+            )
 
     __add_actions = {
         Check:              add_Check,
