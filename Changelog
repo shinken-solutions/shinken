@@ -41,6 +41,7 @@ Shinken ChangeLog
 	Fix: (reported by mohierf) STATS - fix statsd format.
 	Fix: (reported by: Stéphane Loeuillet) Config Parsing - manage , case at the end of members list (hostgroups & contactgroups)
 	Fix: (reported by: Stéphane Loeuillet) Config Parsing - host check_period was mandatory with some parameters, now is missing always true period.
+	Fix: + char in servicegroups
 
 
 
