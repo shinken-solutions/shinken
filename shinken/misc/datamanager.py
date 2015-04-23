@@ -207,7 +207,8 @@ class DataManager(object):
                 if s.problem_has_been_acknowledged:
                     continue
                 # We search for impacts that were NOT currently managed
-                if len([p for p in s.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                if sum(1 for p in s.source_problems
+                       if not p.problem_has_been_acknowledged) > 0:
                     res.append(s)
         for h in self.rg.hosts:
             if h.is_impact and h.state not in ['UP', 'PENDING']:
@@ -215,7 +216,8 @@ class DataManager(object):
                 if h.problem_has_been_acknowledged:
                     continue
                 # We search for impacts that were NOT currently managed
-                if len([p for p in h.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                if sum(1 for p in h.source_problems
+                       if not p.problem_has_been_acknowledged) > 0:
                     res.append(h)
         return res
 

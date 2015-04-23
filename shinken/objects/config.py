@@ -1983,7 +1983,8 @@ class Config(Item):
                                            "realm: %s" % (e.get_full_name(), elt_r))
                             r = False
 
-        if len([realm for realm in self.realms if hasattr(realm, 'default') and realm.default]) > 1:
+        if sum(1 for realm in self.realms
+               if hasattr(realm, 'default') and realm.default) > 1:
             err = "Error : More than one realm are set to the default realm"
             logger.error(err)
             self.add_error(err)
@@ -2255,7 +2256,8 @@ class Config(Item):
     def cut_into_parts(self):
         # print "Scheduler configured:", self.schedulers
         # I do not care about alive or not. User must have set a spare if need it
-        nb_parts = len([s for s in self.schedulers if not s.spare])
+        nb_parts = sum(1 for s in self.schedulers
+                       if not s.spare)
 
         if nb_parts == 0:
             nb_parts = 1

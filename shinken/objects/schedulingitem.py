@@ -1084,7 +1084,8 @@ class SchedulingItem(Item):
         if not c.from_trigger:
             self.eval_triggers()
         if c.from_trigger or not c.from_trigger and \
-                len([t for t in self.triggers if t.trigger_broker_raise_enabled]) == 0:
+                sum(1 for t in self.triggers
+                    if t.trigger_broker_raise_enabled) == 0:
             self.broks.append(self.get_check_result_brok())
 
         self.get_obsessive_compulsive_processor_command()
