@@ -160,9 +160,14 @@ class DependencyNode(object):
 
         # We look for each application
         nb_sons = len(states)
-        nb_ok = len([s for s in states if s == 0])
-        nb_warn = len([s for s in states if s == 1])
-        nb_crit = len([s for s in states if s == 2])
+        nb_ok = nb_warn = nb_crit = 0
+        for s in states:
+            if s == 0:
+                nb_ok += 1
+            elif s == 1:
+                nb_warn += 1
+            elif s == 2:
+                nb_crit += 1
 
         # print "NB:", nb_ok, nb_warn, nb_crit
 
