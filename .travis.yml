@@ -18,3 +18,7 @@ script:
 # specific call to launch coverage data into coveralls.io
 after_success:
   coveralls
+
+after_script:
+   - ./test/uninstall_shiken.sh develop virtualenv
+   - ./test/test_all_setup.sh
