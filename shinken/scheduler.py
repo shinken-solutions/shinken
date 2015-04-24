@@ -1580,15 +1580,14 @@ class Scheduler(object):
                 checks_status_counts[status],
                 now))
 
-        metrics.append('scheduler.%s.actions.queue %d %d' %
-                       (self.instance_name,
-                        len(self.actions), now))
-        metrics.append('scheduler.%s.broks.queue %d %d' %
-                       (self.instance_name, len(self.broks), now))
-        metrics.append('scheduler.%s.downtimes %d %d' %
-                       (self.instance_name, len(self.downtimes), now))
-        metrics.append('scheduler.%s.comments %d %d'
-                       (self.instance_name, len(self.comments), now))
+        for what in ('actions', 'broks'):
+            metrics.append('scheduler.%s.%s.queue %d %d' % (
+                self.instance_name, what, len(getattr(self, what)), now))
+
+        for what in ('downtimes', 'comments'):
+            metrics.append('scheduler.%s.%s %d %d' % (
+                self.instance_name, what, len(getattr(self, what)), now))
+
         if lat_min:
             metrics.append('scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now))
             metrics.append('scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now))
