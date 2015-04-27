@@ -4,11 +4,11 @@ STOP_ON_FAILURE=0
 
 DISTRO=$(lsb_release -i | cut -f 2 | tr [A-Z] [a-z])
 
-if [[ $? -ne 0 ]];then
+if [[ $? -ne 0 ]]; then
    DISTRO=$(head -1 /etc/issue | cut -f 1 -d " " | tr [A-Z] [a-z])
 fi
 
-if [[ "$DISTRO" == "" ]]; then
+if [[ "$DISTRO" == "" ]]; then
     echo "Can't determine distro"
 fi
 
@@ -46,7 +46,7 @@ for line in $(cat $1); do
 
     if [[ "$exp_chmod" != "$cur_chmod" ]]; then
         echo "Right error on file $file - expected: $exp_chmod, found: $cur_chmod"
-        if [[ $STOP_ON_FAILURE -eq 1 ]];then
+        if [[ $STOP_ON_FAILURE -eq 1 ]]; then
             return 1
         else
             error_found=1
@@ -64,13 +64,14 @@ done
 # for now all was done in root. Maybe we will need specific user tests
 
 error_found=0
+sed 
 for pyenv in "root" "virtualenv"; do
     for install_type in "install" "develop"; do
         if [[ ! -e ./test/install_files/${install_type}_${pyenv}_${DISTRO} ]]; then
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
             continue
         fi
-        python setup.py $install_type 
+        python setup.py $install_type --user=$(id -u -n) --group=$(id -g -n) # may require sudo
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
@@ -80,7 +81,7 @@ for pyenv in "root" "virtualenv"; do
             error_found=1
         fi
 
-        pip -y uninstall shinken
+        pip uninstall -y shinken
         ./test/uninstall_shinken.sh $install_type $pyenv
     done
 done
