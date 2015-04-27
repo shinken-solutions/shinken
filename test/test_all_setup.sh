@@ -1,3 +1,5 @@
+#!/bin/bash
+
 STOP_ON_FAILURE=0
 
 DISTRO=$(lsb_release -i | cut -f 2 | tr [A-Z] [a-z])
