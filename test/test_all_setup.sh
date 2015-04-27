@@ -6,8 +6,21 @@ if [[ $? -ne 0 ]];then
    DISTRO=$(head -1 /etc/issue | cut -f 1 -d " " | tr [A-Z] [a-z])
 fi
 
-if [[ $DISTRO == "" ]]; then
+if [[ "$DISTRO" == "" ]]; then
     echo "Can't determine distro"
+fi
+
+
+
+
+function get_python(){
+    python -V  2>&1 | awk -F "[ .]" '{print $2.$3}'
+}
+
+VIRTUALENVPATH="/tmp/env"
+
+if [[ "$TRAVIS" -eq 1 ]]; then
+    VIRTUALENVPATH="/home/travis/virtualenv/python$(get_python)"
 fi
 
 function test_setup_develop_root(){
@@ -16,8 +29,8 @@ test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
 function test_setup(){
 error_found=0
-for line in $1; do
-    file=$(echo $line | cut -d " " -f 2)
+for line in $(cat $1); do
+    file=$(echo $line | cut -d " " -f 2| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g")
     exp_chmod=$(echo $line | cut -d " " -f 1)
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then
@@ -53,8 +66,9 @@ for pyenv in "root" "virtualenv"; do
     for install_type in "install" "develop"; do
         if [[ ! -e ./test/install_files/${install_type}_${pyenv}_${DISTRO} ]]; then
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
+            continue
         fi
-        python setup.py $install_type $pyenv
+        python setup.py $install_type 
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
@@ -64,7 +78,7 @@ for pyenv in "root" "virtualenv"; do
             error_found=1
         fi
 
-        pip uninstall shinken
+        pip -y uninstall shinken
         ./test/uninstall_shinken.sh $install_type $pyenv
     done
 done
