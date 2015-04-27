@@ -75,6 +75,7 @@ for pyenv in "root" "virtualenv"; do
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
             continue
         fi
+        pip install -r test/requirements.txt # may require sudo
         python setup.py $install_type --user=$(id -u -n) --group=$(id -g -n) # may require sudo
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
