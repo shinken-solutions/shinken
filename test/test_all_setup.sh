@@ -64,8 +64,12 @@ done
 # for now all was done in root. Maybe we will need specific user tests
 
 error_found=0
-sed 
+deactivate
+ 
 for pyenv in "root" "virtualenv"; do
+    if [[ "$pyenv" == "virtualenv" ]]; then
+    source $VIRTUALENVPATH/bin/activate
+    fi
     for install_type in "install" "develop"; do
         if [[ ! -e ./test/install_files/${install_type}_${pyenv}_${DISTRO} ]]; then
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
