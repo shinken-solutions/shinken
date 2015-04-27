@@ -361,6 +361,10 @@ class Arbiter(Daemon):
                             # test if raw_objects[k] are already set - if not, add empty array
                             if k not in raw_objects:
                                 raw_objects[k] = []
+                            # put the imported_from property if the module is not already setting
+                            # it so we know where does this object came from
+                            if 'imported_from' not in x:
+                                x['imported_from'] = 'module:%s' % inst.get_name()
                             # now append the object
                             raw_objects[k].append(x)
                         logger.debug("Added %i objects to %s from module %s",
