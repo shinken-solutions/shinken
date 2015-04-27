@@ -32,11 +32,11 @@ test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 function test_setup(){
 error_found=0
 for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
-    exp_chmod=$(grep $file $1| cut -t " " -f 1 )
+    exp_chmod=$(grep $file $1| cut -d " " -f 1 )
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then
         tail -1 /tmp/stat.failure
-        if [[ $STOP_ON_FAILURE -eq 1 ]];then
+        if [[ $STOP_ON_FAILURE -eq 1 ]];then
             return 1
         else
             error_found=1
@@ -79,7 +79,7 @@ for pyenv in "root" "virtualenv"; do
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
-        if [[ $STOP_ON_FAILURE -eq 1 ]];then
+        if [[ $STOP_ON_FAILURE -eq 1 ]];then
             exit 1
         else
             error_found=1
