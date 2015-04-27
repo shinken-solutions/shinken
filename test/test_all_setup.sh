@@ -31,9 +31,8 @@ test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
 function test_setup(){
 error_found=0
-for line in $(cat $1); do
-    file=$(echo $line | cut -d " " -f 2| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g")
-    exp_chmod=$(echo $line | cut -d " " -f 1)
+for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
+    exp_chmod=$(grep $file $1| cut -t " " -f 1 )
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then
         tail -1 /tmp/stat.failure
