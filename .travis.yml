@@ -20,5 +20,5 @@ after_success:
   coveralls
 
 after_script:
-   - ./test/uninstall_shiken.sh develop virtualenv
+   - ./test/uninstall_shinken.sh develop virtualenv
    - ./test/test_all_setup.sh
