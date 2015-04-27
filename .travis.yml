@@ -12,12 +12,12 @@ install:
 # so we must combine them in the end
 script:
   - cd test
-  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken
-  - coverage combine
-  - cd .. && pep8 --max-line-length=100 --ignore=E303,E302,E301,E241 --exclude='*.pyc' shinken/*
+#  - nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken
+#  - coverage combine
+#  - cd .. && pep8 --max-line-length=100 --ignore=E303,E302,E301,E241 --exclude='*.pyc' shinken/*
 # specific call to launch coverage data into coveralls.io
-after_success:
-  coveralls
+#after_success:
+#  coveralls
 
 after_script:
    - ./test/uninstall_shinken.sh develop virtualenv
