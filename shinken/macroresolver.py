@@ -393,36 +393,33 @@ class MacroResolver(Borg):
     def _get_timet(self):
         return str(int(time.time()))
 
-    def _get_total_hosts_up(self):
-        return len([h for h in self.hosts if h.state == 'UP'])
+    def _tot_hosts_by_state(self, state):
+        return sum(1 for h in self.hosts if h.state == state)
 
-    def _get_total_hosts_down(self):
-        return len([h for h in self.hosts if h.state == 'DOWN'])
-
-    def _get_total_hosts_unreachable(self):
-        return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
+    _get_total_hosts_up = lambda s: s._tot_hosts_by_state('UP')
+    _get_total_hosts_down = lambda s: s._tot_hosts_by_state('DOWN')
+    _get_total_hosts_unreachable = lambda s: s._tot_hosts_by_state('UNREACHABLE')
 
     # TODO
     def _get_total_hosts_unreachable_unhandled(self):
         return 0
 
     def _get_total_hosts_problems(self):
-        return len([h for h in self.hosts if h.is_problem])
+        return sum(1 for h in self.hosts if h.is_problem)
 
     def _get_total_hosts_problems_unhandled(self):
         return 0
 
-    def _get_total_service_ok(self):
-        return len([s for s in self.services if s.state == 'OK'])
+    def _tot_services_by_state(self, state):
+        return sum(1 for s in self.services if s.state == state)
 
-    def _get_total_services_warning(self):
-        return len([s for s in self.services if s.state == 'WARNING'])
+    _get_total_service_ok = lambda s: s._tot_services_by_state('OK')
 
-    def _get_total_services_critical(self):
-        return len([s for s in self.services if s.state == 'CRITICAL'])
+    _get_total_service_warning = lambda s: s._tot_services_by_state('WARNING')
 
-    def _get_total_services_unknown(self):
-        return len([s for s in self.services if s.state == 'UNKNOWN'])
+    _get_total_service_critical = lambda s: s._tot_services_by_state('CRITICAL')
+
+    _get_total_service_unknown = lambda s: s._tot_services_by_state('UNKNOWN')
 
     # TODO
     def _get_total_services_warning_unhandled(self):
@@ -435,7 +432,7 @@ class MacroResolver(Borg):
         return 0
 
     def _get_total_service_problems(self):
-        return len([s for s in self.services if s.is_problem])
+        return sum(1 for s in self.services if s.is_problem)
 
     def _get_total_service_problems_unhandled(self):
         return 0

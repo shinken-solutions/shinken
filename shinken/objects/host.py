@@ -1320,27 +1320,18 @@ class Host(SchedulingItem):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
-
     # Macro part
     def get_total_services(self):
         return str(len(self.services))
 
+    def _tot_services_by_state(self, state):
+        return str(sum(1 for s in self.services
+                       if s.state_id == state))
 
-    def get_total_services_ok(self):
-        return str(len([s for s in self.services if s.state_id == 0]))
-
-
-    def get_total_services_warning(self):
-        return str(len([s for s in self.services if s.state_id == 1]))
-
-
-    def get_total_services_critical(self):
-        return str(len([s for s in self.services if s.state_id == 2]))
-
-
-    def get_total_services_unknown(self):
-        return str(len([s for s in self.services if s.state_id == 3]))
-
+    get_total_services_ok = lambda s: s._tot_services_by_state(0)
+    get_total_services_warning = lambda s: s._tot_services_by_state(1)
+    get_total_services_critical = lambda s: s._tot_services_by_state(2)
+    get_total_services_unknown = lambda s: s._tot_services_by_state(3)
 
     def get_ack_author_name(self):
         if self.acknowledgement is None:

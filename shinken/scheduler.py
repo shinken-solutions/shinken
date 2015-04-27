@@ -22,6 +22,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+from collections import defaultdict
 
 import time
 import os
@@ -1533,6 +1534,23 @@ class Scheduler(object):
         return self.sched_daemon.get_objects_from_from_queues()
 
 
+    def get_checks_status_counts(self, checks=None):
+        """ Compute the counts of the different checks status and
+        return it as a defaultdict(int) with the keys being the different
+        statutes and the value being the count of the checks in that status.
+
+        :checks: None or the checks you want to count their statuses.
+                 If None then self.checks is used.
+        :param checks: NoneType | dict
+        :rtype: defaultdict(int)
+        """
+        if checks is None:
+            checks = self.checks
+        res = defaultdict(int)
+        for chk in checks.itervalues():
+            res[chk.status] += 1
+        return res
+
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
@@ -1552,24 +1570,24 @@ class Scheduler(object):
         res['services'] = len(self.services)
         # metrics specific
         metrics = res['metrics']
-        metrics.append('scheduler.%s.checks.scheduled %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.inpoller %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.zombie %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.actions.queue %d %d' %
-                       (self.instance_name,
-                        len(self.actions), now))
-        metrics.append('scheduler.%s.broks.queue %d %d' %
-                       (self.instance_name, len(self.broks), now))
-        metrics.append('scheduler.%s.downtimes %d %d' %
-                       (self.instance_name, len(self.downtimes), now))
-        metrics.append('scheduler.%s.comments %d %d'
-                       (self.instance_name, len(self.comments), now))
+
+        checks_status_counts = self.get_checks_status_counts()
+
+        for status in ('scheduled', 'inpoller', 'zombie'):
+            metrics.append('scheduler.%s.checks.%s %d %d' % (
+                self.instance_name,
+                status,
+                checks_status_counts[status],
+                now))
+
+        for what in ('actions', 'broks'):
+            metrics.append('scheduler.%s.%s.queue %d %d' % (
+                self.instance_name, what, len(getattr(self, what)), now))
+
+        for what in ('downtimes', 'comments'):
+            metrics.append('scheduler.%s.%s %d %d' % (
+                self.instance_name, what, len(getattr(self, what)), now))
+
         if lat_min:
             metrics.append('scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now))
             metrics.append('scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now))
@@ -1684,9 +1702,14 @@ class Scheduler(object):
             self.get_actions_from_passives_satellites()
 
             # stats
-            nb_scheduled = len([c for c in self.checks.values() if c.status == 'scheduled'])
-            nb_inpoller = len([c for c in self.checks.values() if c.status == 'inpoller'])
-            nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
+            nb_scheduled = nb_inpoller = nb_zombies = 0
+            for chk in self.checks.itervalues():
+                if chk.status == 'scheduled':
+                    nb_scheduled += 1
+                elif chk.status == 'inpoller':
+                    nb_inpoller += 1
+                elif chk.status == 'zombie':
+                    nb_zombies += 1
             nb_notifications = len(self.actions)
 
             logger.debug("Checks: total %s, scheduled %s,"

@@ -136,13 +136,17 @@ class IStats(Interface):
 '''
     def get_raw_stats(self):
         sched = self.app.sched
-        res = {}
-        res['nb_scheduled'] = len([c for c in sched.checks.values() if c.status == 'scheduled'])
-        res['nb_inpoller'] = len([c for c in sched.checks.values() if c.status == 'inpoller'])
-        res['nb_zombies'] = len([c for c in sched.checks.values() if c.status == 'zombie'])
-        res['nb_notifications'] = len(sched.actions)
 
-        # Spare scehdulers do not have such properties
+        res = sched.get_checks_status_counts()
+
+        res = {
+            'nb_scheduled': res['scheduled'],
+            'nb_inpoller': res['inpoller'],
+            'nb_zombies': res['zombie'],
+            'nb_notifications': len(sched.actions)
+        }
+
+        # Spare schedulers do not have such properties
         if hasattr(sched, 'services'):
             # Get a overview of the latencies with just
             # a 95 percentile view, but lso min/max values
