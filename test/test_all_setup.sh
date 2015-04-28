@@ -16,7 +16,7 @@ VIRTUALENVPATH="/tmp/env"
 
 if [[ "$TRAVIS" -eq 1 ]]; then
    VIRTUALENVPATH="$VIRTUAL_ENV"
-   ls -l $VIRTUALENVPATH/*
+   ls -l $VIRTUALENVPATH/lib/*
 fi
 
 function test_setup_develop_root(){
@@ -29,6 +29,9 @@ for raw_file in $(awk '{print $2}' $1); do
     file=$(echo "$raw_file" | sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g")
     bfile=$(echo "$raw_file" | sed 's:\.:\\\.:g' | sed 's:\*:\\\*:g')
     exp_chmod=$(grep "$bfile$" $1| cut -d " " -f 1 )
+    if [[ "$exp_chmod" == "" ]];
+        echo "RAWFILE:$raw_file, FILE:$file, BFILE:$bfile"
+    fi
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then
         tail -1 /tmp/stat.failure
