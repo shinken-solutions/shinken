@@ -12,17 +12,10 @@ if [[ "$DISTRO" == "" ]]; then
     echo "Can't determine distro"
 fi
 
-
-
-
-function get_python(){
-    python -V  2>&1 | awk -F "[ .]" '{print $2.$3}'
-}
-
 VIRTUALENVPATH="/tmp/env"
 
 if [[ "$TRAVIS" -eq 1 ]]; then
-    VIRTUALENVPATH="/home/travis/virtualenv/python$(get_python)"
+    VIRTUALENVPATH="$VIRTUAL_ENV"
 fi
 
 function test_setup_develop_root(){
@@ -57,29 +50,67 @@ for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
 done 
 }
 
+deactivate () {
+    unset pydoc
+
+    # reset old environment variables
+    if [ -n "$_OLD_VIRTUAL_PATH" ] ; then
+        PATH="$_OLD_VIRTUAL_PATH"
+        export PATH
+        unset _OLD_VIRTUAL_PATH
+    fi
+    if [ -n "$_OLD_VIRTUAL_PYTHONHOME" ] ; then
+        PYTHONHOME="$_OLD_VIRTUAL_PYTHONHOME"
+        export PYTHONHOME
+        unset _OLD_VIRTUAL_PYTHONHOME
+    fi
+
+    # This should detect bash and zsh, which have a hash command that must
+    # be called to get it to forget past commands.  Without forgetting
+    # past commands the $PATH changes we made may not be respected
+    if [ -n "$BASH" -o -n "$ZSH_VERSION" ] ; then
+        hash -r 2>/dev/null
+    fi
+
+    if [ -n "$_OLD_VIRTUAL_PS1" ] ; then
+        PS1="$_OLD_VIRTUAL_PS1"
+        export PS1
+        unset _OLD_VIRTUAL_PS1
+    fi
+
+    unset VIRTUAL_ENV
+    if [ ! "$1" = "nondestructive" ] ; then
+    # Self destruct!
+        unset -f deactivate
+    fi
+}
+
 #TODO
 # go though install files and assert right are correct
 # check owner also
 # for now all was done in root. Maybe we will need specific user tests
 
 error_found=0
-echo "VIRTUAL:$VIRTUAL_ENV"
-env
+#echo "VIRTUAL:$VIRTUAL_ENV"
+#env
 
 #Will copy it from activate
-#deactivate 
+deactivate 
  
 for pyenv in "root" "virtualenv"; do
     if [[ "$pyenv" == "virtualenv" ]]; then
-    source $VIRTUALENVPATH/bin/activate
+        source $VIRTUALENVPATH/bin/activate
+        SUDO=""
+    else
+        SUDO="sudo"
     fi
     for install_type in "install" "develop"; do
         if [[ ! -e ./test/install_files/${install_type}_${pyenv}_${DISTRO} ]]; then
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
             continue
         fi
-        pip install -r test/requirements.txt # may require sudo
-        python setup.py $install_type --owner=$(id -u -n) --group=$(id -g -n) # may require sudo
+        $SUDO pip install -r test/requirements.txt # may require sudo
+        $SUDO python setup.py $install_type --owner=$(id -u -n) --group=$(id -g -n) # may require sudo
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
