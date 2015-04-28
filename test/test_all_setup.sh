@@ -25,9 +25,9 @@ test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
 function test_setup(){
 error_found=0
-for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
-    bfile=$(echo "$file" | sed 's:\.:\\\.:g' | sed 's:\*:\\\*:g')
-    echo "FILE: $file, BFILE: $bfile"
+for raw_file in $(awk '{print $2}' $1); do
+    file=$(echo "$raw_file" | sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g")
+    bfile=$(echo "$raw_file" | sed 's:\.:\\\.:g' | sed 's:\*:\\\*:g')
     exp_chmod=$(grep "$bfile$" $1| cut -d " " -f 1 )
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then

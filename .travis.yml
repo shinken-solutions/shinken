@@ -22,4 +22,4 @@ script:
 after_script:
    - cd ..
    - ./test/uninstall_shinken.sh develop virtualenv
-   - bash -x ./test/test_all_setup.sh
+   - ./test/test_all_setup.sh
