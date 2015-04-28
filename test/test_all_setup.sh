@@ -44,10 +44,9 @@ for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
             error_found=1
         fi
     fi
-
-    return $error_found
-
 done 
+
+return $error_found
 }
 
 deactivate () {
