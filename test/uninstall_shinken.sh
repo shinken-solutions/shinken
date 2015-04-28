@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function remove_develop_root(){
     find /usr/ -name "Shinken.egg-link" -exec rm -f {} \;
     # rm -rf build

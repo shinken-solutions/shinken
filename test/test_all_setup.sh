@@ -114,10 +114,12 @@ for pyenv in "root" "virtualenv"; do
         #test_setup_${install_type}_${pyenv}
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
-        if [[ $STOP_ON_FAILURE -eq 1 ]];then
-            exit 1
-        else
-            error_found=1
+        if [[ $? -ne 0 ]];then
+            if [[ $STOP_ON_FAILURE -eq 1 ]];then
+                exit 1
+            else
+                error_found=1
+            fi
         fi
 
         $SUDO pip uninstall -y shinken
