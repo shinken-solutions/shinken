@@ -9,13 +9,14 @@ if [[ $? -ne 0 ]]; then
 fi
 
 if [[ "$DISTRO" == "" ]]; then
-    echo "Can't determine distro"
+   echo "Can't determine distro"
 fi
 
 VIRTUALENVPATH="/tmp/env"
 
 if [[ "$TRAVIS" -eq 1 ]]; then
-    VIRTUALENVPATH="$VIRTUAL_ENV"
+   VIRTUALENVPATH="$VIRTUAL_ENV"
+   ls -l $VIRTUALENVPATH/*
 fi
 
 function test_setup_develop_root(){
