@@ -26,6 +26,7 @@ function test_setup(){
 error_found=0
 for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
     bfile=$(echo "$file" | sed 's:\.:\\\.:g' | sed 's:\*:\\\*:g')
+    echo "FILE: $file, BFILE: $bfile"
     exp_chmod=$(grep "$bfile$" $1| cut -d " " -f 1 )
     cur_chmod=$(stat -c "%A" $file 2>> /tmp/stat.failure)
     if [[ $? -ne 0 ]];then
