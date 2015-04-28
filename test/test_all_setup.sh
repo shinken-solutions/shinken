@@ -63,7 +63,11 @@ done
 # for now all was done in root. Maybe we will need specific user tests
 
 error_found=0
-deactivate
+echo "VIRTUAL:$VIRTUAL_ENV"
+env
+
+#Will copy it from activate
+#deactivate 
  
 for pyenv in "root" "virtualenv"; do
     if [[ "$pyenv" == "virtualenv" ]]; then
