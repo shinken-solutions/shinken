@@ -1,11 +1,11 @@
 function remove_develop_root(){
-    find /usr/ -name "Shinken.egg-link" -exec rm {} \;
+    find /usr/ -name "Shinken.egg-link" -exec rm -f {} \;
     # rm -rf build
     # rm -rf Shinken.egg-info
 }
 
 function remove_develop_virtualenv(){
-    find ~ -name "Shinken.egg-link" -exec rm {} \;
+    find ~ -name "Shinken.egg-link" -exec rm -f {} \;
     # rm -rf build
     # rm -rf Shinken.egg-info
 }
