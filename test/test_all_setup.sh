@@ -38,7 +38,7 @@ for file in $(awk '{print $2}' $1| sed "s:VIRTUALENVPATH:$VIRTUALENVPATH:g"); do
 
     if [[ "$exp_chmod" != "$cur_chmod" ]]; then
         echo "Right error on file $file - expected: $exp_chmod, found: $cur_chmod"
-        if [[ $STOP_ON_FAILURE -eq 1 ]]; then
+        if [[ $STOP_ON_FAILURE -eq 1 ]]; then
             return 1
         else
             error_found=1
@@ -85,15 +85,9 @@ deactivate () {
 }
 
 #TODO
-# go though install files and assert right are correct
-# check owner also
-# for now all was done in root. Maybe we will need specific user tests
+# check owner also, maybe we will need specific user tests
 
 error_found=0
-#echo "VIRTUAL:$VIRTUAL_ENV"
-#env
-
-#Will copy it from activate
 deactivate 
  
 for pyenv in "root" "virtualenv"; do
@@ -108,9 +102,13 @@ for pyenv in "root" "virtualenv"; do
             echo "DISTRO $DISTRO not supported for python setup.py $install_type $pyenv"
             continue
         fi
-        $SUDO pip install -r test/requirements.txt # may require sudo
-        $SUDO python setup.py $install_type --owner=$(id -u -n) --group=$(id -g -n) # may require sudo
-        #test_setup_${install_type}_${pyenv}
+
+        echo "============================================"
+        echo "TEST SETUP for ${install_type} ${pyenv}"
+        echo "============================================"
+
+        $SUDO pip install -r test/requirements.txt 2>&1 1>/dev/null
+        $SUDO python setup.py $install_type --owner=$(id -u -n) --group=$(id -g -n) >/dev/null
         test_setup "test/install_files/${install_type}_${pyenv}_${DISTRO}"
 
         if [[ $? -ne 0 ]];then
@@ -121,8 +119,13 @@ for pyenv in "root" "virtualenv"; do
             fi
         fi
 
-        $SUDO pip uninstall -y shinken
+        $SUDO pip uninstall -y shinken 2>&1 1>/dev/null
         $SUDO ./test/uninstall_shinken.sh $install_type $pyenv
+
+        echo "==============================================="
+        echo "TEST SETUP for ${install_type} ${pyenv} DONE"
+        echo "==============================================="
+
     done
 done
 
