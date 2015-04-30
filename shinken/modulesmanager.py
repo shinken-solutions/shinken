@@ -78,6 +78,7 @@ class ModulesManager(object):
         self.load()
         self.get_instances()
 
+
     @classmethod
     def try_best_load(cls, name, package=None):
         try:
@@ -119,6 +120,7 @@ class ModulesManager(object):
             if prev_module is not None:  # and restore it after we have loaded our one (or not)
                 sys.modules['module'] = prev_module
 
+
     @classmethod
     def try_load(cls, mod_name, mod_dir=None):
         msg = ''
@@ -136,6 +138,7 @@ class ModulesManager(object):
         if msg:
             logger.info(msg, mod_name)
         return mod
+
 
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
