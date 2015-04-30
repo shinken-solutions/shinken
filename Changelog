@@ -2,10 +2,12 @@
 Shinken ChangeLog
 ########################
 
-2.4   - 2X/04/2015
+2.4   - 3X/04/2015
 -------------------
 	CORE ENHANCEMENT
 	Add: Hosts - Service_includes feature. Similar to service_excludes
+	Add: Deprecation in the doc about the discovery part. Should be move to contrib or as a module in next versions
+
 
 	Enh: Actions - Catch stderr output
 	Enh: Arbiter -  Unpickle new conf earlier. Prevent a memory issue

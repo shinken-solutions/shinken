@@ -5,6 +5,13 @@ Discovery with Shinken
 ======================
 
 
+DEPRATATION WARNING
+===================
+
+BEWARE: The discovery part is depracted in the 2.4 version, and will be moved to a module in the next versions.
+
+
+
 Simple use of the discovery tool 
 ================================
 
