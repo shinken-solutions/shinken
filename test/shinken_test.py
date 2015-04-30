@@ -193,6 +193,29 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()
+
+        # If we got one arbiter defined here (before default) we should be in a case where
+        # the tester want to load/test a module, so we simulate an arbiter daemon
+        # and the modules loading phase. As it has its own modulesmanager, should
+        # not impact scheduler modules ones, especially we are asking for arbiter type :)
+        if len(self.conf.arbiters) == 1:
+            arbdaemon = Arbiter([''],[''], False, False, None, None)
+            # only load if the module_dir is reallyexisting, so was set explicitly
+            # in the test configuration
+            if os.path.exists(getattr(self.conf, 'modules_dir', '')):
+                arbdaemon.modules_dir = self.conf.modules_dir
+                arbdaemon.load_modules_manager()
+            
+                # we request the instances without them being *started*
+                # (for those that are concerned ("external" modules):
+                # we will *start* these instances after we have been daemonized (if requested)
+                me = None
+                for arb in self.conf.arbiters:
+                    me = arb
+                    arbdaemon.modules_manager.set_modules(arb.modules)
+                    arbdaemon.do_load_modules()
+                    arbdaemon.load_modules_configuration_objects(raw_objects)
+
         self.conf.create_objects(raw_objects)
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
