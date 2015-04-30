@@ -2221,8 +2221,11 @@ class Config(Item):
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        logger.info("Total number of hosts : %d",
-                    nb_elements_all_realms)
+
+        for what in (self.contacts, self.hosts, self.services, self.commands):
+            logger.info("Number of %s : %d", type(what).__name__, len(what))
+
+        logger.info("Total number of hosts in all realms: %d", nb_elements_all_realms)
         if len(self.hosts) != nb_elements_all_realms:
             logger.warning("There are %d hosts defined, and %d hosts dispatched in the realms. "
                            "Some hosts have been ignored", len(self.hosts), nb_elements_all_realms)
