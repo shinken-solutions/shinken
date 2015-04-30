@@ -29,13 +29,15 @@ import hashlib
 import base64
 import socket
 
+from shinken.log import logger
+
 # For old users python-crypto was not mandatory, don't break their setup
 try:
     from Crypto.Cipher import AES
 except ImportError:
+    logger.error('Cannot find python lib crypto: export to kernel.shinken.io isnot available')
     AES = None
 
-from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPException
 
 
@@ -197,7 +199,7 @@ class Stats(object):
                 try:
                     r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
                 except HTTPException, exp:
-                    logger.debug('Stats REAPER cannot put to the metric server %s' % exp)
+                    logger.error('Stats REAPER cannot put to the metric server %s' % exp)
             time.sleep(60)
 
 
