@@ -2,7 +2,7 @@
 Shinken ChangeLog
 ########################
 
-2.4   - 3X/04/2015
+2.4   - 04/05/2015
 -------------------
 	CORE ENHANCEMENT
 	Add: Hosts - Service_includes feature. Similar to service_excludes
