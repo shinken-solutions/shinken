@@ -19,7 +19,7 @@ their monitoring system that is designed to scale to large environments.
 
 Shinken is backwards-compatible with the Nagios configuration standard
 and plugins. It works on any operating system and architecture that
-supports Python, which includes Windows and GNU/Linux.
+supports Python, which includes Windows, GNU/Linux and FreeBSD.
 
 Requirements
 ============
@@ -46,7 +46,7 @@ Update
 
 Launch:
 
-  python setup.py update
+  python setup.py install --update
 
 It will only update the shinken lib and scripts, but won't touch your current configuration
 
@@ -120,104 +120,3 @@ When filing a new bug, please remember to include:
 __ https://github.com/naparuba/shinken/issues/
 __ https://gist.github.com/
 
-
-Install Shinken as python lib
-=============================
-
-In  avirtualenv ::
-
-  virtualenv env
-  source env/bin/activate
-  python setup.py install_lib
-  python -c 'from shinken.bin import VERSION; print(VERSION)'
-
-Or directly on your system::
-
-  sudo python setup.py install_lib
-  python -c 'from shinken.bin import VERSION; print(VERSION)'
-
-
-Get Shinken dev environment
-===========================
-
-
-To setup Shinken dev environment::
-
-  virtualenv env
-  source env/bin/activate
-  python setup.py develop
-  python setup.py install_data
-
-If you want to use init scripts in your virtualenv you have to REsource ``activate``::
-
-  source env/bin/activate
-
-
-Folders
--------
-
-env/etc: Configuration folder
-
-env/var/lib/shinken/modules: Modules folder
-
-env/var/log/shinken: Logs folder
-
-env/var/run/shinken: Pid files folder
-
-Launch daemons
---------------
-
-With binaries
-~~~~~~~~~~~~~
-
-Arbiter::
-
-  shinken-arbiter -c env/etc/shinken/shinken.cfg
-
-Broker::
-
-  shinken-broker -c env/etc/shinken/daemons/brokerd.ini
-
-Scheduler::
-
-  shinken-scheduler -c env/etc/shinken/daemons/schedulerd.ini
-
-Poller::
-
-  shinken-poller -c env/etc/shinken/daemons/pollerd.ini
-
-Reactionner::
-
-  shinken-reactionner -c env/etc/shinken/daemons/reactionnerd.ini
-
-Receiver::
-
-  shinken-receiver -c env/etc/shinken/daemons/receiverd.ini
-
-
-With init scripts
-~~~~~~~~~~~~~~~~~
-
-Arbiter::
-
-  env/etc/init.d/shinken-arbiter start
-
-Broker::
-
-  env/etc/init.d/shinken-broker start
-
-Scheduler::
-
-  env/etc/init.d/shinken-scheduler start
-
-Poller::
-
-  env/etc/init.d/shinken-poller start
-
-Reactionner::
-
-  env/etc/init.d/shinken-reactionner start
-
-Receiver::
-
-  env/etc/init.d/shinken-receiver start
