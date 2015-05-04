@@ -29,6 +29,7 @@ that shinken modules will subclass
 import os
 import signal
 import time
+import traceback
 from re import compile
 from multiprocessing import Queue, Process
 
@@ -158,6 +159,14 @@ class BaseModule(object):
         self.to_q = self.from_q = None
 
 
+    def start_module(self):
+        try:
+            self._main()
+        except Exception as e:
+            logger.error('[%s] %s', self.name, traceback.format_exc())
+            raise e
+
+
     # Start this module process if it's external. if not -> donothing
     def start(self, http_daemon=None):
 
@@ -165,7 +174,7 @@ class BaseModule(object):
             return
         self.stop_process()
         logger.info("Starting external process for instance %s", self.name)
-        p = Process(target=self._main, args=())
+        p = Process(target=self.start_module, args=())
 
         # Under windows we should not call start() on an object that got
         # its process as object, so we remove it and we set it in a earlier
