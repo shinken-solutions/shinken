@@ -7,6 +7,7 @@ Shinken ChangeLog
 	CORE ENHANCEMENT
 	Add: Hosts - Service_includes feature. Similar to service_excludes
 	Add: Deprecation in the doc about the discovery part. Should be move to contrib or as a module in next versions
+	Add: (by Ddurieux) better logging of failed external modules
 
 
 	Enh: Actions - Catch stderr output
