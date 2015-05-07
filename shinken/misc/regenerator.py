@@ -67,7 +67,7 @@ class Regenerator(object):
         self.receivers = ReceiverLinks([])
         # From now we only look for realms names
         self.realms = set()
-        self.tags = {}
+        self.hosts_tags = {}
         self.services_tags = {}
 
         # And in progress one
@@ -228,9 +228,9 @@ class Regenerator(object):
 
             # Linkify tags
             for t in h.tags:
-                if t not in self.tags:
-                    self.tags[t] = 0
-                self.tags[t] += 1
+                if t not in self.hosts_tags[inst_id]:
+                    self.hosts_tags[inst_id][t] = 0
+                self.hosts_tags[inst_id][t] += 1
 
             # We can really declare this host OK now
             self.hosts.add_item(h)
@@ -287,9 +287,9 @@ class Regenerator(object):
 
             # Linkify services tags
             for t in s.tags:
-                if t not in self.services_tags:
-                    self.services_tags[t] = 0
-                self.services_tags[t] += 1
+                if t not in self.services_tags[inst_id]:
+                    self.services_tags[inst_id][t] = 0
+                self.services_tags[inst_id][t] += 1
 
             # We can really declare this host OK now
             self.services.add_item(s, index=True)
@@ -493,6 +493,20 @@ class Regenerator(object):
         self.configs[c_id] = c
 
         # Clean the old "hard" objects
+
+        # if this is the first time WebUI load the program_status brok,
+        # then we should add an entry for the corresponding 'instance_id';
+        # otherwise it should be a reload phrase, then we just need to clear
+        # the tags corresponding to the 'instance_id'.
+        if c_id in self.hosts_tags:
+            self.hosts_tags[c_id].clear()
+        else:
+            self.hosts_tags[c_id] = {}
+
+        if c_id in self.services_tags:
+            self.services_tags[c_id].clear()
+        else:
+            self.services_tags[c_id] = {}
 
         # We should clean all previously added hosts and services
         safe_print("Clean hosts/service of", c_id)
