@@ -503,6 +503,13 @@ class Regenerator(object):
         # Clean hosts from hosts and hostgroups
         for h in to_del_h:
             safe_print("Deleting", h.get_name())
+            # clean contact and the corresponding notificationways
+            for contact in self.hosts[h.id].getattr('contacts', []):
+                for notificationway in self.contacts[contact.id].getattr(
+                        'notificationways', []):
+                    del self.notificationways[notificationway.id]
+                del self.contacts[contact.id]
+
             del self.hosts[h.id]
 
         # Now clean all hostgroups too
@@ -514,6 +521,13 @@ class Regenerator(object):
 
         for s in to_del_srv:
             safe_print("Deleting", s.get_full_name())
+            # clean contact and the corresponding notificationways
+            for contact in self.services[s.id].getattr('contacts', []):
+                for notificationway in self.contacts[contact.id].getattr(
+                        'notificationways', []):
+                    del self.notificationways[notificationway.id]
+                del self.contacts[contact.id]
+
             del self.services[s.id]
 
         # Now clean service groups
@@ -655,16 +669,25 @@ class Regenerator(object):
         safe_print("Got notif ways", nws)
         new_notifways = []
         for cnw in nws:
+            new_notifways_flag = False
             nwname = cnw.notificationway_name
             nw = self.notificationways.find_by_name(nwname)
             if not nw:
                 safe_print("Creating notif way", nwname)
                 nw = NotificationWay([])
-                self.notificationways.add_item(nw)
+                new_notifways_flag = True
             # Now update it
             for prop in NotificationWay.properties:
                 if hasattr(cnw, prop):
                     setattr(nw, prop, getattr(cnw, prop))
+
+            # we must call self.notificationways.add_item after the initial
+            # or update phase(the above for loop), because we need
+            # 'notificationway_name' as the key to insert the notificationway
+            # into the self.notificationways dict.
+            if new_notifways_flag:
+                self.notificationways.add_item(nw)
+
             new_notifways.append(nw)
 
             # Linking the notification way
