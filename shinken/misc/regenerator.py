@@ -504,11 +504,21 @@ class Regenerator(object):
         for h in to_del_h:
             safe_print("Deleting", h.get_name())
             # clean contact and the corresponding notificationways
-            for contact in self.hosts[h.id].getattr('contacts', []):
-                for notificationway in self.contacts[contact.id].getattr(
-                        'notificationways', []):
-                    del self.notificationways[notificationway.id]
-                del self.contacts[contact.id]
+            for contact in getattr(self.hosts[h.id], 'contacts', []):
+                try:
+                    contact_obj = self.contacts[contact.id]
+                    for notificationway in getattr(contact_obj,
+                                                   'notificationways', []):
+                        del self.notificationways[notificationway.id]
+                    del self.contacts[contact.id]
+                except Exception:
+                    # in case different hosts configured with the same contacts
+                    # and when the first host has been traversed the
+                    # contacts is deleted too. This is mainly used to
+                    # bypass the keyError exception when host, other than
+                    # the first one, is traversed and contacts should be
+                    # deleted.
+                    pass
 
             del self.hosts[h.id]
 
@@ -522,11 +532,21 @@ class Regenerator(object):
         for s in to_del_srv:
             safe_print("Deleting", s.get_full_name())
             # clean contact and the corresponding notificationways
-            for contact in self.services[s.id].getattr('contacts', []):
-                for notificationway in self.contacts[contact.id].getattr(
-                        'notificationways', []):
-                    del self.notificationways[notificationway.id]
-                del self.contacts[contact.id]
+            for contact in getattr(self.services[s.id], 'contacts', []):
+                try:
+                    contact_obj = self.contacts[contact.id]
+                    for notificationway in getattr(contact_obj,
+                                                   'notificationways', []):
+                        del self.notificationways[notificationway.id]
+                    del self.contacts[contact.id]
+                except Exception:
+                    # in case different services configured with the same
+                    # contacts and when the first service has been traversed
+                    # the contacts is deleted too. This is mainly used to
+                    # bypass the keyError exception when service, other than
+                    # the first one, is traversed and contacts should be
+                    # deleted.
+                    pass
 
             del self.services[s.id]
 
