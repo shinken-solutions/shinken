@@ -512,12 +512,12 @@ class Regenerator(object):
                         del self.notificationways[notificationway.id]
                     del self.contacts[contact.id]
                 except Exception:
-                    # in case different hosts configured with the same contacts
-                    # and when the first host has been traversed the
-                    # contacts is deleted too. This is mainly used to
-                    # bypass the keyError exception when host, other than
-                    # the first one, is traversed and contacts should be
-                    # deleted.
+                    # in case different hosts and services are configured with
+                    # the same contacts and when the first host has been
+                    # traversed, the corresponding contacts is deleted too.
+                    # This is mainly used to bypass the keyError exception
+                    # when host, other than the first one, is traversed and
+                    # contacts should be deleted.
                     pass
 
             del self.hosts[h.id]
@@ -540,12 +540,12 @@ class Regenerator(object):
                         del self.notificationways[notificationway.id]
                     del self.contacts[contact.id]
                 except Exception:
-                    # in case different services configured with the same
-                    # contacts and when the first service has been traversed
-                    # the contacts is deleted too. This is mainly used to
-                    # bypass the keyError exception when service, other than
-                    # the first one, is traversed and contacts should be
-                    # deleted.
+                    # in case different hosts and services configured with the
+                    # same contacts and when the first service has been
+                    # traversed, the corresponding contacts is deleted too.
+                    # This is mainly used to bypass the keyError exception
+                    # when service, other than the first one, is traversed and
+                    # contacts should be deleted.
                     pass
 
             del self.services[s.id]
