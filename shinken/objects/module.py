@@ -50,6 +50,8 @@ class Module(Item):
     def __repr__(self):
         return '<module type=%s name=%s />' % (self.module_type, self.module_name)
 
+    __str__ = __repr__
+
 
 class Modules(Items):
     name_property = "module_name"
