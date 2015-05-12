@@ -96,9 +96,6 @@ class Command(Item):
     def get_name(self):
         return self.command_name
 
-    def __str__(self):
-        return str(self.__dict__)
-
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties

@@ -111,9 +111,6 @@ class Itemgroup(Item):
             self.unknown_members = []
         add_fun(self.unknown_members, member)
 
-    def __str__(self):
-        return str(self.__dict__) + '\n'
-
     def __iter__(self):
         return self.members.__iter__()
 
