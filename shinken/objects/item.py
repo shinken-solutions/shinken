@@ -212,6 +212,8 @@ Like temporary attributes such as "imported_from", etc.. """
         cls_name = self.__class__.__name__
         return '<%s "name"=%r />' % (cls_name, self.get_name())
 
+    __repr__ = __str__
+
     def is_tpl(self):
         """ Return if the elements is a template """
         return not getattr(self, "register", True)
@@ -1084,6 +1086,8 @@ class Items(object):
     def __str__(self):
         return '<%s nbr_elements=%s nbr_templates=%s />' % (
             self.__class__.__name__, len(self), len(self.templates))
+
+    __repr__ = __str__
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
