@@ -1085,7 +1085,7 @@ class Items(object):
 
     def __str__(self):
         return '<%s nbr_elements=%s nbr_templates=%s />' % (
-            self.__class__.__name__, len(self), len(self.templates))
+            self.__class__.__name__, len(self), len(self.name_to_template))
 
     __repr__ = __str__
 
