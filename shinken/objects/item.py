@@ -1082,11 +1082,8 @@ class Items(object):
             i.fill_default()
 
     def __str__(self):
-        s = ''
-        cls = self.__class__
-        for id in self.items:
-            s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
-        return s
+        return '<%s nbr_elements=%s nbr_templates=%s />' % (
+            self.__class__.__name__, len(self), len(self.templates))
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
