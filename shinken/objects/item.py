@@ -205,8 +205,12 @@ Like temporary attributes such as "imported_from", etc.. """
             except AttributeError:
                 pass
 
+    def get_name(self):
+        return getattr(self, 'name', "unknown")
+
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        cls_name = self.__class__.__name__
+        return '<%s "name"=%r />' % (cls_name, self.get_name())
 
     def is_tpl(self):
         """ Return if the elements is a template """
