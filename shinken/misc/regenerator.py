@@ -110,12 +110,11 @@ class Regenerator(object):
         print "Regenerator::load_from_scheduler"
         self.notificationways = c.notificationways
         for notificationway in c.notificationways:
-            setattr(self.notificationways[notificationway.id],
-                    'regenerator_refs', 0)
+            self.notificationways[notificationway.id].regenerator_refs = 0
 
         self.contacts = c.contacts
         for contact in c.contacts:
-            setattr(self.contacts[contact.id], 'regenerator_refs', 0)
+            self.contacts[contact.id].regenerator_refs = 0
 
         self.hosts = c.hosts
         for h in self.hosts:
@@ -700,7 +699,7 @@ class Regenerator(object):
             c = Contact({})
             self.update_element(c, data)
             self.contacts.add_item(c)
-            setattr(self.contacts[c.id], 'regenerator_refs', 0)
+            self.contacts[c.id].regenerator_refs = 0
 
         # Delete some useless contact values
         del c.host_notification_commands
@@ -733,7 +732,7 @@ class Regenerator(object):
             # into the self.notificationways.
             if new_notifways_flag:
                 self.notificationways.add_item(nw)
-                setattr(self.notificationways[nw.id], 'regenerator_refs', 0)
+                self.notificationways[nw.id].regenerator_refs = 0
 
             new_notifways.append(nw)
 
