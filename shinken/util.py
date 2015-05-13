@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -29,6 +27,7 @@ import copy
 import sys
 import os
 import json
+
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
@@ -43,6 +42,8 @@ try:
 except Exception, exp:
     logger.error('Encoding detection error= %s', exp)
     safe_stdout = False
+
+
 
 
 # ########## Strings #############

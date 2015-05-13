@@ -80,7 +80,6 @@ class HTTPClient(object):
         if proxy:
             self.con.setopt(pycurl.PROXY, proxy)
 
-
         # Also set the SSL options to do not look at the certificates too much
         # unless the admin asked for it
         if strong_ssl:
@@ -90,17 +89,18 @@ class HTTPClient(object):
             self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
             self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
 
+
     def set_proxy(self, proxy):
         if proxy:
             logger.debug('PROXY SETTING PROXY %s', proxy)
             self.con.setopt(pycurl.PROXY, proxy)
+
 
     # Try to get an URI path
     def get(self, path, args={}, wait='short'):
         c = self.con
         c.setopt(c.POST, 0)
         c.setopt(pycurl.HTTPGET, 1)
-
 
         # For the TIMEOUT, it will depends if we are waiting for a long query or not
         # long:data_timeout, like for huge broks receptions
@@ -114,7 +114,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-
+        c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
         except pycurl.error, error:
@@ -133,6 +133,7 @@ class HTTPClient(object):
             # print "GOT RAW RESULT", ret, type(ret)
             return ret
 
+
     # Try to get an URI path
     def post(self, path, args, wait='short'):
         size = 0
@@ -141,7 +142,6 @@ class HTTPClient(object):
             args[k] = zlib.compress(cPickle.dumps(v), 2)
             size += len(args[k])
         # Ok go for it!
-        logger.debug('Posting to %s: %sB' % (self.uri + path, size))
 
         c = self.con
         c.setopt(pycurl.HTTPGET, 0)
@@ -163,7 +163,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-        # c.setopt(c.VERBOSE, 1)
+        c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
         except pycurl.error as error:
@@ -209,6 +209,7 @@ class HTTPClient(object):
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
         c.setopt(c.URL, str(self.uri + path))
+        c.setopt(c.VERBOSE, 0)
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
