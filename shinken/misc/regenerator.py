@@ -500,7 +500,7 @@ class Regenerator(object):
                     if nw.id in self.notificationways and (self.notificationways[nw.id] == nw):
                         del self.notificationways[nw.id]
                     else:
-                        name_property = getattr(nw.__class__, "name_property", None)
+                        name_property = getattr(self.notificationways.__class__, "name_property", None)
                         name = getattr(nw, name_property, '')
                         self.notificationways.delete_by_name(name)
             if contact.regenerator_refs > 1:
@@ -509,7 +509,7 @@ class Regenerator(object):
                 if contact.id in self.contacts and (self.contacts[contact.id] == contact):
                     del self.contacts[contact.id]
                 else:
-                    name_property = getattr(contact.__class__, "name_property", None)
+                    name_property = getattr(self.contacts.__class__, "name_property", None)
                     name = getattr(contact, name_property, '')
                     self.contacts.delete_by_name(name)
 
