@@ -35,7 +35,7 @@ from shinken.log import logger
 try:
     from Crypto.Cipher import AES
 except ImportError:
-    logger.error('Cannot find python lib crypto: export to kernel.shinken.io isnot available')
+    logger.debug('Cannot find python lib crypto: export to kernel.shinken.io isnot available')
     AES = None
 
 from shinken.http_client import HTTPClient, HTTPException
