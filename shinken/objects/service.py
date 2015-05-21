@@ -794,7 +794,7 @@ class Service(SchedulingItem):
                                 '$' + key + '$', safe_key_value
                             )
                     # Here is a list of property where we will expand the $KEY$ by the value
-                    _the_expandables = ['check_command', 'aggregation', 'event_handler']
+                    _the_expandables = ['check_command', 'display_name', 'aggregation', 'event_handler']
                     for prop in _the_expandables:
                         if hasattr(self, prop):
                             # here we can replace VALUE, VALUE1, VALUE2,...
