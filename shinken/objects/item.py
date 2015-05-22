@@ -205,8 +205,14 @@ Like temporary attributes such as "imported_from", etc.. """
             except AttributeError:
                 pass
 
+    def get_name(self):
+        return getattr(self, 'name', "unknown")
+
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        cls_name = self.__class__.__name__
+        return '<%s "name"=%r />' % (cls_name, self.get_name())
+
+    __repr__ = __str__
 
     def is_tpl(self):
         """ Return if the elements is a template """
@@ -1078,11 +1084,10 @@ class Items(object):
             i.fill_default()
 
     def __str__(self):
-        s = ''
-        cls = self.__class__
-        for id in self.items:
-            s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
-        return s
+        return '<%s nbr_elements=%s nbr_templates=%s />' % (
+            self.__class__.__name__, len(self), len(self.name_to_template))
+
+    __repr__ = __str__
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
