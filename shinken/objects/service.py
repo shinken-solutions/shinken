@@ -195,9 +195,9 @@ class Service(SchedulingItem):
             BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
         'business_rule_host_notification_options':
-            ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+            ListProp(default=[], fill_brok=['full_status'], split_on_coma=True),
         'business_rule_service_notification_options':
-            ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+            ListProp(default=[], fill_brok=['full_status'], split_on_coma=True),
 
         # Easy Service dep definition
         'service_dependencies':  # TODO: find a way to brok it?
