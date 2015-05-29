@@ -382,7 +382,7 @@ class HTTPDaemon(object):
                         args_time = t1 - t0
 
                         if need_lock:
-                            #logger.debug("HTTP: calling lock for %s", fname)
+                            logger.debug("HTTP: calling lock for %s", fname)
                             lock.acquire()
 
                         t2 = time.time()

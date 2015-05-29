@@ -176,7 +176,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-        #c.setopt(c.VERBOSE, 1)        
+        # c.setopt(c.VERBOSE, 1)        
         try:
             c.perform()
         except pycurl.error as error:
