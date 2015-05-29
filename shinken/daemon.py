@@ -398,10 +398,10 @@ class Daemon(object):
 
     def change_to_workdir(self):
         self.workdir = os.path.abspath(self.workdir)
-        # If the directory is missing, try to create it for me
-        if not os.path.exists(self.workdir):
-            self.__create_directory(self.workdir)
         try:
+            # If the directory is missing, try to create it for me
+            if not os.path.exists(self.workdir):
+                self.__create_directory(self.workdir)
             os.chdir(self.workdir)
         except Exception, e:
             raise InvalidWorkDir(e)
