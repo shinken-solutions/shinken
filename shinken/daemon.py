@@ -384,9 +384,23 @@ class Daemon(object):
         self.modules_manager.load_manager(self.manager)
 
 
+    # create a dir and set to my user
+    def __create_directory(self, d):
+        if not os.path.exists(d):
+            os.mkdir(d)
+            # And set the user as shinken so the sub-fork can
+            # reopen the pid when no more root
+            if os.name != 'nt':
+                uid = self.find_uid_from_name()
+                gid = self.find_gid_from_name()
+                os.chown(d, uid, gid)
+
 
     def change_to_workdir(self):
         self.workdir = os.path.abspath(self.workdir)
+        # If the directory is missing, try to create it for me
+        if not os.path.exists(self.workdir):
+            self.__create_directory(self.workdir)
         try:
             os.chdir(self.workdir)
         except Exception, e:
@@ -432,6 +446,12 @@ class Daemon(object):
         # if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
+            # Look if the pid directory is existing or not
+            # (some systems are cleaning /var/run directories, yes I look
+            # at you debian 8)
+            p_dir = os.path.dirname(p)
+            if not os.path.exists(p_dir):
+                self.__create_directory(p_dir)
             self.debug_output.append("Opening pid file: %s" % p)
             # Windows do not manage the rw+ mode,
             # so we must open in read mode first, then reopen it write mode...
@@ -618,8 +638,8 @@ class Daemon(object):
     # use_pyro= open the TCP port for communication
     # fake= use for test to do not launch runonly feature, like the stats reaper thread
     def do_daemon_init_and_start(self, use_pyro=True, fake=False):
+        self.change_to_workdir()        
         self.change_to_user_group()
-        self.change_to_workdir()
         self.check_parallel_run()
         if use_pyro:
             self.setup_pyro_daemon()

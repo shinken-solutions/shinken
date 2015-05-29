@@ -66,38 +66,51 @@ class HTTPClient(object):
         else:
             self.uri = uri
 
-        self.con = pycurl.Curl()
+        self.get_con  = self.__create_con(proxy, strong_ssl)
+        self.post_con = self.__create_con(proxy, strong_ssl)
+        self.put_con  = self.__create_con(proxy, strong_ssl)
 
+        
+    def __create_con(self, proxy, strong_ssl):            
+        con = pycurl.Curl()
+        con.setopt(con.VERBOSE, 0)
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not
         # manage it
-        self.con.setopt(pycurl.HTTPHEADER, ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive'])
-        self.con.setopt(pycurl.USERAGENT, 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION))
-        self.con.setopt(pycurl.FOLLOWLOCATION, 1)
-        self.con.setopt(pycurl.FAILONERROR, True)
-        self.con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
-        self.con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
+        con.setopt(pycurl.HTTPHEADER, ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive'])
+        con.setopt(pycurl.USERAGENT, 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION))
+        con.setopt(pycurl.FOLLOWLOCATION, 1)
+        con.setopt(pycurl.FAILONERROR, True)
+        con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
+        con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
 
         if proxy:
-            self.con.setopt(pycurl.PROXY, proxy)
+            con.setopt(pycurl.PROXY, proxy)
 
 
         # Also set the SSL options to do not look at the certificates too much
         # unless the admin asked for it
         if strong_ssl:
-            self.con.setopt(pycurl.SSL_VERIFYPEER, 1)
-            self.con.setopt(pycurl.SSL_VERIFYHOST, 2)
+            con.setopt(pycurl.SSL_VERIFYPEER, 1)
+            con.setopt(pycurl.SSL_VERIFYHOST, 2)
         else:
-            self.con.setopt(pycurl.SSL_VERIFYPEER, 0)
-            self.con.setopt(pycurl.SSL_VERIFYHOST, 0)
+            con.setopt(pycurl.SSL_VERIFYPEER, 0)
+            con.setopt(pycurl.SSL_VERIFYHOST, 0)
 
+        return con
+
+            
+            
     def set_proxy(self, proxy):
         if proxy:
             logger.debug('PROXY SETTING PROXY %s', proxy)
-            self.con.setopt(pycurl.PROXY, proxy)
+            self.get_con.setopt(pycurl.PROXY, proxy)
+            self.post_con.setopt(pycurl.PROXY, proxy)
+            self.put_con.setopt(pycurl.PROXY, proxy)            
 
+            
     # Try to get an URI path
     def get(self, path, args={}, wait='short'):
-        c = self.con
+        c = self.get_con
         c.setopt(c.POST, 0)
         c.setopt(pycurl.HTTPGET, 1)
 
@@ -143,7 +156,7 @@ class HTTPClient(object):
         # Ok go for it!
         logger.debug('Posting to %s: %sB' % (self.uri + path, size))
 
-        c = self.con
+        c = self.post_con
         c.setopt(pycurl.HTTPGET, 0)
         c.setopt(c.POST, 1)
 
@@ -163,7 +176,7 @@ class HTTPClient(object):
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
-        # c.setopt(c.VERBOSE, 1)
+        #c.setopt(c.VERBOSE, 1)        
         try:
             c.perform()
         except pycurl.error as error:
@@ -190,7 +203,7 @@ class HTTPClient(object):
     # Try to get an URI path
     def put(self, path, v, wait='short'):
 
-        c = self.con
+        c = self.put_con
         filesize = len(v)
         f = StringIO(v)
 
