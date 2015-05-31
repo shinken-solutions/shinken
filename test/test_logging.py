@@ -257,6 +257,35 @@ class TestDefaultLoggingMethods(NoSetup, ShinkenTest, LogCollectMixin):
         # test whether the normal format is used again
         self.test_basic_logging_info()
 
+class TestLogRotationMethods(NoSetup, ShinkenTest):
+    def _prepare_logging(self):
+        from logging.handlers import TimedRotatingFileHandler
+        logfile = NamedTemporaryFile("w", delete=False)
+        logfile.close()
+        self.logfile_name = logfile.name
+
+    def test_daily_logrotation(self):
+        self._prepare_logging()
+        shinken_logger.register_local_log(self.logfile_name, purge_buffer=False, log_rotation_method='d')
+        self.assertIsInstance(shinken_logger.handlers[-1], logging.handlers.TimedRotatingFileHandler)
+        self.assertEqual(shinken_logger.handlers[-1].when, 'MIDNIGHT')
+
+    def test_weekly_logrotation(self):
+        self._prepare_logging()
+        shinken_logger.register_local_log(self.logfile_name, purge_buffer=False, log_rotation_method='w')
+        self.assertIsInstance(shinken_logger.handlers[-1], logging.handlers.TimedRotatingFileHandler)
+        self.assertEqual(shinken_logger.handlers[-1].when, 'W5')
+
+    # TODO : This one is NOT handled yet
+    #def test_monthly_logrotation(self):
+    #    shinken_logger.register_local_log(logfile.name, purge_buffer=False, log_rotation_method='d')
+    #    self.assertIsInstance(shinken_logger.handlers[-1], logging.handlers.TimedRotatingFileHandler)
+    #    self.assertEqual(shinken_logger.handlers[-1].when, '')
+
+    def test_none_logrotation(self):
+        self._prepare_logging()
+        shinken_logger.register_local_log(self.logfile_name, purge_buffer=False, log_rotation_method='n')
+        self.assertIsInstance(shinken_logger.handlers[-1], logging.FileHandler)
 
 class TestColorConsoleLogger(NoSetup, ShinkenTest, LogCollectMixin):
 
