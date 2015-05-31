@@ -400,7 +400,8 @@ class Daemon(object):
         if hasattr(self, 'use_local_log') and self.use_local_log:
             try:
                 #self.local_log_fd = self.log.register_local_log(self.local_log)
-                self.local_log_fd = logger.register_local_log(self.local_log)
+                self.local_log_fd = logger.register_local_log(self.local_log,
+                        log_rotation_method=self.conf.log_rotation_method)
             except IOError, exp:
                 logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
                 sys.exit(2)
