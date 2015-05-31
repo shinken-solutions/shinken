@@ -779,9 +779,9 @@ Example:
 
 This is the rotation method that you would like Shinken to use for your log file on the **broker server**. Values are as follows:
 
-  * n = None (don't rotate the log - this is the default)
+  * n = None (don't rotate the log)
   * h = Hourly (rotate the log at the top of each hour)
-  * d = Daily (rotate the log at midnight each day)
+  * d = Daily (rotate the log at midnight each day - this is the default)
   * w = Weekly (rotate the log at midnight on Saturday)
   * m = Monthly (rotate the log at midnight on the last day of the month)
 
