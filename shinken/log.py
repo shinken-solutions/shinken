@@ -135,7 +135,8 @@ class Log(logging.Logger):
         self.addHandler(_brokhandler_)
 
 
-    def register_local_log(self, path, level=None, purge_buffer=True):
+    def register_local_log(self, path, level=None, purge_buffer=True, log_rotation_method='d',
+            backup_count=5):
         """The shinken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
         close it.
@@ -145,13 +146,35 @@ class Log(logging.Logger):
         The file will be rotated once a day
         """
         self.log_set = True
-        # Todo : Create a config var for backup count
         if os.path.exists(path) and not stat.S_ISREG(os.stat(path).st_mode):
             # We don't have a regular file here. Rotate may fail
             # It can be one of the stat.S_IS* (FIFO? CHR?)
             handler = FileHandler(path)
         else:
-            handler = TimedRotatingFileHandler(path, 'midnight', backupCount=5)
+            # Conversion between shinken's log_rotation_method and TimedRotatingFileHandler
+            # parameters
+            if log_rotation_method == 'h':
+                when = 'H'
+            elif log_rotation_method == 'd':
+                when = 'midnight'
+            elif log_rotation_method == 'w':
+                when = 'W5'
+            elif log_rotation_method == 'm':
+                # How to handle montly logrotation ? TimedRotatingFileHandler does not seem to
+                # handle it... For now, don't handle it: fallback of default value 'd'
+                when = 'midnight'
+            elif log_rotation_method == 'n':
+                when = None
+            else:
+                # What to do when wrong parameters are given ? Should it be filtered before being
+                # passed to low-lever functions like this one ?
+                when = None
+
+            if when is not None:
+                handler = TimedRotatingFileHandler(path, when, backupCount=backup_count)
+            else:
+                handler = FileHandler(path)
+
         if level is not None:
             handler.setLevel(level)
         if self.name is not None:
