@@ -785,7 +785,7 @@ This is the rotation method that you would like Shinken to use for your log file
   * w = Weekly (rotate the log at midnight on Saturday)
   * m = Monthly (rotate the log at midnight on the last day of the month)
 
-.. tip::  From now, only the d (Daily) parameter is managed.
+.. tip::  Currently, the m (Monthly) parameter is **not** managed.
 
 
 .. _configuration/configmain-advanced#check_external_commands:
