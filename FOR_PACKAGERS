@@ -67,9 +67,9 @@ the owner of theses dir (and ALL files in them) in this file.
 But WARNING (bis): if you set a --root (example =/tmp/something) it will not update the owner of the /etc and /var directory (calling with a --root is for having all files to create a package, so you don't need changing owners).
 
 Example when you call:
-python setuppackage.py install --root=/tmp/something --record=INSTALLED_FILES --install-scripts=/usr/bin
+python setup.py install --root=/tmp/something --record=INSTALLED_FILES --install-scripts=/usr/bin
 (no trailing / for install_scripts)
-You get all files to package in the file INSTALLED_FILES (and only the /tmp/moncul is changed, so it's ok for your system ;)).
+You get all files to package in the file INSTALLED_FILES (and only the /tmp/something is changed, so it's ok for your system ;)).
 
 The setup.py will also generate the bin/default/shinken file that will be install in /etc/default/shinken. In it, you get
 all variables used by the init.d scripts. It will generate the etc and var directory with the values you give in the setup cfg file.
