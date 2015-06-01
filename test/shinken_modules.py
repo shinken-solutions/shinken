@@ -33,6 +33,7 @@ LiveStatus_broker = livestatus_broker.LiveStatus_broker
 LiveStatus = livestatus_broker.LiveStatus
 LiveStatusRegenerator = livestatus_broker.LiveStatusRegenerator
 LiveStatusQueryCache = livestatus_broker.LiveStatusQueryCache
+LiveStatusClientThread = livestatus_broker.LiveStatusClientThread
 
 Logline = livestatus_broker.Logline
 LiveStatusLogStoreMongoDB = modulesctx.get_module('logstore-mongodb').LiveStatusLogStoreMongoDB

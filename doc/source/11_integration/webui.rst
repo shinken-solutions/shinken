@@ -68,6 +68,8 @@ Enable the **webui** module in ''modules/webui.cfg'' configuration file that is 
 
 .. important::  Have you changed the **auth_secret** parameter already? No? Do it now!
 
+.. important:: Also add the webui to the modules in the broker config in brokers/broker-master.cfg.
+
 .. note::  The web-server handling HTTP Request to the WebUI is a Python process. You *do not need* any web-server (like Apache) to run the WebUI.
 
 

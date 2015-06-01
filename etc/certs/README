@@ -1,11 +1,7 @@
-The CA pass phase is:
-iloveshinken
+# Do not use this KPI/Certs in production. they are only here for easy demo and ssl test in your testing env.
+# NOT IN YOUR PRODUCTION, NEVER!
 
-To generate new certificate with this CA, launch:
-openssl req -new -nodes -out server.req -keyout server.key -config ./shinken_openssl_cnf
-openssl ca -out server.pem -config ./shinken_openssl_cnf -infiles server.req
-cp server.pem server.pem.bkp
-cp server.key server.pem
-cat server.pem.bkp >> server.pem
-cp server.pem client.pem
+To generate a new:
+openssl req -new -nodes -out server-req.pem -keyout private/server-key.pem -config /etc/ssl/openssl.cnf
+openssl ca -config openssl.conf -out server-cert.pem -infiles server-req.pem
 

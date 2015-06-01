@@ -1,4 +1,4 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # skvidal@fedoraproject.org, modified by David Laval
 # gplv2+
 

@@ -118,7 +118,7 @@ class Item(object):
                               (key, cls.__name__)
                     self.configuration_warnings.append(warning)
                     val = ToGuessProp.pythonize(params[key])
-            except PythonizeError as expt:
+            except (PythonizeError, ValueError) as expt:
                 err = "Error while pythonizing parameter '%s': %s" % (key, expt)
                 self.configuration_errors.append(err)
                 continue
@@ -647,10 +647,9 @@ Like temporary attributes such as "imported_from", etc.. """
                                           reactionner_tag=self.reactionner_tag)
                 else:
                     cmdCall = CommandCall(commands, command)
-                    setattr(self, prop, cmdCall)
+                setattr(self, prop, cmdCall)
             else:
                 setattr(self, prop, None)
-
 
 
     # We look at the 'trigger' prop and we create a trigger for it
@@ -742,7 +741,7 @@ class Items(object):
             else:
                 self.add_item(i, index_items)
 
-    def manage_conflict(self, item, name):
+    def manage_conflict(self, item, name, partial=False):
         """
         Cheks if an object holding the same name already exists in the index.
 
@@ -761,6 +760,8 @@ class Items(object):
         """
         if item.is_tpl():
             existing = self.name_to_template[name]
+        elif partial:
+            existing = self.name_to_partial[name]
         else:
             existing = self.name_to_item[name]
         existing_prio = getattr(

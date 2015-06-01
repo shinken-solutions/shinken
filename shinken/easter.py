@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from shinken.log import logger
 
 def episode_iv():
@@ -66,6 +67,12 @@ def naheulbeuk():
     screen.put_image((0, 0), image)
     logger.info(screen.render())
 
+
+
+def what_it_make_me_think(subject):
+    import hashlib
+    if hashlib.md5(subject.lower()).hexdigest() == '6376e9755f8047391621b577ae03966a':
+        print "Thanks to %s now I feel like this:  https://youtu.be/efTZslkr5Fs?t=60" % subject
 
 
 def dark():

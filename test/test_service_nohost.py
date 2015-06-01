@@ -42,7 +42,7 @@ class TestServiceNoHost(ShinkenTest):
             len( [ log
                         for log in logs
                         if re.search(
-                                'a service has been defined without host_name nor hostgroups',
+                                'a service item has been defined without unique_key ',
                                 log)
             ])
         )

@@ -1310,7 +1310,7 @@ class Config(Item):
             logger.debug("[config] time to serialize the global conf : %s (size:%s)",
                          time.time() - t0, len(whole_conf_pack))
             self.whole_conf_pack = whole_conf_pack
-            print "TOTAL serializing in", time.time() - t1
+            logger.debug("[config]serializing total: %s" % (time.time() - t1))
 
         else:
             logger.info('Using the multiprocessing serialization pass')

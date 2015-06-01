@@ -336,35 +336,9 @@ class Arbiter(Daemon):
         # Call modules that manage this read configuration pass
         self.hook_point('read_configuration')
 
-        # Now we ask for configuration modules if they
-        # got items for us
-        for inst in self.modules_manager.instances:
-            # TODO : clean
-            if hasattr(inst, 'get_objects'):
-                _t = time.time()
-                try:
-                    r = inst.get_objects()
-                except Exception, exp:
-                    logger.error("Instance %s raised an exception %s. Log and continue to run",
-                                 inst.get_name(), str(exp))
-                    output = cStringIO.StringIO()
-                    traceback.print_exc(file=output)
-                    logger.error("Back trace of this remove: %s", output.getvalue())
-                    output.close()
-                    continue
-                statsmgr.incr('hook.get-objects', time.time() - _t)
-                types_creations = self.conf.types_creations
-                for k in types_creations:
-                    (cls, clss, prop, dummy) = types_creations[k]
-                    if prop in r:
-                        for x in r[prop]:
-                            # test if raw_objects[k] are already set - if not, add empty array
-                            if k not in raw_objects:
-                                raw_objects[k] = []
-                            # now append the object
-                            raw_objects[k].append(x)
-                        logger.debug("Added %i objects to %s from module %s",
-                                     len(r[prop]), k, inst.get_name())
+        # Call modules get_objects() to load new objects from them
+        # (example modules: glpi, mongodb, dummy_arbiter)
+        self.load_modules_configuration_objects(raw_objects)
 
         # Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -512,6 +486,43 @@ class Arbiter(Daemon):
         self.port = self.me.port
 
         logger.info("Configuration Loaded")
+
+
+    def load_modules_configuration_objects(self, raw_objects):
+        # Now we ask for configuration modules if they
+        # got items for us
+        for inst in self.modules_manager.instances:
+            # TODO : clean
+            if hasattr(inst, 'get_objects'):
+                _t = time.time()
+                try:
+                    r = inst.get_objects()
+                except Exception, exp:
+                    logger.error("Instance %s raised an exception %s. Log and continue to run",
+                                 inst.get_name(), str(exp))
+                    output = cStringIO.StringIO()
+                    traceback.print_exc(file=output)
+                    logger.error("Back trace of this remove: %s", output.getvalue())
+                    output.close()
+                    continue
+                statsmgr.incr('hook.get-objects', time.time() - _t)
+                types_creations = self.conf.types_creations
+                for k in types_creations:
+                    (cls, clss, prop, dummy) = types_creations[k]
+                    if prop in r:
+                        for x in r[prop]:
+                            # test if raw_objects[k] are already set - if not, add empty array
+                            if k not in raw_objects:
+                                raw_objects[k] = []
+                            # put the imported_from property if the module is not already setting
+                            # it so we know where does this object came from
+                            if 'imported_from' not in x:
+                                x['imported_from'] = 'module:%s' % inst.get_name()
+                            # now append the object
+                            raw_objects[k].append(x)
+                        logger.debug("Added %i objects to %s from module %s",
+                                     len(r[prop]), k, inst.get_name())
+
 
 
     def launch_analyse(self):

@@ -833,7 +833,7 @@ class TestService(PropertiesTester, ShinkenTest):
         ('max_check_attempts', 1),
         ('hostgroup_name', ''),
         ('display_name', ''),
-        ('servicegroups', ''),
+        ('servicegroups', []),
         ('is_volatile', False),
         ('initial_state', 'o'),
         ('active_checks_enabled', True),

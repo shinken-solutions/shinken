@@ -29,13 +29,15 @@ import hashlib
 import base64
 import socket
 
+from shinken.log import logger
+
 # For old users python-crypto was not mandatory, don't break their setup
 try:
     from Crypto.Cipher import AES
 except ImportError:
+    logger.debug('Cannot find python lib crypto: export to kernel.shinken.io isnot available')
     AES = None
 
-from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPException
 
 
@@ -127,7 +129,7 @@ class Stats(object):
         # Manage local statd part
         if self.statsd_sock and self.name:
             # beware, we are sending ms here, v is in s
-            packet = '%s.%s.%s: %d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
+            packet = '%s.%s.%s:%d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
             try:
                 self.statsd_sock.sendto(packet, self.statsd_addr)
             except (socket.error, socket.gaierror), exp:
@@ -197,7 +199,7 @@ class Stats(object):
                 try:
                     r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
                 except HTTPException, exp:
-                    logger.debug('Stats REAPER cannot put to the metric server %s' % exp)
+                    logger.error('Stats REAPER cannot put to the metric server %s' % exp)
             time.sleep(60)
 
 

@@ -30,7 +30,8 @@ class TestArbiterError(ShinkenTest):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
 
     def test_arbiter_error(self):
-        self.assertListEqual(self.conf.arbiters[0].configuration_errors, [])
+        arbiterlink = self.conf.arbiters.find_by_name('Default-Arbiter')
+        self.assertListEqual(arbiterlink.configuration_errors, [])
 
 
 if __name__ == '__main__':

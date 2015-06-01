@@ -47,6 +47,23 @@ class testSchedulerInit(ShinkenTest):
         cls = Shinken
         return cls(daemons_config[cls], False, True, False, None, '')
 
+    def _get_subproc_data(self, proc):
+        try:
+            proc.terminate()  # make sure the proc has exited..
+            proc.wait()
+        except Exception as err:
+            print("prob on terminate and wait subproc: %s" % err)
+        data = {}
+        data['out'] = proc.stdout.read()
+        data['err'] = proc.stderr.read()
+        data['rc'] = proc.returncode
+        return data
+
+    def tearDown(self):
+        proc = getattr(self, 'arb_proc', None)
+        if proc:
+            self._get_subproc_data(proc)  # so to terminate / wait it..
+
     def test_scheduler_init(self):
 
         shinken_log.local_log = None  # otherwise get some "trashs" logs..
@@ -68,12 +85,12 @@ class testSchedulerInit(ShinkenTest):
             assert(fun in reg_list)
 
         # Launch an arbiter so that the scheduler get a conf and init
-        subprocess.Popen(["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"])
+        args = ["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
+        proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)
-        if not d.new_conf:
-            return
+        self.assertTrue(d.new_conf)
 
         d.setup_new_conf()
 
@@ -109,10 +126,17 @@ class testSchedulerInit(ShinkenTest):
 
         # "Clean" shutdown
         sleep(2)
-        pid = int(file("tmp/arbiterd.pid").read())
-        print ("KILLING %d" % pid)*50
-        os.kill(int(file("tmp/arbiterd.pid").read()), 2)
-        d.do_stop()
+        try:
+            pid = int(open("tmp/arbiterd.pid").read())
+            print ("KILLING %d" % pid)*50
+            os.kill(int(open("tmp/arbiterd.pid").read()), 2)
+            d.do_stop()
+        except Exception as err:
+            data = self._get_subproc_data(proc)
+            data.update(err=err)
+            self.assertTrue(False,
+                "Could not read pid file or so : %(err)s\n"
+                "rc=%(rc)s\nstdout=%(out)s\nstderr=%(err)s" % data)
 
 
 if __name__ == '__main__':

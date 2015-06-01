@@ -407,7 +407,6 @@ class Satellite(BaseSatellite):
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
     def do_manage_returns(self):
-        # return
         # For all schedulers, we check for waitforhomerun
         # and we send back results
         for sched_id in self.schedulers:
@@ -423,7 +422,7 @@ class Satellite(BaseSatellite):
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results': ret})
-                # Not connected or sched is gone
+                        # Not connected or sched is gone
                 except (HTTPExceptions, KeyError), exp:
                     logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
                     self.pynag_con_init(sched_id)
@@ -599,6 +598,7 @@ class Satellite(BaseSatellite):
             # So now we can really forgot it
             del self.workers[id]
 
+        
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
@@ -639,7 +639,7 @@ class Satellite(BaseSatellite):
             del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
-
+        
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
     # workers
@@ -860,6 +860,7 @@ class Satellite(BaseSatellite):
         while self.get_returns_queue_len() != 0:
             self.manage_action_return(self.get_returns_queue_item())
 
+
         # If we are passive, we do not initiate the check getting
         # and return
         if not self.passive:
@@ -881,7 +882,6 @@ class Satellite(BaseSatellite):
     # we must register our interfaces for 3 possible callers: arbiter,
     # schedulers or brokers.
     def do_post_daemon_init(self):
-
         # And we register them
         self.uri2 = self.http_daemon.register(self.interface)
         self.uri3 = self.http_daemon.register(self.brok_interface)
