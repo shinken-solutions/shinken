@@ -248,7 +248,7 @@ if __name__ == "__main__":
                       action='store_true', help='Generate a test mail message')
     group_debug.add_option('-t', '--test', dest='test',
                       action='store_true', help='Generate a test mail message')
-    group_general.add_option('-w', '--webui', dest='webui', default=False,
+    group_general.add_option('-w', '--webui', dest='webui', default=True,
                       action='store_true', help='Include link to the problem in Shinken WebUI.')
     group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'], 
                       default='html', help='Mail format "html" or "txt". Default: html')
