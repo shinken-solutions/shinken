@@ -110,7 +110,7 @@ class template_Daemon_Bad_Start():
         print "Testing bad pidfile ..."
         d = self.get_daemon()
         d.workdir = tempfile.mkdtemp()
-        d.pidfile = os.path.join('/DONOTEXISTS', "daemon.pid")
+        d.pidfile = os.path.join('/proc/DONOTEXISTS', "daemon.pid")
         prev_dir = os.getcwd()
         self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start, fake=True)
         shutil.rmtree(d.workdir)
@@ -119,7 +119,7 @@ class template_Daemon_Bad_Start():
     def test_bad_workdir(self):
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         d = self.get_daemon()
-        d.workdir = '/DONOTEXISTS'
+        d.workdir = '/proc/DONOTEXISTS'
         prev_dir = os.getcwd()
         self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start, fake=True)
         d.do_stop()

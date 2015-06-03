@@ -1350,7 +1350,7 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.partial_services.itervalues(),
                                  self.templates.itervalues()):
-            i.get_property_by_inheritance(prop)
+            i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
                 if getattr(i, prop) == 'null':
@@ -1370,13 +1370,14 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.partial_services.itervalues(),
                                  self.templates.itervalues()):
-            i.get_customs_properties_by_inheritance()
+            i.get_customs_properties_by_inheritance(0)
 
         for i in self.partial_services.itervalues():
             self.add_item(i, True, True)
 
         del self.partial_services
         del self.name_to_partial
+
 
     def linkify_templates(self):
         # First we create a list of all templates
