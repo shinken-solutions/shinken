@@ -7,9 +7,9 @@ Tired of brut text email notification, want to add more details to them and even
 
 .. image:: /_static/images/shinken-html-notification.png
 
-Here it is the command you can use to have a basic html notification. You have to specify usual shinken macros in option. If not specified then it will try to get them from environment variable if you have set option enable_environment_macros in shinken.cfg if you want to used them. It isn't recommanded to use them for large environment. You better use option -c, -o and -s or -h depend on which object you'll notify. Each macros separated by double comma.
+Here it is the command you can use to have a basic html notification. You have to specify usual shinken macros in option. If not specified then it will try to get them from environment variable if you have set option ``enable_environment_macros`` in ``shinken.cfg`` if you want to used them. It isn't recommanded to use them for large environment. You better use option ``-c``, ``-o`` and ``-s`` or ``-h`` depend on which object you'll notify. Each macros separated by double comma.
 
-Here is an example :
+Here is commands examples ready to use with it :
 
 ::
 
@@ -24,18 +24,23 @@ Here is an example :
         command_line    $PLUGINSDIR$/notify_by_email.py -n service -S localhost -r $CONTACTEMAIL$ -f html -c "$NOTIFICATIONTYPE$,,$HOSTNAME$,,$HOSTADDRESS$,,$LONGDATETIME$" -o "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$"
     }
 
+Add an header logo
+~~~~~~~~~~~~~~~~~~~~
+
+Let's say that you want to deliver mail to a customer and integrate its logo into, you only have to get a logo, named it ``customer_logo.png`` and paste it into ``/var/lib/shinken/share/images/``.
+
+
 Detailled Notifications
 --------------------------
 
 Detailled notifications is a way to customize and add useful informations in email notification send to your contacts. To do so, use 3 objects macros, services or hosts :
 
-- _DETAILLEDESC : Complete and add a more detailled description of service or host.
-- _IMPACT       : Specify what will be the impact
-- _FIXACTIONS   : And what is the recommended actions to do when there is an alert about it.
+- **_DETAILLEDESC** : Complete and add a more detailled description of service or host.
+- **_IMPACT**       : Specify what will be the impact
+- **_FIXACTIONS**   : And what is the recommended actions to do when there is an alert about it.
 
 Example 
 ~~~~~~~~
-
 
 For example, you can have the below configuration:
 our service :
