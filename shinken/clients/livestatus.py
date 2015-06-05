@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
 import socket
 import asyncore
 from log import logger
@@ -405,7 +406,6 @@ class LSConnectionPool(object):
 
 if __name__ == "__main__":
     c = LSAsynConnection()
-    import time
     t = time.time()
 
     q = Query('GET hosts\nColumns name\n')
@@ -433,5 +433,4 @@ if __name__ == "__main__":
     cp = LSConnectionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
     r = cp.launch_raw_query('GET hosts\nColumns name last_check\n')
     logger.debug("Result= %s", str(r))
-    import time
     logger.debug(int(time.time()))
