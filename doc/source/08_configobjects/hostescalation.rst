@@ -43,8 +43,8 @@ Escalate to all-router-admins after one hour of problem, and stop at 2 hours.
 
   define hostescalation{
       host_name               router-34
-      first_notification      60
-      last_notification       120
+      first_notification_time 60
+      last_notification_time  120
       notification_interval   60
       contact_groups          all-router-admins
   }
