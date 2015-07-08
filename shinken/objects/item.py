@@ -912,7 +912,8 @@ class Items(object):
                    (objcls, name_property, self.get_source(item))
             item.configuration_errors.append(mesg)
         elif name in self.name_to_item:
-            item = self.manage_conflict(item, name)
+            if item.id != self.name_to_item[name].id:
+                item = self.manage_conflict(item, name)
         self.name_to_item[name] = item
         return item
 
