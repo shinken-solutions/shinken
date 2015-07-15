@@ -794,7 +794,10 @@ class Service(SchedulingItem):
                                 '$' + key + '$', safe_key_value
                             )
                     # Here is a list of property where we will expand the $KEY$ by the value
-                    _the_expandables = ['check_command', 'aggregation', 'event_handler']
+                    _the_expandables = ['check_command',
+                                        'display_name',
+                                        'aggregation',
+                                        'event_handler']
                     for prop in _the_expandables:
                         if hasattr(self, prop):
                             # here we can replace VALUE, VALUE1, VALUE2,...
@@ -1347,7 +1350,7 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.partial_services.itervalues(),
                                  self.templates.itervalues()):
-            i.get_property_by_inheritance(prop)
+            i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
                 if getattr(i, prop) == 'null':
@@ -1367,13 +1370,14 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.partial_services.itervalues(),
                                  self.templates.itervalues()):
-            i.get_customs_properties_by_inheritance()
+            i.get_customs_properties_by_inheritance(0)
 
         for i in self.partial_services.itervalues():
             self.add_item(i, True, True)
 
         del self.partial_services
         del self.name_to_partial
+
 
     def linkify_templates(self):
         # First we create a list of all templates

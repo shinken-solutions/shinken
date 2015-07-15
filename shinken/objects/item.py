@@ -50,6 +50,9 @@ from shinken.complexexpression import ComplexExpressionFactory
 from shinken.graph import Graph
 
 
+
+INHERITANCE_DEEP_LIMIT = 32
+
 class Item(object):
 
     properties = {
@@ -270,9 +273,15 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     # We fillfull properties with template ones if need
-    def get_property_by_inheritance(self, prop):
+    def get_property_by_inheritance(self, prop, deep_level):
         if prop == 'register':
             return None  # We do not inherit from register
+
+        # Don't allow to loop too much over the inheritance, to avoid infinite
+        # recursive calls. This loop will raise an error at global configuration
+        # check.
+        if deep_level > INHERITANCE_DEEP_LIMIT:
+            return None
 
         # If I have the prop, I take mine but I check if I must
         # add a plus property
@@ -292,7 +301,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # We reverse list, so that when looking for properties by inheritance,
         # the least defined template wins (if property is set).
         for i in self.templates:
-            value = i.get_property_by_inheritance(prop)
+            value = i.get_property_by_inheritance(prop, deep_level + 1)
 
             if value is not None and value != []:
                 # If our template give us a '+' value, we should continue to loop
@@ -364,11 +373,15 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     # We fillfull properties with template ones if need
-    def get_customs_properties_by_inheritance(self):
+    def get_customs_properties_by_inheritance(self, deep_level):
+        # protect against infinite recursive loop
+        if deep_level > INHERITANCE_DEEP_LIMIT:
+            return self.customs
+
         # We reverse list, so that when looking for properties by inheritance,
         # the least defined template wins (if property is set).
         for i in self.templates:
-            tpl_cv = i.get_customs_properties_by_inheritance()
+            tpl_cv = i.get_customs_properties_by_inheritance(deep_level + 1)
             if tpl_cv is not {}:
                 for prop in tpl_cv:
                     if prop not in self.customs:
@@ -741,6 +754,7 @@ class Items(object):
             else:
                 self.add_item(i, index_items)
 
+
     def manage_conflict(self, item, name, partial=False):
         """
         Cheks if an object holding the same name already exists in the index.
@@ -793,6 +807,7 @@ class Items(object):
             self.remove_item(existing)
         return item
 
+
     def add_template(self, tpl):
         """
         Adds and index a template into the `templates` container.
@@ -801,6 +816,7 @@ class Items(object):
         """
         tpl = self.index_template(tpl)
         self.templates[tpl.id] = tpl
+
 
     def index_template(self, tpl):
         """
@@ -819,6 +835,7 @@ class Items(object):
         self.name_to_template[name] = tpl
         return tpl
 
+
     def remove_template(self, tpl):
         """
         Removes and unindex a template from the `templates` container.
@@ -830,6 +847,7 @@ class Items(object):
         except KeyError:
             pass
         self.unindex_template(tpl)
+
 
     def unindex_template(self, tpl):
         """
@@ -843,6 +861,7 @@ class Items(object):
         except KeyError:
             pass
 
+
     def add_item(self, item, index=True):
         """Adds an item into our containers, and index it depending on the `index` flag.
 
@@ -854,6 +873,7 @@ class Items(object):
             item = self.index_item(item)
         self.items[item.id] = item
 
+
     def remove_item(self, item):
         """Removes (and un-index) an item from our containers.
 
@@ -862,6 +882,7 @@ class Items(object):
         """
         self.unindex_item(item)
         self.items.pop(item.id, None)
+
 
     def index_item(self, item):
         """ Indexes an item into our `name_to_item` dictionary.
@@ -895,6 +916,7 @@ class Items(object):
         self.name_to_item[name] = item
         return item
 
+
     def unindex_item(self, item):
         """ Unindex an item from our name_to_item dict.
         :param item:    The item to unindex
@@ -904,11 +926,14 @@ class Items(object):
             return
         self.name_to_item.pop(getattr(item, name_property, ''), None)
 
+
     def __iter__(self):
         return self.items.itervalues()
 
+
     def __len__(self):
         return len(self.items)
+
 
     def __delitem__(self, key):
         try:
@@ -917,17 +942,21 @@ class Items(object):
         except KeyError:  # we don't want it, we do not have it. All is perfect
             pass
 
+
     def __setitem__(self, key, value):
         self.items[key] = value
         name_property = getattr(self.__class__, "name_property", None)
         if name_property:
             self.index_item(value)
 
+
     def __getitem__(self, key):
         return self.items[key]
 
+
     def __contains__(self, key):
         return key in self.items
+
 
     def compute_hash(self):
         for i in self:
@@ -968,12 +997,15 @@ class Items(object):
                                  self.templates.itervalues()):
             i.old_properties_names_to_new()
 
+
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()
 
+
     def find_tpl_by_name(self, name):
         return self.name_to_template.get(name, None)
+
 
     def get_all_tags(self, item):
         all_tags = item.get_templates()
@@ -1009,6 +1041,7 @@ class Items(object):
                     tpls.append(t)
         item.templates = tpls
 
+
     # We will link all templates, and create the template
     # graph too
     def linkify_templates(self):
@@ -1018,6 +1051,12 @@ class Items(object):
             self.linkify_item_templates(i)
         for i in self:
             i.tags = self.get_all_tags(i)
+
+        # Look if there are loop in our parents definition
+        if not self.no_loop_in_parents("self", "templates", templates=True):
+            err = '[items] There are loops in the %s templates definition.' % i.__class__.my_type
+            self.configuration_errors.append(err)
+
 
     def is_correct(self):
         # we are ok at the beginning. Hope we still ok at the end...
@@ -1033,6 +1072,7 @@ class Items(object):
                                i.__class__.my_type,
                                i.get_name(),
                                getattr(i, 'imported_from', "unknown source"))
+
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -1060,11 +1100,13 @@ class Items(object):
 
         return r
 
+
     def remove_templates(self):
         """ Remove useless templates (& properties) of our items
             otherwise we could get errors on config.is_correct()
         """
         del self.templates
+
 
     def clean(self):
         """ Request to remove the unnecessary attributes/others from our items """
@@ -1072,10 +1114,12 @@ class Items(object):
             i.clean()
         Item.clean(self)
 
+
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
         for i in self:
             i.fill_default()
+
 
     def __str__(self):
         s = ''
@@ -1084,17 +1128,19 @@ class Items(object):
             s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
         return s
 
+
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
         for i in itertools.chain(self.items.itervalues(),
                                  self.templates.itervalues()):
-            i.get_property_by_inheritance(prop)
+            i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
                 if getattr(i, prop) == 'null':
                     delattr(i, prop)
             except AttributeError:
                 pass
+
 
     def apply_inheritance(self):
         """ For all items and templates inherite properties and custom
@@ -1107,7 +1153,8 @@ class Items(object):
             self.apply_partial_inheritance(prop)
         for i in itertools.chain(self.items.itervalues(),
                                  self.templates.itervalues()):
-            i.get_customs_properties_by_inheritance()
+            i.get_customs_properties_by_inheritance(0)
+
 
     # We've got a contacts property with , separated contacts names
     # and we want have a list of Contacts
@@ -1415,9 +1462,10 @@ class Items(object):
         for i in self:
             i.explode_trigger_string_into_triggers(triggers)
 
+
     # Parent graph: use to find quickly relations between all item, and loop
     # return True if there is a loop
-    def no_loop_in_parents(self, attr1, attr2):
+    def no_loop_in_parents(self, attr1, attr2, templates=False):
         """ Find loop in dependencies.
         For now, used with the following attributes :
         :(self, parents):
@@ -1427,15 +1475,18 @@ class Items(object):
         :(service_description, dependent_service_description):
             service dependencies from servicedependencies object
         """
-
         # Ok, we say "from now, no loop :) "
         r = True
 
         # Create parent graph
         parents = Graph()
 
+        elts_lst = self
+        if templates:
+            elts_lst = self.templates.values()
+
         # Start with all items as nodes
-        for item in self:
+        for item in elts_lst:
             # Hack to get self here. Used when looping on host and host parent's
             if attr1 == "self":
                 obj = item          # obj is a host/service [list]
@@ -1449,7 +1500,7 @@ class Items(object):
                     parents.add_node(obj)
 
         # And now fill edges
-        for item in self:
+        for item in elts_lst:
             if attr1 == "self":
                 obj1 = item
             else:

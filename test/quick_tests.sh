@@ -44,7 +44,7 @@ python-coverage xml --omit=/usr/lib
 
 echo "Launchng pep8 now"
 cd ..
-pep8 --max-line-length=100 --ignore=E303,E302,E301,E241 --exclude='*.pyc' shinken/*
+pep8 --max-line-length=120 --ignore=E303,E302,E301,E241,W293,W291,E221 --exclude='*.pyc,*~' shinken/*
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"
