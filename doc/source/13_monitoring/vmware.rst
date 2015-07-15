@@ -66,7 +66,7 @@ Please ask your VMware administrator to create a Shinken account (can be a windo
 Setup the vSphere console server connection 
 ============================================
 
-You need to configure in the "resource.cfg" file ("/etc/shinken/resource.cfg" under linux or "c:\shinken\etc\resource.cfg" under windows):
+You need to configure in the "resource.cfg" file ("/etc/shinken/resource.cfg" under linux or "c:\\shinken\\etc\\resource.cfg" under windows):
   
   * the VSPHERE host connection
   * the login for the connection

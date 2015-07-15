@@ -1,0 +1,55 @@
+.TH shinken 8 "July 7, 2014" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken - Shinken packs and modules manager
+.SH SYNOPSIS
+.PP
+shinken [OPTION]... \f[I]FILE\f[] 
+.SH DESCRIPTION
+.PP
+Shinken packs and modules manager
+.PP
+Shinken is a usefull tool to manage your Shinken packs and modules and 
+can be used to download packs and modules from \f[I]http://shinken.io\f[] and 
+also to publish yours.
+.SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
+.TP
+.B -A \f[I]API_KEY\f[], --api-keys \f[I]API_KEY\f[]
+Your API key for uploading the package to the
+Shinken.io website. If you don't have one, please go
+to your account page
+.RS
+.RE
+.TP
+.B -l, --list
+List available commands
+.RS
+.RE
+.TP
+.B --init
+Initialize/refill your shinken.ini file (default home directory)
+.RS
+.RE
+.TP
+.B -D
+Enable the debug mode
+.RS
+.RE
+.TP
+.B -c \f[I]INICONFIG\f[], --config \f[I]INICONFIG\f[]
+Path to your shinken.ini file.
+.RS
+.RE
+.TP
+.B -h, --help
+Print detailed help screen.
+.RS
+.RE
+.SH AUTHORS
+David Hannequin.
+Michael Leinartas.
