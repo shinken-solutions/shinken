@@ -143,7 +143,6 @@ class Servicedependencies(Items):
             hnames = []
             if hasattr(sd, 'hostgroup_name'):
                 hg_names = [n.strip() for n in sd.hostgroup_name.split(',')]
-                hg_names = [hg_name.strip() for hg_name in hg_names]
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
