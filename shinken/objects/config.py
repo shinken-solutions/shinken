@@ -1469,7 +1469,7 @@ class Config(Item):
         self.hostdependencies.explode(self.hostgroups)
 
         # print "Servicedependency"
-        self.servicedependencies.explode(self.hostgroups)
+        self.servicedependencies.explode(self.hostgroups, self.services)
 
         # Serviceescalations hostescalations will create new escalations
         self.serviceescalations.explode(self.escalations)

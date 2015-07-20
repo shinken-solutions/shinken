@@ -122,7 +122,7 @@ class Servicedependencies(Items):
                         self.add_item(new_sd)
 
     # We create new servicedep if necessary (host groups and co)
-    def explode(self, hostgroups):
+    def explode(self, hostgroups, services):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it
         srvdep_to_remove = []
@@ -203,8 +203,40 @@ class Servicedependencies(Items):
                     self.add_item(new_sd)
                 # Ok so we can remove the old one, once
                 if not removed_once:
-                    removed_once = true
+                    removed_once = True
                     srvdep_to_remove.append(id)
+
+            if dep_couples == []:
+                special_singles = {}
+                for sname in snames:
+                    special_singles[sname] = set()
+                for service in services:
+                    sname = service.service_description
+                    if sname in snames:
+                        special_singles[sname].add(service.host_name)
+
+                special_dep_singles = {}
+                for sname in dep_snames:
+                    special_dep_singles[sname] = set()
+                for service in services:
+                    sname = service.service_description
+                    if sname in dep_snames:
+                        special_dep_singles[sname].add(service.host_name)
+
+                for dep_sname in special_dep_singles:
+                    for sname in special_singles:
+                        hnames_in_both = special_singles[sname]
+                        hnames_in_both &= special_dep_singles[dep_sname]
+                        for hname in hnames_in_both:
+                            new_sd = sd.copy()
+                            new_sd.host_name = hname
+                            new_sd.service_description = sname
+                            new_sd.dependent_host_name = hname
+                            new_sd.dependent_service_description = dep_sname
+                            self.add_item(new_sd)
+                            if not removed_once:
+                                removed_once = True
+                                srvdep_to_remove.append(id)
 
         self.delete_servicesdep_by_id(srvdep_to_remove)
 
