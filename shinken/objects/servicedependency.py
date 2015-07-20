@@ -192,6 +192,7 @@ class Servicedependencies(Items):
                     dep_couples.append((dep_hname.strip(), dep_sname.strip()))
 
             # Create the new service deps from all of this.
+            removed_once = False
             for (dep_hname, dep_sname) in dep_couples:  # the sons, like HTTP
                 for (hname, sname) in couples:  # the fathers, like MySQL
                     new_sd = sd.copy()
@@ -200,8 +201,10 @@ class Servicedependencies(Items):
                     new_sd.dependent_host_name = dep_hname
                     new_sd.dependent_service_description = dep_sname
                     self.add_item(new_sd)
-                # Ok so we can remove the old one
-                srvdep_to_remove.append(id)
+                # Ok so we can remove the old one, once
+                if not removed_once:
+                    removed_once = true
+                    srvdep_to_remove.append(id)
 
         self.delete_servicesdep_by_id(srvdep_to_remove)
 
