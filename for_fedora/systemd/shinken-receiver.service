@@ -5,6 +5,8 @@ After=syslog.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/shinken-receiver -d -c /etc/shinken/daemons/receiverd.ini
+KillMode=process
+TimeoutStopSec=3
 
 [Install]
 WantedBy=multi-user.target
