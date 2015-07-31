@@ -74,6 +74,14 @@ class Comment:
     def __str__(self):
         return "Comment id=%d %s" % (self.id, self.comment)
 
+    def get_id(self):
+        """Getter for id attribute
+
+        :return: id
+        :rtype: int
+        """
+        return self.id
+
     # Call by pickle for dataify the ackn
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
