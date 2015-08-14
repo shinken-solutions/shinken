@@ -1754,6 +1754,11 @@ class Services(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        for id in self.templates.keys():
+            t = self.templates[id]
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+            self.explode_services_from_templates(hosts, t)
+
         # Explode services that have a duplicate_foreach clause
         duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
         for id in duplicates:
@@ -1787,11 +1792,6 @@ class Services(Items):
                 # Delete expanded source service
                 if not s.configuration_errors:
                     self.remove_item(s)
-
-        for id in self.templates.keys():
-            t = self.templates[id]
-            self.explode_contact_groups_into_contacts(t, contactgroups)
-            self.explode_services_from_templates(hosts, t)
 
         to_remove = []
         for service in self:
