@@ -1754,6 +1754,13 @@ class Services(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        # Explode services that have a duplicate_foreach clause
+        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
+        for id in duplicates:
+            s = self.items[id]
+            self.explode_services_duplicates(hosts, s)
+            if not s.configuration_errors:
+                self.remove_item(s)
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
@@ -1785,14 +1792,6 @@ class Services(Items):
             t = self.templates[id]
             self.explode_contact_groups_into_contacts(t, contactgroups)
             self.explode_services_from_templates(hosts, t)
-
-        # Explode services that have a duplicate_foreach clause
-        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
-        for id in duplicates:
-            s = self.items[id]
-            self.explode_services_duplicates(hosts, s)
-            if not s.configuration_errors:
-                self.remove_item(s)
 
         to_remove = []
         for service in self:
