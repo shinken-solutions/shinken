@@ -54,7 +54,7 @@ class TestServiceDependencyAutoComputing(ShinkenTest):
 
     def test_multiple_srv_description(self):
         services = self.conf.services
-        expected_dep_svc = {'h1': ['svc2'], 'h2': ['svc2'],\
+        expected_dep_svc = {'h1': ['svc2'], 'h2': ['svc2'],
                             'h3': ['svc2', 'svc3'], 'h4': ['svc2', 'svc3']}
         svcs = []
         svcs.append(services.find_srv_by_name_and_hostname('h1', 'svc1'))
@@ -69,6 +69,26 @@ class TestServiceDependencyAutoComputing(ShinkenTest):
                 self.assertTrue(dep_svc.service_description in description)
                 description.remove(dep_svc.service_description)
             self.assertEqual(description, [])
+
+    def test_host_to_host_dependency(self):
+        services = self.conf.services
+        servicedependencies = self.conf.servicedependencies
+        svcs = []
+        svcs.append(services.find_srv_by_name_and_hostname('h6', 'svc4'))
+        svcs.append(services.find_srv_by_name_and_hostname('h7', 'svc4'))
+        for svc in svcs:
+            self.assertIsNotNone(svc)
+            dep_svcs = [info_dep[0] for info_dep in svc.act_depend_of_me]
+            self.assertNotEqual(dep_svcs, [])
+            for dep_svc in dep_svcs:
+                self.assertEqual(dep_svc.host_name, svc.host_name)
+                self.assertEqual(dep_svc.service_description, 'svc5')
+
+        # Check that host8 was not caught in the process
+        h8_svc4 = services.find_srv_by_name_and_hostname('h8', 'svc4')
+
+        self.assertIsNotNone(h8_svc4)
+        self.assertFalse(h8_svc4.act_depend_of_me)
 
 
 if __name__ == '__main__':

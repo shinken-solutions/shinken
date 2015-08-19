@@ -181,7 +181,7 @@ class Servicedependencies(Items):
                     dep_hnames.extend([m.strip() for m in hg.members])
 
             if not hasattr(sd, 'dependent_host_name'):
-                sd.dependent_host_name = getattr(sd, 'host_name', '')
+                sd.dependent_host_name = ''
 
             if sd.dependent_host_name != '':
                 dep_hnames.extend([n.strip() for n in sd.dependent_host_name.split(',')])
@@ -214,6 +214,13 @@ class Servicedependencies(Items):
                     sname = service.service_description
                     if sname in snames:
                         special_singles[sname].add(service.host_name)
+                if hnames:
+                    # host_names without dependent_host_names
+                    # => host to host dependencies
+                    for sname in snames:
+                        # Should log something when a host does not
+                        # match any service
+                        special_singles[sname] &= set(hnames)
 
                 special_dep_singles = {}
                 for sname in dep_snames:
