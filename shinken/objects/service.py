@@ -793,6 +793,16 @@ class Service(SchedulingItem):
                             new_s.service_description = self.service_description.replace(
                                 '$' + key + '$', safe_key_value
                             )
+                        # Issue with thruk if display_name is not handled as well.
+                        if hasattr(self, 'display_name'):
+                            # We want to change all illegal chars to a _ sign.
+                            # We can't use class.illegal_obj_char
+                            # because in the "explode" phase, we do not have access to this data! :(
+                            safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_',
+                                                    key_value[key])
+                            new_s.display_name = self.display_name.replace(
+                                '$' + key + '$', safe_key_value
+                            )
                     # Here is a list of property where we will expand the $KEY$ by the value
                     _the_expandables = ['check_command',
                                         'display_name',
