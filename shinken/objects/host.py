@@ -54,12 +54,6 @@ class Host(SchedulingItem):
     ok_up = 'UP'
     my_type = 'host'
 
-    # if Host(or more generally Item) instances were created with all properties
-    # having a default value set in the instance then we wouldn't need this:
-    service_includes = service_excludes = []
-    # though, as these 2 attributes are to be relatively low used it's not
-    # that bad to have the default be defined only once here at the class level.
-
     # properties defined by configuration
     # *required: is required in conf
     # *default: default value if no set in conf
@@ -899,9 +893,9 @@ class Host(SchedulingItem):
         ''' Check whether this host should have the passed service *description*
             be "excluded" or "not included".
         '''
-        if not is_tpl and self.service_includes:
+        if not is_tpl and hasattr(self, "service_includes"):
             return sdesc not in self.service_includes
-        if self.service_excludes:
+        if hasattr(self, "service_excludes"):
             return sdesc in self.service_excludes
         return False
 
