@@ -604,6 +604,15 @@ class Service(SchedulingItem):
     def get_service_tags(self):
         return self.tags
 
+    def is_duplicate(self):
+        """
+        Indicates if a service holds a duplicate_foreach statement
+        """
+        if getattr(self, "duplicate_foreach", None):
+            return True
+        else:
+            return False
+
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
@@ -1627,7 +1636,10 @@ class Services(Items):
         new_s = service.copy()
         new_s.host_name = host_name
         new_s.register = 1
-        self.add_item(new_s)
+        if new_s.is_duplicate():
+            self.add_item(new_s, index=False)
+        else:
+            self.add_item(new_s)
         return new_s
 
 
@@ -1666,7 +1678,6 @@ class Services(Items):
         :param s:       The service to explode
         :type s:        Service
         """
-
         hname = getattr(s, "host_name", None)
         if hname is None:
             return
@@ -1754,13 +1765,12 @@ class Services(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        for id in self.templates.keys():
-            t = self.templates[id]
+        for t in self.templates.values():
             self.explode_contact_groups_into_contacts(t, contactgroups)
             self.explode_services_from_templates(hosts, t)
 
         # Explode services that have a duplicate_foreach clause
-        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
+        duplicates = [s.id for s in self if s.is_duplicate()]
         for id in duplicates:
             s = self.items[id]
             self.explode_services_duplicates(hosts, s)

@@ -74,7 +74,7 @@ class TestConfig(ShinkenTest):
         # But not on other of course
         self.assertNotIn(svc_c_dep, svc_d.child_dependencies)
 
-        
+
 
     def test_service_generators_not(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -151,6 +151,17 @@ class TestConfig(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service ISDN1')
         self.assertIsNot(svc, None)
         self.assertEqual('check_service!4!80%!95%', svc.check_command.call)
+
+    def test_key_as_descr(self):
+        svc_h = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service H")
+        svc_i = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service I")
+        svc_j = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service J")
+        svc_k = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service K")
+
+        self.assertIsNotNone(svc_h)
+        self.assertIsNotNone(svc_i)
+        self.assertIsNotNone(svc_j)
+        self.assertIsNotNone(svc_k)
 
 
 if __name__ == '__main__':
