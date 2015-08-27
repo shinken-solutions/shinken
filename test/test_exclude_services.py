@@ -52,10 +52,24 @@ class TestPropertyOverride(ShinkenTest):
 
         # Half the services only should exist for test_host_02
         find = partial(Find, 'test_host_02')
-        for svc in ('srv-svc12', 'srv-svc22', 'proc proc2', ):
+        for svc in ('srv-svc12', 'srv-svc22', 'proc proc2'):
             self.assertIsNotNone(find(svc))
 
-        for svc in ('srv-svc11', 'srv-svc21', 'proc proc1', ):
+        for svc in ('srv-svc11', 'srv-svc21', 'proc proc1'):
+            self.assertIsNone(find(svc))
+
+        # 2 and 21 should not exist on test-04
+        find = partial(Find, 'test_host_04')
+        for svc in ('srv-svc11', 'srv-svc12', 'proc proc1'):
+            self.assertIsNotNone(find(svc))
+
+        for svc in ('srv-svc21', 'srv-svc22', 'proc proc2'):
+            self.assertIsNone(find(svc))
+
+        # no service should be defined on test_host_05
+        find = partial(Find, 'test_host_05')
+        for svc in ('srv-svc11', 'srv-svc12', 'proc proc1',
+                    'srv-svc21', 'srv-svc22', 'proc proc2'):
             self.assertIsNone(find(svc))
 
 
