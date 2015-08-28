@@ -2,6 +2,27 @@
 Shinken ChangeLog
 ########################
 
+2.4.2 - xx/09/2015
+-------------------
+	CORE ENHANCEMENT
+	Add: Service excludes/includes/overrides extension
+
+	CORE FIXES
+	Fix: Service Description using duplicate_foreach with only $KEY$ as description
+        Fix: Service_(includes|excludes) template recursion
+
+2.4.1 - 15/07/2015
+-------------------
+	CORE ENHANCEMENT
+	Add: Safe Pickle
+	Add: Better Debian 8 Jessie support
+
+	CORE FIXES
+	Fix: Display_name when using duplicate_foreach
+        Fix: template definition loop did segfault python
+        Fix: Service Description inheritance when using several level of inheritance
+        Fix: cpu looping for receiver
+
 2.4   - 04/05/2015
 -------------------
 	CORE ENHANCEMENT
