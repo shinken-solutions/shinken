@@ -9,6 +9,8 @@ INSTALLED_FILES
 .settings
 .gitignore
 modules/*
+.ropeproject
+.coverage
 
 # Logs and databases #
 ######################
