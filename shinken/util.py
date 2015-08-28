@@ -896,4 +896,3 @@ def get_exclude_match_expr(pattern):
         return reg.match
     else:
         return lambda d: d == pattern
-
