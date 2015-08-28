@@ -518,6 +518,18 @@ Its syntax is:
 
 It could be summarized as "*For the service bound to me, named ``xxx``, I want the directive ``yyy`` set to ``zzz`` rather tran the inherited value*"
 
+The service description selector (represented by ``xxx`` in the previous example) may be:
+
+A service name (default)
+  The ``service_description`` of one of the services attached to the host.
+
+``*`` (wildcard)
+  Means *all the services attached to the host*
+
+A regular expression
+  A regular expression against the ``service_description`` of the services attached to the host (it has to be prefixed by ``r:``).
+
+
 Example:
 
 ::
@@ -543,8 +555,22 @@ Example:
          ...
   }
   ...
+  define host {
+         host_name               web-back-02
+         hostgroups              web
+         service_overrides       *,notification_options c
+         ...
+  }
+  ...
+  define host {
+         host_name               web-back-03
+         hostgroups              web
+         service_overrides       r:^HTTP,notification_options r
+         ...
+  }
+  ...
 
-In the previous example, we defined only one instance of the HTTP service, and we enforced the service ``notification_options`` for the web servers composing the backend. The final result is the same, but the second example is shorter, and does not require the second service definition.
+In the previous example, we defined only one instance of the HTTP service, and we enforced the service ``notification_options`` for some web servers composing the backend. The final result is the same, but the second example is shorter, and does not require the second service definition.
 
 Using packs allows an even shorter configuration.
 
@@ -563,6 +589,20 @@ Example:
          use                     http
          host_name               web-back-01
          service_overrides       HTTP,notification_options c,r
+         ...
+  }
+  ...
+  define host {
+         use                     http
+         host_name               web-back-02
+         service_overrides       HTTP,notification_options c
+         ...
+  }
+  ...
+  define host {
+         use                     http
+         host_name               web-back-03
+         service_overrides       HTTP,notification_options r
          ...
   }
   ...
@@ -612,7 +652,24 @@ In this situation, there is several ways to manage the situation:
 
 None of these options are satisfying.
 
-There is a last solution that consists of excluding the corresponding service from the specified host. This may be done using the ``service_excludes directive``.
+There is a last solution that consists of excluding the corresponding service from the specified host. This may be done using the ``service_excludes`` directive.
+
+Its syntax is:
+
+::
+
+  service_excludes xxx
+
+The service description selector (represented by ``xxx`` in the previous example) may be:
+
+A service name (default)
+  The ``service_description`` of one of the services attached to the host.
+
+``*`` (wildcard)
+  Means *all the services attached to the host*
+
+A regular expression
+  A regular expression against the ``service_description`` of the services attached to the host (it has to be prefixed by ``r:``).
 
 Example:
 
@@ -620,18 +677,32 @@ Example:
 ::
 
   define host {
-         use                     web-fromt
+         use                     web-front
          host_name               web-back-01
          ...
   }
 
   define host {
-         use                     web-fromt
+         use                     web-front
          host_name               web-back-02    ; The virtual server
          service_excludes        Management interface
          ...
   }
   ...
+  define host {
+         use                     web-front
+         host_name               web-back-03    ; The virtual server
+         service_excludes        *
+         ...
+  }
+  ...
+  define host {
+         use                     web-front
+         host_name               web-back-04    ; The virtual server
+         service_excludes        r^Management
+         ...
+  }
+  ...
 
 
-In the case you want the opposite (exclude all except) you can use the service_includes directive
+In the case you want the opposite (exclude all except) you can use the ``service_includes`` directive which is its corollary.

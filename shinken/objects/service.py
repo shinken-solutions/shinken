@@ -48,6 +48,8 @@ from shinken.property import BoolProp, IntegerProp, FloatProp,\
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
+from shinken.util import filter_service_by_regex_name
+from shinken.util import filter_service_by_host_name
 
 
 class Service(SchedulingItem):
@@ -1448,15 +1450,6 @@ class Services(Items):
                     host.configuration_errors.append(err)
                     continue
                 sdescr, prop, value = match.groups()
-                # Looks for corresponding service
-                service = self.find_srv_by_name_and_hostname(
-                    getattr(host, "host_name", ""),  sdescr
-                )
-                if service is None:
-                    err = "Error: trying to override property '%s' on service '%s' " \
-                          "but it's unknown for this host" % (prop, sdescr)
-                    host.configuration_errors.append(err)
-                    continue
                 # Checks if override is allowed
                 excludes = ['host_name', 'service_description', 'use',
                             'servicegroups', 'trigger', 'trigger_name']
@@ -1465,9 +1458,37 @@ class Services(Items):
                           (prop, sdescr)
                     host.configuration_errors.append(err)
                     continue
+                # Looks for corresponding services
+                services = self.get_ovr_services_from_expression(host, sdescr)
+                if not services:
+                    err = "Error: trying to override property '%s' on " \
+                          "service identified by '%s' " \
+                          "but it's unknown for this host" % (prop, sdescr)
+                    host.configuration_errors.append(err)
+                    continue
+                value = Service.properties[prop].pythonize(value)
+                for service in services:
+                    # Pythonize the value because here value is str.
+                    setattr(service, prop, value)
 
-                # Pythonize the value because here value is str.
-                setattr(service, prop, service.properties[prop].pythonize(value))
+    def get_ovr_services_from_expression(self, host, sdesc):
+        hostname = getattr(host, "host_name", "")
+        if sdesc == "*":
+            filters = [filter_service_by_host_name(hostname)]
+            return self.find_by_filter(filters)
+        elif sdesc.startswith("r:"):
+            pattern = sdesc[2:]
+            filters = [
+                filter_service_by_host_name(hostname),
+                filter_service_by_regex_name(pattern)
+            ]
+            return self.find_by_filter(filters)
+        else:
+            svc = self.find_srv_by_name_and_hostname(hostname,  sdesc)
+            if svc is not None:
+                return [svc]
+            else:
+                return []
 
 
     # We can link services with hosts so

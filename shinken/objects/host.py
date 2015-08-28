@@ -37,7 +37,7 @@ from schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
                           to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names,
-                          to_name_if_possible, strip_and_uniq)
+                          to_name_if_possible, strip_and_uniq, get_exclude_match_expr)
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -894,10 +894,27 @@ class Host(SchedulingItem):
             be "excluded" or "not included".
         '''
         if not is_tpl and hasattr(self, "service_includes"):
-            return sdesc not in self.service_includes
+            incl = False
+            for d in self.service_includes:
+                try:
+                    fct = get_exclude_match_expr(d)
+                    if fct(sdesc):
+                        incl = True
+                except Exception, e:
+                    self.configuration_errors.append(
+                        "Invalid include expression: %s: %s" % (d, e))
+            return not incl
         if hasattr(self, "service_excludes"):
-            return sdesc in self.service_excludes
+            for d in self.service_excludes:
+                try:
+                    fct = get_exclude_match_expr(d)
+                    if fct(sdesc):
+                        return True
+                except Exception, e:
+                    self.configuration_errors.append(
+                        "Invalid exclude expression: %s: %s" % (d, e))
         return False
+
 
 #####
 #                         _

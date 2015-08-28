@@ -33,16 +33,17 @@ VERSION = (1, 1, 0)
 
 ATTRIBUTES = dict(
     list(
-        zip([
-            'bold',
-            'dark',
-            '',
-            'underline',
-            'blink',
-            '',
-            'reverse',
-            'concealed'
-        ],
+        zip(
+            [
+                'bold',
+                'dark',
+                '',
+                'underline',
+                'blink',
+                '',
+                'reverse',
+                'concealed'
+            ],
             list(range(1, 9))
         )
     )
@@ -52,16 +53,17 @@ del ATTRIBUTES['']
 
 HIGHLIGHTS = dict(
     list(
-        zip([
-            'on_grey',
-            'on_red',
-            'on_green',
-            'on_yellow',
-            'on_blue',
-            'on_magenta',
-            'on_cyan',
-            'on_white'
-        ],
+        zip(
+            [
+                'on_grey',
+                'on_red',
+                'on_green',
+                'on_yellow',
+                'on_blue',
+                'on_magenta',
+                'on_cyan',
+                'on_white'
+            ],
             list(range(40, 48))
         )
     )
@@ -70,16 +72,17 @@ HIGHLIGHTS = dict(
 
 COLORS = dict(
     list(
-        zip([
-            'grey',
-            'red',
-            'green',
-            'yellow',
-            'blue',
-            'magenta',
-            'cyan',
-            'white',
-        ],
+        zip(
+            [
+                'grey',
+                'red',
+                'green',
+                'yellow',
+                'blue',
+                'magenta',
+                'cyan',
+                'white',
+            ],
             list(range(90, 98))
         )
     )
