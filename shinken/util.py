@@ -563,15 +563,15 @@ def get_key_value_sequence(entry, default_value=None):
 
     # match a key$(value1..n)$
     keyval_pattern_txt = r"""
-\s*(?P<key>[^,]+?)(?P<values>(\$\(.*?\)\$)*)(?:[,]|$)
+\s*(?P<key>[^,]+?)(?P<values>(\s*\$\(.*?\)\$\s*)*)(?:[,]|$)
 """
     keyval_pattern = re.compile('(?x)' + keyval_pattern_txt)
     # match a whole sequence of key$(value1..n)$
     all_keyval_pattern = re.compile('(?x)^(' + keyval_pattern_txt + ')+$')
     # match a single value
-    value_pattern = re.compile('(?:\$\((?P<val>.*?)\)\$)')
+    value_pattern = re.compile('(?:\s*\$\((?P<val>.*?)\)\$\s*)')
     # match a sequence of values
-    all_value_pattern = re.compile('^(?:\$\(.*?\)\$)+$')
+    all_value_pattern = re.compile('^(?:\s*\$\(.*?\)\$\s*)+$')
 
     if all_keyval_pattern.match(conf_entry):
         for mat in re.finditer(keyval_pattern, conf_entry):
