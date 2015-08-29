@@ -90,7 +90,9 @@ class Service(SchedulingItem):
         'check_command':
             StringProp(fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='o', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -605,6 +607,27 @@ class Service(SchedulingItem):
 
     def get_service_tags(self):
         return self.tags
+
+    def set_initial_state(self):
+        mapping = {
+            "o": {
+                "state": "OK",
+                "state_id": 0
+            },
+            "w": {
+                "state": "WARNING",
+                "state_id": 1
+            },
+            "c": {
+                "state": "CRITICAL",
+                "state_id": 2
+            },
+            "u": {
+                "state": "UNKNOWN",
+                "state_id": 3
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
 
     # Check is required prop are set:
     # template are always correct
@@ -1573,6 +1596,14 @@ class Services(Items):
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
+
+
+    def set_initial_state(self):
+        """
+        Sets services initial state if required in configuration
+        """
+        for s in self:
+            s.set_initial_state()
 
 
     # For services the main clean is about service with bad hosts

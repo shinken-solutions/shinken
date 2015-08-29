@@ -82,6 +82,40 @@ class SchedulingItem(Item):
             if prop in state:
                 setattr(self, prop, state[prop])
 
+    def set_initial_state(self, mapping):
+        """
+        Sets the object's initial state, state_id, and output attributes if
+        initial other than default values are wanted.
+
+        The allowed states have to be given in the mapping dictionnary,
+        following the pattern below:
+
+            {
+                "o": {
+                    "state": "OK",
+                    "state_id": 0
+                },
+                ...
+            }
+
+        :param mapping: The mapping describing the allowed states
+        """
+        # Enforced initial state
+        init_state = getattr(self, "initial_state", "")
+        if init_state:
+            if init_state in mapping:
+                self.state = mapping[init_state]["state"]
+                self.state_id = mapping[init_state]["state_id"]
+            else:
+                err = "invalid initial_state: %s, should be one of %s" % (
+                    init_state, ", ".join(mapping.keys()))
+                self.configuration_errors.append(err)
+
+        # Enforced check output
+        output = getattr(self, "initial_output", "")
+        if output:
+            self.output = self.long_output = output
+
     # Register the son in my child_dependencies, and
     # myself in its parent_dependencies
     def register_son_in_parent_child_dependencies(self, son):

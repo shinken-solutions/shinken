@@ -86,7 +86,9 @@ class Host(SchedulingItem):
         'check_command':
             StringProp(default='_internal_host_up', fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='u', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -638,6 +640,23 @@ class Host(SchedulingItem):
 #                         __/ |
 #                        |___/
 ######
+
+    def set_initial_state(self):
+        mapping = {
+            "u": {
+                "state": "UP",
+                "state_id": 0
+            },
+            "d": {
+                "state": "DOWN",
+                "state_id": 1
+            },
+            "u": {
+                "state": "UNREACHABLE",
+                "state_id": 2
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
 
 
     # Fill address with host_name if not already set
@@ -1541,6 +1560,13 @@ class Hosts(Items):
     def apply_dependencies(self):
         for h in self:
             h.fill_parents_dependency()
+
+    def set_initial_state(self):
+        """
+        Sets hosts initial state if required in configuration
+        """
+        for h in self:
+            h.set_initial_state()
 
     # Return a list of the host_name of the hosts
     # that got the template with name=tpl_name or inherit from

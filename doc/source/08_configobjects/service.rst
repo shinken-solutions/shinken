@@ -26,6 +26,7 @@ servicegroups                              servicegroup_names
 is_volatile                                [0/1]
 **check_command**                          ***command_name***
 initial_state                              [o,w,u,c]
+initial_output                             *output*
 **max_check_attempts**                     **#**
 **check_interval**                         **#**
 **retry_interval**                         **#**
@@ -164,12 +165,15 @@ check_command
   If at least one of the apaches on servers websrv1 and websrv2 is OK and if the oracle database on dbsrv1 is OK then the rule and thus the service is OK
 
 initial_state
-  By default Shinken will assume that all services are in OK states when in starts. You can override the initial state for a service by using this directive. Valid options are:
+  By default Shinken will assume that all services are in PENDING state when in starts. You can override the initial state for a service by using this directive. Valid options are:
 
     * **o** = OK
     * **w** = WARNING
     * **u** = UNKNOWN
     * **c** = CRITICAL.
+
+initial_output
+  As of the initial state, the initial check output may also be overridden by this directive.
 
 max_check_attempts
   This directive is used to define the number of times that Shinken will retry the service check command if it returns any state other than an OK state. Setting this value to 1 will cause Shinken to generate an alert without retrying the service check again.
@@ -384,7 +388,7 @@ maintenance_period
 
 host_dependency_enabled
   This variable may be used to remove the dependency between a service and its parent host. Used for volatile services that need notification related to itself and not depend on the host notifications.
-  
+
 labels
   This variable may be used to place arbitrary labels (separated by comma character). Those labels may be used in other configuration objects such as :ref:`business rules <medium/business-rules>` to identify groups of services.
 
