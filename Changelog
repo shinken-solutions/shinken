@@ -6,6 +6,7 @@ Shinken ChangeLog
 -------------------
 	CORE ENHANCEMENT
 	Add: Service excludes/includes/overrides extension
+	Add: Implementation of inital_state
 
 	CORE FIXES
 	Fix: Service Description using duplicate_foreach with only $KEY$ as description
