@@ -1253,6 +1253,13 @@ class Config(Item):
     def remove_exclusions(self):
         return self.services.remove_exclusions(self.hosts)
 
+    def set_initial_state(self):
+        """
+        Sets services and hosts initial states.
+        """
+        self.hosts.set_initial_state()
+        self.services.set_initial_state()
+
     # Some elements are maybe set as wrong after a is_correct, so clean them
     # if possible
     def clean(self):
