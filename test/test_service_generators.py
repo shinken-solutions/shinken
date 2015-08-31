@@ -158,6 +158,17 @@ class TestConfig(ShinkenTest):
         self.assertIsNotNone(s1)
         self.assertIsNotNone(s2)
 
+    def test_key_as_descr(self):
+        svc_h = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service H")
+        svc_i = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service I")
+        svc_j = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service J")
+        svc_k = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service K")
+
+        self.assertIsNotNone(svc_h)
+        self.assertIsNotNone(svc_i)
+        self.assertIsNotNone(svc_j)
+        self.assertIsNotNone(svc_k)
+
 
 if __name__ == '__main__':
     unittest.main()

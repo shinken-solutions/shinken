@@ -90,7 +90,9 @@ class Service(SchedulingItem):
         'check_command':
             StringProp(fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='o', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -605,6 +607,36 @@ class Service(SchedulingItem):
 
     def get_service_tags(self):
         return self.tags
+
+    def is_duplicate(self):
+        """
+        Indicates if a service holds a duplicate_foreach statement
+        """
+        if getattr(self, "duplicate_foreach", None):
+            return True
+        else:
+            return False
+
+    def set_initial_state(self):
+        mapping = {
+            "o": {
+                "state": "OK",
+                "state_id": 0
+            },
+            "w": {
+                "state": "WARNING",
+                "state_id": 1
+            },
+            "c": {
+                "state": "CRITICAL",
+                "state_id": 2
+            },
+            "u": {
+                "state": "UNKNOWN",
+                "state_id": 3
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
 
     # Check is required prop are set:
     # template are always correct
@@ -1534,6 +1566,14 @@ class Services(Items):
             s.fill_daddy_dependency()
 
 
+    def set_initial_state(self):
+        """
+        Sets services initial state if required in configuration
+        """
+        for s in self:
+            s.set_initial_state()
+
+
     # For services the main clean is about service with bad hosts
     def clean(self):
         to_del = []
@@ -1607,7 +1647,10 @@ class Services(Items):
         new_s = service.copy()
         new_s.host_name = host_name
         new_s.register = 1
-        self.add_item(new_s)
+        if new_s.is_duplicate():
+            self.add_item(new_s, index=False)
+        else:
+            self.add_item(new_s)
         return new_s
 
 
@@ -1646,7 +1689,6 @@ class Services(Items):
         :param s:       The service to explode
         :type s:        Service
         """
-
         hname = getattr(s, "host_name", None)
         if hname is None:
             return
@@ -1734,13 +1776,12 @@ class Services(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        for id in self.templates.keys():
-            t = self.templates[id]
+        for t in self.templates.values():
             self.explode_contact_groups_into_contacts(t, contactgroups)
             self.explode_services_from_templates(hosts, t)
 
         # Explode services that have a duplicate_foreach clause
-        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
+        duplicates = [s.id for s in self if s.is_duplicate()]
         for id in duplicates:
             s = self.items[id]
             self.explode_services_duplicates(hosts, s)

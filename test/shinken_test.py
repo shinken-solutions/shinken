@@ -205,7 +205,7 @@ class ShinkenTest(unittest.TestCase):
             if os.path.exists(getattr(self.conf, 'modules_dir', '')):
                 arbdaemon.modules_dir = self.conf.modules_dir
                 arbdaemon.load_modules_manager()
-            
+
                 # we request the instances without them being *started*
                 # (for those that are concerned ("external" modules):
                 # we will *start* these instances after we have been daemonized (if requested)
@@ -237,6 +237,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.override_properties()
         self.conf.linkify()
         self.conf.apply_dependencies()
+        self.conf.set_initial_state()
         self.conf.explode_global_conf()
         self.conf.propagate_timezone_option()
         self.conf.create_business_rules()
