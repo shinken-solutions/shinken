@@ -48,6 +48,8 @@ from shinken.property import BoolProp, IntegerProp, FloatProp,\
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
+from shinken.util import filter_service_by_regex_name
+from shinken.util import filter_service_by_host_name
 
 
 class Service(SchedulingItem):
@@ -88,7 +90,9 @@ class Service(SchedulingItem):
         'check_command':
             StringProp(fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='o', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -612,6 +616,27 @@ class Service(SchedulingItem):
             return True
         else:
             return False
+
+    def set_initial_state(self):
+        mapping = {
+            "o": {
+                "state": "OK",
+                "state_id": 0
+            },
+            "w": {
+                "state": "WARNING",
+                "state_id": 1
+            },
+            "c": {
+                "state": "CRITICAL",
+                "state_id": 2
+            },
+            "u": {
+                "state": "UNKNOWN",
+                "state_id": 3
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
 
     # Check is required prop are set:
     # template are always correct
@@ -1457,15 +1482,6 @@ class Services(Items):
                     host.configuration_errors.append(err)
                     continue
                 sdescr, prop, value = match.groups()
-                # Looks for corresponding service
-                service = self.find_srv_by_name_and_hostname(
-                    getattr(host, "host_name", ""),  sdescr
-                )
-                if service is None:
-                    err = "Error: trying to override property '%s' on service '%s' " \
-                          "but it's unknown for this host" % (prop, sdescr)
-                    host.configuration_errors.append(err)
-                    continue
                 # Checks if override is allowed
                 excludes = ['host_name', 'service_description', 'use',
                             'servicegroups', 'trigger', 'trigger_name']
@@ -1474,9 +1490,37 @@ class Services(Items):
                           (prop, sdescr)
                     host.configuration_errors.append(err)
                     continue
+                # Looks for corresponding services
+                services = self.get_ovr_services_from_expression(host, sdescr)
+                if not services:
+                    err = "Error: trying to override property '%s' on " \
+                          "service identified by '%s' " \
+                          "but it's unknown for this host" % (prop, sdescr)
+                    host.configuration_errors.append(err)
+                    continue
+                value = Service.properties[prop].pythonize(value)
+                for service in services:
+                    # Pythonize the value because here value is str.
+                    setattr(service, prop, value)
 
-                # Pythonize the value because here value is str.
-                setattr(service, prop, service.properties[prop].pythonize(value))
+    def get_ovr_services_from_expression(self, host, sdesc):
+        hostname = getattr(host, "host_name", "")
+        if sdesc == "*":
+            filters = [filter_service_by_host_name(hostname)]
+            return self.find_by_filter(filters)
+        elif sdesc.startswith("r:"):
+            pattern = sdesc[2:]
+            filters = [
+                filter_service_by_host_name(hostname),
+                filter_service_by_regex_name(pattern)
+            ]
+            return self.find_by_filter(filters)
+        else:
+            svc = self.find_srv_by_name_and_hostname(hostname,  sdesc)
+            if svc is not None:
+                return [svc]
+            else:
+                return []
 
 
     # We can link services with hosts so
@@ -1561,6 +1605,14 @@ class Services(Items):
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
+
+
+    def set_initial_state(self):
+        """
+        Sets services initial state if required in configuration
+        """
+        for s in self:
+            s.set_initial_state()
 
 
     # For services the main clean is about service with bad hosts

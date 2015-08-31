@@ -37,7 +37,7 @@ from schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
                           to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names,
-                          to_name_if_possible, strip_and_uniq)
+                          to_name_if_possible, strip_and_uniq, get_exclude_match_expr)
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -86,7 +86,9 @@ class Host(SchedulingItem):
         'check_command':
             StringProp(default='_internal_host_up', fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='u', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -639,6 +641,23 @@ class Host(SchedulingItem):
 #                        |___/
 ######
 
+    def set_initial_state(self):
+        mapping = {
+            "u": {
+                "state": "UP",
+                "state_id": 0
+            },
+            "d": {
+                "state": "DOWN",
+                "state_id": 1
+            },
+            "u": {
+                "state": "UNREACHABLE",
+                "state_id": 2
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
+
 
     # Fill address with host_name if not already set
     def fill_predictive_missing_parameters(self):
@@ -894,10 +913,27 @@ class Host(SchedulingItem):
             be "excluded" or "not included".
         '''
         if not is_tpl and hasattr(self, "service_includes"):
-            return sdesc not in self.service_includes
+            incl = False
+            for d in self.service_includes:
+                try:
+                    fct = get_exclude_match_expr(d)
+                    if fct(sdesc):
+                        incl = True
+                except Exception, e:
+                    self.configuration_errors.append(
+                        "Invalid include expression: %s: %s" % (d, e))
+            return not incl
         if hasattr(self, "service_excludes"):
-            return sdesc in self.service_excludes
+            for d in self.service_excludes:
+                try:
+                    fct = get_exclude_match_expr(d)
+                    if fct(sdesc):
+                        return True
+                except Exception, e:
+                    self.configuration_errors.append(
+                        "Invalid exclude expression: %s: %s" % (d, e))
         return False
+
 
 #####
 #                         _
@@ -1524,6 +1560,13 @@ class Hosts(Items):
     def apply_dependencies(self):
         for h in self:
             h.fill_parents_dependency()
+
+    def set_initial_state(self):
+        """
+        Sets hosts initial state if required in configuration
+        """
+        for h in self:
+            h.set_initial_state()
 
     # Return a list of the host_name of the hosts
     # that got the template with name=tpl_name or inherit from

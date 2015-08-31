@@ -5,7 +5,7 @@ After=syslog.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/shinken-broker -d -c /etc/shinken/daemons/brokerd.ini
-KillMode=process
+KillMode=mixed
 TimeoutStopSec=3
 
 [Install]
