@@ -229,7 +229,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('webui_host', '0.0.0.0'),
 
         ('use_multiprocesses_serializer', False),
-        ('daemon_thread_pool_size', 8),
+        ('daemon_thread_pool_size', 16),
         ('enable_environment_macros', True),
         ('timeout_exit_status', 2),
 
