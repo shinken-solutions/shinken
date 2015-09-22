@@ -4,23 +4,24 @@ Shinken ChangeLog
 
 2.4.2 - xx/09/2015
 -------------------
-	CORE ENHANCEMENT
-	Add: Service excludes/includes/overrides extension
-	Add: Implementation of inital_state
+        CORE ENHANCEMENT
+        Add: Service excludes/includes/overrides extension
+        Add: Implementation of inital_state
         Enh: allow white space between foreach elements
+        Enh: Increase default http thread_pool to 16
 
-	CORE FIXES
-	Fix: Duplicate Service from template using duplicate_foreach with the same name
+        CORE FIXES
+        Fix: Duplicate Service from template using duplicate_foreach with the same name
         Fix: Service_(includes|excludes) template recursion
 
 2.4.1 - 15/07/2015
 -------------------
-	CORE ENHANCEMENT
-	Add: Safe Pickle
-	Add: Better Debian 8 Jessie support
+        CORE ENHANCEMENT
+        Add: Safe Pickle
+        Add: Better Debian 8 Jessie support
 
-	CORE FIXES
-	Fix: Display_name when using duplicate_foreach
+        CORE FIXES
+        Fix: Display_name when using duplicate_foreach
         Fix: template definition loop did segfault python
         Fix: Service Description inheritance when using several level of inheritance
         Fix: cpu looping for receiver
