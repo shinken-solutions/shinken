@@ -536,7 +536,7 @@ class Config(Item):
             BoolProp(default=True),  # Put to 0 to disable the arbiter to run
 
         'daemon_thread_pool_size':
-            IntegerProp(default=8),
+            IntegerProp(default=16),
 
         'flap_history':
             IntegerProp(default=20, class_inherit=[(Host, None), (Service, None)]),
