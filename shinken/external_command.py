@@ -1747,6 +1747,19 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(host)
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
+            
+        data = {
+            'host_name': host.get_name(),
+            'start_time': start_time,
+            'end_time': end_time, 
+            'fixed': fixed,
+            'trigger_id': trigger_id,
+            'duration': duration,
+            'author': author,
+            'comment': comment
+        }
+
+        self.sched.add_Brok(Brok('schedule_host_downtime', data))
 
     # SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_HOST_SVC_CHECKS(self, host, check_time):
@@ -1794,6 +1807,20 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(service)
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
+            
+        data = {
+            'host_name': service.host_name,
+            'service_description': service.service_description,
+            'start_time': start_time,
+            'end_time': end_time, 
+            'fixed': fixed,
+            'trigger_id': trigger_id,
+            'duration': duration,
+            'author': author,
+            'comment': comment
+        }
+
+        self.sched.add_Brok(Brok('schedule_service_downtime', data))
 
     # SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
     def SEND_CUSTOM_HOST_NOTIFICATION(self, host, options, author, comment):
