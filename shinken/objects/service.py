@@ -1294,11 +1294,6 @@ class Services(Items):
     name_property = 'unique_key'  # only used by (un)indexitem (via 'name_property')
     inner_class = Service  # use for know what is in items
 
-    def __init__(self, items, index_items=True):
-        self.partial_services = {}
-        self.name_to_partial = {}
-        super(Services, self).__init__(items, index_items)
-
     def add_template(self, tpl):
         """
         Adds and index a template into the `templates` container.
@@ -1319,7 +1314,7 @@ class Services(Items):
             tpl = self.index_template(tpl)
         self.templates[tpl.id] = tpl
 
-    def add_item(self, item, index=True, was_partial=False):
+    def add_item(self, item, index=True):
         """
         Adds and index an item into the `items` container.
 
@@ -1338,51 +1333,23 @@ class Services(Items):
             in_file = " in %s" % source
         else:
             in_file = ""
-        if not hname and not hgname and not sdesc:
+        if not hname and not hgname:
             mesg = "a %s has been defined without host_name nor " \
-                   "hostgroups nor service_description%s" % (objcls, in_file)
+                   "hostgroups%s" % (objcls, in_file)
             item.configuration_errors.append(mesg)
-        elif not sdesc or sdesc and not hgname and not hname and not was_partial:
-            self.add_partial_service(item, index, (objcls, hname, hgname, sdesc, in_file))
-            return
-
         if index is True:
-            item = self.index_item(item)
+            if hname and sdesc:
+                item = self.index_item(item)
+            else:
+                mesg = "a %s has been defined without host_name nor " \
+                    "service_description%s" % (objcls, in_file)
+                item.configuration_errors.append(mesg)
+                return
         self.items[item.id] = item
-
-    def add_partial_service(self, item, index=True, var_tuple=None):
-        if var_tuple is None:
-            return
-
-        objcls, hname, hgname, sdesc, in_file = var_tuple
-        use = getattr(item, 'use', [])
-
-
-        if use == []:
-            mesg = "a %s has been defined without host_name nor " \
-                   "hostgroups nor service_description and " \
-                   "there is no use to create a unique key%s" % (objcls, in_file)
-            item.configuration_errors.append(mesg)
-            return
-
-        use = ','.join(use)
-        if sdesc:
-            name = "::".join((sdesc, use))
-        elif hname:
-            name = "::".join((hname, use))
-        else:
-            name = "::".join((hgname, use))
-
-        if name in self.name_to_partial:
-            item = self.manage_conflict(item, name, partial=True)
-        self.name_to_partial[name] = item
-
-        self.partial_services[item.id] = item
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
@@ -1402,21 +1369,13 @@ class Services(Items):
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             i.get_customs_properties_by_inheritance(0)
-
-        for i in self.partial_services.itervalues():
-            self.add_item(i, True, True)
-
-        del self.partial_services
-        del self.name_to_partial
 
 
     def linkify_templates(self):
         # First we create a list of all templates
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             self.linkify_item_templates(i)
         for i in self:
@@ -1831,8 +1790,7 @@ class Services(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        for id in self.items.keys():
-            s = self.items[id]
+        for s in self.items.values():
             # items::explode_host_groups_into_hosts
             # take all hosts from our hostgroup_name into our host_name property
             self.explode_host_groups_into_hosts(s, hosts, hostgroups)

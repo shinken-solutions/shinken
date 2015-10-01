@@ -152,6 +152,12 @@ class TestConfig(ShinkenTest):
         self.assertIsNot(svc, None)
         self.assertEqual('check_service!4!80%!95%', svc.check_command.call)
 
+    def test_service_inherited_description(self):
+        s1 = self.sched.services.find_srv_by_name_and_hostname("r1", 'SSH')
+        s2 = self.sched.services.find_srv_by_name_and_hostname("r2", 'SSH')
+        self.assertIsNotNone(s1)
+        self.assertIsNotNone(s2)
+
     def test_key_as_descr(self):
         svc_h = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service H")
         svc_i = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service I")
