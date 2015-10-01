@@ -592,8 +592,8 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['d','u']),
-        ('business_rule_host_notification_options', ['']),
-        ('business_rule_service_notification_options', ['']),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ])
 
     def setUp(self):
@@ -896,8 +896,8 @@ class TestService(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['w','c','u']),
-        ('business_rule_host_notification_options', None),
-        ('business_rule_service_notification_options', None),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ('host_dependency_enabled', True),
         ])
 
