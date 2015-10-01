@@ -212,9 +212,9 @@ class Host(SchedulingItem):
             BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
         'business_rule_host_notification_options':
-            ListProp(default=[''], fill_brok=['full_status']),
+            ListProp(default=[], fill_brok=['full_status']),
         'business_rule_service_notification_options':
-            ListProp(default=[''], fill_brok=['full_status']),
+            ListProp(default=[], fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':
