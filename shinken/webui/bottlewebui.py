@@ -465,7 +465,7 @@ class Bottle(object):
 
     def mount(self, app, prefix, **options):
         ''' Mount an application to a specific URL prefix. The prefix is added
-            to SCIPT_PATH and removed from PATH_INFO before the sub-application
+            to SCRIPT_PATH and removed from PATH_INFO before the sub-application
             is called.:param app: an instance of :class:`Bottle`.:param prefix:
             path prefix used as a mount-point.
 
