@@ -108,10 +108,22 @@ class Regenerator(object):
 
         # Now we will lie and directly map our objects :)
         print "Regenerator::load_from_scheduler"
-        self.hosts = c.hosts
-        self.services = c.services
         self.notificationways = c.notificationways
+        for nw in c.notificationways:
+            nw.regenerator_refs = 0
+
         self.contacts = c.contacts
+        for contact in c.contacts:
+            contact.regenerator_refs = 0
+
+        self.hosts = c.hosts
+        for h in c.hosts:
+            self.add_contact_and_nw(h)
+
+        self.services = c.services
+        for s in self.services:
+            self.add_contact_and_nw(s)
+
         self.hostgroups = c.hostgroups
         self.servicegroups = c.servicegroups
         self.contactgroups = c.contactgroups
@@ -226,6 +238,9 @@ class Regenerator(object):
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
 
+            # Add contact and notificationway references
+            self.add_contact_and_nw(h)
+
             # Linkify tags
             for t in h.tags:
                 if t not in self.tags:
@@ -284,6 +299,9 @@ class Regenerator(object):
 
             # And link contacts too
             self.linkify_contacts(s, 'contacts')
+
+            # Add contact and notificationway references
+            self.add_contact_and_nw(s)
 
             # Linkify services tags
             for t in s.tags:
@@ -468,6 +486,42 @@ class Regenerator(object):
         """
         pass
 
+#############
+# util for contact and notificationway
+############
+    # clean up all the contact and notificationway binding to specified
+    # host/service object
+    def clean_contact_and_nw(self, obj):
+        for contact in obj.contacts:
+            for nw in contact.notificationways:
+                if nw.regenerator_refs > 1:
+                    nw.regenerator_refs -= 1
+                else:
+                    if nw.id in self.notificationways and (self.notificationways[nw.id] == nw):
+                        del self.notificationways[nw.id]
+                    else:
+                        name_property = getattr(self.notificationways.__class__,
+                                                "name_property", None)
+                        name = getattr(nw, name_property, '')
+                        self.notificationways.delete_by_name(name)
+            if contact.regenerator_refs > 1:
+                contact.regenerator_refs -= 1
+            else:
+                if contact.id in self.contacts and (self.contacts[contact.id] == contact):
+                    del self.contacts[contact.id]
+                else:
+                    name_property = getattr(self.contacts.__class__, "name_property", None)
+                    name = getattr(contact, name_property, '')
+                    self.contacts.delete_by_name(name)
+
+    # add up all the contact and notificationway binding to specified
+    # host/service object
+    def add_contact_and_nw(self, obj):
+        for contact in obj.contacts:
+            contact.regenerator_refs += 1
+        for nw in contact.notificationways:
+            nw.regenerator_refs += 1
+
 #######
 # INITIAL PART
 #######
@@ -503,6 +557,8 @@ class Regenerator(object):
         # Clean hosts from hosts and hostgroups
         for h in to_del_h:
             safe_print("Deleting", h.get_name())
+            # clean contact and the corresponding notificationways
+            self.clean_contact_and_nw(h)
             del self.hosts[h.id]
 
         # Now clean all hostgroups too
@@ -514,6 +570,8 @@ class Regenerator(object):
 
         for s in to_del_srv:
             safe_print("Deleting", s.get_full_name())
+            # clean contact and the corresponding notificationways
+            self.clean_contact_and_nw(s)
             del self.services[s.id]
 
         # Now clean service groups
@@ -641,6 +699,7 @@ class Regenerator(object):
             c = Contact({})
             self.update_element(c, data)
             self.contacts.add_item(c)
+            c.regenerator_refs = 0
 
         # Delete some useless contact values
         del c.host_notification_commands
@@ -655,16 +714,26 @@ class Regenerator(object):
         safe_print("Got notif ways", nws)
         new_notifways = []
         for cnw in nws:
+            new_notifways_flag = False
             nwname = cnw.notificationway_name
             nw = self.notificationways.find_by_name(nwname)
             if not nw:
                 safe_print("Creating notif way", nwname)
                 nw = NotificationWay([])
-                self.notificationways.add_item(nw)
+                new_notifways_flag = True
             # Now update it
             for prop in NotificationWay.properties:
                 if hasattr(cnw, prop):
                     setattr(nw, prop, getattr(cnw, prop))
+
+            # we must call self.notificationways.add_item after
+            # the initial or update phase(the above for loop), because we need
+            # 'notificationway_name' as the key to insert the notificationway
+            # into the self.notificationways.
+            if new_notifways_flag:
+                self.notificationways.add_item(nw)
+                nw.regenerator_refs = 0
+
             new_notifways.append(nw)
 
             # Linking the notification way

@@ -965,6 +965,8 @@ class Items(object):
     def find_by_name(self, name):
         return self.name_to_item.get(name, None)
 
+    def delete_by_name(self, name):
+        return self.name_to_item.pop(name, None)
 
     # Search items using a list of filter callbacks. Each callback is passed
     # the item instances and should return a boolean value indicating if it
