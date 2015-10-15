@@ -598,7 +598,7 @@ class Satellite(BaseSatellite):
             # So now we can really forgot it
             del self.workers[id]
 
-        
+
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
@@ -639,7 +639,7 @@ class Satellite(BaseSatellite):
             del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
-        
+
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
     # workers
@@ -932,18 +932,28 @@ class Satellite(BaseSatellite):
         self.statsd_port = g_conf['statsd_port']
         self.statsd_prefix = g_conf['statsd_prefix']
         self.statsd_enabled = g_conf['statsd_enabled']
+        self.statsd_interval = g_conf['statsd_interval']
 
         # we got a name, we can now say it to our statsmgr
         if 'poller_name' in g_conf:
             statsmgr.register(self, self.name, 'poller',
-                              api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
-                              statsd_host=self.statsd_host, statsd_port=self.statsd_port,
-                              statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+                              api_key=self.api_key,
+                              secret=self.secret,
+                              http_proxy=self.http_proxy,
+                              statsd_host=self.statsd_host,
+                              statsd_port=self.statsd_port,
+                              statsd_prefix=self.statsd_prefix,
+                              statsd_enabled=self.statsd_enabled,
+                              statsd_interval=self.statsd_interval)
         else:
             statsmgr.register(self, self.name, 'reactionner',
-                              api_key=self.api_key, secret=self.secret,
-                              statsd_host=self.statsd_host, statsd_port=self.statsd_port,
-                              statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+                              api_key=self.api_key,
+                              secret=self.secret,
+                              statsd_host=self.statsd_host,
+                              statsd_port=self.statsd_port,
+                              statsd_prefix=self.statsd_prefix,
+                              statsd_enabled=self.statsd_enabled,
+                              statsd_interval=self.statsd_interval)
 
         self.passive = g_conf['passive']
         if self.passive:

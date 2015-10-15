@@ -1538,7 +1538,8 @@ class Scheduler(object):
         now = int(time.time())
 
         res = self.sched_daemon.get_stats_struct()
-        res.update({'name': self.instance_name, 'type': 'scheduler'})
+        instance_name = getattr(self, "instance_name", "")
+        res.update({'name': instance_name, 'type': 'scheduler'})
 
         # Get a overview of the latencies with just
         # a 95 percentile view, but lso min/max values
@@ -1552,15 +1553,14 @@ class Scheduler(object):
         res['services'] = len(self.services)
         # metrics specific
         metrics = res['metrics']
-        metrics.append('scheduler.%s.checks.scheduled %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.inpoller %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.zombie %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
+        metrics.append('scheduler.%s.checks.queue %d %d' %
+                       (self.instance_name, len(self.checks), now))
+        for s in ("scheduled", "inpoller", "zombie", "timeout",
+                  "waitconsume", "waitdep", "havetoresolvedep"):
+            metrics.append('scheduler.%s.checks.%s %d %d' %
+                        (self.instance_name, s,
+                            len([c for c in self.checks.values() if c.status == s]),
+                            now))
         metrics.append('scheduler.%s.actions.queue %d %d' %
                        (self.instance_name,
                         len(self.actions), now))

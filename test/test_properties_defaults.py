@@ -243,6 +243,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('statsd_port', 8125),
         ('statsd_prefix', 'shinken'),
         ('statsd_enabled', False),
+        ('statsd_interval', 10),
         ])
 
     def setUp(self):

@@ -28,6 +28,7 @@ import json
 import hashlib
 import base64
 import socket
+import traceback
 
 from shinken.log import logger
 
@@ -68,6 +69,7 @@ class Stats(object):
         self.http_proxy = ''
         self.con = HTTPClient(uri='http://kernel.shinken.io')
         # then the statsd one
+        self.statsd_interval = 5
         self.statsd_sock = None
         self.statsd_addr = None
 
@@ -78,9 +80,15 @@ class Stats(object):
         self.reaper_thread.start()
 
 
+    def launch_harvester_thread(self):
+        self.harvester_thread = threading.Thread(None, target=self.harvester, name='stats-harvester')
+        self.harvester_thread.daemon = True
+        self.harvester_thread.start()
+
+
     def register(self, app, name, _type, api_key='', secret='', http_proxy='',
                  statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken',
-                 statsd_enabled=False):
+                 statsd_enabled=False, statsd_interval=5):
         self.app = app
         self.name = name
         self.type = _type
@@ -93,6 +101,7 @@ class Stats(object):
         self.statsd_port = statsd_port
         self.statsd_prefix = statsd_prefix
         self.statsd_enabled = statsd_enabled
+        self.statsd_interval = statsd_interval
 
         if self.statsd_enabled:
             logger.debug('Loading statsd communication with %s:%s.%s',
@@ -154,53 +163,111 @@ class Stats(object):
         return base64.urlsafe_b64encode(encrypted)
 
 
-
     def reaper(self):
         while True:
-            now = int(time.time())
-            stats = self.stats
-            self.stats = {}
+            try:
+                now = int(time.time())
+                stats = self.stats
+                self.stats = {}
 
-            if len(stats) != 0:
-                s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
-            # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
-            # to find the data after this
-            if not self.name or not self.api_key or not self.secret:
-                time.sleep(60)
-                continue
+                if len(stats) != 0:
+                    s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
+                # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
+                # to find the data after this
+                if not self.name or not self.api_key or not self.secret:
+                    time.sleep(60)
+                    continue
 
-            metrics = []
-            for (k, e) in stats.iteritems():
-                nk = '%s.%s.%s' % (self.type, self.name, k)
-                _min, _max, nb, _sum = e
-                _avg = float(_sum) / nb
-                # nb can't be 0 here and _min_max can't be None too
-                s = '%s.avg %f %d' % (nk, _avg, now)
-                metrics.append(s)
-                s = '%s.min %f %d' % (nk, _min, now)
-                metrics.append(s)
-                s = '%s.max %f %d' % (nk, _max, now)
-                metrics.append(s)
-                s = '%s.count %f %d' % (nk, nb, now)
-                metrics.append(s)
+                metrics = []
+                for (k, e) in stats.iteritems():
+                    nk = '%s.%s.%s' % (self.type, self.name, k)
+                    _min, _max, nb, _sum = e
+                    _avg = float(_sum) / nb
+                    # nb can't be 0 here and _min_max can't be None too
+                    s = '%s.avg %f %d' % (nk, _avg, now)
+                    metrics.append(s)
+                    s = '%s.min %f %d' % (nk, _min, now)
+                    metrics.append(s)
+                    s = '%s.max %f %d' % (nk, _max, now)
+                    metrics.append(s)
+                    s = '%s.count %f %d' % (nk, nb, now)
+                    metrics.append(s)
 
-            # logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
-            # get the inner data for the daemon
-            struct = self.app.get_stats_struct()
-            struct['metrics'].extend(metrics)
-            # logger.debug('REAPER whole struct %s' % struct)
-            j = json.dumps(struct)
-            if AES is not None and self.secret != '':
-                logger.debug('Stats PUT to kernel.shinken.io/api/v1/put/ with %s %s' % (
-                    self.api_key, self.secret))
+                # logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
+                # get the inner data for the daemon
+                struct = self.app.get_stats_struct()
+                struct['metrics'].extend(metrics)
+                # logger.debug('REAPER whole struct %s' % struct)
+                j = json.dumps(struct)
+                if AES is not None and self.secret != '':
+                    logger.debug('Stats PUT to kernel.shinken.io/api/v1/put/ with %s %s' % (
+                        self.api_key, self.secret))
 
-                # assume a %16 length messagexs
-                encrypted_text = self._encrypt(j)
-                try:
-                    r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
-                except HTTPException, exp:
-                    logger.error('Stats REAPER cannot put to the metric server %s' % exp)
+                    # assume a %16 length messagexs
+                    encrypted_text = self._encrypt(j)
+                    try:
+                        r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
+                    except HTTPException, exp:
+                        logger.error('Stats REAPER cannot put to the metric server %s' % exp)
+            except Exception, e:
+                logger.error(str(e))
+                logger.debug(traceback.format_exc())
             time.sleep(60)
+
+
+    def harvester(self):
+        while True:
+            try:
+                if not self.statsd_sock or not self.name or not self.app:
+                    time.sleep(self.statsd_interval)
+                    continue
+
+                # During daemon config load operation, some attributes may not
+                # have been initialized when we query stats_struct, so we
+                # ignore AttributeError.
+                try:
+                    struct = self.app.get_stats_struct()
+                except AttributeError:
+                    logger.debug("Waiting for daemon to initialize")
+                    time.sleep(self.statsd_interval)
+                    continue
+
+                packets = []
+                for metric in struct["metrics"]:
+                    name, val, _ = metric.split()
+                    # Mormalizs name
+                    parts = name.split(".")
+                    parts.pop(1)
+                    name = ".".join(parts)
+                    if "." in val:
+                        # Value is a float
+                        packets.append('%s.%s.%s:%f|g' % (
+                            self.statsd_prefix, self.name, name, float(val)))
+                    else:
+                        # Value is an integer
+                        packets.append('%s.%s.%s:%d|g' % (
+                            self.statsd_prefix, self.name, name, int(val)))
+
+                if "hosts" in struct:
+                    count = struct["hosts"]
+                    packets.append('%s.%s.%s.hosts:%d|g' % (
+                        self.statsd_prefix, self.name, struct["type"], count))
+
+                if "services" in struct:
+                    count = struct["services"]
+                    packets.append('%s.%s.%s.services:%d|g' % (
+                        self.statsd_prefix, self.name, struct["type"], count))
+
+                for packet in packets:
+                    try:
+                        self.statsd_sock.sendto(packet, self.statsd_addr)
+                    except (socket.error, socket.gaierror):
+                        pass  # cannot send? ok not a huge problem here and cannot
+                        # log because it will be far too verbose :p
+            except Exception, e:
+                logger.error(str(e))
+                logger.debug(traceback.format_exc())
+            time.sleep(self.statsd_interval)
 
 
 statsmgr = Stats()

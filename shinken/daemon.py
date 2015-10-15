@@ -638,7 +638,7 @@ class Daemon(object):
     # use_pyro= open the TCP port for communication
     # fake= use for test to do not launch runonly feature, like the stats reaper thread
     def do_daemon_init_and_start(self, use_pyro=True, fake=False):
-        self.change_to_workdir()        
+        self.change_to_workdir()
         self.change_to_user_group()
         self.check_parallel_run()
         if use_pyro:
@@ -671,6 +671,7 @@ class Daemon(object):
         # a test launch (time.time() is hooked and will do BIG problems there)
         if not fake:
             statsmgr.launch_reaper_thread()
+            statsmgr.launch_harvester_thread()
 
         # Now start the http_daemon thread
         self.http_thread = None

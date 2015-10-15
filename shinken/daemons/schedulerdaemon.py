@@ -361,12 +361,18 @@ class Shinken(BaseSatellite):
         statsd_port = pk['statsd_port']
         statsd_prefix = pk['statsd_prefix']
         statsd_enabled = pk['statsd_enabled']
+        statsd_interval = pk['statsd_interval']
 
         # horay, we got a name, we can set it in our stats objects
         statsmgr.register(self.sched, instance_name, 'scheduler',
-                          api_key=api_key, secret=secret, http_proxy=http_proxy,
-                          statsd_host=statsd_host, statsd_port=statsd_port,
-                          statsd_prefix=statsd_prefix, statsd_enabled=statsd_enabled)
+                          api_key=api_key,
+                          secret=secret,
+                          http_proxy=http_proxy,
+                          statsd_host=statsd_host,
+                          statsd_port=statsd_port,
+                          statsd_prefix=statsd_prefix,
+                          statsd_enabled=statsd_enabled,
+                          statsd_interval=statsd_interval)
 
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
