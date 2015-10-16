@@ -33,7 +33,7 @@ import base64
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
-from shinken.daemon import Daemon
+from shinken.daemon import Daemon, DEFAULT_LIB_DIR
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
@@ -214,6 +214,8 @@ class Shinken(BaseSatellite):
         'pidfile':   PathProp(default='schedulerd.pid'),
         'port':      IntegerProp(default=7768),
         'local_log': PathProp(default='schedulerd.log'),
+        'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'scheduler.conf.cache')),
+        'configuration_cache_load_delay': IntegerProp(default=0),
     })
 
     # Create the shinken class:
@@ -333,6 +335,30 @@ class Shinken(BaseSatellite):
             Daemon.manage_signal(self, sig, frame)
 
 
+    def check_for_configuration_cache_load(self):
+        now = int(time.time())
+        logger.error('check_for_configuration_cache_load::%s %s' % (self.program_start, now - self.configuration_cache_load_delay))
+        if self.program_start < now - self.configuration_cache_load_delay:
+            logger.debug('Try to look for configuration cache availability')
+            if not os.path.exists(self.configuration_cache_path):
+                logger.debug('Cannot load configuration cache as no file available at %s' % self.configuration_cache_path)
+                return
+            try:
+                f = open(self.configuration_cache_path, 'rb')
+                buf = f.read()
+                f.close()
+            except IOError, exp:
+                logger.error('Cannot read configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
+                return
+            try:
+                new_conf = cPickle.loads(buf)
+            except Exception, exp:
+                logger.error('Cannot unparse configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
+                return
+            self.new_conf = new_conf
+            logger.info('Configuration cache was loaded from file %s' % self.configuration_cache_path)
+
+
     def do_loop_turn(self):
         # Ok, now the conf
         self.wait_for_initial_conf()
@@ -345,6 +371,15 @@ class Shinken(BaseSatellite):
 
 
     def setup_new_conf(self):
+        # First save the new conf pickle as cache
+        cache_data = cPickle.dumps(self.new_conf)
+        try:
+            f = open(self.configuration_cache_path, 'wb')
+            f.write(cache_data)
+            f.close()
+            logger.info('Configuration cache was saved in the file %s' % self.configuration_cache_path)
+        except Exception, exp:
+            logger.error('Cannot save configuration cache at file %s:%s' % (self.configuration_cache_path, exp))
         pk = self.new_conf
         conf_raw = pk['conf']
         override_conf = pk['override_conf']
@@ -506,6 +541,7 @@ class Shinken(BaseSatellite):
             return {self.conf.instance_id: self.conf.push_flavor}
         else:
             return {}
+
 
     # our main function, launch after the init
     def main(self):

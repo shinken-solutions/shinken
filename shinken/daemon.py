@@ -1010,6 +1010,11 @@ class Daemon(object):
         logger.warning('A system time change of %s has been detected.  Compensating...', difference)
 
 
+    # Unless implemented, do nothing
+    def check_for_configuration_cache_load(self):
+        pass
+
+
     # Use to wait conf from arbiter.
     # It send us conf in our http_daemon. It put the have_conf prop
     # if he send us something
@@ -1027,6 +1032,8 @@ class Daemon(object):
                 cur_timeout = timeout
             sys.stdout.write(".")
             sys.stdout.flush()
+            # Look if it's time to load a configuration in cache
+            self.check_for_configuration_cache_load()
 
 
     # We call the function of modules that got the this
