@@ -22,7 +22,7 @@
 # This file is used to test reading and processing of config files
 #
 
-
+import os
 import subprocess
 from time import sleep
 
@@ -63,6 +63,7 @@ class testSchedulerInit(ShinkenTest):
         proc = getattr(self, 'arb_proc', None)
         if proc:
             self._get_subproc_data(proc)  # so to terminate / wait it..
+            print "HEHE", proc.__dict__
 
     def test_scheduler_init(self):
 
@@ -85,8 +86,11 @@ class testSchedulerInit(ShinkenTest):
             assert(fun in reg_list)
 
         # Launch an arbiter so that the scheduler get a conf and init
+        # notice: set this process master with preexec_fn=os.setsid so when we kill it
+        # it will also kill sons
         args = ["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
-        proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    preexec_fn=os.setsid)
 
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)

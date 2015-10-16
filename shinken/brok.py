@@ -23,7 +23,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import cPickle
-
+from shinken.safepickle import SafeUnpickler
 
 class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
@@ -51,7 +51,7 @@ class Brok:
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
         if hasattr(self, 'prepared') and not self.prepared:
-            self.data = cPickle.loads(self.data)
+            self.data = SafeUnpickler.loads(self.data)
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True

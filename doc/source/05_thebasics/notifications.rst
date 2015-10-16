@@ -106,6 +106,54 @@ DOWNTIMESTOP      The host or service has just exited from a period of :ref:`sch
 DOWNTIMECANCELLED The period of :ref:`scheduled downtime <advanced/downtime>` for the host or service was just cancelled. Notifications about problems can now resume.                                                                                                          
 ================= ====================================================================================================================================================================================================================================================================
 
+Detailled Notification Macros
+==============================
+
+Shinken introduces optional hosts and services macros that adds informations about which impacts have an object and what to do. That can be usefull when users that are notified, works for many customers and don't know very well every services. So that help users without knowledge to take a decision about it.
+
+There are 3 objects macros to add on host or service object definition :
+   - _DETAILLEDESC : provides detailled informations about monitored object.
+   - _IMPACT : describes impacts that will have on infrastructure and help to specify severity.
+   - _FIXACTIONS : How resolved the problem. Only available on service type objects.
+  
+::
+
+  define service{
+     service_description    Oracle-$KEY$-tnsping
+     use                    oracle-service
+     register               0
+     host_name              oracle
+     check_command          check_oracle_tnsping!$KEY$
+     duplicate_foreach      _databases
+     business_impact      5
+     aggregation            /oracle/$KEY$/connectivity
+  
+     _DETAILLEDESC          Ping Oracle Listener
+     _IMPACT                Critical: Can't network connect to database
+     _FIXACTIONS            Start listener !
+  }
+
+  define host{
+    host_name   hostA
+    use         generic_host
+
+    _DETAILLEDESC   This is control all the IT !!!
+    _IMPACT         Critical: Nothing can work without it !
+  }
+  
+
+Then all you got to do is to change notificationways of your contact to get detailled email notification, example :
+
+::
+
+  define contact{
+    contact_name                    hotline
+    use                             generic-contact
+    email                           hotline@corporation.com
+    can_submit_commands             1
+    notificationways                detailled-email
+  }
+
 
 Helpful Resources 
 ==================

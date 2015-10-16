@@ -345,11 +345,9 @@ class Receiver(Satellite):
 
         self.push_external_commands_to_schedulers()
 
-        # Maybe we do not have something to do, so we wait a little
-        if len(self.broks) == 0:
-            # print "watch new conf 1: begin", len(self.broks)
-            self.watch_for_new_conf(1.0)
-            # print "get enw broks watch new conf 1: end", len(self.broks)
+        # print "watch new conf 1: begin", len(self.broks)
+        self.watch_for_new_conf(1.0)
+        # print "get enw broks watch new conf 1: end", len(self.broks)
 
 
     #  Main function, will loop forever

@@ -28,7 +28,6 @@ import errno
 import time
 import socket
 import select
-import cPickle
 import inspect
 import json
 import zlib
@@ -58,9 +57,11 @@ except ImportError:
 
 from wsgiref import simple_server
 
+
 # load global helper objects for logs and stats computation
 from log import logger
 from shinken.stats import statsmgr
+from shinken.safepickle import SafeUnpickler
 
 # Let's load bottlecore! :)
 from shinken.webui import bottlecore as bottle
@@ -364,10 +365,11 @@ class HTTPDaemon(object):
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
-                                # Post args are zlibed and cPickled
+                                # Post args are zlibed and cPickled (but in
+                                # safemode)
                                 if v is not None:
                                     v = zlib.decompress(v)
-                                    v = cPickle.loads(v)
+                                    v = SafeUnpickler.loads(v)
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:

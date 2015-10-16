@@ -334,8 +334,8 @@ duplicate_foreach
   define host {
     host_name    linux-server
     ...
-    _partitions   var $(/var)$ root $(/)
-    _openvpns   vpn1  $(tun1)$$(10.8.0.1)$ vpn2 $(tun2)$$(192.168.3.254)$
+    _partitions   var $(/var)$, root $(/)$
+    _openvpns   vpn1 $(tun1)$$(10.8.0.1)$, vpn2 $(tun2)$$(192.168.3.254)$
     ...
   }
 
