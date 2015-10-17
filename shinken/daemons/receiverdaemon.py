@@ -39,7 +39,7 @@ from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 from shinken.http_client import HTTPExceptions
-from shinken.daemon import Interface
+from shinken.daemon import Interface, DEFAULT_LIB_DIR
 from shinken.stats import statsmgr
 
 class IStats(Interface):
@@ -76,6 +76,8 @@ class Receiver(Satellite):
         'pidfile':   PathProp(default='receiverd.pid'),
         'port':      IntegerProp(default=7773),
         'local_log': PathProp(default='receiverd.log'),
+        'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'receiver.conf.cache')),
+        'configuration_cache_load_delay': IntegerProp(default=0),
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):

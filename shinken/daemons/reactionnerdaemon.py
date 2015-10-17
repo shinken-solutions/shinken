@@ -36,6 +36,9 @@
 # The configuration consists of a list of Schedulers for which
 # the Reactionner will launch actions for.
 
+import os
+
+from shinken.daemon import DEFAULT_LIB_DIR
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 
@@ -50,6 +53,9 @@ class Reactionner(Satellite):
         'pidfile':   PathProp(default='reactionnerd.pid'),
         'port':      IntegerProp(default=7769),
         'local_log': PathProp(default='reactionnerd.log'),
+        'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'reactionner.conf.cache')),
+        'configuration_cache_load_delay': IntegerProp(default=0),
+
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):

@@ -22,6 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
+from shinken.daemon import DEFAULT_LIB_DIR
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 
@@ -37,6 +40,9 @@ class Poller(Satellite):
         'pidfile':   PathProp(default='pollerd.pid'),
         'port':      IntegerProp(default=7771),
         'local_log': PathProp(default='pollerd.log'),
+        'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'poller.conf.cache')),
+        'configuration_cache_load_delay': IntegerProp(default=0),
+
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile):

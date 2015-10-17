@@ -36,6 +36,7 @@ import cStringIO
 import logging
 import inspect
 from Queue import Empty
+import cPickle
 
 # Try to see if we are in an android device or not
 try:
@@ -1013,6 +1014,35 @@ class Daemon(object):
     # Unless implemented, do nothing
     def check_for_configuration_cache_load(self):
         pass
+
+
+    # Factorize daemon code
+    def do_check_for_configuration_cache_load(self):
+        # Maybe the configuration cache is disabled
+        if self.configuration_cache_load_delay == 0:
+            return
+        now = int(time.time())
+        logger.error('check_for_configuration_cache_load::%s %s' % (self.program_start, now - self.configuration_cache_load_delay))
+        if self.program_start < now - self.configuration_cache_load_delay:
+            logger.debug('Try to look for configuration cache availability')
+            if not os.path.exists(self.configuration_cache_path):
+                logger.debug('Cannot load configuration cache as no file available at %s' % self.configuration_cache_path)
+                return
+            try:
+                f = open(self.configuration_cache_path, 'rb')
+                buf = f.read()
+                f.close()
+            except IOError, exp:
+                logger.error('Cannot read configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
+                return
+            try:
+                new_conf = cPickle.loads(buf)
+            except Exception, exp:
+                logger.error('Cannot unparse configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
+                return
+            self.new_conf = new_conf
+            self.cur_conf = None
+            logger.info('Configuration cache was loaded from file %s' % self.configuration_cache_path)
 
 
     # Use to wait conf from arbiter.

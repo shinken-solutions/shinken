@@ -309,6 +309,10 @@ class Satellite(BaseSatellite):
         return r
 
 
+    def check_for_configuration_cache_load(self):
+        self.do_check_for_configuration_cache_load()
+
+
     # Initialize or re-initialize connection with scheduler """
     def do_pynag_con_init(self, id):
         sched = self.schedulers[id]
@@ -317,7 +321,7 @@ class Satellite(BaseSatellite):
         # it is just useless
         if not sched['active']:
             return
-
+        
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
@@ -913,6 +917,17 @@ class Satellite(BaseSatellite):
         logger.debug("[%s] Sending us a configuration %s", self.name, conf)
         self.new_conf = None
         self.cur_conf = conf
+
+        # First save the new conf pickle as cache
+        cache_data = cPickle.dumps(conf)
+        try:
+            f = open(self.configuration_cache_path, 'wb')
+            f.write(cache_data)
+            f.close()
+            logger.info('Configuration cache was saved in the file %s' % self.configuration_cache_path)
+        except Exception, exp:
+            logger.error('Cannot save configuration cache at file %s:%s' % (self.configuration_cache_path, exp))
+
         g_conf = conf['global']
 
         # Got our name from the globals

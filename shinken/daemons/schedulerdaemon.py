@@ -336,27 +336,7 @@ class Shinken(BaseSatellite):
 
 
     def check_for_configuration_cache_load(self):
-        now = int(time.time())
-        logger.error('check_for_configuration_cache_load::%s %s' % (self.program_start, now - self.configuration_cache_load_delay))
-        if self.program_start < now - self.configuration_cache_load_delay:
-            logger.debug('Try to look for configuration cache availability')
-            if not os.path.exists(self.configuration_cache_path):
-                logger.debug('Cannot load configuration cache as no file available at %s' % self.configuration_cache_path)
-                return
-            try:
-                f = open(self.configuration_cache_path, 'rb')
-                buf = f.read()
-                f.close()
-            except IOError, exp:
-                logger.error('Cannot read configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
-                return
-            try:
-                new_conf = cPickle.loads(buf)
-            except Exception, exp:
-                logger.error('Cannot unparse configuration file cache at %s: %s' % (self.configuration_cache_path, exp))
-                return
-            self.new_conf = new_conf
-            logger.info('Configuration cache was loaded from file %s' % self.configuration_cache_path)
+        self.do_check_for_configuration_cache_load()
 
 
     def do_loop_turn(self):

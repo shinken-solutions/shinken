@@ -39,7 +39,7 @@ from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
 from shinken.http_client import HTTPClient, HTTPExceptions
-from shinken.daemon import Daemon, Interface
+from shinken.daemon import Daemon, Interface, DEFAULT_LIB_DIR
 
 class IStats(Interface):
     """
@@ -70,6 +70,9 @@ class Broker(BaseSatellite):
         'pidfile':   PathProp(default='brokerd.pid'),
         'port':      IntegerProp(default=7772),
         'local_log': PathProp(default='brokerd.log'),
+        'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'broker.conf.cache')),
+        'configuration_cache_load_delay': IntegerProp(default=0),
+
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
@@ -175,6 +178,10 @@ class Broker(BaseSatellite):
         if now - last_connection < 5:
             return True
         return False
+
+
+    def check_for_configuration_cache_load(self):
+        self.do_check_for_configuration_cache_load()
 
 
     # wrapper function for the real function do_
@@ -387,6 +394,17 @@ class Broker(BaseSatellite):
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
+
+        # First save the new conf pickle as cache
+        cache_data = cPickle.dumps(conf)
+        try:
+            f = open(self.configuration_cache_path, 'wb')
+            f.write(cache_data)
+            f.close()
+            logger.info('Configuration cache was saved in the file %s' % self.configuration_cache_path)
+        except Exception, exp:
+            logger.error('Cannot save configuration cache at file %s:%s' % (self.configuration_cache_path, exp))
+
         # Got our name from the globals
         g_conf = conf['global']
         if 'broker_name' in g_conf:
