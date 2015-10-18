@@ -72,7 +72,6 @@ class Broker(BaseSatellite):
         'local_log': PathProp(default='brokerd.log'),
         'configuration_cache_path': PathProp(default=os.path.join(DEFAULT_LIB_DIR, 'broker.conf.cache')),
         'configuration_cache_load_delay': IntegerProp(default=0),
-
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file, profile=''):
