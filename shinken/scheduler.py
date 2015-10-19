@@ -1558,7 +1558,7 @@ class Scheduler(object):
         for s in ("scheduled", "inpoller", "zombie", "timeout",
                   "waitconsume", "waitdep", "havetoresolvedep"):
             metrics.append('scheduler.%s.checks.%s %d %d' %
-                        (self.instance_name, s,
+                           (self.instance_name, s,
                             len([c for c in self.checks.values() if c.status == s]),
                             now))
         metrics.append('scheduler.%s.actions.queue %d %d' %
