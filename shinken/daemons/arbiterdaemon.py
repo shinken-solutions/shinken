@@ -42,7 +42,7 @@ from shinken.stats import statsmgr
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.property import BoolProp
-from shinken.util import jsonify_r
+from shinken.util import jsonify_r, get_memory
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -240,12 +240,16 @@ class Arbiter(Daemon):
 
     # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
+        _type = self.__class__.my_type
         tabs = [self.conf.brokers, self.conf.schedulers,
                 self.conf.pollers, self.conf.reactionners,
                 self.conf.receivers]
         for tab in tabs:
             for s in tab:
+                _ttype =  tab.__class__.my_type
                 new_broks = s.get_all_broks()
+                statsmgr.incr('%s.broks.in.%s' % (_type, _ttype),
+                              len(new_broks))
                 for b in new_broks:
                     self.add(b)
 
@@ -511,7 +515,7 @@ class Arbiter(Daemon):
                     logger.error("Back trace of this remove: %s", output.getvalue())
                     output.close()
                     continue
-                statsmgr.incr('hook.get-objects', time.time() - _t)
+                statsmgr.timing('hook.get-objects', time.time() - _t)
                 types_creations = self.conf.types_creations
                 for k in types_creations:
                     (cls, clss, prop, dummy) = types_creations[k]
@@ -806,20 +810,20 @@ class Arbiter(Daemon):
             # Now the dispatcher job
             _t = time.time()
             self.dispatcher.check_alive()
-            statsmgr.incr('core.check-alive', time.time() - _t)
+            statsmgr.timing('core.check-alive', time.time() - _t)
 
             _t = time.time()
             self.dispatcher.check_dispatch()
-            statsmgr.incr('core.check-dispatch', time.time() - _t)
+            statsmgr.timing('core.check-dispatch', time.time() - _t)
 
             # REF: doc/shinken-conf-dispatching.png (3)
             _t = time.time()
             self.dispatcher.dispatch()
-            statsmgr.incr('core.dispatch', time.time() - _t)
+            statsmgr.timing('core.dispatch', time.time() - _t)
 
             _t = time.time()
             self.dispatcher.check_bad_dispatch()
-            statsmgr.incr('core.check-bad-dispatch', time.time() - _t)
+            statsmgr.timing('core.check-bad-dispatch', time.time() - _t)
 
             # Now get things from our module instances
             self.get_objects_from_from_queues()
@@ -840,7 +844,7 @@ class Arbiter(Daemon):
 
             _t = time.time()
             self.push_external_commands_to_schedulers()
-            statsmgr.incr('core.push-external-commands', time.time() - _t)
+            statsmgr.timing('core.push-external-commands', time.time() - _t)
 
             # It's sent, do not keep them
             # TODO: check if really sent. Queue by scheduler?
@@ -887,5 +891,7 @@ class Arbiter(Daemon):
         # metrics specific
         metrics.append('arbiter.%s.external-commands.queue %d %d' %
                        (self.me.get_name(), len(self.external_commands), now))
+        metrics.append('arbiter.%s.mem %d %d' % (self.me.get_name(),
+                                                 get_memory(), now))
 
         return res

@@ -43,7 +43,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
-from shinken.util import nighty_five_percent
+from shinken.util import nighty_five_percent, get_memory
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.stats import statsmgr
@@ -1639,6 +1639,8 @@ class Scheduler(object):
         # We must reset it if we received a new conf from the Arbiter.
         # Otherwise, the stat check average won't be correct
         self.nb_check_received = 0
+        if statsmgr.is_enabled():
+            mem_before = get_memory()
 
         self.load_one_min = Load(initial_value=1)
         logger.debug("First loop at %d", time.time())
@@ -1677,7 +1679,12 @@ class Scheduler(object):
                         # Call it and save the time spend in it
                         _t = time.time()
                         f()
-                        statsmgr.incr('loop.%s' % name, time.time() - _t)
+                        statsmgr.timing('loop.%s' % name, time.time() - _t)
+                # Getting memory has a cost, do not cellect it if not needed
+                if statsmgr.is_enabled():
+                    mem_after = get_memory()
+                    statsmgr.incr('loop.%s.mem' % name, mem_after - mem_before)
+                    mem_before = mem_after
 
             # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
@@ -1723,6 +1730,9 @@ class Scheduler(object):
                 self.dump_config()
                 self.need_objects_dump = False
 
+            # Getting memory has a cost, do not cellect it if not needed
+            if statsmgr.is_enabled():
+                statsmgr.gauge('scheduler.mem', get_memory())
 
 
         # WE must save the retention at the quit BY OURSELF

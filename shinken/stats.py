@@ -112,6 +112,23 @@ class Stats(object):
         self.con.set_proxy(self.http_proxy)
 
 
+    # Tells whether statsd is enabled and stats should be sent
+    def is_statsd_enabled(self):
+        return (self.statsd_sock is not None and
+                self.name and
+                self.app is not None)
+
+
+    # Tells whether kernel.status.io exporter is enabled
+    def is_shinkenio_enabled(self):
+        return (self.name and self.api_key and self.secret)
+
+
+    # Tells whether internal stats should be gatherred
+    def is_enabled(self):
+        return self.is_statsd_enabled() or self.is_shinkenio_enabled()
+
+
     # Let be crystal clear about why I don't use the statsd lib in python: it's crappy.
     # how guys did you fuck this up to this point? django by default for the conf?? really?...
     # So raw socket are far better here
@@ -124,8 +141,18 @@ class Stats(object):
             return
 
 
-    # Will increment a stat key, if None, start at 0
-    def incr(self, k, v):
+    # Sends a metric to statsd daemon
+    def send_metric(self, packet):
+        try:
+            self.statsd_sock.sendto(packet, self.statsd_addr)
+        except (socket.error, socket.gaierror):
+            # cannot send? ok not a huge problem here and cannot
+            # log because it will be far too verbose :p
+            self.load_statsd()
+
+
+    # Updates internal stats for sending to kernel.shinken.io
+    def update_internal_stats(self, k, v):
         _min, _max, nb, _sum = self.stats.get(k, (None, None, 0, 0))
         nb += 1
         _sum += v
@@ -135,15 +162,30 @@ class Stats(object):
             _max = v
         self.stats[k] = (_min, _max, nb, _sum)
 
-        # Manage local statd part
+
+    # Will increment a counter key
+    def incr(self, k, v):
         if self.statsd_sock and self.name:
+            self.update_internal_stats(k, v)
+            packet = '%s.%s.%s:%d|c' % (self.statsd_prefix, self.name, k, v)
+            self.send_metric(packet)
+
+
+    # Will send a gauge value
+    def gauge(self, k, v):
+        if self.statsd_sock and self.name:
+            self.update_internal_stats(k, v)
+            packet = '%s.%s.%s:%d|g' % (self.statsd_prefix, self.name, k, v)
+            self.send_metric(packet)
+
+
+    # Will increment a timer key, if None, start at 0
+    def timing(self, k, v):
+        if self.statsd_sock and self.name:
+            self.update_internal_stats(k, v)
             # beware, we are sending ms here, v is in s
             packet = '%s.%s.%s:%d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
-            try:
-                self.statsd_sock.sendto(packet, self.statsd_addr)
-            except (socket.error, socket.gaierror), exp:
-                pass  # cannot send? ok not a huge problem here and cannot
-                # log because it will be far too verbose :p
+            self.send_metric(packet)
 
 
     def _encrypt(self, data):
@@ -174,7 +216,7 @@ class Stats(object):
                     s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
                 # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
                 # to find the data after this
-                if not self.name or not self.api_key or not self.secret:
+                if not self.is_shinkenio_enabled():
                     time.sleep(60)
                     continue
 
@@ -218,7 +260,7 @@ class Stats(object):
     def harvester(self):
         while True:
             try:
-                if not self.statsd_sock or not self.name or not self.app:
+                if not self.is_enabled():
                     time.sleep(self.statsd_interval)
                     continue
 
@@ -228,7 +270,6 @@ class Stats(object):
                 try:
                     struct = self.app.get_stats_struct()
                 except AttributeError:
-                    logger.debug("Waiting for daemon to initialize")
                     time.sleep(self.statsd_interval)
                     continue
 
@@ -259,11 +300,7 @@ class Stats(object):
                         self.statsd_prefix, self.name, struct["type"], count))
 
                 for packet in packets:
-                    try:
-                        self.statsd_sock.sendto(packet, self.statsd_addr)
-                    except (socket.error, socket.gaierror):
-                        pass  # cannot send? ok not a huge problem here and cannot
-                        # log because it will be far too verbose :p
+                    self.send_metric(packet)
             except Exception, e:
                 logger.error(str(e))
                 logger.debug(traceback.format_exc())

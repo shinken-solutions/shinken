@@ -1044,7 +1044,7 @@ class Daemon(object):
                     logger.warning('The instance %s raised an exception %s. I disabled it,'
                                    'and set it to restart later', inst.get_name(), str(exp))
                     self.modules_manager.set_to_restart(inst)
-        statsmgr.incr('core.hook.%s' % hook_name, time.time() - _t)
+        statsmgr.timing('core.hook.%s' % hook_name, time.time() - _t)
 
 
     # Dummy function for daemons. Get all retention data

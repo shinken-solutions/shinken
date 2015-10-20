@@ -66,6 +66,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
+from shinken.util import get_memory
 from shinken.stats import statsmgr
 
 
@@ -305,7 +306,7 @@ class Satellite(BaseSatellite):
     def pynag_con_init(self, id):
         _t = time.time()
         r = self.do_pynag_con_init(id)
-        statsmgr.incr('con-init.scheduler', time.time() - _t)
+        statsmgr.timing('con-init.scheduler', time.time() - _t)
         return r
 
 
@@ -400,7 +401,7 @@ class Satellite(BaseSatellite):
     def manage_returns(self):
         _t = time.time()
         r = self.do_manage_returns()
-        statsmgr.incr('core.manage-returns', time.time() - _t)
+        statsmgr.timing('core.manage-returns', time.time() - _t)
         return r
 
 
@@ -549,6 +550,8 @@ class Satellite(BaseSatellite):
 
     # Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
+        _type = self.__class__.my_type
+        statsmgr.incr('%s.broks.out' % (_type), len(self.broks))
         res = copy.copy(self.broks)
         self.broks.clear()
         return res
@@ -663,6 +666,8 @@ class Satellite(BaseSatellite):
 
     # Add a list of actions to our queues
     def add_actions(self, lst, sched_id):
+        _type = self.__class__.my_type
+        statsmgr.incr('%s.new-actions' % (_type), len(lst))
         for a in lst:
             # First we look if we do not already have it, if so
             # do nothing, we are already working!
@@ -687,7 +692,7 @@ class Satellite(BaseSatellite):
     def get_new_actions(self):
         _t = time.time()
         self.do_get_new_actions()
-        statsmgr.incr('core.get-new-actions', time.time() - _t)
+        statsmgr.timing('core.get-new-actions', time.time() - _t)
 
 
     # We get new actions from schedulers, we create a Message and we
@@ -821,7 +826,7 @@ class Satellite(BaseSatellite):
                                  sched_id, sched['name'], mod,
                                  i, q.qsize(), self.get_returns_queue_len())
                     # also update the stats module
-                    statsmgr.incr('core.worker-%s.queue-size' % mod, q.qsize())
+                    statsmgr.gauge('core.worker-%s.queue-size' % mod, q.qsize())
 
         # Before return or get new actions, see how we manage
         # old ones: are they still in queue (s)? If True, we
@@ -842,14 +847,14 @@ class Satellite(BaseSatellite):
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
         logger.debug("Wait ratio: %f", wait_ratio)
-        statsmgr.incr('core.wait-ratio', wait_ratio)
+        statsmgr.timing('core.wait-ratio', wait_ratio)
 
         # We can wait more than 1s if needed,
         # no more than 5s, but no less than 1
         timeout = self.timeout * wait_ratio
         timeout = max(self.polling_interval, timeout)
         self.timeout = min(5 * self.polling_interval, timeout)
-        statsmgr.incr('core.timeout', wait_ratio)
+        statsmgr.timing('core.timeout', wait_ratio)
 
         # Maybe we do not have enough workers, we check for it
         # and launch the new ones if needed
@@ -1070,7 +1075,14 @@ class Satellite(BaseSatellite):
         # metrics specific
         metrics.append('%s.%s.external-commands.queue %d %d' % (
             _type, self.name, len(self.external_commands), now))
-
+        # Arbiter name is not defined under the same attribute as other
+        # services other services. Arbiter metrics are managed in arbiter
+        # itself.
+        if _type != "arbiter":
+            metrics.append('%s.%s.mem %d %d' %
+                           (_type, self.name, get_memory(), now))
+            metrics.append('%s.%s.broks.queue %d %d' %
+                           (_type, self.name, len(self.broks), now))
         return res
 
 

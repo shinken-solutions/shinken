@@ -415,14 +415,8 @@ class Receiver(Satellite):
 
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
-        now = int(time.time())
         # call the daemon one
         res = super(Receiver, self).get_stats_struct()
         res.update({'name': self.name, 'type': 'receiver',
                     'direct_routing': self.direct_routing})
-        metrics = res['metrics']
-        # metrics specific
-        metrics.append('receiver.%s.external-commands.queue %d %d' % (
-            self.name, len(self.external_commands), now))
-
         return res

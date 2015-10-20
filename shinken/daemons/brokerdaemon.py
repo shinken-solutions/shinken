@@ -182,7 +182,7 @@ class Broker(BaseSatellite):
     def pynag_con_init(self, id, type='scheduler'):
         _t = time.time()
         r = self.do_pynag_con_init(id, type)
-        statsmgr.incr('con-init.%s' % type, time.time() - _t)
+        statsmgr.timing('con-init.%s' % type, time.time() - _t)
         return r
 
 
@@ -645,16 +645,11 @@ class Broker(BaseSatellite):
 
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
-        now = int(time.time())
         # call the daemon one
         res = super(Broker, self).get_stats_struct()
         res.update({'name': self.name, 'type': 'broker'})
-        metrics = res['metrics']
-        # metrics specific
-        metrics.append('broker.%s.external-commands.queue %d %d' % (
-            self.name, len(self.external_commands), now))
-        metrics.append('broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now))
-
+        res['hosts'] = len(self.conf.hosts)
+        res['services'] = len(self.conf.services)
         return res
 
 
@@ -705,7 +700,7 @@ class Broker(BaseSatellite):
             _t = time.time()
             # And from schedulers
             self.get_new_broks(type=_type)
-            statsmgr.incr('get-new-broks.%s' % _type, time.time() - _t)
+            statsmgr.timing('get-new-broks.%s' % _type, time.time() - _t)
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)
@@ -738,7 +733,7 @@ class Broker(BaseSatellite):
         # No more need to send them
         for b in to_send:
             b.need_send_to_ext = False
-        statsmgr.incr('core.put-to-external-queue', time.time() - t0)
+        statsmgr.timing('core.put-to-external-queue', time.time() - t0)
         logger.debug("Time to send %s broks (%d secs)", len(to_send), time.time() - t0)
 
         # We must had new broks at the end of the list, so we reverse the list
@@ -759,7 +754,7 @@ class Broker(BaseSatellite):
             b.prepare()
             _t = time.time()
             self.manage_brok(b)
-            statsmgr.incr('core.manage-brok', time.time() - _t)
+            statsmgr.timing('core.manage-brok', time.time() - _t)
 
             nb_broks = len(self.broks)
 
