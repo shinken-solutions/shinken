@@ -229,7 +229,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('webui_host', '0.0.0.0'),
 
         ('use_multiprocesses_serializer', False),
-        ('daemon_thread_pool_size', 8),
+        ('daemon_thread_pool_size', 16),
         ('enable_environment_macros', True),
         ('timeout_exit_status', 2),
 
@@ -527,7 +527,8 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('parents', []),
         ('hostgroups', []),
         ('check_command', '_internal_host_up'),
-        ('initial_state', 'u'),
+        ('initial_state', ''),
+        ('initial_output', ''),
         ('check_interval', 0),
         ('max_check_attempts', 1),
         ('retry_interval', 0),
@@ -591,8 +592,8 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['d','u']),
-        ('business_rule_host_notification_options', ['']),
-        ('business_rule_service_notification_options', ['']),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ])
 
     def setUp(self):
@@ -835,7 +836,8 @@ class TestService(PropertiesTester, ShinkenTest):
         ('display_name', ''),
         ('servicegroups', []),
         ('is_volatile', False),
-        ('initial_state', 'o'),
+        ('initial_state', ''),
+        ('initial_output', ''),
         ('active_checks_enabled', True),
         ('passive_checks_enabled', True),
         ('obsess_over_service', False),
@@ -894,8 +896,8 @@ class TestService(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['w','c','u']),
-        ('business_rule_host_notification_options', None),
-        ('business_rule_service_notification_options', None),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ('host_dependency_enabled', True),
         ])
 

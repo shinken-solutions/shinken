@@ -185,3 +185,4 @@ If you want to try out a non-traditional method of notification, you might want 
 .. _Network Audio System (NAS): http://radscan.com/nas
 .. _QuickPage: http://www.qpage.org/
 .. _Sendpage: http://www.sendpage.org/
+.. _SMSEagle: http://www.smseagle.eu/shinken.php

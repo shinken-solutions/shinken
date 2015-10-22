@@ -563,15 +563,15 @@ def get_key_value_sequence(entry, default_value=None):
 
     # match a key$(value1..n)$
     keyval_pattern_txt = r"""
-\s*(?P<key>[^,]+?)(?P<values>(\$\(.*?\)\$)*)(?:[,]|$)
+\s*(?P<key>[^,]+?)(?P<values>(\s*\$\(.*?\)\$\s*)*)(?:[,]|$)
 """
     keyval_pattern = re.compile('(?x)' + keyval_pattern_txt)
     # match a whole sequence of key$(value1..n)$
     all_keyval_pattern = re.compile('(?x)^(' + keyval_pattern_txt + ')+$')
     # match a single value
-    value_pattern = re.compile('(?:\$\((?P<val>.*?)\)\$)')
+    value_pattern = re.compile('(?:\s*\$\((?P<val>.*?)\)\$\s*)')
     # match a sequence of values
-    all_value_pattern = re.compile('^(?:\$\(.*?\)\$)+$')
+    all_value_pattern = re.compile('^(?:\s*\$\(.*?\)\$\s*)+$')
 
     if all_keyval_pattern.match(conf_entry):
         for mat in re.finditer(keyval_pattern, conf_entry):
@@ -804,9 +804,9 @@ def filter_service_by_regex_name(regex):
 def filter_service_by_host_name(host_name):
 
     def inner_filter(service):
-        if service is None or service.host is None:
+        if service is None:
             return False
-        return service.host.host_name == host_name
+        return service.host_name == host_name
 
     return inner_filter
 
@@ -815,9 +815,9 @@ def filter_service_by_regex_host_name(regex):
     host_re = re.compile(regex)
 
     def inner_filter(service):
-        if service is None or service.host is None:
+        if service is None:
             return False
-        return host_re.match(service.host.host_name) is not None
+        return host_re.match(service.host_name) is not None
 
     return inner_filter
 
@@ -886,3 +886,13 @@ def is_complex_expr(expr):
         if m in expr:
             return True
     return False
+
+
+def get_exclude_match_expr(pattern):
+    if pattern == "*":
+        return lambda d: True
+    elif pattern.startswith("r:"):
+        reg = re.compile(pattern[2:])
+        return reg.match
+    else:
+        return lambda d: d == pattern

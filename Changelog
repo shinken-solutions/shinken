@@ -2,6 +2,34 @@
 Shinken ChangeLog
 ########################
 
+2.4.2 - 01/10/2015
+-------------------
+        CORE ENHANCEMENT
+        Add: Service excludes/includes/overrides extension
+        Add: Implementation of inital_state
+        Add: Broks when host/service downtime is scheduled
+        Add: Solaris SMF manifests
+        Enh: Allow white space between foreach elements
+        Enh: Increase default http thread_pool to 16
+
+        CORE FIXES
+        Fix: Duplicate Service from template using duplicate_foreach with the same name
+        Fix: Service_(includes|excludes) template recursion
+        Fix: Service description with multi level inheritance 
+        Fix: Default business rule notification options
+
+2.4.1 - 15/07/2015
+-------------------
+        CORE ENHANCEMENT
+        Add: Safe Pickle
+        Add: Better Debian 8 Jessie support
+
+        CORE FIXES
+        Fix: Display_name when using duplicate_foreach
+        Fix: template definition loop did segfault python
+        Fix: Service Description inheritance when using several level of inheritance
+        Fix: cpu looping for receiver
+
 2.4   - 04/05/2015
 -------------------
 	CORE ENHANCEMENT

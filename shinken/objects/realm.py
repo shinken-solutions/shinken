@@ -231,7 +231,8 @@ class Realm(Itemgroup):
         self.count_receivers()
         self.fill_potential_satellites_by_type('receivers')
 
-        s = "%s: (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
+        s = "%s: (in/potential) (schedulers:%d) (pollers:%d/%d) "\
+            "(reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
             (self.get_name(),
              len(self.schedulers),
              self.nb_pollers, len(self.potential_pollers),
