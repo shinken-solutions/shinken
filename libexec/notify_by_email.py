@@ -132,7 +132,7 @@ def create_mail(format):
     msg['To'] = opts.receivers
     logging.debug('Subject: %s' % (get_mail_subject(opts.notification_object)))
     msg['Subject'] = get_mail_subject(opts.notification_object)
-    
+
     return msg
 
 #############################################################################
@@ -145,7 +145,7 @@ def create_txt_message(msg):
     for k,v in sorted(shinken_var.iteritems()):
         txt_content.append(k + ': ' + v)
 
-    
+
     # Add url at the end
     url = get_shinken_url()
     if url != None:
@@ -157,7 +157,7 @@ def create_txt_message(msg):
     msg.attach(msgText)
 
     return msg
-    
+
 #############################################################################
 # Html creation lair
 #############################################################################
@@ -227,8 +227,9 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></
     html_content = '\r\n'.join(html_content)
     html_msg = html_content.encode(sys.stdout.encoding)
 
+
     logging.debug('HTML string: %s' % html_msg)
-    
+
     msgText = MIMEText(html_msg, 'html')
     logging.debug('MIMEText: %s' % msgText)
     msg.attach(msgText)
@@ -250,7 +251,7 @@ if __name__ == "__main__":
                       action='store_true', help='Generate a test mail message')
     group_general.add_option('-w', '--webui', dest='webui', default=False,
                       action='store_true', help='Include link to the problem in Shinken WebUI.')
-    group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'], 
+    group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'],
                       default='html', help='Mail format "html" or "txt". Default: html')
     group_debug.add_option('-l', '--logfile', dest='logfile',
                       help='Specify a log file. Default: log to stdout.')
@@ -270,16 +271,16 @@ if __name__ == "__main__":
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. Default: localhost')
-    
+
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
     parser.add_option_group(group_shinken)
     parser.add_option_group(group_shinken_details)
 
     (opts, args) = parser.parse_args()
-    
+
     setup_logging()
-    
+
     # Check and process arguments
     #
     # Retrieve and setup shinken macros that make the mail content
@@ -300,22 +301,22 @@ if __name__ == "__main__":
         }
 
     if opts.objectmacros == None:
-        shinken_notification_object_var = { 
+        shinken_notification_object_var = {
             'service': {
                 'Service description': os.getenv('NAGIOS_SERVICEDESC'),
                 'Service state': os.getenv('NAGIOS_SERVICESTATE'),
                 'Service output': os.getenv('NAGIOS_SERVICEOUTPUT'),
-                'Service duration': os.getenv('NAGIOS_SERVICEDURATION') 
+                'Service duration': os.getenv('NAGIOS_SERVICEDURATION')
             },
             'host': {
-                'Host state': os.getenv('NAGIOS_HOSTSTATE'), 
-                'Host duration': os.getenv('NAGIOS_HOSTDURATION') 
+                'Host state': os.getenv('NAGIOS_HOSTSTATE'),
+                'Host duration': os.getenv('NAGIOS_HOSTDURATION')
             }
         }
     else:
         macros = opts.objectmacros.split(',,')
         if opts.notification_object == 'service':
-            shinken_notification_object_var = { 
+            shinken_notification_object_var = {
                 'service': {
                     'Service description': macros[0],
                     'Service state': macros[1],
@@ -323,13 +324,13 @@ if __name__ == "__main__":
                     'Service duration': macros[3]
                 },
                 'host': {
-                    'Host state': '', 
-                    'Host duration': '' 
+                    'Host state': '',
+                    'Host duration': ''
             }
 
             }
         else:
-            shinken_notification_object_var = { 
+            shinken_notification_object_var = {
                  'service': {
                     'Service description': '',
                     'Service state': '',
@@ -337,7 +338,7 @@ if __name__ == "__main__":
                     'Service duration': ''
                 },'host': {
                     'Host state': macros[0],
-                    'Host duration': macros[1] 
+                    'Host duration': macros[1]
                 }
             }
 
@@ -352,8 +353,8 @@ if __name__ == "__main__":
     else:
         contactemail = opts.receivers
 
-    
-    
+
+
     if opts.detailleddesc:
         shinken_var['Detailled description'] = opts.detailleddesc.decode(sys.stdin.encoding)
     if opts.impact:
@@ -362,7 +363,7 @@ if __name__ == "__main__":
         shinken_var['Fix actions'] = opts.fixaction.decode(sys.stdin.encoding)
 
     receivers = make_receivers_list(opts.receivers)
-    
+
     logging.debug('Create mail skeleton')
     mail = create_mail(opts.format)
     logging.debug('Create %s mail content' % (opts.format))
