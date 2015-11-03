@@ -29,6 +29,13 @@ Text mail
 
 Despite the nice HTML formatting, you still prefer to use plain old text mail, use the `` -f text`` parameter instead of ``if html``.
 
+Mail sender
+~~~~~~~~~~~~~~~~~~~~
+
+Default mail sender is built automatically with current server name and current Shinken user.
+
+If you want to specif the mail sender, use the ``-s (--sender)``. For example: ``-s me@myserver.com``.
+
 
 Add an header logo
 ~~~~~~~~~~~~~~~~~~~~
