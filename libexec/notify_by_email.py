@@ -92,8 +92,11 @@ def get_shinken_url():
 
 # Get current process user that will be the mail sender
 def get_user():
-    return '@'.join((getpass.getuser(), socket.gethostname()))
-    
+    if opts.sender:
+        return opts.sender
+    else:
+        return '@'.join((getpass.getuser(), socket.gethostname()))
+
 
 #############################################################################
 # Common mail functions and var
@@ -271,6 +274,8 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
     group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
+    group_general.add_option('-s', '--sender', dest='sender',
+                      help='Mail sender (From:)')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
@@ -352,7 +357,7 @@ if __name__ == "__main__":
 
     # check required arguments
     if opts.receivers == None:
-        logging.error('You must defined a mail recipient using -r')
+        logging.error('You must define at least one mail recipient using -r')
         sys.exit(5)
     else:
         contactemail = opts.receivers
