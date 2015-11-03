@@ -389,6 +389,9 @@ class Arbiter(Daemon):
         # applying dependencies
         self.conf.apply_dependencies()
 
+        # sets objects initial state
+        self.conf.set_initial_state()
+
         # Hacking some global parameters inherited from Nagios to create
         # on the fly some Broker modules like for status.dat parameters
         # or nagios.log one if there are none already available

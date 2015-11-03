@@ -48,6 +48,8 @@ from shinken.property import BoolProp, IntegerProp, FloatProp,\
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
+from shinken.util import filter_service_by_regex_name
+from shinken.util import filter_service_by_host_name
 
 
 class Service(SchedulingItem):
@@ -88,7 +90,9 @@ class Service(SchedulingItem):
         'check_command':
             StringProp(fill_brok=['full_status']),
         'initial_state':
-            CharProp(default='o', fill_brok=['full_status']),
+            CharProp(default='', fill_brok=['full_status']),
+        'initial_output':
+            StringProp(default='', fill_brok=['full_status']),
         'max_check_attempts':
             IntegerProp(default=1, fill_brok=['full_status']),
         'check_interval':
@@ -195,9 +199,9 @@ class Service(SchedulingItem):
             BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
         'business_rule_host_notification_options':
-            ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+            ListProp(default=[], fill_brok=['full_status'], split_on_coma=True),
         'business_rule_service_notification_options':
-            ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+            ListProp(default=[], fill_brok=['full_status'], split_on_coma=True),
 
         # Easy Service dep definition
         'service_dependencies':  # TODO: find a way to brok it?
@@ -603,6 +607,36 @@ class Service(SchedulingItem):
 
     def get_service_tags(self):
         return self.tags
+
+    def is_duplicate(self):
+        """
+        Indicates if a service holds a duplicate_foreach statement
+        """
+        if getattr(self, "duplicate_foreach", None):
+            return True
+        else:
+            return False
+
+    def set_initial_state(self):
+        mapping = {
+            "o": {
+                "state": "OK",
+                "state_id": 0
+            },
+            "w": {
+                "state": "WARNING",
+                "state_id": 1
+            },
+            "c": {
+                "state": "CRITICAL",
+                "state_id": 2
+            },
+            "u": {
+                "state": "UNKNOWN",
+                "state_id": 3
+            },
+        }
+        SchedulingItem.set_initial_state(self, mapping)
 
     # Check is required prop are set:
     # template are always correct
@@ -1260,11 +1294,6 @@ class Services(Items):
     name_property = 'unique_key'  # only used by (un)indexitem (via 'name_property')
     inner_class = Service  # use for know what is in items
 
-    def __init__(self, items, index_items=True):
-        self.partial_services = {}
-        self.name_to_partial = {}
-        super(Services, self).__init__(items, index_items)
-
     def add_template(self, tpl):
         """
         Adds and index a template into the `templates` container.
@@ -1285,7 +1314,7 @@ class Services(Items):
             tpl = self.index_template(tpl)
         self.templates[tpl.id] = tpl
 
-    def add_item(self, item, index=True, was_partial=False):
+    def add_item(self, item, index=True):
         """
         Adds and index an item into the `items` container.
 
@@ -1304,51 +1333,23 @@ class Services(Items):
             in_file = " in %s" % source
         else:
             in_file = ""
-        if not hname and not hgname and not sdesc:
+        if not hname and not hgname:
             mesg = "a %s has been defined without host_name nor " \
-                   "hostgroups nor service_description%s" % (objcls, in_file)
+                   "hostgroups%s" % (objcls, in_file)
             item.configuration_errors.append(mesg)
-        elif not sdesc or sdesc and not hgname and not hname and not was_partial:
-            self.add_partial_service(item, index, (objcls, hname, hgname, sdesc, in_file))
-            return
-
         if index is True:
-            item = self.index_item(item)
+            if hname and sdesc:
+                item = self.index_item(item)
+            else:
+                mesg = "a %s has been defined without host_name nor " \
+                    "service_description%s" % (objcls, in_file)
+                item.configuration_errors.append(mesg)
+                return
         self.items[item.id] = item
-
-    def add_partial_service(self, item, index=True, var_tuple=None):
-        if var_tuple is None:
-            return
-
-        objcls, hname, hgname, sdesc, in_file = var_tuple
-        use = getattr(item, 'use', [])
-
-
-        if use == []:
-            mesg = "a %s has been defined without host_name nor " \
-                   "hostgroups nor service_description and " \
-                   "there is no use to create a unique key%s" % (objcls, in_file)
-            item.configuration_errors.append(mesg)
-            return
-
-        use = ','.join(use)
-        if sdesc:
-            name = "::".join((sdesc, use))
-        elif hname:
-            name = "::".join((hname, use))
-        else:
-            name = "::".join((hgname, use))
-
-        if name in self.name_to_partial:
-            item = self.manage_conflict(item, name, partial=True)
-        self.name_to_partial[name] = item
-
-        self.partial_services[item.id] = item
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
@@ -1368,21 +1369,13 @@ class Services(Items):
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             i.get_customs_properties_by_inheritance(0)
-
-        for i in self.partial_services.itervalues():
-            self.add_item(i, True, True)
-
-        del self.partial_services
-        del self.name_to_partial
 
 
     def linkify_templates(self):
         # First we create a list of all templates
         for i in itertools.chain(self.items.itervalues(),
-                                 self.partial_services.itervalues(),
                                  self.templates.itervalues()):
             self.linkify_item_templates(i)
         for i in self:
@@ -1448,15 +1441,6 @@ class Services(Items):
                     host.configuration_errors.append(err)
                     continue
                 sdescr, prop, value = match.groups()
-                # Looks for corresponding service
-                service = self.find_srv_by_name_and_hostname(
-                    getattr(host, "host_name", ""),  sdescr
-                )
-                if service is None:
-                    err = "Error: trying to override property '%s' on service '%s' " \
-                          "but it's unknown for this host" % (prop, sdescr)
-                    host.configuration_errors.append(err)
-                    continue
                 # Checks if override is allowed
                 excludes = ['host_name', 'service_description', 'use',
                             'servicegroups', 'trigger', 'trigger_name']
@@ -1465,9 +1449,37 @@ class Services(Items):
                           (prop, sdescr)
                     host.configuration_errors.append(err)
                     continue
+                # Looks for corresponding services
+                services = self.get_ovr_services_from_expression(host, sdescr)
+                if not services:
+                    err = "Error: trying to override property '%s' on " \
+                          "service identified by '%s' " \
+                          "but it's unknown for this host" % (prop, sdescr)
+                    host.configuration_errors.append(err)
+                    continue
+                value = Service.properties[prop].pythonize(value)
+                for service in services:
+                    # Pythonize the value because here value is str.
+                    setattr(service, prop, value)
 
-                # Pythonize the value because here value is str.
-                setattr(service, prop, service.properties[prop].pythonize(value))
+    def get_ovr_services_from_expression(self, host, sdesc):
+        hostname = getattr(host, "host_name", "")
+        if sdesc == "*":
+            filters = [filter_service_by_host_name(hostname)]
+            return self.find_by_filter(filters)
+        elif sdesc.startswith("r:"):
+            pattern = sdesc[2:]
+            filters = [
+                filter_service_by_host_name(hostname),
+                filter_service_by_regex_name(pattern)
+            ]
+            return self.find_by_filter(filters)
+        else:
+            svc = self.find_srv_by_name_and_hostname(hostname,  sdesc)
+            if svc is not None:
+                return [svc]
+            else:
+                return []
 
 
     # We can link services with hosts so
@@ -1554,6 +1566,14 @@ class Services(Items):
             s.fill_daddy_dependency()
 
 
+    def set_initial_state(self):
+        """
+        Sets services initial state if required in configuration
+        """
+        for s in self:
+            s.set_initial_state()
+
+
     # For services the main clean is about service with bad hosts
     def clean(self):
         to_del = []
@@ -1627,7 +1647,10 @@ class Services(Items):
         new_s = service.copy()
         new_s.host_name = host_name
         new_s.register = 1
-        self.add_item(new_s)
+        if new_s.is_duplicate():
+            self.add_item(new_s, index=False)
+        else:
+            self.add_item(new_s)
         return new_s
 
 
@@ -1666,7 +1689,6 @@ class Services(Items):
         :param s:       The service to explode
         :type s:        Service
         """
-
         hname = getattr(s, "host_name", None)
         if hname is None:
             return
@@ -1754,11 +1776,21 @@ class Services(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
+        for t in self.templates.values():
+            self.explode_contact_groups_into_contacts(t, contactgroups)
+            self.explode_services_from_templates(hosts, t)
+
+        # Explode services that have a duplicate_foreach clause
+        duplicates = [s.id for s in self if s.is_duplicate()]
+        for id in duplicates:
+            s = self.items[id]
+            self.explode_services_duplicates(hosts, s)
+            if not s.configuration_errors:
+                self.remove_item(s)
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        for id in self.items.keys():
-            s = self.items[id]
+        for s in self.items.values():
             # items::explode_host_groups_into_hosts
             # take all hosts from our hostgroup_name into our host_name property
             self.explode_host_groups_into_hosts(s, hosts, hostgroups)
@@ -1780,19 +1812,6 @@ class Services(Items):
                 # Delete expanded source service
                 if not s.configuration_errors:
                     self.remove_item(s)
-
-        for id in self.templates.keys():
-            t = self.templates[id]
-            self.explode_contact_groups_into_contacts(t, contactgroups)
-            self.explode_services_from_templates(hosts, t)
-
-        # Explode services that have a duplicate_foreach clause
-        duplicates = [s.id for s in self if getattr(s, 'duplicate_foreach', '')]
-        for id in duplicates:
-            s = self.items[id]
-            self.explode_services_duplicates(hosts, s)
-            if not s.configuration_errors:
-                self.remove_item(s)
 
         to_remove = []
         for service in self:

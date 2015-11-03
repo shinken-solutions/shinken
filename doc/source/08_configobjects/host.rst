@@ -27,6 +27,7 @@ parents                                    *host_names*
 hostgroups                                 *hostgroup_names*
 check_command                              *command_name*
 initial_state                              [o,d,u]
+initial_output                             *output*
 **max_check_attempts**                     **#**
 check_interval                             #
 retry_interval                             #
@@ -148,7 +149,10 @@ check_command
   This directive is used to specify the *short name* of the :ref:`command <configobjects/command>` that should be used to check if the host is up or down. Typically, this command would try and ping the host to see if it is "alive". The command must return a status of OK (0) or Shinken will assume the host is down. If you leave this argument blank, the host will *not* be actively checked. Thus, Shinken will likely always assume the host is up (it may show up as being in a "PENDING" state in the web interface). This is useful if you are monitoring printers or other devices that are frequently turned off. The maximum amount of time that the notification command can run is controlled by the :ref:`host_check_timeout <configuration/configmain#host_check_timeout>` option.
 
 initial_state
-  By default Shinken will assume that all hosts are in UP states when in starts. You can override the initial state for a host by using this directive. Valid options are: **o** = UP, **d** = DOWN, and **u** = UNREACHABLE.
+  By default Shinken will assume that all hosts are in PENDING state when in starts. You can override the initial state for a host by using this directive. Valid options are: **o** = UP, **d** = DOWN, and **u** = UNREACHABLE.
+
+initial_output
+  As of the initial state, the initial check output may also be overridden by this directive.
 
 max_check_attempts
   This directive is used to define the number of times that Shinken will retry the host check command if it returns any state other than an OK state. Setting this value to 1 will cause Shinken to generate an alert without retrying the host check again.
