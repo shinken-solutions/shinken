@@ -225,7 +225,11 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></
     # Make final string var to send and encode it to stdout encoding
     # avoiding decoding error.
     html_content = '\r\n'.join(html_content)
-    html_msg = html_content.encode(sys.stdout.encoding)
+    try:
+        html_msg = html_content.encode(sys.stdout.encoding)
+    except UnicodeDecodeError as e:
+        logging.debug('Content is Unicode encoded.')
+        html_msg = html_content.decode('utf-8').encode(sys.stdout.encoding)
 
 
     logging.debug('HTML string: %s' % html_msg)
