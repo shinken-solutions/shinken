@@ -185,17 +185,17 @@ def create_html_message(msg):
 
     # Header part
     html_content = ['''<html><head>\r
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style type="text/css">body {text-align: center; font-family: Verdana, sans-serif; font-size: 10pt;}\r
-img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\r
-span {font-family: Verdana, sans-serif; font-size: 12pt;}\r
-table {text-align:center; margin-left: auto; margin-right: auto;}\r
-th {white-space: nowrap;}\r
-th.even {background-color: #D9D9D9;}\r
-td.even {background-color: #F2F2F2;}\r
-th.odd {background-color: #F2F2F2;}\r
-td.odd {background-color: #FFFFFF;}\r
-th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
-th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></head><body>\r''']
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style type="text/css">body {text-align: center; font-family: Verdana, sans-serif; font-size: 10pt;}\r
+        img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\r
+        span {font-family: Verdana, sans-serif; font-size: 12pt;}\r
+        table {text-align:center; margin-left: auto; margin-right: auto;}\r
+        th {white-space: nowrap;}\r
+        th.even {background-color: #D9D9D9;}\r
+        td.even {background-color: #F2F2F2;}\r
+        th.odd {background-color: #F2F2F2;}\r
+        td.odd {background-color: #FFFFFF;}\r
+        th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
+        th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></head><body>\r''']
     
     full_logo_path = os.path.join(shinken_image_dir, shinken_customer_logo)
     if os.path.isfile(full_logo_path):
