@@ -36,6 +36,8 @@ shinken_image_dir = '/var/lib/shinken/share/images'
 shinken_customer_logo = 'customer_logo.jpg'
 webui_config_file = '/etc/shinken/modules/webui.cfg'
 
+webui2_config_file = '/etc/shinken/modules/webui2.cfg'
+webui2_image_dir = '/var/lib/shinken/share/photos'
 
 # Set up root logging
 def setup_logging():
@@ -70,19 +72,72 @@ def overload_test_variable():
     }
     return (shinken_notification_object_var, shinken_var)
 
+def get_webui_logo():
+    company_logo=''
+
+    try:
+        webui_config_fh = open(webui2_config_file)
+    except IOError:
+        # WebUI2 not installed ...
+        full_logo_path = os.path.join(shinken_image_dir, shinken_customer_logo)
+        if os.path.isfile(full_logo_path):
+            return full_logo_path
+
+    if opts.webui:
+        # WebUI2 installed
+        logging.debug('Webui2 is installed')
+        webui_config = webui_config_fh.readlines()
+        for line in webui_config:
+            if 'company_logo' in line:
+                company_logo = line.rsplit('company_logo')[1].strip()
+                company_logo += '.png'
+        logging.debug('Found company logo property: %s', company_logo)
+        if company_logo:
+            full_logo_path = os.path.join(webui2_image_dir, company_logo)
+            if os.path.isfile(full_logo_path):
+                logging.debug('Found company logo file: %s', full_logo_path)
+                return full_logo_path
+            else:
+                logging.debug('File %s does not exist!', full_logo_path)
+                return ''
+
+    return company_logo
+
 def get_webui_port():
-    webui_config_fh = open(webui_config_file)
+    port=''
+
+    try:
+        webui_config_fh = open(webui2_config_file)
+    except IOError:
+        # WebUI2 not installed, try WebUI1
+        try:
+            webui_config_fh = open(webui_config_file)
+        except IOError:
+            # No WebUI
+            return ''
+        else:
+            # WebUI1 installed
+            logging.debug('Webui1 is installed')
+    else:
+        # WebUI2 installed
+        logging.debug('Webui2 is installed')
+
+    logging.debug('Webui file handler: %s' % (webui_config_fh))
     webui_config = webui_config_fh.readlines()
+    logging.debug('Webui config: %s' % (webui_config))
     for line in webui_config:
         if 'port' in line:
-            port = line.rsplit('port')[1]
-    return port.strip()
+            port = line.rsplit('port')[1].strip()
+    return port
 
 def get_shinken_url():
     if opts.webui:
         hostname = socket.gethostname()
         webui_port = get_webui_port()
-        url = 'http://%s:%s/%s/%s' % (hostname, webui_port, opts.notification_object, urllib.quote(shinken_var['Hostname']))
+        if opts.webui_url:
+            url = '%s/%s/%s' % (opts.webui_url, opts.notification_object, urllib.quote(shinken_var['Hostname']))
+        else:
+            url = 'http://%s:%s/%s/%s' % (hostname, webui_port, opts.notification_object, urllib.quote(shinken_var['Hostname']))
 
         # Append service if we notify a service object
         if opts.notification_object == 'service':
@@ -196,9 +251,9 @@ def create_html_message(msg):
         td.odd {background-color: #FFFFFF;}\r
         th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
         th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></head><body>\r''']
-    
-    full_logo_path = os.path.join(shinken_image_dir, shinken_customer_logo)
-    if os.path.isfile(full_logo_path):
+
+    full_logo_path = get_webui_logo()
+    if full_logo_path:
         msg = add_image2mail(full_logo_path, msg)
         html_content.append('<img src="cid:customer_logo">')
         html_content.append('<table width="600px"><tr><th colspan="2"><span>%s</span></th></tr>' % mail_welcome)
@@ -258,6 +313,8 @@ if __name__ == "__main__":
                       action='store_true', help='Generate a test mail message')
     group_general.add_option('-w', '--webui', dest='webui', default=False,
                       action='store_true', help='Include link to the problem in Shinken WebUI.')
+    group_general.add_option('-u', '--url', dest='webui_url',
+                      help='WebUI URL as http://my_webui:port/url')
     group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'],
                       default='html', help='Mail format "html" or "txt". Default: html')
     group_debug.add_option('-l', '--logfile', dest='logfile',
