@@ -126,9 +126,9 @@ def create_mail(format):
     # It has to be multipart since we can include an image in it.
     logging.debug('Mail format: %s' % (format))
     msg = mail_format[format]
-    logging.debug('From: %s' % (get_user()))
-    msg['From'] = get_user()
-    logging.debug('To: %s' % (opts.receivers))
+    logging.debug('From: %s' % opts.smtpfrom)
+    msg['From'] = opts.smtpfrom
+    logging.debug('To: %s' % opts.receivers)
     msg['To'] = opts.receivers
     logging.debug('Subject: %s' % (get_mail_subject(opts.notification_object)))
     msg['Subject'] = get_mail_subject(opts.notification_object)
@@ -270,6 +270,8 @@ if __name__ == "__main__":
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
+    group_general.add_option('-F', '--From', dest='smtpfrom', default=get_user(),
+                      help='From mail, default : current_user@hostanme')
 
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
