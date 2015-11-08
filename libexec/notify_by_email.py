@@ -269,8 +269,8 @@ if __name__ == "__main__":
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
-                      help='Target SMTP hostname. Default: localhost')
-    
+                      help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
+
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
     parser.add_option_group(group_shinken)
@@ -371,8 +371,20 @@ if __name__ == "__main__":
     elif opts.format == 'txt':
         mail = create_txt_message(mail)
 
-    logging.debug('Connect to %s smtp server' % (opts.smtp))
-    smtp = smtplib.SMTP(opts.smtp)
-    logging.debug('Send the mail')
-    smtp.sendmail(get_user(), receivers, mail.as_string())
-    logging.info("Mail sent successfuly")
+    if opts.smtp != 'None':
+        logging.debug('Connect to %s smtp server' % (opts.smtp))
+        smtp = smtplib.SMTP(opts.smtp)
+        logging.debug('Send the mail')
+        smtp.sendmail(opts.smtpfrom, receivers, mail.as_string())
+        logging.info("Mail sent successfuly")
+    else:
+        sendmail = '/usr/sbin/sendmail'
+        logging.debug('Send the mail')
+        p = os.popen('/usr/sbin/sendmail -t' , 'w')
+        logging.debug('Final mail : ' + mail.as_string())
+        p.write(mail.as_string())
+        status = p.close()
+        if status is not None:
+            logging.error("Sendmail returned %s" % status)
+        else:
+            logging.info("Mail sent successfuly")
