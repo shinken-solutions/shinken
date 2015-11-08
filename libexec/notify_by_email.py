@@ -382,7 +382,7 @@ if __name__ == "__main__":
     else:
         sendmail = '/usr/sbin/sendmail'
         logging.debug('Send the mail')
-        p = os.popen('/usr/sbin/sendmail -t' , 'w')
+        p = os.popen('%s -t' % sendmail, 'w')
         logging.debug('Final mail : ' + mail.as_string())
         p.write(mail.as_string())
         status = p.close()
