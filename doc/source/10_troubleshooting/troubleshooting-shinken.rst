@@ -26,9 +26,9 @@ Frequently asked questions
 ---------------------------
 
   * :ref:`How to set my daemons in debug mode to review the logs? <troubleshooting/troubleshooting-shinken#FAQ-1>`
-  * :ref:`I am getting an OSError read-only filesystem <troubleshooting/troubleshooting-shinken#FAQ-4>`
-  * :ref:`I am getting an OSError [Errno 24] Too many open files <troubleshooting/troubleshooting-shinken#FAQ-5>`
-  * :ref:`Notification emails have generic-host instead of host_name <troubleshooting/troubleshooting-shinken#FAQ-6>`
+  * :ref:`I am getting an OSError read-only filesystem <troubleshooting/troubleshooting-shinken#FAQ-3>`
+  * :ref:`I am getting an OSError [Errno 24] Too many open files <troubleshooting/troubleshooting-shinken#FAQ-4>`
+  * :ref:`Notification emails have generic-host instead of host_name <troubleshooting/troubleshooting-shinken#FAQ-5>`
 
 
 
@@ -92,16 +92,6 @@ The log file will contain information on the Shinken process and any problems th
 
 .. _troubleshooting/troubleshooting-shinken#FAQ-2:
 
-Changing the log level during runtime
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-shinken-admin is a command line script that can change the logging level of a running daemon.
-
-''linux-server# ./shinken-admin ...''
-
-
-.. _troubleshooting/troubleshooting-shinken#FAQ-3:
-
 Changing the log level in the configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -112,7 +102,7 @@ Possible values: DEBUG,INFO,WARNING,ERROR,CRITICAL
 Re-start the Shinken process.
 
 
-.. _troubleshooting/troubleshooting-shinken#FAQ-4:
+.. _troubleshooting/troubleshooting-shinken#FAQ-3:
 
 OSError read-only filesystem error
 ----------------------------------
@@ -125,7 +115,7 @@ Execute a 'mount' and verify if /tmp or /tmpfs is set to 'ro' (Read-only).
 As root modify your /etc/fstab to set the filesystem to read-write.
 
 
-.. _troubleshooting/troubleshooting-shinken#FAQ-5:
+.. _troubleshooting/troubleshooting-shinken#FAQ-4:
 
 OSError too many files open
 ---------------------------
@@ -146,7 +136,7 @@ This typically changing a system wide file limit and potentially user specific f
 ulimit -n xxxxx now
 
 
-.. _troubleshooting/troubleshooting-shinken#FAQ-6:
+.. _troubleshooting/troubleshooting-shinken#FAQ-5:
 
 Notification emails have generic-host instead of host_name
 ----------------------------------------------------------
