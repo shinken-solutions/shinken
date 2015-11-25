@@ -209,6 +209,13 @@ class __Action(object):
         # we should not keep the process now
         del self.process
 
+        # check if process was signaled #11 (SIGSEGV) 
+        if self.exit_status == -11:
+            self.stderrdata += " signaled #11 (SIGSEGV)"
+        # If abnormal termination of check and no error data, set at least exit status info as error information
+        if not self.stderrdata.strip() and self.exit_status not in valid_exit_status:
+            self.stderrdata += "Abnormal termination with code: %r" % (self.exit_status, )
+            
         if (  # check for bad syntax in command line:
             'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
             or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
