@@ -34,8 +34,6 @@ class Sampler(object):
         stack = ';'.join(reversed(stack))
 
         self._stack_counts[stack] += 1
-        #print "STACK", stack,self._stack_counts[stack], self.nb_sig
-        #signal.setitimer(signal.ITIMER_REAL, self.interval, 0)
 
 
     def _format_frame(self, frame):
@@ -60,4 +58,3 @@ class Sampler(object):
 
 
 profiler = Sampler()
-
