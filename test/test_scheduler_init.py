@@ -89,6 +89,7 @@ class testSchedulerInit(ShinkenTest):
         # notice: set this process master with preexec_fn=os.setsid so when we kill it
         # it will also kill sons
         args = ["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
+        print "Launching sub arbiter with", args
         proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     preexec_fn=os.setsid)
 
