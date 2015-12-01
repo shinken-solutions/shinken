@@ -91,8 +91,12 @@ def get_shinken_url():
         return url
 
 # Get current process user that will be the mail sender
+# Can be overridden by sender argument
 def get_user():
-    return '@'.join((getpass.getuser(), socket.gethostname()))
+    if opts.sender:
+        return opts.sender
+    else:
+        return '@'.join((getpass.getuser(), socket.gethostname()))
     
 
 #############################################################################
@@ -264,6 +268,8 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_shinken_details.add_option('-a', '--action', dest='fixaction',
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
+    group_general.add_option('-s', '--sender', dest='sender',
+                      help='Specify email sender address. Default: user@host')
     group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
