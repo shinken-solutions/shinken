@@ -92,7 +92,10 @@ def get_shinken_url():
 
 # Get current process user that will be the mail sender
 def get_user():
-    return '@'.join((getpass.getuser(), socket.gethostname()))
+    if opts.sender:
+      return opts.sender
+    else:
+      return '@'.join((getpass.getuser(), socket.gethostname()))
     
 
 #############################################################################
@@ -266,6 +269,8 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
     group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
+    group_general.add_option('-F', '--sender', dest='sender',
+                      help='Sender email address, default is system user')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
