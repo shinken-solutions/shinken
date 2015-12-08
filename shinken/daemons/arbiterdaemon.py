@@ -240,15 +240,14 @@ class Arbiter(Daemon):
 
     # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
-        _type = self.__class__.my_type
         tabs = [self.conf.brokers, self.conf.schedulers,
                 self.conf.pollers, self.conf.reactionners,
                 self.conf.receivers]
         for tab in tabs:
             for s in tab:
-                _ttype =  tab.__class__.my_type
                 new_broks = s.get_all_broks()
-                statsmgr.incr('%s.broks.in.%s' % (_type, _ttype),
+                _type = s.my_type
+                statsmgr.incr('arbiter.broks.in.%s' % _type,
                               len(new_broks))
                 for b in new_broks:
                     self.add(b)
@@ -885,10 +884,14 @@ class Arbiter(Daemon):
         # call the daemon one
         res = super(Arbiter, self).get_stats_struct()
         res.update({'name': self.me.get_name(), 'type': 'arbiter'})
-        res['hosts'] = len(self.conf.hosts)
-        res['services'] = len(self.conf.services)
+
+        # Managed objects
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            res[t] = len(getattr(self.conf, t))
+
+        # Metrics specific
         metrics = res['metrics']
-        # metrics specific
         metrics.append('arbiter.%s.external-commands.queue %d %d' %
                        (self.me.get_name(), len(self.external_commands), now))
         metrics.append('arbiter.%s.mem %d %d' % (self.me.get_name(),

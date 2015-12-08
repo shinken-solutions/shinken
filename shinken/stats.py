@@ -289,15 +289,14 @@ class Stats(object):
                         packets.append('%s.%s.%s:%d|g' % (
                             self.statsd_prefix, self.name, name, int(val)))
 
-                if "hosts" in struct:
-                    count = struct["hosts"]
-                    packets.append('%s.%s.%s.hosts:%d|g' % (
-                        self.statsd_prefix, self.name, struct["type"], count))
-
-                if "services" in struct:
-                    count = struct["services"]
-                    packets.append('%s.%s.%s.services:%d|g' % (
-                        self.statsd_prefix, self.name, struct["type"], count))
+                for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                          "services", "servicegroups", "commands"):
+                    if t in struct:
+                        c = struct[t]
+                        p = self.statsd_prefix
+                        n = self.name
+                        s = struct["type"]
+                        packets.append('%s.%s.%s.%s:%d|g' % (p, n, s, t, c))
 
                 for packet in packets:
                     self.send_metric(packet)

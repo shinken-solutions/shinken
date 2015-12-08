@@ -1549,8 +1549,11 @@ class Scheduler(object):
         if lat_avg:
             res['latency'] = {'avg': lat_avg, 'min': lat_min, 'max': lat_max}
 
-        res['hosts'] = len(self.hosts)
-        res['services'] = len(self.services)
+        # Managed objects
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            res[t] = len(getattr(self, t))
+
         # metrics specific
         metrics = res['metrics']
         metrics.append('scheduler.%s.checks.queue %d %d' %
