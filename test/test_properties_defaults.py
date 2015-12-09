@@ -244,6 +244,8 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('statsd_prefix', 'shinken'),
         ('statsd_enabled', False),
         ('statsd_interval', 5),
+        ('statsd_types', None),
+        ('statsd_pattern', None),
         ])
 
     def setUp(self):

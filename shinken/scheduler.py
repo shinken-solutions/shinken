@@ -1533,6 +1533,41 @@ class Scheduler(object):
         return self.sched_daemon.get_objects_from_from_queues()
 
 
+    # Gets internal metrics for both statsd and
+    def get_internal_metrics(self):
+        # Queues
+        metrics = [
+            ('core.scheduler.mem', get_memory(), 'system'),
+            ('core.scheduler.checks.queue', len(self.checks), 'queue'),
+            ('core.scheduler.actions.queue', len(self.actions), 'queue'),
+            ('core.scheduler.broks.queue', len(self.broks), 'queue'),
+            ('core.scheduler.downtimes.queue', len(self.downtimes), 'queue'),
+            ('core.scheduler.comments.queue', len(self.comments), 'queue'),
+        ]
+
+        # Queues
+        for s in ("scheduled", "inpoller", "zombie", "timeout",
+                  "waitconsume", "waitdep", "havetoresolvedep"):
+            count = len([c for c in self.checks.values() if c.status == s])
+            metrics.append(('core.scheduler.checks.%s' % s, count, 'queue'))
+
+        # Latency
+        latencies = [s.latency for s in self.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        if lat_min:
+            metrics.append(('core.scheduler.latency.min', lat_min, 'queue'))
+            metrics.append(('core.scheduler.latency.avg', lat_avg, 'queue'))
+            metrics.append(('core.scheduler.latency.max', lat_max, 'queue'))
+
+        # Objects
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            count = len(getattr(self, t))
+            metrics.append(('core.scheduler.%s' % t, count, 'object'))
+
+        return metrics
+
+
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
@@ -1550,33 +1585,16 @@ class Scheduler(object):
             res['latency'] = {'avg': lat_avg, 'min': lat_min, 'max': lat_max}
 
         # Managed objects
+        res["objects"] = {}
         for t in ("contacts", "contactgroups", "hosts", "hostgroups",
                   "services", "servicegroups", "commands"):
-            res[t] = len(getattr(self, t))
+            res["objects"][t] = len(getattr(self, t))
 
         # metrics specific
         metrics = res['metrics']
-        metrics.append('scheduler.%s.checks.queue %d %d' %
-                       (self.instance_name, len(self.checks), now))
-        for s in ("scheduled", "inpoller", "zombie", "timeout",
-                  "waitconsume", "waitdep", "havetoresolvedep"):
-            metrics.append('scheduler.%s.checks.%s %d %d' %
-                           (self.instance_name, s,
-                            len([c for c in self.checks.values() if c.status == s]),
-                            now))
-        metrics.append('scheduler.%s.actions.queue %d %d' %
-                       (self.instance_name,
-                        len(self.actions), now))
-        metrics.append('scheduler.%s.broks.queue %d %d' %
-                       (self.instance_name, len(self.broks), now))
-        metrics.append('scheduler.%s.downtimes %d %d' %
-                       (self.instance_name, len(self.downtimes), now))
-        metrics.append('scheduler.%s.comments %d %d' %
-                       (self.instance_name, len(self.comments), now))
-        if lat_min:
-            metrics.append('scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now))
-            metrics.append('scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now))
-            metrics.append('scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now))
+        for metric in self.get_internal_metrics():
+            name, value, mtype = metric
+            metrics.append(name, value, now, mtype)
 
         all_commands = {}
         # compute some stats
@@ -1642,8 +1660,6 @@ class Scheduler(object):
         # We must reset it if we received a new conf from the Arbiter.
         # Otherwise, the stat check average won't be correct
         self.nb_check_received = 0
-        if statsmgr.is_enabled():
-            mem_before = get_memory()
 
         self.load_one_min = Load(initial_value=1)
         logger.debug("First loop at %d", time.time())
@@ -1682,12 +1698,8 @@ class Scheduler(object):
                         # Call it and save the time spend in it
                         _t = time.time()
                         f()
-                        statsmgr.timing('loop.%s' % name, time.time() - _t)
+                        statsmgr.timing('loop.scheduler.%s' % name, time.time() - _t, 'perf')
                 # Getting memory has a cost, do not cellect it if not needed
-                if statsmgr.is_enabled():
-                    mem_after = get_memory()
-                    statsmgr.incr('loop.%s.mem' % name, mem_after - mem_before)
-                    mem_before = mem_after
 
             # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
@@ -1732,11 +1744,6 @@ class Scheduler(object):
                 self.dump_objects()
                 self.dump_config()
                 self.need_objects_dump = False
-
-            # Getting memory has a cost, do not cellect it if not needed
-            if statsmgr.is_enabled():
-                statsmgr.gauge('scheduler.mem', get_memory())
-
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

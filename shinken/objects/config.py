@@ -657,6 +657,16 @@ class Config(Item):
                         class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                        (BrokerLink, None), (PollerLink, None),
                                        (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_types':
+            StringProp(default=None,
+                       class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                      (BrokerLink, None), (PollerLink, None),
+                                      (ReceiverLink, None),  (ArbiterLink, None)]),
+        'statsd_pattern':
+            StringProp(default=None,
+                       class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                      (BrokerLink, None), (PollerLink, None),
+                                      (ReceiverLink, None),  (ArbiterLink, None)]),
     }
 
     macros = {

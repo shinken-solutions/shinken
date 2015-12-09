@@ -247,8 +247,8 @@ class Arbiter(Daemon):
             for s in tab:
                 new_broks = s.get_all_broks()
                 _type = s.my_type
-                statsmgr.incr('arbiter.broks.in.%s' % _type,
-                              len(new_broks))
+                statsmgr.incr('core.arbiter.broks.in.%s' % _type,
+                              len(new_broks), 'queue')
                 for b in new_broks:
                     self.add(b)
 
@@ -308,12 +308,16 @@ class Arbiter(Daemon):
                 statsd_interval = getattr(self.conf, 'statsd_interval', 5)
                 statsd_prefix = getattr(self.conf, 'statsd_prefix', 'shinken')
                 statsd_enabled = getattr(self.conf, 'statsd_enabled', False)
+                statsd_types = getattr(self.conf, 'statsd_types', None)
+                statsd_pattern = getattr(self.conf, 'statsd_pattern', '')
                 statsmgr.register(self, arb.get_name(), 'arbiter',
                                   api_key=api_key, secret=secret, http_proxy=http_proxy,
                                   statsd_host=statsd_host, statsd_port=statsd_port,
                                   statsd_prefix=statsd_prefix,
                                   statsd_enabled=statsd_enabled,
-                                  statsd_interval=statsd_interval)
+                                  statsd_interval=statsd_interval,
+                                  statsd_types=statsd_types,
+                                  statsd_pattern=statsd_pattern)
 
                 # Set myself as alive ;)
                 self.me.alive = True
@@ -514,7 +518,7 @@ class Arbiter(Daemon):
                     logger.error("Back trace of this remove: %s", output.getvalue())
                     output.close()
                     continue
-                statsmgr.timing('hook.get-objects', time.time() - _t)
+                statsmgr.timing('hook.get-objects', time.time() - _t, 'perf')
                 types_creations = self.conf.types_creations
                 for k in types_creations:
                     (cls, clss, prop, dummy) = types_creations[k]
@@ -809,20 +813,20 @@ class Arbiter(Daemon):
             # Now the dispatcher job
             _t = time.time()
             self.dispatcher.check_alive()
-            statsmgr.timing('core.check-alive', time.time() - _t)
+            statsmgr.timing('core.arbiter.check-alive', time.time() - _t, 'perf')
 
             _t = time.time()
             self.dispatcher.check_dispatch()
-            statsmgr.timing('core.check-dispatch', time.time() - _t)
+            statsmgr.timing('core.arbiter.check-dispatch', time.time() - _t, 'perf')
 
             # REF: doc/shinken-conf-dispatching.png (3)
             _t = time.time()
             self.dispatcher.dispatch()
-            statsmgr.timing('core.dispatch', time.time() - _t)
+            statsmgr.timing('core.arbiter.dispatch', time.time() - _t, 'perf')
 
             _t = time.time()
             self.dispatcher.check_bad_dispatch()
-            statsmgr.timing('core.check-bad-dispatch', time.time() - _t)
+            statsmgr.timing('core.arbiter.check-bad-dispatch', time.time() - _t, 'perf')
 
             # Now get things from our module instances
             self.get_objects_from_from_queues()
@@ -843,7 +847,8 @@ class Arbiter(Daemon):
 
             _t = time.time()
             self.push_external_commands_to_schedulers()
-            statsmgr.timing('core.push-external-commands', time.time() - _t)
+            statsmgr.timing('core.arbiter.push-external-commands', time.time() - _t,
+                            'perf')
 
             # It's sent, do not keep them
             # TODO: check if really sent. Queue by scheduler?
@@ -878,6 +883,23 @@ class Arbiter(Daemon):
         self.external_commands.extend(external_commands)
 
 
+    # Gets internal metrics for both statsd and
+    def get_internal_metrics(self):
+        # Queues
+        metrics = [
+            ('core.arbiter.mem', get_memory(), 'system'),
+            ('core.arbiter.external-commands.queue',
+             len(self.external_commands), 'queue'),
+            ('core.arbiter.broks.queue', len(self.broks), 'queue'),
+        ]
+        # Objects
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            count = len(getattr(self.conf, t))
+            metrics.append(('core.arbiter.%s' % t, count, 'object'))
+        return metrics
+
+
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
@@ -886,15 +908,15 @@ class Arbiter(Daemon):
         res.update({'name': self.me.get_name(), 'type': 'arbiter'})
 
         # Managed objects
+        res["objects"] = {}
         for t in ("contacts", "contactgroups", "hosts", "hostgroups",
                   "services", "servicegroups", "commands"):
-            res[t] = len(getattr(self.conf, t))
+            res["objects"][t] = len(getattr(self.conf, t))
 
         # Metrics specific
         metrics = res['metrics']
-        metrics.append('arbiter.%s.external-commands.queue %d %d' %
-                       (self.me.get_name(), len(self.external_commands), now))
-        metrics.append('arbiter.%s.mem %d %d' % (self.me.get_name(),
-                                                 get_memory(), now))
+        for metric in self.get_internal_metrics():
+            name, value, mtype = metric
+            metrics.append(name, value, now, mtype)
 
         return res

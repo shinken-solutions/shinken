@@ -1381,6 +1381,7 @@ Example:
 
 This is the api_key/scret to exchange with shinken.io and especially the kernel.shinken.io service that will print your shinken metrics. To enable it you must fill the api_key and secret parameters. You must register to http://shinken.io and look at your profile http://shinken.io/~ for your api_key and your secret.
 
+.. _configuration/configmain-advanced#statsd:
 
 Statsd host
 -----------------------------
@@ -1455,27 +1456,60 @@ Example:
 Enable or not the statsd communication. By default it's disabled.
 
 
-
-Statsd polling interval
------------------------------
+Statsd metrics polling interval
+-------------------------------
 
 Format:
 
 ::
 
-  statsd_interval=10
+  statsd_interval=<int>
 
 Example:
 
 ::
 
-  statsd_interval=10
+  statsd_interval=5
 
 Metrics such as internal queues length (checks, broks), number of elements in
 the configuration, latency and so on...may also be exposed via statsd at the
 interval specified in this parameter.
 
 
+Statsd metric name pattern
+-----------------------------
+
+Format:
+
+::
+
+  statsd_pattern=<string>
+
+Example:
+
+::
+
+  statsd_interval=shinken.{name}.{metric}
+
+Allows to customize metric names using a pattern string. Each metric has a base name which may be enriched using placeholders under the python `format` python string notation. The available placeholders are `service` (the service type), `metric` (the metric name) and `name` (the service name). Note that this parameter is mutually exclusive with `statsd_prefix` and has precedence if both are defined.
+
+
+Statsd metrics filter
+-----------------------------
+
+Format:
+
+::
+
+  statsd_types=<string>
+
+Example:
+
+::
+
+  statsd_types=system,queue,object,perf
+
+Allows to filter the metrics to send to statsd. Each metric is attached a type, and only the metrics holding the specifed types will be sent. See the metrics complete descriptions to see the available types.
 
 
 .. _Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html

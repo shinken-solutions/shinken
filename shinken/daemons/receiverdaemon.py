@@ -185,6 +185,8 @@ class Receiver(Satellite):
         self.statsd_prefix = conf['global']['statsd_prefix']
         self.statsd_enabled = conf['global']['statsd_enabled']
         self.statsd_interval = conf['global']['statsd_interval']
+        self.statsd_types = conf['global']['statsd_types']
+        self.statsd_pattern = conf['global']['statsd_pattern']
 
         statsmgr.register(self, self.name, 'receiver',
                           api_key=self.api_key,
@@ -194,7 +196,9 @@ class Receiver(Satellite):
                           statsd_port=self.statsd_port,
                           statsd_prefix=self.statsd_prefix,
                           statsd_enabled=self.statsd_enabled,
-                          statsd_interval=self.statsd_interval)
+                          statsd_interval=self.statsd_interval,
+                          statsd_types=self.statsd_types,
+                          statsd_pattern=self.statsd_pattern)
         logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
         self.accept_passive_unknown_check_results = \

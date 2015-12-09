@@ -70,25 +70,31 @@ class Stats(object):
         self.con = HTTPClient(uri='http://kernel.shinken.io')
         # then the statsd one
         self.statsd_interval = 5
+        self.statsd_types = ['system', 'queue', 'perf']
         self.statsd_sock = None
         self.statsd_addr = None
+        self.statsd_types = 'system,object,queue,perf'
+        self.statsd_pattern = None
+        self.name_cache = {}
 
 
     def launch_reaper_thread(self):
-        self.reaper_thread = threading.Thread(None, target=self.reaper, name='stats-reaper')
+        self.reaper_thread = threading.Thread(None, target=self.reaper,
+                                              name='stats-reaper')
         self.reaper_thread.daemon = True
         self.reaper_thread.start()
 
 
     def launch_harvester_thread(self):
-        self.harvester_thread = threading.Thread(None, target=self.harvester, name='stats-harvester')
+        self.harvester_thread = threading.Thread(None, target=self.harvester,
+                                                 name='stats-harvester')
         self.harvester_thread.daemon = True
         self.harvester_thread.start()
 
-
     def register(self, app, name, _type, api_key='', secret='', http_proxy='',
                  statsd_host='localhost', statsd_port=8125, statsd_prefix='shinken',
-                 statsd_enabled=False, statsd_interval=5):
+                 statsd_enabled=False, statsd_interval=5, statsd_types=None,
+                 statsd_pattern=None):
         self.app = app
         self.name = name
         self.type = _type
@@ -102,6 +108,11 @@ class Stats(object):
         self.statsd_prefix = statsd_prefix
         self.statsd_enabled = statsd_enabled
         self.statsd_interval = statsd_interval
+        if statsd_types is not None:
+            self.statsd_types = [t.strip() for t in statsd_types.split(",") if t.strip()]
+        if statsd_pattern is not None:
+            self.statsd_pattern = statsd_pattern
+        self.name_cache = {}
 
         if self.statsd_enabled:
             logger.debug('Loading statsd communication with %s:%s.%s',
@@ -124,11 +135,6 @@ class Stats(object):
         return (self.name and self.api_key and self.secret)
 
 
-    # Tells whether internal stats should be gatherred
-    def is_enabled(self):
-        return self.is_statsd_enabled() or self.is_shinkenio_enabled()
-
-
     # Let be crystal clear about why I don't use the statsd lib in python: it's crappy.
     # how guys did you fuck this up to this point? django by default for the conf?? really?...
     # So raw socket are far better here
@@ -139,6 +145,28 @@ class Stats(object):
         except (socket.error, socket.gaierror), exp:
             logger.error('Cannot create statsd socket: %s' % exp)
             return
+
+
+    # Calculates a complete metric name from prefix or pattern
+    # Pattern has precedence on prefix if defined
+    # As formatting may involve extra CPU, we cache the calculated metric
+    # name to speed next calls.
+    def get_metric_name(self, name):
+        if name not in self.name_cache:
+            if self.statsd_pattern is not None:
+                try:
+                    self.name_cache[name] = self.statsd_pattern.format(
+                        metric=name,
+                        name=self.name,
+                        service=self.type)
+                except Exception, e:
+                    logger.error("Failed to build metric name, check your "
+                                 "statsd_pattern parameter: %s" % e)
+            elif self.prefix:
+                self.name_cache[name] = "%s.%s" % (self.statsd_prefix, name)
+            else:
+                self.name_cache[name] = name
+        return self.name_cache[name]
 
 
     # Sends a metric to statsd daemon
@@ -164,27 +192,30 @@ class Stats(object):
 
 
     # Will increment a counter key
-    def incr(self, k, v):
-        if self.statsd_sock and self.name:
+    def incr(self, k, v, t):
+        if self.statsd_sock and self.name and t in self.statsd_types:
+            name = self.get_metric_name(k)
             self.update_internal_stats(k, v)
-            packet = '%s.%s.%s:%d|c' % (self.statsd_prefix, self.name, k, v)
+            packet = '%s:%d|c' % (name, v)
             self.send_metric(packet)
 
 
     # Will send a gauge value
-    def gauge(self, k, v):
-        if self.statsd_sock and self.name:
+    def gauge(self, k, v, t):
+        if self.statsd_sock and self.name and t in self.statsd_types:
+            name = self.get_metric_name(k)
             self.update_internal_stats(k, v)
-            packet = '%s.%s.%s:%d|g' % (self.statsd_prefix, self.name, k, v)
+            packet = '%s:%d|g' % (name, v)
             self.send_metric(packet)
 
 
     # Will increment a timer key, if None, start at 0
-    def timing(self, k, v):
-        if self.statsd_sock and self.name:
+    def timing(self, k, v, t):
+        if self.statsd_sock and self.name and t in self.statsd_types:
+            name = self.get_metric_name(k)
             self.update_internal_stats(k, v)
             # beware, we are sending ms here, v is in s
-            packet = '%s.%s.%s:%d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
+            packet = '%s:%d|ms' % (name, v * 1000)
             self.send_metric(packet)
 
 
@@ -238,7 +269,15 @@ class Stats(object):
                 # logger.debug('REAPER metrics to send %s (%d)' % (metrics, len(str(metrics))) )
                 # get the inner data for the daemon
                 struct = self.app.get_stats_struct()
-                struct['metrics'].extend(metrics)
+                for metric in struct['metrics']:
+                    name, val, ts, _ = metric
+                    if "." in str(val):
+                        # Value is a float
+                        metrics.append('%s %f %d' % (name, val, ts))
+                    else:
+                        # Value is an integer
+                        metrics.append('%s %d %d' % (name, val, ts))
+                struct['metrics'] = metrics
                 # logger.debug('REAPER whole struct %s' % struct)
                 j = json.dumps(struct)
                 if AES is not None and self.secret != '':
@@ -248,7 +287,8 @@ class Stats(object):
                     # assume a %16 length messagexs
                     encrypted_text = self._encrypt(j)
                     try:
-                        r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
+                        self.con.put('/api/v1/put/?api_key=%s' % (
+                                     self.api_key), encrypted_text)
                     except HTTPException, exp:
                         logger.error('Stats REAPER cannot put to the metric server %s' % exp)
             except Exception, e:
@@ -260,7 +300,7 @@ class Stats(object):
     def harvester(self):
         while True:
             try:
-                if not self.is_enabled():
+                if not self.is_statsd_enabled():
                     time.sleep(self.statsd_interval)
                     continue
 
@@ -268,38 +308,14 @@ class Stats(object):
                 # have been initialized when we query stats_struct, so we
                 # ignore AttributeError.
                 try:
-                    struct = self.app.get_stats_struct()
+                    metrics = self.app.get_internal_metrics()
                 except AttributeError:
                     time.sleep(self.statsd_interval)
                     continue
 
-                packets = []
-                for metric in struct["metrics"]:
-                    name, val, _ = metric.split()
-                    # Mormalizs name
-                    parts = name.split(".")
-                    parts.pop(1)
-                    name = ".".join(parts)
-                    if "." in val:
-                        # Value is a float
-                        packets.append('%s.%s.%s:%f|g' % (
-                            self.statsd_prefix, self.name, name, float(val)))
-                    else:
-                        # Value is an integer
-                        packets.append('%s.%s.%s:%d|g' % (
-                            self.statsd_prefix, self.name, name, int(val)))
-
-                for t in ("contacts", "contactgroups", "hosts", "hostgroups",
-                          "services", "servicegroups", "commands"):
-                    if t in struct:
-                        c = struct[t]
-                        p = self.statsd_prefix
-                        n = self.name
-                        s = struct["type"]
-                        packets.append('%s.%s.%s.%s:%d|g' % (p, n, s, t, c))
-
-                for packet in packets:
-                    self.send_metric(packet)
+                for metric in metrics:
+                    name, val, _type = metric
+                    self.gauge(name, val, _type)
             except Exception, e:
                 logger.error(str(e))
                 logger.debug(traceback.format_exc())
