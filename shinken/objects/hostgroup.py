@@ -43,8 +43,7 @@ class Hostgroup(Itemgroup):
         'notes':                StringProp(default='', fill_brok=['full_status']),
         'notes_url':            StringProp(default='', fill_brok=['full_status']),
         'action_url':           StringProp(default='', fill_brok=['full_status']),
-        'realm':                StringProp(default='', fill_brok=['full_status'],
-        conf_send_preparation=get_obj_name),
+        'realm':                StringProp(default='', fill_brok=['full_status'], conf_send_preparation=get_obj_name),
     })
 
     macros = {
