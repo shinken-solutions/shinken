@@ -1,4 +1,11 @@
 language: python
+
+# Allow shinken to run on new travis infra
+sudo: False
+
+# Allow cache of downloads
+cache: pip
+
 python:
   - "2.6"
   - "2.7"
