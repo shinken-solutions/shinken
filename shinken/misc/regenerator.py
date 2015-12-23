@@ -176,7 +176,7 @@ class Regenerator(object):
         # check if the instance is really defined, so got ALL the
         # init phase
         if inst_id not in self.configs.keys():
-            logger.debug("Warning: the instance %d is not fully given, bailout" % inst_id)
+            logger.debug("Warning: the instance %s is not fully given, bailout" % inst_id)
             return
 
         # Try to load the in progress list and make them available for
@@ -542,7 +542,7 @@ class Regenerator(object):
         except Exception, exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result:: Not good!  %s" % exp)
             return
-        # logger.debug("Creating a host: %s in instance %d" % (hname, inst_id))
+        # logger.debug("Creating a host: %s in instance %s" % (hname, inst_id))
 
         h = Host({})
         self.update_element(h, data)
@@ -569,7 +569,7 @@ class Regenerator(object):
             logger.error("[regen] host_check_result:: Not good!   %s" % exp)
             return
 
-        logger.debug("Creating a hostgroup: %s in instance %d" % (hgname, inst_id))
+        logger.debug("Creating a hostgroup: %s in instance %s" % (hgname, inst_id))
 
         # With void members
         hg = Hostgroup([])
@@ -594,7 +594,7 @@ class Regenerator(object):
         except Exception, exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result  Not good!  %s" % exp)
             return
-        # logger.debug("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
+        # logger.debug("Creating a service: %s/%s in instance %s" % (hname, sdesc, inst_id))
 
         s = Service({})
         self.update_element(s, data)
@@ -621,7 +621,7 @@ class Regenerator(object):
             logger.error("[Regen] manage_initial_servicegroup_status_brok:: Not good!  %s" % exp)
             return
 
-        logger.debug("Creating a servicegroup: %s in instance %d" % (sgname, inst_id))
+        logger.debug("Creating a servicegroup: %s in instance %s" % (sgname, inst_id))
 
         # With void members
         sg = Servicegroup([])
@@ -700,7 +700,7 @@ class Regenerator(object):
             logger.error("[Regen] manage_initial_contactgroup_status_brok Not good!  %s" % exp)
             return
 
-        logger.debug("Creating an contactgroup: %s in instance %d" % (cgname, inst_id))
+        logger.debug("Creating an contactgroup: %s in instance %s" % (cgname, inst_id))
 
         # With void members
         cg = Contactgroup([])

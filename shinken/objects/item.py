@@ -29,6 +29,7 @@
 import time
 import cPickle  # for hashing compute
 import itertools
+import uuid
 
 # Try to import md5 function
 try:
@@ -82,7 +83,7 @@ class Item(object):
         # use set attr for going into the slots
         # instead of __dict__ :)
         cls = self.__class__
-        self.id = cls.id
+        self.id = uuid.uuid1().hex
         cls.id += 1
 
         self.customs = {}  # for custom variables
