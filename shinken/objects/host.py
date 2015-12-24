@@ -643,7 +643,7 @@ class Host(SchedulingItem):
 
     def set_initial_state(self):
         mapping = {
-            "u": {
+            "o": {
                 "state": "UP",
                 "state_id": 0
             },
