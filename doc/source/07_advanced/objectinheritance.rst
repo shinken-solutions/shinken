@@ -163,13 +163,13 @@ It is possible to use incomplete object definitions as templates for use by othe
   define host{
          host_name               bighost1
          address                 192.168.1.3
-         use                     generichosthosttemplate
+         use                     generichosttemplate
          }
 
   define host{
          host_name               bighost2
          address                 192.168.1.4
-         use                     generichosthosttemplate
+         use                     generichosttemplate
          }
 
 Notice that the first host definition is incomplete because it is missing the required "host_name" variable. We don't need to supply a host name because we just want to use this definition as a generic host template. In order to prevent this definition from being registered with Shinken as a normal host, we set the "register" variable to 0.
@@ -218,7 +218,7 @@ Any :ref:`custom object variables <configuration/customobjectvars>` that you def
   define host{
          host_name               bighost1
          address                 192.168.1.3
-         use                     generichosthosttemplate
+         use                     generichosttemplate
          }
 
 The host *bighost1* will inherit the custom host variables "_customvar1" and "_snmp_community", as well as their respective values, from the *generichosttemplate* definition. The effective result is a definition for *bighost1* that looks like this:
@@ -254,7 +254,7 @@ In some cases you may not want your host, service, or contact definitions to inh
                  host_name               bighost1
                  address                 192.168.1.3
                  event_handler           null
-                 use                     generichosthosttemplate
+                 use                     generichosttemplate
                  }
 
 In this case, the host *bighost1* will not inherit the value of the "event_handler" variable that is defined in the *generichosttemplate*. The resulting effective definition of *bighost1* is the following:
@@ -291,7 +291,7 @@ This "additive inheritance" can be accomplished by prepending the local variable
   define host{
          host_name              linuxserver1
          hostgroups             +linux-servers,web-servers
-         use                    generichosthosttemplate
+         use                    generichosttemplate
          }
 
 In this case, the host *linuxserver1* will append the value of its local "hostgroups" variable to that from generichosttemplate. The resulting effective definition of *linuxserver1* is the following:
