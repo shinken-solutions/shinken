@@ -129,9 +129,9 @@ def create_mail(format):
     # It has to be multipart since we can include an image in it.
     logging.debug('Mail format: %s' % (format))
     msg = mail_format[format]
-    logging.debug('From: %s' % (get_user()))
-    msg['From'] = get_user()
-    logging.debug('To: %s' % (opts.receivers))
+    logging.debug('From: %s' % opts.smtpfrom)
+    msg['From'] = opts.smtpfrom
+    logging.debug('To: %s' % opts.receivers)
     msg['To'] = opts.receivers
     logging.debug('Subject: %s' % (get_mail_subject(opts.notification_object)))
     msg['Subject'] = get_mail_subject(opts.notification_object)
@@ -274,8 +274,10 @@ if __name__ == "__main__":
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
-                      help='Target SMTP hostname. Default: localhost')
-    
+                      help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
+    group_general.add_option('-F', '--From', dest='smtpfrom', default=get_user(),
+                      help='From mail, default : current_user@hostanme')
+
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
     parser.add_option_group(group_shinken)
@@ -376,8 +378,20 @@ if __name__ == "__main__":
     elif opts.format == 'txt':
         mail = create_txt_message(mail)
 
-    logging.debug('Connect to %s smtp server' % (opts.smtp))
-    smtp = smtplib.SMTP(opts.smtp)
-    logging.debug('Send the mail')
-    smtp.sendmail(get_user(), receivers, mail.as_string())
-    logging.info("Mail sent successfuly")
+    if opts.smtp != 'None':
+        logging.debug('Connect to %s smtp server' % (opts.smtp))
+        smtp = smtplib.SMTP(opts.smtp)
+        logging.debug('Send the mail')
+        smtp.sendmail(opts.smtpfrom, receivers, mail.as_string())
+        logging.info("Mail sent successfuly")
+    else:
+        sendmail = '/usr/sbin/sendmail'
+        logging.debug('Send the mail')
+        p = os.popen('%s -t' % sendmail, 'w')
+        logging.debug('Final mail : ' + mail.as_string())
+        p.write(mail.as_string())
+        status = p.close()
+        if status is not None:
+            logging.error("Sendmail returned %s" % status)
+        else:
+            logging.info("Mail sent successfuly")
