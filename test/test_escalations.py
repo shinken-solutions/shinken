@@ -34,7 +34,7 @@ class TestEscalations(ShinkenTest):
     def test_wildcard_in_service_descrption(self):
         self.print_header()
         sid = int(Serviceescalation.id) - 1
-        generated = self.sched.conf.escalations.find_by_name('Generated-Serviceescalation-%d' % sid)
+        generated = self.sched.conf.escalations.find_by_name('Generated-Serviceescalation-%s' % sid)
         for svc in self.sched.services.find_srvs_by_hostname("test_host_0"):
             self.assertIn(generated, svc.escalations)
 
