@@ -64,7 +64,7 @@ class Serviceescalations(Items):
         for es in self:
             properties = es.__class__.properties
 
-            creation_dict = {'escalation_name': 'Generated-Serviceescalation-%d' % es.id}
+            creation_dict = {'escalation_name': 'Generated-Serviceescalation-%s' % es.id}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
