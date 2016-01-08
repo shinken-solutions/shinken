@@ -44,6 +44,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
+import uuid
 
 class Host(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
@@ -640,6 +641,13 @@ class Host(SchedulingItem):
 #                         __/ |
 #                        |___/
 ######
+
+    def get_newid(self):
+        cls = self.__class__
+        value = uuid.uuid1().hex
+        cls.id += 1
+        return value
+
 
     def set_initial_state(self):
         mapping = {

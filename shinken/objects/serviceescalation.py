@@ -28,6 +28,8 @@ from escalation import Escalation
 
 from shinken.property import IntegerProp, StringProp, ListProp
 
+import uuid
+
 
 class Serviceescalation(Item):
     id = 1  # zero is always special in database, so we do not take risk here
@@ -48,6 +50,12 @@ class Serviceescalation(Item):
         'first_notification_time': IntegerProp(),
         'last_notification_time': IntegerProp(),
     })
+
+    def get_newid(self):
+        cls = self.__class__
+        value = uuid.uuid1().hex
+        cls.id += 1
+        return value
 
     # For debugging purpose only (nice name)
     def get_name(self):

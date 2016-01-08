@@ -29,7 +29,6 @@
 import time
 import cPickle  # for hashing compute
 import itertools
-import uuid
 
 # Try to import md5 function
 try:
@@ -83,8 +82,9 @@ class Item(object):
         # use set attr for going into the slots
         # instead of __dict__ :)
         cls = self.__class__
-        self.id = uuid.uuid1().hex
-        cls.id += 1
+        self.id = self.get_newid()
+        #self.id = cls.id
+        #cls.id += 1
 
         self.customs = {}  # for custom variables
         self.plus = {}  # for value with a +
@@ -156,6 +156,12 @@ class Item(object):
                 self.customs[custom_name] = val
             else:
                 setattr(self, key, val)
+
+    def get_newid(self):
+        cls = self.__class__
+        value = cls.id
+        cls.id += 1
+        return value
 
 
     # When values to set on attributes are unique (single element list),
