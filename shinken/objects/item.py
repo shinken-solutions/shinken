@@ -83,8 +83,6 @@ class Item(object):
         # instead of __dict__ :)
         cls = self.__class__
         self.id = self.get_newid()
-        #self.id = cls.id
-        #cls.id += 1
 
         self.customs = {}  # for custom variables
         self.plus = {}  # for value with a +
