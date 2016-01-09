@@ -1723,6 +1723,7 @@ class Scheduler(object):
                 self.dump_config()
                 self.need_objects_dump = False
 
+            self.hook_point('scheduler_tick')
 
 
         # WE must save the retention at the quit BY OURSELF
