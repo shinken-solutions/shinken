@@ -133,8 +133,8 @@ def create_mail(format):
     msg['From'] = get_user()
     logging.debug('To: %s' % (opts.receivers))
     msg['To'] = opts.receivers
-    logging.debug('Subject: %s' % (get_mail_subject(opts.notification_object)))
-    msg['Subject'] = get_mail_subject(opts.notification_object)
+    logging.debug('Subject: %s' % (opts.prefix + get_mail_subject(opts.notification_object)))
+    msg['Subject'] = opts.prefix + get_mail_subject(opts.notification_object)
     
     return msg
 
@@ -275,6 +275,8 @@ if __name__ == "__main__":
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. Default: localhost')
+    group_general.add_option('-p', '--prefix', dest='prefix', default='',
+                      help='Mail subject prefix. Default is no prefix')
     
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)

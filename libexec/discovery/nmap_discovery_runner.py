@@ -36,9 +36,9 @@ except ImportError:
 VERSION = '0.1.1'
 # Fred : command launched depending on os detection
 if os.name != 'nt': 
-    DEFAULT_CMD = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s"
+    DEFAULT_CMD = "sudo nmap %s -sU -sS --min-rate %d --max-retries %d -T4 -O -oX %s"
 else:
-    DEFAULT_CMD = "nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s"
+    DEFAULT_CMD = "nmap %s -sU -sS --min-rate %d --max-retries %d -T4 -O -oX %s"
     
 parser = optparse.OptionParser(
     "%prog [options] -t nmap scanning targets",
