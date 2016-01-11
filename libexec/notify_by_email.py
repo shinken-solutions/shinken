@@ -134,6 +134,9 @@ def get_shinken_url():
     if opts.webui:
         hostname = socket.gethostname()
         webui_port = get_webui_port()
+        if not webui_port:
+            return
+
         if opts.webui_url:
             url = '%s/%s/%s' % (opts.webui_url, opts.notification_object, urllib.quote(shinken_var['Hostname']))
         else:
@@ -188,8 +191,8 @@ def create_mail(format):
     msg['From'] = get_user()
     logging.debug('To: %s' % (opts.receivers))
     msg['To'] = opts.receivers
-    logging.debug('Subject: %s' % (get_mail_subject(opts.notification_object)))
-    msg['Subject'] = get_mail_subject(opts.notification_object)
+    logging.debug('Subject: %s' % (opts.prefix + get_mail_subject(opts.notification_object)))
+    msg['Subject'] = opts.prefix + get_mail_subject(opts.notification_object)
 
     return msg
 
@@ -331,12 +334,14 @@ if __name__ == "__main__":
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
     group_general.add_option('-r', '--receivers', dest='receivers',
                       help='Mail recipients comma-separated list')
-    group_general.add_option('-s', '--sender', dest='sender',
-                      help='Mail sender (From:)')
+    group_general.add_option('-F', '--sender', dest='sender',
+                      help='Sender email address, default is system user')
     group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
                       choices=['host', 'service'], help='Choose between host or service notification.')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. Default: localhost')
+    group_general.add_option('-p', '--prefix', dest='prefix', default='',
+                      help='Mail subject prefix. Default is no prefix')
 
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
