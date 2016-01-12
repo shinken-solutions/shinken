@@ -29,6 +29,7 @@
 import time
 import cPickle  # for hashing compute
 import itertools
+from shinken.util import safe_print
 
 # Try to import md5 function
 try:
@@ -884,7 +885,11 @@ class Items(object):
         :type item:  Item  # or subclass of
         """
         self.unindex_item(item)
-        self.items.pop(item.id, None)
+        try:
+            self.items.pop(item.id)
+        except KeyError:
+            safe_print("ERROR: Internal Issue, this case should not happen %s " % item )
+            pass
 
 
     def index_item(self, item):
