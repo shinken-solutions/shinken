@@ -243,7 +243,7 @@ class Regenerator(object):
             # We can really declare this host OK now
             old_h = self.hosts.find_by_name(h.get_name())
             if old_h is not None:
-                del self.hosts[old_h.id]
+                self.hosts.remove_item(old_h)
             self.hosts.add_item(h)
 
         # Link SERVICEGROUPS with services
@@ -306,9 +306,6 @@ class Regenerator(object):
                 self.services_tags[t] += 1
 
             # We can really declare this host OK now
-            old_s = self.services.find_srv_by_name_and_hostname(s.host_name, s.service_description)
-            if old_s is not None:
-                del self.services[old_s.id]
             self.services.add_item(s, index=True)
 
 

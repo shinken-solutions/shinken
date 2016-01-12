@@ -888,7 +888,7 @@ class Items(object):
         try:
             self.items.pop(item.id)
         except KeyError:
-            safe_print("ERROR: Internal Issue, this case should not happen %s " % item )
+            safe_print("ERROR: Internal Issue, this case should not happen %s " % item)
             pass
 
 
