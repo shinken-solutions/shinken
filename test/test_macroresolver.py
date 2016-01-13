@@ -201,8 +201,89 @@ class TestMacroResolver(ShinkenTest):
         com = mr.resolve_command(cc, data)
         print com
         self.assertEqual('plugins/nothing you should not pass', com)
-                                                
-                                                
+
+
+    # Look at special on demand macros (ISVALIDTIME and NEXTVALIDTIME)
+    def test_validtime_ondemand_macros(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = hst.get_data_for_checks()
+
+        # Get the 18 of December 2014 at 15:00, thursday
+        dec_the_18_15h = int(time.mktime(time.strptime("18 Dec 2014 15:00:00", "%d %b %Y %H:%M:%S")))
+        # Get the 18 of December 2014 at 20:00, thursday
+        dec_the_18_20h = int(time.mktime(time.strptime("18 Dec 2014 20:00:00", "%d %b %Y %H:%M:%S")))
+        # Get the 18 of December 2014 at 09:00, friday
+        dec_the_19_9h = int(time.mktime(time.strptime("19 Dec 2014 09:00:00", "%d %b %Y %H:%M:%S")))
+
+
+        #with a 24x7 timeperiod
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$ISVALIDTIME:24x7$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing 1', com)
+
+        #with workhours timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$ISVALIDTIME:workhours:{0}$".format(dec_the_18_15h)
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing 1', com)
+
+        #with a timestamp off workhours (equals to 18 Dec 2014 20:00:00)
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$ISVALIDTIME:workhours:{0}$".format(dec_the_18_20h)
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing 0', com)
+
+        # with bad timestamp
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$ISVALIDTIME:workhours:t$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing', com)
+
+        # with a 24x7 timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
+        # Next validtime will be equal to the timestamp
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$NEXTVALIDTIME:24x7:{0}$".format(dec_the_18_15h)
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_18_15h), com)
+
+        # with workhours timeperiod and a timestamp (equals to 18 Dec 2014 15:00:00)
+        # Next validtime will be equal to the timestamp
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:{0}$".format(dec_the_18_15h)
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_18_15h), com)
+
+        # with a timestamp off workhours (equals to 18 Dec 2014 20:00:00)
+        # Next valid time will be 1418976000 (19 Dec 2014 09:00:00)
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:{0}$".format(dec_the_18_20h)
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing {0}'.format(dec_the_19_9h), com)
+
+        # with bad timestamp
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$NEXTVALIDTIME:workhours:string$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assertEqual('plugins/nothing 0', com)
+
 
     # Look at on demand macros
     def test_hostadressX_macros(self):

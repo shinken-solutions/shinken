@@ -34,7 +34,7 @@ import re
 import time
 
 from shinken.borg import Borg
-
+from shinken.objects.timeperiod import Timeperiod
 
 class MacroResolver(Borg):
     """Please Add a Docstring to describe the class here"""
@@ -78,6 +78,11 @@ class MacroResolver(Borg):
         'SERVICEACKCOMMENT'
     ]
 
+    validtime_macros = {
+        'ISVALIDTIME': ('', Timeperiod.is_time_valid),
+        'NEXTVALIDTIME': ('0', Timeperiod.get_next_valid_time_from_t)
+    }
+
     # This must be called ONCE. It just put links for elements
     # by scheduler
     def init(self, conf):
@@ -100,6 +105,9 @@ class MacroResolver(Borg):
         self.contactgroups = conf.contactgroups
         self.lists_on_demand.append(self.contactgroups)
         self.illegal_macro_output_chars = conf.illegal_macro_output_chars
+        self.timeperiods = conf.timeperiods
+        self.lists_on_demand.append(self.timeperiods)
+
 
         # Try cache :)
         # self.cache = {}
@@ -325,8 +333,29 @@ class MacroResolver(Borg):
         elts = macro.split(':')
         nb_parts = len(elts)
         macro_name = elts[0]
+
+        # Look first for the special validtime macros
+        validtime_macro = self.validtime_macros.get(macro_name)
+        if validtime_macro:
+            # Get the right infos
+            failed_output = validtime_macro[0]
+            func_to_call = validtime_macro[1]
+
+            timeperiod_arg = elts[1]
+            timestamp = time.time()
+            # If there a timestamp specifed ?
+            if nb_parts == 3:
+                try:
+                    timestamp = float(elts[2])
+                except ValueError:
+                    return failed_output
+
+            for timeperiod in self.timeperiods:
+                if timeperiod.get_name() == timeperiod_arg:
+                    return str(int(func_to_call(timeperiod, timestamp)))
+            return failed_output
         # Len 3 == service, 2 = all others types...
-        if nb_parts == 3:
+        elif nb_parts == 3:
             val = ''
             # print "Got a Service on demand asking...", elts
             (host_name, service_description) = (elts[1], elts[2])
