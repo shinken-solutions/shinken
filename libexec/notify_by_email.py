@@ -325,48 +325,57 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
 if __name__ == "__main__":
     parser = OptionParser(description='Notify by email receivers of Shinken alerts. Message will be formatted in html and can embed customer logo. To included customer logo, just load png image named customer_logo.png in '+shinken_image_dir)
 
-    group_debug = OptionGroup(parser, 'Debugging and test options', 'Useful to debugging script under shinken processes. Useful to just make a standalone test of script to see what it looks like.')
-    group_shinken_details = OptionGroup(parser, 'Details and additionnals informations', 'You can include some useful additionnals informations to notification using these options. Good practice is to add HOST or SERVICE macros with these details and pass them to the script')
-    group_shinken = OptionGroup(parser, 'Shinken macros to specify.', 'Used to specify usual shinken macros in notify, if not specified then it will try to get them from environment variable. You need to enable_environment_macros in shinken.cfg if you want to used them. It isn\'t recommanded to used them for large environment. You better use option -c and -s or -h depend on which object you\'ll notify.')
+    group_debug = OptionGroup(parser, 'Debugging and test options', 'Useful to debug script under shinken processes. Useful to just make a standalone test of script to see what it looks like.')
     group_general = OptionGroup(parser, 'General options', 'Default options to setup')
+    group_shinken = OptionGroup(parser, 'Shinken macros to specify.', 'Used to specify usual shinken macros in notifications, if not specified then it will try to get them from environment variable. You need to enable_environment_macros in shinken.cfg if you want to used them. It isn\'t recommended to use environment macros for large environments. You \'d better use options -c and -s or -h depending on which object you\'ll notify for.')
+    group_shinken_details = OptionGroup(parser, 'Details and additional information', 'You can include some useful additional information to notifications using these options. Good practice is to add HOST or SERVICE macros with these details and provide them to the script')
+    group_shinken_webui = OptionGroup(parser, 'Shinken WebUI.', 'Used to include some Shinken WebUI information in the notifications.')
 
+    # Debug and test options
     group_debug.add_option('-D', '--debug', dest='debug', default=False,
                       action='store_true', help='Generate a test mail message')
-    group_debug.add_option('-t', '--test', dest='test',
+    group_debug.add_option('-t', '--test', dest='test', default=False,
                       action='store_true', help='Generate a test mail message')
-    group_general.add_option('-w', '--webui', dest='webui', default=False,
-                      action='store_true', help='Include link to the problem in Shinken WebUI.')
-    group_general.add_option('-u', '--url', dest='webui_url',
-                      help='WebUI URL as http://my_webui:port/url')
-    group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'],
-                      default='html', help='Mail format "html" or "txt". Default: html')
     group_debug.add_option('-l', '--logfile', dest='logfile',
                       help='Specify a log file. Default: log to stdout.')
+
+    # General options
+    group_general.add_option('-f', '--format', dest='format', type='choice', choices=['txt', 'html'],
+                      default='html', help='Mail format "html" or "txt". Default: html')
+    group_general.add_option('-r', '--receivers', dest='receivers',
+                      help='Mail recipients comma-separated list')
+    group_general.add_option('-F', '--sender', dest='sender',
+                      help='Sender email address, default is system user')
+    group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
+                      help='Target SMTP hostname. Default: localhost')
+    group_general.add_option('-p', '--prefix', dest='prefix', default='',
+                      help='Mail subject prefix. Default is no prefix')
+
+    # Shinken options
+    group_shinken.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
+                      choices=['host', 'service'], help='Choose between host or service notification.')
     group_shinken.add_option('-c', '--commonmacros', dest='commonmacros',
                       help='Double comma separated shinken macros in this order : "NOTIFICATIONTYPE$,,$HOSTNAME$,,$HOSTADDRESS$,,$LONGDATETIME$".')
     group_shinken.add_option('-o', '--objectmacros', dest='objectmacros',
-                      help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTSTATE$,,$HOSTDURATION$" with host object')
+                      help='Double comma separated object shinken macros in this order : "$SERVICEDESC$,,$SERVICESTATE$,,$SERVICEOUTPUT$,,$SERVICEDURATION$" for a service object and "$HOSTSTATE$,,$HOSTDURATION$" for an host object')
     group_shinken_details.add_option('-d', '--detailleddesc', dest='detailleddesc',
                       help='Specify $_SERVICEDETAILLEDDESC$ custom macros')
     group_shinken_details.add_option('-i', '--impact', dest='impact',
                       help='Specify the $_SERVICEIMPACT$ custom macros')
     group_shinken_details.add_option('-a', '--action', dest='fixaction',
                       help='Specify the $_SERVICEFIXACTIONS$ custom macros')
-    group_general.add_option('-r', '--receivers', dest='receivers',
-                      help='Mail recipients comma-separated list')
-    group_general.add_option('-F', '--sender', dest='sender',
-                      help='Sender email address, default is system user')
-    group_general.add_option('-n', '--notification-object', dest='notification_object', type='choice', default='host',
-                      choices=['host', 'service'], help='Choose between host or service notification.')
-    group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
-                      help='Target SMTP hostname. Default: localhost')
-    group_general.add_option('-p', '--prefix', dest='prefix', default='',
-                      help='Mail subject prefix. Default is no prefix')
+
+    # Shinken WebUI options
+    group_shinken_webui.add_option('-w', '--webui', dest='webui', default=False,
+                      action='store_true', help='Include link to the problem in Shinken WebUI.')
+    group_shinken_webui.add_option('-u', '--url', dest='webui_url',
+                      help='WebUI URL as http://my_webui:port/url')
 
     parser.add_option_group(group_debug)
     parser.add_option_group(group_general)
     parser.add_option_group(group_shinken)
     parser.add_option_group(group_shinken_details)
+    parser.add_option_group(group_shinken_webui)
 
     (opts, args) = parser.parse_args()
 
