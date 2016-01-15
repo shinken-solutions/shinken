@@ -347,7 +347,7 @@ if __name__ == "__main__":
     group_general.add_option('-F', '--sender', dest='sender',
                       help='Sender email address, default is system user')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
-                      help='Target SMTP hostname. Default: localhost')
+                      help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
     group_general.add_option('-p', '--prefix', dest='prefix', default='',
                       help='Mail subject prefix. Default is no prefix')
 
@@ -472,8 +472,22 @@ if __name__ == "__main__":
     elif opts.format == 'txt':
         mail = create_txt_message(mail)
 
-    logging.debug('Connect to %s smtp server' % (opts.smtp))
-    smtp = smtplib.SMTP(opts.smtp)
-    logging.debug('Send the mail')
-    smtp.sendmail(get_user(), receivers, mail.as_string())
-    logging.info("Mail sent successfuly")
+    # Use SMTP or sendmail to send the mail ...
+    if opts.smtp != 'None':
+        logging.debug('Connect to %s smtp server' % (opts.smtp))
+        smtp = smtplib.SMTP(opts.smtp)
+        logging.debug('Send the mail')
+        smtp.sendmail(opts.smtpfrom, receivers, mail.as_string())
+        logging.info("Mail sent successfuly")
+    else:
+        sendmail = '/usr/sbin/sendmail'
+        logging.debug('Send the mail')
+        p = os.popen('%s -t' % sendmail, 'w')
+        logging.debug('Final mail : ' + mail.as_string())
+        logging.debug('Send the mail')
+        p.write(mail.as_string())
+        status = p.close()
+        if status is not None:
+            logging.error("Sendmail returned %s" % status)
+        else:
+            logging.info("Mail sent successfuly")
