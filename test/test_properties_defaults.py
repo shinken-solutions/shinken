@@ -278,7 +278,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['contactgroup_name', 'alias']
+    without_default = ['contactgroup_name', 'contactgroup_members', 'alias']
 
     properties = dict([
         ('members', None),
@@ -487,7 +487,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['hostgroup_name', 'alias']
+    without_default = ['hostgroup_name', 'hostgroup_members', 'alias']
 
     properties = dict([
         ('members', None),
@@ -795,7 +795,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['servicegroup_name', 'alias']
+    without_default = ['servicegroup_name', 'servicegroup_members', 'alias']
 
     properties = dict([
         ('members', None),

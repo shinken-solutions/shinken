@@ -66,6 +66,7 @@ class TestExternalMapping(ShinkenTest):
         inputfile.close()
         self.input_filename = inputfile.name
 
+
     def __cleanup(self):
         """
         Cleanup the temporary files.
