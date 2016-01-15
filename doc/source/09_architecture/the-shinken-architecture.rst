@@ -1,11 +1,11 @@
 .. _architecture/the-shinken-architecture:
 
 =====================
-Shinken Architecture 
+Shinken Architecture
 =====================
 
 
-Summary 
+Summary
 ========
 
 Shinken's architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on a HTTP backend. This makes building a highly available or distributed monitoring architectures quite easy.
@@ -40,26 +40,26 @@ Shinken's architecture has been designed according to the Unix Way: one tool, on
     * Text file management via configuration engines (cfengine, chef, puppet, salt)
 
 
-Shinken innovative features 
+Shinken innovative features
 ============================
 
 Learn more about the :ref:`innovative features of Shinken <about/shinken-innovative-features>`.
 
 
-Shinken data acquisition for monitoring 
+Shinken data acquisition for monitoring
 ========================================
 
 Shinken needs plugins to actually gather data. There exists `**thousands** of plugins for every conceivable application`_. Shinken packages the configurations necessary to use common plugins in :ref:`Packs <contributing/create-and-push-packs>`. Plugins themselves need to be installed by the administrator of the monitoring solution(Shinken will install some common ones for you). This is a great strength and flexibility of Shinken, but also an administrative responsibility to download and install the necessary plugins.
 
 
-Architecture diagram with all daemons illustrated 
+Architecture diagram with all daemons illustrated
 ==================================================
 
 .. image:: /_static/images///official/images/shinken-architecture.png
    :scale: 90 %
 
 
-Shinken Daemon roles 
+Shinken Daemon roles
 =====================
 
     * :ref:`Arbiter <configobjects/arbiter>`: The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons. Additionally, it manages the high availability features: if a particular daemon dies, it re-routes the configuration managed by this failed daemon to the configured spare. Finally, it can receive input from users (such as external commands from nagios.cmd) or passive check results and routes them to the appropriate daemon. Passive check results are forwarded to the Scheduler responsible for the check. There can only be one active arbiter with other arbiters acting as hot standby spares in the architecture.
@@ -91,10 +91,10 @@ Shinken Daemon roles
 
       * Modules for the Livestatus API - live state, status retention and history:  SQLite (default), MongoDB (experimental)
       * Module for centralizing Shinken logs: Simple-log (flat file)
-      * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, <del>couchdb</del> 
+      * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, <del>couchdb</del>
       * Modules for exporting data: Graphite-Perfdata, NPCDMOD(PNP4Nagios), raw_tcp(Splunk), Syslog
-      * Modules for the Shinken WebUI: GRAPHITE_UI, PNP_UI. Trending and data visualization.
-      * Modules for compatibility/migration: Service-Perfdata, Host-Perfdata and Status-Dat 
+      * Modules for the Shinken WebUI: Graphite-UI, PNP-UI. Trending and data visualization.
+      * Modules for compatibility/migration: Service-Perfdata, Host-Perfdata and Status-Dat
 
 
     * **Receiver** (optional): The receiver daemon receives passive check data and serves as a distributed command buffer. There can be many receivers for load-balancing and hot standby spare roles. The receiver can also use modules to accept data from different protocols. Anyone serious about using passive check results should use a receiver to ensure that check data does not go through the Arbiter (which may be busy doing administrative tasks) and is forwarded directly to the appropriate Scheduler daemon(s).
@@ -104,7 +104,7 @@ Shinken Daemon roles
 .. tip::  The various daemons can be run on a single server for small deployments or split on different hardware for larger deployments as performance or availability requirements dictate. For larger deployments, running multiple Schedulers is recommended, even if they are on the same server. Consult :ref:`planning a large scale Shinken deployment <advanced/scaling-shinken>` for more information.
 
 
-Learn more about the Shinken Distributed Architecture 
+Learn more about the Shinken Distributed Architecture
 ======================================================
 
 The Shinken distributed architecture, more features explained.
@@ -117,7 +117,7 @@ The Shinken distributed architecture, more features explained.
 If you are just starting out, you can continue on with the next tutorial, which will help you :ref:`Configure a web front-end <integration/index>`.
 
 
-Planning a large scale Shinken deployment 
+Planning a large scale Shinken deployment
 ==========================================
 
 If you wish to plan a large scale installation of Shinken, you can consult the :ref:`Scaling Shinken <advanced/scaling-shinken>` reference.
