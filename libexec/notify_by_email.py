@@ -52,20 +52,20 @@ def setup_logging():
 def overload_test_variable():
     shinken_notification_object_var = {
         'service': {
-            'Service description': 'CPU load',
-            'Service state': 'PROBLEM',
+            'Service description': 'Test_Service',
+            'Service state': 'TEST',
             'Service output': 'Houston, we got a problem here! Oh, wait. No. It\'s just a test.',
-            'Service duration': '00h 00min 10s'
+            'Service state duration': '00h 00min 10s'
         },
         'host': {
-            'Hostname': 'Shinken monitoring solution: Test host',
-            'Host state': 'TEST PROBLEM',
-            'Host duration': '00h 00h 20s'
+            'Hostname': 'Test_Host',
+            'Host state': 'TEST',
+            'Host state duration': '00h 00h 20s'
         }
     }
 
     shinken_var = {
-        'Hostname': 'shinken.domain.tld',
+        'Hostname': 'shinken',
         'Host address': '127.0.0.1',
         'Notification type': 'TEST',
         'Date': 'Now, test'
@@ -164,7 +164,19 @@ mail_format = { 'html': MIMEMultipart(), 'txt': MIMEMultipart('alternative') }
 
 # Construct mail subject field based on which object we notify
 def get_mail_subject(object):
-    mail_subject = { 'host': 'Host %s alert for %s since %s' % (shinken_notification_object_var['host']['Host state'], shinken_var['Hostname'], shinken_notification_object_var['host']['Host duration']), 'service': '%s on Host: %s about service %s since %s' % (shinken_notification_object_var['service']['Service state'], shinken_var['Hostname'], shinken_notification_object_var['service']['Service description'], shinken_notification_object_var['service']['Service duration'])}
+    mail_subject = {
+        'host': 'Host %s alert for %s since %s' % (
+            shinken_notification_object_var['host']['Host state'],
+            shinken_var['Hostname'],
+            shinken_notification_object_var['host']['Host state duration']
+        ),
+        'service': '%s on Host: %s about service %s since %s' % (
+            shinken_notification_object_var['service']['Service state'],
+            shinken_var['Hostname'],
+            shinken_notification_object_var['service']['Service description'],
+            shinken_notification_object_var['service']['Service state duration']
+        )
+    }
 
     return mail_subject[object]
 
@@ -242,18 +254,26 @@ def create_html_message(msg):
     logging.debug('Grabbed Shinken URL : %s' % url)
 
     # Header part
-    html_content = ['''<html><head>\r
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style type="text/css">body {text-align: center; font-family: Verdana, sans-serif; font-size: 10pt;}\r
-        img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\r
-        span {font-family: Verdana, sans-serif; font-size: 12pt;}\r
-        table {text-align:center; margin-left: auto; margin-right: auto;}\r
-        th {white-space: nowrap;}\r
-        th.even {background-color: #D9D9D9;}\r
-        td.even {background-color: #F2F2F2;}\r
-        th.odd {background-color: #F2F2F2;}\r
-        td.odd {background-color: #FFFFFF;}\r
-        th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
-        th.customer {width: 600px; background-color: #004488; color: #ffffff;}</style></head><body>\r''']
+    html_content = ['''
+<html>\r
+<head>\r
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\r
+<style type="text/css">\r
+body {text-align: center; font-family: Verdana, sans-serif; font-size: 10pt;}\r
+img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\r
+span {font-family: Verdana, sans-serif; font-size: 12pt;}\r
+table {text-align:center; margin-left: auto; margin-right: auto;}\r
+th {white-space: nowrap;}\r
+th.even {background-color: #D9D9D9;}\r
+td.even {background-color: #F2F2F2;}\r
+th.odd {background-color: #F2F2F2;}\r
+td.odd {background-color: #FFFFFF;}\r
+th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
+th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
+</style>\r
+</head>\r
+<body>\r'''
+    ]
 
     full_logo_path = get_webui_logo()
     if full_logo_path:
@@ -377,11 +397,11 @@ if __name__ == "__main__":
                 'Service description': os.getenv('NAGIOS_SERVICEDESC'),
                 'Service state': os.getenv('NAGIOS_SERVICESTATE'),
                 'Service output': os.getenv('NAGIOS_SERVICEOUTPUT'),
-                'Service duration': os.getenv('NAGIOS_SERVICEDURATION')
+                'Service state duration': os.getenv('NAGIOS_SERVICEDURATION')
             },
             'host': {
                 'Host state': os.getenv('NAGIOS_HOSTSTATE'),
-                'Host duration': os.getenv('NAGIOS_HOSTDURATION')
+                'Host state duration': os.getenv('NAGIOS_HOSTDURATION')
             }
         }
     else:
@@ -392,11 +412,11 @@ if __name__ == "__main__":
                     'Service description': macros[0],
                     'Service state': macros[1],
                     'Service output': macros[2],
-                    'Service duration': macros[3]
+                    'Service state duration': macros[3]
                 },
                 'host': {
                     'Host state': '',
-                    'Host duration': ''
+                    'Host state duration': ''
             }
 
             }
@@ -406,10 +426,10 @@ if __name__ == "__main__":
                     'Service description': '',
                     'Service state': '',
                     'Service output': '',
-                    'Service duration': ''
+                    'Service state duration': ''
                 },'host': {
                     'Host state': macros[0],
-                    'Host duration': macros[1]
+                    'Host state duration': macros[1]
                 }
             }
 
