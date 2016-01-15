@@ -55,7 +55,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp,\
     LogLevelProp
 from shinken.misc.common import setproctitle
-
+from shinken.profilermgr import profiler
 
 try:
     import pwd
@@ -113,6 +113,14 @@ class Interface(object):
         return "pong"
     ping.need_lock = False
     ping.doc = doc
+
+    doc = 'Profiling data'
+    def profiling_data(self):
+        return profiler.output_stats()
+    profiling_data.need_lock = False
+    profiling_data.doc = doc
+
+
 
     doc = 'Get the start time of the daemon'
     def get_start_time(self):
@@ -682,6 +690,8 @@ class Daemon(object):
             self.http_thread.daemon = True
             self.http_thread.start()
 
+        # profiler.start()
+        
 
     # TODO: we do not use pyro anymore, change the function name....
     def setup_pyro_daemon(self):

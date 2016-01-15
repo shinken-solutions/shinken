@@ -42,6 +42,7 @@ from shinken.objects.brokerlink import BrokerLink, BrokerLinks
 from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.util import safe_print
 from shinken.message import Message
+from shinken.log import logger
 
 
 # Class for a Regenerator. It will get broks, and "regenerate" real objects
@@ -107,7 +108,7 @@ class Regenerator(object):
         self.manage_program_status_brok(b)
 
         # Now we will lie and directly map our objects :)
-        print "Regenerator::load_from_scheduler"
+        logger.debug("Regenerator::load_from_scheduler")
         self.hosts = c.hosts
         self.services = c.services
         self.notificationways = c.notificationways
@@ -146,7 +147,15 @@ class Regenerator(object):
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
         # If we can and want it, got for it :)
         if manage and self.want_brok(brok):
+            if brok.type not in ('service_next_schedule', 'host_next_schedule', 'service_check_result',
+                                 'host_check_result',
+                                 'update_service_status', 'update_host_status', 'update_poller_status',
+                                 'update_broker_status',
+                                 'update_receiver_status',
+                                 'update_scheduler_status'):
+                logger.debug('REGEN: manage brok %s:%s' % (brok.type, brok.id))
             return manage(brok)
+
 
 
     def update_element(self, e, data):
@@ -159,16 +168,15 @@ class Regenerator(object):
 
         # In a scheduler we are already "linked" so we can skip this
         if self.in_scheduler_mode:
-            safe_print("Regenerator: We skip the all_done_linking phase "
-                       "because we are in a scheduler")
+            logger.debug("Regenerator: We skip the all_done_linking phase because we are in a scheduler")
             return
 
         start = time.time()
-        safe_print("In ALL Done linking phase for instance", inst_id)
+        logger.debug("In ALL Done linking phase for instance %s" % inst_id)
         # check if the instance is really defined, so got ALL the
         # init phase
         if inst_id not in self.configs.keys():
-            safe_print("Warning: the instance %d is not fully given, bailout" % inst_id)
+            logger.debug("Warning: the instance %d is not fully given, bailout" % inst_id)
             return
 
         # Try to load the in progress list and make them available for
@@ -180,7 +188,7 @@ class Regenerator(object):
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
         except Exception, exp:
-            print "Warning all done: ", exp
+            logger.error("[Regen] Warning all done: %s" % exp)
             return
 
         # Link HOSTGROUPS with hosts
@@ -349,7 +357,7 @@ class Regenerator(object):
             else:  # else take the new one
                 self.contactgroups.add_item(inpcg)
 
-        safe_print("ALL LINKING TIME" * 10, time.time() - start)
+        logger.debug("[Regen] ALL LINKING TIME %s" % (time.time() - start))
 
         # clean old objects
         del self.inp_hosts[inst_id]
@@ -442,6 +450,7 @@ class Regenerator(object):
                 new_v.append(h)
         setattr(o, prop, new_v)
 
+
     def linkify_host_and_hosts(self, o, prop):
         v = getattr(o, prop)
 
@@ -475,7 +484,7 @@ class Regenerator(object):
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
-        safe_print("Regenerator: Creating config:", c_id)
+        logger.debug("[Regen] Creating config: %s" % c_id)
 
         # We get a real Conf object ,adn put our data
         c = Config()
@@ -495,25 +504,25 @@ class Regenerator(object):
         # Clean the old "hard" objects
 
         # We should clean all previously added hosts and services
-        safe_print("Clean hosts/service of", c_id)
+        logger.debug("Clean hosts/service of %s" % c_id)
         to_del_h = [h for h in self.hosts if h.instance_id == c_id]
         to_del_srv = [s for s in self.services if s.instance_id == c_id]
 
-        safe_print("Cleaning host:%d srv:%d" % (len(to_del_h), len(to_del_srv)))
+        logger.debug("Cleaning host:%d srv:%d" % (len(to_del_h), len(to_del_srv)))
         # Clean hosts from hosts and hostgroups
         for h in to_del_h:
-            safe_print("Deleting", h.get_name())
+            logger.debug("Deleting %s" % h.get_name())
             del self.hosts[h.id]
 
         # Now clean all hostgroups too
         for hg in self.hostgroups:
-            safe_print("Cleaning hostgroup %s:%d" % (hg.get_name(), len(hg.members)))
+            logger.debug("Cleaning hostgroup %s:%d" % (hg.get_name(), len(hg.members)))
             # Exclude from members the hosts with this inst_id
             hg.members = [h for h in hg.members if h.instance_id != c_id]
-            safe_print("Len after", len(hg.members))
+            logger.debug("Len after clean %s" % len(hg.members))
 
         for s in to_del_srv:
-            safe_print("Deleting", s.get_full_name())
+            logger.debug("Deleting %s" % s.get_full_name())
             del self.services[s.id]
 
         # Now clean service groups
@@ -531,9 +540,9 @@ class Regenerator(object):
         try:
             inp_hosts = self.inp_hosts[inst_id]
         except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+            logger.error("[Regen] host_check_result:: Not good!  %s" % exp)
             return
-        # safe_print("Creating a host: %s in instance %d" % (hname, inst_id))
+        # logger.debug("Creating a host: %s in instance %d" % (hname, inst_id))
 
         h = Host({})
         self.update_element(h, data)
@@ -557,10 +566,10 @@ class Regenerator(object):
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
         except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+            logger.error("[regen] host_check_result:: Not good!   %s" % exp)
             return
 
-        safe_print("Creating a hostgroup: %s in instance %d" % (hgname, inst_id))
+        logger.debug("Creating a hostgroup: %s in instance %d" % (hgname, inst_id))
 
         # With void members
         hg = Hostgroup([])
@@ -583,9 +592,9 @@ class Regenerator(object):
         try:
             inp_services = self.inp_services[inst_id]
         except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+            logger.error("[Regen] host_check_result  Not good!  %s" % exp)
             return
-        # safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
+        # logger.debug("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
 
         s = Service({})
         self.update_element(s, data)
@@ -609,10 +618,10 @@ class Regenerator(object):
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
         except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+            logger.error("[Regen] manage_initial_servicegroup_status_brok:: Not good!  %s" % exp)
             return
 
-        safe_print("Creating a servicegroup: %s in instance %d" % (sgname, inst_id))
+        logger.debug("Creating a servicegroup: %s in instance %d" % (sgname, inst_id))
 
         # With void members
         sg = Servicegroup([])
@@ -632,12 +641,11 @@ class Regenerator(object):
     def manage_initial_contact_status_brok(self, b):
         data = b.data
         cname = data['contact_name']
-        safe_print("Contact with data", data)
+
         c = self.contacts.find_by_name(cname)
         if c:
             self.update_element(c, data)
         else:
-            safe_print("Creating Contact:", cname)
             c = Contact({})
             self.update_element(c, data)
             self.contacts.add_item(c)
@@ -652,13 +660,12 @@ class Regenerator(object):
         # Same than for contacts. We create or
         # update
         nws = c.notificationways
-        safe_print("Got notif ways", nws)
         new_notifways = []
         for cnw in nws:
             nwname = cnw.notificationway_name
             nw = self.notificationways.find_by_name(nwname)
             if not nw:
-                safe_print("Creating notif way", nwname)
+                logger.debug("Creating notif way %s" % nwname)
                 nw = NotificationWay([])
                 self.notificationways.add_item(nw)
             # Now update it
@@ -690,10 +697,10 @@ class Regenerator(object):
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
         except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+            logger.error("[Regen] manage_initial_contactgroup_status_brok Not good!  %s" % exp)
             return
 
-        safe_print("Creating an contactgroup: %s in instance %d" % (cgname, inst_id))
+        logger.debug("Creating an contactgroup: %s in instance %d" % (cgname, inst_id))
 
         # With void members
         cg = Contactgroup([])
@@ -746,66 +753,49 @@ class Regenerator(object):
     def manage_initial_scheduler_status_brok(self, b):
         data = b.data
         scheduler_name = data['scheduler_name']
-        print "Creating Scheduler:", scheduler_name, data
         sched = SchedulerLink({})
-        print "Created a new scheduler", sched
         self.update_element(sched, data)
-        print "Updated scheduler"
-        # print "CMD:", c
         self.schedulers[scheduler_name] = sched
-        print "scheduler added"
+
 
 
     def manage_initial_poller_status_brok(self, b):
         data = b.data
         poller_name = data['poller_name']
-        print "Creating Poller:", poller_name, data
         poller = PollerLink({})
-        print "Created a new poller", poller
         self.update_element(poller, data)
-        print "Updated poller"
-        # print "CMD:", c
         self.pollers[poller_name] = poller
-        print "poller added"
 
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
         reactionner_name = data['reactionner_name']
-        print "Creating Reactionner:", reactionner_name, data
         reac = ReactionnerLink({})
-        print "Created a new reactionner", reac
         self.update_element(reac, data)
-        print "Updated reactionner"
-        # print "CMD:", c
         self.reactionners[reactionner_name] = reac
-        print "reactionner added"
+
 
 
     def manage_initial_broker_status_brok(self, b):
         data = b.data
         broker_name = data['broker_name']
-        print "Creating Broker:", broker_name, data
+
         broker = BrokerLink({})
-        print "Created a new broker", broker
+
         self.update_element(broker, data)
-        print "Updated broker"
+
         # print "CMD:", c
         self.brokers[broker_name] = broker
-        print "broker added"
+
 
 
     def manage_initial_receiver_status_brok(self, b):
         data = b.data
         receiver_name = data['receiver_name']
-        print "Creating Receiver:", receiver_name, data
         receiver = ReceiverLink({})
-        print "Created a new receiver", receiver
         self.update_element(receiver, data)
-        print "Updated receiver"
-        # print "CMD:", c
         self.receivers[receiver_name] = receiver
-        print "receiver added"
+
 
 
 
@@ -813,7 +803,6 @@ class Regenerator(object):
     # So we got all data, we can link all together :)
     def manage_initial_broks_done_brok(self, b):
         inst_id = b.data['instance_id']
-        print "Finish the configuration of instance", inst_id
         self.all_done_linking(inst_id)
 
 
@@ -834,7 +823,7 @@ class Regenerator(object):
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
-                print "I ask the broker for instance id data:", c_id
+                logger.debug("I ask the broker for instance id data: %s" % c_id)
                 msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
@@ -877,7 +866,7 @@ class Regenerator(object):
 
             # If the topology change, update it
             if toplogy_change:
-                print "Topology change for", h.get_name(), h.parent_dependencies
+                logger.debug("Topology change for %s %s"  % (h.get_name(), h.parent_dependencies))
                 self.linkify_host_and_hosts(h, 'parents')
                 self.linkify_host_and_hosts(h, 'childs')
                 self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')

@@ -36,14 +36,14 @@ class Hostgroup(Itemgroup):
 
     properties = Itemgroup.properties.copy()
     properties.update({
-        'id':             IntegerProp(default=0, fill_brok=['full_status']),
-        'hostgroup_name': StringProp(fill_brok=['full_status']),
-        'alias':          StringProp(fill_brok=['full_status']),
-        'notes':          StringProp(default='', fill_brok=['full_status']),
-        'notes_url':      StringProp(default='', fill_brok=['full_status']),
-        'action_url':     StringProp(default='', fill_brok=['full_status']),
-        'realm':          StringProp(default='', fill_brok=['full_status'],
-                                     conf_send_preparation=get_obj_name),
+        'id':                   IntegerProp(default=0, fill_brok=['full_status']),
+        'hostgroup_name':       StringProp(fill_brok=['full_status']),
+        'hostgroup_members':    StringProp(fill_brok=['full_status']),
+        'alias':                StringProp(fill_brok=['full_status']),
+        'notes':                StringProp(default='', fill_brok=['full_status']),
+        'notes_url':            StringProp(default='', fill_brok=['full_status']),
+        'action_url':           StringProp(default='', fill_brok=['full_status']),
+        'realm':                StringProp(default='', fill_brok=['full_status'], conf_send_preparation=get_obj_name),
     })
 
     macros = {
