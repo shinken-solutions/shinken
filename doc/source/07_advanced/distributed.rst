@@ -1,26 +1,26 @@
 .. _advanced/distributed:
 
 ========================
- Distributed Monitoring 
+ Distributed Monitoring
 ========================
 
 
-Introduction 
+Introduction
 =============
 
 Shinken can be configured to support distributed monitoring of network services and resources. Shinken is designed for it in contrast to the Nagios way of doing it: which is more of a "MacGyver" way.
 
 
-Goals 
+Goals
 ======
 
 The goal in the distributed monitoring environment is to offload the overhead (CPU usage, etc.) of performing and receiving service checks from a "central" server onto one or more "distributed" servers. Most small to medium sized shops will not have a real need for setting up such an environment. However, when you want to start monitoring thousands of hosts (and several times that many services) using Shinken, this becomes quite important.
 
 
-The global architecture 
+The global architecture
 ========================
 
-Shinken's architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on the a HTTP backend. This makes building a highly available or distributed monitoring architecture quite easy. In contrast, the Nagios daemon does nearly everything: it loads the configuration, schedules and launches checks, and raises notifications. 
+Shinken's architecture has been designed according to the Unix Way: one tool, one task. Shinken has an architecture where each part is isolated and connects to the others via standard interfaces. Shinken is based on the a HTTP backend. This makes building a highly available or distributed monitoring architecture quite easy. In contrast, the Nagios daemon does nearly everything: it loads the configuration, schedules and launches checks, and raises notifications.
 
 Major innovations of Shinken over Nagios are to :
   * split the different roles into separate daemons
@@ -29,13 +29,13 @@ Major innovations of Shinken over Nagios are to :
 Shinken core uses **distributed** programming, meaning a daemon will often do remote invocations of code on other daemons, this means that to ensure maximum compatibility and stability, the core language, paths and module versions **must** be the same everywhere a daemon is running.
 
 
-Shinken Daemon roles 
+Shinken Daemon roles
 =====================
 
     * **Arbiter**: The arbiter daemon reads the configuration, divides it into parts (N schedulers = N parts), and distributes them to the appropriate Shinken daemons. Additionally, it manages the high availability features: if a particular daemon dies, it re-routes the configuration managed by this failed daemon to the configured spare. Finally, it receives input from users (such as external commands from nagios.cmd) or passive check results and routes them to the appropriate daemon. Passive check results are forwarded to the Scheduler responsible for the check. There can only be one active arbiter with other arbiters acting as hot standby spares in the architecture.
 
       * Modules for data collection: NSCA, TSCA, Ws_arbiter (web service)
-      * Modules for configuration data storage: MongoDB, 
+      * Modules for configuration data storage: MongoDB,
       * Modules for status retention: PickleRententionArbiter
       * Modules for configuration manipulation: IP_Tag, MySQLImport, GLPI, vmware autolinking and other task specific modules
 
@@ -55,21 +55,21 @@ Shinken Daemon roles
     * **Reactionner**: The reactionner daemon issues notifications and launches event_handlers. This centralizes communication channels with external systems in order to simplify SMTP authorizations or RSS feed sources (only one for all hosts/services). There can be many reactionners for load-balancing and spare roles
       * Module for external communications: AndroidSMS
 
-    * **Broker**: The broker daemon exports and manages data from schedulers.  The management can is done exclusively with modules. Multiple :ref:`Broker modules <the_broker_modules>` can be enabled simultaneously.
+    * **Broker**: The broker daemon exports and manages data from schedulers.  The management is done exclusively with modules. Multiple :ref:`Broker modules <the_broker_modules>` can be enabled simultaneously.
 
       * Module for centralizing Shinken logs: Simple-log (flat file)
-      * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, couchdb 
+      * Modules for data retention: Pickle , ToNdodb_Mysql, ToNdodb_Oracle, couchdb
       * Modules for exporting data: Graphite-Perfdata, NPCDMOD(PNP4Nagios) and Syslog
       * Modules for the Livestatus API - status retention and history:  SQLite (default), MongoDB (experimental)
-      * Modules for the Shinken WebUI: GRAPHITE_UI, PNP_UI. Trending and data visualization.
-      * Modules for compatibility: Service-Perfdata, Host-Perfdata and Status-Dat 
+      * Modules for the Shinken WebUI: Graphite-UI, PNP-UI. Trending and data visualization.
+      * Modules for compatibility: Service-Perfdata, Host-Perfdata and Status-Dat
 
 
     * **Receiver** (optional): The receiver daemon receives passive check data and serves as a distributed passive command buffer that will be read by the arbiter daemon. There can be many receivers for load-balancing and hot standby spare roles. The receiver can also use modules to accept data from different protocols. Anyone serious about using passive check results should use a receiver to ensure that when the arbiter is not available (when updating a configuration) all check results are buffered by the receiver and forwarded when the arbiter is back on-line.
 
       * Module for passive data collection: :ref:`NSCA <nsca_daemon_module>`, :ref:`TSCA <tsca_daemon_module>`, :ref:`Ws_arbiter (web service) <ws_daemon_module>`
 
-This architecture is fully flexible and scalable: the daemons that require more performance are the poller and the schedulers. The administrator can add as many as he wants. The broker daemon should be on a well provisioned server for larger installations, as only a single broker can be active at one time. A picture is worth a thousand words: 
+This architecture is fully flexible and scalable: the daemons that require more performance are the poller and the schedulers. The administrator can add as many as he wants. The broker daemon should be on a well provisioned server for larger installations, as only a single broker can be active at one time. A picture is worth a thousand words:
 
 
 .. image:: /_static/images///official/images/shinken-architecture.png
@@ -78,7 +78,7 @@ This architecture is fully flexible and scalable: the daemons that require more 
 
 .. _advanced/distributed#the_smart_and_automatic_load_balancing:
 
-The smart and automatic load balancing 
+The smart and automatic load balancing
 =======================================
 
 
@@ -98,7 +98,7 @@ This action is done in two parts:
 
 .. _advanced/distributed#creating_independent_packs:
 
-Creating independent packs 
+Creating independent packs
 ---------------------------
 
 
@@ -123,7 +123,7 @@ In this example, we will have two packs:
 
 .. _advanced/distributed#the_packs_aggregations_into_scheduler_configurations:
 
-The packs aggregations into scheduler configurations 
+The packs aggregations into scheduler configurations
 -----------------------------------------------------
 
 
@@ -136,16 +136,16 @@ When all relation packs are created, the Arbiter aggregates them into N configur
 
 .. _advanced/distributed#the_configurations_sending_to_satellites:
 
-The configurations sending to satellites 
+The configurations sending to satellites
 -----------------------------------------
 
 
-When all configurations are created, the Arbiter sends them to the N active Schedulers. A Scheduler can start processing checks once it has received and loaded it's configuration without having to wait for all schedulers to be ready(v1.2). For larger configurations, having more than one Scheduler, even on a single server is highly recommended, as they will load their configurations(new or updated) faster. The Arbiter also creates configurations for satellites (pollers, reactionners and brokers) with links to Schedulers so they know where to get jobs to do. After sending the configurations, the Arbiter begins to watch for orders from the users and is responsible for monitoring the availability of the satellites. 
+When all configurations are created, the Arbiter sends them to the N active Schedulers. A Scheduler can start processing checks once it has received and loaded it's configuration without having to wait for all schedulers to be ready(v1.2). For larger configurations, having more than one Scheduler, even on a single server is highly recommended, as they will load their configurations(new or updated) faster. The Arbiter also creates configurations for satellites (pollers, reactionners and brokers) with links to Schedulers so they know where to get jobs to do. After sending the configurations, the Arbiter begins to watch for orders from the users and is responsible for monitoring the availability of the satellites.
 
 
 .. _advanced/distributed#the_high_availability:
 
-The high availability 
+The high availability
 ======================
 
 
@@ -156,11 +156,11 @@ The shinken architecture is a high availability one. Before looking at how this 
 
 .. _advanced/distributed#when_a_node_dies:
 
-When a node dies 
+When a node dies
 -----------------
 
 
-Nobody is perfect. A server can crash, an application too. That is why administrators have spares: they can take configurations of failing elements and reassign them. For the moment the only daemon that does not have a spare is the Arbiter, but this will be added in the future. The Arbiter regularly checks if everyone is available. If a scheduler or another satellite is dead, it sends its conf to a spare node, defined by the administrator. All satellites are informed by this change so they can get their jobs from the new element and do not try to reach the dead one. If a node was lost due to a network interruption and it comes back up, the Arbiter will notice and ask the old system to drop its configuration. 
+Nobody is perfect. A server can crash, an application too. That is why administrators have spares: they can take configurations of failing elements and reassign them. For the moment the only daemon that does not have a spare is the Arbiter, but this will be added in the future. The Arbiter regularly checks if everyone is available. If a scheduler or another satellite is dead, it sends its conf to a spare node, defined by the administrator. All satellites are informed by this change so they can get their jobs from the new element and do not try to reach the dead one. If a node was lost due to a network interruption and it comes back up, the Arbiter will notice and ask the old system to drop its configuration.
 The availability parameters can be modified from the default settings when using larger configurations as the Schedulers or Brokers can become busy and delay their availability responses. The timers are aggressive by default for smaller installations. See daemon configuration parameters for more information on the three timers involved.
 This can be explained by the following picture :
 
@@ -169,7 +169,7 @@ This can be explained by the following picture :
    :scale: 90 %
 
 
-External commands dispatching 
+External commands dispatching
 ==============================
 
 The administrator needs to send orders to the schedulers (like a new status for passive checks). In the Shinken way of thinking, the users only need to send orders to one daemon that will then dispatch them to all others. In Nagios the administrator needs to know where the hosts or services are to send the order to the right node. In Shinken the administrator just sends the order to the Arbiter, that's all. External commands can be divided into two types :
@@ -182,7 +182,7 @@ For each command, Shinken knows if it is global or not. If global, it just sends
 
 .. _advanced/distributed#poller_tag:
 
-Different types of Pollers: poller_tag 
+Different types of Pollers: poller_tag
 =======================================
 
 
@@ -205,7 +205,7 @@ The pollers can be tagged with multiple poller_tags. If they are tagged, they wi
 
 .. _advanced/distributed#use_cases:
 
-Use cases 
+Use cases
 ----------
 
 
@@ -219,12 +219,12 @@ In the first case, it can be useful to have a windows box in a domain with a pol
 The second case is a classic one: when you have a DMZ network, you need to have a dedicated poller that is in the DMZ, and return results to a scheduler in LAN. With this, you can still have dependencies between DMZ hosts and LAN hosts, and still be sure that checks are done in a DMZ-only poller.
 
 
-Different types of Reactionners: reactionner_tag 
+Different types of Reactionners: reactionner_tag
 =================================================
 
   * :ref:`Use cases <advanced/distributed#use_cases>`
 
-Like for the pollers, reactionners can also have 'tags'. So you can tag your host/service or commands with 
+Like for the pollers, reactionners can also have 'tags'. So you can tag your host/service or commands with
 "reactionner_tag". If a notification or an event handler uses a "tagged" or "untagged" command in a untagged host/service, it takes the reactionner_tag of this host/service. In a "untaged" host/service, it's the command tag that is taken into account.
 
 The reactionners can be tagged with multiple reactionner_tags. If they are tagged, they will only take checks that are tagged, not the untagged ones, unless they defined the tag "None".
@@ -234,7 +234,7 @@ Like for the poller case, it's mainly useful for DMZ/LAN or GNU/Linux/Windows ca
 
 .. _advanced/distributed#realms:
 
-Advanced architectures: Realms 
+Advanced architectures: Realms
 ===============================
 
 
@@ -256,7 +256,7 @@ We will use a generic term for this site management, **Realms**.
 
 .. _advanced/distributed#realms_in_few_words:
 
-Realms in few words 
+Realms in few words
 --------------------
 
 
@@ -265,7 +265,7 @@ A realm is a pool of resources (scheduler, poller, reactionner and broker) that 
 
 .. _advanced/distributed#realms_are_not_poller_tags:
 
-Realms are not poller_tags! 
+Realms are not poller_tags!
 ----------------------------
 
 
@@ -274,16 +274,16 @@ Make sure to undestand when to use realms and when to use poller_tags.
   * **realms are used to segregate schedulers**
   * **poller_tags are used to segregate pollers**
 
-For some cases poller_tag functionality could also be done using Realms. The question you need to ask yourself: Is a poller_tag "enough", or do you need to fully segregate a the scheduler level and use Realms. In realms, schedulers do not communicate with schedulers from other Realms. 
+For some cases poller_tag functionality could also be done using Realms. The question you need to ask yourself: Is a poller_tag "enough", or do you need to fully segregate a the scheduler level and use Realms. In realms, schedulers do not communicate with schedulers from other Realms.
 
-If you just need a poller in a DMZ network, use poller_tag. 
+If you just need a poller in a DMZ network, use poller_tag.
 
 If you need a scheduler/poller in a customer LAN, use realms.
 
 
 .. _advanced/distributed#sub_realms:
 
-Sub realms 
+Sub realms
 -----------
 
 
@@ -292,7 +292,7 @@ A realm can contain another realm. It does not change anything for schedulers: t
 
 .. _advanced/distributed#example_of_realm_usage:
 
-Example of realm usage 
+Example of realm usage
 -----------------------
 
 
