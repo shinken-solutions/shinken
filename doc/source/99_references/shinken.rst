@@ -669,5 +669,4 @@ Subpackages
     shinken.discovery
     shinken.misc
     shinken.objects
-    shinken.webui
 
