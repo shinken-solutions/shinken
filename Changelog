@@ -2,6 +2,20 @@
 Shinken ChangeLog
 ########################
 
+2.4.3 - xx/0x/2016
+-------------------
+        CORE ENHANCEMENT
+        Add: First version for a online profiling system, not enabled currently
+
+        CORE FIXES
+        Fix: initial_state mapping for hosts
+        Add: Better logging for regenerator
+
+        MISC ENHANCEMENT
+        Enh: HTML mail notifications fix and improvements
+        Enh: Change TCP Connect scan to TCP Syn scan with nmap for discovery features
+        Enh: Various Documentation 
+
 2.4.2 - 01/10/2015
 -------------------
         CORE ENHANCEMENT
