@@ -477,7 +477,7 @@ if __name__ == "__main__":
         logging.debug('Connect to %s smtp server' % (opts.smtp))
         smtp = smtplib.SMTP(opts.smtp)
         logging.debug('Send the mail')
-        smtp.sendmail(opts.smtpfrom, receivers, mail.as_string())
+        smtp.sendmail(get_user(), receivers, mail.as_string())
         logging.info("Mail sent successfuly")
     else:
         sendmail = '/usr/sbin/sendmail'
