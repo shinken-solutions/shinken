@@ -52,7 +52,7 @@ Shinken has a lot of featuress, we started to list some of them in the last para
 
   * Integration with web user interfaces:
 
-      * WebUI (Shinken's own UI)
+      * WebUI (Shinken own User Interface: https://github.com/shinken-monitoring/mod-webui/wiki)
       * Thruk
       * Adagios
       * Multisite

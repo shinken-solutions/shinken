@@ -296,6 +296,7 @@ business_impact_modulations
 
 icon_set
   This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server
+  *Note:* In WebUI version 2, this variable is not used anymore
 
 maintenance_period
   Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_

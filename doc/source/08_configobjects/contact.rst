@@ -1,48 +1,48 @@
 .. _configobjects/contact:
 
 ===================
-Contact Definition 
+Contact Definition
 ===================
 
 
-Description 
+Description
 ============
 
 A contact definition is used to identify someone who should be contacted in the event of a problem on your network. The different arguments to a contact definition are described below.
 
 
-Definition Format 
+Definition Format
 ==================
 
 Bold directives are required, while the others are optional.
 
 
 ================================= =====================================
-define contact{                                                        
-**contact_name**                  ***contact_name***                   
-alias                             *alias*                              
-contactgroups                     *contactgroup_names*                 
-**host_notifications_enabled**    **[0/1]**                            
-**service_notifications_enabled** **[0/1]**                            
-**host_notification_period**      ***timeperiod_name***                
-**service_notification_period**   ***timeperiod_name***                
-**host_notification_options**     **[d,u,r,f,s,n]**                    
-**service_notification_options**  **[w,u,c,r,f,s,n]**                  
-**host_notification_commands**    ***command_name***                   
-**service_notification_commands** ***command_name***                   
-email                             *email_address*                      
+define contact{
+**contact_name**                  ***contact_name***
+alias                             *alias*
+contactgroups                     *contactgroup_names*
+**host_notifications_enabled**    **[0/1]**
+**service_notifications_enabled** **[0/1]**
+**host_notification_period**      ***timeperiod_name***
+**service_notification_period**   ***timeperiod_name***
+**host_notification_options**     **[d,u,r,f,s,n]**
+**service_notification_options**  **[w,u,c,r,f,s,n]**
+**host_notification_commands**    ***command_name***
+**service_notification_commands** ***command_name***
+email                             *email_address*
 pager                             *pager_number or pager_email_gateway*
-address*x*                        *additional_contact_address*         
-can_submit_commands               [0/1]                                
-is_admin                          [0/1]                                
-retain_status_information         [0/1]                                
-retain_nonstatus_information      [0/1]                                
-min_business_impact               [0/1/2/3/4/5]                        
+address*x*                        *additional_contact_address*
+can_submit_commands               [0/1]
+is_admin                          [0/1]
+retain_status_information         [0/1]
+retain_nonstatus_information      [0/1]
+min_business_impact               [0/1/2/3/4/5]
 }
 ================================= =====================================
 
 
-Example Definition 
+Example Definition
 ===================
 
 
@@ -67,7 +67,7 @@ Example Definition
   }
 
 
-Directive Descriptions 
+Directive Descriptions
 =======================
 
 contact_name
@@ -81,13 +81,13 @@ contactgroups
 
 host_notifications_enabled
   This directive is used to determine whether or not the contact will receive notifications about host problems and recoveries. Values :
-  
+
     * 0 = don't send notifications
     * 1 = send notifications
 
 service_notifications_enabled
   This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries. Values:
-   
+
     * 0 = don't send notifications
     * 1 = send notifications
 
@@ -102,7 +102,7 @@ host_notification_commands
 
 host_notification_options
   This directive is used to define the host states for which notifications can be sent out to this contact. Valid options are a combination of one or more of the following:
-  
+
     * d = notify on DOWN host states
     * u = notify on UNREACHABLE host states
     * r = notify on host recoveries (UP states)
@@ -111,7 +111,7 @@ host_notification_options
 
 service_notification_options
   This directive is used to define the service states for which notifications can be sent out to this contact. Valid options are a combination of one or more of the following:
-  
+
     * w = notify on WARNING service states
     * u = notify on UNKNOWN service states
     * c = notify on CRITICAL service states
@@ -132,32 +132,32 @@ address*x*
   Address directives are used to define additional “addresses" for the contact. These addresses can be anything - cell phone numbers, instant messaging addresses, etc. Depending on how you configure your notification commands, they can be used to send out an alert o the contact. Up to six addresses can be defined using these directives (*address1* through *address6*). The $CONTACTADDRESS*x*$ :ref:`macro <thebasics/macros>` will contain this value.
 
 can_submit_commands
-  This directive is used to determine whether or not the contact can submit :ref:`external commands <advanced/extcommands>` to Shinken from the CGIs. Values:
-  
+  This directive is used to determine whether or not the contact can submit :ref:`external commands <advanced/extcommands>` to Shinken from the WebUI. Values:
+
     * 0 = don't allow contact to submit commands
     * 1 = allow contact to submit commands.
 
 is_admin
   This directive is used to determine whether or not the contact can see all object in :ref:`WebUI <integration/webui>`. Values:
-  
+
     * 0 = normal user, can see all objects he is in contact
     * 1 = allow contact to see all objects
 
 retain_status_information
   This directive is used to determine whether or not status-related information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value :
-  
+
     * 0 = disable status information retention
     * 1 = enable status information retention.
 
 retain_nonstatus_information
   This directive is used to determine whether or not non-status information about the contact is retained across program restarts. This is only useful if you have enabled state retention using the :ref:`retain_state_information <configuration/configmain-advanced#retain_state_information>` directive. Value :
-  
+
     * 0 = disable non-status information retention
     * 1 = enable non-status information retention
 
 min_business_impact
-  This directive is use to define the minimum business criticity level of a service/host the contact will be notified. Please see :ref:`root_problems_and_impacts <architecture/problems-and-impacts>`  for more details. 
-  
+  This directive is use to define the minimum business criticity level of a service/host the contact will be notified. Please see :ref:`root_problems_and_impacts <architecture/problems-and-impacts>`  for more details.
+
     * 0 = less important
     * 1 = more important than 0
     * 2 = more important than 1
