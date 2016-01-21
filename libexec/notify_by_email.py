@@ -25,7 +25,6 @@ import logging
 import getpass
 import smtplib
 import urllib
-from html import HTML
 from optparse import OptionParser, OptionGroup
 from email.mime.text import MIMEText
 from email.MIMEImage import MIMEImage
@@ -132,7 +131,7 @@ def get_webui_port():
 
 def get_shinken_url():
     if opts.webui:
-        hostname = socket.gethostname()
+        hostname = socket.getfqdn()
         webui_port = get_webui_port()
         if not webui_port:
             return
@@ -153,7 +152,7 @@ def get_user():
     if opts.sender:
         return opts.sender
     else:
-        return '@'.join((getpass.getuser(), socket.gethostname()))
+        return '@'.join((getpass.getuser(), socket.getfqdn()))
 
 
 #############################################################################
@@ -307,10 +306,14 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
     # avoiding decoding error.
     html_content = '\r\n'.join(html_content)
     try:
-        html_msg = html_content.encode(sys.stdout.encoding)
-    except UnicodeDecodeError as e:
+        if sys.stdout.encoding is not None:
+            encoding = sys.stdout.encoding
+        else:
+            encoding = 'utf-8'
+        html_msg = html_content.encode(encoding)
+    except UnicodeDecodeError:
         logging.debug('Content is Unicode encoded.')
-        html_msg = html_content.decode('utf-8').encode(sys.stdout.encoding)
+        html_msg = html_content.decode('utf-8').encode(encoding)
 
 
     logging.debug('HTML string: %s' % html_msg)
