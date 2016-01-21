@@ -12,30 +12,30 @@ Tuning and advanced parameters
    (and ask for help on the mailing list).
 
 
-Performance data parameters 	
+Performance data parameters
 ============================
 
-Performance Data Processor Command Timeout 
+Performance Data Processor Command Timeout
 -------------------------------------------
 
-Format:  
+Format:
 
 ::
 
   perfdata_timeout=<seconds>
 
-Example:  
+Example:
 
 ::
 
   perfdata_timeout=5
-  
+
 This is the maximum number of seconds that Shinken will allow a :ref:`host performance data processor command <configuration/configmain-advanced#host_perfdata_file_processing_command>` or :ref:`service performance data processor command <configuration/configmain-advanced#service_perfdata_file_processing_command>` to be run. If a command exceeds this time limit it will be killed and a warning will be logged.
 
 
 .. _configuration/configmain-advanced#process_performance_data:
 
-Performance Data Processing Option 
+Performance Data Processing Option
 -----------------------------------
 
 Format:
@@ -52,7 +52,7 @@ Example:
 
 This value determines whether or not Shinken will process host and service check :ref:`performance data <advanced/perfdata>`.
 
-  * 0 = Don't process performance data 
+  * 0 = Don't process performance data
   * 1 = Process performance data (default)
 
 If you want to use tools like PNP, NagiosGrapher or Graphite set it to 1.
@@ -61,7 +61,7 @@ If you want to use tools like PNP, NagiosGrapher or Graphite set it to 1.
 .. _configuration/configmain-advanced#host_perfdata_command:
 .. _configuration/configmain-advanced#service_perfdata_command:
 
-Host/Service Performance Data Processing Command 
+Host/Service Performance Data Processing Command
 -------------------------------------------------
 
 Format:
@@ -77,14 +77,14 @@ Example:
 
   host_perfdata_command=process-host-perfdata
   service_perfdata_command=process-service-perfdata
-  
+
 This option allows you to specify a command to be run after every host/service check to process host/service :ref:`performance data <advanced/perfdata>` that may be returned from the check. The command argument is the short name of a :ref:`command definition <configobjects/command>` that you define in your object configuration file. This command is only executed if the :ref:`Performance Data Processing Option <configuration/configmain-advanced#process_performance_data>` option is enabled globally and if the "process_perf_data" directive in the :ref:`host definition <configobjects/host>` is enabled.
 
 
 .. _configuration/configmain-advanced#host_perfdata_file:
 .. _configuration/configmain-advanced#service_perfdata_file:
 
-Host/Service Performance Data File 
+Host/Service Performance Data File
 -----------------------------------
 
 Format:
@@ -100,13 +100,13 @@ Example:
 
   host_perfdata_file=/var/lib/shinken/host-perfdata.dat
   service_perfdata_file=/var/lib/shinken/service-perfdata.dat
-  
+
 This option allows you to specify a file to which host/service :ref:`performance data <advanced/perfdata>` will be written after every host check. Data will be written to the performance file as specified by the :ref:`Host Performance Data File Template <configuration/configmain-advanced#host_perfdata_file_template>` option or the service one. Performance data is only written to this file if the :ref:`Performance Data Processing Option <configuration/configmain-advanced#process_performance_data>` option is enabled globally and if the "process_perf_data" directive in the :ref:`host definition <configobjects/host>` is enabled.
 
 
 .. _configuration/configmain-advanced#host_perfdata_file_template:
 
-Host Performance Data File Template 
+Host Performance Data File Template
 ------------------------------------
 
 Format:
@@ -120,13 +120,13 @@ Example:
 ::
 
   host_perfdata_file_template=[HOSTPERFDATA]\t$TIMET$\t$HOSTNAME$\t$HOSTEXECUTIONTIME$\t$HOSTOUTPUT$\t$HOSTPERFDATA$
-  
+
 This option determines what (and how) data is written to the :ref:`host performance data file <configuration/configmain-advanced#host_perfdata_file>`. The template may contain :ref:`macros <thebasics/macros>`, special characters (\t for tab, \r for carriage return, \n for newline) and plain text. A newline is automatically added after each write to the performance data file.
 
 
 .. _configuration/configmain-advanced#service_perfdata_file_template:
 
-Service Performance Data File Template 
+Service Performance Data File Template
 ---------------------------------------
 
 Format:
@@ -140,14 +140,14 @@ Example:
 ::
 
   service_perfdata_file_template=[SERVICEPERFDATA]\t$TIMET$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$
-  
+
 This option determines what (and how) data is written to the :ref:`service performance data file <configuration/configmain-advanced#service_perfdata_file>`. The template may contain :ref:`macros <thebasics/macros>`, special characters (\t for tab, \r for carriage return, \n for newline) and plain text. A newline is automatically added after each write to the performance data file.
 
 
 .. _configuration/configmain-advanced#host_perfdata_file_mode:
 .. _configuration/configmain-advanced#service_perfdata_file_mode:
 
-Host/Service Performance Data File Mode 
+Host/Service Performance Data File Mode
 ----------------------------------------
 
 Format:
@@ -163,7 +163,7 @@ Example:
 
   host_perfdata_file_mode=a
   service_perfdata_file_mode=a
-  
+
 This option determines how the :ref:`host performance data file <configuration/configmain-advanced#host_perfdata_file>` (or the service one) is opened. Unless the file is a named pipe you'll probably want to use the default mode of append.
 
   * a = Open file in append mode (default)
@@ -174,7 +174,7 @@ This option determines how the :ref:`host performance data file <configuration/c
 .. _configuration/configmain-advanced#host_perfdata_file_processing_interval:
 .. _configuration/configmain-advanced#service_perfdata_file_processing_interval:
 
-Host/Service Performance Data File Processing Interval (Unused) 
+Host/Service Performance Data File Processing Interval (Unused)
 ----------------------------------------------------------------
 
 Format:
@@ -190,14 +190,14 @@ Example:
 
   host_perfdata_file_processing_interval=0
   service_perfdata_file_processing_interval=0
-  
+
 This option allows you to specify the interval (in seconds) at which the :ref:`host performance data file <configuration/configmain-advanced#host_perfdata_file>` (or the service one) is processed using the :ref:`host performance data file processing command <configuration/configmain-advanced#host_perfdata_command>`. A value of 0 indicates that the performance data file should not be processed at regular intervals.
 
 
 .. _configuration/configmain-advanced#host_perfdata_file_processing_command:
 .. _configuration/configmain-advanced#service_perfdata_file_processing_command:
 
-Host/Service Performance Data File Processing Command (Unused) 
+Host/Service Performance Data File Processing Command (Unused)
 ---------------------------------------------------------------
 
 Format:
@@ -213,17 +213,17 @@ Example:
 
   host_perfdata_file_processing_command=process-host-perfdata-file
   service_perfdata_file_processing_command=process-service-perfdata-file
-  
+
 This option allows you to specify the command that should be executed to process the :ref:`host performance data file <configuration/configmain-advanced#host_perfdata_file>` (or the service one). The command argument is the short name of a :ref:`command definition <configobjects/command>` that you define in your object configuration file. The interval at which this command is executed is determined by the :ref:`host_perfdata_file_processing_interval <configuration/configmain-advanced#host_perfdata_file_processing_interval>` directive.
 
 
-Advanced scheduling parameters 
+Advanced scheduling parameters
 ===============================
 
 
 .. _configuration/configmain-advanced#passive_host_checks_are_soft:
 
-Passive Host Checks Are SOFT Option (Not implemented) 
+Passive Host Checks Are SOFT Option (Not implemented)
 ------------------------------------------------------
 
 Format:
@@ -237,7 +237,7 @@ Example:
 ::
 
   passive_host_checks_are_soft=1
-  
+
 This option determines whether or not Shinken will treat :ref:`passive host checks <thebasics/passivechecks>` as HARD states or SOFT states. By default, a passive host check result will put a host into a :ref:`HARD state type <thebasics/statetypes>`. You can change this behavior by enabling this option.
 
   * 0 = Passive host checks are HARD (default)
@@ -248,7 +248,7 @@ This option determines whether or not Shinken will treat :ref:`passive host chec
 .. _configuration/configmain-advanced#enable_predictive_host_dependency_checks:
 .. _configuration/configmain-advanced#enable_predictive_service_dependency_checks:
 
-Predictive Host/Service Dependency Checks Option (Unused) 
+Predictive Host/Service Dependency Checks Option (Unused)
 ----------------------------------------------------------
 
 Format:
@@ -264,7 +264,7 @@ Example:
 
   enable_predictive_host_dependency_checks=1
   enable_predictive_service_dependency_checks=1
-  
+
 This option determines whether or not Shinken will execute predictive checks of hosts/services that are being depended upon (as defined in :ref:`host/services dependencies <advanced/dependencies>`) for a particular host/service when it changes state. Predictive checks help ensure that the dependency logic is as accurate as possible. More information on how predictive checks work can be found :ref:`here <advanced/dependencychecks>`.
 
   * 0 = Disable predictive checks
@@ -274,7 +274,7 @@ This option determines whether or not Shinken will execute predictive checks of 
 .. _configuration/configmain-advanced#check_for_orphaned_services:
 .. _configuration/configmain-advanced#check_for_orphaned_hosts:
 
-Orphaned Host/Service Check Option 
+Orphaned Host/Service Check Option
 -----------------------------------
 
 Format:
@@ -290,7 +290,7 @@ Example:
 
   check_for_orphaned_services=1
   check_for_orphaned_hosts=1
-  
+
 This option allows you to enable or disable checks for orphaned service/host checks. Orphaned checks are checks which have been launched to pollers but have not had any results reported in a long time.
 
 Since no results have come back in for it, it is not rescheduled in the event queue. This can cause checks to stop being executed. Normally it is very rare for this to happen - it might happen if an external user or process killed off the process that was being used to execute a check.
@@ -305,7 +305,7 @@ If this option is enabled and Shinken finds that results for a particular check 
 
 .. _configuration/configmain-advanced#soft_state_dependencies:
 
-Soft State Dependencies Option (Not implemented) 
+Soft State Dependencies Option (Not implemented)
 -------------------------------------------------
 
 Format:  soft_state_dependencies=<0/1>
@@ -317,13 +317,13 @@ This option determines whether or not Shinken will use soft state information wh
   * 1 = Use soft state dependencies
 
 
-Performance tuning 
+Performance tuning
 ===================
 
 .. _configuration/configmain-advanced#cached_host_check_horizon:
 .. _configuration/configmain-advanced#cached_service_check_horizon:
 
-Cached Host/Service Check Horizon 
+Cached Host/Service Check Horizon
 ----------------------------------
 
 Format:
@@ -339,7 +339,7 @@ Example:
 
    cached_host_check_horizon=15
    cached_service_check_horizon=15
-  
+
 This option determines the maximum amount of time (in seconds) that the state of a previous host check is considered current. Cached host states (from host/service checks that were performed more recently than the time specified by this value) can improve host check performance immensely. Too high of a value for this option may result in (temporarily) inaccurate host/service states, while a low value may result in a performance hit for host/service checks. Use a value of 0 if you want to disable host/service check caching. More information on cached checks can be found :ref:`here <advanced/cachedchecks>`.
 
 .. tip::  Nagios default is 15s, but it's a tweak that make checks less accurate. So Shinken use 0s as a default. If you have performances problems and you can't add a new scheduler or poller, increase this value and start to buy a new server because this won't be magical.
@@ -347,7 +347,7 @@ This option determines the maximum amount of time (in seconds) that the state of
 
 .. _configuration/configmain-advanced#use_large_installation_tweaks:
 
-Large Installation Tweaks Option 
+Large Installation Tweaks Option
 ---------------------------------
 
 Format:
@@ -361,7 +361,7 @@ Example:
 ::
 
   use_large_installation_tweaks=0
-  
+
 This option determines whether or not the Shinken daemon will take shortcuts to improve performance. These shortcuts result in the loss of a few features, but larger installations will likely see a lot of benefit from doing so. If you can't add new satellites to manage the load (like new pollers), you can activate it. More information on what optimizations are taken when you enable this option can be found :ref:`here <tuning/largeinstalltweaks>`.
 
   * 0 = Don't use tweaks (default)
@@ -369,12 +369,12 @@ This option determines whether or not the Shinken daemon will take shortcuts to 
 
 
 
-Flapping parameters 
+Flapping parameters
 ====================
 
 .. _configuration/configmain-advanced#enable_flap_detection:
 
-Flap Detection Option 
+Flap Detection Option
 ----------------------
 
 Format:
@@ -388,7 +388,7 @@ Example:
 ::
 
   enable_flap_detection=1
-  
+
 This option determines whether or not Shinken will try and detect hosts and services that are “flapping". Flapping occurs when a host or service changes between states too frequently, resulting in a barrage of notifications being sent out. When Shinken detects that a host or service is flapping, it will temporarily suppress notifications for that host/service until it stops flapping.
 
 More information on how flap detection and handling works can be found :ref:`here <advanced/flapping>`.
@@ -400,7 +400,7 @@ More information on how flap detection and handling works can be found :ref:`her
 .. _configuration/configmain-advanced#low_host_flap_threshold:
 .. _configuration/configmain-advanced#low_service_flap_threshold:
 
-Low Service/Host Flap Threshold 
+Low Service/Host Flap Threshold
 --------------------------------
 
 Format:
@@ -416,14 +416,14 @@ Example:
 
   low_service_flap_threshold=25.0
   low_host_flap_threshold=25.0
-  
+
 This option is used to set the low threshold for detection of host/service flapping. For more information on how flap detection and handling works (and how this option affects things) read :ref:`this <advanced/flapping>`.
 
 
 .. _configuration/configmain-advanced#high_host_flap_threshold:
 .. _configuration/configmain-advanced#high_service_flap_threshold:
 
-High Service/Host Flap Threshold 
+High Service/Host Flap Threshold
 ---------------------------------
 
 Format:
@@ -439,7 +439,7 @@ Example:
 
   high_service_flap_threshold=50.0
   high_host_flap_threshold=50.0
-  
+
 This option is used to set the high threshold for detection of host/service flapping. For more information on how flap detection and handling works (and how this option affects things) read :ref:`this <advanced/flapping>`.
 
 
@@ -448,7 +448,7 @@ This option is used to set the high threshold for detection of host/service flap
 .. _configuration/configmain-advanced#event_handler_timeout:
 .. _configuration/configmain-advanced#notification_timeout:
 
-Various commands Timeouts 
+Various commands Timeouts
 --------------------------
 
 Format:
@@ -468,18 +468,18 @@ Example:
   notification_timeout=60
   ocsp_timeout=5
   ochp_timeout=5
-  
+
 This is the maximum number of seconds that Shinken will allow :ref:`event handlers <advanced/eventhandlers>`, notification, :ref:`obsessive compulsive service processor command <configuration/configmain-advanced#ocsp_command>` or a :ref:`Obsessive Compulsive Host Processor Command <configuration/configmain-advanced#ochp_command>` to be run. If an command exceeds this time limit it will be killed and a warning will be logged.
 
 There is often widespread confusion as to what this option really does. It is meant to be used as a last ditch mechanism to kill off commands which are misbehaving and not exiting in a timely manner. It should be set to something high (like 60 seconds or more for notification, less for oc*p commands), so that each event handler command normally finishes executing within this time limit. If an event handler runs longer than this limit, Shinken will kill it off thinking it is a runaway processes.
 
 
-Old Obsess Over commands 
+Old Obsess Over commands
 =========================
 
 .. _configuration/configmain-advanced#obsess_over_services:
 
-Obsess Over Services Option 
+Obsess Over Services Option
 ----------------------------
 
 Format:
@@ -493,7 +493,7 @@ Example:
 ::
 
   obsess_over_services=1
-  
+
 This value determines whether or not Shinken will “obsess" over service checks results and run the :ref:`obsessive compulsive service processor command <configuration/configmain-advanced#ocsp_command>` you define. I know _ funny name, but it was all I could think of. This option is useful for performing :ref:`distributed monitoring <advanced/distributed>`. If you're not doing distributed monitoring, don't enable this option.
 
   * 0 = Don't obsess over services (default)
@@ -502,7 +502,7 @@ This value determines whether or not Shinken will “obsess" over service checks
 
 .. _configuration/configmain-advanced#ocsp_command:
 
-Obsessive Compulsive Service Processor Command 
+Obsessive Compulsive Service Processor Command
 -----------------------------------------------
 
 Format:
@@ -524,7 +524,7 @@ It's used nearly only for the old school distributed architecture. If you use it
 
 .. _configuration/configmain-advanced#obsess_over_hosts:
 
-Obsess Over Hosts Option 
+Obsess Over Hosts Option
 -------------------------
 
 Format:
@@ -538,7 +538,7 @@ Example:
 ::
 
   obsess_over_hosts=1
-  
+
 This value determines whether or not Shinken will “obsess" over host checks results and run the :ref:`obsessive compulsive host processor command <configuration/configmain-advanced#ochp_command>` you define. Same like the service one but for hosts :)
 
   * 0 = Don't obsess over hosts (default)
@@ -547,7 +547,7 @@ This value determines whether or not Shinken will “obsess" over host checks re
 
 .. _configuration/configmain-advanced#ochp_command:
 
-Obsessive Compulsive Host Processor Command 
+Obsessive Compulsive Host Processor Command
 --------------------------------------------
 
 Format:
@@ -561,19 +561,19 @@ Example:
 ::
 
   ochp_command=obsessive_host_handler
-  
-This option allows you to specify a command to be run after every host check, which can be useful in :ref:`distributed monitoring <advanced/distributed>`. This command is executed after any :ref:`event handler <advanced/eventhandlers>` or :ref:`notification <thebasics/notifications>` commands. The command argument is the short name of a :ref:`command definition <configobjects/command>` that you define in your object configuration file. 
+
+This option allows you to specify a command to be run after every host check, which can be useful in :ref:`distributed monitoring <advanced/distributed>`. This command is executed after any :ref:`event handler <advanced/eventhandlers>` or :ref:`notification <thebasics/notifications>` commands. The command argument is the short name of a :ref:`command definition <configobjects/command>` that you define in your object configuration file.
 
 This command is only executed if the :ref:`Obsess Over Hosts Option <configuration/configmain-advanced#obsess_over_hosts>` option is enabled globally and if the "obsess_over_host" directive in the :ref:`host definition <configobjects/host>` is enabled.
 
 
-Freshness check 
+Freshness check
 ================
 
 .. _configuration/configmain-advanced#check_service_freshness:
 .. _configuration/configmain-advanced#check_host_freshness:
 
-Host/Service Freshness Checking Option 
+Host/Service Freshness Checking Option
 ---------------------------------------
 
 Format:
@@ -589,7 +589,7 @@ Example:
 
   check_service_freshness=0
   check_host_freshness=0
-  
+
 This option determines whether or not Shinken will periodically check the “freshness" of host/service checks. Enabling this option is useful for helping to ensure that :ref:`passive service checks <thebasics/passivechecks>` are received in a timely manner. More information on freshness checking can be found :ref:`here <advanced/freshness>`.
 
   * 0 = Don't check host/service freshness
@@ -599,7 +599,7 @@ This option determines whether or not Shinken will periodically check the “fre
 .. _configuration/configmain-advanced#service_freshness_check_interval:
 .. _configuration/configmain-advanced#host_freshness_check_interval:
 
-Host/Service Freshness Check Interval 
+Host/Service Freshness Check Interval
 --------------------------------------
 
 Format:
@@ -615,13 +615,13 @@ Example:
 
   service_freshness_check_interval=60
   host_freshness_check_interval=60
-  
+
 This setting determines how often (in seconds) Shinken will periodically check the “freshness" of host/service check results. If you have disabled host/service freshness checking (with the :ref:`check_service_freshness <configuration/configmain-advanced#check_service_freshness>` option), this option has no effect. More information on freshness checking can be found :ref:`here <advanced/freshness>`.
 
 
 .. _configuration/configmain-advanced#additional_freshness_latency:
 
-Additional Freshness Threshold Latency Option (Not implemented) 
+Additional Freshness Threshold Latency Option (Not implemented)
 ----------------------------------------------------------------
 
 Format:
@@ -635,7 +635,7 @@ Example:
 ::
 
   additional_freshness_latency=15
-  
+
 This option determines the number of seconds Shinken will add to any host or services freshness threshold it automatically calculates (e.g. those not specified explicitly by the user). More information on freshness checking can be found :ref:`here <advanced/freshness>`.
 
 
@@ -1177,13 +1177,13 @@ They are listed on another page :ref:`unused Nagios parameters <advanced/unused-
 
 
 
-All the others :) 
+All the others :)
 ==================
 
 
 .. _configuration/configmain-advanced#date_format:
 
-Date Format (Not implemented) 
+Date Format (Not implemented)
 ------------------------------
 
 Format:
@@ -1197,11 +1197,11 @@ Example:
 ::
 
   date_format=us
-  
+
 This option allows you to specify what kind of date/time format Shinken should use in date/time :ref:`macros <thebasics/macros>`. Possible options (along with example output) include:
 
 ============== =================== ===================
-Option         Output Format       Sample Output      
+Option         Output Format       Sample Output
 us             MM/DD/YYYY HH:MM:SS 06/30/2002 03:15:00
 euro           DD/MM/YYYY HH:MM:SS 30/06/2002 03:15:00
 iso8601        YYYY-MM-DD HH:MM:SS 2002-06-30 03:15:00
@@ -1213,7 +1213,7 @@ strict-iso8601 YYYY-MM-DDTHH:MM:SS 2002-06-30T03:15:00
 
 .. _configuration/configmain-advanced#illegal_object_name_chars:
 
-Illegal Object Name Characters 
+Illegal Object Name Characters
 -------------------------------
 
 Format:
@@ -1227,13 +1227,13 @@ Example:
 ::
 
   illegal_object_name_chars=`-!$%^&*"|'<>?,()=
-  
+
 This option allows you to specify illegal characters that cannot be used in host names, service descriptions, or names of other object types. Shinken will allow you to use most characters in object definitions, but I recommend not using the characters shown in the example above. Doing may give you problems in the web interface, notification commands, etc.
 
 
 .. _configuration/configmain-advanced#illegal_macro_output_chars:
 
-Illegal Macro Output Characters 
+Illegal Macro Output Characters
 --------------------------------
 
 Format:
@@ -1247,7 +1247,7 @@ Example:
 ::
 
   illegal_macro_output_chars=`-$^&"|'<>
-  
+
 This option allows you to specify illegal characters that should be stripped from :ref:`macros <thebasics/macros>` before being used in notifications, event handlers, and other commands. This DOES NOT affect macros used in service or host check commands. You can choose to not strip out the characters shown in the example above, but I recommend you do not do this. Some of these characters are interpreted by the shell (i.e. the backtick) and can lead to security problems. The following macros are stripped of the characters you specify:
 
   * "$HOSTOUTPUT$"
@@ -1259,10 +1259,10 @@ This option allows you to specify illegal characters that should be stripped fro
   * "$SERVICEACKAUTHOR$"
   * "$SERVICEACKCOMMENT$"
 
-  
+
 .. _configuration/configmain-advanced#use_regexp_matching:
 
-Regular Expression Matching Option (Not implemented) 
+Regular Expression Matching Option (Not implemented)
 -----------------------------------------------------
 
 Format:
@@ -1276,7 +1276,7 @@ Example:
 ::
 
   use_regexp_matching=0
-  
+
 This option determines whether or not various directives in your :ref:`Object Configuration Overview <configuration/configobject>` will be processed as regular expressions. More information on how this works can be found :ref:`here <advanced/objecttricks>`.
 
   * 0 = Don't use regular expression matching (default)
@@ -1285,7 +1285,7 @@ This option determines whether or not various directives in your :ref:`Object Co
 
 .. _configuration/configmain-advanced#use_true_regexp_matching:
 
-True Regular Expression Matching Option (Not implemented) 
+True Regular Expression Matching Option (Not implemented)
 ----------------------------------------------------------
 
 Format:
@@ -1299,7 +1299,7 @@ Example:
 ::
 
   use_true_regexp_matching=0
-  
+
 If you've enabled regular expression matching of various object directives using the :ref:`Regular Expression Matching Option <configuration/configmain-advanced#use_regexp_matching>` option, this option will determine when object directives are treated as regular expressions. If this option is disabled (the default), directives will only be treated as regular expressions if they contain \*, ?, +, or \.. If this option is enabled, all appropriate directives will be treated as regular expression _ be careful when enabling this! More information on how this works can be found :ref:`here <advanced/objecttricks>`.
 
   * 0 = Don't use true regular expression matching (default)
@@ -1308,7 +1308,7 @@ If you've enabled regular expression matching of various object directives using
 
 .. _configuration/configmain-advanced#admin_email:
 
-Administrator Email Address (unused) 
+Administrator Email Address (unused)
 -------------------------------------
 
 Format:
@@ -1322,13 +1322,13 @@ Example:
 ::
 
   admin_email=root@localhost.localdomain
-  
+
 This is the email address for the administrator of the local machine (i.e. the one that Shinken is running on). This value can be used in notification commands by using the "$ADMINEMAIL$" :ref:`macro <thebasics/macros>`.
 
 
 .. _configuration/configmain-advanced#admin_pager:
 
-Administrator Pager (unused) 
+Administrator Pager (unused)
 -----------------------------
 
 Format:
@@ -1342,7 +1342,7 @@ Example:
 ::
 
   admin_pager=pageroot@localhost.localdomain
-  
+
 This is the pager number (or pager email gateway) for the administrator of the local machine (i.e. the one that Shinken is running on). The pager number/address can be used in notification commands by using the $ADMINPAGER$ :ref:`macro <thebasics/macros>`.
 
 
@@ -1360,7 +1360,7 @@ Example:
 ::
 
   api_key=AZERTYUIOP
-  
+
 This is the api_key/scret to exchange with shinken.io and especially the kernel.shinken.io service that will print your shinken metrics. To enable it you must fill the api_key and secret parameters. You must register to http://shinken.io and look at your profile http://shinken.io/~ for your api_key and your secret.
 
 
@@ -1378,9 +1378,10 @@ Example:
 ::
 
   secret=QSDFGHJ
-  
+
 This is the api_key/scret to exchange with shinken.io and especially the kernel.shinken.io service that will print your shinken metrics. To enable it you must fill the api_key and secret parameters. You must register to http://shinken.io and look at your profile http://shinken.io/~ for your api_key and your secret.
 
+.. _configuration/configmain-advanced#statsd:
 
 Statsd host
 -----------------------------
@@ -1396,7 +1397,7 @@ Example:
 ::
 
   statsd_host=localhost
-  
+
 Configure your local statsd daemon address.
 
 
@@ -1415,7 +1416,7 @@ Example:
 ::
 
   statsd_port=8125
-  
+
 Configure your local statsd daemon port. Notice that the port is in UDP
 
 
@@ -1433,7 +1434,7 @@ Example:
 ::
 
   statsd_prefix=shinken
-  
+
 The prefix to add before all your stats so you will find them easily in graphite
 
 
@@ -1451,13 +1452,64 @@ Example:
 ::
 
   statsd_enabled=0
-  
+
 Enable or not the statsd communication. By default it's disabled.
 
 
+Statsd metrics polling interval
+-------------------------------
+
+Format:
+
+::
+
+  statsd_interval=<int>
+
+Example:
+
+::
+
+  statsd_interval=5
+
+Metrics such as internal queues length (checks, broks), number of elements in
+the configuration, latency and so on...may also be exposed via statsd at the
+interval specified in this parameter.
 
 
+Statsd metric name pattern
+-----------------------------
 
+Format:
+
+::
+
+  statsd_pattern=<string>
+
+Example:
+
+::
+
+  statsd_interval=shinken.{name}.{metric}
+
+Allows to customize metric names using a pattern string. Each metric has a base name which may be enriched using placeholders under the python `format` python string notation. The available placeholders are `service` (the service type), `metric` (the metric name) and `name` (the service name). Note that this parameter is mutually exclusive with `statsd_prefix` and has precedence if both are defined.
+
+
+Statsd metrics filter
+-----------------------------
+
+Format:
+
+::
+
+  statsd_types=<string>
+
+Example:
+
+::
+
+  statsd_types=system,queue,object,perf
+
+Allows to filter the metrics to send to statsd. Each metric is attached a type, and only the metrics holding the specifed types will be sent. See the metrics complete descriptions to see the available types.
 
 
 .. _Related topic: http://www.shinken-monitoring.org/forum/index.php/topic,21.0.html

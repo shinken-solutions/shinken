@@ -414,6 +414,9 @@ class SatelliteLink(Item):
         self.cfg['global']['statsd_port'] = cls.statsd_port
         self.cfg['global']['statsd_prefix'] = cls.statsd_prefix
         self.cfg['global']['statsd_enabled'] = cls.statsd_enabled
+        self.cfg['global']['statsd_interval'] = cls.statsd_interval
+        self.cfg['global']['statsd_types'] = cls.statsd_types
+        self.cfg['global']['statsd_pattern'] = cls.statsd_pattern
 
 
     # Some parameters for satellites are not defined in the satellites conf

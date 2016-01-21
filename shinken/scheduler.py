@@ -43,7 +43,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
-from shinken.util import nighty_five_percent
+from shinken.util import nighty_five_percent, get_memory
 from shinken.load import Load
 from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.stats import statsmgr
@@ -1533,12 +1533,48 @@ class Scheduler(object):
         return self.sched_daemon.get_objects_from_from_queues()
 
 
+    # Gets internal metrics for both statsd and
+    def get_internal_metrics(self):
+        # Queues
+        metrics = [
+            ('core.scheduler.mem', get_memory(), 'system'),
+            ('core.scheduler.checks.queue', len(self.checks), 'queue'),
+            ('core.scheduler.actions.queue', len(self.actions), 'queue'),
+            ('core.scheduler.broks.queue', len(self.broks), 'queue'),
+            ('core.scheduler.downtimes.queue', len(self.downtimes), 'queue'),
+            ('core.scheduler.comments.queue', len(self.comments), 'queue'),
+        ]
+
+        # Queues
+        for s in ("scheduled", "inpoller", "zombie", "timeout",
+                  "waitconsume", "waitdep", "havetoresolvedep"):
+            count = len([c for c in self.checks.values() if c.status == s])
+            metrics.append(('core.scheduler.checks.%s' % s, count, 'queue'))
+
+        # Latency
+        latencies = [s.latency for s in self.services]
+        lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+        if lat_min:
+            metrics.append(('core.scheduler.latency.min', lat_min, 'queue'))
+            metrics.append(('core.scheduler.latency.avg', lat_avg, 'queue'))
+            metrics.append(('core.scheduler.latency.max', lat_max, 'queue'))
+
+        # Objects
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            count = len(getattr(self, t))
+            metrics.append(('core.scheduler.%s' % t, count, 'object'))
+
+        return metrics
+
+
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
 
         res = self.sched_daemon.get_stats_struct()
-        res.update({'name': self.instance_name, 'type': 'scheduler'})
+        instance_name = getattr(self, "instance_name", "")
+        res.update({'name': instance_name, 'type': 'scheduler'})
 
         # Get a overview of the latencies with just
         # a 95 percentile view, but lso min/max values
@@ -1548,32 +1584,17 @@ class Scheduler(object):
         if lat_avg:
             res['latency'] = {'avg': lat_avg, 'min': lat_min, 'max': lat_max}
 
-        res['hosts'] = len(self.hosts)
-        res['services'] = len(self.services)
+        # Managed objects
+        res["objects"] = {}
+        for t in ("contacts", "contactgroups", "hosts", "hostgroups",
+                  "services", "servicegroups", "commands"):
+            res["objects"][t] = len(getattr(self, t))
+
         # metrics specific
         metrics = res['metrics']
-        metrics.append('scheduler.%s.checks.scheduled %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.inpoller %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.checks.zombie %d %d' %
-                       (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
-        metrics.append('scheduler.%s.actions.queue %d %d' %
-                       (self.instance_name,
-                        len(self.actions), now))
-        metrics.append('scheduler.%s.broks.queue %d %d' %
-                       (self.instance_name, len(self.broks), now))
-        metrics.append('scheduler.%s.downtimes %d %d' %
-                       (self.instance_name, len(self.downtimes), now))
-        metrics.append('scheduler.%s.comments %d %d' %
-                       (self.instance_name, len(self.comments), now))
-        if lat_min:
-            metrics.append('scheduler.%s.latency.min %f %d' % (self.instance_name, lat_min, now))
-            metrics.append('scheduler.%s.latency.avg %f %d' % (self.instance_name, lat_avg, now))
-            metrics.append('scheduler.%s.latency.max %f %d' % (self.instance_name, lat_max, now))
+        for metric in self.get_internal_metrics():
+            name, value, mtype = metric
+            metrics.append(name, value, now, mtype)
 
         all_commands = {}
         # compute some stats
@@ -1677,7 +1698,8 @@ class Scheduler(object):
                         # Call it and save the time spend in it
                         _t = time.time()
                         f()
-                        statsmgr.incr('loop.%s' % name, time.time() - _t)
+                        statsmgr.timing('loop.scheduler.%s' % name, time.time() - _t, 'perf')
+                # Getting memory has a cost, do not cellect it if not needed
 
             # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
@@ -1722,8 +1744,6 @@ class Scheduler(object):
                 self.dump_objects()
                 self.dump_config()
                 self.need_objects_dump = False
-
-
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

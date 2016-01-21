@@ -66,6 +66,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
+from shinken.util import get_memory
 from shinken.stats import statsmgr
 
 
@@ -305,7 +306,7 @@ class Satellite(BaseSatellite):
     def pynag_con_init(self, id):
         _t = time.time()
         r = self.do_pynag_con_init(id)
-        statsmgr.incr('con-init.scheduler', time.time() - _t)
+        statsmgr.timing('con-init.scheduler', time.time() - _t, "perf")
         return r
 
 
@@ -400,7 +401,9 @@ class Satellite(BaseSatellite):
     def manage_returns(self):
         _t = time.time()
         r = self.do_manage_returns()
-        statsmgr.incr('core.manage-returns', time.time() - _t)
+        _type = self.__class__.my_type
+        statsmgr.timing('core.%s.manage-returns' % _type, time.time() - _t,
+                        'perf')
         return r
 
 
@@ -409,6 +412,7 @@ class Satellite(BaseSatellite):
     def do_manage_returns(self):
         # For all schedulers, we check for waitforhomerun
         # and we send back results
+        count = 0
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
             # If sched is not active, I do not try return
@@ -435,10 +439,13 @@ class Satellite(BaseSatellite):
 
             # We clean ONLY if the send is OK
             if send_ok:
+                count += len(ret)
                 sched['wait_homerun'].clear()
             else:
                 self.pynag_con_init(sched_id)
                 logger.warning("Sent failed!")
+        _type = self.__class__.my_type
+        statsmgr.incr('core.%s.results.out' % _type, count, 'queue')
 
 
     # Get all returning actions for a call from a
@@ -457,7 +464,6 @@ class Satellite(BaseSatellite):
 
         # and clear our dict
         sched['wait_homerun'].clear()
-
         return ret
 
 
@@ -549,6 +555,8 @@ class Satellite(BaseSatellite):
 
     # Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
+        _type = self.__class__.my_type
+        statsmgr.incr('core.%s.broks.out' % _type, len(self.broks), 'queue')
         res = copy.copy(self.broks)
         self.broks.clear()
         return res
@@ -598,7 +606,7 @@ class Satellite(BaseSatellite):
             # So now we can really forgot it
             del self.workers[id]
 
-        
+
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
@@ -639,7 +647,7 @@ class Satellite(BaseSatellite):
             del self.q_by_mod[mod]
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
-        
+
     # Get the Queue() from an action by looking at which module
     # it wants with a round robin way to scale the load between
     # workers
@@ -687,7 +695,9 @@ class Satellite(BaseSatellite):
     def get_new_actions(self):
         _t = time.time()
         self.do_get_new_actions()
-        statsmgr.incr('core.get-new-actions', time.time() - _t)
+        _type = self.__class__.my_type
+        statsmgr.timing('core.%s.get-new-actions' % _type, time.time() - _t,
+                        'perf')
 
 
     # We get new actions from schedulers, we create a Message and we
@@ -702,6 +712,7 @@ class Satellite(BaseSatellite):
         do_actions = self.__class__.do_actions
 
         # We check for new check in each schedulers and put the result in new_checks
+        count = 0
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
             # If sched is not active, I do not try return
@@ -733,6 +744,7 @@ class Satellite(BaseSatellite):
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
+                    count += len(tmp)
                 else:  # no con? make the connection
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
@@ -749,6 +761,8 @@ class Satellite(BaseSatellite):
             except Exception, exp:
                 logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                 raise
+        _type = self.__class__.my_type
+        statsmgr.incr('core.%s.actions.in' % _type, count, 'queue')
 
 
     # In android we got a Queue, and a manager list for others
@@ -820,12 +834,11 @@ class Satellite(BaseSatellite):
                     logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)",
                                  sched_id, sched['name'], mod,
                                  i, q.qsize(), self.get_returns_queue_len())
-                    # also update the stats module
-                    statsmgr.incr('core.worker-%s.queue-size' % mod, q.qsize())
 
         # Before return or get new actions, see how we manage
         # old ones: are they still in queue (s)? If True, we
         # must wait more or at least have more workers
+        _type = self.__class__.my_type
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
         for mod in self.q_by_mod:
@@ -842,14 +855,14 @@ class Satellite(BaseSatellite):
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
         logger.debug("Wait ratio: %f", wait_ratio)
-        statsmgr.incr('core.wait-ratio', wait_ratio)
+        statsmgr.gauge('core.%s.wait-ratio' % _type, wait_ratio, 'queue')
 
         # We can wait more than 1s if needed,
         # no more than 5s, but no less than 1
         timeout = self.timeout * wait_ratio
         timeout = max(self.polling_interval, timeout)
         self.timeout = min(5 * self.polling_interval, timeout)
-        statsmgr.incr('core.timeout', wait_ratio)
+        statsmgr.gauge('core.%s.timeout' % _type, self.timeout, 'queue')
 
         # Maybe we do not have enough workers, we check for it
         # and launch the new ones if needed
@@ -859,7 +872,6 @@ class Satellite(BaseSatellite):
         # for queue in self.return_messages:
         while self.get_returns_queue_len() != 0:
             self.manage_action_return(self.get_returns_queue_item())
-
 
         # If we are passive, we do not initiate the check getting
         # and return
@@ -932,18 +944,26 @@ class Satellite(BaseSatellite):
         self.statsd_port = g_conf['statsd_port']
         self.statsd_prefix = g_conf['statsd_prefix']
         self.statsd_enabled = g_conf['statsd_enabled']
+        self.statsd_interval = g_conf['statsd_interval']
+        self.statsd_types = g_conf['statsd_types']
+        self.statsd_pattern = g_conf['statsd_pattern']
 
         # we got a name, we can now say it to our statsmgr
         if 'poller_name' in g_conf:
-            statsmgr.register(self, self.name, 'poller',
-                              api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
-                              statsd_host=self.statsd_host, statsd_port=self.statsd_port,
-                              statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+            service = 'poller'
         else:
-            statsmgr.register(self, self.name, 'reactionner',
-                              api_key=self.api_key, secret=self.secret,
-                              statsd_host=self.statsd_host, statsd_port=self.statsd_port,
-                              statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+            service = 'reactionner'
+        statsmgr.register(self, self.name, service,
+                          api_key=self.api_key,
+                          secret=self.secret,
+                          http_proxy=self.http_proxy,
+                          statsd_host=self.statsd_host,
+                          statsd_port=self.statsd_port,
+                          statsd_prefix=self.statsd_prefix,
+                          statsd_enabled=self.statsd_enabled,
+                          statsd_interval=self.statsd_interval,
+                          statsd_types=self.statsd_types,
+                          statsd_pattern=self.statsd_pattern)
 
         self.passive = g_conf['passive']
         if self.passive:
@@ -1046,6 +1066,29 @@ class Satellite(BaseSatellite):
                 self.q_by_mod[module.module_type] = {}
 
 
+    # Gets internal metrics for both statsd and
+    def get_internal_metrics(self):
+        _type = self.__class__.my_type
+
+        # Queues
+        metrics = [
+            ('core.%s.mem' % _type, get_memory(), 'system'),
+            ('core.%s.workers' % _type, len(self.workers), 'system'),
+            ('core.%s.external-commands.queue' % _type,
+             len(self.external_commands), 'queue'),
+            ('core.%s.broks.queue' % _type, len(self.broks), 'queue'),
+            ('core.%s.results.queue' % _type, self.get_returns_queue_len(),
+             'queue'),
+        ]
+
+        actions = 0
+        for mod in self.q_by_mod:
+            for q in self.q_by_mod[mod].values():
+                actions += q.qsize()
+        metrics.append(('core.%s.actions.queue' % _type, actions, 'queue'))
+        return metrics
+
+
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
@@ -1056,11 +1099,11 @@ class Satellite(BaseSatellite):
         # The receiver do nto have a passie prop
         if hasattr(self, 'passive'):
             res['passive'] = self.passive
-        metrics = res['metrics']
         # metrics specific
-        metrics.append('%s.%s.external-commands.queue %d %d' % (
-            _type, self.name, len(self.external_commands), now))
-
+        metrics = res['metrics']
+        for metric in self.get_internal_metrics():
+            name, value, mtype = metric
+            metrics.append(name, value, now, mtype)
         return res
 
 
