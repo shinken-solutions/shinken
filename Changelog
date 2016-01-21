@@ -9,6 +9,7 @@ Shinken ChangeLog
 
         CORE FIXES
         Fix: initial_state mapping for hosts
+        Fix: Fix duration when a parent is down
         Add: Better logging for regenerator
 
         MISC ENHANCEMENT
