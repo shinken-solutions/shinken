@@ -1023,7 +1023,7 @@ class Host(SchedulingItem):
         if state_code in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
         if self.state != self.last_state and \
-        not(self.state == "DOWN" and self.last_state == "UNREACHABLE"):
+                not(self.state == "DOWN" and self.last_state == "UNREACHABLE"):
             self.last_state_change = self.last_state_update
         self.duration_sec = now - self.last_state_change
 
