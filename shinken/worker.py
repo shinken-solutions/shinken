@@ -45,10 +45,10 @@ import traceback
 import cStringIO
 
 
-from shinken.log import logger
+from shinken.log import logger, BrokHandler
 from shinken.misc.common import setproctitle
 
-class Worker:
+class Worker(object):
     """This class is used for poller and reactionner to work.
     The worker is a process launch by theses process and read Message in a Queue
     (self.s) (slave)
@@ -79,7 +79,7 @@ class Worker:
         # By default, take our own code
         if target is None:
             target = self.work
-        self._process = Process(target=target, args=(s, returns_queue, self._c))
+        self._process = Process(target=self._prework, args=(target, s, returns_queue, self._c))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
         self.i_am_dying = False
@@ -89,6 +89,13 @@ class Worker:
             self.http_daemon = http_daemon
         else:  # windows forker do not like pickle http/lock
             self.http_daemon = None
+
+    def _prework(self, real_work, *args):
+        for handler in list(logger.handlers):
+            if isinstance(handler, BrokHandler):
+                logger.info("Cleaning BrokHandler %r from logger.handlers..", handler)
+                logger.removeHandler(handler)
+        real_work(*args)
 
     def is_mortal(self):
         return self._mortal
