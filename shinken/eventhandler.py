@@ -60,11 +60,13 @@ class EventHandler(Action):
         'worker':         StringProp(default='none'),
         'reactionner_tag':     StringProp(default='None'),
         'is_snapshot':    BoolProp(default=False),
+        'priority':       IntegerProp(default=100),
     }
 
     # id = 0  #Is common to Actions
     def __init__(self, command, id=None, ref=None, timeout=10, env={},
-                 module_type='fork', reactionner_tag='None', is_snapshot=False):
+                 module_type='fork', reactionner_tag='None',
+                 is_snapshot=False, priority=100):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -89,6 +91,7 @@ class EventHandler(Action):
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
         self.is_snapshot = is_snapshot
+        self.priority = priority
 
 
     # return a copy of the check but just what is important for execution

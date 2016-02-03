@@ -292,7 +292,7 @@ class Stats(object):
                     except HTTPException, exp:
                         logger.error('Stats REAPER cannot put to the metric server %s' % exp)
             except Exception, e:
-                logger.error(str(e))
+                logger.error("Reaper: %s", str(e))
                 logger.debug(traceback.format_exc())
             time.sleep(60)
 
@@ -317,7 +317,7 @@ class Stats(object):
                     name, val, _type = metric
                     self.gauge(name, val, _type)
             except Exception, e:
-                logger.error(str(e))
+                logger.error("Harvester: %s", str(e))
                 logger.debug(traceback.format_exc())
             time.sleep(self.statsd_interval)
 

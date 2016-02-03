@@ -171,7 +171,7 @@ class TestConfig(ShinkenTest):
         print "Host state", host.state, host.problem_has_been_acknowledged
         self.assertEqual('DOWN', host.state)
         self.assertEqual(True, host.problem_has_been_acknowledged)
-        
+
         # REMOVE ACK HOST
         excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
         self.sched.run_external_command(excmd)
@@ -193,7 +193,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(2, [])
         self.assert_any_log_match('RELOAD')
         self.assert_any_log_match('I awoke after sleeping 2 seconds')
-        
+
         # Show recent logs
         self.show_logs()
 
@@ -203,34 +203,34 @@ class TestConfig(ShinkenTest):
         self.sched.conf.accept_passive_unknown_check_results = True
 
         # Sched receives known host but unknown service service_check_result
-        self.sched.broks.clear()
+        del self.sched.broks[:]
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
-        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        broks = [b for b in self.sched.broks if b.type == 'unknown_service_check_result']
         self.assertTrue(len(broks) == 1)
 
         # Sched receives unknown host and service service_check_result
-        self.sched.broks.clear()
+        del self.sched.broks[:]
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;unknownhost;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
-        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        broks = [b for b in self.sched.broks if b.type == 'unknown_service_check_result']
         self.assertTrue(len(broks) == 1)
 
         # Sched receives unknown host host_check_result
-        self.sched.broks.clear()
+        del self.sched.broks[:]
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;unknownhost;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
-        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_host_check_result']
+        broks = [b for b in self.sched.broks if b.type == 'unknown_host_check_result']
         self.assertTrue(len(broks) == 1)
 
         # Now turn it off...
         self.sched.conf.accept_passive_unknown_check_results = False
 
         # Sched receives known host but unknown service service_check_result
-        self.sched.broks.clear()
+        del self.sched.broks[:]
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time()
         self.sched.run_external_command(excmd)
-        broks = [b for b in self.sched.broks.values() if b.type == 'unknown_service_check_result']
+        broks = [b for b in self.sched.broks if b.type == 'unknown_service_check_result']
         self.assertTrue(len(broks) == 0)
         self.assert_log_match(1, 'A command was received for service .* on host .*, but the service could not be found!')
         self.clear_logs()
@@ -246,7 +246,7 @@ class TestConfig(ShinkenTest):
         excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
         receiverdaemon.unprocessed_external_commands.append(excmd)
         receiverdaemon.push_external_commands_to_schedulers()
-        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        broks = [b for b in receiverdaemon.broks if b.type == 'unknown_service_check_result']
         self.assertEqual(len(broks), 1)
 
         # now turn it off...
@@ -255,8 +255,8 @@ class TestConfig(ShinkenTest):
         excmd = ExternalCommand('[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;unknownservice;1;Bobby is not happy|rtt=9999;5;10;0;10000' % time.time())
         receiverdaemon.unprocessed_external_commands.append(excmd)
         receiverdaemon.push_external_commands_to_schedulers()
-        receiverdaemon.broks.clear()
-        broks = [b for b in receiverdaemon.broks.values() if b.type == 'unknown_service_check_result']
+        del receiverdaemon.broks[:]
+        broks = [b for b in receiverdaemon.broks if b.type == 'unknown_service_check_result']
         self.assertEqual(len(broks), 0)
 
 

@@ -535,6 +535,9 @@ class Config(Item):
         'daemon_enabled':
             BoolProp(default=True),  # Put to 0 to disable the arbiter to run
 
+        'graceful_enabled':
+            BoolProp(default=False),  # Put to 0 to disable the arbiter to run
+
         'daemon_thread_pool_size':
             IntegerProp(default=16),
 

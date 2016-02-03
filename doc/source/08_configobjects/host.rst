@@ -88,6 +88,7 @@ snapshot_criteria                          [d,u]
 snapshot_interval                          #
 trigger_name                               *trigger_name*
 trigger_broker_raise_enabled               [0/1]
+priority                                   *priority*
 }
 ========================================== ======================================
 
@@ -273,14 +274,14 @@ realm
   This variable is used to define the :ref:`realm <configobjects/realm>` where the host will be put. By putting the host in a realm, it will be manage by one of the scheduler of this realm.
 
 poller_tag
-  This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter.
+  This directive is used to define the poller_tag of this command. This parameter may be defined, in order of precedence, on a`command`, a `host` or a `service`. If a poller tag is set, only pollers holding the same tag will handle the corresponding action.
 
-  By default the pollerag value is 'None', so all untagged pollers can take it because None is set by default for them.
+  By default there is no poller_tag, so all untagged pollers can take it.
 
 reactionner_tag
-  This variable is used to define the reactionner_tag of notifications_commands from this service. All of theses notifications will be taken by reactionners that have this value in their reactionner_tags parameter.
+  This directive is used to define the reactionner_tag of this command. This parameter may be defined, in order of precedence, on a`command`, a `host` or a `service`. If a reactionner tag is set, only reactionners holding the same tag will handle the corresponding action.
 
-  By default there is no reactionner_tag, so all untaggued reactionners can take it.
+  By default there is no reactionner_tag, so all untagged reactionners can take it.
 
 business_impact
   This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it's in error) to the maximum (5 = you lost your job if it fail). The default value is 2.
@@ -292,7 +293,7 @@ escalations
   This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.
 
 business_impact_modulations
-  This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.
+  This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a pay server, it will be important only in a specific timeperiod: near the pay day). Look at business_impact_modulations objects for more details.
 
 icon_set
   This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server
@@ -305,11 +306,11 @@ service_overrides
   This variable may be used to override services directives for a specific host. This is especially useful when services are inherited (for instance from packs), because it allows to have a host attached service set one of its directives a specific value. For example, on a set of web servers, **HTTP** service (inherited from **http** pack) on *production* servers should have notifications enabled **24x7**, and *staging* server should only notify during **workhours**. To do so, staging server should be set the following directive: **service_overrides HTTP,notification_period workhours**. Several overrides may be specified, each override should be written on a single line. *Caution*, *service_overrides* may be inherited (through the **use** directive), but specifying an override on a host overloads all values inherited from parent hosts, it does not append it (as of any single valued attribute). See :ref:`inheritance description<advanced/objectinheritance>` for more details.
 
 service_excludes
-  This variable may be used to *exclude* a service from a host. It addresses the situations where a set of serices is inherited from a pack or attached from a hostgroup, and an identified host should **NOT** have one (or more, comma separated) services defined. This allows to manage exceptions in the service asignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
+  This variable may be used to *exclude* a service from a host. It addresses the situations where a set of services is inherited from a pack or attached from a hostgroup, and an identified host should **NOT** have one (or more, comma separated) services defined. This allows to manage exceptions in the service assignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
   This will be **ignored** if there is *service_includes*
 
 service_includes
-  This variable may be used to *include only* a service from a host. It addresses the situations where a set of serices is inherited from a pack or attached from a hostgroup, and an identified host should **have only** one (or more, comma separated) services defined. This allows to manage exceptions in the service asignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
+  This variable may be used to *include only* a service from a host. It addresses the situations where a set of services is inherited from a pack or attached from a hostgroup, and an identified host should **have only** one (or more, comma separated) services defined. This allows to manage exceptions in the service assignment without having to define intermediary templates/hostgroups. See :ref:`inheritance description<advanced/objectinheritance>` for more details.
   This variable is considered **before** *service_excludes*
 
 labels
@@ -353,6 +354,9 @@ trigger_broker_raise_enabled
   This option define the behavior of the defined trigger (Default 0). If set to 1, this means the trigger will modify the output / return code of the check.
   If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
   Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
+
+priority
+  This options defines the host's priority regarding checks execution. When a poller is asking for new actions to execute to the scheduler, it will return the highest priority tasks first (the lower the number, the higher the priority). The `priority` parameter may be set, in order of ascending precedence, on a `command`, on a `host` and on a `service`. Priority defaults to `100`.
 
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

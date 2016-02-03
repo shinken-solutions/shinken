@@ -55,7 +55,7 @@ class TestSnapshot(ShinkenTest):
 
         self.show_and_clear_logs()
         
-        broks = self.sched.broks.values()
+        broks = self.sched.broks
         [b.prepare() for b in broks]
         types = set([b.type for b in broks])
         print types

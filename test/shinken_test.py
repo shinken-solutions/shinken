@@ -182,7 +182,7 @@ class ShinkenTest(unittest.TestCase):
         time_hacker.set_my_time()
         self.print_header()
         # i am arbiter-like
-        self.broks = {}
+        self.broks = []
         self.me = None
         self.log = logger
         self.log.load_obj(self)
@@ -276,7 +276,7 @@ class ShinkenTest(unittest.TestCase):
 
     def add(self, b):
         if isinstance(b, Brok):
-            self.broks[b.id] = b
+            self.broks.append(b)
             return
         if isinstance(b, ExternalCommand):
             self.sched.run_external_command(b.cmd_line)
@@ -366,7 +366,7 @@ class ShinkenTest(unittest.TestCase):
             broks = self.sched.broks
         else:
             broks = self.broks
-        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
+        for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
@@ -407,7 +407,7 @@ class ShinkenTest(unittest.TestCase):
             broks = self.sched.broks
         else:
             broks = self.broks
-        return len([b for b in broks.values() if b.type == 'log'])
+        return len([b for b in broks if b.type == 'log'])
 
 
     def count_actions(self):
@@ -423,12 +423,12 @@ class ShinkenTest(unittest.TestCase):
             broks = self.sched.broks
         else:
             broks = self.broks
-        id_to_del = []
-        for b in broks.values():
+        to_del = []
+        for b in broks:
             if b.type == 'log':
-                id_to_del.append(b.id)
-        for id in id_to_del:
-            del broks[id]
+                to_del.append(b)
+        for b in to_del:
+            broks.remove(b)
 
 
     def clear_actions(self):
@@ -444,22 +444,26 @@ class ShinkenTest(unittest.TestCase):
             self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
         lognum = 1
-        broks = sorted(self.sched.broks.values(), key=lambda x: x.id)
+        broks = sorted(self.sched.broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
+                print "%s (%s): %s" % (lognum, brok.id, brok.data['log'])
                 if index == lognum:
+                    print brok.data['log']
                     if re.search(regex, brok.data['log']):
                         return
                 lognum += 1
+
+        [b.prepare() for b in self.broks]
         self.assertTrue(no_match, "%s found a matched log line in broks :\n"
-                               "index=%s pattern=%r\n"
-                               "broks_logs=[[[\n%s\n]]]" % (
+                            "index=%s pattern=%r\n"
+                            "broks_logs=[[[\n%s\n]]]" % (
             '*HAVE*' if no_match else 'Not',
             index, pattern, '\n'.join(
                 '\t%s=%s' % (idx, b.strip())
                 for idx, b in enumerate(
-                    (b.data['log'] for b in broks if b.type == 'log'),
+                    (b.data['log'] for b in self.broks if b.type == 'log'),
                     1)
             )
         ))
@@ -467,7 +471,7 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(broks.values(), lambda x, y: x.id - y.id)
+        broks = sorted(broks, lambda x, y: x.id - y.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -492,7 +496,7 @@ class ShinkenTest(unittest.TestCase):
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
         res = []
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        for brok in self.sched.broks:
             if brok.type == 'log':
                 if re.search(regex, brok.data['log']):
                     res.append(brok.data['log'])

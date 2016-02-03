@@ -29,6 +29,7 @@ import traceback
 import cPickle
 import zlib
 import base64
+import sys
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -37,8 +38,9 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
-from shinken.util import nighty_five_percent
+from shinken.util import nighty_five_percent, parse_memory_expr
 from shinken.stats import statsmgr
+
 
 # Interface for Workers
 
@@ -54,12 +56,20 @@ if not, they must drop their checks """
     # poller or reactionner ask us actions
     def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'],
                    reactionner_tags=['None'], worker_name='none',
-                   module_types=['fork']):
+                   module_types=['fork'], max_actions=None):
         # print "We ask us checks"
         do_checks = (do_checks == 'True')
         do_actions = (do_actions == 'True')
-        res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags, reactionner_tags,
-                                         worker_name, module_types)
+        if max_actions is not None:
+            try:
+                max_actions = int(max_actions)
+            except ValueError:
+                logger.error("Invalid max_actions in get_checks, should be an "
+                             "integer. Igored.")
+                max_actions = None
+        res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags,
+                                         reactionner_tags, worker_name,
+                                         module_types, max_actions)
         # print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
 
@@ -92,14 +102,22 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
 (initial status BEFORE update...) """
 
     # A broker ask us broks
-    def get_broks(self, bname):
+    def get_broks(self, bname, broks_batch=0):
         # Maybe it was not registered as it should, if so,
         # do it for it
         if bname not in self.app.brokers:
             self.fill_initial_broks(bname)
 
+        if broks_batch > 0:
+            try:
+                broks_batch = int(broks_batch)
+            except ValueError:
+                logger.error("Invalid broks_batch in get_broks, should be an "
+                             "integer. Igored.")
+                broks_batch = 0
+
         # Now get the broks for this specific broker
-        res = self.app.get_broks(bname)
+        res = self.app.get_broks(bname, broks_batch)
         # got only one global counter for broks
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
@@ -115,10 +133,10 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
     def fill_initial_broks(self, bname):
         if bname not in self.app.brokers:
             logger.info("A new broker just connected : %s", bname)
-            self.app.brokers[bname] = {'broks': {}, 'has_full_broks': False}
+            self.app.brokers[bname] = {'broks': [], 'has_full_broks': False}
         e = self.app.brokers[bname]
         if not e['has_full_broks']:
-            e['broks'].clear()
+            del e['broks'][:]
             self.app.fill_initial_broks(bname, with_logs=True)
 
 
@@ -342,6 +360,8 @@ class Shinken(BaseSatellite):
         self.setup_new_conf()
         logger.info("New configuration loaded")
         self.sched.run()
+        if self.new_conf and self.graceful_enabled:
+            self.switch_process()
 
 
     def setup_new_conf(self):
@@ -364,6 +384,7 @@ class Shinken(BaseSatellite):
         statsd_interval = pk['statsd_interval']
         statsd_types = pk['statsd_types']
         statsd_pattern = pk['statsd_pattern']
+        harakiri_threshold = parse_memory_expr(pk['harakiri_threshold'])
 
         # horay, we got a name, we can set it in our stats objects
         statsmgr.register(self.sched, instance_name, 'scheduler',
@@ -381,6 +402,11 @@ class Shinken(BaseSatellite):
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs", t0, time.time() - t0)
+
+        if harakiri_threshold is not None:
+            self.raw_conf = self.new_conf
+        else:
+            self.raw_conf = None
         self.new_conf = None
 
         # Tag the conf with our data
@@ -394,6 +420,7 @@ class Shinken(BaseSatellite):
         self.override_conf = override_conf
         self.modules = modules
         self.satellites = satellites
+        self.harakiri_threshold = harakiri_threshold
         # self.pollers = self.app.pollers
 
         if self.conf.human_timestamp_log:
@@ -508,6 +535,11 @@ class Shinken(BaseSatellite):
         # and set ourself in it
         self.schedulers = {self.conf.instance_id: self.sched}
 
+    # Suicide service if memory threshold has been exceeded
+    def check_memory_usage(self):
+        super(Shinken, self).check_memory_usage()
+        if self.new_conf is not None:
+            self.sched.die()
 
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
@@ -528,6 +560,7 @@ class Shinken(BaseSatellite):
                 logger.setLevel('DEBUG')
 
             self.look_for_early_exit()
+            self.load_parent_config()
             self.do_daemon_init_and_start()
             self.load_modules_manager()
             self.http_daemon.register(self.interface)

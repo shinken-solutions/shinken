@@ -253,6 +253,10 @@ class Host(SchedulingItem):
             ListProp(default=['d', 'u'], fill_brok=['full_status'], merging='join'),
         'snapshot_interval':
             IntegerProp(default=5),
+
+        # Check/notification priority
+        'priority':
+            IntegerProp(default=100, fill_brok=['full_status']),
     })
 
     # properties set only for running purpose

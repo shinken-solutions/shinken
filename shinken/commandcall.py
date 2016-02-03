@@ -58,10 +58,12 @@ class CommandCall(DummyCommandCall):
         'timeout':         IntegerProp(default=-1),
         'late_relink_done': BoolProp(default=False),
         'enable_environment_macros': BoolProp(default=False),
+        'priority':        IntegerProp(default=100),
     }
 
     def __init__(self, commands, call, poller_tag='None',
-                 reactionner_tag='None', enable_environment_macros=0):
+                 reactionner_tag='None', enable_environment_macros=0,
+                 priority=100):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -89,6 +91,11 @@ class CommandCall(DummyCommandCall):
             if self.valid and reactionner_tag is 'None':
                 # from command if not set
                 self.reactionner_tag = self.command.reactionner_tag
+            # Item priority has precedence if a value is explicitely set
+            if int(priority) != self.properties["priority"].default:
+                self.priority = int(priority)
+            else:
+                self.priority = int(self.command.priority)
 
     def get_command_and_args(self):
         """We want to get the command and the args with ! splitting.

@@ -33,8 +33,8 @@ class Testservice_without_host(ShinkenTest):
     def test_service_without_host_do_not_break(self):
         self.assertIs(False, self.conf.conf_is_correct)
 
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+        [b.prepare() for b in self.broks]
+        logs = [b.data['log'] for b in self.broks if b.type == 'log']
         self.assertLess(
             0,
             len([ log

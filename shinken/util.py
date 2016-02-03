@@ -916,3 +916,21 @@ def get_memory(who="self"):
         return resource.getrusage(resource.RUSAGE_BOTH).ru_maxrss * 1024
     else:
         return 0
+
+
+def parse_memory_expr(expr):
+    if expr is None:
+        return None
+    try:
+        if expr.endswith("K"):
+            value = float(expr[:-1]) * 1024
+        if expr.endswith("M"):
+            value = float(expr[:-1]) * 1048576
+        elif expr.endswith("G"):
+            value = float(expr[:-1]) * 1073741824
+        else:
+            value = float(expr)
+        return value
+    except ValueError:
+        logger.error("Invalid memory threshold expression: %s" % expr)
+        return None

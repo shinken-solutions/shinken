@@ -79,7 +79,7 @@ snapshot_criteria                          [w,c,u]
 snapshot_interval                          #
 trigger_name                               *trigger_name*
 trigger_broker_raise_enabled               [0/1]
-
+priority                                   *priority*
 }
 ========================================== ======================================
 
@@ -115,7 +115,7 @@ host_name
 hostgroup_name
   This directive is used to specify the *short name(s)* of the :ref:`hostgroup(s) <configobjects/hostgroup>` that the service "runs" on or is associated with. Multiple hostgroups should be separated by commas. The hostgroup_name may be used instead of, or in addition to, the host_name directive.
 
-  This is possibleto define "complex" hostgroup expression with the following operators :
+  This is possible to define "complex" hostgroup expression with the following operators :
 
     * & : it's use to make an AND betweens groups
     * | : it's use to make an OR betweens groups
@@ -306,10 +306,10 @@ notes
   This directive is used to define an optional string of notes pertaining to the service. If you specify a note here, you will see the it in the :ref:`extended information <thebasics/cgis>` CGI (when you are viewing information about the specified service).
 
 notes_url
-  This directive is used to define an optional URL that can be used to provide more information about the service. If you specify an URL, you will see a red folder icon in the CGIs (when you are viewing service information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///). This can be very useful if you want to make detailed information on the service, emergency contact methods, etc. available to other support staff.
+  This directive is used to define an optional URL that can be used to provide more information about the service. If you specify an URL, you will see a red folder icon in the CGIs (when you are viewing service information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the  same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///). This can be very useful if you want to make detailed information on the service, emergency contact methods, etc. available to other support staff.
 
 action_url
-  This directive is used to define an optional URL that can be used to provide more actions to be performed on the service. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing service information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///).
+  This directive is used to define an optional URL that can be used to provide more actions to be performed on the service. If you specify an URL, you will see a red “splat" icon in the CGIs (when you are viewing service information) that links to the URL you specify here. Any valid URL can be used. If you plan on using relative paths, the base path will the  same as what is used to access the CGIs (i.e. ///cgi-bin/shinken///).
 
 icon_image
   This variable is used to define the name of a GIF, PNG, or JPG image that should be associated with this service. This image will be displayed in the :ref:`status <thebasics/cgis#thebasics_cgis_status_cgi>` and :ref:`extended information <thebasics/cgis>` CGIs. The image will look best if it is 40x40 pixels in size. Images for services are assumed to be in the **logos/** subdirectory in your HTML images directory.
@@ -318,19 +318,19 @@ icon_image_alt
   This variable is used to define an optional string that is used in the ALT tag of the image specified by the *<icon_image>* argument. The ALT tag is used in the :ref:`status <thebasics/cgis#thebasics_cgis_status_cgi>`, :ref:`extended information <thebasics/cgis>` and :ref:`statusmap <thebasics/cgis#thebasics_cgis_statusmap_cgi>` CGIs.
 
 poller_tag
-  This variable is used to define the poller_tag of checks from this service. All of theses checks will be taken by pollers that have this value in their poller_tags parameter.
+  This directive is used to define the poller_tag of this command. This parameter may be defined, in order of precedence, on a`command`, a `host` or a `service`. If a poller tag is set, only pollers holding the same tag will handle the corresponding action.
 
-  By default there is no poller_tag, so all untaggued pollers can take it.
+  By default there is no poller_tag, so all untagged pollers can take it.
 
 reactionner_tag
-  This variable is used to define the reactionner_tag of notifications_commands from this service. All of theses notifications will be taken by reactionners that have this value in their reactionner_tags parameter.
+  This directive is used to define the reactionner_tag of this command. This parameter may be defined, in order of precedence, on a`command`, a `host` or a `service`. If a reactionner tag is set, only reactionners holding the same tag will handle the corresponding action.
 
-  By default there is no reactionner_tag, so all untaggued reactionners can take it.
+  By default there is no reactionner_tag, so all untagged reactionners can take it.
 
 duplicate_foreach
-  This is used to generate serveral service with only one service declaration.
-  Shinken understands this statement as : "Create a service for earch key in the variable".
-  Usually, this statement come with a "$KEY$" string in the service_description (to have a differente name) and in the check_command (you want also a different check)
+  This is used to generate several service with only one service declaration.
+  Shinken understands this statement as : "Create a service for each key in the variable".
+  Usually, this statement come with a "$KEY$" string in the service_description (to have a different name) and in the check_command (you want also a different check)
   Moreover, one or several variables can be associated to each key. Then, values can be used in the service definition with $VALUE$ or $VALUEn$ macros.
 
 ::
@@ -368,7 +368,7 @@ duplicate_foreach
   }
 
 service_dependencies
-  This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dpendency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
+  This variable is used to define services that this service is dependent of for notifications. It's a comma separated list of services: host,service_description,host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period). For more complex failure criteria or dependency period you must create a service_dependency object, as described in :ref:`advanced dependency configuraton <advanced/advanced-dependencies>`. The host can be omitted from the configuration, which means that the service dependency is for the same host.
 
   ::
 
@@ -432,5 +432,7 @@ trigger_broker_raise_enabled
   If 0, this means the code executed by the trigger does nothing to the check (compute something elsewhere ?)
   Basically, if you use one of the predefined function (trigger_functions.py) set it to 1
 
+priority
+  This options defines the service's priority regarding checks execution. When a poller is asking for new actions to execute to the scheduler, it will return the highest priority tasks first (the lower the number, the higher the priority). The `priority` parameter may be set, in order of ascending precedence, on a `command`, on a `host` and on a `service`. Priority defaults to `100`.
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

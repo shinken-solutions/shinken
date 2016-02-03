@@ -1418,12 +1418,14 @@ class SchedulingItem(Item):
             poller_tag = c_in_progress.poller_tag
             env = c_in_progress.env
             module_type = c_in_progress.module_type
+            priority = c_in_progress.priority
 
             c = Check('scheduled', command_line, self, t, ref_check,
                       timeout=timeout,
                       poller_tag=poller_tag,
                       env=env,
                       module_type=module_type,
+                      priority=priority,
                       dependency_check=True)
 
             self.actions.append(c)
@@ -1469,12 +1471,15 @@ class SchedulingItem(Item):
             if check_command.timeout != -1:
                 timeout = check_command.timeout
 
+            priority = check_command.priority
+
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
             # And reactionner_tag too
             c = Check('scheduled', command_line, self, t, ref_check,
                       timeout=timeout, poller_tag=check_command.poller_tag,
-                      env=env, module_type=check_command.module_type)
+                      env=env, module_type=check_command.module_type,
+                      priority=priority)
 
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not

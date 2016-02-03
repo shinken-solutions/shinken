@@ -176,13 +176,14 @@ class Arbiter(Daemon):
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace,
                                       debug, debug_file)
 
+        self.graceful_enabled = False
         self.config_files = config_files
         self.verify_only = verify_only
         self.analyse = analyse
         self.migrate = migrate
         self.arb_name = arb_name
 
-        self.broks = {}
+        self.broks = []
         self.is_master = False
         self.me = None
 
@@ -204,7 +205,7 @@ class Arbiter(Daemon):
     # Use for adding things like broks
     def add(self, b):
         if isinstance(b, Brok):
-            self.broks[b.id] = b
+            self.broks.append(b)
         elif isinstance(b, ExternalCommand):
             self.external_commands.append(b)
         else:
@@ -217,13 +218,18 @@ class Arbiter(Daemon):
     # TODO: better find the broker, here it can be dead?
     # or not the good one?
     def push_broks_to_broker(self):
-        for brk in self.conf.brokers:
-            # Send only if alive of course
-            if brk.manage_arbiters and brk.alive:
-                is_send = brk.push_broks(self.broks)
+        brokers = self.conf.brokers
+        for brk in [b for b in brokers if b.manage_arbiters and b.alive]:
+            while len(self.broks) > 0:
+                if brk.broks_batch > 0:
+                    count = len(self.broks)
+                else:
+                    count = min(brk.broks_batch, len(self.broks))
+                is_send = brk.push_broks(self.broks[:count])
                 if is_send:
                     # They are gone, we keep none!
-                    self.broks.clear()
+                    del self.broks[:count]
+                    statsmgr.incr('core.arbiter.broks.out', count, 'queue')
 
     # We must take external_commands from all satellites
     # like brokers, pollers, reactionners or receivers
@@ -879,7 +885,7 @@ class Arbiter(Daemon):
     def restore_retention_data(self, data):
         broks = data['broks']
         external_commands = data['external_commands']
-        self.broks.update(broks)
+        self.broks.extend(broks)
         self.external_commands.extend(external_commands)
 
 

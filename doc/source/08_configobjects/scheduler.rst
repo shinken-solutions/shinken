@@ -1,11 +1,11 @@
 .. _configobjects/scheduler:
 
 =====================
-Scheduler Definition 
+Scheduler Definition
 =====================
 
 
-Description 
+Description
 ============
 
 The Scheduler daemon is in charge of the scheduling checks, the analysis of results and follow up actions (like if a service is down, ask for a host check). They do not launch checks or notifications. They keep a queue of pending checks and notifications for other elements of the architecture (like pollers or reactionners). There can be many schedulers.
@@ -13,13 +13,13 @@ The Scheduler daemon is in charge of the scheduling checks, the analysis of resu
 The Scheduler definition is optionnal. If no scheduler is defined, Shinken will "create" one for the user. There will be no high availability for it (no spare), and will use the default port in the server where the deamon is launched.
 
 
-Definition Format 
+Definition Format
 ==================
 
 Variables in red are required, while those in black are optional. However, you need to supply at least one optional variable in each definition for it to be of much use.
 
 ==================================== ========================
-define scheduler{                         
+define scheduler{
 scheduler_name                       *scheduler_name*
 address                              *dns name of ip address*
 port                                 *port*
@@ -27,11 +27,12 @@ spare                                //[0/1]//
 realm                                *realm name*
 modules                              *modules*
 accept_passive_unknown_check_results //[0/1]//
-}                                         
+harakiri_threshold                   *memory*
+}
 ==================================== ========================
 
 
-Example Definition: 
+Example Definition:
 ====================
 
 ::
@@ -42,7 +43,7 @@ Example Definition:
       port                   7770
       spare                  0
       realm                  Europe
-      
+
       # Optional parameters
       spare                  0   ; 1 = is a spare, 0 = is not a spare
       weight                 1   ; Some schedulers can manage more hosts than others
@@ -51,11 +52,11 @@ Example Definition:
       max_check_attempts     3   ; If ping fails N or more, then the node is dead
       check_interval         60  ; Ping node every minutes
       modules                PickleRetention
-      
+
       # Skip initial broks creation for faster boot time. Experimental feature
       # which is not stable.
       skip_initial_broks    0
-      
+
       # In NATted environments, you declare each satellite ip[:port] as seen by
       # *this* scheduler (if port not set, the port declared by satellite itself
       # is used)
@@ -63,7 +64,7 @@ Example Definition:
   }
 
 
-Variable Descriptions 
+Variable Descriptions
 ======================
 
 scheduler_name
@@ -86,3 +87,6 @@ modules
 
 accept_passive_unknown_check_results
   If this is enabled, the scheduler will accept passive check results for unconfigured hosts and will generate unknown host/service check result broks.
+
+harakiri_threshold
+  This parameter activates a memory watchdog that automatically restarts the service if the used memory raises the threshold. The default unit is the *kB*, but it may be defined with an explicit unit specifier: **M = MB**, **G = GB**. Note that `harakiri` is only active if `graceful_enabled` is set to `1` in daemon's ini file.

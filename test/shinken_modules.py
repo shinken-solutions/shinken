@@ -210,7 +210,7 @@ class TestConfig(ShinkenModulesTest):
     def show_broks(self, title):
         print
         print "--- ", title
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        for brok in sorted(self.sched.broks, lambda x, y: x.id - y.id):
             if re.compile('^service_').match(brok.type):
                 pass
                 #print "BROK:", brok.type

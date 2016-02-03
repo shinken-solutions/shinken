@@ -53,6 +53,7 @@ class Command(Item):
         'module_type':  StringProp(default=None),
         'timeout':      IntegerProp(default=-1),
         'enable_environment_macros': BoolProp(default=False),
+        'priority':     IntegerProp(default=100),
     })
 
     def __init__(self, params={}):
@@ -92,6 +93,8 @@ class Command(Item):
             # If no command starting with _, be fork :)
             else:
                 self.module_type = 'fork'
+        if not hasattr(self, 'priority'):
+            self.priority = 100
 
     def get_name(self):
         return self.command_name

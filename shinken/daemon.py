@@ -24,6 +24,7 @@
 
 import os
 import errno
+import stat
 import sys
 import time
 import signal
@@ -35,6 +36,9 @@ import traceback
 import cStringIO
 import logging
 import inspect
+import cPickle
+import subprocess
+import socket
 from Queue import Empty
 
 # Try to see if we are in an android device or not
@@ -56,6 +60,8 @@ from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, Int
     LogLevelProp
 from shinken.misc.common import setproctitle
 from shinken.profilermgr import profiler
+from shinken.safepickle import SafeUnpickler
+from shinken.util import get_memory
 
 try:
     import pwd
@@ -238,10 +244,12 @@ class Daemon(object):
         'hard_ssl_name_check':    BoolProp(default=False),
         'idontcareaboutsecurity': BoolProp(default=False),
         'daemon_enabled': BoolProp(default=True),
+        'graceful_enabled': BoolProp(default=False),
         'spare':         BoolProp(default=False),
         'max_queue_size': IntegerProp(default=0),
         'daemon_thread_pool_size': IntegerProp(default=8),
         'http_backend':  StringProp(default='auto'),
+        'graceful_timeout': IntegerProp(default=60),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -271,6 +279,7 @@ class Daemon(object):
 
         self.new_conf = None  # used by controller to push conf
         self.cur_conf = None
+        self.raw_conf = None
 
         # Flag to know if we need to dump memory or not
         self.need_dump_memory = False
@@ -319,7 +328,9 @@ class Daemon(object):
         self.unlink()
         self.do_stop()
         # Brok facilities are no longer available simply print the message to STDOUT
-        print("Stopping daemon. Exiting")
+        msg = "Stopping daemon. Exiting"
+        logger.info(msg)
+        print(msg)
         sys.exit(0)
 
 
@@ -332,6 +343,68 @@ class Daemon(object):
 
     def do_loop_turn(self):
         raise NotImplementedError()
+
+
+    # Respawn daemon and send it received configuration
+    def switch_process(self):
+        logger.info("Gracefully reloading daemon: %s" % " ".join(sys.argv))
+        env = os.environ.copy()
+        #env["SHINKEN_PPID"] = os.getpid()
+        p = subprocess.Popen(sys.argv,
+                             stdin=subprocess.PIPE,
+                             preexec_fn=os.setsid,
+                             env=env)
+        logger.info("Reloading daemon [pid=%s]", p.pid)
+        try:
+            raw_conf = cPickle.dumps(self.new_conf)
+            p.stdin.write(raw_conf)
+            p.stdin.close()
+            self.request_stop()
+        except Exception, e:
+            stdout = p.stdout.read()
+            logger.error("Failed to send configuration to spawned child "
+                         "[pid=%s] [retcode=%s] [stdout=%s] [err=%s]",
+                         p.pid, p.returncode, stdout, e)
+
+
+    def is_switched_process(self):
+        mode = os.fstat(0).st_mode
+        data_available = stat.S_ISFIFO(mode) or stat.S_ISREG(mode)
+        return self.graceful_enabled and self.is_daemon and data_available
+
+
+    def wait_parent_exit(self):
+        logger.info("Waiting for parent to stop")
+        now = time.time()
+        if self.host == "0.0.0.0":
+            host = "127.0.0.1"
+        else:
+            host = self.host
+        timeout = self.graceful_timeout
+
+        while True:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex((host, self.port))
+            logger.info("waiting parent: %s" % result)
+            if result == 0:
+                sock.close()
+                time.sleep(0.5)
+            else:
+                break
+            if timeout and time.time() - now > timeout:
+                break
+
+    # Loads configuration sent by parent process only if available
+    def load_parent_config(self):
+        if self.is_switched_process():
+            logger.info("Loading configuration from parent")
+            raw_config = sys.stdin.read()
+            new_conf = SafeUnpickler.loads(raw_config)
+            logger.info("Successfully loaded configuration from parent")
+            logger.info("Waiting for parent to stop")
+            self.wait_parent_exit()
+            self.new_conf = new_conf
 
 
     # Main loop for nearly all daemon
@@ -439,7 +512,6 @@ class Daemon(object):
 
     # Only on linux: Check for /dev/shm write access
     def check_shm(self):
-        import stat
         shm_path = '/dev/shm'
         if os.name == 'posix' and os.path.exists(shm_path):
             # We get the access rights, and we check them
@@ -471,7 +543,8 @@ class Daemon(object):
             raise InvalidPidFile(err)
 
 
-    # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
+    # Check (in pidfile) if there isn't already a daemon running. If yes and
+    # do_replace: kill it.
     # Keep in self.fpid the File object to the pidfile. Will be used by writepid.
     def check_parallel_run(self):
         # TODO: other daemon run on nt
@@ -482,10 +555,20 @@ class Daemon(object):
 
         # First open the pid file in open mode
         self.__open_pidfile()
+
+        # If graceful restart is enabled, do not try to check/kill parent
+        # daemon unless explicitely asked for, by giving the parent pid as pid
+        # parameter.
+        if self.graceful_enabled and self.new_conf is not None:
+            logger.info("Graceful restart required, delaying "
+                        "check_parallel_run.")
+            return
+
         try:
             pid = int(self.fpid.readline().strip(' \r\n'))
         except Exception as err:
-            logger.info("Stale pidfile exists at %s (%s). Reusing it.", err, self.pidfile)
+            logger.info("Stale pidfile exists at %s (%s). Reusing it.",
+                        err, self.pidfile)
             return
 
         try:
@@ -498,8 +581,8 @@ class Daemon(object):
             return
 
         if not self.do_replace:
-            raise SystemExit("valid pidfile exists (pid=%s) and not forced to replace. Exiting."
-                             % pid)
+            raise SystemExit("valid pidfile exists (pid=%s) and not forced "
+                             "to replace. Exiting." % pid)
 
         self.debug_output.append("Replacing previous instance %d" % pid)
         try:
@@ -575,8 +658,8 @@ class Daemon(object):
             # In the father: we check if our child exit correctly
             # it has to write the pid of our future little child..
             def do_exit(sig, frame):
-                logger.error("Timeout waiting child while it should have quickly returned ;"
-                             "something weird happened")
+                logger.error("Timeout waiting child while it should have "
+                             "quickly returned ;something weird happened")
                 os.kill(pid, 9)
                 sys.exit(1)
             # wait the child process to check its return status:
@@ -586,7 +669,8 @@ class Daemon(object):
             # 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.error("Something weird happened with/during second fork: status= %s", status)
+                logger.error("Something weird happened with/during second "
+                             "fork: status= %s", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -692,7 +776,7 @@ class Daemon(object):
             self.http_thread.start()
 
         # profiler.start()
-        
+
 
     # TODO: we do not use pyro anymore, change the function name....
     def setup_pyro_daemon(self):
@@ -817,6 +901,10 @@ class Daemon(object):
         uid = self.find_uid_from_name()
         gid = self.find_gid_from_name()
 
+        if os.getuid() == uid and os.getgid() == gid:
+            logger.debug("No need to setuid, already good.")
+            return
+
         if uid is None or gid is None:
             logger.error("uid or gid is none. Exiting")
             sys.exit(2)
@@ -828,16 +916,16 @@ class Daemon(object):
             try:
                 os.initgroups(self.user, gid)
             except OSError, e:
-                logger.warning('Cannot call the additional groups setting with initgroups (%s)',
-                               e.strerror)
+                logger.warning('Cannot call the additional groups setting '
+                               'with initgroups (%s)', e.strerror)
         elif hasattr(os, 'setgroups'):
             groups = [gid] + \
                      [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
             try:
                 os.setgroups(groups)
             except OSError, e:
-                logger.warning('Cannot call the additional groups setting with setgroups (%s)',
-                               e.strerror)
+                logger.warning('Cannot call the additional groups setting '
+                               'with setgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
@@ -1115,3 +1203,11 @@ class Daemon(object):
                     had_some_objects = True
                     self.add(o)
         return had_some_objects
+
+    # Checks memory consumption, and gracefully restarts if we're out of bounds
+    def check_memory_usage(self):
+        if self.graceful_enabled is False or self.harakiri_threshold is None:
+            return
+        if self.new_conf is None and get_memory() >= self.harakiri_threshold:
+            logger.info("Harakiri threshold reached, restarting the service")
+            self.new_conf = self.raw_conf

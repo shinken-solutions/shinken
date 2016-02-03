@@ -1522,8 +1522,8 @@ class TestConfigBroken(ShinkenTest):
         self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+        [b.prepare() for b in self.broks]
+        logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
         # Info: Simple_1Of_1unk_svc: my business rule is invalid
         # Info: Simple_1Of_1unk_svc: Business rule uses unknown service test_host_0/db3

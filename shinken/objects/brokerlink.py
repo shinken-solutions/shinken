@@ -34,6 +34,8 @@ class BrokerLink(SatelliteLink):
     properties.update({
         'broker_name': StringProp(fill_brok=['full_status'], to_send=True),
         'port': IntegerProp(default=7772, fill_brok=['full_status']),
+        'broks_batch': IntegerProp(default=0, fill_brok=['full_status'], to_send=True),
+        'harakiri_threshold': StringProp(default=None, fill_brok=['full_status'], to_send=True),
     })
 
     def get_name(self):

@@ -33,8 +33,8 @@ class TestServiceNoHost(ShinkenTest):
         # A service that has no host to be linked to should raise on error.
         self.assertIs(False, self.conf.conf_is_correct)
 
-        [b.prepare() for b in self.broks.values()]
-        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+        [b.prepare() for b in self.broks]
+        logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
 
         self.assertLess(

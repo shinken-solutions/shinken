@@ -64,11 +64,13 @@ class Check(Action):
         'module_type':      StringProp(default='fork'),
         'worker':           StringProp(default='none'),
         'from_trigger':     BoolProp(default=False),
+        'priority':         IntegerProp(default=100),
     }
 
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None,
                  timeout=10, poller_tag='None', reactionner_tag='None',
-                 env={}, module_type='fork', from_trigger=False, dependency_check=False):
+                 env={}, module_type='fork', from_trigger=False,
+                 dependency_check=False, priority=100):
 
         self.is_a = 'check'
         self.type = ''
@@ -109,6 +111,7 @@ class Check(Action):
             self.internal = False
         self.from_trigger = from_trigger
         self.dependency_check = dependency_check
+        self.priority = priority
 
 
     def copy_shell(self):
