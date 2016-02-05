@@ -438,8 +438,11 @@ class SchedulingItem(Item):
         if False in parent_is_down:
             return False
         else:  # every parents are dead, so... It's not my fault, unless I want to know about it anyway :)
-            if 'u' in self.notification_options:
-                return False
+            if hasattr(self, 'notification_options'):
+                if 'u' in self.notification_options:
+                    return False
+                else:
+                    return True
             else:
                 return True
 
