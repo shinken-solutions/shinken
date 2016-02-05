@@ -437,8 +437,11 @@ class SchedulingItem(Item):
         # if a parent is not down, no dep can explain the pb
         if False in parent_is_down:
             return False
-        else:  # every parents are dead, so... It's not my fault :)
-            return True
+        else:  # every parents are dead, so... It's not my fault, unless I want to know about it anyway :)
+            if 'u' in self.notification_options:
+                return False
+            else:
+                return True
 
     # We check if we are no action just because of ours parents (or host for
     # service)
