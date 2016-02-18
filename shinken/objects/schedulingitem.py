@@ -1352,6 +1352,11 @@ class SchedulingItem(Item):
             else:
                 contacts = self.contacts
 
+        if hasattr(self, "host"):
+            contacts = contacts + self.host.contacts
+            # Make contact uniq
+            contacts = [x for i,x in enumerate(contacts) if x not in contacts[i+1:]]
+
         for contact in contacts:
             # We do not want to notify again a contact with
             # notification interval == 0 that has been already
