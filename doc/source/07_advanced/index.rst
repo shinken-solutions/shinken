@@ -53,3 +53,4 @@ Advanced Topics
    unused-nagios-parameters
    discovery-with-shinken-advanced
    discovery-with-shinken
+   internals-monitoring

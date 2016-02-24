@@ -421,6 +421,9 @@ class Dispatcher:
                             'statsd_port': self.conf.statsd_port,
                             'statsd_prefix': self.conf.statsd_prefix,
                             'statsd_enabled': self.conf.statsd_enabled,
+                            'statsd_interval': self.conf.statsd_interval,
+                            'statsd_types': self.conf.statsd_types,
+                            'statsd_pattern': self.conf.statsd_pattern,
                         }
 
                         t1 = time.time()
