@@ -504,7 +504,7 @@ Default:
 
   use_ssl=0
 
-Use SSl or not. You have to enable it on other daemons too.
+Use SSL or not. You have to enable it on other daemons too.
 
 
 .. _configuration/configmain#ca_cert:
@@ -522,7 +522,7 @@ Default:
 
 ::
 
-  ca_cert=etc/certs/ca.pem
+  ca_cert=/etc/certs/ca.pem
 
 Certification Authority (CA) certificate
 
