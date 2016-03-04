@@ -318,7 +318,7 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
 
     logging.debug('HTML string: %s' % html_msg)
 
-    msgText = MIMEText(html_msg, 'html')
+    msgText = MIMEText(html_msg, 'html', encoding)
     logging.debug('MIMEText: %s' % msgText)
     msg.attach(msgText)
     logging.debug('Mail object: %s' % msg)
