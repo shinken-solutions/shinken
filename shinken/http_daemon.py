@@ -416,7 +416,7 @@ class HTTPDaemon(object):
                                ('global', global_time)]
                         # increase the stats timers
                         for (k, _t) in lst:
-                            statsmgr.incr('http.%s.%s' % (fname, k), _t)
+                            statsmgr.timing('http.%s.%s' % (fname, k), _t, 'perf')
 
                         return j
                     # Ok now really put the route in place

@@ -34,7 +34,7 @@ from multiprocessing import active_children
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
-from shinken.util import sort_by_ids
+from shinken.util import sort_by_ids, get_memory
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
@@ -182,7 +182,7 @@ class Broker(BaseSatellite):
     def pynag_con_init(self, id, type='scheduler'):
         _t = time.time()
         r = self.do_pynag_con_init(id, type)
-        statsmgr.incr('con-init.%s' % type, time.time() - _t)
+        statsmgr.timing('con-init.%s' % type, time.time() - _t, 'perf')
         return r
 
 
@@ -401,13 +401,23 @@ class Broker(BaseSatellite):
         self.statsd_port = g_conf['statsd_port']
         self.statsd_prefix = g_conf['statsd_prefix']
         self.statsd_enabled = g_conf['statsd_enabled']
+        self.statsd_interval = g_conf['statsd_interval']
+        self.statsd_types = g_conf['statsd_types']
+        self.statsd_pattern = g_conf['statsd_pattern']
 
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker',
-                          api_key=self.api_key, secret=self.secret, http_proxy=self.http_proxy,
-                          statsd_host=self.statsd_host, statsd_port=self.statsd_port,
-                          statsd_prefix=self.statsd_prefix, statsd_enabled=self.statsd_enabled)
+                          api_key=self.api_key,
+                          secret=self.secret,
+                          http_proxy=self.http_proxy,
+                          statsd_host=self.statsd_host,
+                          statsd_port=self.statsd_port,
+                          statsd_prefix=self.statsd_prefix,
+                          statsd_enabled=self.statsd_enabled,
+                          statsd_interval=self.statsd_interval,
+                          statsd_types=self.statsd_types,
+                          statsd_pattern=self.statsd_pattern)
 
         logger.debug("[%s] Sending us configuration %s", self.name, conf)
         # If we've got something in the schedulers, we do not
@@ -636,19 +646,29 @@ class Broker(BaseSatellite):
         self.modules_manager.clear_instances()
 
 
+    # Gets internal metrics for both statsd and
+    def get_internal_metrics(self):
+        # Queues
+        metrics = [
+            ('core.broker.mem', get_memory(), 'system'),
+            ('core.broker.external-commands.queue',
+             len(self.external_commands), 'queue'),
+            ('core.broker.broks.queue', len(self.broks), 'queue'),
+        ]
+        return metrics
+
 
     # stats threads is asking us a main structure for stats
     def get_stats_struct(self):
         now = int(time.time())
         # call the daemon one
         res = super(Broker, self).get_stats_struct()
-        res.update({'name': self.name, 'type': 'broker'})
-        metrics = res['metrics']
+        res.update({'name': self.name, 'type': "broker"})
         # metrics specific
-        metrics.append('broker.%s.external-commands.queue %d %d' % (
-            self.name, len(self.external_commands), now))
-        metrics.append('broker.%s.broks.queue %d %d' % (self.name, len(self.broks), now))
-
+        metrics = res["metrics"]
+        for metric in self.get_internal_metrics():
+            name, value, mtype = metric
+            metrics.append(name, value, now, mtype)
         return res
 
 
@@ -699,7 +719,8 @@ class Broker(BaseSatellite):
             _t = time.time()
             # And from schedulers
             self.get_new_broks(type=_type)
-            statsmgr.incr('get-new-broks.%s' % _type, time.time() - _t)
+            statsmgr.timing('core.broker.get-new-broks.%s' % _type, time.time() - _t,
+                            'perf')
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)
@@ -732,7 +753,8 @@ class Broker(BaseSatellite):
         # No more need to send them
         for b in to_send:
             b.need_send_to_ext = False
-        statsmgr.incr('core.put-to-external-queue', time.time() - t0)
+        statsmgr.timing('core.broker.put-to-external-queue', time.time() - t0,
+                        'perf')
         logger.debug("Time to send %s broks (%d secs)", len(to_send), time.time() - t0)
 
         # We must had new broks at the end of the list, so we reverse the list
@@ -753,7 +775,7 @@ class Broker(BaseSatellite):
             b.prepare()
             _t = time.time()
             self.manage_brok(b)
-            statsmgr.incr('core.manage-brok', time.time() - _t)
+            statsmgr.timing('core.broker.manage-brok', time.time() - _t, 'perf')
 
             nb_broks = len(self.broks)
 

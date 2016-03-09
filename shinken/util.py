@@ -33,6 +33,11 @@ try:
 except ImportError:
     NodeSet = None
 
+try:
+    import resource
+except ImportError:
+    resource = None
+
 from shinken.macroresolver import MacroResolver
 from shinken.log import logger
 
@@ -896,3 +901,18 @@ def get_exclude_match_expr(pattern):
         return reg.match
     else:
         return lambda d: d == pattern
+
+
+# ##################### system related utility functions  #####################
+
+def get_memory(who="self"):
+    if resource is None:
+        return 0
+    if who == "self":
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    elif who == "children":
+        return resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * 1024
+    elif who == "both":
+        return resource.getrusage(resource.RUSAGE_BOTH).ru_maxrss * 1024
+    else:
+        return 0

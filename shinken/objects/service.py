@@ -29,6 +29,7 @@ If you look at the scheduling part, look at the scheduling item class"""
 import time
 import re
 import itertools
+import uuid
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -547,6 +548,12 @@ class Service(SchedulingItem):
 #                         __/ |
 #                        |___/
 ######
+
+    def get_newid(self):
+        cls = self.__class__
+        value = uuid.uuid1().hex
+        cls.id += 1
+        return value
 
     def __repr__(self):
         return '<Service host_name=%r desc=%r name=%r use=%r />' % (

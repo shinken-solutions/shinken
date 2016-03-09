@@ -69,7 +69,7 @@ class ContactDowntime:
         now = time.time()
         was_is_in_effect = self.is_in_effect
         self.is_in_effect = (self.start_time <= now <= self.end_time)
-        logger.info("CHECK ACTIVATION:%s", self.is_in_effect)
+        logger.debug("CHECK ACTIVATION:%s", self.is_in_effect)
 
         # Raise a log entry when we get in the downtime
         if not was_is_in_effect and self.is_in_effect:

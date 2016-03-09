@@ -44,6 +44,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
+import uuid
 
 class Host(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
@@ -641,6 +642,13 @@ class Host(SchedulingItem):
 #                        |___/
 ######
 
+    def get_newid(self):
+        cls = self.__class__
+        value = uuid.uuid1().hex
+        cls.id += 1
+        return value
+
+
     def set_initial_state(self):
         mapping = {
             "o": {
@@ -1022,7 +1030,8 @@ class Host(SchedulingItem):
             state_code = 'd'
         if state_code in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
-        if self.state != self.last_state:
+        if self.state != self.last_state and \
+                not(self.state == "DOWN" and self.last_state == "UNREACHABLE"):
             self.last_state_change = self.last_state_update
         self.duration_sec = now - self.last_state_change
 
