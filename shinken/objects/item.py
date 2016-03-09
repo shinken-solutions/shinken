@@ -29,6 +29,7 @@
 import time
 import cPickle  # for hashing compute
 import itertools
+from shinken.util import safe_print
 
 # Try to import md5 function
 try:
@@ -82,8 +83,7 @@ class Item(object):
         # use set attr for going into the slots
         # instead of __dict__ :)
         cls = self.__class__
-        self.id = cls.id
-        cls.id += 1
+        self.id = self.get_newid()
 
         self.customs = {}  # for custom variables
         self.plus = {}  # for value with a +
@@ -155,6 +155,12 @@ class Item(object):
                 self.customs[custom_name] = val
             else:
                 setattr(self, key, val)
+
+    def get_newid(self):
+        cls = self.__class__
+        value = cls.id
+        cls.id += 1
+        return value
 
 
     # When values to set on attributes are unique (single element list),
@@ -879,7 +885,11 @@ class Items(object):
         :type item:  Item  # or subclass of
         """
         self.unindex_item(item)
-        self.items.pop(item.id, None)
+        try:
+            self.items.pop(item.id)
+        except KeyError:
+            safe_print("ERROR: Internal Issue, this case should not happen %s " % item)
+            pass
 
 
     def index_item(self, item):
