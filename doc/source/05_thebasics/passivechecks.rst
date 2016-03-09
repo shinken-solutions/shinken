@@ -40,7 +40,7 @@ How Passive Checks Work
    :scale: 90 %
 
 
-DEPRECATED IMAGE - TODO REPLACE WITH MOE ACCURATE DEPTICTION
+DEPRECATED IMAGE - TODO REPLACE WITH MORE ACCURATE DEPICTION
 
 Here's how passive checks work in more detail...
 
