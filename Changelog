@@ -2,14 +2,15 @@
 Shinken ChangeLog
 ########################
 
-2.4.3 - xx/0x/2016
+2.4.3 - xx/03/2016
 -------------------
         CORE ENHANCEMENT
         Add: First version for a online profiling system, not enabled currently
 
         CORE FIXES
+        Fix: Fix missing Services/Hosts in Livestatus (Close #1691)
         Fix: initial_state mapping for hosts
-        Fix: Fix duration when a parent is down
+        Fix: Fix duration when a parent is down (Close #1779)
         Add: Better logging for regenerator
 
         MISC ENHANCEMENT
