@@ -2,7 +2,7 @@
 Shinken ChangeLog
 ########################
 
-2.4.3 - xx/03/2016
+2.4.3 - 10/03/2016
 -------------------
         CORE ENHANCEMENT
         Add: First version for a online profiling system, not enabled currently
