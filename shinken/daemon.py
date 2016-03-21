@@ -349,7 +349,6 @@ class Daemon(object):
     def switch_process(self):
         logger.info("Gracefully reloading daemon: %s" % " ".join(sys.argv))
         env = os.environ.copy()
-        #env["SHINKEN_PPID"] = os.getpid()
         p = subprocess.Popen(sys.argv,
                              stdin=subprocess.PIPE,
                              preexec_fn=os.setsid,
