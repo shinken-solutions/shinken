@@ -71,10 +71,9 @@ class Metric:
                 self.max = 100
 
     def __str__(self):
-        components = [ "%s=%s%s" % (self.name, self.value, self.uom),
-                       self.warning, self.critical, self.min, self.max ]
+        components = ["%s=%s%s" % (self.name, self.value, self.uom), self.warning, self.critical, self.min, self.max]
         while components[-1] is None:
-	    components.pop()
+            components.pop()
         return ";".join(map(lambda v: "" if v is None else str(v), components))
 
 
