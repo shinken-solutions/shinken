@@ -71,12 +71,11 @@ class Metric:
                 self.max = 100
 
     def __str__(self):
-        s = "%s=%s%s" % (self.name, self.value, self.uom)
-        if self.warning:
-            s = s + ";%s" % (self.warning)
-        if self.critical:
-            s = s + ";%s" % (self.critical)
-        return s
+        components = [ "%s=%s%s" % (self.name, self.value, self.uom),
+                       self.warning, self.critical, self.min, self.max ]
+        while components[-1] is None:
+	    components.pop()
+        return ";".join(map(lambda v: "" if v is None else str(v), components))
 
 
 class PerfDatas:
