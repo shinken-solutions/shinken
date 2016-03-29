@@ -61,6 +61,22 @@ class TestStringPerfdata(ShinkenTest):
         self.assertEqual('ramused=1009MB;;;0', str(Metric('ramused=1009MB;;;0')))
         self.assertEqual('ramused=1009MB;;;;0', str(Metric('ramused=1009MB;;;;0')))
 
+    def test_string_percent_minmaxdefault_0_100(self):
+        # If not specified, defaults of 0 and 100 for min/max should not come back
+        self.assertEqual('utilization=80%;90;95', str(Metric('utilization=80%;90;95')))
+        self.assertEqual('utilization=80%;90;95;;', str(Metric('utilization=80%;90;95')) + ";;")
+
+    def test_string_percent_minmax_echo(self):
+        # Defined values of min max should come back always, even if defaults
+        self.assertEqual('utilization=80%;50;75;0;100', str(Metric('utilization=80%;50;75;0;100')))
+        self.assertEqual('utilization=80%;50;75;0', str(Metric('utilization=80%;50;75;0')))
+        self.assertEqual('utilization=80%;50;75;;100', str(Metric('utilization=80%;50;75;;100')))
+
+        # Same tests with non-default values
+        self.assertEqual('utilization=80%;50;75;85;95', str(Metric('utilization=80%;50;75;85;95')))
+        self.assertEqual('utilization=80%;50;75;85', str(Metric('utilization=80%;50;75;85')))
+        self.assertEqual('utilization=80%;50;75;;95', str(Metric('utilization=80%;50;75;;95')))
+
 if __name__ == '__main__':
     unittest.main()
 

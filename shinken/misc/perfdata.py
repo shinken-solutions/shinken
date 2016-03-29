@@ -62,16 +62,24 @@ class Metric:
             self.critical = guess_int_or_float(r.group(5))
             self.min = guess_int_or_float(r.group(6))
             self.max = guess_int_or_float(r.group(7))
+            self.min_specified = self.min is not None
+            self.max_specified = self.max is not None
             # print 'Name', self.name
             # print "Value", self.value
             # print "Res", r
             # print r.groups()
             if self.uom == '%':
-                self.min = 0
-                self.max = 100
+                self.min = self.min if self.min_specified is not None else 0
+                self.max = self.max if self.max_specified is not None else 100
 
     def __str__(self):
-        components = ["%s=%s%s" % (self.name, self.value, self.uom), self.warning, self.critical, self.min, self.max]
+        min = self.min if self.min_specified else None
+        max = self.max if self.max_specified else None
+        prefix =  "min=%s, max=%s" % (min, max)
+        if self.uom == '%':
+            min = None if (self.min == 0) and not self.min_specified else min
+            max = None if (self.max == 100) and not self.max_specified else max
+        components = ["%s=%s%s" % (self.name, self.value, self.uom), self.warning, self.critical, min, max]
         while components[-1] is None:
             components.pop()
         return ";".join(map(lambda v: "" if v is None else str(v), components))
@@ -99,3 +107,4 @@ class PerfDatas:
 
     def __contains__(self, key):
         return key in self.metrics
+
