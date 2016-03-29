@@ -77,6 +77,18 @@ class TestStringPerfdata(ShinkenTest):
         self.assertEqual('utilization=80%;50;75;85', str(Metric('utilization=80%;50;75;85')))
         self.assertEqual('utilization=80%;50;75;;95', str(Metric('utilization=80%;50;75;;95')))
 
+    def test_string_quoted_names(self):
+        self.assertEqual("ram''used''=10", str(Metric("ram''used''=10")))
+        self.assertEqual("ram''used=10", str(Metric("ram''used=10")))
+        # Outer quotes present but not necessary should be stripped on format
+        self.assertEqual("ram''used=10", str(Metric("'ram''used'=10")))
+        # But not so if there is also a space
+        self.assertEqual("'ram was ''used'=10", str(Metric("'ram was ''used'=10")))
+
+        # String missing required outer quotes, should come back quoted
+        # This is debatable as it basically is an invalid metric/perfdata
+        self.assertEqual("'ram  ''used'''=10", str(Metric("ram  ''used''=10")))
+
 if __name__ == '__main__':
     unittest.main()
 
