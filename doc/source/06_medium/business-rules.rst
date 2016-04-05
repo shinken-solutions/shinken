@@ -482,5 +482,12 @@ Imagine you want to build a consolidated service which notifications contain lin
 
 The resulting output would look like ``Down web services: link1 link2 link3 ...`` where ``linkN`` are urls leading to the problem in the WebUI.
 
+Acknowledge management
+======================
+
+By default, if we acknowledge an element, it conserves its state to determine the status of our aggregated service.
+In some cases, we want that an acknowledge element is considered as if it was in Ok/Up state for a business rule.
+
+To enable this feature, simply set `business_rule_ack_as_ok`` to ``1``..
 
 .. _ticket: https://github.com/naparuba/shinken/issues/509

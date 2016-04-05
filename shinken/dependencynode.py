@@ -42,8 +42,10 @@ from shinken.util import filter_service_by_host_bp_rule_label
 """
 Here is a node class for dependency_node(s) and a factory to create them
 """
+
+
 class DependencyNode(object):
-    def __init__(self):
+    def __init__(self, ack_as_ok=False):
         self.operand = None
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
@@ -51,6 +53,7 @@ class DependencyNode(object):
         self.is_of_mul = False
         self.configuration_errors = []
         self.not_value = False
+        self.ack_as_ok = ack_as_ok
 
     def __str__(self):
         return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (self.operand, self.of_values,
@@ -91,6 +94,9 @@ class DependencyNode(object):
         # Make DOWN look as CRITICAL (2 instead of 1)
         if self.operand == 'host' and state == 1:
             state = 2
+        # If our node is acknowledged and business_rule_ack_as_ok is true, state is ok/up
+        if self.sons[0].problem_has_been_acknowledged and self.ack_as_ok:
+            state = 0
         # Maybe we are a NOT node, so manage this
         if self.not_value:
             # We inverse our states
@@ -322,7 +328,7 @@ class DependencyNodeFactory(object):
     # Evaluate a complex correlation expression, such as an &, |, nested
     # expressions in par, and so on.
     def eval_complex_cor_pattern(self, pattern, hosts, services, running=False):
-        node = DependencyNode()
+        node = DependencyNode(self.bound_item.business_rule_ack_as_ok)
         pattern = self.eval_xof_pattern(node, pattern)
 
         in_par = False
@@ -440,7 +446,7 @@ class DependencyNodeFactory(object):
     # Evaluate a simple correlation expression, such as a host, a host + a
     # service, or expand a host or service expression.
     def eval_simple_cor_pattern(self, pattern, hosts, services, running=False):
-        node = DependencyNode()
+        node = DependencyNode(self.bound_item.business_rule_ack_as_ok)
         pattern = self.eval_xof_pattern(node, pattern)
 
         # print "Try to find?", pattern
@@ -513,7 +519,7 @@ class DependencyNodeFactory(object):
     # using (host|service)group membership, regex, or labels as item selector.
     def expand_expression(self, pattern, hosts, services, running=False):
         error = None
-        node = DependencyNode()
+        node = DependencyNode(self.bound_item.business_rule_ack_as_ok)
         node.operand = '&'
         elts = [e.strip() for e in pattern.split(',')]
         # If host_name is empty, use the host_name the business rule is bound to
@@ -555,7 +561,7 @@ class DependencyNodeFactory(object):
         # Creates dependency node subtree
         for item in items:
             # Creates a host/service node
-            son = DependencyNode()
+            son = DependencyNode(self.bound_item.business_rule_ack_as_ok)
             son.operand = item.__class__.my_type
             son.sons.append(item)
             # Appends it to wrapping node

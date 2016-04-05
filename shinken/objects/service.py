@@ -198,6 +198,9 @@ class Service(SchedulingItem):
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack':
             BoolProp(default=False, fill_brok=['full_status']),
+        # Treat acknowledged host/service like an Ok/Up state in a business rule
+        'business_rule_ack_as_ok':
+            BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
         'business_rule_host_notification_options':
             ListProp(default=[], fill_brok=['full_status'], split_on_coma=True),
