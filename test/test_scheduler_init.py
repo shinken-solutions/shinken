@@ -110,15 +110,16 @@ class testSchedulerInit(ShinkenTest):
 
 
         # Test that use_ssl parameter generates the good uri
-        if d.pollers[0]['use_ssl']:
-            assert d.pollers[0]['uri'] == 'https://localhost:7771/'
+        print d.pollers
+        if d.pollers[d.pollers.keys()[0]]['use_ssl']:
+            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'https://localhost:7771/'
         else:
-            assert d.pollers[0]['uri'] == 'http://localhost:7771/'
+            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'http://localhost:7771/'
 
 
         # Test receivers are init like pollers
         assert d.reactionners != {}  # Previously this was {} for ever
-        assert d.reactionners[0]['uri'] == 'http://localhost:7769/' # Test dummy value
+        assert d.reactionners[d.reactionners.keys()[0]]['uri'] == 'http://localhost:7769/' # Test dummy value
 
         # I want a simple init
         d.must_run = False
@@ -126,8 +127,8 @@ class testSchedulerInit(ShinkenTest):
         d.sched.run()
 
         # Test con key is missing or not. Passive daemon should have one
-        assert 'con' not in d.pollers[0] # Ensure con key is not here, deamon is not passive so we did not try to connect
-        assert d.reactionners[0]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
+        assert 'con' not in d.pollers[d.pollers.keys()[0]] # Ensure con key is not here, deamon is not passive so we did not try to connect
+        assert d.reactionners[d.reactionners.keys()[0]]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
 
         # "Clean" shutdown
         sleep(2)
