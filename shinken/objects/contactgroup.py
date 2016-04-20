@@ -142,6 +142,12 @@ class Contactgroups(Itemgroups):
             # We find the id, we replace the names
             cg.replace_members(new_mbrs)
 
+            # Now register us in our members
+            for c in cg.members:
+                c.contactgroups.append(cg)
+                # and be sure we are uniq in it
+                c.contactgroups = list(set(c.contactgroups))
+
     # Add a contact string to a contact member
     # if the contact group do not exist, create it
     def add_member(self, cname, cgname):
