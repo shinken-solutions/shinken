@@ -116,6 +116,23 @@ class Contact(Item):
         except AttributeError:
             return 'UnnamedContact'
 
+    def get_groupname(self):
+        groupname = ''
+        for cg in self.contactgroups:
+            groupname = "%s" % (cg.alias)
+        return groupname
+
+
+    def get_groupnames(self):
+        groupnames = ''
+        for cg in self.contactgroups:
+            if groupnames == '':
+                groupnames = cg.get_name()
+            else:
+                groupnames = "%s, %s" % (groupnames, cg.get_name())
+        return groupnames
+
+
     # Search for notification_options with state and if t is
     # in service_notification_period
     def want_service_notification(self, t, state, type, business_impact, cmd=None):
