@@ -214,6 +214,9 @@ class Host(SchedulingItem):
         # Treat acknowledged host/service like an Ok/Up state in a business rule
         'business_rule_ack_as_ok':
             BoolProp(default=False, fill_brok=['full_status']),
+        # Treat downtimed host/service like an Ok/Up state in a business rule
+        'business_rule_downtime_as_ok':
+            BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
         'business_rule_host_notification_options':
             ListProp(default=[], fill_brok=['full_status']),
