@@ -39,7 +39,7 @@ Example Definition:
   define scheduler{
       scheduler_name         Europe-scheduler
       address                node1.mydomain
-      port                   7770
+      port                   7768
       spare                  0
       realm                  Europe
       
