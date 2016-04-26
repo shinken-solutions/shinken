@@ -121,7 +121,7 @@ core.scheduler.actions.queue
   The notifications and eventhandlers queue to be consumed by the reactionners
 
 core.scheduler.actions.reenabled
-  If actions are not done quick enoush, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
+  If actions are not done quick enough, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
 
 core.scheduler.checks.havetoresolvedep
   The checks count having havetoresolvedep state in the scheduler. Those checks have dependent checks that have to be checked before taking any decision.
@@ -136,7 +136,7 @@ core.scheduler.checks.scheduled
   The checks count having scheduled state in the scheduler. Those checks have to be taken by a poller.
 
 core.scheduler.checks.reenabled
-  If checks are not done quick enoush, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
+  If checks are not done quick enough, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
 
 core.scheduler.checks.timeout
   The checks count having inpoller state in the scheduler. Those checks have been got from by a poller, and the result did not came in time.
