@@ -807,10 +807,8 @@ Example:
 
 This option determines whether or not Shinken will check the :ref:`External Command File <configuration/configmain-advanced#command_file>` for commands that should be executed with the **arbiter daemon**. More information on external commands can be found :ref:`here <advanced/extcommands>`.
 
-  * 0 = Don't check external commands (default)
+  * 0 = Don't check external commands
   * 1 = Check external commands (default)
-
-.. note::  FIX ME : Find the real default value
 
 
 .. _configuration/configmain-advanced#command_file:
