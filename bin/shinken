@@ -139,7 +139,8 @@ class CLICommander(object):
                                               '''after each install. Create an account at '''
                                               '''http://shinken.io and go to '''
                                               '''http://shinken.io/~''',
-                                   'values': [('proxy', ''), ('api_key', '')]
+                                   'values': [('proxy', ''), ('api_key', ''), ('url', 'http://shinken.io/'), ('hard_ssl_name_check', '1'),
+                                              ('ca_cert', ''), ('client_cert', ''), ('client_key', '')]
                                    }
                     }
 
@@ -394,6 +395,16 @@ def main(custom_args=None):
         add_help_option=False)
     parser.add_option('--proxy', dest="proxy",
                       help="""Proxy URI. Like http://user:password@proxy-server:3128""")
+    parser.add_option('--url', dest='url',
+                      help="""Base mirror URI. Like http://shinken.io/""")
+    parser.add_option('--hard-ssl-name-check', dest='hard_ssl_name_check',
+                      help="""Set SSL certificate check. Like 1 (default, verify certificate) or 0""")
+    parser.add_option('--ca-cert', dest='ca_cert',
+                      help="""Set SSL CA certificate. Like /etc/ssl/certs/ca.pem""")
+    parser.add_option('--client-cert', dest='client_cert',
+                      help="""Set SSL client certificate. Like /etc/ssl/certs/cert.pem""")
+    parser.add_option('--client-key', dest='client_key',
+                      help="""Set SSL client private key. Like /etc/ssl/private/key.pem""")
     parser.add_option('-A', '--api-key',
                       dest="api_key", help=("Your API key for uploading the package to the "
                                             "Shinken.io website. If you don't have one, "
@@ -452,6 +463,26 @@ def main(custom_args=None):
         CONFIG['shinken.io']['proxy'] = opts.proxy
         logger.debug("Using given proxy in command line")
 
+    if opts.url:
+        CONFIG['shinken.io']['url'] = opts.url
+        logger.debug("Using given url in command line")
+
+    if opts.hard_ssl_name_check:
+        CONFIG['shinken.io']['hard_ssl_name_check'] = opts.hard_ssl_name_check
+        logger.debug("Using given hard_ssl_name_check in command line")
+
+    if opts.ca_cert:
+        CONFIG['shinken.io']['ca_cert'] = opts.ca_cert
+        logger.debug("Using given ca_cert in command line")
+
+    if opts.client_cert:
+        CONFIG['shinken.io']['client_cert'] = opts.client_cert
+        logger.debug("Using given client_cert in command line")
+
+    if opts.client_key:
+        CONFIG['shinken.io']['client_key'] = opts.client_key
+        logger.debug("Using given client_key in command line")
+
     CLI = CLICommander(CONFIG, cfg, opts)
 
     # We should look on the sys.argv if we find a valid keywords to
@@ -500,6 +531,16 @@ def main(custom_args=None):
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
         CONFIG['shinken.io']['proxy'] = opts.proxy
+    if opts.url:
+        CONFIG['shinken.io']['url'] = opts.url
+    if opts.hard_ssl_name_check:
+        CONFIG['shinken.io']['hard_ssl_name_check'] = opts.hard_ssl_name_check
+    if opts.ca_cert:
+        CONFIG['shinken.io']['ca_cert'] = opts.ca_cert
+    if opts.client_cert:
+        CONFIG['shinken.io']['client_cert'] = opts.client_cert
+    if opts.client_key:
+        CONFIG['shinken.io']['client_key'] = opts.client_key
 
     # Maybe he/she just want to list our commands?
     if opts.do_list:

@@ -56,6 +56,43 @@ def read_package_json(fd):
     return package_json
 
 
+def prepare_curl_connection(url_path, post=0, verbose=0):
+    """Create a cURL connection with all standard options
+
+    :param url_path: "/push" or "/grab" or "/search"
+    :return:
+    :rtype:
+    """
+    proxy = CONFIG['shinken.io']['proxy']
+    url = CONFIG['shinken.io']['url']
+    if url.endswith('/'):
+        url = url[:-1]
+    hard_ssl_name_check = CONFIG['shinken.io']['hard_ssl_name_check']
+    ca_cert = CONFIG['shinken.io']['ca_cert']
+    client_cert = CONFIG['shinken.io']['client_cert']
+    client_key = CONFIG['shinken.io']['client_key']
+    # Ok we will push the file with a 10s timeout
+    c = pycurl.Curl()
+    c.setopt(c.POST, post)
+    c.setopt(c.CONNECTTIMEOUT, 30)
+    c.setopt(c.TIMEOUT, 300)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    if hard_ssl_name_check != '0':
+        c.setopt(pycurl.SSL_VERIFYPEER, 1)
+        c.setopt(pycurl.SSL_VERIFYHOST, 2)
+    else:
+        c.setopt(pycurl.SSL_VERIFYPEER, 0)
+        c.setopt(pycurl.SSL_VERIFYHOST, 0)
+    if ca_cert:
+        c.setopt(pycurl.CAINFO, ca_cert)
+    if client_cert:
+        c.setopt(pycurl.SSLCERT, client_cert)
+    if client_key:
+        c.setopt(pycurl.SSLKEY, client_key)
+    c.setopt(c.URL, "%s%s" % (url, url_path))
+    c.setopt(c.VERBOSE, verbose)
+    return c
 
 
 def create_archive(to_pack):
@@ -100,17 +137,8 @@ def create_archive(to_pack):
 
 def publish_archive(archive):
     # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
     api_key = CONFIG['shinken.io']['api_key']
-
-    # Ok we will push the file with a 10s timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 1)
-    c.setopt(c.CONNECTTIMEOUT, 30)
-    c.setopt(c.TIMEOUT, 300)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, "http://shinken.io/push")
+    c = prepare_curl_connection('/push', post=1, verbose=1)
     c.setopt(c.HTTPPOST, [("api_key", api_key),
                           ("data",
                            (c.FORM_FILE, str(archive),
@@ -118,10 +146,10 @@ def publish_archive(archive):
                           ])
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
-    c.setopt(c.VERBOSE, 1)
+
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return
@@ -152,22 +180,12 @@ def do_publish(to_pack='.'):
 ################" *********************** SEARCH *************** ##################
 def search(look_at):
     # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
-    api_key = CONFIG['shinken.io']['api_key']
+    args = {'keywords': ','.join(look_at)}
+    c = prepare_curl_connection(str('/searchcli?' + urllib.urlencode(args)))
 
     # Ok we will push the file with a 10s timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 30)
-    c.setopt(c.TIMEOUT, 300)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-
-    args = {'keywords':','.join(look_at)}
-    c.setopt(c.URL, str('shinken.io/searchcli?'+urllib.urlencode(args)))
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
-    #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
     except pycurl.error, exp:
@@ -200,11 +218,11 @@ def print_search_matches(matches):
     names = [p['name'] for p in matches]
     names = list(set(names))
     names.sort()
-    
+
     for p in matches:
         name = p['name']
         ps[name] = p
-    
+
     for name in names:
         p = ps[name]
         user_id = p['user_id']
@@ -243,7 +261,7 @@ def inventor(look_at):
     inventory = CONFIG['paths']['inventory']
     logger.debug("dumping inventory %s", inventory)
     # get all sub-direcotries
- 
+
     for d in os.listdir(inventory):
         if os.path.exists(os.path.join(inventory, d, 'package.json')):
             if not look_at or d in look_at:
@@ -309,26 +327,13 @@ def _chmodplusx(d):
 def grab_package(pname):
     cprint('Grabbing : ' , end='')
     cprint('%s' %  pname, 'green')
-
-    # Now really publish it
-    proxy = CONFIG['shinken.io']['proxy']
-    api_key = CONFIG['shinken.io']['api_key']
-
-    # Ok we will push the file with a 5m timeout
-    c = pycurl.Curl()
-    c.setopt(c.POST, 0)
-    c.setopt(c.CONNECTTIMEOUT, 30)
-    c.setopt(c.TIMEOUT, 300)
-    if proxy:
-        c.setopt(c.PROXY, proxy)
-
-    c.setopt(c.URL, str('shinken.io/grab/%s' % pname))
+    c = prepare_curl_connection('/grab/%s' % pname)
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
     #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return ''
@@ -489,7 +494,7 @@ def install_package(pname, raw, update_only=False):
         shutil.copytree(p_doc, doc_dest)
         logger.info("Copy done in the doc directory %s", doc_dest)
 
-        
+
     if not update_only:
         # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
         p_pack = os.path.join(tmpdir, 'pack')
@@ -544,7 +549,7 @@ def install_package(pname, raw, update_only=False):
     cont = open(os.path.join(p_inv, 'content.json'), 'w')
     cont.write(json.dumps(package_content))
     cont.close()
-    
+
     # We now clean (rm) the tmpdir we don't need any more
     try:
         shutil.rmtree(tmpdir, ignore_errors=True)

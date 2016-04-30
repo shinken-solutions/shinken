@@ -31,6 +31,11 @@ OPTIONS
 
   --version             show program's version number and exit
   --proxy=PROXY         Proxy URI. Like http://user:password@proxy-server:3128
+  --url                 Base mirror URI. Like http://shinken.io/
+  --hard-ssl-name-check Set SSL certificate check. Like 1 (default, verify certificate) or 0
+  --ca-cert             Set SSL CA certificate. Like /etc/ssl/certs/ca.pem
+  --client-cert         Set SSL client certificate. Like /etc/ssl/certs/cert.pem
+  --client-key          Set SSL client private key. Like /etc/ssl/private/key.pem
   -A API_KEY, --api-key=API_KEY
                         Your API key for uploading the package to the
                         Shinken.io website. If you don't have one, please go
