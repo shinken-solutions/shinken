@@ -1385,7 +1385,11 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.templates.itervalues()):
             self.linkify_item_templates(i)
-        for i in self:
+
+        # Then we set the tags issued from the built templates
+        # for i in self:
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
             i.tags = self.get_all_tags(i)
 
 
