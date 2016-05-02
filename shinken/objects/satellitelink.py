@@ -397,6 +397,9 @@ class SatelliteLink(Item):
         except AttributeError:
             self.con = None
             return []
+        except:
+            self.con = None
+            return []
 
 
     def prepare_for_conf(self):

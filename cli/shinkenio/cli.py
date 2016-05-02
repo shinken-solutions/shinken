@@ -101,6 +101,7 @@ def create_archive(to_pack):
 def publish_archive(archive):
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
+    proxy_socks5 = CONFIG['shinken.io']['proxy_socks5']
     api_key = CONFIG['shinken.io']['api_key']
 
     # Ok we will push the file with a 10s timeout
@@ -110,6 +111,9 @@ def publish_archive(archive):
     c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
+    if proxy_socks5:
+        c.setopt(c.PROXY, proxy_socks5)
+        c.setopt(c.PROXYTYPE, c.PROXYTYPE_SOCKS5)
     c.setopt(c.URL, "http://shinken.io/push")
     c.setopt(c.HTTPPOST, [("api_key", api_key),
                           ("data",
@@ -153,6 +157,7 @@ def do_publish(to_pack='.'):
 def search(look_at):
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
+    proxy_socks5 = CONFIG['shinken.io']['proxy_socks5']
     api_key = CONFIG['shinken.io']['api_key']
 
     # Ok we will push the file with a 10s timeout
@@ -162,7 +167,9 @@ def search(look_at):
     c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
-
+    if proxy_socks5:
+        c.setopt(c.PROXY, proxy_socks5)
+        c.setopt(c.PROXYTYPE, c.PROXYTYPE_SOCKS5)
     args = {'keywords':','.join(look_at)}
     c.setopt(c.URL, str('shinken.io/searchcli?'+urllib.urlencode(args)))
     response = StringIO()
@@ -312,6 +319,7 @@ def grab_package(pname):
 
     # Now really publish it
     proxy = CONFIG['shinken.io']['proxy']
+    proxy_socks5 = CONFIG['shinken.io']['proxy_socks5']
     api_key = CONFIG['shinken.io']['api_key']
 
     # Ok we will push the file with a 5m timeout
@@ -321,7 +329,9 @@ def grab_package(pname):
     c.setopt(c.TIMEOUT, 300)
     if proxy:
         c.setopt(c.PROXY, proxy)
-
+    if proxy_socks5:
+        c.setopt(c.PROXY, proxy_socks5)
+        c.setopt(c.PROXYTYPE, c.PROXYTYPE_SOCKS5)
     c.setopt(c.URL, str('shinken.io/grab/%s' % pname))
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)

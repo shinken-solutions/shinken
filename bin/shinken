@@ -134,12 +134,13 @@ class CLICommander(object):
                               },
                     'shinken.io': {'comment': '''# Options for connection to the shinken.io '''
                                               '''website.  # proxy: curl style, should look as '''
-                                              '''http://user:password@server:3128 # api_key: '''
+                                              '''http://user:password@server:3128 # proxy_socks5: '''
+                                              ''' curl style, should look as server:1080 # api_key: '''
                                               '''useful for publishing packages or earn XP '''
                                               '''after each install. Create an account at '''
                                               '''http://shinken.io and go to '''
                                               '''http://shinken.io/~''',
-                                   'values': [('proxy', ''), ('api_key', '')]
+                                   'values': [('proxy', ''), ('proxy_socks5', ''), ('api_key', '')]
                                    }
                     }
 
@@ -394,6 +395,8 @@ def main(custom_args=None):
         add_help_option=False)
     parser.add_option('--proxy', dest="proxy",
                       help="""Proxy URI. Like http://user:password@proxy-server:3128""")
+    parser.add_option('--proxy_socks5', dest="proxy_socks5",
+                      help="""Socks5 proxy URI. Like server:1080""")
     parser.add_option('-A', '--api-key',
                       dest="api_key", help=("Your API key for uploading the package to the "
                                             "Shinken.io website. If you don't have one, "
@@ -452,6 +455,10 @@ def main(custom_args=None):
         CONFIG['shinken.io']['proxy'] = opts.proxy
         logger.debug("Using given proxy in command line")
 
+    if opts.proxy_socks5:
+        CONFIG['shinken.io']['proxy_socks5'] = opts.proxy_socks5
+        logger.debug("Using given socks5 proxy in command line")
+
     CLI = CLICommander(CONFIG, cfg, opts)
 
     # We should look on the sys.argv if we find a valid keywords to
@@ -500,6 +507,9 @@ def main(custom_args=None):
     # If the user explicitely set the proxy, take it!
     if opts.proxy:
         CONFIG['shinken.io']['proxy'] = opts.proxy
+
+    if opts.proxy_socks5:
+        CONFIG['shinken.io']['proxy_socks5'] = opts.proxy_socks5
 
     # Maybe he/she just want to list our commands?
     if opts.do_list:

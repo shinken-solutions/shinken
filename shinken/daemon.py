@@ -247,7 +247,7 @@ class Daemon(object):
         'graceful_enabled': BoolProp(default=False),
         'spare':         BoolProp(default=False),
         'max_queue_size': IntegerProp(default=0),
-        'daemon_thread_pool_size': IntegerProp(default=8),
+        'daemon_thread_pool_size': IntegerProp(default=16),
         'http_backend':  StringProp(default='auto'),
         'graceful_timeout': IntegerProp(default=60),
     }

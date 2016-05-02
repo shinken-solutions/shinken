@@ -48,6 +48,6 @@ OPTIONS
   --debugfile=DEBUGFILE                     Enable debug logging to *DEBUGFILE*
   -p PROFILE, --profile=PROFILE             Dump a profile file. Need the python cProfile librairy
   -a ANALYSE, --analyse=ANALYSE             Dump an analyse statistics file, for support
-  -m MIGRATE, --migrate=MIGRATE             Migrate the raw configuration read from the arbier to another module. --> VERY EXPERIMENTAL!
+  -m MIGRATE, --migrate=MIGRATE             Migrate the raw configuration read from the arbiter to another module. --> VERY EXPERIMENTAL!
   -n ARB_NAME, --name=ARB_NAME              Give the arbiter name to use. Optionnal, will use the hostaddress if not provide to find it.
 

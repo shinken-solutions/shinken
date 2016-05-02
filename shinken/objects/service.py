@@ -29,6 +29,7 @@ If you look at the scheduling part, look at the scheduling item class"""
 import time
 import re
 import itertools
+import uuid
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -550,6 +551,12 @@ class Service(SchedulingItem):
 #                         __/ |
 #                        |___/
 ######
+
+    def get_newid(self):
+        cls = self.__class__
+        value = uuid.uuid1().hex
+        cls.id += 1
+        return value
 
     def __repr__(self):
         return '<Service host_name=%r desc=%r name=%r use=%r />' % (
@@ -1381,7 +1388,11 @@ class Services(Items):
         for i in itertools.chain(self.items.itervalues(),
                                  self.templates.itervalues()):
             self.linkify_item_templates(i)
-        for i in self:
+
+        # Then we set the tags issued from the built templates
+        # for i in self:
+        for i in itertools.chain(self.items.itervalues(),
+                                 self.templates.itervalues()):
             i.tags = self.get_all_tags(i)
 
 

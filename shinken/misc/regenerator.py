@@ -241,6 +241,9 @@ class Regenerator(object):
                 self.tags[t] += 1
 
             # We can really declare this host OK now
+            old_h = self.hosts.find_by_name(h.get_name())
+            if old_h is not None:
+                self.hosts.remove_item(old_h)
             self.hosts.add_item(h)
 
         # Link SERVICEGROUPS with services
@@ -279,6 +282,9 @@ class Regenerator(object):
             hname = s.host_name
             s.host = self.hosts.find_by_name(hname)
             if s.host:
+                old_s = s.host.find_service_by_name(s.service_description)
+                if old_s is not None:
+                    s.host.services.remove(old_s)
                 s.host.services.append(s)
 
             # Now link Command() objects
@@ -301,6 +307,7 @@ class Regenerator(object):
 
             # We can really declare this host OK now
             self.services.add_item(s, index=True)
+
 
 
         # Add realm of theses hosts. Only the first is useful
@@ -512,7 +519,7 @@ class Regenerator(object):
         # Clean hosts from hosts and hostgroups
         for h in to_del_h:
             logger.debug("Deleting %s" % h.get_name())
-            del self.hosts[h.id]
+            self.hosts.remove_item(h)
 
         # Now clean all hostgroups too
         for hg in self.hostgroups:
@@ -523,7 +530,7 @@ class Regenerator(object):
 
         for s in to_del_srv:
             logger.debug("Deleting %s" % s.get_full_name())
-            del self.services[s.id]
+            self.services.remove_item(s)
 
         # Now clean service groups
         for sg in self.servicegroups:
@@ -838,7 +845,7 @@ class Regenerator(object):
     def manage_update_host_status_brok(self, b):
         # There are some properties that should not change and are already linked
         # so just remove them
-        clean_prop = ['check_command', 'hostgroups',
+        clean_prop = ['id', 'check_command', 'hostgroups',
                       'contacts', 'notification_period', 'contact_groups',
                       'check_period', 'event_handler',
                       'maintenance_period', 'realm', 'customs', 'escalations']
@@ -881,7 +888,7 @@ class Regenerator(object):
     def manage_update_service_status_brok(self, b):
         # There are some properties that should not change and are already linked
         # so just remove them
-        clean_prop = ['check_command', 'servicegroups',
+        clean_prop = ['id', 'check_command', 'servicegroups',
                       'contacts', 'notification_period', 'contact_groups',
                       'check_period', 'event_handler',
                       'maintenance_period', 'customs', 'escalations']
