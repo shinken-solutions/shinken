@@ -42,7 +42,7 @@ if python_version < (2, 6):
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
-package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
+PACKAGE_DATA = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
 
 def read(fname):
@@ -55,7 +55,7 @@ def ensure_dir_exist(f):
         os.makedirs(dirname)
 
 
-def generate_default_shinken_file():
+def generate_default_shinken_file(default_paths):
     # The default file must have good values for the directories:
     # etc, var and where to push scripts that launch the app.
     templatefile = "bin/default/shinken.in"
@@ -149,73 +149,81 @@ def _chmodplusx(d):
         os.chmod(d, st.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
 
 
-parser = optparse.OptionParser(
-    "%prog [options]", version="%prog ")
-parser.add_option('--root',
-                  dest="proot", metavar="ROOT",
-                  help='Root dir to install, usefull only for packagers')
-parser.add_option('--upgrade', '--update',
-                  dest="upgrade", action='store_true',
-                  help='Only upgrade')
-parser.add_option('--owner',
-                  dest="owner", metavar="OWNER",
-                  help='User to install with, default shinken')
-parser.add_option('--group',
-                  dest="group", metavar="GROUP",
-                  help='Group to install with, default shinken')
-parser.add_option('--install-scripts',
-                  dest="install_scripts",
-                  help='Path to install the shinken-* scripts')
-parser.add_option('--skip-build',
-                  dest="skip_build", action='store_true',
-                  help='skipping build')
-parser.add_option('-O', type="int",
-                  dest="optimize",
-                  help='skipping build')
-parser.add_option('--record',
-                  dest="record",
-                  help='File to save writing files. Used by pip install only')
-parser.add_option('--single-version-externally-managed',
-                  dest="single_version", action='store_true',
-                  help='I really dont know, this option is for pip only')
-parser.add_option('--package-only',
-                  dest="package_only", action='store_true',
-                  help="Don't setup shinken, just install the package")
+def main():
+    parser = optparse.OptionParser(
+        "%prog [options]", version="%prog ")
+    parser.add_option('--root',
+                      dest="proot", metavar="ROOT",
+                      help='Root dir to install, usefull only for packagers')
+    parser.add_option('--upgrade', '--update',
+                      dest="upgrade", action='store_true',
+                      help='Only upgrade')
+    parser.add_option('--owner',
+                      dest="owner", metavar="OWNER",
+                      help='User to install with, default shinken')
+    parser.add_option('--group',
+                      dest="group", metavar="GROUP",
+                      help='Group to install with, default shinken')
+    parser.add_option('--install-scripts',
+                      dest="install_scripts",
+                      help='Path to install the shinken-* scripts')
+    parser.add_option('--skip-build',
+                      dest="skip_build", action='store_true',
+                      help='skipping build')
+    parser.add_option('-O', type="int",
+                      dest="optimize",
+                      help='skipping build')
+    parser.add_option('--record',
+                      dest="record",
+                      help='File to save writing files. Used by pip install only')
+    parser.add_option('--single-version-externally-managed',
+                      dest="single_version", action='store_true',
+                      help='I really dont know, this option is for pip only')
+    parser.add_option('--package-only',
+                      dest="package_only", action='store_true',
+                      help="Don't setup shinken, just install the package")
+    old_error = parser.error
 
-old_error = parser.error
+    def _error(msg):
+        print 'Parser error', msg
+
+    parser.error = _error
+    opts, args = parser.parse_args()
+    # reenable the errors for later use
+    parser.error = old_error
+    root = opts.proot or ''
+    user = opts.owner or 'shinken'
+    group = opts.group or 'shinken'
+    required_pkgs = []
+
+    # Not allowed options we need
+    package_only = False
+    if "--package-only" in args:
+        package_only = True
+        sys.argv.remove("--package-only")
+    # Not allowed options we don't need
+
+    data_files = []
+    #
+    is_install = 'install' in args
+    if is_install and not package_only:
+        print "Full install procedure"
+        data_files, default_paths, scripts = pre_install(is_install, user, group, root, args, opts)
+        setup_package(required_pkgs, data_files)
+        post_install(user, group, root, default_paths, scripts)
+    else:
+        setup_package(required_pkgs, data_files)
+        print "Package install procedure"
+
+    print "Shinken setup done"
 
 
-def _error(msg):
-    print 'Parser error', msg
-
-
-parser.error = _error
-opts, args = parser.parse_args()
-# reenable the errors for later use
-parser.error = old_error
-
-root = opts.proot or ''
-user = opts.owner or 'shinken'
-group = opts.group or 'shinken'
-
-scripts = []
-data_files = []
-default_paths = {}
-
-is_install = False
-package_only = False
-if "--package-only" in args:
-    package_only = True
-    sys.argv.remove("--package-only")
-
-
-def preinstall():
-    global is_install
-    global data_files
+def pre_install(is_install, user, group, root, args, opts):
+    print "Preparing for shinken install..."
     # We try to see if we are in a full install or an update process
     is_update = False
-    # Try to import shinekn but not the local one. If avialable, we are in
-    # and upgrade phase, not a classic install
+    # Try to import shinken but not the local one. If available, we are in
+    # an upgrade phase, not a classic install
     try:
         if '.' in sys.path:
             sys.path.remove('.')
@@ -240,13 +248,11 @@ def preinstall():
 
         print "Shinken Lib Updating process only"
         is_update = True
-    is_install = False
-    if 'install' in args:
-        is_install = True
+
     install_scripts = opts.install_scripts or ''
 
     # Maybe the user is unknown, but we are in a "classic" install, if so, bail out
-    if is_install and not root and not is_update and pwd and not opts.skip_build:
+    if is_install and not root and pwd and not opts.skip_build:
         uid = get_uid(user)
         gid = get_gid(group)
 
@@ -276,73 +282,7 @@ def preinstall():
     # compute scripts
     scripts = [s for s in glob('bin/shinken*') if not s.endswith('.py')]
     # Define files
-    if 'win' in sys.platform:
-        default_paths = {
-            'bin': install_scripts or "c:\\shinken\\bin",
-            'var': "c:\\shinken\\var",
-            'share': "c:\\shinken\\var\\share",
-            'etc': "c:\\shinken\\etc",
-            'log': "c:\\shinken\\var",
-            'run': "c:\\shinken\\var",
-            'libexec': "c:\\shinken\\libexec",
-        }
-        data_files = []
-    elif 'linux' in sys.platform or 'sunos5' in sys.platform:
-        default_paths = {
-            'bin': install_scripts or "/usr/bin",
-            'var': "/var/lib/shinken/",
-            'share': "/var/lib/shinken/share",
-            'etc': "/etc/shinken",
-            'run': "/var/run/shinken",
-            'log': "/var/log/shinken",
-            'libexec': "/var/lib/shinken/libexec",
-        }
-        data_files = [
-            (
-                os.path.join('/etc', 'init.d'),
-                ['bin/init.d/shinken',
-                 'bin/init.d/shinken-arbiter',
-                 'bin/init.d/shinken-broker',
-                 'bin/init.d/shinken-receiver',
-                 'bin/init.d/shinken-poller',
-                 'bin/init.d/shinken-reactionner',
-                 'bin/init.d/shinken-scheduler',
-                 ]
-            )
-        ]
-
-        if is_install:
-            # warning: The default file will be generated a bit later
-            data_files.append(
-                (os.path.join('/etc', 'default', ),
-                 ['build/bin/default/shinken']
-                 ))
-    elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
-        default_paths = {
-            'bin': install_scripts or "/usr/local/bin",
-            'var': "/usr/local/libexec/shinken",
-            'share': "/usr/local/share/shinken",
-            'etc': "/usr/local/etc/shinken",
-            'run': "/var/run/shinken",
-            'log': "/var/log/shinken",
-            'libexec': "/usr/local/libexec/shinken/plugins",
-        }
-        data_files = [
-            (
-                '/usr/local/etc/rc.d',
-                ['bin/rc.d/shinken_arbiter',
-                 'bin/rc.d/shinken_broker',
-                 'bin/rc.d/shinken_receiver',
-                 'bin/rc.d/shinken_poller',
-                 'bin/rc.d/shinken_reactionner',
-                 'bin/rc.d/shinken_scheduler',
-                 ]
-            )
-        ]
-    else:
-        data_files = []
-        raise "Unsupported platform, sorry"
-
+    data_files, default_paths = get_default_platform_paths(install_scripts, is_install)
     # Change paths if need
     # if root:
     #    for (k,v) in default_paths.iteritems():
@@ -351,7 +291,7 @@ def preinstall():
     data_files.append((default_paths['bin'], scripts))
     # Only some platform are managed by the init.d scripts
     if is_install and ('linux' in sys.platform or 'sunos5' in sys.platform):
-        generate_default_shinken_file()
+        generate_default_shinken_file(default_paths)
     daemonsini = []
     if not is_update:
         ## get all files + under-files in etc/ except daemons folder
@@ -382,7 +322,7 @@ def preinstall():
         for name in ['shinken.cfg']:
             inname = os.path.join('etc', name)
             outname = os.path.join('build', name)
-            print('updating path in %s', outname)
+            print('updating path in %s' % outname)
 
             ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
             update_file_with_string(inname, outname,
@@ -422,51 +362,121 @@ def preinstall():
         if o in sys.argv:
             sys.argv.remove(o)
 
-
-if not package_only:
-    preinstall()
-
-required_pkgs = []
-setup(
-    name="Shinken",
-    version="2.4.3",
-    packages=find_packages(),
-    package_data={'': package_data},
-    description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
-    long_description=read('README.rst'),
-    author="Gabes Jean",
-    author_email="naparuba@gmail.com",
-    license="GNU Affero General Public License",
-    url="http://www.shinken-monitoring.org",
-    zip_safe=False,
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: GNU Affero General Public License v3',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
-        'Programming Language :: Python',
-        'Topic :: System :: Monitoring',
-        'Topic :: System :: Networking :: Monitoring',
-    ],
-    install_requires=[
-        required_pkgs
-    ],
-
-    extras_require={
-        'setproctitle': ['setproctitle']
-    },
-
-    data_files=data_files,
-)
+    return data_files, default_paths, scripts
 
 
-def post_install():
-    global default_paths
+def get_default_platform_paths(install_scripts, is_install):
+    default_paths = {}
+    data_files = []
+    if 'win' in sys.platform:
+        default_paths = {
+            'bin': install_scripts or "c:\\shinken\\bin",
+            'var': "c:\\shinken\\var",
+            'share': "c:\\shinken\\var\\share",
+            'etc': "c:\\shinken\\etc",
+            'log': "c:\\shinken\\var",
+            'run': "c:\\shinken\\var",
+            'libexec': "c:\\shinken\\libexec",
+        }
+    elif 'linux' in sys.platform or 'sunos5' in sys.platform:
+        default_paths = {
+            'bin': install_scripts or "/usr/bin",
+            'var': "/var/lib/shinken/",
+            'share': "/var/lib/shinken/share",
+            'etc': "/etc/shinken",
+            'run': "/var/run/shinken",
+            'log': "/var/log/shinken",
+            'libexec': "/var/lib/shinken/libexec",
+        }
+        data_files = [
+            (
+                os.path.join('/etc', 'init.d'),
+                ['bin/init.d/shinken',
+                 'bin/init.d/shinken-arbiter',
+                 'bin/init.d/shinken-broker',
+                 'bin/init.d/shinken-receiver',
+                 'bin/init.d/shinken-poller',
+                 'bin/init.d/shinken-reactionner',
+                 'bin/init.d/shinken-scheduler',
+                 ]
+            )
+        ]
+
+        if is_install:
+            # warning: The default file will be generated a bit later
+            data_files.append(
+                (os.path.join('/etc', 'default', ),
+                 ['build/bin/default/shinken']
+                 ))
+    elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
+        default_paths.update({
+            'bin': install_scripts or "/usr/local/bin",
+            'var': "/usr/local/libexec/shinken",
+            'share': "/usr/local/share/shinken",
+            'etc': "/usr/local/etc/shinken",
+            'run': "/var/run/shinken",
+            'log': "/var/log/shinken",
+            'libexec': "/usr/local/libexec/shinken/plugins",
+        })
+        data_files = [
+            (
+                '/usr/local/etc/rc.d',
+                ['bin/rc.d/shinken_arbiter',
+                 'bin/rc.d/shinken_broker',
+                 'bin/rc.d/shinken_receiver',
+                 'bin/rc.d/shinken_poller',
+                 'bin/rc.d/shinken_reactionner',
+                 'bin/rc.d/shinken_scheduler',
+                 ]
+            )
+        ]
+    else:
+        raise Exception("Unsupported platform, sorry")
+
+    return data_files, default_paths
+
+
+def setup_package(required_pkgs, data_files):
+    setup(
+        name="Shinken",
+        version="2.0",
+        packages=find_packages(),
+        package_data={'': PACKAGE_DATA},
+        description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
+        long_description=read('README.rst'),
+        author="Gabes Jean",
+        author_email="naparuba@gmail.com",
+        license="GNU Affero General Public License",
+        url="http://www.shinken-monitoring.org",
+        zip_safe=False,
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: Console',
+            'Intended Audience :: System Administrators',
+            'License :: OSI Approved :: GNU Affero General Public License v3',
+            'Operating System :: MacOS :: MacOS X',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Programming Language :: Python',
+            'Topic :: System :: Monitoring',
+            'Topic :: System :: Networking :: Monitoring',
+        ],
+        install_requires=[
+            required_pkgs
+        ],
+
+        extras_require={
+            'setproctitle': ['setproctitle']
+        },
+
+        data_files=data_files,
+    )
+
+
+def post_install(user, group, root, default_paths, scripts):
+    print "Post installation actions..."
     # if root is set, it's for package, so NO chown
-    if pwd and not root and is_install:
+    if pwd and not root:
         # assume a posix system
         uid = get_uid(user)
         gid = get_gid(group)
@@ -500,7 +510,5 @@ def post_install():
               "you should install the python-cherrypy3 lib"
 
 
-if not package_only:
-    post_install()
-
-print "Shinken setup done"
+if __name__ == '__main__':
+    main()
