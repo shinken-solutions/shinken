@@ -6,7 +6,10 @@ After=syslog.target
 Type=forking
 ExecStart=/usr/sbin/shinken-broker -d -c /etc/shinken/daemons/brokerd.ini
 KillMode=mixed
-TimeoutStopSec=3
+TimeoutStopSec=30
+PIDFile=/var/run/shinken/brokerd.pid
+Restart=on-failure
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target
