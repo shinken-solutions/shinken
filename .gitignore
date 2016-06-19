@@ -52,3 +52,7 @@ test/tmp/.cov*
 # Pbr
 pbr-*.egg/
 
+
+# Virtualization #
+##################
+.vagrant
