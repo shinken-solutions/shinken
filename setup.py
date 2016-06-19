@@ -71,7 +71,7 @@ def generate_default_shinken_file(default_paths):
     # Read the template file
     f = open(templatefile)
     buf = f.read()
-    f.close
+    f.close()
     # substitute
     buf = buf.replace("$ETC$", default_paths['etc'])
     buf = buf.replace("$VAR$", default_paths['var'])
@@ -149,6 +149,10 @@ def _chmodplusx(d):
         os.chmod(d, st.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def _error(msg):
+    print 'Parser error', msg
+
+
 def main():
     parser = optparse.OptionParser(
         "%prog [options]", version="%prog ")
@@ -183,76 +187,64 @@ def main():
                       dest="package_only", action='store_true',
                       help="Don't setup shinken, just install the package")
     old_error = parser.error
-
-    def _error(msg):
-        print 'Parser error', msg
-
     parser.error = _error
     opts, args = parser.parse_args()
     # reenable the errors for later use
     parser.error = old_error
+
+    # Handle the args
     root = opts.proot or ''
     user = opts.owner or 'shinken'
     group = opts.group or 'shinken'
-    required_pkgs = []
 
-    # Not allowed options we need
+    is_install = 'install' in args
+    install_scripts = opts.install_scripts or ''
+    skip_build = opts.skip_build
+
+    # These are commands that setup is supposed to handle
+    fallthrough_commands = ['egg_info', 'pip-egg-info']
+    has_fallthrough_command = any(fallthrough_command in args for fallthrough_command in fallthrough_commands)
+
+    # Options that setup doesn't like, but that we need
     package_only = False
     if "--package-only" in args:
         package_only = True
         sys.argv.remove("--package-only")
-    # Not allowed options we don't need
 
-    data_files = []
-    #
-    is_install = 'install' in args
-    if is_install and not package_only:
-        print "Full install procedure"
-        data_files, default_paths, scripts = pre_install(is_install, user, group, root, args, opts)
-        setup_package(required_pkgs, data_files)
-        post_install(user, group, root, default_paths, scripts)
+    # We try to see if we are in a full install or an update process
+    required_pkgs = []
+    is_update = check_is_update(args, opts) or check_is_package_installed()
+    if not has_fallthrough_command and is_update and not package_only:
+        if not check_are_data_files_installed(install_scripts, is_install):
+            # We may have only done a package install before
+            print "Not all files are installed"
+            full_install(user, group, root, required_pkgs, install_scripts, skip_build)
+        else:
+            # A real upgrade
+            data_files, default_paths, scripts = get_default_platform_paths(install_scripts, False)
+            setup_package(required_pkgs, data_files)
+    elif not has_fallthrough_command and is_install and not package_only:
+        full_install(user, group, root, required_pkgs, install_scripts, skip_build)
     else:
+        print "Simple setup"
+        data_files, default_paths, scripts = get_default_platform_paths(install_scripts, False)
         setup_package(required_pkgs, data_files)
-        print "Package install procedure"
 
     print "Shinken setup done"
 
 
-def pre_install(is_install, user, group, root, args, opts):
+def full_install(user, group, root, required_pkgs, install_scripts, skip_build):
+    print "Full install procedure"
+    data_files, default_paths, scripts = pre_install(user, group, root, install_scripts, skip_build)
+    setup_package(required_pkgs, data_files)
+    post_install(user, group, root, default_paths, scripts)
+
+
+def pre_install(user, group, root, install_scripts, skip_build):
     print "Preparing for shinken install..."
-    # We try to see if we are in a full install or an update process
-    is_update = False
-    # Try to import shinken but not the local one. If available, we are in
-    # an upgrade phase, not a classic install
-    try:
-        if '.' in sys.path:
-            sys.path.remove('.')
-        if os.path.abspath('.') in sys.path:
-            sys.path.remove(os.path.abspath('.'))
-        if '' in sys.path:
-            sys.path.remove('')
-        import shinken
-        is_update = True
-        print "Previous Shinken lib detected (%s)" % shinken.__file__
-    except ImportError:
-        pass
-    if '--update' in args or opts.upgrade or '--upgrade' in args:
-        print "Shinken Lib Updating process only"
-        if 'update' in args:
-            sys.argv.remove('update')
-            sys.argv.insert(1, 'install')
-        if '--update' in args:
-            sys.argv.remove('--update')
-        if '--upgrade' in args:
-            sys.argv.remove('--upgrade')
-
-        print "Shinken Lib Updating process only"
-        is_update = True
-
-    install_scripts = opts.install_scripts or ''
 
     # Maybe the user is unknown, but we are in a "classic" install, if so, bail out
-    if is_install and not root and pwd and not opts.skip_build:
+    if not root and pwd and not skip_build:
         uid = get_uid(user)
         gid = get_gid(group)
 
@@ -279,34 +271,23 @@ def pre_install(is_install, user, group, root, args, opts):
     for idx in to_del:
         sys.argv.pop(idx)
 
-    # compute scripts
-    scripts = [s for s in glob('bin/shinken*') if not s.endswith('.py')]
     # Define files
-    data_files, default_paths = get_default_platform_paths(install_scripts, is_install)
-    # Change paths if need
-    # if root:
-    #    for (k,v) in default_paths.iteritems():
-    #        default_paths[k] = os.path.join(root, v[1:])
-    # Beware to install scripts in the bin dir
-    data_files.append((default_paths['bin'], scripts))
-    # Only some platform are managed by the init.d scripts
-    if is_install and ('linux' in sys.platform or 'sunos5' in sys.platform):
-        generate_default_shinken_file(default_paths)
+    data_files, default_paths, scripts = get_default_platform_paths(install_scripts, True)
+
     daemonsini = []
-    if not is_update:
-        ## get all files + under-files in etc/ except daemons folder
-        for path, subdirs, files in os.walk('etc'):
-            if len(files) == 0:
-                data_files.append((os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)), []))
-            for name in files:
-                if name == 'shinken.cfg':
-                    continue
-                if 'daemons' in path:
-                    daemonsini.append(os.path.join(path, name))
-                else:
-                    data_files.append((os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)),
-                                       [os.path.join(path, name)]))
-    if os.name != 'nt' and not is_update:
+    # get all files + under-files in etc/ except daemons folder
+    for path, subdirs, files in os.walk('etc'):
+        if len(files) == 0:
+            data_files.append((os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)), []))
+        for name in files:
+            if name == 'shinken.cfg':
+                continue
+            if 'daemons' in path:
+                daemonsini.append(os.path.join(path, name))
+            else:
+                data_files.append((os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)),
+                                   [os.path.join(path, name)]))
+    if os.name != 'nt':
         for _file in daemonsini:
             inifile = _file
             outname = os.path.join('build', _file)
@@ -324,7 +305,7 @@ def pre_install(is_install, user, group, root, args, opts):
             outname = os.path.join('build', name)
             print('updating path in %s' % outname)
 
-            ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
+            # but we HAVE to set the shinken_user & shinken_group to thoses requested:
             update_file_with_string(inname, outname,
                                     ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+",
                                      "local_log=.+", "modules_dir=.+", "pack_distribution_file=.+"],
@@ -339,30 +320,57 @@ def pre_install(is_install, user, group, root, args, opts):
                                     )
             data_files.append((default_paths['etc'], [outname]))
 
-    # Modules, doc, inventory and cli are always installed
-    paths = ('modules', 'doc', 'inventory', 'cli')
-    for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
-        for name in files:
-            data_files.append((os.path.join(default_paths['var'], path), [os.path.join(path, name)]))
-    for path, subdirs, files in os.walk('share'):
-        for name in files:
-            data_files.append((os.path.join(default_paths['share'], re.sub(r"^(share\/|share$)", "", path)),
-                               [os.path.join(path, name)]))
-    for path, subdirs, files in os.walk('libexec'):
-        for name in files:
-            data_files.append((os.path.join(default_paths['libexec'], re.sub(r"^(libexec\/|libexec$)", "", path)),
-                               [os.path.join(path, name)]))
-    data_files.append((default_paths['run'], []))
-    data_files.append((default_paths['log'], []))
-    # Note: we do not add the "scripts" entry in the setup phase because we need to generate the
-    # default/shinken file with the bin path before run the setup phase, and it's not so
-    # easy to do in a clean and easy way
     not_allowed_options = ['--upgrade', '--update']
     for o in not_allowed_options:
         if o in sys.argv:
             sys.argv.remove(o)
 
     return data_files, default_paths, scripts
+
+
+def check_is_update(args, opts):
+    is_update = False
+    if '--update' in args or opts.upgrade or '--upgrade' in args:
+        if 'update' in args:
+            sys.argv.remove('update')
+            sys.argv.insert(1, 'install')
+        if '--update' in args:
+            sys.argv.remove('--update')
+        if '--upgrade' in args:
+            sys.argv.remove('--upgrade')
+
+        print "Shinken Lib Updating process only"
+        is_update = True
+    return is_update
+
+
+def check_is_package_installed():
+    # Try to import shinken but not the local one. If available, we are in
+    # an upgrade phase, not a classic install
+    is_package_installed = False
+    try:
+        if '.' in sys.path:
+            sys.path.remove('.')
+        if os.path.abspath('.') in sys.path:
+            sys.path.remove(os.path.abspath('.'))
+        if '' in sys.path:
+            sys.path.remove('')
+        import shinken
+        is_package_installed = True
+        print "Previous Shinken lib detected (%s)" % shinken.__file__
+    except ImportError:
+        pass
+    return is_package_installed
+
+
+def check_are_data_files_installed(install_scripts, is_install):
+    data_files, _, _ = get_default_platform_paths(install_scripts, is_install)
+    for sys_path, _ in data_files:
+        if not os.path.exists(sys_path):
+            print "%s doesn't exist"
+            return False
+
+    return True
 
 
 def get_default_platform_paths(install_scripts, is_install):
@@ -401,7 +409,7 @@ def get_default_platform_paths(install_scripts, is_install):
                  ]
             )
         ]
-
+        generate_default_shinken_file(default_paths)
         if is_install:
             # warning: The default file will be generated a bit later
             data_files.append(
@@ -433,7 +441,28 @@ def get_default_platform_paths(install_scripts, is_install):
     else:
         raise Exception("Unsupported platform, sorry")
 
-    return data_files, default_paths
+    # Common data files
+    paths = ('modules', 'doc', 'inventory', 'cli')
+    for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
+        for name in files:
+            data_files.append((os.path.join(default_paths['var'], path), [os.path.join(path, name)]))
+    for path, subdirs, files in os.walk('share'):
+        for name in files:
+            data_files.append((os.path.join(default_paths['share'], re.sub(r"^(share\/|share$)", "", path)),
+                               [os.path.join(path, name)]))
+    for path, subdirs, files in os.walk('libexec'):
+        for name in files:
+            data_files.append((os.path.join(default_paths['libexec'], re.sub(r"^(libexec\/|libexec$)", "", path)),
+                               [os.path.join(path, name)]))
+    data_files.append((default_paths['run'], []))
+    data_files.append((default_paths['log'], []))
+
+    # compute scripts
+    scripts = [s for s in glob('bin/shinken*') if not s.endswith('.py')]
+    # Beware to install scripts in the bin dir
+    data_files.append((default_paths['bin'], scripts))
+
+    return data_files, default_paths, scripts
 
 
 def setup_package(required_pkgs, data_files):
