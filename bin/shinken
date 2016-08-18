@@ -437,6 +437,7 @@ def main(custom_args=None):
     cfg = None
     if not os.path.exists(opts.iniconfig):
         logger.debug('Missing configuration file!')
+        CONFIG['shinken.io'] = {}
     else:
         cfg = ConfigParser.ConfigParser()
         cfg.read(opts.iniconfig)
