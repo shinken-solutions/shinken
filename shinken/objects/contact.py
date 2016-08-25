@@ -297,4 +297,5 @@ class Contacts(Items):
                 if not hasattr(c, 'notificationways'):
                     c.notificationways = [nw_name]
                 else:
+                    c.notificationways = list(c.notificationways)
                     c.notificationways.append(nw_name)
