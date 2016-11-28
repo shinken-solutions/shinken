@@ -235,7 +235,9 @@ class DependencyNode(object):
             return [self.sons[0]]
 
         for s in self.sons:
-            r.extend(s.list_all_elements())
+            # check first if son is not None (valid conf file)
+            if s:
+                r.extend(s.list_all_elements())
 
         # and uniq the result
         return list(set(r))
