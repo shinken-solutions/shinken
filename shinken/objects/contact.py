@@ -227,8 +227,8 @@ class Contacts(Items):
     inner_class = Contact
 
     def linkify(self, timeperiods, commands, notificationways):
-        # self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
-        # self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
+        self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
+        self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         # self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         # self.linkify_command_list_with_commands(commands, 'host_notification_commands')
         self.linkify_with_notificationways(notificationways)
