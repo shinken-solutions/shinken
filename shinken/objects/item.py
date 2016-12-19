@@ -217,6 +217,14 @@ Like temporary attributes such as "imported_from", etc.. """
     def __str__(self):
         return str(self.__dict__) + '\n'
 
+    def get_id(self):
+        """Getter for id attribute
+
+        :return: id
+        :rtype: int
+        """
+        return self.id
+
     def is_tpl(self):
         """ Return if the elements is a template """
         return not getattr(self, "register", True)

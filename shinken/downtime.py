@@ -113,6 +113,14 @@ class Downtime:
         return "%s %s Downtime id=%d %s - %s" % (
             active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
 
+    def get_id(self):
+        """Getter for id attribute
+
+        :return: id
+        :rtype: int
+        """
+        return self.id
+
     def trigger_me(self, other_downtime):
         self.activate_me.append(other_downtime)
 
