@@ -128,17 +128,19 @@ class __Action(object):
         #print "Get only," , max_plugins_output_length, "bytes"
         # Squeeze all output after max_plugins_output_length
         out = out[:max_plugins_output_length]
+        # manage escaped pipes
+        out = out.replace('\|', '___PROTECT_PIPE___')
         # Then cuts by lines
         elts = out.split('\n')
         # For perf data
         elts_line1 = elts[0].split('|')
         # First line before | is output, and strip it
-        self.output = elts_line1[0].strip()
+        self.output = elts_line1[0].strip().replace('___PROTECT_PIPE___', '|')
         # Init perfdata as void
         self.perf_data = ''
         # After | is perfdata, and strip it
         if len(elts_line1) > 1:
-            self.perf_data = elts_line1[1].strip()
+            self.perf_data = elts_line1[1].strip().replace('___PROTECT_PIPE___', '|')
         # Now manage others lines. Before the | it's long_output
         # And after it's all perf_data, \n join
         long_output = []
@@ -146,16 +148,22 @@ class __Action(object):
         for line in elts[1:]:
             # if already in perfdata, direct append
             if in_perfdata:
-                self.perf_data += ' ' + line.strip()
+                self.perf_data += ' ' + line.strip().replace('___PROTECT_PIPE___', '|')
             else:  # not already in? search for the | part :)
                 elts = line.split('|', 1)
                 # The first part will always be long_output
-                long_output.append(elts[0].strip())
+                long_output.append(elts[0].strip().replace('___PROTECT_PIPE___', '|'))
                 if len(elts) > 1:
                     in_perfdata = True
-                    self.perf_data += ' ' + elts[1].strip()
+                    self.perf_data += ' ' + elts[1].strip().replace('___PROTECT_PIPE___', '|')
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
+        
+        logger.debug("Output : %s" % self.output)
+        logger.debug("- perf_data : %s" % self.perf_data)
+        # safe_print("Output : ", self.output)
+        # safe_print("- perf_data : ", self.perf_data)
+        # safe_print("- long_output : ", self.long_output)
 
 
     def check_finished(self, max_plugins_output_length):
@@ -291,6 +299,7 @@ if os.name != 'nt':
                     return
 
 
+            logger.debug("Launching : %s" % cmd)
             #safe_print("Launching", cmd)
             #safe_print("With env", self.local_env)
 
@@ -357,6 +366,10 @@ else:
                     self.execution_time = time.time() - self.check_time
                     return
 
+            logger.debug("Launching : %s" % cmd)
+            # safe_print("Launching : ", cmd)
+            # safe_print("With env : ", self.local_env)
+            
             try:
                 self.process = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
