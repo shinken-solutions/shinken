@@ -2,6 +2,17 @@
 Shinken ChangeLog
 ########################
 
+
+3.0.03 - X/X/2017
+-----------------
+        CORE ENHANCEMENT
+        Enh: (backport from Enterprise, internal ref #SEF-202) Big boost for the broker daemons, especially for very large setups and slow modules (yes Graphite, I'm looking at you).
+        Enh: (backport from Enterprise ref:#SEF-103) Slight boost of startup time by remiving useless hash computation.
+
+        CORE FIXES
+        Fix: (backport from Enterprise ref:#SEF-76) In some case, we can have "negative" value for downtime depth, and then the element will never exit from downtime.
+
+
 2.4.3 - 10/03/2016
 -------------------
         CORE ENHANCEMENT
