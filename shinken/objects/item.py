@@ -27,15 +27,8 @@
  elements like service, hosts or contacts.
 """
 import time
-import cPickle  # for hashing compute
 import itertools
 from shinken.util import safe_print
-
-# Try to import md5 function
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
 
 from copy import copy
 
@@ -77,6 +70,7 @@ class Item(object):
 
     macros = {
     }
+
 
     def __init__(self, params={}):
         # We have our own id of My Class type :)
@@ -156,6 +150,7 @@ class Item(object):
             else:
                 setattr(self, key, val)
 
+
     def get_newid(self):
         cls = self.__class__
         value = cls.id
@@ -176,6 +171,7 @@ class Item(object):
         else:
             return val
 
+
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
@@ -187,6 +183,7 @@ class Item(object):
             else:
                 setattr(self, prop, val)
             # each instance to have his own running prop!
+
 
     def copy(self):
         """ Return a copy of the item, but give him a new id """
@@ -214,12 +211,15 @@ Like temporary attributes such as "imported_from", etc.. """
             except AttributeError:
                 pass
 
+
     def __str__(self):
         return str(self.__dict__) + '\n'
+
 
     def is_tpl(self):
         """ Return if the elements is a template """
         return not getattr(self, "register", True)
+
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -229,6 +229,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.has_default:
                 setattr(self, prop, entry.default)
+
 
     # We load every useful parameter so no need to access global conf later
     # Must be called after a change in a global conf parameter
@@ -255,20 +256,6 @@ Like temporary attributes such as "imported_from", etc.. """
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
 
-
-    # Compute a hash of this element values. Should be launched
-    # When we got all our values, but not linked with other objects
-    def compute_hash(self):
-        # ID will always changed between runs, so we remove it
-        # for hash compute
-        i = self.id
-        del self.id
-        m = md5()
-        tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
-        m.update(tmp)
-        self.hash = m.digest()
-        # and put again our id
-        self.id = i
 
     def get_templates(self):
         use = getattr(self, 'use', '')
@@ -469,6 +456,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, new_name, value)
                 delattr(self, old_name)
 
+
     # The arbiter is asking us our raw value before all explode or linking
     def get_raw_import_values(self):
         r = {}
@@ -488,6 +476,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
 
+
     def del_downtime(self, downtime_id):
         d_to_del = None
         for dt in self.downtimes:
@@ -497,8 +486,10 @@ Like temporary attributes such as "imported_from", etc.. """
         if d_to_del is not None:
             self.downtimes.remove(d_to_del)
 
+
     def add_comment(self, comment):
         self.comments.append(comment)
+
 
     def del_comment(self, comment_id):
         c_to_del = None
@@ -508,6 +499,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 c.can_be_deleted = True
         if c_to_del is not None:
             self.comments.remove(c_to_del)
+
 
     def acknowledge_problem(self, sticky, notify, persistent, author, comment, end_time=0):
         if self.state != self.ok_up:
@@ -529,6 +521,7 @@ Like temporary attributes such as "imported_from", etc.. """
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
 
+
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
@@ -536,6 +529,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 self.acknowledgement.end_time != 0 and
                 self.acknowledgement.end_time < time.time()):
             self.unacknowledge_problem()
+
 
     #  Delete the acknowledgement object and reset the flag
     #  but do not remove the associated comment.
@@ -554,12 +548,14 @@ Like temporary attributes such as "imported_from", etc.. """
                     self.del_comment(c.id)
             self.broks.append(self.get_update_status_brok())
 
+
     # Check if we have an acknowledgement and if this is marked as sticky.
     # This is needed when a non-ok state changes
     def unacknowledge_problem_if_not_sticky(self):
         if hasattr(self, 'acknowledgement') and self.acknowledgement is not None:
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
+
 
     # Will flatten some parameters tagged by the 'conf_send_preparation'
     # property because they are too "linked" to be send like that (like realms)
@@ -583,6 +579,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
 
+
     # Get the property for an object, with good value
     # and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
@@ -597,6 +594,7 @@ Like temporary attributes such as "imported_from", etc.. """
             value = pre_op(self, value)
 
         return value
+
 
     # Fill data with info of item by looking at brok_type
     # in props of properties or running_properties
@@ -630,17 +628,20 @@ Like temporary attributes such as "imported_from", etc.. """
         self.fill_data_brok_from(data, 'full_status')
         return Brok('update_' + self.my_type + '_status', data)
 
+
     # Get a brok with check_result
     def get_check_result_brok(self):
         data = {}
         self.fill_data_brok_from(data, 'check_result')
         return Brok(self.my_type + '_check_result', data)
 
+
     # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
         data = {}
         self.fill_data_brok_from(data, 'next_schedule')
         return Brok(self.my_type + '_next_schedule', data)
+
 
     # A snapshot brok is alike a check_result, with also a
     # output from the snapshot command
@@ -652,6 +653,7 @@ Like temporary attributes such as "imported_from", etc.. """
         }
         self.fill_data_brok_from(data, 'check_result')
         return Brok(self.my_type + '_snapshot', data)
+
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -705,6 +707,7 @@ Like temporary attributes such as "imported_from", etc.. """
                                                            tname))
         self.triggers = new_triggers
 
+
     def dump(self):
         dmp = {}
         for prop in self.properties.keys():
@@ -718,6 +721,7 @@ Like temporary attributes such as "imported_from", etc.. """
             elif attr:
                 dmp[prop] = getattr(self, prop)
         return dmp
+
 
     def _get_name(self):
         if hasattr(self, 'get_name'):
@@ -738,12 +742,14 @@ class Items(object):
         self.configuration_errors = []
         self.add_items(items, index_items)
 
+
     def get_source(self, item):
         source = getattr(item, 'imported_from', None)
         if source:
             return " in %s" % source
         else:
             return ""
+
 
     def add_items(self, items, index_items):
         """
@@ -1186,6 +1192,7 @@ class Items(object):
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
 
+
     # Make link between an object and its escalations
     def linkify_with_escalations(self, escalations):
         for i in self:
@@ -1201,6 +1208,7 @@ class Items(object):
                                                                                    i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
+
 
     # Make link between item and it's resultmodulations
     def linkify_with_resultmodulations(self, resultmodulations):
@@ -1219,6 +1227,7 @@ class Items(object):
                         continue
                 i.resultmodulations = new_resultmodulations
 
+
     # Make link between item and it's business_impact_modulations
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
@@ -1235,6 +1244,7 @@ class Items(object):
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
+
 
     # If we've got a contact_groups properties, we search for all
     # theses groups and ask them their contacts, and then add them
@@ -1263,6 +1273,7 @@ class Items(object):
                     else:
                         item.contacts = cnames
 
+
     # Link a timeperiod property (prop)
     def linkify_with_timeperiods(self, timeperiods, prop):
         for i in self:
@@ -1284,6 +1295,7 @@ class Items(object):
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
+
     def create_commandcall(self, prop, commands, command):
         comandcall = dict(commands=commands, call=command)
         if hasattr(prop, 'enable_environment_macros'):
@@ -1295,6 +1307,7 @@ class Items(object):
             comandcall['reactionner_tag'] = prop.reactionner_tag
 
         return CommandCall(**comandcall)
+
 
     # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
@@ -1310,6 +1323,7 @@ class Items(object):
 
                     setattr(i, prop, None)
 
+
     # Link a command list (commands with , between) in real CommandCalls
     def linkify_command_list_with_commands(self, commands, prop):
         for i in self:
@@ -1324,6 +1338,7 @@ class Items(object):
                     else:  # TODO: catch?
                         pass
                 setattr(i, prop, com_list)
+
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
@@ -1387,6 +1402,7 @@ class Items(object):
                     s.configuration_errors.append(err)
             s.modules = new_modules
 
+
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         # print "\n"*10, "looking for expression", expr
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
@@ -1399,15 +1415,11 @@ class Items(object):
             f = ComplexExpressionFactory(look_in, hosts, hosts)
         expr_tree = f.eval_cor_pattern(expr)
 
-        # print "RES of ComplexExpressionFactory"
-        # print expr_tree
-
-        # print "Try to resolve the Tree"
         set_res = expr_tree.resolve_elements()
-        # print "R2d2 final is", set_res
 
         # HOOK DBG
         return list(set_res)
+
 
     def get_hosts_from_hostgroups(self, hgname, hostgroups):
         if not isinstance(hgname, list):
@@ -1465,6 +1477,7 @@ class Items(object):
                 hnames.add(h)
 
         item.host_name = ','.join(hnames)
+
 
     # Take our trigger strings and create true objects with it
     def explode_trigger_string_into_triggers(self, triggers):
