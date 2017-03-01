@@ -181,7 +181,7 @@ class Downtime:
         self.can_be_deleted = True
         self.ref.in_scheduled_downtime_during_last_check = True
         # Nagios does not notify on canceled downtimes, but we does
-        res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
+        self.ref.create_notifications('DOWNTIMECANCELLED')
         # Also cancel other downtimes triggered by me
         for dt in self.activate_me:
             res.extend(dt.cancel())
