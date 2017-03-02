@@ -26,13 +26,14 @@ echo "$PWD"
 # delete the result of nosetest, for coverage
 rm -f nosetests.xml
 rm -f coverage.xml
-rm -f .coverage
+rm -f .coverage*
 
 
 function launch_and_assert {
     SCRIPT=$1
-    #nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
-    output=$(python ./$SCRIPT > /tmp/test.running 2>&1)
+    # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
+    # so we must combine them in the end
+    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken ./$SCRIPT > /tmp/test.running 2>&1)
     printf " - %-60s" $SCRIPT
     if [ $? != 0 ] ; then
         printf "\033[31m[ FAILED ]\033[0m\n"
@@ -49,14 +50,19 @@ for ii in `ls -1 test_*py`; do
 done
 
 # And create the coverage file
-python-coverage xml --omit=/usr/lib
+coverage combine
+
 
 echo "Launchng pep8 now"
 cd ..
-pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203 --exclude='*.pyc,*~' shinken/*
+pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203,E129 --exclude='*.pyc,*~' shinken/*
+if [ $? != 0 ] ; then
+   printf "PEP8 compliant: \033[31m[ FAILED ]\033[0m\n"
+   exit 1
+fi
 
-echo "All quick unit tests passed :)"
-echo "But please launch a test.sh pass too for long tests too!"
+
+echo "All unit tests did pass"
 
 exit 0
 

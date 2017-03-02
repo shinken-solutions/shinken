@@ -222,12 +222,11 @@ class __Action(object):
         # If abnormal termination of check and no error data, set at least exit status info as error information
         if not self.stderrdata.strip() and self.exit_status not in valid_exit_status:
             self.stderrdata += "Abnormal termination with code: %r" % (self.exit_status,)
-        
-        if (  # check for bad syntax in command line:
-                            'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
-                    or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
-                or 'Syntax error: Unterminated quoted string' in self.stderrdata
-        ):
+
+        # check for bad syntax in command line:
+        if ('sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
+            or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
+            or 'Syntax error: Unterminated quoted string' in self.stderrdata):
             # Very, very ugly. But subprocess._handle_exitstatus does
             # not see a difference between a regular "exit 1" and a
             # bailing out shell. Strange, because strace clearly shows
