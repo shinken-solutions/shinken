@@ -67,7 +67,7 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         c.check_finished(8000)
         print c.status
         self.assertEqual('done', c.status)
-        self.assertEqual('£°é§', c.output)
+        self.assertEqual(u'£°é§', c.output)
         print "Done with good output, that's great"
         svc.consume_result(c)
         self.assertEqual(unicode('£°é§'.decode('utf8')), svc.output)

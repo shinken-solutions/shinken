@@ -973,10 +973,6 @@ class Items(object):
         return key in self.items
 
 
-    def compute_hash(self):
-        for i in self:
-            i.compute_hash()
-
 
     def find_by_name(self, name):
         return self.name_to_item.get(name, None)

@@ -403,8 +403,8 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
-        props_to_get = ['api_key', 'secret', 'http_proxy', 'statsd_host', 'statsd_port', 'statsd_prefix', 'statsd_enabled',
-                        'statsd_interval', 'statsd_types', 'statsd_pattern']
+        props_to_get = ['api_key', 'secret', 'http_proxy', 'statsd_host', 'statsd_port', 'statsd_prefix',
+                        'statsd_enabled', 'statsd_interval', 'statsd_types', 'statsd_pattern']
         for prop in props_to_get:
             v = g_conf[prop]
             setattr(self, prop, v)
@@ -742,7 +742,7 @@ class Broker(BaseSatellite):
             try:
                 q.put(to_send)
             except Exception:  # we catch but the kill detector on the next loop will detect the fail module and will manage it
-                logger.error('FAIL TO PUSH DATA TO EXTERNAL MODULE     the broker did fail to push data to an external module, this module will be detected and restart.')
+                logger.error('FAIL TO PUSH DATA TO EXTERNAL MODULE  this module will be detected and restart.')
         
         statsmgr.timing('core.broker.put-to-external-queue', time.time() - t0, 'perf')
         logger.debug("[Broks] Time to send [%s] broks to module ([%.3f] secs)" % (len(to_send), time.time() - t0))

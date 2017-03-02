@@ -321,8 +321,7 @@ if os.name != 'nt':
                 logger.error("Fail launching command: %s %s %s",
                              self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
-                if (not force_shell and exp.errno == 8
-                    and exp.strerror == 'Exec format error'):
+                if (not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error'):
                     return self.execute__(True)
                 self.output = exp.__str__()
                 self.exit_status = 2

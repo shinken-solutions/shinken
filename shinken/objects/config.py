@@ -2037,11 +2037,6 @@ class Config(Item):
         self.discoveryruns.remove_templates()
 
 
-    # We will compute simple element md5hash, so we can know
-    # if they changed or not between the restart
-    def compute_hash(self):
-        self.hosts.compute_hash()
-
 
     # Add an error in the configuration error list so we can print them
     # all in one place
