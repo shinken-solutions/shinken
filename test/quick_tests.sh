@@ -28,25 +28,35 @@ rm -f nosetests.xml
 rm -f coverage.xml
 rm -f .coverage
 
+
 function launch_and_assert {
     SCRIPT=$1
     #nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
-    python ./$SCRIPT
+    output=$(python ./$SCRIPT > /tmp/test.running 2>&1)
+    printf " - %-60s" $SCRIPT
     if [ $? != 0 ] ; then
-	echo "Error: the test $SCRIPT failed"
-	exit 2
+        printf "\033[31m[ FAILED ]\033[0m\n"
+	    echo "Error: the test $SCRIPT failed:"
+	    cat /tmp/test.running
+	    exit 2
     fi
+    printf "\033[92m[ OK ]\033[0m\n"
 }
 
-for ii in `ls -1 test_*py`; do launch_and_assert $ii; done
+echo "Launching tests:"
+for ii in `ls -1 test_*py`; do
+   launch_and_assert $ii;
+done
+
 # And create the coverage file
 python-coverage xml --omit=/usr/lib
 
 echo "Launchng pep8 now"
 cd ..
-pep8 --max-line-length=120 --ignore=E303,E302,E301,E241,W293,W291,E221 --exclude='*.pyc,*~' shinken/*
+pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203 --exclude='*.pyc,*~' shinken/*
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"
 
 exit 0
+
