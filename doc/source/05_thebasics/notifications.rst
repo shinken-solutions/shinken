@@ -48,7 +48,7 @@ The first filter that notifications must pass is a test of whether or not notifi
 Service and Host Filters: 
 ==========================
 
-The first filter for host or service notifications is a check to see if the host or service is in a period of :ref:`scheduled downtime <advanced/downtime>`. It it is in a scheduled downtime, no one gets notified. If it isn't in a period of downtime, it gets passed on to the next filter. As a side note, notifications for services are suppressed if the host they're associated with is in a period of scheduled downtime.
+The first filter for host or service notifications is a check to see if the host or service is in a period of :ref:`scheduled downtime <advanced/downtime>`. It is in a scheduled downtime, no one gets notified. If it isn't in a period of downtime, it gets passed on to the next filter. As a side note, notifications for services are suppressed if the host they're associated with is in a period of scheduled downtime.
 
 The second filter for host or service notification is a check to see if the host or service is :ref:`flapping <advanced/flapping>` (if you enabled flap detection). If the service or host is currently flapping, no one gets notified. Otherwise it gets passed to the next filter.
 
