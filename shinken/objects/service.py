@@ -1542,16 +1542,6 @@ class Services(Items):
                         s.configuration_errors.append(err)
             s.servicegroups = new_servicegroups
 
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify_s_by_commands(self, commands):
-        props = ['check_command', 'event_handler', 'snapshot_command']
-        for s in self:
-            for prop in props:
-                cc = getattr(s, prop, None)
-                if cc:
-                    cc.late_linkify_with_command(commands)
-
     # Delete services by ids
     def delete_services_by_id(self, ids):
         for id in ids:

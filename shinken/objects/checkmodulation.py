@@ -101,13 +101,6 @@ class CheckModulation(Item):
         return state
 
 
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify_cw_by_commands(self, commands):
-        if self.check_command:
-            self.check_command.late_linkify_with_command(commands)
-
-
 class CheckModulations(Items):
     name_property = "checkmodulation_name"
     inner_class = CheckModulation

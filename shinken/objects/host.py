@@ -1547,23 +1547,6 @@ class Hosts(Items):
                 for hg in h.hostgroups:
                     hostgroups.add_member(hname, hg.strip())
 
-
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify_h_by_commands(self, commands):
-        props = ['check_command', 'event_handler', 'snapshot_command']
-        for h in self:
-            for prop in props:
-                cc = getattr(h, prop, None)
-                if cc:
-                    cc.late_linkify_with_command(commands)
-
-            # Ok also link checkmodulations
-            for cw in h.checkmodulations:
-                cw.late_linkify_cw_by_commands(commands)
-                print cw
-
-
     # Create dependencies:
     # Dependencies at the host level: host parent
     def apply_dependencies(self):
