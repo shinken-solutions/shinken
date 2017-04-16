@@ -88,10 +88,9 @@ class BaseModule(object):
     """
 
     def __init__(self, mod_conf):
-        """Instanciate a new module.
-        There can be many instance of the same type.
-        'mod_conf' is module configuration object
-        for this new module instance.
+        """Instantiate a new module. There can be many instance of the same type.
+        :param mod_conf: The module configuration instance for this new module instance.
+        :type mod_conf: shinken.objects.module.Module
         """
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
@@ -285,18 +284,28 @@ class BaseModule(object):
     def _main(self):
         """module "main" method. Only used by external modules."""
         self.set_proctitle(self.name)
+        self.set_signal_handler()
 
         # TODO: fix this hack:
         if shinken.http_daemon.daemon_inst:
             shinken.http_daemon.daemon_inst.shutdown()
 
-        self.set_signal_handler()
         logger.info("[%s[%d]]: Now running..", self.name, os.getpid())
-        # Will block here!
-        self.main()
+        try:
+            self.main()
+        except Exception as err:
+            logger.exception('%s: unexepected error: %s', self.get_name(), err)
         self.do_stop()
         logger.info("[%s]: exiting now..", self.name)
 
+    def work(self, in_queue, out_queue, control_queue):
+        ''' Main method of an external module. This is so the method executed in a subprocess
 
-    # TODO: apparently some modules would uses "work" as the main method??
-    work = _main
+        :param in_queue:        The "incoming" queue to receive Message from the parent.
+        :param out_queue:       The "outgoing" queue to return things to the parent.
+        :param control_queue:   The "control" queue to receive controls from the parent.
+        '''
+        self.in_queue = self.in_queue
+        self.out_queue = self.out_queue
+        self.control_queue = control_queue
+        return self._main()
