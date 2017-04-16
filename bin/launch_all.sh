@@ -27,7 +27,7 @@ echo "Going to dir $DIR"
 
 cd "$DIR"/..
 
-export LANG=us_US.UTF-8
+export LANG=C
 
 "$DIR"/launch_scheduler.sh
 "$DIR"/launch_poller.sh
