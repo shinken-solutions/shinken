@@ -1024,6 +1024,7 @@ class SchedulingItem(Item):
             else:
                 # This is the first NON-OK result. Initiate the SOFT-sequence
                 # Also launch the event handler, he might fix it.
+                self.time_first_soft_result = int(time.time())
                 self.attempt = 1
                 self.state_type = 'SOFT'
                 self.raise_alert_log_entry()
@@ -1277,7 +1278,10 @@ class SchedulingItem(Item):
             t_wished = now
             # if first notification, we must add first_notification_delay
             if self.current_notification_number == 0 and type == 'PROBLEM':
-                last_time_non_ok_or_up = self.last_time_non_ok_or_up()
+                if self.time_first_soft_result != 0:
+                    last_time_non_ok_or_up = self.time_first_soft_result
+                else:
+                    last_time_non_ok_or_up = self.last_time_non_ok_or_up()
                 if last_time_non_ok_or_up == 0:
                     # this happens at initial
                     t_wished = now + self.first_notification_delay * cls.interval_length

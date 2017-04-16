@@ -302,6 +302,8 @@ class Host(SchedulingItem):
             StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id':
             IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'time_first_soft_result':
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_up':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_down':
@@ -588,6 +590,7 @@ class Host(SchedulingItem):
         'HOSTGROUPNAMES':    'get_groupnames',
         'LASTHOSTCHECK':     'last_chk',
         'LASTHOSTSTATECHANGE': 'last_state_change',
+        'TIMEFIRSTSOFTRESULT': 'time_first_soft_result',
         'LASTHOSTUP':        'last_time_up',
         'LASTHOSTDOWN':      'last_time_down',
         'LASTHOSTUNREACHABLE': 'last_time_unreachable',
