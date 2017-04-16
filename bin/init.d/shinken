@@ -299,10 +299,11 @@ do_start() {
     else
         if ! test "$SHINKENSPECIFICCFG"
         then
-            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" $DEBUGCMD 2>&1) >> $LOG/${mod}d.log
         else
-            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
+            output=$($PYTHON "$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1) >> $LOG/${mod}d.log
         fi
+        # Arbiter doesn't write logs in its initial phase - Issue #1320 - Let's force it to the logfile
         rc=$?
     fi
     # debug:
