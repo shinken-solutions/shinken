@@ -216,8 +216,6 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('hard_ssl_name_check', False),
         ('http_backend', 'auto'),
 
-        ('human_timestamp_log', False),
-
         # Discovery part
         ('strip_idname_fqdn', True),
         ('runners_timeout', 3600),
