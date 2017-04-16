@@ -2538,17 +2538,12 @@ function install_nagios-plugins(){
     esac
 
     cd $TMP
-    if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
-    then
-        cecho " > Getting nagios-plugins archive" green
-        wget $WGETPROXY $NAGPLUGBASEURI >> ${LOGFILE} 2>&1
-    fi
-    cecho " > Extract archive content " green
-    rm -Rf nagios-plugins-$NAGPLUGVERS
-    tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> ${LOGFILE} 2>&1
-    cd nagios-plugins-$NAGPLUGVERS
-    cecho " > Patching nagios-plugins" green
-    patch -p0 < $myscripts/install.d/nagios-plugins-gets-patch.patch >> ${LOGFILE} 2>&1
+    cecho " > Getting nagios-plugins archive" green
+    rm -Rf nagios-plugins
+    git clone https://github.com/nagios-plugins/nagios-plugins.git >> ${LOGFILE} 2>&1
+    cd nagios-plugins
+    sudo apt-get install autoconf
+    ./tools/setup
     cecho " > Configure source tree" green
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> ${LOGFILE} 2>&1
     cecho " > Building ...." green
