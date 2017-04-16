@@ -1728,3 +1728,10 @@ class SchedulingItem(Item):
                     "We got an exception from a trigger on %s for %s",
                     self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())
                 )
+
+    def fill_data_brok_from(self, data, brok_type):
+        super(SchedulingItem, self).fill_data_brok_from(data, brok_type)
+        # workaround/easy trick to have the command_name of this
+        # SchedulingItem in its check_result brok
+        if brok_type == 'check_result':
+            data['command_name'] = self.check_command.command.command_name
