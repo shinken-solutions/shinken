@@ -111,22 +111,23 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
         output = output + ' | ' + perfdata
 
     now = time.time()
-    cls = obj.__class__
-    i = obj.launch_check(now, force=True)
-    for chk in obj.checks_in_progress:
-        if chk.id == i:
-            logger.debug("[trigger] I found the check I want to change")
-            c = chk
-            # Now we 'transform the check into a result'
-            # So exit_status, output and status is eaten by the host
-            c.exit_status = return_code
-            c.get_outputs(output, obj.max_plugins_output_length)
-            c.status = 'waitconsume'
-            c.check_time = now
-            # IMPORTANT: tag this check as from a trigger, so we will not
-            # loop in an infinite way for triggers checks!
-            c.from_trigger = True
-            # Ok now this result will be read by scheduler the next loop
+
+    c = obj.launch_check(now, force=True)
+    if c is None:
+        logger.debug("[trigger] %s > none check launched", obj.get_full_name())
+    else:
+        logger.debug("[trigger] %s > I found the check I want to change",
+                     obj.get_full_name())
+        # Now we 'transform the check into a result'
+        # So exit_status, output and status is eaten by the host
+        c.exit_status = return_code
+        c.get_outputs(output, obj.max_plugins_output_length)
+        c.status = 'waitconsume'
+        c.check_time = now
+        # IMPORTANT: tag this check as from a trigger, so we will not
+        # loop in an infinite way for triggers checks!
+        c.from_trigger = True
+        # Ok now this result will be read by scheduler the next loop
 
 
 @declared

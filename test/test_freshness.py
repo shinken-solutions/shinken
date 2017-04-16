@@ -22,7 +22,15 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import with_statement
+
+import mock
+from shinken.util import format_t_into_dhms_format
+
 from shinken_test import *
+
+import shinken.objects.host
+from shinken.objects.host import Host
 
 
 class TestFreshness(ShinkenTest):
@@ -75,6 +83,95 @@ class TestFreshness(ShinkenTest):
         self.assertEqual(1, len(svc.actions))
         # And we check for the message in the log too
         self.assert_any_log_match('The results of service.*')
+
+    def test_scheduler_check_freshness(self):
+        now = time.time()
+        sched = self.sched
+
+        # we need a host to act on :
+        host = sched.hosts.find_by_name('test_host_0')
+
+        # prepare it :
+        # some cleaning:
+        del host.actions[:]
+        del host.checks_in_progress[:]
+        host.update_in_checking()  # and update_in_checking()
+        # so that host.in_checking == False
+
+        host.last_state_update = now - 60*60*12
+        host.freshness_threshold = 60*60 * 24  # 24 hour
+        host.passive_checks_enabled = True
+        host.active_checks_enabled = False
+        host.check_period = None
+        host.freshness_threshold = 15
+        host.check_freshness = True
+
+        Host.global_check_freshness = True  # we also need to enable this
+
+        # that's what we should get after calling check_freshness():
+        expected_host_next_chk = host.next_chk
+        expected_brok_id = Brok.id
+
+        with mock.patch('shinken.objects.host.logger') as log_mock:
+            with mock.patch('time.time', return_value=now):
+
+                # pre-asserts :
+                self.assertFalse(host.actions)
+                self.assertFalse(host.checks_in_progress)
+                self.assertFalse(sched.broks)
+                self.assertFalse(sched.checks)
+
+                # now call the scheduler.check_freshness() :
+                self.sched.check_freshness()
+
+        # and here comes the post-asserts :
+        self.assertEqual(1, len(host.actions),
+                         '1 action should have been created for the host.')
+        chk = host.actions[0]
+
+        self.assertEqual(host.actions, host.checks_in_progress,
+                         'the host should have got 1 check in progress.')
+
+        self.assertEqual(1, len(sched.checks),
+                         '1 check should have been created in the scheduler checks dict.')
+
+        # now assert that the scheduler has also got the new check:
+
+        # in its checks:
+        self.assertIn(chk.id, sched.checks)
+        self.assertIs(chk, sched.checks[chk.id])
+
+        log_mock.warning.assert_called_once_with(
+            "The results of host '%s' are stale by %s "
+            "(threshold=%s).  I'm forcing an immediate check "
+            "of the host.",
+            host.get_name(),
+            format_t_into_dhms_format(int(now - host.last_state_update)),
+            format_t_into_dhms_format(int(now - host.freshness_threshold)),
+        )
+
+        # finally assert the there had a new host_next_scheduler brok:
+        self.assertEqual(1, len(sched.broks),
+                         '1 brok should have been created in the scheduler broks.')
+        self.assertIn(expected_brok_id, sched.broks,
+                      'We should have got this brok_id in the scheduler broks.')
+        brok = sched.broks[expected_brok_id]
+        self.assertEqual(brok.type, 'host_next_schedule')
+
+        brok.prepare()
+        self.assertEqual(host.host_name, brok.data['host_name'])
+        self.assertTrue(brok.data['in_checking'])
+        # verify the host next_chk attribute is good:
+        self.assertLess(now, brok.data['next_chk'])
+        interval = host.check_interval * host.interval_length
+        interval = min(interval, host.max_check_spread * host.interval_length)
+        max_next_chk = now + min(interval, host.max_check_spread * host.interval_length)
+        self.assertGreater(max_next_chk, brok.data['next_chk'])
+        # actually it should not have been updated, so the one we recorded
+        # before calling check_freshness() should be exactly equals,
+        # but NB: this could highly depend on the condition applied to the
+        # host used in this test case !!
+        self.assertEqual(expected_host_next_chk, brok.data['next_chk'])
 
 
 if __name__ == '__main__':

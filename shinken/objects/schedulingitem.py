@@ -516,10 +516,10 @@ class SchedulingItem(Item):
                 # cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
                     # Fred : passive only checked host dependency ...
-                    i = dep.launch_check(now, ref_check, dependent=True)
+                    chk = dep.launch_check(now, ref_check, dependent=True)
                     # i = dep.launch_check(now, ref_check)
-                    if i is not None:
-                        checks.append(i)
+                    if chk is not None:
+                        checks.append(chk)
                 # else:
                 # print "DBG: **************** The state is FRESH",
                 # dep.host_name, time.asctime(time.localtime(dep.last_state_update))
@@ -884,10 +884,10 @@ class SchedulingItem(Item):
             c.status = 'waitdep'
             # Make sure the check know about his dep
             # C is my check, and he wants dependencies
-            checks_id = self.raise_dependencies_check(c)
-            for check_id in checks_id:
+            deps_checks = self.raise_dependencies_check(c)
+            for check in deps_checks:
                 # Get checks_id of dep
-                c.depend_on.append(check_id)
+                c.depend_on.append(check.id)
             # Ok, no more need because checks are not
             # take by host/service, and not returned
 
@@ -1389,11 +1389,15 @@ class SchedulingItem(Item):
 
         return childnotifications
 
-    # return a check to check the host/service
-    # and return id of the check
-    # Fred : passive only checked host dependency
     def launch_check(self, t, ref_check=None, force=False, dependent=False):
-        # def launch_check(self, t, ref_check=None, force=False):
+        '''
+        :type t: int
+        :type ref_check: __builtin__.NoneType |
+        :type force: bool
+        :type dependent: bool
+        :return:
+        :rtype:  NoneType | Check
+        '''
         c = None
         cls = self.__class__
 
@@ -1405,7 +1409,7 @@ class SchedulingItem(Item):
             now = time.time()
             c_in_progress = self.checks_in_progress[0]
             c_in_progress.t_to_go = now
-            return c_in_progress.id
+            return c_in_progress
 
         # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
@@ -1434,7 +1438,7 @@ class SchedulingItem(Item):
 
             self.actions.append(c)
             # print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
-            return c.id
+            return c
 
         if force or (not self.is_no_check_dependent()):
             # Fred : passive only checked host dependency
@@ -1491,7 +1495,7 @@ class SchedulingItem(Item):
         # so scheduler can take it
         if c is not None:
             self.actions.append(c)
-            return c.id
+            return c
         # None mean I already take it into account
         return None
 
