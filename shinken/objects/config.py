@@ -1280,23 +1280,6 @@ class Config(Item):
     def clean(self):
         self.services.clean()
 
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify(self):
-        props = ['ocsp_command', 'ochp_command',
-                 'service_perfdata_command', 'host_perfdata_command',
-                 'global_host_event_handler', 'global_service_event_handler']
-        for prop in props:
-            cc = getattr(self, prop, None)
-            if cc:
-                cc.late_linkify_with_command(self.commands)
-
-        # But also other objects like hosts and services
-        self.hosts.late_linkify_h_by_commands(self.commands)
-        self.services.late_linkify_s_by_commands(self.commands)
-        self.contacts.late_linkify_c_by_commands(self.commands)
-
-
     # Some properties are dangerous to be send like that
     # like realms linked in hosts. Realms are too big to send (too linked)
     # We are also pre-serializing the confs so the sending phase will
@@ -2255,8 +2238,11 @@ class Config(Item):
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        logger.info("Total number of hosts : %d",
-                    nb_elements_all_realms)
+
+        for what in (self.contacts, self.hosts, self.services, self.commands):
+            logger.info("Number of %s : %d", type(what).__name__, len(what))
+
+        logger.info("Total number of hosts in all realms: %d", nb_elements_all_realms)
         if len(self.hosts) != nb_elements_all_realms:
             logger.warning("There are %d hosts defined, and %d hosts dispatched in the realms. "
                            "Some hosts have been ignored", len(self.hosts), nb_elements_all_realms)

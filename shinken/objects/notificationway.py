@@ -232,15 +232,6 @@ class NotificationWay(Item):
         return state
 
 
-    # In the scheduler we need to relink the commandCall with
-    # the real commands
-    def late_linkify_nw_by_commands(self, commands):
-        props = ['service_notification_commands', 'host_notification_commands']
-        for prop in props:
-            for cc in getattr(self, prop, []):
-                cc.late_linkify_with_command(commands)
-
-
 class NotificationWays(Items):
     name_property = "notificationway_name"
     inner_class = NotificationWay
