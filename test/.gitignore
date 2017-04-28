@@ -1,1 +1,6 @@
 *.pyc
+
+# Local test suites
+etc/local
+etc/shinken_local.cfg
+test_local.py
