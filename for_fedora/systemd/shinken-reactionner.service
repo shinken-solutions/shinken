@@ -5,8 +5,11 @@ After=syslog.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/shinken-reactionner -d -c /etc/shinken/daemons/reactionnerd.ini
-KillMode=process
-TimeoutStopSec=3
+KillMode=mixed
+TimeoutStopSec=30
+PIDFile=/var/run/shinken/reactionnerd.pid
+Restart=on-failure
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target

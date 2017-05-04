@@ -437,6 +437,7 @@ def main(custom_args=None):
     cfg = None
     if not os.path.exists(opts.iniconfig):
         logger.debug('Missing configuration file!')
+        CONFIG['shinken.io'] = {}
     else:
         cfg = ConfigParser.ConfigParser()
         cfg.read(opts.iniconfig)
@@ -454,10 +455,14 @@ def main(custom_args=None):
     if opts.proxy:
         CONFIG['shinken.io']['proxy'] = opts.proxy
         logger.debug("Using given proxy in command line")
+    else:
+        CONFIG['shinken.io']['proxy'] = None
 
     if opts.proxy_socks5:
         CONFIG['shinken.io']['proxy_socks5'] = opts.proxy_socks5
         logger.debug("Using given socks5 proxy in command line")
+    else:
+        CONFIG['shinken.io']['proxy_socks5'] = None
 
     CLI = CLICommander(CONFIG, cfg, opts)
 
