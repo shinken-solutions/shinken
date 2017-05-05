@@ -862,10 +862,10 @@ class Satellite(BaseSatellite):
             self.watch_for_new_conf(self.timeout)
             end = time.time()
             if self.new_conf:
-                if not self.graceful_enabled:
-                    self.setup_new_conf()
-                else:
-                    self.switch_process()
+                if self.graceful_enabled and self.switch_process() is True:
+                    # Child successfully spawned, we're exiting
+                    return
+                self.setup_new_conf()
             self.timeout = self.timeout - (end - begin)
 
         logger.debug(" ======================== ")

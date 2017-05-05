@@ -315,6 +315,11 @@ class Daemon(object):
             print('Stopping all modules')
             self.modules_manager.stop_all()
             print('Stopping inter-process message')
+        if self.manager:
+            try:
+                self.manager.shutdown()
+            except Exception as e:
+                logger.error("failed to stop sync manager: %s", e)
         if self.http_daemon:
             # Release the lock so the daemon can shutdown without problem
             try:
@@ -347,23 +352,39 @@ class Daemon(object):
 
     # Respawn daemon and send it received configuration
     def switch_process(self):
-        logger.info("Gracefully reloading daemon: %s" % " ".join(sys.argv))
+        logger.info("Gracefully reloading daemon: %s", " ".join(sys.argv))
         env = os.environ.copy()
-        p = subprocess.Popen(sys.argv,
-                             stdin=subprocess.PIPE,
-                             preexec_fn=os.setsid,
-                             env=env)
+        try:
+            p = subprocess.Popen(sys.argv,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
+                                 preexec_fn=os.setsid,
+                                 env=env)
+        except Exception, e:
+            logger.error("Failed to spawn child [pid=%s] [retcode=%s] [err=%s]" %
+                         p.pid, p.returncode, e)
+            return False
         logger.info("Reloading daemon [pid=%s]", p.pid)
         try:
             raw_conf = cPickle.dumps(self.new_conf)
             p.stdin.write(raw_conf)
             p.stdin.close()
-            self.request_stop()
         except Exception, e:
             stdout = p.stdout.read()
             logger.error("Failed to send configuration to spawned child "
-                         "[pid=%s] [retcode=%s] [stdout=%s] [err=%s]",
-                         p.pid, p.returncode, stdout, e)
+                         "[pid=%s] [retcode=%s] [err=%s] stdout=[%s]",
+                         p.pid, p.returncode, e, stdout)
+            return False
+        if p.poll() is not None:
+            stdout = p.stdout.read()
+            p.wait()
+            logger.error("Failed to spawn child [pid=%s] [retcode=%s] "
+                         "[stdout=%s]" % p.pid, p.returncode, stdout)
+            logger.info("Resuming normal operations without switching process")
+            return False
+        self.request_stop()
+        return True
 
 
     def is_switched_process(self):
@@ -386,13 +407,14 @@ class Daemon(object):
             sock.settimeout(1)
             result = sock.connect_ex((host, self.port))
             logger.info("waiting parent: %s" % result)
-            if result == 0:
+            if result in (0, 110):
                 sock.close()
                 time.sleep(0.5)
             else:
                 break
             if timeout and time.time() - now > timeout:
                 break
+
 
     # Loads configuration sent by parent process only if available
     def load_parent_config(self):
