@@ -31,7 +31,7 @@ Shinken.
 
 import sys
 
-VERSION = "2.4.3"
+VERSION = "3.0.0"
 
 
 # Make sure people are using Python 2.6 or higher

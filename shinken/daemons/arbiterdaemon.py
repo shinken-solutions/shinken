@@ -25,12 +25,10 @@
 import sys
 import os
 import time
-import traceback
 import socket
 import traceback
 import cStringIO
 import cPickle
-import copy
 import json
 
 from shinken.objects.config import Config
@@ -392,9 +390,6 @@ class Arbiter(Daemon):
 
         # Remove templates from config
         self.conf.remove_templates()
-
-        # We compute simple item hash
-        self.conf.compute_hash()
 
         # Overrides sepecific service instaces properties
         self.conf.override_properties()

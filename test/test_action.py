@@ -265,7 +265,7 @@ class TestAction(ShinkenTest):
         a.execute()
         self.wait_finished(a)
         #print a.output
-        self.assertEqual(a.output.decode('utf8'), u"Wiadomo\u015b\u0107")
+        self.assertEqual(a.output, u"Wiadomo\u015b\u0107")
 
     def test_non_zero_exit_status_empty_output_but_non_empty_stderr(self):
         a = Action()

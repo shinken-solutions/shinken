@@ -13,7 +13,7 @@ The Shinken Project
 ===================
 
 Shinken is now an open source monitoring *framework*, but was first created to be a open source monitoring *solution*.
-This difference is important for the team, a framework does not have the same use than an all in one solution.
+This difference is important for the team, a framework does not have the same use as an all in one solution.
 The main idea when developing Shinken is the flexibility which is our definition of framework.  Nevertheless, Shinken was first made differently and we try to keep all the good things that made it a monitoring solution:
    * Easy to install: install is generally done with pip, but some packages are available (deb / rpm) and we are planning to provide nightly builds.
    * Easy for new users: once installed, Shinken provides a simple command line interface to install new modules and packs.

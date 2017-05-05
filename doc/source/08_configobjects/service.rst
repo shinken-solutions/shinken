@@ -290,7 +290,7 @@ contacts
   This is a list of the *short names* of the :ref:`contacts <configobjects/contact>` that should be notified whenever there are problems (or recoveries) with this service. Multiple contacts should be separated by commas. Useful if you want notifications to go to just a few people and don't want to configure :ref:`contact groups <configobjects/contactgroup>`. You must specify at least one contact or contact group in each service definition.
 
 contact_groups
-  This is a list of the *short names* of the :ref:`contact groups <configobjects/contactgroup>` that should be notified whenever there are problems (or recoveries) with this service. Multiple contact groups should be separated by commas. You must specify at least one contact or contact group in each service definition.
+  This is a list of the *short names* of the :ref:`contact groups <configobjects/contactgroup>` that should be notified whenever there are problems (or recoveries) with this service. Multiple contact groups should be separated by commas. You must specify at least one contact or contact group in each service definition. If there is no contact or contact_groups defined, it's host's contact/contactgroup wich is used by object_inheritance. 
 
 stalking_options
   This directive determines which service states "stalking" is enabled for. Valid options are a combination of one or more of the following :

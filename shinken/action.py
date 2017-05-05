@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2014:
+# Copyright (C) 2009-2017:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -38,7 +38,7 @@ except ImportError:
 
 from shinken.log import logger
 
-__all__ = ('Action', )
+__all__ = ('Action',)
 
 valid_exit_status = (0, 1, 2, 3)
 
@@ -46,7 +46,7 @@ only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout',
                   'env', 'module_type', 'execution_time', 'u_time', 's_time')
 
 shellchars = ('!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
-                   '|', '{', '}', ';', '<', '>', '?', '`')
+              '|', '{', '}', ';', '<', '>', '?', '`')
 
 
 # Try to read a fd in a non blocking mode
@@ -60,14 +60,13 @@ def no_block_read(output):
         return ''
 
 
-
-
 class __Action(object):
     """
     This abstract class is used just for having a common id for both
     actions and checks.
     """
     id = 0
+
 
     # Ok when we load a previous created element, we should
     # not start at 0 for new object, so we must raise the Action.id
@@ -81,9 +80,11 @@ class __Action(object):
         "Dummy function, only useful for checks"
         pass
 
+
     def set_type_passive(self):
         "Dummy function, only useful for checks"
         pass
+
 
     def get_local_environnement(self):
         """
@@ -157,6 +158,13 @@ class __Action(object):
                     self.perf_data += ' ' + elts[1].strip().replace('___PROTECT_PIPE___', '|')
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
+        # Force strings to be unicode from here
+        if isinstance(self.output, str):
+            self.output = self.output.decode('utf8', 'ignore')
+        if isinstance(self.long_output, str):
+            self.long_output = self.long_output.decode('utf8', 'ignore')
+        if isinstance(self.perf_data, str):
+            self.perf_data = self.perf_data.decode('utf8', 'ignore')
 
 
     def check_finished(self, max_plugins_output_length):
@@ -177,7 +185,6 @@ class __Action(object):
             if fcntl:
                 self.stdoutdata += no_block_read(self.process.stdout)
                 self.stderrdata += no_block_read(self.process.stderr)
-
 
             if (now - self.check_time) > self.timeout:
                 self.kill__()
@@ -209,18 +216,17 @@ class __Action(object):
         # we should not keep the process now
         del self.process
 
-        # check if process was signaled #11 (SIGSEGV) 
+        # check if process was signaled #11 (SIGSEGV)
         if self.exit_status == -11:
             self.stderrdata += " signaled #11 (SIGSEGV)"
         # If abnormal termination of check and no error data, set at least exit status info as error information
         if not self.stderrdata.strip() and self.exit_status not in valid_exit_status:
-            self.stderrdata += "Abnormal termination with code: %r" % (self.exit_status, )
-            
-        if (  # check for bad syntax in command line:
-            'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
-            or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
-            or 'Syntax error: Unterminated quoted string' in self.stderrdata
-        ):
+            self.stderrdata += "Abnormal termination with code: %r" % (self.exit_status,)
+
+        # check for bad syntax in command line:
+        if ('sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata
+                or ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata)
+                or 'Syntax error: Unterminated quoted string' in self.stderrdata):
             # Very, very ugly. But subprocess._handle_exitstatus does
             # not see a difference between a regular "exit 1" and a
             # bailing out shell. Strange, because strace clearly shows
@@ -298,7 +304,6 @@ if os.name != 'nt':
                     self.execution_time = time.time() - self.check_time
                     return
 
-
             # Now: GO for launch!
             # logger.debug("Launching: %s" % (self.command.encode('utf8', 'ignore')))
 
@@ -315,8 +320,7 @@ if os.name != 'nt':
                 logger.error("Fail launching command: %s %s %s",
                              self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
-                if (not force_shell and exp.errno == 8
-                   and exp.strerror == 'Exec format error'):
+                if (not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error'):
                     return self.execute__(True)
                 self.output = exp.__str__()
                 self.exit_status = 2
@@ -326,6 +330,7 @@ if os.name != 'nt':
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
+
 
         def kill__(self):
             # We kill a process group because we launched them with
@@ -343,6 +348,7 @@ if os.name != 'nt':
 else:
 
     import ctypes
+
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
 
 
@@ -371,6 +377,7 @@ else:
                 logger.info("We kill the process: %s %s", exp, self.command)
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time
+
 
         def kill__(self):
             TerminateProcess(int(self.process._handle), -1)
