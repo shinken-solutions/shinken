@@ -724,8 +724,9 @@ class Broker(BaseSatellite):
         # When it pushes conf to us, we reinit connections
         self.watch_for_new_conf(0.0)
         if self.new_conf:
-            if self.graceful_enabled:
-                self.switch_process()
+            if self.graceful_enabled and self.switch_process() is True:
+                # Child successfully spawned, we're exiting
+                return
             self.setup_new_conf()
 
         # Maybe the last loop we raised some broks internally we should
