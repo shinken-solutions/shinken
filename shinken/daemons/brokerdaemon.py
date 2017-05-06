@@ -687,8 +687,8 @@ class Broker(BaseSatellite):
 
         self.broks_done = 0
         # FIXME: Does it come from a structure only known from enterprise ?
-        #for mod in self.modules_manager.get_internal_instances():
-        #    self.local_module_stats[mod.get_name()] = 0
+        # for mod in self.modules_manager.get_internal_instances():
+        #     self.local_module_stats[mod.get_name()] = 0
 
         # Dump modules Queues size
         external_modules = [
