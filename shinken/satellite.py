@@ -781,7 +781,7 @@ class Satellite(BaseSatellite):
         statsmgr.incr('core.%s.actions.in' % _type, count, 'queue')
 
 
-    # Returns the maximim number of actions a sattelite may accept, and ask
+    # Returns the maximim number of actions a satellite may accept, and ask
     # to the scheduler.
     def get_available_slots(self):
         # We limit the maximum number of actions to q_factor times the number of
