@@ -686,8 +686,9 @@ class Broker(BaseSatellite):
         logger.debug("[Broks] Begin Loop: managing queue broks [%d]" % nb_broks)
 
         self.broks_done = 0
-        for mod in self.modules_manager.get_internal_instances():
-            self.local_module_stats[mod.get_name()] = 0
+        # FIXME: Does it come from a structure only known from enterprise ?
+        #for mod in self.modules_manager.get_internal_instances():
+        #    self.local_module_stats[mod.get_name()] = 0
 
         # Dump modules Queues size
         external_modules = [
@@ -781,7 +782,7 @@ class Broker(BaseSatellite):
                 # so we must remerge our last broks with the main broks to do not
                 # lost them
                 with self.broks_lock:
-                    logger.info(
+                    logger.debug(
                         'Cannot manage all remaining broks [%d] in a loop '
                         'turn, push bask this broks in the queue.' % len(broks)
                     )
@@ -796,13 +797,17 @@ class Broker(BaseSatellite):
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
             # We un serialize the brok before consume it
+            b.prepare()
             _t = time.time()
             self.manage_brok(b)
             statsmgr.timing('core.broker.manage-brok', time.time() - _t, 'perf')
 
         # Maybe external modules raised 'objects' we should get them
         nb_object_get = self.get_objects_from_from_queues()
-        logger.info('[stats] nb object get control queues of external module [%d]' % nb_object_get)
+        logger.debug(
+            '[stats] nb object get control queues of external module [%d]' %
+            nb_object_get
+        )
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
