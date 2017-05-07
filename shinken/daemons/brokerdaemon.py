@@ -36,7 +36,7 @@ from collections import deque
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
-from shinken.util import sort_by_ids, get_memory, parse_memory_expr
+from shinken.util import sort_by_ids, get_memory, parse_memory_expr, free_memory
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
@@ -419,6 +419,7 @@ class Broker(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
+        free_memory()
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker',

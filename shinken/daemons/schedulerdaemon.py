@@ -38,7 +38,7 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
-from shinken.util import nighty_five_percent, parse_memory_expr
+from shinken.util import nighty_five_percent, parse_memory_expr, free_memory
 from shinken.stats import statsmgr
 
 
@@ -408,6 +408,7 @@ class Shinken(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
+        free_memory()
 
         # Tag the conf with our data
         self.conf = conf

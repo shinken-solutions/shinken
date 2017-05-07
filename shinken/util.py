@@ -27,6 +27,7 @@ import copy
 import sys
 import os
 import json
+import platform
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -934,3 +935,16 @@ def parse_memory_expr(expr):
     except ValueError:
         logger.error("Invalid memory threshold expression: %s" % expr)
         return None
+
+
+def free_memory():
+    """
+    Under Linux, when a new configuration is loaded, the old config memory
+    is not really freed.
+
+    This function forces memory to be freed.
+    """
+    if platform.system() == "Linux":
+        import ctypes
+        libc6 = ctypes.CDLL('libc.so.6')
+        libc6.malloc_trim(0)

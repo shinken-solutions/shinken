@@ -66,7 +66,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-from shinken.util import get_memory, parse_memory_expr
+from shinken.util import get_memory, parse_memory_expr, free_memory
 from shinken.stats import statsmgr
 
 
@@ -1018,6 +1018,7 @@ class Satellite(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
+        free_memory()
 
         # we got a name, we can now say it to our statsmgr
         statsmgr.register(self, self.name, service,

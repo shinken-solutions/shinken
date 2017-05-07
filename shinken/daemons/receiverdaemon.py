@@ -41,7 +41,7 @@ from shinken.external_command import ExternalCommand, ExternalCommandManager
 from shinken.http_client import HTTPExceptions
 from shinken.daemon import Interface
 from shinken.stats import statsmgr
-from shinken.util import parse_memory_expr
+from shinken.util import parse_memory_expr, free_memory
 
 class IStats(Interface):
     """
@@ -195,6 +195,7 @@ class Receiver(Satellite):
         else:
             self.raw_conf = None
         self.new_conf = None
+        free_memory()
 
         statsmgr.register(self, self.name, 'receiver',
                           api_key=self.api_key,

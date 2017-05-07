@@ -40,7 +40,7 @@ from shinken.stats import statsmgr
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.property import BoolProp
-from shinken.util import jsonify_r, get_memory
+from shinken.util import jsonify_r, get_memory, free_memory
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -656,6 +656,7 @@ class Arbiter(Daemon):
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf
+        free_memory()
         for arb in self.conf.arbiters:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
