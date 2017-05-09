@@ -1401,7 +1401,7 @@ class Scheduler(object):
                     end_dt = elt.maintenance_period.get_next_invalid_time_from_t(start_dt + 1) - 1
                     dt = Downtime(elt, start_dt, end_dt, 1, 0, 0,
                                   "system",
-                                  "this downtime was automatically scheduled"
+                                  "this downtime was automatically scheduled "
                                   "through a maintenance_period")
                     elt.add_downtime(dt)
                     self.add(dt)
