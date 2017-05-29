@@ -290,10 +290,10 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
     for k,v in sorted(shinken_var.iteritems()):
         logging.debug('type %s : %s' % (k, type(v)))
         if odd:
-            html_content.append('<tr><th class="odd">' + k + '</th><td class="odd">' + v + '</td></tr>')
+            html_content.append('<tr><th class="odd">' + str(k) + '</th><td class="odd">' + str(v) + '</td></tr>')
             odd=False
         else:
-            html_content.append('<tr><th class="even">' + k + '</th><td class="even">' + v + '</td></tr>')
+            html_content.append('<tr><th class="even">' + str(k) + '</th><td class="even">' + str(v) + '</td></tr>')
             odd=True
 
     html_content.append('</table>')
