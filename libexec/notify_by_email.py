@@ -351,6 +351,12 @@ if __name__ == "__main__":
                       help='Sender email address, default is system user')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
+    group_general.add_option('-S', '--smtp-user', dest='smtp_user', default=None,
+                      help='SMTP username. Default: None')
+    group_general.add_option('-S', '--smtp-password', dest='smtp_password', default=None,
+                      help='SMTP password. Default: None')
+    group_general.add_option('-S', '--smtp-starttls', dest='smtp_starttls', default=False,
+                      action='store_true', help='Connect to smtp using starttls')
     group_general.add_option('-p', '--prefix', dest='prefix', default='',
                       help='Mail subject prefix. Default is no prefix')
 
@@ -480,6 +486,10 @@ if __name__ == "__main__":
         logging.debug('Connect to %s smtp server' % (opts.smtp))
         smtp = smtplib.SMTP(opts.smtp)
         logging.debug('Send the mail')
+        if opts.smtp_starttls:
+            smtp.starttls()
+        if opts.smtp_user and opts.smtp_password:
+            smtp.login(opts.smtp_user, opts.smtp_password)
         smtp.sendmail(get_user(), receivers, mail.as_string())
         logging.info("Mail sent successfuly")
     else:
