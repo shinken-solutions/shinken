@@ -351,11 +351,11 @@ if __name__ == "__main__":
                       help='Sender email address, default is system user')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
-    group_general.add_option('-S', '--smtp-user', dest='smtp_user', default=None,
+    group_general.add_option('-U', '--smtp-user', dest='smtp_user', default=None,
                       help='SMTP username. Default: None')
-    group_general.add_option('-S', '--smtp-password', dest='smtp_password', default=None,
+    group_general.add_option('-P', '--smtp-password', dest='smtp_password', default=None,
                       help='SMTP password. Default: None')
-    group_general.add_option('-S', '--smtp-starttls', dest='smtp_starttls', default=False,
+    group_general.add_option('-T', '--smtp-starttls', dest='smtp_starttls', default=False,
                       action='store_true', help='Connect to smtp using starttls')
     group_general.add_option('-p', '--prefix', dest='prefix', default='',
                       help='Mail subject prefix. Default is no prefix')
