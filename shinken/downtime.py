@@ -45,31 +45,31 @@ from shinken.brok import Brok
 
 class Downtime:
     id = 1
-    
+
     # Just to list the properties we will send as pickle
     # so to others daemons, so all but NOT REF
     properties = {
-        'activate_me'       : StringProp(default=[]),
-        'entry_time'        : IntegerProp(default=0, fill_brok=['full_status']),
-        'fixed'             : BoolProp(default=True, fill_brok=['full_status']),
-        'start_time'        : IntegerProp(default=0, fill_brok=['full_status']),
-        'duration'          : IntegerProp(default=0, fill_brok=['full_status']),
-        'trigger_id'        : IntegerProp(default=0),
-        'end_time'          : IntegerProp(default=0, fill_brok=['full_status']),
-        'real_end_time'     : IntegerProp(default=0),
-        'author'            : StringProp(default='', fill_brok=['full_status']),
-        'comment'           : StringProp(default=''),
-        'is_in_effect'      : BoolProp(default=False),
+        'activate_me':        StringProp(default=[]),
+        'entry_time':         IntegerProp(default=0, fill_brok=['full_status']),
+        'fixed':              BoolProp(default=True, fill_brok=['full_status']),
+        'start_time':         IntegerProp(default=0, fill_brok=['full_status']),
+        'duration':           IntegerProp(default=0, fill_brok=['full_status']),
+        'trigger_id':         IntegerProp(default=0),
+        'end_time':           IntegerProp(default=0, fill_brok=['full_status']),
+        'real_end_time':      IntegerProp(default=0),
+        'author':             StringProp(default='', fill_brok=['full_status']),
+        'comment':            StringProp(default=''),
+        'is_in_effect':       BoolProp(default=False),
         'has_been_triggered': BoolProp(default=False),
-        'can_be_deleted'    : BoolProp(default=False),
-        
+        'can_be_deleted':     BoolProp(default=False),
+
         # TODO: find a very good way to handle the downtime "ref".
         # ref must effectively not be in properties because it points
         # onto a real object.
         # 'ref': None
     }
-    
-    
+
+
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         now = datetime.datetime.now()
         self.id = int(time.mktime(now.timetuple()) * 1e6 + now.microsecond)
@@ -99,12 +99,12 @@ class Downtime:
         self.is_in_effect = False
         # fixed: start_time has been reached,
         # flexible: non-ok checkresult
-        
+
         self.has_been_triggered = False  # another downtime has triggered me
         self.can_be_deleted = False
         self.add_automatic_comment()
-    
-    
+
+
     def __str__(self):
         if self.is_in_effect is True:
             active = "active"
@@ -116,16 +116,16 @@ class Downtime:
             type = "flexible"
         return "%s %s Downtime id=%d %s - %s" % (
             active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
-    
-    
+
+
     def trigger_me(self, other_downtime):
         self.activate_me.append(other_downtime)
-    
-    
+
+
     def in_scheduled_downtime(self):
         return self.is_in_effect
-    
-    
+
+
     # The referenced host/service object enters now a (or another) scheduled
     # downtime. Write a log message only if it was not already in a downtime
     def enter(self):
@@ -142,8 +142,8 @@ class Downtime:
         for dt in self.activate_me:
             res.extend(dt.enter())
         return res
-    
-    
+
+
     # The end of the downtime was reached.
     def exit(self):
         res = []
@@ -167,8 +167,8 @@ class Downtime:
         # to send a notification
         self.ref.in_scheduled_downtime_during_last_check = True
         return res
-    
-    
+
+
     # A scheduled downtime was prematurely canceled
     def cancel(self):
         res = []
@@ -186,8 +186,8 @@ class Downtime:
         for dt in self.activate_me:
             res.extend(dt.cancel())
         return res
-    
-    
+
+
     # Scheduling a downtime creates a comment automatically
     def add_automatic_comment(self):
         if self.fixed is True:
@@ -218,16 +218,16 @@ class Downtime:
         self.comment_id = c.id
         self.extra_comment = c
         self.ref.add_comment(c)
-    
-    
+
+
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
         # TODO: remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
             # self.ref.del_comment(self.comment_id)
-    
-    
+
+
     # Fill data with info of item by looking at brok_type
     # in props of properties or running_properties
     def fill_data_brok_from(self, data, brok_type):
@@ -237,17 +237,17 @@ class Downtime:
             if hasattr(prop, 'fill_brok'):
                 if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)
-    
-    
+
+
     # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
-        
+
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('downtime_raise', data)
         return b
-    
-    
+
+
     # Call by pickle for dataify the downtime
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
@@ -258,16 +258,16 @@ class Downtime:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
         return res
-    
-    
+
+
     # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-        
+
         if self.id >= cls.id:
             cls.id = self.id + 1

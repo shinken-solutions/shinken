@@ -78,6 +78,7 @@ class Notification(Action):
         'enable_environment_macros': BoolProp(default=False),
         # Keep a list of currently active escalations
         'already_start_escalations':  StringProp(default=set()),
+        'priority':            IntegerProp(default=100),
 
     }
 
@@ -102,7 +103,8 @@ class Notification(Action):
                  escalated=False, contacts_notified=0,
                  start_time=0, end_time=0, notification_type=0, id=None,
                  notif_nb=1, timeout=10, env={}, module_type='fork',
-                 reactionner_tag='None', enable_environment_macros=0):
+                 reactionner_tag='None', enable_environment_macros=0,
+                 priority=100):
 
         self.is_a = 'notification'
         self.type = type
@@ -155,6 +157,7 @@ class Notification(Action):
         self.reactionner_tag = reactionner_tag
         self.already_start_escalations = set()
         self.enable_environment_macros = enable_environment_macros
+        self.priority = priority
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all

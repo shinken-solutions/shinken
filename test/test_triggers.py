@@ -112,9 +112,9 @@ class TestTriggers(ShinkenTest):
     def test_morecomplex_cpu_too_high(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "cpu_too_high_bis")
 
-        firstlen = len([b for b in self.sched.broks.values() if b.type == 'service_check_result'])
+        firstlen = len([b for b in self.sched.broks if b.type == 'service_check_result'])
         self.scheduler_loop(1, [(svc, 0, 'I am OK | cpu=95%')])
-        seclen = len([b for b in self.sched.broks.values() if b.type == 'service_check_result'])
+        seclen = len([b for b in self.sched.broks if b.type == 'service_check_result'])
         self.scheduler_loop(1, [])
         print "Output", svc.output
         print "Perf_Data", svc.perf_data

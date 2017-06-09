@@ -258,6 +258,8 @@ This option determines whether or not the Shinken daemon will make all standard 
   * 0 = Don't make macros available as environment variables
   * 1 = Make macros available as environment variables
 
+Note that this parameter may be set on a :ref:`specific command <configobjects/command#enable_environment_macros>` rather than globally. This is the preferred way if you don't need this globally.
+
 
 .. _configuration/configmain#log_initial_states:
 
@@ -613,3 +615,39 @@ Default:
 
 Specify which http_backend to use. Auto is better. If cherrypy3 is not available, it will fail back to swsgiref
 .. note:: Actually, if you specify something else than cherrypy or auto, it will fall into swsgiref
+
+Graceful restart
+----------------
+
+Format:
+
+::
+
+  graceful_enabled=[0/1]
+
+Default:
+
+::
+
+  graceful_enabled=0
+
+
+Enables the graceful restart. If enabled, when a new configuration is received by a daemon, it forks a new daemon and send it the received configuration on stdin. Next it exits to let the newly spawned instance replace it. This option has to be set in the daemon local \*d.ini files.
+
+Graceful restart timeout
+------------------------
+
+Format:
+
+::
+
+  graceful_timeout=<int>
+
+Default:
+
+::
+
+  graceful_timeout=60
+
+
+Maximum delay to wait for parent configuration before giving up in a newly gracefully spawned daemon. This option has to be set in the daemon local \*d.ini files.

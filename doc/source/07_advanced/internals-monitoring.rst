@@ -99,6 +99,7 @@ The scheduler operations are measured carefully. Each operation registered in th
 loop.*                                 timer   Time spent in the operation                      perf
 loop.*.mem                             counter Memory usage evolution involved by the operation perf
 core.scheduler.actions.queue           gauge   The actions queue size in the Scheduler          queue
+core.scheduler.actions.reenabled       counter The actions rescheduled because of timeout       queue
 core.scheduler.checks.havetoresolvedep gauge   The check queue size in state havetoresolvedep   queue
 core.scheduler.checks.inpoller         gauge   The check queue size in state inpoller           queue
 core.scheduler.checks.queue            gauge   The total check queue size in the scheduler      queue
@@ -107,6 +108,7 @@ core.scheduler.checks.timeout          gauge   The check queue size in state tim
 core.scheduler.checks.waitconsume      gauge   The check queue size in state waitconsume        queue
 core.scheduler.checks.waitdep          gauge   The check queue size in state waitdep            queue
 core.scheduler.checks.zombie           gauge   The check queue size in state zombie             queue
+core.scheduler.checks.reenabled        counter The actions rescheduled because of timeout       queue
 ====================================== ======= ================================================ =====
 
 loop.*
@@ -117,6 +119,9 @@ loop.*.mem
 
 core.scheduler.actions.queue
   The notifications and eventhandlers queue to be consumed by the reactionners
+
+core.scheduler.actions.reenabled
+  If actions are not done quick enough, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
 
 core.scheduler.checks.havetoresolvedep
   The checks count having havetoresolvedep state in the scheduler. Those checks have dependent checks that have to be checked before taking any decision.
@@ -129,6 +134,9 @@ core.scheduler.checks.queue
 
 core.scheduler.checks.scheduled
   The checks count having scheduled state in the scheduler. Those checks have to be taken by a poller.
+
+core.scheduler.checks.reenabled
+  If checks are not done quick enough, they are rescheduled to be handled by another reactionner. This is the number of reenabled actions.
 
 core.scheduler.checks.timeout
   The checks count having inpoller state in the scheduler. Those checks have been got from by a poller, and the result did not came in time.

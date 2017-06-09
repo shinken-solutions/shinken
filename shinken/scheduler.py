@@ -124,7 +124,7 @@ class Scheduler(object):
         self.downtimes = {}
         self.contact_downtimes = {}
         self.comments = {}
-        self.broks = {}
+        self.broks = []
 
         # Some flags
         self.has_full_broks = False  # have a initial_broks in broks queue?
@@ -146,8 +146,9 @@ class Scheduler(object):
             del self.waiting_results[:]
         for o in self.checks, self.actions, self.downtimes,\
                 self.contact_downtimes, self.comments,\
-                self.broks, self.brokers:
+                self.brokers:
             o.clear()
+        del self.broks[:]
 
     def iter_hosts_and_services(self):
         for what in (self.hosts, self.services):
@@ -247,7 +248,7 @@ class Scheduler(object):
                     (a.__class__.my_type.upper(), a.id, a.status,
                      a.t_to_go, a.reactionner_tag, a.command, a.worker)
                 f.write(s)
-            for b in self.broks.values():
+            for b in self.broks:
                 s = 'BROK: %s:%s\n' % (b.id, b.type)
                 f.write(s)
             f.close()
@@ -294,19 +295,17 @@ class Scheduler(object):
         brok.instance_id = self.instance_id
         # Maybe it's just for one broker
         if bname:
-            broks = self.brokers[bname]['broks']
-            broks[brok.id] = brok
+            self.brokers[bname]['broks'].append(brok)
         else:
             # If there are known brokers, give it to them
             if len(self.brokers) > 0:
                 # Or maybe it's for all
                 for bname in self.brokers:
-                    broks = self.brokers[bname]['broks']
-                    broks[brok.id] = brok
+                    self.brokers[bname]['broks'].append(brok)
             else:  # no brokers? maybe at startup for logs
                 # we will put in global queue, that the first broker
                 # connection will get all
-                self.broks[brok.id] = brok
+                self.broks.append(brok)
 
 
     def add_Notification(self, notif):
@@ -443,15 +442,12 @@ class Scheduler(object):
         b_lists = [self.broks]
         for (bname, e) in self.brokers.iteritems():
             b_lists.append(e['broks'])
+        nb_broks_drops = 0
         for broks in b_lists:
             if len(broks) > max_broks:
-                id_max = max(broks.keys())
-                id_to_del_broks = [i for i in broks if i < id_max - max_broks]
-                nb_broks_drops = len(id_to_del_broks)
-                for i in id_to_del_broks:
-                    del broks[i]
-            else:
-                nb_broks_drops = 0
+                count = len(broks) - max_broks
+                del broks[-count:]
+                nb_broks_drops += count
 
         if len(self.actions) > max_actions:
             id_max = max(self.actions.keys())
@@ -465,6 +461,11 @@ class Scheduler(object):
                 del self.actions[i]
         else:
             nb_actions_drops = 0
+
+
+        statsmgr.incr("scheduler.checks.dropped", nb_checks_drops, "queue")
+        statsmgr.incr("scheduler.broks.dropped", nb_broks_drops, "queue")
+        statsmgr.incr("scheduler.actions.dropped", nb_actions_drops, "queue")
 
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             logger.warning("We drop %d checks, %d broks and %d actions",
@@ -614,14 +615,22 @@ class Scheduler(object):
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
                           poller_tags=['None'], reactionner_tags=['None'],
-                          worker_name='none', module_types=['fork']
+                          worker_name='none', module_types=['fork'],
+                          max_actions=None
                           ):
         res = []
         now = time.time()
 
+        # As priority attribute may not exist on objects loaded from retention
+        # backend, we ensure that filtering does not break
+        def get_prio(o):
+            return getattr(o, "priority", o.properties["priority"].default)
+
         # If poller want to do checks
         if do_checks:
-            for c in self.checks.values():
+            for c in sorted(self.checks.itervalues(), key=get_prio):
+                if max_actions is not None and len(res) >= max_actions:
+                    break
                 #  If the command is untagged, and the poller too, or if both are tagged
                 #  with same name, go for it
                 # if do_check, call for poller, and so poller_tags by default is ['None']
@@ -640,7 +649,9 @@ class Scheduler(object):
 
         # If reactionner want to notify too
         if do_actions:
-            for a in self.actions.values():
+            for a in sorted(self.actions.itervalues(), key=get_prio):
+                if max_actions is not None and len(res) >= max_actions:
+                    break
                 is_master = (a.is_a == 'notification' and not a.contact)
 
                 if not is_master:
@@ -957,17 +968,22 @@ class Scheduler(object):
 
     # Call by brokers to have broks
     # We give them, and clean them!
-    def get_broks(self, bname):
+    def get_broks(self, bname, broks_batch=0):
+        res = []
+        if broks_batch > 0:
+            count = len(self.broks)
+        else:
+            count = min(broks_batch, len(self.broks))
+        res.extend(self.broks[:count])
+        del self.broks[:count]
         # If we are here, we are sure the broker entry exists
-        res = self.brokers[bname]['broks']
-        # They are gone, we keep none!
-        self.brokers[bname]['broks'] = {}
-
-        # Also put in the result the possible first log broks if so
-        res.update(self.broks)
-        # and clean the global broks too now
-        self.broks.clear()
-
+        if broks_batch > 0:
+            count = len(self.brokers[bname]['broks'])
+        else:
+            count = min(broks_batch, len(self.brokers[bname]['broks']))
+            count -= len(res)
+        res.extend(self.brokers[bname]['broks'][:count])
+        del self.brokers[bname]['broks'][:count]
         return res
 
 
@@ -1385,7 +1401,7 @@ class Scheduler(object):
                     end_dt = elt.maintenance_period.get_next_invalid_time_from_t(start_dt + 1) - 1
                     dt = Downtime(elt, start_dt, end_dt, 1, 0, 0,
                                   "system",
-                                  "this downtime was automatically scheduled"
+                                  "this downtime was automatically scheduled "
                                   "through a maintenance_period")
                     elt.add_downtime(dt)
                     self.add(dt)
@@ -1491,22 +1507,36 @@ class Scheduler(object):
                 if c.status == 'inpoller' and c.t_to_go < now - time_to_orphanage:
                     c.status = 'scheduled'
                     if c.worker not in worker_names:
-                        worker_names[c.worker] = 1
+                        worker_names[c.worker] = {"checks": 1}
                         continue
-                    worker_names[c.worker] += 1
+                    if "checks" not in worker_names[c.worker]:
+                        worker_names[c.worker]["checks"] = 1
+                        continue
+                    worker_names[c.worker]["checks"] += 1
         for a in self.actions.values():
             time_to_orphanage = a.ref.get_time_to_orphanage()
             if time_to_orphanage:
                 if a.status == 'inpoller' and a.t_to_go < now - time_to_orphanage:
                     a.status = 'scheduled'
                     if a.worker not in worker_names:
-                        worker_names[a.worker] = 1
+                        worker_names[a.worker] = {"actions": 1}
                         continue
-                    worker_names[a.worker] += 1
+                    if "actions" not in worker_names[a.worker]:
+                        worker_names[a.worker]["actions"] = 1
+                        continue
+                    worker_names[a.worker]["actions"] += 1
 
+        reenabled = {"checks": 0, "actions": 0}
         for w in worker_names:
-            logger.warning("%d actions never came back for the satellite '%s'."
-                           "I reenable them for polling", worker_names[w], w)
+            for _type in worker_names[w]:
+                reenabled[_type] += worker_names[w][_type]
+                logger.warning("%d %s never came back for the satellite "
+                               "'%s'. I reenable them for polling",
+                               worker_names[w][_type], _type, w)
+        for _type in reenabled:
+            count = reenabled[_type]
+            if count:
+                statsmgr.incr("scheduler.%s.reenabled" % _type, count, "queue")
 
 
     # Each loop we are going to send our broks to our modules (if need)
@@ -1516,13 +1546,13 @@ class Scheduler(object):
         for mod in self.sched_daemon.modules_manager.get_external_instances():
             logger.debug("Look for sending to module %s", mod.get_name())
             q = mod.to_q
-            to_send = [b for b in self.broks.values()
+            to_send = [b for b in self.broks
                        if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
             q.put(to_send)
             nb_sent += len(to_send)
 
         # No more need to send them
-        for b in self.broks.values():
+        for b in self.broks:
             b.sent_to_sched_externals = True
         logger.debug("Time to send %s broks (after %d secs)", nb_sent, time.time() - t0)
 
@@ -1744,6 +1774,9 @@ class Scheduler(object):
                 self.dump_objects()
                 self.dump_config()
                 self.need_objects_dump = False
+
+            # Checks if memory consumption did not exceed allowed thresold
+            self.sched_daemon.check_memory_usage()
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

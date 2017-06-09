@@ -19,17 +19,19 @@ Definition Format
 Variables in red are required, while those in black are optional. However, you need to supply at least one optional variable in each definition for it to be of much use.
 
 
-================= ========================
+================== ========================
 define broker{
-broker_name       *broker_name*
-address           *dns name of ip address*
-port              *port*
-spare             //[0/1]//
-realm             *realm name*
-manage_sub_realms *[0,1]*
-modules           *modules*
+broker_name        *broker_name*
+address            *dns name of ip address*
+port               *port*
+spare              //[0/1]//
+realm              *realm name*
+manage_sub_realms  *[0,1]*
+modules            *modules*
+broks_batch        *count*
+harakiri_threshold *memory*
 }
-================= ========================
+================== ========================
 
 
 Example Definition:
@@ -81,3 +83,9 @@ manage_sub_realms
 
 modules
   This variable is used to define all modules that the broker will load. The main goal of the Broker is to give status to theses modules.
+
+broks_batch
+  This variable controls the broks fetch rate limiting. If set to *0* (default), there is no limit, and all available broks are fetched at once. If set an integer value, the results are fetched batched by `broks_batch`.
+
+harakiri_threshold
+  This parameter activates a memory watchdog that automatically restarts the service if the used memory raises the threshold. The default unit is the *kB*, but it may be defined with an explicit unit specifier: **M = MB**, **G = GB**. Note that `harakiri` is only active if `graceful_enabled` is set to `1` in daemon's ini file.

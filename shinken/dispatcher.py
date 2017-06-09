@@ -410,6 +410,7 @@ class Dispatcher:
                             'skip_initial_broks': sched.skip_initial_broks,
                             'accept_passive_unknown_check_results':
                                 sched.accept_passive_unknown_check_results,
+                            'harakiri_threshold': sched.harakiri_threshold,
                             # shiken.io part
                             'api_key': self.conf.api_key,
                             'secret': self.conf.secret,

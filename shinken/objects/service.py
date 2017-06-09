@@ -256,6 +256,9 @@ class Service(SchedulingItem):
         'snapshot_interval':
             IntegerProp(default=5),
 
+        # Check/notification priority
+        'priority':
+            IntegerProp(default=100, fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -1564,7 +1567,7 @@ class Services(Items):
         for prop in ('contacts', 'contact_groups', 'notification_interval',
                      'notification_period', 'resultmodulations', 'business_impact_modulations',
                      'escalations', 'poller_tag', 'reactionner_tag', 'check_period',
-                     'business_impact', 'maintenance_period'):
+                     'business_impact', 'maintenance_period', 'priority'):
             for s in self:
                 if not hasattr(s, prop) and hasattr(s, 'host_name'):
                     h = hosts.find_by_name(s.host_name)
