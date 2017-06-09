@@ -79,6 +79,8 @@ labels                                     *labels*
 business_rule_output_template              *template*
 business_rule_smart_notifications          [0/1]
 business_rule_downtime_as_ack              [0/1]
+business_rule_downtime_as_ok               [0/1]
+business_rule_ack_as_ok                    [0/1]
 business_rule_host_notification_options    [d,u,r,f,s]
 business_rule_service_notification_options [w,u,c,r,f,s]
 snapshot_enabled                           [0/1]
@@ -321,8 +323,14 @@ business_rule_output_template
 business_rule_smart_notifications
   This variable may be used to activate smart notifications on :ref:`business rules <medium/business-rules>`. This allows to stop sending notification if all underlying problems have been acknowledged.
 
-business_rule_smart_notifications
+business_rule_downtime_as_ack
   By default, downtimes are not taken into account by :ref:`business rules <medium/business-rules>` smart notifications processing. This variable allows to extend smart notifications to underlying hosts or service checks under downtime (they are treated as if they were acknowledged).
+
+business_rule_ack_as_ok
+  By default, acknowledging an underlying problem doesn't change its state for the :ref:`business rules <medium/business-rules>` evaluation. This variable allows to treat acknowledged services or hosts as if their are in an Ok/Up state.
+
+business_rule_downtime_as_ok
+  By default, marking an underlying problem as downtime doesn't change its state for the :ref:`business rules <medium/business-rules>` evaluation. This variable allows to treat services or hosts in downtime as if their are in an Ok/Up state.
 
 business_rule_host_notification_options
   This option allows to enforce :ref:`business rules <medium/business-rules>` underlying hosts notification options to easily compose a consolidated meta check. This is especially useful for business rules relying on grouping expansion.

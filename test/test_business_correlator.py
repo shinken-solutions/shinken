@@ -56,6 +56,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(False, svc_bd2.got_business_rule)
         self.assertIs(None, svc_bd2.business_rule)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
+        self.assertIs(True, svc_cor.business_rule_ack_as_ok)
+        self.assertIs(True, svc_cor.business_rule_downtime_as_ok)
         self.assertEqual(True, svc_cor.got_business_rule)
         self.assertIsNot(svc_cor.business_rule, None)
         bp_rule = svc_cor.business_rule
@@ -128,7 +130,41 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(1, state)
 
+        # With business_rule_ack_as_ok in a rule, an service/host acknowledged
+        # have an Ok/Up state for the evaluation of the rule
 
+        # We acknowledge bd1
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db1;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd1.problem_has_been_acknowledged)
+        self.assertEqual('CRITICAL', svc_bd1.state)
+        self.assertEqual('HARD', svc_bd1.state_type)
+        self.assertEqual(2, svc_bd1.last_hard_state_id)
+        # Must be OK (bd 1 is OK from the rule point of view)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # With business_rule_downtime_as_ok in a rule, an service/host in downtime
+        # have an Ok/Up state for the evaluation of the rule
+
+        # We unacknowledge then downtime bd1
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db1" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db1;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd1.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd1.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd1.in_scheduled_downtime)
+        self.assertEqual('CRITICAL', svc_bd1.state)
+        self.assertEqual('HARD', svc_bd1.state_type)
+        self.assertEqual(2, svc_bd1.last_hard_state_id)
+        # Must be OK (bd 1 is OK from the rule point of view)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
 
 
     # We will try a simple bd1 AND db2
@@ -218,6 +254,45 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(1, svc_bd1.last_hard_state_id)
 
         # Must be WARNING (worse no 0 value for both)
+        state = bp_rule.get_state()
+        self.assertEqual(1, state)
+
+        # With business_rule_ack_as_ok in a rule, an service/host acknowledged
+        # have an Ok/Up state for the evaluation of the rule
+
+        # BD1 Critical, BD2 Warning, we acknowledge bd1
+        self.scheduler_loop(2, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db1;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd1.problem_has_been_acknowledged)
+        self.assertEqual('CRITICAL', svc_bd1.state)
+        self.assertEqual('HARD', svc_bd1.state_type)
+        self.assertEqual(2, svc_bd1.last_hard_state_id)
+
+        # Must be Warning (bd 1 is OK from the rule point of view)
+        state = bp_rule.get_state()
+        self.assertEqual(1, state)
+
+        # With business_rule_ack_as_ok in a rule, an service/host in downtime
+        # have an Ok/Up state for the evaluation of the rule
+
+        # BD1 Critical, BD2 Warning, we unacknowledge then downtime bd1
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db1" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db1;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd1.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd1.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd1.in_scheduled_downtime)
+        self.assertEqual('CRITICAL', svc_bd1.state)
+        self.assertEqual('HARD', svc_bd1.state_type)
+        self.assertEqual(2, svc_bd1.last_hard_state_id)
+
+        # Must be Warning (bd 1 is OK from the rule point of view)
         state = bp_rule.get_state()
         self.assertEqual(1, state)
 
@@ -350,6 +425,45 @@ class TestBusinesscorrel(ShinkenTest):
         # Must be WARNING (worse no 0 value for both, like for AND rule)
         state = bp_rule.get_state()
         self.assertEqual(1, state)
+
+        # With business_rule_ack_as_ok in a rule, an service/host acknowledged
+        # have an Ok/Up state for the evaluation of the rule
+
+        # BD1 Warning, BD2 Critical, we acknowledge bd2
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db2;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd2.problem_has_been_acknowledged)
+        self.assertEqual('CRITICAL', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(2, svc_bd2.last_hard_state_id)
+
+        # Must be OK (bd2 is OK from the rule point of view)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # With business_rule_downtime_as_ok in a rule, an service/host in downtime
+        # have an Ok/Up state for the evaluation of the rule
+
+        # We unacknowledge then downtime bd1
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db2" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db2;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd2.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd2.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd2.in_scheduled_downtime)
+        self.assertEqual('CRITICAL', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(2, svc_bd2.last_hard_state_id)
+        # Must be OK (bd 1 is OK from the rule point of view)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+
 
     # We will try a simple 1of: test_router_0 OR/AND test_host_0
     def test_simple_1of_business_correlator_with_hosts(self):
@@ -643,6 +757,88 @@ class TestBusinesscorrel(ShinkenTest):
         # and bd1 too
         self.assertIn(svc_cor, svc_bd1.impacts)
 
+        # With business_rule_ack_as_ok in a rule, an service/host acknowledged
+        # have an Ok/Up state for the evaluation of the rule
+
+        # BD2 Warning, BD1 Critical, we acknowledge bd2
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db2;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd2.problem_has_been_acknowledged)
+
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be Ok
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # And in a HARD
+        print "Launch internal check"
+        svc_cor.launch_check(now-1)
+        c = svc_cor.actions[0]
+        self.assertEqual(True, c.internal)
+        self.assertTrue(c.is_launchable(now))
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
+        self.scheduler_loop(2, [])
+
+        # We should have no more the check
+        self.assertEqual(0, len(svc_cor.actions))
+
+        print "Look at svc_cor state", svc_cor.state
+        # What is the svc_cor state now?
+        self.assertEqual('OK', svc_cor.state)
+        self.assertEqual('HARD', svc_cor.state_type)
+        self.assertEqual(0, svc_cor.last_hard_state_id)
+
+        # With business_rule_ack_as_ok in a rule, an service/host in downtime
+        # have an Ok/Up state for the evaluation of the rule
+
+        # BD2 Warning, BD1 Critical, we unacknowledge then downtime bd2
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db1" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db1;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd1.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd1.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd1.in_scheduled_downtime)
+
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be Ok
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # And in a HARD
+        print "Launch internal check"
+        svc_cor.launch_check(now-1)
+        c = svc_cor.actions[0]
+        self.assertEqual(True, c.internal)
+        self.assertTrue(c.is_launchable(now))
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
+        self.scheduler_loop(2, [])
+
+        # We should have no more the check
+        self.assertEqual(0, len(svc_cor.actions))
+
+        print "Look at svc_cor state", svc_cor.state
+        # What is the svc_cor state now?
+        self.assertEqual('OK', svc_cor.state)
+        self.assertEqual('HARD', svc_cor.state_type)
+        self.assertEqual(0, svc_cor.last_hard_state_id)
+
     def test_dep_node_list_elements(self):
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assertEqual(False, svc_bd1.got_business_rule)
@@ -888,6 +1084,79 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('WARNING', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
         self.assertEqual(1, svc_cor.last_hard_state_id)
+
+        #Now we acknowledge the warning in bd2 with business_rule_ack_as_ok
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db2;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd2.problem_has_been_acknowledged)
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be OK
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # And in a HARD
+        print "ERP: Launch internal check"
+        svc_cor.launch_check(now-1)
+        c = svc_cor.actions[0]
+        self.assertEqual(True, c.internal)
+        self.assertTrue(c.is_launchable(now))
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
+        self.scheduler_loop(2, [])
+
+        # We should have no more the check
+        self.assertEqual(0, len(svc_cor.actions))
+
+        print "ERP: Look at svc_cor state", svc_cor.state
+        # What is the svc_cor state now?
+        self.assertEqual('OK', svc_cor.state)
+        self.assertEqual('HARD', svc_cor.state_type)
+        self.assertEqual(0, svc_cor.last_hard_state_id)
+
+        #Now we unacknowledge and downtime the warning in bd2 with business_rule_ack_as_ok
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db2" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db2;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd2.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd2.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd2.in_scheduled_downtime)
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be OK
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # And in a HARD
+        print "ERP: Launch internal check"
+        svc_cor.launch_check(now-1)
+        c = svc_cor.actions[0]
+        self.assertEqual(True, c.internal)
+        self.assertTrue(c.is_launchable(now))
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
+        self.scheduler_loop(2, [])
+
+        # We should have no more the check
+        self.assertEqual(0, len(svc_cor.actions))
+
+        print "ERP: Look at svc_cor state", svc_cor.state
+        # What is the svc_cor state now?
+        self.assertEqual('OK', svc_cor.state)
+        self.assertEqual('HARD', svc_cor.state_type)
+        self.assertEqual(0, svc_cor.last_hard_state_id)
 
         print "All elements", bp_rule.list_all_elements()
 
@@ -1157,6 +1426,66 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule.is_of_mul = True
         self.assertEqual(1, bp_rule.get_state())
 
+        ##* W ack(C) C O O with business_rule_ack_as_ok
+        # * 3 of: OK
+        # * 4,1,1 -> Critical (same as before)
+        # * 4,1,2 -> Warning
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;B;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+
+        if with_pct == False:
+            bp_rule.of_values = ('3', '5', '5')
+        else:
+            bp_rule.of_values = ('60%', '100%', '100%')
+        bp_rule.is_of_mul = False
+        self.assertEqual(0, bp_rule.get_state())
+        # * 4,1,1
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '1')
+        else:
+            bp_rule.of_values = ('80%', '20%', '20%')
+        bp_rule.is_of_mul = True
+        self.assertEqual(2, bp_rule.get_state())
+        # * 4,1,3
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '2')
+        else:
+            bp_rule.of_values = ('80%', '20%', '40%')
+        bp_rule.is_of_mul = True
+        self.assertEqual(1, bp_rule.get_state())
+
+        ##* W down(C) C O O with business_rule_ack_as_ok
+        # * 3 of: OK
+        # * 4,1,1 -> Critical (same as before)
+        # * 4,1,2 -> Warning
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;B" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;B;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        if with_pct == False:
+            bp_rule.of_values = ('3', '5', '5')
+        else:
+            bp_rule.of_values = ('60%', '100%', '100%')
+        bp_rule.is_of_mul = False
+        self.assertEqual(0, bp_rule.get_state())
+        # * 4,1,1
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '1')
+        else:
+            bp_rule.of_values = ('80%', '20%', '20%')
+        bp_rule.is_of_mul = True
+        self.assertEqual(2, bp_rule.get_state())
+        # * 4,1,3
+        if with_pct == False:
+            bp_rule.of_values = ('4', '1', '2')
+        else:
+            bp_rule.of_values = ('80%', '20%', '40%')
+        bp_rule.is_of_mul = True
+        self.assertEqual(1, bp_rule.get_state())
+
     # We will try a simple bd1 AND NOT db2
     def test_simple_and_not_business_correlator(self):
         #
@@ -1247,6 +1576,49 @@ class TestBusinesscorrel(ShinkenTest):
         # Must be WARNING (worse no 0 value for both)
         state = bp_rule.get_state()
         self.assertEqual(1, state)
+
+        # Acknowledge bd2 with business_rule_ack_as_ok
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db2;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be CRITICAL
+        state = bp_rule.get_state()
+        self.assertEqual(2, state)
+
+        # Now try to get ok in both place, should be bad :)
+        self.scheduler_loop(2, [[svc_bd1, 0, 'OK | value1=1 value2=2'], [svc_bd2, 0, 'OK | value1=1 value2=2']])
+        self.assertEqual('OK', svc_bd1.state)
+        self.assertEqual('HARD', svc_bd1.state_type)
+        self.assertEqual(0, svc_bd1.last_hard_state_id)
+        self.assertEqual('OK', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(0, svc_bd2.last_hard_state_id)
+
+        # Must be CRITICAL (ok and not ok IS no OK :) )
+        state = bp_rule.get_state()
+        self.assertEqual(2, state)
+
+        # Unacknowledge then downtime bd2 with business_rule_downtime_as_ok
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db2" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db2;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd2.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd2.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd2.in_scheduled_downtime)
+        self.assertEqual('OK', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(0, svc_bd2.last_hard_state_id)
+
+        # Must be CRITICAL
+        state = bp_rule.get_state()
+        self.assertEqual(2, state)
 
         # Now try to get ok in both place, should be bad :)
         self.scheduler_loop(2, [[svc_bd1, 0, 'OK | value1=1 value2=2'], [svc_bd2, 0, 'OK | value1=1 value2=2']])
@@ -1404,6 +1776,45 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(1, state)
 
+        # Acknowledge bd2 with business_rule_ack_as_ok
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;db2;2;1;1;lausser;blablub" % (now)
+        self.sched.run_external_command(cmd)
+        self.assertIs(True, svc_bd2.problem_has_been_acknowledged)
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be OK
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
+        # We should got now svc_bd2 and svc_bd1 as root problems
+        print "Root problems"
+        for p in svc_cor.source_problems:
+            print p.get_full_name()
+        self.assertIn(svc_bd1, svc_cor.source_problems)
+        self.assertIn(svc_bd2, svc_cor.source_problems)
+
+        # Unacknowledge then downtime bd2 with business_rule_downtime_as_ok
+        duration = 300
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;db2" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;db2;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+
+        self.scheduler_loop(1, [[svc_cor, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[svc_cor, None, None]])
+        self.assertGreater(svc_bd2.scheduled_downtime_depth, 0)
+        self.assertIs(False, svc_bd2.problem_has_been_acknowledged)
+        self.assertIs(True, svc_bd2.in_scheduled_downtime)
+        self.assertEqual('WARNING', svc_bd2.state)
+        self.assertEqual('HARD', svc_bd2.state_type)
+        self.assertEqual(1, svc_bd2.last_hard_state_id)
+
+        # Must be OK
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
+
         # We should got now svc_bd2 and svc_bd1 as root problems
         print "Root problems"
         for p in svc_cor.source_problems:
@@ -1501,7 +1912,37 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
+        # We acknowledge A with business_rule_ack_as_ok
+        self.scheduler_loop(3, [[B, 0, 'UP']])
+        self.assertEqual('UP', B.state)
+        self.assertEqual('HARD', B.state_type)
+        self.assertEqual(0, B.last_hard_state_id)
+        cmd = "[%lu] ACKNOWLEDGE_HOST_PROBLEM;test_darthelmet_A;1;1;0;lausser;blablub" % now
+        self.sched.run_external_command(cmd)
+        self.assertEqual('DOWN', A.state)
+        self.assertEqual('HARD', A.state_type)
+        self.assertEqual(1, A.last_hard_state_id)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
 
+        # We unacknowledge then downtime A with business_rule_downtime_as_ok
+        self.scheduler_loop(3, [[B, 0, 'UP']])
+        self.assertEqual('UP', B.state)
+        self.assertEqual('HARD', B.state_type)
+        self.assertEqual(0, B.last_hard_state_id)
+
+        duration = 300
+        cmd = "[%lu] REMOVE_HOST_ACKNOWLEDGEMENT;test_darthelmet_A" % now
+        self.sched.run_external_command(cmd)
+        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_darthelmet_A;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        self.scheduler_loop(1, [[B, None, None]], do_sleep=True)
+        self.scheduler_loop(1, [[B, None, None]])
+        self.assertEqual('DOWN', A.state)
+        self.assertEqual('HARD', A.state_type)
+        self.assertEqual(1, A.last_hard_state_id)
+        state = bp_rule.get_state()
+        self.assertEqual(0, state)
 
 
 
