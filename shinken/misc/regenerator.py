@@ -929,9 +929,10 @@ class Regenerator(object):
         broker_name = data['broker_name']
         try:
             s = self.brokers[broker_name]
+        except KeyError:
+            self.manage_initial_broker_status_brok(b)
+        else:
             self.update_element(s, data)
-        except Exception:
-            pass
 
 
     def manage_update_receiver_status_brok(self, b):
@@ -939,19 +940,20 @@ class Regenerator(object):
         receiver_name = data['receiver_name']
         try:
             s = self.receivers[receiver_name]
+        except KeyError:
+            self.manage_initial_receiver_status_brok(b)
+        else:
             self.update_element(s, data)
-        except Exception:
-            pass
-
 
     def manage_update_reactionner_status_brok(self, b):
         data = b.data
         reactionner_name = data['reactionner_name']
         try:
             s = self.reactionners[reactionner_name]
+        except KeyError:
+            self.manage_initial_reactionner_status_brok(b)
+        else:
             self.update_element(s, data)
-        except Exception:
-            pass
 
 
     def manage_update_poller_status_brok(self, b):
@@ -959,9 +961,10 @@ class Regenerator(object):
         poller_name = data['poller_name']
         try:
             s = self.pollers[poller_name]
+        except KeyError:
+            self.manage_initial_poller_status_brok(b)
+        else:
             self.update_element(s, data)
-        except Exception:
-            pass
 
 
     def manage_update_scheduler_status_brok(self, b):
@@ -969,10 +972,10 @@ class Regenerator(object):
         scheduler_name = data['scheduler_name']
         try:
             s = self.schedulers[scheduler_name]
+        except KeyError:
+            self.manage_initial_scheduler_status_brok(b)
+        else:
             self.update_element(s, data)
-            # print "S:", s
-        except Exception:
-            pass
 
 
 #################
