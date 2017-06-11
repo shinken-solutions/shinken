@@ -198,6 +198,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('modified_attributes', 0L),
         ('daemon_enabled', True),
         ('graceful_enabled', False),
+        ('aggressive_memory_management', False),
 
         # Shinken specific
         ('idontcareaboutsecurity', False),

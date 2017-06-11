@@ -419,7 +419,8 @@ class Broker(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
-        free_memory()
+        if self.aggressive_memory_management:
+            free_memory()
         # We got a name so we can update the logger and the stats global objects
         logger.load_obj(self, name)
         statsmgr.register(self, name, 'broker',

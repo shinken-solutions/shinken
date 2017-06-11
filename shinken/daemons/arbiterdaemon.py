@@ -656,7 +656,8 @@ class Arbiter(Daemon):
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf
-        free_memory()
+        if self.aggressive_memory_management:
+            free_memory()
         for arb in self.conf.arbiters:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb

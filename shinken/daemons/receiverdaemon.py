@@ -195,7 +195,8 @@ class Receiver(Satellite):
         else:
             self.raw_conf = None
         self.new_conf = None
-        free_memory()
+        if self.aggressive_memory_management:
+            free_memory()
 
         statsmgr.register(self, self.name, 'receiver',
                           api_key=self.api_key,
