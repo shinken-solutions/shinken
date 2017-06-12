@@ -47,7 +47,7 @@ class TestCheckModulations(ShinkenTest):
         self.assertIn(mod, host.checkmodulations)
 
         c = None
-        for c in host.checks_in_progress:
+        for c in host.get_checks_in_progress():
             print c.command
             self.assertEqual('plugins/nothing VALUE', c.command)
 

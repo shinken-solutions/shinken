@@ -1122,7 +1122,6 @@ class Scheduler(object):
                     self.add(a)
                     # Also raises the action id, so do not overlap ids
                     a.assume_at_least_id(a.id)
-                h.update_in_checking()
                 # And also add downtimes and comments
                 for dt in h.downtimes:
                     dt.ref = h
@@ -1185,7 +1184,6 @@ class Scheduler(object):
                     self.add(a)
                     # Also raises the action id, so do not overlap id
                     a.assume_at_least_id(a.id)
-                s.update_in_checking()
                 # And also add downtimes and comments
                 for dt in s.downtimes:
                     dt.ref = s
@@ -1378,11 +1376,76 @@ class Scheduler(object):
         for id in id_to_del:
             del self.actions[id]  # ZANKUSEN!
 
+    def get_maintenance_dt_times(self, now, elt):
+        start_time = None
+        end_time = None
+        period = elt.maintenance_period
+        if period is not None and period.is_time_valid(now):
+            start_time = period.get_next_valid_time_from_t(now)
+            end_time = period.get_next_invalid_time_from_t(start_time + 1) - 1
+        elif elt.maintenance_state_id == 1:
+            start_time = now
+            duration = elt.maintenance_check_interval * elt.interval_length
+            end_time = now + duration * 3
+        return start_time, end_time
+
+    def update_maintenance_downtimes(self, now):
+        # Check maintenance periods
+        for elt in self.iter_hosts_and_services():
+            if elt.maintenance_period is None and elt.maintenance_check_period is None:
+                continue
+
+            if elt.in_maintenance is None:
+                start_time, end_time = self.get_maintenance_dt_times(now, elt)
+
+                # Got a maintenance period or check
+                if start_time is not None:
+                    dt = Downtime(elt, start_time, end_time, True, 0, 0,
+                                  "system",
+                                  "this downtime was automatically scheduled "
+                                  "through a maintenance_period or "
+                                  "a maintenance_check")
+                    elt.add_downtime(dt)
+                    self.add(dt)
+                    self.get_and_register_status_brok(elt)
+                    elt.in_maintenance = dt.id
+            else:
+                dt = self.downtimes.get(elt.in_maintenance)
+                # In case of retention loading issue, avoid crashing the
+                # scheduler if the downtime could not be found
+                if dt is None:
+                    logger.error(
+                        "Failed to find maintenance downtime %s, resetting "
+                        "in_maintenance" % elt.in_maintenance
+                    )
+                    elt.in_maintenance = None
+                    continue
+                # If detected as under maintenance by check command, extend
+                # the current downtime length, otehwise invalidate it.
+                if elt.maintenance_state_id == 1 or \
+                        (elt.maintenance_period is not None and
+                         elt.maintenance_period.is_time_valid(now)):
+                    _, end_time = self.get_maintenance_dt_times(now, elt)
+                    dt.end_time = dt.real_end_time = end_time
+                    dt.duration = dt.end_time - dt.start_time
+                elif elt.maintenance_state_id == 0:
+                    dt.end_time = dt.real_end_time = now - 1
+                    dt.duration = dt.end_time - dt.start_time
+
+    def cleanup_maintenance_downtimes(self):
+        for elt in self.iter_hosts_and_services():
+            if elt.in_maintenance is not None and \
+                    elt.in_maintenance not in self.downtimes:
+                # the main downtimes has expired or was manually deleted
+                elt.in_maintenance = None
+
     # Check for downtimes start and stop, and register
     # them if needed
     def update_downtimes_and_comments(self):
         broks = []
-        now = time.time()
+        # Necessary to floor time value because miliseconds may result in
+        # too early downtimes expiration.
+        now = int(time.time())
 
         # Look for in objects comments, and look if we already got them
         for elt in self.iter_hosts_and_services():
@@ -1390,32 +1453,23 @@ class Scheduler(object):
                 if c.id not in self.comments:
                     self.comments[c.id] = c
 
-        # Check maintenance periods
-        for elt in self.iter_hosts_and_services():
-            if elt.maintenance_period is None:
-                continue
-
-            if elt.in_maintenance is None:
-                if elt.maintenance_period.is_time_valid(now):
-                    start_dt = elt.maintenance_period.get_next_valid_time_from_t(now)
-                    end_dt = elt.maintenance_period.get_next_invalid_time_from_t(start_dt + 1) - 1
-                    dt = Downtime(elt, start_dt, end_dt, 1, 0, 0,
-                                  "system",
-                                  "this downtime was automatically scheduled "
-                                  "through a maintenance_period")
-                    elt.add_downtime(dt)
-                    self.add(dt)
-                    self.get_and_register_status_brok(elt)
-                    elt.in_maintenance = dt.id
-            else:
-                if elt.in_maintenance not in self.downtimes:
-                    # the main downtimes has expired or was manually deleted
-                    elt.in_maintenance = None
+        self.update_maintenance_downtimes(now)
 
         #  Check the validity of contact downtimes
         for elt in self.contacts:
             for dt in elt.downtimes:
                 dt.check_activation()
+
+        # Check start and stop times
+        for dt in self.downtimes.values():
+            if dt.real_end_time < now:
+                # this one has expired
+                broks.extend(dt.exit())  # returns downtimestop notifications
+            elif now >= dt.start_time and dt.fixed is True and \
+                    dt.is_in_effect is False and dt.can_be_deleted is False:
+                # this one has to start now
+                broks.extend(dt.enter())  # returns downtimestart notifications
+                broks.append(dt.ref.get_update_status_brok())
 
         # A loop where those downtimes are removed
         # which were marked for deletion (mostly by dt.exit())
@@ -1440,15 +1494,8 @@ class Scheduler(object):
                 self.del_comment(c.id)
                 broks.append(ref.get_update_status_brok())
 
-        # Check start and stop times
-        for dt in self.downtimes.values():
-            if dt.real_end_time < now:
-                # this one has expired
-                broks.extend(dt.exit())  # returns downtimestop notifications
-            elif now >= dt.start_time and dt.fixed and not dt.is_in_effect:
-                # this one has to start now
-                broks.extend(dt.enter())  # returns downtimestart notifications
-                broks.append(dt.ref.get_update_status_brok())
+        # If downtimes were previously deleted, cleanup in_maintenance
+        self.cleanup_maintenance_downtimes()
 
         for b in broks:
             self.add(b)

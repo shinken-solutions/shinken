@@ -45,7 +45,7 @@ class TestDisableActiveChecks(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
 
         print "Checks in progress", host.checks_in_progress
-        c = host.checks_in_progress.pop()
+        c = host.get_checks_in_progress().pop()
         print c.__dict__
         print c.status
 
@@ -57,7 +57,7 @@ class TestDisableActiveChecks(ShinkenTest):
         host.schedule()
         self.sched.external_command.DISABLE_HOST_CHECK(host)
 
-        c = host.checks_in_progress.pop()
+        c = host.get_checks_in_progress().pop()
         print c.__dict__
         print c.status
         self.assertEqual('waitconsume', c.status)
@@ -67,9 +67,9 @@ class TestDisableActiveChecks(ShinkenTest):
         print host.output
         self.assertEqual(last_output, host.output)
 
-        print len(host.checks_in_progress)
-        print host.in_checking
-        self.assertEqual(False, host.in_checking)
+        print len(host.get_checks_in_progress())
+        print host.is_in_checking()
+        self.assertEqual(False, host.is_in_checking())
 
 
 

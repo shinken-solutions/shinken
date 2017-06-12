@@ -1,1 +1,4 @@
 *.pyc
+test_local.py
+etc/local/*
+etc/shinken_local.cfg

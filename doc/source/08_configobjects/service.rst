@@ -64,7 +64,6 @@ duplicate_foreach                          *$MACRO$*
 service_dependencies                       *host,service_description*
 business_impact                            [0/1/2/3/4/5]
 icon_set                                   [database/disk/network_service/server]
-maintenance_period                         *timeperiod_name*
 host_dependency_enabled                     [0/1]
 labels                                     *labels*
 business_rule_output_template              *template*
@@ -80,6 +79,12 @@ snapshot_interval                          #
 trigger_name                               *trigger_name*
 trigger_broker_raise_enabled               [0/1]
 priority                                   *priority*
+maintenance_period                         *timeperiod_name*
+maintenance_checks_enabled                 [0/1]
+maintenance_check_command                  *command_name*
+maintenance_check_period                   *timeperiod_name*
+maintenance_check_interval                 #
+maintenance_retry_interval                 #
 }
 ========================================== ======================================
 
@@ -384,9 +389,6 @@ icon_set
   This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server
   *Note:* In WebUI version 2, this variable is not used anymore
 
-maintenance_period
-  Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_
-
 host_dependency_enabled
   This variable may be used to remove the dependency between a service and its parent host. Used for volatile services that need notification related to itself and not depend on the host notifications.
 
@@ -434,5 +436,38 @@ trigger_broker_raise_enabled
 
 priority
   This options defines the service's priority regarding checks execution. When a poller is asking for new actions to execute to the scheduler, it will return the highest priority tasks first (the lower the number, the higher the priority). The `priority` parameter may be set, in order of ascending precedence, on a `command`, on a `host` and on a `service`. Priority defaults to `100`.
+
+maintenance_period
+  Shinken-specific variable to specify a recurring downtime period. This works like a scheduled downtime, so unlike a check_period with exclusions, checks will still be made (no ":ref:`blackout <thebasics/timeperiods#how_time_periods_work_with_host_and_service_checks>`" times). `announcement`_.
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
+
+maintenance_checks_enabled
+  This directive is used to determine whether or not maintenance checks of this service are enabled. Values:
+
+    * 0 = disable active service checks
+    * 1 = enable active service checks.
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
+
+maintenance_check_command
+  Command to launch to check if service is under maintenance.
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
+
+maintenance_check_period
+  Timeperiod when the maintenance check is allowed is allowed
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
+
+maintenance_check_interval
+  This directive is used to define the number of “time units" to wait before scheduling the next “maintenance" check of the service. “Maintenance" checks are those that occur when the service is in an PRODUCTION. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
+
+maintenance_retry_interval
+  This directive is used to define the number of “time units" to wait before scheduling a re-check of the service maintenance. Services maintenance checks are rescheduled at the retry interval when they have changed to a MAINTENANCE state. Unless you've changed the :ref:`interval_length <configuration/configmain-advanced#interval_length>` directive from the default value of 60, this number will mean minutes. More information on this value can be found in the :ref:`check scheduling <advanced/checkscheduling>` documentation.
+
+  See :ref:`maintenance related documentation <advanced/maintenance-downtime>` for more details.
 
 .. _announcement: http://www.mail-archive.com/shinken-devel@lists.sourceforge.net/msg00247.html

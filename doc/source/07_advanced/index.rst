@@ -28,6 +28,7 @@ Advanced Topics
    stalking
    perfdata
    downtime
+   maintenance-downtime
    adaptative
    dependencychecks
    cachedchecks
