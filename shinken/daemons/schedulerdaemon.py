@@ -408,7 +408,8 @@ class Shinken(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
-        free_memory()
+        if self.aggressive_memory_management:
+            free_memory()
 
         # Tag the conf with our data
         self.conf = conf

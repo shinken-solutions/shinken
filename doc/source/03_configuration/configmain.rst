@@ -651,3 +651,19 @@ Default:
 
 
 Maximum delay to wait for parent configuration before giving up in a newly gracefully spawned daemon. This option has to be set in the daemon local \*d.ini files.
+
+Aggressive memory management
+----------------------------
+
+::
+
+  aggressive_memory_management=[0/1]
+
+Default:
+
+::
+
+  aggressive_memory_management=0
+
+
+On some distributions, dealing with large configuration can result in memory leaks when the new configuration is sent, because of an inneficient memory cleanup in the python interpreter. This options enables a more aggressive memory routine that forces unused memory to be freed.

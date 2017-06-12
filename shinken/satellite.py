@@ -1018,7 +1018,8 @@ class Satellite(BaseSatellite):
         else:
             self.raw_conf = None
         self.new_conf = None
-        free_memory()
+        if self.aggressive_memory_management:
+            free_memory()
 
         # we got a name, we can now say it to our statsmgr
         statsmgr.register(self, self.name, service,

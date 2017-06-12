@@ -28,6 +28,7 @@ import sys
 import os
 import json
 import platform
+import traceback
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -944,7 +945,12 @@ def free_memory():
 
     This function forces memory to be freed.
     """
-    if platform.system() == "Linux":
-        import ctypes
-        libc6 = ctypes.CDLL('libc.so.6')
-        libc6.malloc_trim(0)
+    try:
+        if platform.system() == "Linux":
+            logger.debug("Forcing memory free")
+            import ctypes
+            libc6 = ctypes.CDLL('libc.so.6')
+            libc6.malloc_trim(0)
+    except Exception:
+        logger.error("Failed to free memory")
+        logger.debug(traceback.format_exc())
