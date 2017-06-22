@@ -7,6 +7,7 @@ INSTALLED_FILES
 .project
 .pydevproject
 .settings
+.idea
 .gitignore
 modules/*
 .ropeproject
@@ -51,3 +52,7 @@ test/tmp/.cov*
 # Pbr
 pbr-*.egg/
 
+
+# Virtualization #
+##################
+.vagrant
