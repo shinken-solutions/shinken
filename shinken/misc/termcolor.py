@@ -131,6 +131,8 @@ def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
     It accepts arguments of print function.
     """
 
+    if isinstance(text, unicode):
+        text = text.encode("utf-8")
     print((colored(text, color, on_color, attrs)), **kwargs)
 
 
