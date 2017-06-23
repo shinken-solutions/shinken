@@ -24,7 +24,7 @@ try:
     from setuptools import find_packages
 except:
     sys.exit("Error: missing python-setuptools library")
-    
+
 from itertools import chain
 import optparse
 import itertools
@@ -65,7 +65,7 @@ def generate_default_shinken_file():
     #print('generating %s from %s', outfile, templatefile)
 
     mkpath(os.path.dirname(outfile))
-    
+
     bin_path = default_paths['bin']
 
     # Read the template file
@@ -117,13 +117,13 @@ def recursive_chown(path, uid, gid, owner, group):
                 os.chown(path, uid, gid)
 
 
-            
+
 def get_uid(user_name):
     try:
         return pwd.getpwnam(user_name)[2]
     except KeyError, exp:
         return None
-    
+
 
 def get_gid(group_name):
     try:
@@ -193,7 +193,7 @@ root = opts.proot or ''
 
 # We try to see if we are in a full install or an update process
 is_update = False
-# Try to import shinekn but not the local one. If avialable, we are in 
+# Try to import shinekn but not the local one. If avialable, we are in
 # and upgrade phase, not a classic install
 try:
     if '.' in sys.path:
@@ -217,7 +217,7 @@ if '--update' in args or opts.upgrade or '--upgrade' in args:
         sys.argv.remove('--update')
     if '--upgrade' in args:
         sys.argv.remove('--upgrade')
-    
+
     print "Shinken Lib Updating process only"
     is_update = True
 
@@ -240,8 +240,8 @@ if is_install and not root and not is_update and pwd and not opts.skip_build:
     if uid is None or gid is None:
         print "Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user,group, user)
         sys.exit(2)
-    
-    
+
+
 
 # setup() will warn about unknown parameter we already managed
 # to delete them
@@ -270,7 +270,7 @@ for idx in to_del:
 scripts = [ s for s in glob('bin/shinken*') if not s.endswith('.py')]
 
 # Define files
-if 'win' in sys.platform:
+if sys.platform.startswith('win'):
     default_paths = {
         'bin':      install_scripts or "c:\\shinken\\bin",
         'var':      "c:\\shinken\\var",
@@ -362,7 +362,7 @@ if not is_update:
             if 'daemons' in path:
                 daemonsini.append(os.path.join(path, name))
             else:
-                data_files.append( (os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)), 
+                data_files.append( (os.path.join(default_paths['etc'], re.sub(r"^(etc\/|etc$)", "", path)),
                                     [os.path.join(path, name)]) )
 
 if os.name != 'nt' and not is_update:
@@ -382,7 +382,7 @@ if os.name != 'nt' and not is_update:
         inname = os.path.join('etc', name)
         outname = os.path.join('build', name)
         print('updating path in %s', outname)
-        
+
         ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
         update_file_with_string(inname, outname,
                                 ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+", "local_log=.+", "modules_dir=.+", "pack_distribution_file=.+"],
@@ -403,22 +403,22 @@ paths = ('modules', 'doc', 'inventory', 'cli')
 for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
     for name in files:
         data_files.append( (os.path.join(default_paths['var'], path), [os.path.join(path, name)]))
-	
+
 for path, subdirs, files in os.walk('share'):
     for name in files:
-        data_files.append( (os.path.join(default_paths['share'], re.sub(r"^(share\/|share$)", "", path)), 
+        data_files.append( (os.path.join(default_paths['share'], re.sub(r"^(share\/|share$)", "", path)),
                             [os.path.join(path, name)]) )
 
 for path, subdirs, files in os.walk('libexec'):
     for name in files:
-        data_files.append( (os.path.join(default_paths['libexec'], re.sub(r"^(libexec\/|libexec$)", "", path)), 
+        data_files.append( (os.path.join(default_paths['libexec'], re.sub(r"^(libexec\/|libexec$)", "", path)),
                             [os.path.join(path, name)]) )
 
 data_files.append( (default_paths['run'], []) )
 data_files.append( (default_paths['log'], []) )
 
 
-# Note: we do not add the "scripts" entry in the setup phase because we need to generate the 
+# Note: we do not add the "scripts" entry in the setup phase because we need to generate the
 # default/shinken file with the bin path before run the setup phase, and it's not so
 # easy to do in a clean and easy way
 
