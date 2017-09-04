@@ -561,7 +561,6 @@ class SchedulingItem(Item):
         # if last_chk == 0 put in a random way so all checks
         # are not in the same time
 
-        #import pudb; pudb.set_trace()
         # next_chk il already set, do not change
         # unless we force the check or the time
         if self.is_in_checking() and not (force or force_time):
@@ -1018,7 +1017,6 @@ class SchedulingItem(Item):
 
         # Use to know if notif is raise or not
         no_action = False
-        #import pudb; pudb.set_trace()
 
         # C was waitdep, but now all dep are resolved, so check for deps
         if c.status == 'waitdep':
