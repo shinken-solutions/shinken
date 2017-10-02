@@ -25,6 +25,7 @@ fi
 
 if [ $? != 0 ];then
    echo "Shinken did fail to start"
+   ps -fu shinken
    exit 2
 fi
 
