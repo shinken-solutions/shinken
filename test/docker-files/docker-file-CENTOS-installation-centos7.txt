@@ -1,0 +1,10 @@
+FROM centos:7
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        yum --nogpgcheck  -y  upgrade
+ADD        . /root/shinken-framework
+
+WORKDIR    /root/shinken-framework
+ENTRYPOINT        test/test_one_linux_installation.sh
+
+

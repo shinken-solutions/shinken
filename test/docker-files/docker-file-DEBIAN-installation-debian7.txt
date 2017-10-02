@@ -1,0 +1,9 @@
+FROM debian:7
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        apt-get update && apt-get install -y python
+ADD        . /root/shinken-framework
+
+WORKDIR       /root/shinken-framework
+ENTRYPOINT    test/test_one_linux_installation.sh
+

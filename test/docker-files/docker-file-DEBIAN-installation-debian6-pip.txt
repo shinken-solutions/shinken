@@ -1,0 +1,19 @@
+FROM debian:6
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+# Debian 6 is is orphaned, so need to put back real repository
+RUN        printf "deb http://archive.debian.org/debian-archive/debian/ squeeze main contrib non-free\n" > /etc/apt/sources.list
+RUN        printf "deb http://archive.debian.org/debian-archive/debian/ squeeze-lts main contrib non-free" >> /etc/apt/sources.list
+RUN        echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/90ignore-release-date
+
+RUN        apt-get update && apt-get install -y python
+RUN        apt-get install -y python-pip
+
+ADD        . /root/shinken-framework
+
+WORKDIR     /root
+RUN     tar cfz shinken-0.1.tar.gz shinken-framework
+
+# local pip install
+
+ENTRYPOINT     DEBUG_INSTALL=0 pip install shinken-0.1.tar.gz && cd shinken-framework && test/test_one_linux_installation.sh

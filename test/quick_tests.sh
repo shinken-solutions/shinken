@@ -52,6 +52,8 @@ done
 # And create the coverage file
 coverage combine
 
+# Send to coveralls (if present, so if launch in TRAVIS)
+coveralls
 
 echo "Launchng pep8 now"
 cd ..
@@ -60,6 +62,8 @@ if [ $? != 0 ] ; then
    printf "PEP8 compliant: \033[31m[ FAILED ]\033[0m\n"
    exit 1
 fi
+
+
 
 
 echo "All unit tests did pass"
