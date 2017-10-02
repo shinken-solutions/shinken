@@ -4,6 +4,10 @@ echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪
 
 # TODO: remove the useradd
 useradd shinken
+if [ $? != 0 ]; then
+   # some dispo do not have the right command, like alpine linux
+   adduser -D shinken
+fi
 
 python setup.py install
 

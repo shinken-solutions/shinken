@@ -473,8 +473,7 @@ do_start_() {
     if [ $rc -eq 0 ]; then
         echo_started
     else
-        echo "$startoutput"
-        echo_failure
+        echo_failed "$startoutput"
     fi
     return $rc
 }
@@ -492,7 +491,6 @@ do_stop_() {
     fi
     if [ $rc -ne 0 ]; then
         echo_failed "$failuremsg"
-        echo_failure
     else
         echo_started
     fi
@@ -516,7 +514,6 @@ do_restart_() {
         echo_started
     else
         echo_failed "$startoutput"
-        echo_failure
     fi
     return $rc
 }
@@ -542,7 +539,6 @@ do_reload_() {
         echo_started
     else
         echo_failed "$startoutput"
-        echo_failure
     fi
     return $rc
 }
@@ -555,7 +551,7 @@ do_status_() {
     if [ $rc -eq 0 ]; then
         echo_started
     else
-        echo_failure
+        echo_failed
     fi
 
 }
@@ -575,7 +571,6 @@ do_check_() {
         output=$(echo "$output" | tail -1)
         log_warning_msg "full result is in ${check_res_file}"
         echo_failed "ConfigCheck failed: $output"
-        echo_failure
     fi
     return $rc
 }
