@@ -2,6 +2,8 @@ FROM ubuntu:14.04
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 RUN        apt-get update && apt-get install -y python
+RUN        apt-get install -y python-setuptools
+
 ADD        . /root/shinken-framework
 
 ENTRYPOINT    test/test_one_linux_installation.sh

@@ -30,6 +30,7 @@ RUN        apt-get install -y strace
 RUN        apt-get install -y less
 RUN        apt-get install -y python-blessed
 RUN        apt-get install -y locales
+RUN        apt-get install -y python-setuptools
 
 ADD        . /root/shinken-framework
 WORKDIR       /root/shinken-framework

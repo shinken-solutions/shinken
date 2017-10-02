@@ -8,6 +8,7 @@ RUN        echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/90ign
 
 RUN        apt-get update && apt-get install -y python
 RUN        apt-get install -y python-pip
+RUN        apt-get install -y python-setuptools
 
 ADD        . /root/shinken-framework
 

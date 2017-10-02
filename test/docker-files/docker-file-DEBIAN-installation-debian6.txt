@@ -8,6 +8,8 @@ RUN        printf "deb http://archive.debian.org/debian-archive/debian/ squeeze-
 RUN        echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/90ignore-release-date
 
 RUN         apt-get update && apt-get install -y python
+RUN         apt-get install -y python-setuptools
+
 ADD         . /root/shinken
 
 WORKDIR     /root/shinken

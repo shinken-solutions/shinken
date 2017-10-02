@@ -92,12 +92,17 @@ pythonver() {
     done
     if [ -z "$LASTFOUND" ]
     then
-        # Finaly try to find a default python
+# Finaly try to find a default python
         which python > /dev/null 2>&1
         if [ $? -ne 0 ]
         then
-            echo "No python interpreter found!"
-            exit 2
+            # Beware: maybe it's because which is not exiting itself! (like in docker centos images)
+            if [ -f "/usr/bin/python" ]; then
+                LASTFOUND="/usr/bin/python"
+            else
+                echo "No python interpreter found!"
+                exit 2
+            fi
         else
             echo "python found"
             LASTFOUND=$(which python)
