@@ -81,22 +81,19 @@ class TestRegenerator(ShinkenTest):
         # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
         self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.brokers['Default-Broker'] = {'broks' : [], 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
         self.rg = Regenerator()
 
         # Got the initial creation ones
-        ids = self.sched.broks.keys()
-        ids.sort()
         t0 = time.time()
-        for i in ids:
-            b = self.sched.broks[i]
+        for b in self.sched.broks:
             print "Manage b", b.type
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print 'First inc', t1 - t0, len(self.sched.broks)
-        self.sched.broks.clear()
+        del self.sched.broks[:]
 
         self.look_for_same_values()
 
@@ -114,17 +111,14 @@ class TestRegenerator(ShinkenTest):
         self.assertEqual('DOWN', host.state)
         self.assertEqual('HARD', host.state_type)
 
-        ids = self.sched.broks.keys()
-        ids.sort()
         t0 = time.time()
-        for i in ids:
-            b = self.sched.broks[i]
+        for b in self.sched.broks:
             print "Manage b", b.type
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print 'Time', t1 - t0
-        self.sched.broks.clear()
+        del self.sched.broks[:]
 
         self.look_for_same_values()
 
@@ -184,20 +178,17 @@ class TestRegenerator(ShinkenTest):
         self.rg.load_from_scheduler(self.sched)
 
         self.sched.conf.skip_initial_broks = False
-        self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
+        self.sched.brokers['Default-Broker'] = {'broks' : [], 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
         # Got the initial creation ones
-        ids = self.sched.broks.keys()
-        ids.sort()
         t0 = time.time()
-        for i in ids:
-            b = self.sched.broks[i]
+        for b in self.sched.broks:
             print "Manage b", b.type
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print 'First inc', t1 - t0, len(self.sched.broks)
-        self.sched.broks.clear()
+        del self.sched.broks[:]
 
         self.look_for_same_values()
 

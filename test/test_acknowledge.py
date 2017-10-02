@@ -185,7 +185,7 @@ class TestAcks(ShinkenTest):
         now = time.time()
         cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
         self.sched.run_external_command(cmd)
-        
+
         self.scheduler_loop(1, [], do_sleep=False)
         #elf.sched.get_new_actions()
         #self.worker_loop()
@@ -320,7 +320,7 @@ class TestAcks(ShinkenTest):
         self.assertEqual(0, svc.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        
+
 
     def test_ack_sticky_changing_service(self):
         # acknowledge is sticky
@@ -507,7 +507,7 @@ class TestAcks(ShinkenTest):
         self.show_actions()
         self.assertEqual(2, self.count_logs())  # alert, eventhndlr, notification
         self.show_actions()
-        
+
         print self.count_actions()
         self.assertEqual(1, self.count_actions())  # evt, no more notif
         self.assertFalse(host.problem_has_been_acknowledged)
@@ -515,7 +515,7 @@ class TestAcks(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-        
+
     def test_ack_hard_host(self):
         self.print_header()
         now = time.time()
@@ -615,7 +615,7 @@ class TestAcks(ShinkenTest):
         self.assertEqual(0, host.current_notification_number)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-        
+
 
     def test_unack_removes_comments(self):
         # critical

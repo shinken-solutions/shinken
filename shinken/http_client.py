@@ -70,8 +70,8 @@ class HTTPClient(object):
         self.post_con = self.__create_con(proxy, strong_ssl)
         self.put_con  = self.__create_con(proxy, strong_ssl)
 
-        
-    def __create_con(self, proxy, strong_ssl):            
+
+    def __create_con(self, proxy, strong_ssl):
         con = pycurl.Curl()
         con.setopt(con.VERBOSE, 0)
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not
@@ -103,7 +103,7 @@ class HTTPClient(object):
             logger.debug('PROXY SETTING PROXY %s', proxy)
             self.get_con.setopt(pycurl.PROXY, proxy)
             self.post_con.setopt(pycurl.PROXY, proxy)
-            self.put_con.setopt(pycurl.PROXY, proxy)            
+            self.put_con.setopt(pycurl.PROXY, proxy)
 
 
     # Try to get an URI path
@@ -136,7 +136,7 @@ class HTTPClient(object):
         if r != 200:
             err = response.getvalue()
             logger.error("There was a critical error : %s", err)
-            raise Exception('Connection error to %s : %s' % (self.uri, r))
+            raise HTTPException('Connection error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl
             ret = json.loads(response.getvalue().replace('\\/', '/'))
@@ -186,7 +186,7 @@ class HTTPClient(object):
         if r != 200:
             err = response.getvalue()
             logger.error("There was a critical error : %s", err)
-            raise Exception('Connection error to %s : %s' % (self.uri, r))
+            raise HTTPException('Connection error to %s : %s' % (self.uri, r))
         else:
             # Manage special return of pycurl
             # ret  = json.loads(response.getvalue().replace('\\/', '/'))
@@ -238,7 +238,7 @@ class HTTPClient(object):
         if r != 200:
             err = response.getvalue()
             logger.error("There was a critical error : %s", err)
-            return ''
+            raise HTTPException('Connection error to %s : %s' % (self.uri, r))
         else:
             ret = response.getvalue()
             return ret

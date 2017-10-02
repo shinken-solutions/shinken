@@ -66,7 +66,7 @@ from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-from shinken.util import get_memory
+from shinken.util import get_memory, parse_memory_expr, free_memory
 from shinken.stats import statsmgr
 
 
@@ -120,7 +120,7 @@ class IForArbiter(Interface):
     # Used by the Arbiter to push broks to broker
     def push_broks(self, broks):
         with self.app.arbiter_broks_lock:
-            self.app.arbiter_broks.extend(broks.values())
+            self.app.arbiter_broks.extend(broks)
     push_broks.method = 'post'
     # We are using a Lock just for NOT lock this call from the arbiter :)
     push_broks.need_lock = False
@@ -187,8 +187,8 @@ class IBroks(Interface):
 
     doc = 'Get broks from the daemon'
     # poller or reactionner ask us actions
-    def get_broks(self, bname):
-        res = self.app.get_broks()
+    def get_broks(self, bname, broks_batch=0):
+        res = self.app.get_broks(broks_batch)
         return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
     get_broks.doc = doc
 
@@ -228,6 +228,7 @@ class BaseSatellite(Daemon):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         super(BaseSatellite, self).__init__(name, config_file, is_daemon,
                                             do_replace, debug, debug_file)
+
         # Ours schedulers
         self.schedulers = {}
 
@@ -283,7 +284,7 @@ class Satellite(BaseSatellite):
                                         debug, debug_file)
 
         # Keep broks so they can be eaten by a broker
-        self.broks = {}
+        self.broks = []
 
         self.workers = {}   # dict of active workers
 
@@ -310,7 +311,7 @@ class Satellite(BaseSatellite):
         return r
 
 
-    # Initialize or re-initialize connection with scheduler """
+    # Initialize or re-initialize connection with scheduler
     def do_pynag_con_init(self, id):
         sched = self.schedulers[id]
 
@@ -354,7 +355,7 @@ class Satellite(BaseSatellite):
             logger.info("[%s] The running id of the scheduler %s changed, "
                         "we must clear its actions",
                         self.name, sname)
-            sched['wait_homerun'].clear()
+            del sched['wait_homerun'][:]
         sched['running_id'] = new_run_id
         logger.info("[%s] Connection OK with scheduler %s", self.name, sname)
 
@@ -392,7 +393,7 @@ class Satellite(BaseSatellite):
         # in the scheduler
         # action.status = 'waitforhomerun'
         try:
-            self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+            self.schedulers[sched_id]['wait_homerun'].append(action)
         except KeyError:
             pass
 
@@ -420,7 +421,11 @@ class Satellite(BaseSatellite):
                 continue
             # Now ret have all verifs, we can return them
             send_ok = False
-            ret = sched['wait_homerun'].values()
+            if self.results_batch > 0:
+                batch = min(self.results_batch, len(sched['wait_homerun']))
+            else:
+                batch = len(sched['wait_homerun'])
+            ret = sched['wait_homerun'][:batch]
             if ret is not []:
                 try:
                     con = sched['con']
@@ -440,7 +445,7 @@ class Satellite(BaseSatellite):
             # We clean ONLY if the send is OK
             if send_ok:
                 count += len(ret)
-                sched['wait_homerun'].clear()
+                del sched['wait_homerun'][:batch]
             else:
                 self.pynag_con_init(sched_id)
                 logger.warning("Sent failed!")
@@ -457,13 +462,17 @@ class Satellite(BaseSatellite):
             return []
 
         sched = self.schedulers[sched_id]
-        logger.debug("Preparing to return %s", str(sched['wait_homerun'].values()))
+        logger.debug("Preparing to return %s", str(sched['wait_homerun']))
 
         # prepare our return
-        ret = copy.copy(sched['wait_homerun'].values())
+        if self.results_batch > 0:
+            batch = min(self.results_batch, len(sched['wait_homerun']))
+        else:
+            batch = len(sched['wait_homerun'])
+        ret = sched['wait_homerun'][:batch]
 
         # and clear our dict
-        sched['wait_homerun'].clear()
+        del sched['wait_homerun'][:batch]
         return ret
 
 
@@ -545,7 +554,7 @@ class Satellite(BaseSatellite):
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
             elt.instance_id = 0
-            self.broks[elt.id] = elt
+            self.broks.append(elt)
             return
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command '%s'", str(elt.__dict__))
@@ -554,11 +563,15 @@ class Satellite(BaseSatellite):
 
 
     # Someone ask us our broks. We send them, and clean the queue
-    def get_broks(self):
+    def get_broks(self, broks_batch=0):
         _type = self.__class__.my_type
-        statsmgr.incr('core.%s.broks.out' % _type, len(self.broks), 'queue')
-        res = copy.copy(self.broks)
-        self.broks.clear()
+        if broks_batch > 0:
+            count = len(self.broks)
+        else:
+            count = min(broks_batch, len(self.broks))
+        res = self.broks[:count]
+        del self.broks[:count]
+        statsmgr.incr('core.%s.broks.out' % _type, count, 'queue')
         return res
 
 
@@ -618,7 +631,7 @@ class Satellite(BaseSatellite):
         # I want at least min_workers by module then if I can, I add worker for load balancing
         for mod in self.q_by_mod:
             # At least min_workers
-            while len(self.q_by_mod[mod]) < self.min_workers:
+            while len(self.q_by_mod[mod]) < self.max_workers:
                 try:
                     self.create_and_launch_worker(module_name=mod)
                 # Maybe this modules is not a true worker one.
@@ -728,14 +741,17 @@ class Satellite(BaseSatellite):
                     # OK, go for it :)
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    tmp = con.get('get_checks', {
+                    args = {
                         'do_checks': do_checks, 'do_actions': do_actions,
                         'poller_tags': self.poller_tags,
                         'reactionner_tags': self.reactionner_tags,
                         'worker_name': self.name,
-                        'module_types': self.q_by_mod.keys()
-                    },
-                        wait='long')
+                        'module_types': self.q_by_mod.keys(),
+                    }
+                    slots = self.get_available_slots()
+                    if slots is not None:
+                        args['max_actions'] = slots
+                    tmp = con.get('get_checks', args, wait='long')
                     # Explicit pickle load
                     tmp = base64.b64decode(tmp)
                     tmp = zlib.decompress(tmp)
@@ -765,6 +781,41 @@ class Satellite(BaseSatellite):
         statsmgr.incr('core.%s.actions.in' % _type, count, 'queue')
 
 
+    # Returns the maximim number of actions a satellite may accept, and ask
+    # to the scheduler.
+    def get_available_slots(self):
+        # We limit the maximum number of actions to q_factor times the number of
+        # allowed concurrent processes.
+        if self.max_q_size > 0:
+            slots = self.max_q_size
+        elif self.q_factor > 0:
+            slots = self.get_workers_count() * self.processes_by_worker
+            slots *= self.q_factor
+        else:
+            # No limits
+            return None
+        actions = self.get_actions_queue_len()
+        return max(0, slots - actions)
+
+
+    # Returns the total number of elements contained in all the workers queues
+    def get_actions_queue_len(self):
+        actions = 0
+        for mod in self.q_by_mod:
+            for q in self.q_by_mod[mod].values():
+                actions += q.qsize()
+        return actions
+
+
+    # Returns the number of registerred workers
+    def get_workers_count(self):
+        return len(self.workers)
+
+
+    # In android we got a Queue, and a manager list for others
+    def is_returns_queue_empty(self):
+        return self.returns_queue.empty()
+
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
         return self.returns_queue.qsize()
@@ -780,7 +831,7 @@ class Satellite(BaseSatellite):
     def clean_previous_run(self):
         # Clean all lists
         self.schedulers.clear()
-        self.broks.clear()
+        del self.broks[:]
         with self.external_commands_lock:
             self.external_commands = self.external_commands[:]
 
@@ -811,6 +862,9 @@ class Satellite(BaseSatellite):
             self.watch_for_new_conf(self.timeout)
             end = time.time()
             if self.new_conf:
+                if self.graceful_enabled and self.switch_process() is True:
+                    # Child successfully spawned, we're exiting
+                    return
                 self.setup_new_conf()
             self.timeout = self.timeout - (end - begin)
 
@@ -870,8 +924,7 @@ class Satellite(BaseSatellite):
 
         # Manage all messages we've got in the last timeout
         # for queue in self.return_messages:
-        while self.get_returns_queue_len() != 0:
-            self.manage_action_return(self.get_returns_queue_item())
+        self.get_workers_results()
 
         # If we are passive, we do not initiate the check getting
         # and return
@@ -888,6 +941,15 @@ class Satellite(BaseSatellite):
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
+
+        # Checks if memory consumption did not exceed allowed thresold
+        self.check_memory_usage()
+
+
+    def get_workers_results(self):
+        while not self.is_returns_queue_empty():
+            item = self.get_returns_queue_item()
+            self.manage_action_return(item)
 
 
     # Do this satellite (poller or reactionner) post "daemonize" init:
@@ -923,17 +985,19 @@ class Satellite(BaseSatellite):
     def setup_new_conf(self):
         conf = self.new_conf
         logger.debug("[%s] Sending us a configuration %s", self.name, conf)
-        self.new_conf = None
         self.cur_conf = conf
         g_conf = conf['global']
 
         # Got our name from the globals
         if 'poller_name' in g_conf:
             name = g_conf['poller_name']
+            service = 'poller'
         elif 'reactionner_name' in g_conf:
             name = g_conf['reactionner_name']
+            service = 'reactionner'
         else:
             name = 'Unnamed satellite'
+            service = 'unknown'
         self.name = name
         # kernel.io part
         self.api_key = g_conf['api_key']
@@ -947,12 +1011,17 @@ class Satellite(BaseSatellite):
         self.statsd_interval = g_conf['statsd_interval']
         self.statsd_types = g_conf['statsd_types']
         self.statsd_pattern = g_conf['statsd_pattern']
+        self.harakiri_threshold = parse_memory_expr(g_conf['harakiri_threshold'])
+
+        if self.harakiri_threshold is not None:
+            self.raw_conf = self.new_conf
+        else:
+            self.raw_conf = None
+        self.new_conf = None
+        if self.aggressive_memory_management:
+            free_memory()
 
         # we got a name, we can now say it to our statsmgr
-        if 'poller_name' in g_conf:
-            service = 'poller'
-        else:
-            service = 'reactionner'
         statsmgr.register(self, self.name, service,
                           api_key=self.api_key,
                           secret=self.secret,
@@ -1006,7 +1075,7 @@ class Satellite(BaseSatellite):
                 self.schedulers[sched_id]['wait_homerun'] = wait_homerun
                 self.schedulers[sched_id]['actions'] = actions
             else:
-                self.schedulers[sched_id]['wait_homerun'] = {}
+                self.schedulers[sched_id]['wait_homerun'] = []
                 self.schedulers[sched_id]['actions'] = {}
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
@@ -1036,6 +1105,9 @@ class Satellite(BaseSatellite):
         logger.info("[%s] Using min workers: %s", self.name, self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
+        self.max_q_size = g_conf['max_q_size']
+        self.q_factor = g_conf['q_factor']
+        self.results_batch = g_conf['results_batch']
         self.polling_interval = g_conf['polling_interval']
         self.timeout = self.polling_interval
 
@@ -1081,10 +1153,7 @@ class Satellite(BaseSatellite):
              'queue'),
         ]
 
-        actions = 0
-        for mod in self.q_by_mod:
-            for q in self.q_by_mod[mod].values():
-                actions += q.qsize()
+        actions = self.get_actions_queue_len()
         metrics.append(('core.%s.actions.queue' % _type, actions, 'queue'))
         return metrics
 
@@ -1122,6 +1191,7 @@ class Satellite(BaseSatellite):
 
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
+            self.load_parent_config()
             self.do_daemon_init_and_start()
 
             self.do_post_daemon_init()
@@ -1141,7 +1211,7 @@ class Satellite(BaseSatellite):
             self.modules_manager.start_external_instances()
 
             # Allocate Mortal Threads
-            for _ in xrange(1, self.min_workers):
+            for _ in xrange(1, self.max_workers):
                 to_del = []
                 for mod in self.q_by_mod:
                     try:

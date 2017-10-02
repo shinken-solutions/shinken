@@ -44,6 +44,7 @@ class SchedulerLink(SatelliteLink):
         'weight':             IntegerProp(default=1, fill_brok=['full_status']),
         'skip_initial_broks': BoolProp(default=False, fill_brok=['full_status']),
         'accept_passive_unknown_check_results': BoolProp(default=False, fill_brok=['full_status']),
+        'harakiri_threshold': StringProp(default=None, fill_brok=['full_status'], to_send=True),
     })
 
     running_properties = SatelliteLink.running_properties.copy()

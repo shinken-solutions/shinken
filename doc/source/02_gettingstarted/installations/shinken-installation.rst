@@ -64,6 +64,8 @@ You can download the tarball and execute the setup.py or just use the pip comman
   pip install shinken
 
 
+.. notice:: Depending on your distribution, you may need to explicitly tell pip where to install the executables. For example on Ubuntu you should use ``pip install shinken --install-option="--install-scripts=/usr/local/bin"``.
+
 Method 2: Packages 
 -------------------
 

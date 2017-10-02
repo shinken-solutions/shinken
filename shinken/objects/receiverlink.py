@@ -44,6 +44,7 @@ class ReceiverLink(SatelliteLink):
         'direct_routing':     BoolProp(default=False, fill_brok=['full_status'], to_send=True),
         'accept_passive_unknown_check_results': BoolProp(default=False,
                                                          fill_brok=['full_status'], to_send=True),
+        'harakiri_threshold': StringProp(default=None, fill_brok=['full_status'], to_send=True),
     })
 
     def get_name(self):

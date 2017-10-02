@@ -660,14 +660,11 @@ Like temporary attributes such as "imported_from", etc.. """
         if hasattr(self, prop):
             command = getattr(self, prop).strip()
             if command != '':
-                if hasattr(self, 'poller_tag'):
-                    cmdCall = CommandCall(commands, command,
-                                          poller_tag=self.poller_tag)
-                elif hasattr(self, 'reactionner_tag'):
-                    cmdCall = CommandCall(commands, command,
-                                          reactionner_tag=self.reactionner_tag)
-                else:
-                    cmdCall = CommandCall(commands, command)
+                parms = {}
+                for parm in ('poller_tag', 'reactionner_tag', 'priority'):
+                    if hasattr(self, parm):
+                        parms[parm] = getattr(self, parm)
+                cmdCall = CommandCall(commands, command, **parms)
                 setattr(self, prop, cmdCall)
             else:
                 setattr(self, prop, None)
@@ -1294,14 +1291,10 @@ class Items(object):
 
     def create_commandcall(self, prop, commands, command):
         comandcall = dict(commands=commands, call=command)
-        if hasattr(prop, 'enable_environment_macros'):
-            comandcall['enable_environment_macros'] = prop.enable_environment_macros
-
-        if hasattr(prop, 'poller_tag'):
-            comandcall['poller_tag'] = prop.poller_tag
-        elif hasattr(prop, 'reactionner_tag'):
-            comandcall['reactionner_tag'] = prop.reactionner_tag
-
+        for parm in ('enable_environment_macros', 'poller_tag',
+                     'reactionner_tag', 'priority'):
+            if hasattr(prop, parm):
+                comandcall[parm] = getattr(prop, parm)
         return CommandCall(**comandcall)
 
 
@@ -1312,11 +1305,9 @@ class Items(object):
                 command = getattr(i, prop).strip()
                 if command != '':
                     cmdCall = self.create_commandcall(i, commands, command)
-
                     # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
-
                     setattr(i, prop, None)
 
 

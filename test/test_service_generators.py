@@ -163,11 +163,19 @@ class TestConfig(ShinkenTest):
         svc_i = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service I")
         svc_j = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service J")
         svc_k = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service K")
+        svc_l1 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service L")
+        svc_m1 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "Generated Service M")
+        svc_l2 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service L")
+        svc_m2 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "Generated Service M")
 
         self.assertIsNotNone(svc_h)
         self.assertIsNotNone(svc_i)
         self.assertIsNotNone(svc_j)
         self.assertIsNotNone(svc_k)
+        self.assertIsNotNone(svc_l1)
+        self.assertIsNotNone(svc_m1)
+        self.assertIsNotNone(svc_l2)
+        self.assertIsNotNone(svc_m2)
 
 
 if __name__ == '__main__':

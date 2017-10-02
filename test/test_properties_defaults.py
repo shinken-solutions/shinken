@@ -197,6 +197,8 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('broker_module', ''),
         ('modified_attributes', 0L),
         ('daemon_enabled', True),
+        ('graceful_enabled', False),
+        ('aggressive_memory_management', False),
 
         # Shinken specific
         ('idontcareaboutsecurity', False),
@@ -270,6 +272,7 @@ class TestCommand(PropertiesTester, ShinkenTest):
         ('module_type', None),
         ('timeout', -1),
         ('enable_environment_macros', False),
+        ('priority', 100),
         ])
 
     def setUp(self):
@@ -597,6 +600,7 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('snapshot_criteria', ['d','u']),
         ('business_rule_host_notification_options', []),
         ('business_rule_service_notification_options', []),
+        ('priority', 100),
         ])
 
     def setUp(self):
@@ -902,6 +906,7 @@ class TestService(PropertiesTester, ShinkenTest):
         ('business_rule_host_notification_options', []),
         ('business_rule_service_notification_options', []),
         ('host_dependency_enabled', True),
+        ('priority', 100),
         ])
 
     def setUp(self):

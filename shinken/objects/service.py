@@ -256,6 +256,9 @@ class Service(SchedulingItem):
         'snapshot_interval':
             IntegerProp(default=5),
 
+        # Check/notification priority
+        'priority':
+            IntegerProp(default=100, fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -820,6 +823,9 @@ class Service(SchedulingItem):
                     continue
                 value = key_value['VALUE']
                 new_s = self.copy()
+                # The copied service is not a duplicate_foreach, but a final
+                # object
+                new_s.duplicate_foreach = ""
                 new_s.host_name = host.get_name()
                 if self.is_tpl():  # if template, the new one is not
                     new_s.register = 1
@@ -1344,7 +1350,9 @@ class Services(Items):
             mesg = "a %s has been defined without host_name nor " \
                    "hostgroups%s" % (objcls, in_file)
             item.configuration_errors.append(mesg)
-        if index is True:
+        # Do not index `duplicate_foreach` services, they have to be expanded
+        # during `explode` phase, similarly to what's done with templates
+        if index is True and not item.is_duplicate():
             if hname and sdesc:
                 item = self.index_item(item)
             else:
@@ -1564,7 +1572,7 @@ class Services(Items):
         for prop in ('contacts', 'contact_groups', 'notification_interval',
                      'notification_period', 'resultmodulations', 'business_impact_modulations',
                      'escalations', 'poller_tag', 'reactionner_tag', 'check_period',
-                     'business_impact', 'maintenance_period'):
+                     'business_impact', 'maintenance_period', 'priority'):
             for s in self:
                 if not hasattr(s, prop) and hasattr(s, 'host_name'):
                     h = hosts.find_by_name(s.host_name)
@@ -1658,10 +1666,7 @@ class Services(Items):
         new_s = service.copy()
         new_s.host_name = host_name
         new_s.register = 1
-        if new_s.is_duplicate():
-            self.add_item(new_s, index=False)
-        else:
-            self.add_item(new_s)
+        self.add_item(new_s)
         return new_s
 
 
@@ -1791,14 +1796,6 @@ class Services(Items):
             self.explode_contact_groups_into_contacts(t, contactgroups)
             self.explode_services_from_templates(hosts, t)
 
-        # Explode services that have a duplicate_foreach clause
-        duplicates = [s.id for s in self if s.is_duplicate()]
-        for id in duplicates:
-            s = self.items[id]
-            self.explode_services_duplicates(hosts, s)
-            if not s.configuration_errors:
-                self.remove_item(s)
-
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
         for s in self.items.values():
@@ -1816,13 +1813,22 @@ class Services(Items):
             # We will duplicate if we have multiple host_name
             # or if we are a template (so a clean service)
             if len(hnames) == 1:
-                self.index_item(s)
+                if not s.is_duplicate():
+                    self.index_item(s)
             else:
                 if len(hnames) >= 2:
                     self.explode_services_from_hosts(hosts, s, hnames)
                 # Delete expanded source service
                 if not s.configuration_errors:
                     self.remove_item(s)
+
+        # Explode services that have a duplicate_foreach clause
+        duplicates = [s.id for s in self if s.is_duplicate()]
+        for id in duplicates:
+            s = self.items[id]
+            self.explode_services_duplicates(hosts, s)
+            if not s.configuration_errors:
+                self.remove_item(s)
 
         to_remove = []
         for service in self:

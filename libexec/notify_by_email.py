@@ -290,10 +290,10 @@ th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
     for k,v in sorted(shinken_var.iteritems()):
         logging.debug('type %s : %s' % (k, type(v)))
         if odd:
-            html_content.append('<tr><th class="odd">' + k + '</th><td class="odd">' + v + '</td></tr>')
+            html_content.append('<tr><th class="odd">' + str(k) + '</th><td class="odd">' + str(v) + '</td></tr>')
             odd=False
         else:
-            html_content.append('<tr><th class="even">' + k + '</th><td class="even">' + v + '</td></tr>')
+            html_content.append('<tr><th class="even">' + str(k) + '</th><td class="even">' + str(v) + '</td></tr>')
             odd=True
 
     html_content.append('</table>')
@@ -351,6 +351,12 @@ if __name__ == "__main__":
                       help='Sender email address, default is system user')
     group_general.add_option('-S', '--SMTP', dest='smtp', default='localhost',
                       help='Target SMTP hostname. None for just a sendmail lanch. Default: localhost')
+    group_general.add_option('-U', '--smtp-user', dest='smtp_user', default=None,
+                      help='SMTP username. Default: None')
+    group_general.add_option('-P', '--smtp-password', dest='smtp_password', default=None,
+                      help='SMTP password. Default: None')
+    group_general.add_option('-T', '--smtp-starttls', dest='smtp_starttls', default=False,
+                      action='store_true', help='Connect to smtp using starttls')
     group_general.add_option('-p', '--prefix', dest='prefix', default='',
                       help='Mail subject prefix. Default is no prefix')
 
@@ -480,6 +486,10 @@ if __name__ == "__main__":
         logging.debug('Connect to %s smtp server' % (opts.smtp))
         smtp = smtplib.SMTP(opts.smtp)
         logging.debug('Send the mail')
+        if opts.smtp_starttls:
+            smtp.starttls()
+        if opts.smtp_user and opts.smtp_password:
+            smtp.login(opts.smtp_user, opts.smtp_password)
         smtp.sendmail(get_user(), receivers, mail.as_string())
         logging.info("Mail sent successfuly")
     else:
