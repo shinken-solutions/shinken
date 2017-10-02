@@ -209,6 +209,13 @@ is_install = False
 if 'install' in args:
     is_install = True
 
+# Last step for pip insta an install one (at least in pip 9.0.1)
+is_pip_real_install_step = 'bdist_wheel' in sys.argv
+if is_pip_real_install_step:
+    is_update = False
+    is_install = True
+
+
 install_scripts = opts.install_scripts or ''
 
 user = opts.owner or 'shinken'

@@ -13,6 +13,8 @@ ADD        . /root/shinken-framework
 WORKDIR     /root
 RUN     tar cfz shinken-0.1.tar.gz shinken-framework
 
+RUN     useradd shinken
+
 # local pip install
 #ENTRYPOINT     DEBUG_INSTALL=1 pip -vvv install shinken --no-index --find-links file://shinken-0.1.tar.gz && cd shinken-framework && test/test_one_linux_installation.sh
 ENTRYPOINT     DEBUG_INSTALL=0 pip install shinken-0.1.tar.gz && cd shinken-framework && test/test_one_linux_installation.sh
