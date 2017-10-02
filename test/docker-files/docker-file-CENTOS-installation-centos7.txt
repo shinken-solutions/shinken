@@ -2,6 +2,8 @@ FROM centos:7
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 RUN        yum --nogpgcheck  -y  upgrade
+RUN        yum --nogpgcheck  -y install python-setuptools
+
 ADD        . /root/shinken-framework
 
 WORKDIR    /root/shinken-framework

@@ -1,6 +1,8 @@
 FROM oraclelinux:7.2
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
+RUN        yum --nogpgcheck  -y install python-setuptools
+
 ADD        . /root/shinken-framework
 
 ENTRYPOINT    test/test_one_linux_installation.sh

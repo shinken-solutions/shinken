@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪   Installation   ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪  *************************"
+
+# TODO: remove the useradd
+useradd shinken
+
 python setup.py install
 
 if [ $? != 0 ]; then
