@@ -1,7 +1,8 @@
 language: python
 
-# Allow shinken to run on new travis infra
-sudo: False
+# We need docker for our scripts that test various installations
+services:
+  - docker
 
 # Allow cache of downloads
 cache: pip
@@ -12,14 +13,26 @@ python:
   
 # command to install dependencies
 # some are only used for travis/coveralls so we are installing them here only
-install:
-  - ./test/setup_test.sh
+#install:
+#  - ./test/setup_test.sh
 # command to run tests
+
+
+env:
+  # Python:
+  - TEST_SUITE=PYTHON
+  # Then installations on various distro
+  - TEST_SUITE=CENTOS
+  - TEST_SUITE=DEBIAN
+  - TEST_SUITE=FEDORA
+  - TEST_SUITE=OTHER
+  - TEST_SUITE=UBUNTU
 
 script:
   - cd test
-  - ./quick_tests.sh
+  - chmod a+x *sh *py
+  - ./test_suite.sh
 
 # specific call to launch coverage data into coveralls.io
-after_success:
-  coveralls
+#after_success:
+#  coveralls

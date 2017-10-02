@@ -1,0 +1,8 @@
+FROM amazonlinux:2016.09
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python
+ADD        . /root/shinken-framework
+
+WORKDIR       /root/shinken-framework
+ENTRYPOINT    test/test_one_linux_installation.sh
