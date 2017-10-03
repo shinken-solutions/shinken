@@ -3,7 +3,8 @@
 echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪   Installation   ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪  *************************"
 
 # TODO: remove the useradd
-useradd shinken
+# note: -U, --user-group              create a group with the same name as the user  , need for opensuse
+useradd -U shinken
 if [ $? != 0 ]; then
    # some dispo do not have the right command, like alpine linux
    adduser -D shinken

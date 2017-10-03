@@ -9,6 +9,8 @@ RUN        zypper --non-interactive install python-pycrypto
 RUN        zypper --non-interactive install python-Jinja2
 RUN        zypper --non-interactive install python-requests
 RUN        zypper --non-interactive install python-setuptools
+RUN        zypper --non-interactive install python-pycurl
+
 
 ADD        . /root/shinken-framework
 WORKDIR       /root/shinken-framework
