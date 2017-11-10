@@ -1,0 +1,13 @@
+FROM debian:9
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        apt-get update && apt-get install -y python
+RUN        apt-get install -y python-setuptools
+RUN         apt-get install -y python-pycurl
+RUN         apt-get install -y procps
+RUN         apt-get install -y python-cherrypy3
+
+ADD        . /root/shinken-framework
+
+WORKDIR       /root/shinken-framework
+ENTRYPOINT    test/test_one_linux_installation.sh

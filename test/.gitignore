@@ -2,3 +2,7 @@
 test_local.py
 etc/local/*
 etc/shinken_local.cfg
+# Local test suites
+etc/local
+etc/shinken_local.cfg
+test_local.py

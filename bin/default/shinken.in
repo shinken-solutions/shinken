@@ -132,3 +132,4 @@ NICENESS=5
 #SHINKENUSER=shinken
 #SHINKENGROUP=shinken
 #HOME=`grep ^$SHINKENUSER: /etc/passwd | cut -d: -f 6`
+

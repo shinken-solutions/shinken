@@ -17,7 +17,7 @@ This difference is important for the team, a framework does not have the same us
 The main idea when developing Shinken is the flexibility which is our definition of framework.  Nevertheless, Shinken was first made differently and we try to keep all the good things that made it a monitoring solution:
    * Easy to install: install is generally done with pip, but some packages are available (deb / rpm) and we are planning to provide nightly builds.
    * Easy for new users: once installed, Shinken provides a simple command line interface to install new modules and packs.
-   * Easy to migrate from Nagios: we want Nagios configuration and plugins to work in Shinken, so that it is a "in place" replacement.
+   * Easy to migrate from Nagios: we want Nagios configuration and plugins to work in Shinken, so that it is an "in place" replacement.
      Plugins provide great flexibility and are a big legacy codebase to use. It would be a shame not to use all this community work.
    * Multi-platform:  Python is available for many Operating Systems.  We try to write generic code to keep this possible.
    * Utf8 compliant:  Python is here to do that.  Shinken is currently compatible with Python 2.6-2.7 version, but Python 3.X is even more character encoding friendly.
@@ -36,7 +36,7 @@ Shinken has a lot of featuress, we started to list some of them in the last para
   * Role separated daemons:  we want a daemon to do one thing, and one thing well.  There are 6 of them but one is not compulsory.
   * Great flexibility:  you didn't get that already?  Shinken modules allow it to talk to almost everything you can imagin.
 
-  Those to points involve all the following:
+  Those two points involve all the following:
 
   * Data export to databases:
 
@@ -52,7 +52,7 @@ Shinken has a lot of featuress, we started to list some of them in the last para
 
   * Integration with web user interfaces:
 
-      * WebUI (Shinken own User Interface: https://github.com/shinken-monitoring/mod-webui/wiki)
+      * WebUI (Shinken's own User Interface: https://github.com/shinken-monitoring/mod-webui/wiki)
       * Thruk
       * Adagios
       * Multisite
@@ -93,7 +93,7 @@ Shinken has a lot of featuress, we started to list some of them in the last para
   * Business impacts:  Shinken can differentiate impact of a critical alert on a toaster versus the web store.
   * Efficient correlation between parent-child relationship and business process rules.
   * High availability:  daemons can have spare ones.
-  * Business rules:  For a higher level of monitoring, Shinken can notify you only if 3 out 5 of your server are down
+  * Business rules:  For a higher level of monitoring, Shinken can notify you only if 3 out 5 of your servers are down
   * Very open-minded team:  help and suggestions are always welcome.
 
 

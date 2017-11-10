@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright (C) 2009-2014:
 #    Gabes Jean, naparuba@gmail.com
@@ -68,8 +68,8 @@ test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
 test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
-export LANG=en_US.UTF8
-export LC_ALL=en_US.UTF8
+export LANG=en_US.UTF8    2>/dev/null
+export LC_ALL=en_US.UTF8  2>/dev/null
 export PYTHONIOENCODING=utf8
 export PYTHONUNBUFFERED="0"
 export TZ=:/etc/localtime
@@ -92,12 +92,17 @@ pythonver() {
     done
     if [ -z "$LASTFOUND" ]
     then
-        # Finaly try to find a default python
+# Finaly try to find a default python
         which python > /dev/null 2>&1
         if [ $? -ne 0 ]
         then
-            echo "No python interpreter found!"
-            exit 2
+            # Beware: maybe it's because which is not exiting itself! (like in docker centos images)
+            if [ -f "/usr/bin/python" ]; then
+                LASTFOUND="/usr/bin/python"
+            else
+                echo "No python interpreter found!"
+                exit 2
+            fi
         else
             echo "python found"
             LASTFOUND=$(which python)
@@ -190,15 +195,61 @@ cd $VAR
 #set -xv
 
 
-echo_success() {
-   log_end_msg 0 $*
+
+# Have a special started output to show that we did launch but it's not currently finished yet
+echo_started() {
+  RES_COL=60
+  MOVE_TO_COL="echo -en \\033[${RES_COL}G"
+  SETCOLOR_SUCCESS="echo -en \\033[32m"
+  SETCOLOR_NORMAL="echo -en \\033[0;39m"
+  $MOVE_TO_COL
+  echo -n "["
+  $SETCOLOR_SUCCESS
+  echo -n $"√ OK"
+  $SETCOLOR_NORMAL
+  echo -n "]"
+  printf "\n"
+  return 0
 }
 
-echo_failure() {
-    log_end_msg 1 $*
+
+# Have a special started output to show that we did launch but it's not currently finished yet
+echo_already_started() {
+  RES_COL=60
+  MOVE_TO_COL="echo -en \\033[${RES_COL}G"
+  SETCOLOR_WARNING="echo -en \\033[33m"
+  SETCOLOR_NORMAL="echo -en \\033[0;39m"
+  $MOVE_TO_COL
+  echo -n "["
+  $SETCOLOR_WARNING
+  echo -n $"‼ WARNING: Already running"
+  $SETCOLOR_NORMAL
+  echo -n "]"
+  printf "\n"
+  return 0
 }
 
-#log_end_msg
+# Have a special started output to show that we did launch but it's not currently finished yet
+echo_failed() {
+  error_msg="$1"
+  RES_COL=60
+  MOVE_TO_COL="echo -en \\033[${RES_COL}G"
+  SETCOLOR_ERROR="echo -en \\033[31m"
+  SETCOLOR_NORMAL="echo -en \\033[0;39m"
+  $MOVE_TO_COL
+  echo -n "["
+  $SETCOLOR_ERROR
+  echo -n $"Х ERROR"
+  $SETCOLOR_NORMAL
+  echo -n "]"
+  echo ""
+  $SETCOLOR_ERROR
+  echo $error_msg
+  $SETCOLOR_NORMAL
+  printf "\n"
+  return 0
+}
+
 
 
 # Load the VERBOSE setting and other rcS variables
@@ -272,7 +323,7 @@ do_status() {
     ps -p "$pid" >/dev/null 2>&1
     rc=$?
     if [ $rc != 0 ]; then
-        log_failure_msg  "$mod NOT RUNNING (process $pid doesn't exist?)"
+        echo_failed  "$mod NOT RUNNING (process $pid doesn't exist?)"
         return 1
     fi
     echo "$mod RUNNING (pid $pid)"
@@ -286,7 +337,7 @@ do_start() {
     mod=$1
     modfilepath="$BIN/shinken-${mod}"
     [ -e "$modfilepath" ] || {
-        log_failure_msg "FAILED: did not find $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
+        echo_failed "FAILED: did not find $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
         return 5
     }
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
@@ -402,7 +453,7 @@ do_start_() {
     status=$(do_status "$1")
     rc=$?
     if [ $rc -eq 0 ]; then
-        log_warning_msg "Already running"
+        echo_already_started
         return
     fi
     if test "$1" = "arbiter"
@@ -420,10 +471,9 @@ do_start_() {
     startoutput=$(do_start "$1")
     rc=$?
     if [ $rc -eq 0 ]; then
-        echo_success
+        echo_started
     else
-        echo "$startoutput"
-        echo_failure
+        echo_failed "$startoutput"
     fi
     return $rc
 }
@@ -440,10 +490,9 @@ do_stop_() {
         [ $rc -ne 0 ] && failuremsg="Couldn't stop $1: $stopoutput"
     fi
     if [ $rc -ne 0 ]; then
-        log_failure_msg "$failuremsg"
-        echo_failure
+        echo_failed "$failuremsg"
     else
-        echo_success
+        echo_started
     fi
     return $rc
 }
@@ -462,10 +511,9 @@ do_restart_() {
     startoutput=$(do_start "$mod")
     rc=$?
     if [ $rc -eq 0 ]; then
-        echo_success
+        echo_started
     else
-        log_failure_msg "$startoutput"
-        echo_failure
+        echo_failed "$startoutput"
     fi
     return $rc
 }
@@ -488,10 +536,9 @@ do_reload_() {
     startoutput=$(do_start "$mod")
     rc=$?
     if [ $rc -eq 0 ]; then
-        echo_success
+        echo_started
     else
-        log_failure_msg "$startoutput"
-        echo_failure
+        echo_failed "$startoutput"
     fi
     return $rc
 }
@@ -502,9 +549,9 @@ do_status_() {
     do_status "$1"
     rc=$?
     if [ $rc -eq 0 ]; then
-        echo_success
+        echo_started
     else
-        echo_failure
+        echo_failed
     fi
 
 }
@@ -519,12 +566,11 @@ do_check_() {
     check_res_file="/tmp/shinken_checkconfig_result"
 
     if [ $rc -eq 0 ]; then
-        echo_success
+        echo_started
     else
         output=$(echo "$output" | tail -1)
         log_warning_msg "full result is in ${check_res_file}"
-        log_failure_msg "ConfigCheck failed: $output"
-        echo_failure
+        echo_failed "ConfigCheck failed: $output"
     fi
     return $rc
 }
