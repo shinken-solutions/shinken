@@ -100,7 +100,7 @@ class __Action(object):
         # instance).
         local_env = os.environ.copy()
         for p in self.env:
-            local_env[p] = self.env[p].encode('utf8')
+            local_env[p] = self.env[p].encode('utf8').rstrip('\x00')
         return local_env
 
 
