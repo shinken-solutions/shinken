@@ -1,4 +1,4 @@
-CherryPy
+CherryPy>=3
 pycurl
 importlib
 pbr
