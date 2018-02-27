@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:17.04
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 # Fev 2018: this version is moved to old-releases

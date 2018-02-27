@@ -1,4 +1,4 @@
-FROM ubuntu:17.04
+FROM ubuntu:17.10
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 RUN        apt-get update && apt-get install -y python
