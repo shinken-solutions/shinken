@@ -1,14 +1,14 @@
 FROM ubuntu:16.10
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN        apt-get update && apt-get install -y python
-RUN        apt-get install -y python-setuptools
-RUN         apt-get install -y python-pycurl
-RUN         apt-get install -y procps
-RUN         apt-get install -y python-cherrypy3
+#RUN        apt-get update && apt-get install -y python
+#RUN        apt-get install -y python-setuptools
+#RUN         apt-get install -y python-pycurl
+#RUN         apt-get install -y procps
+#RUN         apt-get install -y python-cherrypy3
 
 
 ADD        . /root/shinken-framework
 
-ENTRYPOINT    test/test_one_linux_installation.sh
+ENTRYPOINT    echo "Ubuntu 16.10 is failing and cannot install anymore due to repository errors. (26 fev 2018)"
 WORKDIR       /root/shinken-framework
