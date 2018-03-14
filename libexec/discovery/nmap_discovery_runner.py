@@ -358,7 +358,8 @@ for h in hosts:
         cls = ios.findall('osclass')
 	# if no osclass found, try bellow the osmatch element (nmap recent versions)
 	if len(cls) == 0:
-		cls = ios.find('osmatch').findall('osclass')
+		_os = ios.find('osmatch')
+		cls = _os.findall('osclass') if _os else []
 
         for c in cls:
             #print "Class", c.__dict__
