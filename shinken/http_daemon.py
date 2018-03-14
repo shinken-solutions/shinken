@@ -299,6 +299,7 @@ class HTTPDaemon(object):
                 self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
                                            ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
             else:
+                logger.warning('Loading the old WSGI Backend. CherryPy >= 3 is recommanded instead')
                 self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
                                           ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
 
