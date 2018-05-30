@@ -169,7 +169,8 @@ class IForArbiter(Interface):
 class Arbiter(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug,
-                 debug_file, profile=None, analyse=None, migrate=None, arb_name=''):
+                 debug_file, profile=None, analyse=None, migrate=None, arb_name='',
+                 dump_config_file=None):
 
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace,
                                       debug, debug_file)
@@ -180,6 +181,7 @@ class Arbiter(Daemon):
         self.analyse = analyse
         self.migrate = migrate
         self.arb_name = arb_name
+        self.dump_config_file = dump_config_file
 
         self.broks = []
         self.is_master = False
@@ -458,6 +460,9 @@ class Arbiter(Daemon):
         # Clean objects of temporary/unnecessary attributes for live work:
         self.conf.clean()
 
+        if self.dump_config_file:
+            self.dump_config()
+
         # Exit if we are just here for config checking
         if self.verify_only:
             sys.exit(0)
@@ -561,6 +566,13 @@ class Arbiter(Daemon):
         logger.info("Saving stats data to a file %s", s)
         f.write(s)
         f.close()
+
+
+    def dump_config(self):
+        logger.info("Dumping configuration to %s", self.dump_config_file)
+        with open(self.dump_config_file, "w") as f:
+            self.conf.dump(f)
+            f.close()
 
 
     def go_migrate(self):
