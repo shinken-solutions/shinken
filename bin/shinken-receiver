@@ -76,8 +76,8 @@ def main():
                       dest="do_replace",
                       help="Replace previous running receiver")
     parser.add_option('--debugfile', dest='debug_file',
-                      help=("Debug file. Default: not used "
-                            "(why debug a bug free program? :) )"))
+                      help=("Enable debug log and save it to a file. "
+                            "Default: not used"))
     opts, args = parser.parse_args()
     if args:
         parser.error("Does not accept any argument.")

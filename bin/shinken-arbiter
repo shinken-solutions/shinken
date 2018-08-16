@@ -88,8 +88,8 @@ def main():
                       dest="do_replace",
                       help="Replace previous running arbiter")
     parser.add_option('--debugfile', dest='debug_file',
-                      help=("Debug file. Default: not used "
-                            "(why debug a bug free program? :) )"))
+                      help=("Enable debug log and save it to a file. "
+                            "Default: not used"))
     parser.add_option("-v", "--verify-config",
                       dest="verify_only", action="store_true",
                       help="Verify config file and exit")
