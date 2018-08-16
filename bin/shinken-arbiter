@@ -95,7 +95,7 @@ def main():
                       help="Verify config file and exit")
     parser.add_option("-p", "--profile",
                       dest="profile",
-                      help="Dump a profile file. Need the python cProfile librairy")
+                      help="Dump a profile file. Need the python cProfile library")
     parser.add_option("-a", "--analyse",
                       dest="analyse",
                       help="Dump an analyse statistics file, for support")
