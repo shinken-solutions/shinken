@@ -970,14 +970,14 @@ class Scheduler(object):
     # We give them, and clean them!
     def get_broks(self, bname, broks_batch=0):
         res = []
-        if broks_batch > 0:
+        if broks_batch == 0:
             count = len(self.broks)
         else:
             count = min(broks_batch, len(self.broks))
         res.extend(self.broks[:count])
         del self.broks[:count]
         # If we are here, we are sure the broker entry exists
-        if broks_batch > 0:
+        if broks_batch == 0:
             count = len(self.brokers[bname]['broks'])
         else:
             count = min(broks_batch, len(self.brokers[bname]['broks']))
