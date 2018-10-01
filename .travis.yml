@@ -27,6 +27,7 @@ env:
   - TEST_SUITE=FEDORA
   - TEST_SUITE=OTHER
   - TEST_SUITE=UBUNTU
+  - TEST_SUITE=CODE
 
 script:
   - cd test

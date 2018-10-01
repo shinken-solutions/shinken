@@ -29,12 +29,20 @@ rm -f coverage.xml
 rm -f .coverage*
 
 
+# Get test in place if send from dev tools
+chmod a+x *sh *py libexec/* ../libexec/*
+dos2unix libexec/* ../libexec/*
+rm -f var/lib/shinken/modules
+ln -s ../../../modules var/lib/shinken/modules
+
+# specific test that must have symlink
+rm -f etc/conf_in_symlinks/links/link
+ln -s ../dest etc/conf_in_symlinks/links/link
+
 function launch_and_assert {
     SCRIPT=$1
-    # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
-    # so we must combine them in the end
-    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken ./$SCRIPT > /tmp/test.running 2>&1)
     printf " - %-60s" $SCRIPT
+    output=$(python ./$SCRIPT > /tmp/test.running 2>&1)
     if [ $? != 0 ] ; then
         printf "\033[31m[ FAILED ]\033[0m\n"
 	    echo "Error: the test $SCRIPT failed:"
@@ -62,7 +70,6 @@ if [ $? != 0 ] ; then
    printf "PEP8 compliant: \033[31m[ FAILED ]\033[0m\n"
    exit 1
 fi
-
 
 
 
