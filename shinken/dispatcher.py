@@ -411,7 +411,7 @@ class Dispatcher:
                             'accept_passive_unknown_check_results':
                                 sched.accept_passive_unknown_check_results,
                             'harakiri_threshold': sched.harakiri_threshold,
-                            # shiken.io part
+                            # shinken.io part
                             'api_key': self.conf.api_key,
                             'secret': self.conf.secret,
                             'http_proxy': self.conf.http_proxy,
