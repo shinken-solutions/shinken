@@ -1439,7 +1439,7 @@ class Items(object):
             try:
                 hnames_list.extend(
                     self.get_hosts_from_hostgroups(hgnames, hostgroups))
-            except ValueError, e:
+            except ValueError as e:
                 item.configuration_errors.append(str(e))
 
         # Expands host names

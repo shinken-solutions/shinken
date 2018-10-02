@@ -43,7 +43,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -53,7 +53,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -69,7 +69,7 @@ class TestAcks(ShinkenTest):
         # service reaches soft;1
         # there must not be any notification
         #--------------------------------------------------------------
-        print "- 1 x BAD get soft -------------------------------------"
+        print("- 1 x BAD get soft -------------------------------------")
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -95,7 +95,7 @@ class TestAcks(ShinkenTest):
         # a notification must have been created but blocked
         # log for alert hard and log for eventhandler
         #--------------------------------------------------------------
-        print "- 1 x BAD get hard -------------------------------------"
+        print("- 1 x BAD get hard -------------------------------------")
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
         self.assertEqual(2, self.count_logs())
         self.assertEqual(2, self.count_actions())
@@ -108,7 +108,7 @@ class TestAcks(ShinkenTest):
         # the acknowledgement must have been removed automatically
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(2, self.count_logs())  # alert, eventhndlr
@@ -131,7 +131,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -141,7 +141,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -152,7 +152,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()
@@ -211,12 +211,12 @@ class TestAcks(ShinkenTest):
         # received a critical/warning notification
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notif
         self.show_actions()
-        print self.count_actions()
+        print(self.count_actions())
         self.assertEqual(2, self.count_actions())  # evt, recovery notif zombie
         self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
@@ -240,7 +240,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -250,7 +250,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -261,7 +261,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()
@@ -309,7 +309,7 @@ class TestAcks(ShinkenTest):
         # the acknowledgement must have been removed automatically
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notification
@@ -338,7 +338,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -348,7 +348,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -359,7 +359,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()
@@ -406,7 +406,7 @@ class TestAcks(ShinkenTest):
         # the acknowledgement must have been removed automatically
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notification
@@ -433,7 +433,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, host.current_notification_number)
 
@@ -443,7 +443,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 3 x DOWN get hard -------------------------------------"
+        print("- 3 x DOWN get hard -------------------------------------")
         self.scheduler_loop(3, [[host, 2, 'DOWN']])
         self.assertEqual(1, host.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -459,7 +459,7 @@ class TestAcks(ShinkenTest):
         # service reaches soft;1
         # there must not be any notification
         #--------------------------------------------------------------
-        print "- 1 x BAD get soft -------------------------------------"
+        print("- 1 x BAD get soft -------------------------------------")
         self.scheduler_loop(1, [[host, 2, 'DOWN']])
         self.assertEqual(0, host.current_notification_number)
 
@@ -485,7 +485,7 @@ class TestAcks(ShinkenTest):
         # eventhandler hard3 (eventhandler soft2 is already zombied when
         # the workerloop is finished
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[host, 2, 'DOWN']])
         self.show_logs()
         self.show_actions()
@@ -502,13 +502,13 @@ class TestAcks(ShinkenTest):
         # received a critical/warning notification
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(2, self.count_logs())  # alert, eventhndlr, notification
         self.show_actions()
 
-        print self.count_actions()
+        print(self.count_actions())
         self.assertEqual(1, self.count_actions())  # evt, no more notif
         self.assertFalse(host.problem_has_been_acknowledged)
         self.assertEqual(0, host.current_notification_number)
@@ -529,7 +529,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, host.current_notification_number)
 
@@ -539,7 +539,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(3, [[host, 2, 'DOWN']])
         self.assertEqual(1, host.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -550,7 +550,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[host, 2, 'DOWN']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()
@@ -604,11 +604,11 @@ class TestAcks(ShinkenTest):
         # the acknowledgement must have been removed automatically
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'GOOD']])
-        print "- 1 x OK recover"
+        print("- 1 x OK recover")
         self.show_logs()
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notification
-        print self.count_actions()
+        print(self.count_actions())
         self.show_actions()
         self.assertEqual(2, self.count_actions())  # evt,  recovery notif zombie
         self.assertFalse(host.problem_has_been_acknowledged)
@@ -637,7 +637,7 @@ class TestAcks(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -647,7 +647,7 @@ class TestAcks(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -658,7 +658,7 @@ class TestAcks(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()
@@ -693,7 +693,7 @@ class TestAcks(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         self.assertEqual(3, len(svc.comments))
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
         self.show_and_clear_logs()
         self.show_actions()

@@ -228,7 +228,6 @@ class ShinkenTest(unittest.TestCase):
         self.conf.apply_inheritance()
         #import pdb;pdb.set_trace()
         self.conf.explode()
-        #print "Aconf.services has %d elements" % len(self.conf.services)
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
@@ -242,7 +241,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
-            print "The conf is not correct, I stop here"
+            print("The conf is not correct, I stop here")
             self.conf.dump()
             return
         self.conf.clean()
@@ -280,7 +279,6 @@ class ShinkenTest(unittest.TestCase):
             self.sched.run_external_command(b.cmd_line)
 
     def fake_check(self, ref, exit_status, output="OK"):
-        #print "fake", ref
         now = time.time()
         ref.schedule(force=True)
         # now checks are schedule and we get them in
@@ -316,7 +314,7 @@ class ShinkenTest(unittest.TestCase):
             obj.checks_in_progress = []
         for loop in range(1, count + 1):
             if verbose is True:
-                print "processing check", loop
+                print("processing check %s" % loop)
             for ref in reflist:
                 (obj, exit_status, output) = ref
                 obj.update_in_checking()
@@ -342,12 +340,8 @@ class ShinkenTest(unittest.TestCase):
         self.sched.delete_zombie_actions()
         checks = self.sched.get_to_run_checks(True, False, worker_name='tester')
         actions = self.sched.get_to_run_checks(False, True, worker_name='tester')
-        #print "------------ worker loop checks ----------------"
-        #print checks
-        #print "------------ worker loop actions ----------------"
         if verbose is True:
             self.show_actions()
-        #print "------------ worker loop new ----------------"
         for a in actions:
             a.status = 'inpoller'
             a.check_time = time.time()
@@ -355,11 +349,10 @@ class ShinkenTest(unittest.TestCase):
             self.sched.put_results(a)
         if verbose is True:
             self.show_actions()
-        #print "------------ worker loop end ----------------"
 
 
     def show_logs(self):
-        print "--- logs <<<----------------------------------"
+        print("--- logs <<<----------------------------------")
         if hasattr(self, "sched"):
             broks = self.sched.broks
         else:
@@ -369,11 +362,11 @@ class ShinkenTest(unittest.TestCase):
                 brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
 
-        print "--- logs >>>----------------------------------"
+        print("--- logs >>>----------------------------------")
 
 
     def show_actions(self):
-        print "--- actions <<<----------------------------------"
+        print("--- actions <<<----------------------------------")
         if hasattr(self, "sched"):
             actions = self.sched.actions
         else:
@@ -384,10 +377,10 @@ class ShinkenTest(unittest.TestCase):
                     ref = "host: %s" % a.ref.get_name()
                 else:
                     ref = "host: %s svc: %s" % (a.ref.host.get_name(), a.ref.get_name())
-                print "NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status)
+                print("NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status))
             elif a.is_a == 'eventhandler':
-                print "EVENTHANDLER:", a
-        print "--- actions >>>----------------------------------"
+                print("EVENTHANDLER: %s" % a)
+        print("--- actions >>>----------------------------------")
 
 
     def show_and_clear_logs(self):
@@ -446,9 +439,9 @@ class ShinkenTest(unittest.TestCase):
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
-                print "%s (%s): %s" % (lognum, brok.id, brok.data['log'])
+                print("%s (%s): %s" % (lognum, brok.id, brok.data['log']))
                 if index == lognum:
-                    print brok.data['log']
+                    print(brok.data['log'])
                     if re.search(regex, brok.data['log']):
                         return
                 lognum += 1
@@ -501,9 +494,9 @@ class ShinkenTest(unittest.TestCase):
         return res
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def xtest_conf_is_correct(self):
         self.print_header()

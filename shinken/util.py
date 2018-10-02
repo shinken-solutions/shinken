@@ -46,7 +46,7 @@ from shinken.log import logger
 try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
-except Exception, exp:
+except Exception as exp:
     logger.error('Encoding detection error= %s', exp)
     safe_stdout = False
 
@@ -79,7 +79,7 @@ def safe_print(*args):
         else:
             l.append(unicode(e))
     # Ok, now print it :)
-    print u' '.join(l)
+    print(u' '.join(l))
 
 
 def split_semicolon(line, maxsplit=None):
@@ -133,7 +133,7 @@ def jsonify_r(obj):
         try:
             json.dumps(obj)
             return obj
-        except Exception, exp:
+        except Exception as exp:
             return None
     properties = cls.properties.keys()
     if hasattr(cls, 'running_properties'):
@@ -150,7 +150,7 @@ def jsonify_r(obj):
                 v = sorted(v)
             json.dumps(v)
             res[prop] = v
-        except Exception, exp:
+        except Exception as exp:
             if isinstance(v, list):
                 lst = []
                 for _t in v:
