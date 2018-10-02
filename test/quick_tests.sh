@@ -30,10 +30,12 @@ rm -f .coverage*
 
 
 # Get test in place if send from dev tools
-chmod a+x *sh *py libexec/* ../libexec/*
-dos2unix libexec/* ../libexec/*
+chmod a+x *sh *py libexec/* ../libexec/* ../bin/*
+dos2unix libexec/* ../libexec/* ../bin/*
 rm -f var/lib/shinken/modules
-ln -s ../../../modules var/lib/shinken/modules
+ln -sf ../../../../modules var/lib/shinken/modules
+ln -sf ./shinken-arbiter ../bin/shinken-arbiter.py
+ln -sf ./shinken-scheduler ../bin/shinken-scheduler.py
 
 # specific test that must have symlink
 rm -f etc/conf_in_symlinks/links/link
