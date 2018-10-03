@@ -30,9 +30,10 @@ scheduling/consume check smart things :)
 
 import time
 import itertools
+import uuid
 
-from item import Items
-from schedulingitem import SchedulingItem
+from .item import Items
+from .schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
@@ -44,7 +45,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
-import uuid
+
 
 class Host(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
@@ -265,7 +266,7 @@ class Host(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -931,7 +932,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         incl = True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid include expression: %s: %s" % (d, e))
             return not incl
@@ -941,7 +942,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         return True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid exclude expression: %s: %s" % (d, e))
         return False
@@ -1565,8 +1566,7 @@ class Hosts(Items):
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
-                print cw
-
+                
 
     # Create dependencies:
     # Dependencies at the host level: host parent

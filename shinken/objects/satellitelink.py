@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,8 +24,7 @@
 
 import time
 
-import cPickle
-
+from shinken.imports import cpickle
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
@@ -125,9 +123,8 @@ class SatelliteLink(Item):
         try:
             self.con.get('ping')
             self.con.post('put_conf', {'conf': conf}, wait='long')
-            print "PUT CONF SUCESS", self.get_name()
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
             return False
@@ -230,7 +227,7 @@ class SatelliteLink(Item):
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -240,7 +237,7 @@ class SatelliteLink(Item):
         try:
             r = self.con.get('wait_new_conf')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -261,11 +258,10 @@ class SatelliteLink(Item):
                 r = self.con.get('have_conf')
             else:
                 r = self.con.get('have_conf', {'magic_hash': magic_hash})
-            print "have_conf RAW CALL", r, type(r)
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -285,7 +281,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -301,7 +297,7 @@ class SatelliteLink(Item):
         try:
             self.con.get('remove_from_conf', {'sched_id': sched_id})
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -317,12 +313,10 @@ class SatelliteLink(Item):
 
         try:
             tab = self.con.get('what_i_managed')
-            print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
+            print("[%s]What i managed raw value is %s" % (self.get_name(), tab))
 
             # Protect against bad return
             if not isinstance(tab, dict):
-                print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
-                      self.get_name(), tab
                 self.con = None
                 self.managed_confs = {}
                 return
@@ -333,17 +327,14 @@ class SatelliteLink(Item):
                 try:
                     tab_cleaned[int(k)] = v
                 except ValueError:
-                    print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
-                          self.get_name(), tab
+                    print("[%s]What i managed: Got exception: bad what_i_managed returns" %
+                          self.get_name(), tab)
             # We can update our list now
             self.managed_confs = tab_cleaned
-        except HTTPExceptions, exp:
-            print "EXCEPTION INwhat_i_managed", str(exp)
+        except HTTPExceptions as exp:
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
             self.con = None
-            print "[%s]What i managed: Got exception: %s %s %s" % \
-                  (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
 
@@ -369,7 +360,7 @@ class SatelliteLink(Item):
             self.con.get('ping')
             self.con.post('push_broks', {'broks': broks}, wait='long')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions:
             self.con = None
             return False
 
@@ -385,13 +376,13 @@ class SatelliteLink(Item):
         try:
             self.con.get('ping')
             tab = self.con.get('get_external_commands', wait='long')
-            tab = cPickle.loads(str(tab))
+            tab = cpickle.loads(str(tab))
             # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None
                 return []
             return tab
-        except HTTPExceptions, exp:
+        except HTTPExceptions:
             self.con = None
             return []
         except AttributeError:

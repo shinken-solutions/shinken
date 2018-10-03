@@ -446,9 +446,9 @@ class ExternalCommandManager:
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
                 try:
-                    os.mkfifo(self.pipe_path, 0660)
+                    os.mkfifo(self.pipe_path, 660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError, exp:
+                except OSError as exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
@@ -481,7 +481,7 @@ class ExternalCommandManager:
         # Maybe the command is invalid. Bailout
         try:
             command = excmd.cmd_line
-        except AttributeError, exp:
+        except AttributeError as exp:
             logger.debug("resolve_command:: error with command %s: %s", excmd, exp)
             return
 
@@ -2042,7 +2042,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(FIFO_PATH):
         os.umask(0)
-        os.mkfifo(FIFO_PATH, 0660)
+        os.mkfifo(FIFO_PATH, 660)
         my_fifo = open(FIFO_PATH, 'w+')
         logger.debug("my_fifo: %s", my_fifo)
 

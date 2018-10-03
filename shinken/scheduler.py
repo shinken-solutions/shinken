@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,13 +24,12 @@
 
 import time
 import os
-import cStringIO
+from shinken.imports import StringIO as cStringIO
 import tempfile
 import traceback
-import cPickle
+from shinken.imports import cpickle as cPickle
 
 import threading
-from Queue import Empty
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
@@ -252,7 +250,7 @@ class Scheduler(object):
                 s = 'BROK: %s:%s\n' % (b.id, b.type)
                 f.write(s)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
 
@@ -265,7 +263,7 @@ class Scheduler(object):
             f.write('Scheduler config DUMP at %d\n' % time.time())
             self.conf.dump(f)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
     # Load the external command
@@ -388,7 +386,7 @@ class Scheduler(object):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("The instance %s raise an exception %s."
                                  "I disable it and set it to restart it later",
                                  inst.get_name(), str(exp))
@@ -714,10 +712,10 @@ class Scheduler(object):
                     logger.warning("The notification command '%s' raised an error "
                                    "(exit code=%d): '%s'", c.command, c.exit_status, c.output)
 
-            except KeyError, exp:  # bad number for notif, not that bad
+            except KeyError as exp:  # bad number for notif, not that bad
                 logger.warning('put_results:: get unknown notification : %s ', str(exp))
 
-            except AttributeError, exp:  # bad object, drop it
+            except AttributeError as exp:  # bad object, drop it
                 logger.warning('put_results:: get bad notification : %s ', str(exp))
         elif c.is_a == 'check':
             try:
@@ -728,7 +726,7 @@ class Scheduler(object):
                     c.exit_status = self.conf.timeout_exit_status
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-            except KeyError, exp:
+            except KeyError as exp:
                 pass
 
 
@@ -802,7 +800,7 @@ class Scheduler(object):
         try:
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -810,11 +808,11 @@ class Scheduler(object):
         try:
             # initial ping must be quick
             con.get('ping')
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
-        except KeyError, exp:
+        except KeyError as exp:
             logger.warning("The %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -837,11 +835,11 @@ class Scheduler(object):
                     logger.debug("Sending %s actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -864,11 +862,11 @@ class Scheduler(object):
                     logger.debug("Sending %d actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -899,7 +897,7 @@ class Scheduler(object):
                     # now go the cpickle pass, and catch possible errors from it
                     try:
                         results = cPickle.loads(results)
-                    except Exception, exp:
+                    except Exception as exp:
                         logger.error('Cannot load passive results from satellite %s : %s',
                                      p['name'], str(exp))
                         continue
@@ -911,11 +909,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
@@ -941,11 +939,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return

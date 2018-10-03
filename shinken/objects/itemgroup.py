@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -27,7 +26,7 @@
 
 # And itemgroup is like a item, but it's a group of items :)
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.brok import Brok
 from shinken.property import StringProp, ListProp, ToGuessProp

@@ -88,13 +88,12 @@
 import time
 import re
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.daterange import Daterange, CalendarDaterange
 from shinken.daterange import StandardDaterange, MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange, WeekDayDaterange
 from shinken.daterange import MonthDayDaterange
-from shinken.brok import Brok
 from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
 from shinken.log import logger, naglog_result
 
@@ -171,7 +170,6 @@ class Timeperiod(Item):
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                print prop, ":", v
                 r[prop] = v
         # Now the unresolved one. The only way to get ride of same key things is to put
         # directly the full value as the key
@@ -858,8 +856,8 @@ if __name__ == '__main__':
             'december 2 - may -15               00:00-24:00',
             ]
     for entry in test:
-        print "**********************"
-        print entry
+        print("**********************")
+        print(entry)
         t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, entry)
@@ -870,14 +868,14 @@ if __name__ == '__main__':
         # print "Is valid NOW?", t.is_time_valid(now)
         t_next = t.get_next_valid_time_from_t(now + 5 * 60)
         if t_next is not None:
-            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<=="
+            print("Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<==")
         else:
-            print "===> No future time!!!"
+            print("===> No future time!!!")
         # print "End date:", t.get_end_time()
         # print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
-        print str(t) + '\n\n'
+        print(str(t) + '\n\n')
 
-    print "*************************************************************"
+    print("*************************************************************")
     t3 = Timeperiod()
     t3.timeperiod_name = 't3'
     t3.resolve_daterange(t3.dateranges, 'day 1 - 10 10:30-15:00')
@@ -893,8 +891,8 @@ if __name__ == '__main__':
     t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
 
-    print "Mon T", str(t) + '\n\n'
+    print("Mon T", str(t) + '\n\n')
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
-    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<=="
-    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<=="
+    print("Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<==")
+    print("Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<==")

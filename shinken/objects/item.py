@@ -28,10 +28,9 @@
 """
 import time
 import itertools
-from shinken.util import safe_print
-
 from copy import copy
 
+from shinken.util import safe_print
 from shinken.commandcall import CommandCall
 from shinken.property import (StringProp, ListProp, BoolProp,
                               IntegerProp, ToGuessProp, PythonizeError)

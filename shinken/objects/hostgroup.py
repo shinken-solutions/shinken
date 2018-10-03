@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,8 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from itemgroup import Itemgroup, Itemgroups
-
+from .itemgroup import Itemgroup, Itemgroups
 from shinken.util import get_obj_name
 from shinken.property import StringProp, IntegerProp
 from shinken.log import logger

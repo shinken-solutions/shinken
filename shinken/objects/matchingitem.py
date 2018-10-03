@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -30,7 +29,7 @@
 
 import re
 
-from item import Item
+from .item import Item
 
 
 class MatchingItem(Item):
@@ -59,7 +58,6 @@ class MatchingItem(Item):
         values = value.split(',')
         for m in matchings:
             for v in values:
-                print "Try to match", m, v
                 # Maybe m is a list, if so should check one values
                 if isinstance(m, list):
                     for _m in m:

@@ -51,7 +51,7 @@ class Graph:
         try:
             self.nodes[from_node].append(to_node)
         # If from_node does not exist, add it with its son
-        except KeyError, exp:
+        except KeyError as exp:
             self.nodes[from_node] = [to_node]
 
     # Return all nodes that are in a loop. So if return [], no loop

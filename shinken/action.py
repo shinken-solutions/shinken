@@ -297,7 +297,7 @@ if os.name != 'nt':
             else:
                 try:
                     cmd = shlex.split(self.command.encode('utf8', 'ignore'))
-                except Exception, exp:
+                except Exception as exp:
                     self.output = 'Not a valid shell command: ' + exp.__str__()
                     self.exit_status = 3
                     self.status = 'done'
@@ -316,7 +316,7 @@ if os.name != 'nt':
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
-            except OSError, exp:
+            except OSError as exp:
                 logger.error("Fail launching command: %s %s %s",
                              self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
@@ -362,7 +362,7 @@ else:
             else:
                 try:
                     cmd = shlex.split(self.command.encode('utf8', 'ignore'))
-                except Exception, exp:
+                except Exception as exp:
                     self.output = 'Not a valid shell command: ' + exp.__str__()
                     self.exit_status = 3
                     self.status = 'done'
@@ -373,7 +373,7 @@ else:
                 self.process = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     env=self.local_env, shell=True)
-            except WindowsError, exp:
+            except WindowsError as exp:
                 logger.info("We kill the process: %s %s", exp, self.command)
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time

@@ -27,7 +27,6 @@ from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
 from .itemgroup import Itemgroup, Itemgroups
-from .service import Service
 
 
 class Servicegroup(Itemgroup):

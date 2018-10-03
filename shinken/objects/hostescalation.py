@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,8 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
-from escalation import Escalation
+from .item import Item, Items
+from .escalation import Escalation
 
 from shinken.property import IntegerProp, StringProp, ListProp
 

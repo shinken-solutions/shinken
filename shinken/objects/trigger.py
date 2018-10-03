@@ -66,12 +66,12 @@ class Trigger(Item):
             locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
-        try:
-            exec code in dict(locals())
-        except Exception as err:
-            set_value(self, "UNKNOWN: Trigger error: %s" % err, "", 3)
-            logger.error('%s Trigger %s failed: %s ; '
-                         '%s' % (self.host_name, myself.trigger_name, err, traceback.format_exc()))
+        #try:
+        #    exec code in dict(locals())
+        #except Exception as err:
+        #    set_value(self, "UNKNOWN: Trigger error: %s" % err, "", 3)
+        #    logger.error('%s Trigger %s failed: %s ; '
+        #                 '%s' % (self.host_name, myself.trigger_name, err, traceback.format_exc()))
 
 
     def __getstate__(self):
@@ -100,7 +100,7 @@ class Triggers(Items):
                         fd = open(p, 'rU')
                         buf = fd.read()
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open trigger file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue

@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -39,7 +38,7 @@ class declared(object):
     def __init__(self, f):
         self.f = f
         global functions
-        n = f.func_name
+        n = getattr(f, 'func_name', 'no name')
         # logger.debug("Initializing function %s %s" % (n, f))
         trigger_functions[n] = f
 

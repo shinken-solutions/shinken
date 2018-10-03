@@ -142,7 +142,7 @@ class Stats(object):
         try:
             self.statsd_addr = (socket.gethostbyname(self.statsd_host), self.statsd_port)
             self.statsd_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        except (socket.error, socket.gaierror), exp:
+        except (socket.error, socket.gaierror) as exp:
             logger.error('Cannot create statsd socket: %s' % exp)
             return
 
@@ -159,7 +159,7 @@ class Stats(object):
                         metric=name,
                         name=self.name,
                         service=self.type)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Failed to build metric name, check your "
                                  "statsd_pattern parameter: %s" % e)
             elif self.prefix:
@@ -289,9 +289,9 @@ class Stats(object):
                     try:
                         self.con.put('/api/v1/put/?api_key=%s' % (
                                      self.api_key), encrypted_text)
-                    except HTTPException, exp:
+                    except HTTPException as exp:
                         logger.error('Stats REAPER cannot put to the metric server %s' % exp)
-            except Exception, e:
+            except Exception as e:
                 logger.error("Reaper: %s", str(e))
                 logger.debug(traceback.format_exc())
             time.sleep(60)
@@ -316,7 +316,7 @@ class Stats(object):
                 for metric in metrics:
                     name, val, _type = metric
                     self.gauge(name, val, _type)
-            except Exception, e:
+            except Exception as e:
                 logger.error("Harvester: %s", str(e))
                 logger.debug(traceback.format_exc())
             time.sleep(self.statsd_interval)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -24,6 +23,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+
+from shinken.log import logger
 from shinken.util import filter_any, filter_none
 from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group,\
     filter_host_by_tag
@@ -340,7 +341,6 @@ class DependencyNodeFactory(object):
                 # that should not be good in fact !
                 if stacked_par == 1 and tmp != '':
                     # TODO : real error
-                    print "ERROR : bad expression near", tmp
                     continue
 
                 # If we are already in a par, add this (
@@ -354,7 +354,6 @@ class DependencyNodeFactory(object):
 
                 if stacked_par < 0:
                     # TODO : real error
-                    print "Error : bad expression near", tmp, "too much ')'"
                     continue
 
                 if stacked_par == 0:
@@ -386,7 +385,7 @@ class DependencyNodeFactory(object):
             elif c == '!':
                 tmp = tmp.strip()
                 if tmp and tmp[0] != '!':
-                    print "Error : bad expression near", tmp, "wrong position for '!'"
+                    logger.error("Error : bad expression near %s wrong position for '!'" % tmp)
                     continue
                 # Flags next node not state
                 son_is_not = True
@@ -533,7 +532,7 @@ class DependencyNodeFactory(object):
                 host_expr = elts[0]
                 filters.extend(self.get_host_filters(host_expr))
                 items = hosts.find_by_filter(filters)
-        except re.error, e:
+        except re.error as e:
             error = "Business rule uses invalid regex %s: %s" % (pattern, e)
         else:
             if not items:

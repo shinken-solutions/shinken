@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -27,9 +26,8 @@
 # The resultmodulation class is used for in scheduler modulation of results
 # like the return code or the output.
 
-import time
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.property import StringProp, IntegerProp
 

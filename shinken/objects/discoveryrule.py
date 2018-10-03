@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,10 +24,10 @@
 
 from copy import copy
 
-from item import Item, Items
+from .item import Item, Items
 from shinken.objects.matchingitem import MatchingItem
-from service import Service
-from host import Host
+from .service import Service
+from .host import Host
 from shinken.property import StringProp, ListProp, IntegerProp
 
 

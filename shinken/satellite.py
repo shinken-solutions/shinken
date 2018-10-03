@@ -43,17 +43,14 @@ try:
 except ImportError:
     is_android = False
 
-from Queue import Empty
-
 if not is_android:
     from multiprocessing import Queue, active_children, cpu_count
 else:
     from Queue import Queue
 
 import os
-import copy
 import time
-import cPickle
+from shinken.imports import cpickle as cPickle
 import traceback
 import zlib
 import base64
@@ -332,7 +329,7 @@ class Satellite(BaseSatellite):
             sch_con = sched['con'] = HTTPClient(
                 uri=uri, strong_ssl=sched['hard_ssl_name_check'],
                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
                            self.name, sname, str(exp))
             sched['con'] = None
@@ -343,7 +340,7 @@ class Satellite(BaseSatellite):
         try:
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
-        except (HTTPExceptions, cPickle.PicklingError, KeyError), exp:
+        except (HTTPExceptions, cPickle.PicklingError, KeyError) as exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
                            self.name, sname, str(exp))
             sched['con'] = None
@@ -432,13 +429,13 @@ class Satellite(BaseSatellite):
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results': ret})
                         # Not connected or sched is gone
-                except (HTTPExceptions, KeyError), exp:
+                except (HTTPExceptions, KeyError) as exp:
                     logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError, exp:  # the scheduler must  not be initialized
+                except AttributeError as exp:  # the scheduler must  not be initialized
                     logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                     raise
 
@@ -487,7 +484,7 @@ class Satellite(BaseSatellite):
                 q = self.manager.Queue()
         # If we got no /dev/shm on linux, we can got problem here.
         # Must raise with a good message
-        except OSError, exp:
+        except OSError as exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
                 logger.critical("Got an exception (%s). If you are under Linux, "
@@ -765,16 +762,16 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (HTTPExceptions, KeyError), exp:
+            except (HTTPExceptions, KeyError) as exp:
                 logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
-            except AttributeError, exp:
+            except AttributeError as exp:
                 logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
             # What the F**k? We do not know what happened,
             # log the error message if possible.
-            except Exception, exp:
+            except Exception as exp:
                 logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                 raise
         _type = self.__class__.my_type

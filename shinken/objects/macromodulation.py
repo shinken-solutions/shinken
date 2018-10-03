@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,7 +24,8 @@
 
 import time
 
-from item import Item, Items
+from .item import Item, Items
+
 from shinken.property import StringProp
 from shinken.util import to_name_if_possible
 from shinken.log import logger

@@ -26,8 +26,7 @@ import os
 import time
 import sys
 import traceback
-import cStringIO
-import imp
+from shinken.imports import StringIO as cStringIO
 
 
 from os.path import join, isdir, abspath, dirname
@@ -202,7 +201,7 @@ class ModulesManager(object):
                 inst.create_queues(self.manager)
 
             inst.init()
-        except Exception, e:
+        except Exception as e:
             logger.error("The instance %s raised an exception %s, I remove it!",
                          inst.get_name(), str(e))
             output = cStringIO.StringIO()
@@ -311,7 +310,7 @@ class ModulesManager(object):
                 queue_size = 0
                 try:
                     queue_size = inst.to_q.qsize()
-                except Exception, exp:
+                except Exception:
                     pass
                 if queue_size > self.max_queue_size:
                     logger.error("The external module %s got a too high brok queue size (%s > %s)!",

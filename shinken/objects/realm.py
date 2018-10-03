@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,8 +24,8 @@
 
 import copy
 
-from item import Item
-from itemgroup import Itemgroup, Itemgroups
+from .item import Item
+from .itemgroup import Itemgroup, Itemgroups
 from shinken.property import BoolProp, IntegerProp, StringProp, DictProp, ListProp
 from shinken.log import logger
 

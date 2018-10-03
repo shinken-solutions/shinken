@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -41,7 +40,7 @@ metric_pattern = \
 def guess_int_or_float(val):
     try:
         return to_best_int_float(val)
-    except Exception, exp:
+    except Exception:
         return None
 
 

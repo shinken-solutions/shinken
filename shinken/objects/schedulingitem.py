@@ -35,7 +35,7 @@ import random
 import time
 import traceback
 
-from item import Item
+from .item import Item
 
 from shinken.check import Check
 from shinken.notification import Notification
@@ -1676,7 +1676,7 @@ class SchedulingItem(Item):
                 self.create_business_rules(hosts, services, running=True)
                 state = self.business_rule.get_state()
                 c.output = self.get_business_rule_output()
-            except Exception, e:
+            except Exception as e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
                 logger.debug("[%s] Error while re-evaluating business rule:\n%s",
@@ -1728,7 +1728,7 @@ class SchedulingItem(Item):
         for t in self.triggers:
             try:
                 t.eval(self)
-            except Exception, exp:
+            except Exception as exp:
                 logger.error(
                     "We got an exception from a trigger on %s for %s",
                     self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())

@@ -22,8 +22,11 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import cPickle
-from cStringIO import StringIO
+try:
+    import cPickle as cpickle
+except ImportError:
+    import pickle as cpickle
+from .imports import StringIO
 
 
 
@@ -51,6 +54,6 @@ class SafeUnpickler(object):
 
     @classmethod
     def loads(cls, pickle_string):
-        pickle_obj = cPickle.Unpickler(StringIO(pickle_string))
+        pickle_obj = cpickle.Unpickler(StringIO(pickle_string))
         pickle_obj.find_global = cls.find_class
         return pickle_obj.load()

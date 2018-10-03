@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,13 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import os
 import re
-try:
-    import json
-except ImportError:
-    json = None
+import json
 
 from shinken.objects.item import Item, Items
 from shinken.property import StringProp
@@ -69,7 +64,7 @@ class Packs(Items):
                         fd = open(p, 'rU')
                         buf = fd.read()
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open pack file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
@@ -99,5 +94,5 @@ class Packs(Items):
                 p.path += '/'
             # Ok, add it
             self[p.id] = p
-        except ValueError, exp:
+        except ValueError as exp:
             logger.error("[Pack] error in loading pack file '%s': '%s'", name, exp)

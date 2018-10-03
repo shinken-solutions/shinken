@@ -36,39 +36,38 @@ import socket
 import itertools
 import time
 import random
-import cPickle
 import tempfile
-from StringIO import StringIO
 from multiprocessing import Process, Manager
 import json
 
-from item import Item
-from timeperiod import Timeperiod, Timeperiods
-from service import Service, Services
-from command import Command, Commands
-from resultmodulation import Resultmodulation, Resultmodulations
-from businessimpactmodulation import Businessimpactmodulation, Businessimpactmodulations
-from escalation import Escalation, Escalations
-from serviceescalation import Serviceescalation, Serviceescalations
-from hostescalation import Hostescalation, Hostescalations
-from host import Host, Hosts
-from hostgroup import Hostgroup, Hostgroups
-from realm import Realm, Realms
-from contact import Contact, Contacts
-from contactgroup import Contactgroup, Contactgroups
-from notificationway import NotificationWay, NotificationWays
-from checkmodulation import CheckModulation, CheckModulations
-from macromodulation import MacroModulation, MacroModulations
-from servicegroup import Servicegroup, Servicegroups
-from servicedependency import Servicedependency, Servicedependencies
-from hostdependency import Hostdependency, Hostdependencies
-from module import Module, Modules
-from discoveryrule import Discoveryrule, Discoveryrules
-from discoveryrun import Discoveryrun, Discoveryruns
-from hostextinfo import HostExtInfo, HostsExtInfo
-from serviceextinfo import ServiceExtInfo, ServicesExtInfo
-from trigger import Triggers
-from pack import Packs
+from shinken.imports import cpickle as cPickle, StringIO
+from .item import Item
+from .timeperiod import Timeperiod, Timeperiods
+from .service import Service, Services
+from .command import Command, Commands
+from .resultmodulation import Resultmodulation, Resultmodulations
+from .businessimpactmodulation import Businessimpactmodulation, Businessimpactmodulations
+from .escalation import Escalation, Escalations
+from .serviceescalation import Serviceescalation, Serviceescalations
+from .hostescalation import Hostescalation, Hostescalations
+from .host import Host, Hosts
+from .hostgroup import Hostgroup, Hostgroups
+from .realm import Realm, Realms
+from .contact import Contact, Contacts
+from .contactgroup import Contactgroup, Contactgroups
+from .notificationway import NotificationWay, NotificationWays
+from .checkmodulation import CheckModulation, CheckModulations
+from .macromodulation import MacroModulation, MacroModulations
+from .servicegroup import Servicegroup, Servicegroups
+from .servicedependency import Servicedependency, Servicedependencies
+from .hostdependency import Hostdependency, Hostdependencies
+from .module import Module, Modules
+from .discoveryrule import Discoveryrule, Discoveryrules
+from .discoveryrun import Discoveryrun, Discoveryruns
+from .hostextinfo import HostExtInfo, HostsExtInfo
+from .serviceextinfo import ServiceExtInfo, ServicesExtInfo
+from .trigger import Triggers
+from .pack import Packs
 from shinken.util import split_semicolon
 from shinken.objects.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
@@ -525,7 +524,7 @@ class Config(Item):
             UnusedProp(text=None),
 
         'modified_attributes':
-            IntegerProp(default=0L),
+            IntegerProp(default=0),
         # '$USERn$: {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
@@ -881,7 +880,7 @@ class Config(Item):
                 buf = fd.readlines()
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
-            except IOError, exp:
+            except IOError as exp:
                 logger.error("[config] cannot open config file '%s' for reading: %s", file, exp)
                 # The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
@@ -909,7 +908,7 @@ class Config(Item):
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open config file '%s' for reading: %s",
                                      cfg_file_name, exp)
                         # The configuration is invalid because we have a bad file!
@@ -943,7 +942,7 @@ class Config(Item):
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
-                                except IOError, exp:
+                                except IOError as exp:
                                     logger.error("Cannot open config file '%s' for reading: %s",
                                                  os.path.join(root, file), exp)
                                     # The configuration is invalid
@@ -2206,13 +2205,13 @@ class Config(Item):
             for s in no_spare_schedulers:
                 packindices[s.id] = packindex
                 packindex += 1
-                for i in xrange(0, s.weight):
+                for i in range(0, s.weight):
                     weight_list.append(s.id)
 
             rr = itertools.cycle(weight_list)
 
             # We must have nb_schedulers packs
-            for i in xrange(0, nb_schedulers):
+            for i in range(0, nb_schedulers):
                 packs[i] = []
 
             # Try to load the history association dict so we will try to
@@ -2288,7 +2287,7 @@ class Config(Item):
         # conf but without hosts and services (because they are dispatched between
         # theses configurations)
         self.confs = {}
-        for i in xrange(0, nb_parts):
+        for i in range(0, nb_parts):
             # print "Create Conf:", i, '/', nb_parts -1
             cur_conf = self.confs[i] = Config()
 
@@ -2471,7 +2470,7 @@ class Config(Item):
 # ...
 def lazy():
     # let's compute the "USER" properties and macros..
-    for n in xrange(1, 256):
+    for n in range(1, 256):
         n = str(n)
         Config.properties['$USER' + str(n) + '$'] = StringProp(default='')
         Config.macros['USER' + str(n)] = '$USER' + n + '$'

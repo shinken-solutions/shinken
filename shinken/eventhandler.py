@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -25,7 +24,7 @@
 
 import time
 
-from action import Action
+from .action import Action
 from shinken.property import IntegerProp, StringProp, FloatProp, BoolProp
 from shinken.autoslots import AutoSlots
 

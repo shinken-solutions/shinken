@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,7 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
+from shinken.imports import cpickle
+from shinken.imports import StringIO
 import zlib
 import json
 
@@ -31,7 +31,6 @@ import json
 import pycurl
 pycurl.global_init(pycurl.GLOBAL_ALL)
 import urllib
-from StringIO import StringIO
 
 from shinken.bin import VERSION
 from shinken.log import logger
@@ -127,7 +126,7 @@ class HTTPClient(object):
         c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
@@ -149,7 +148,7 @@ class HTTPClient(object):
         size = 0
         # Take args, pickle them and then compress the result
         for (k, v) in args.iteritems():
-            args[k] = zlib.compress(cPickle.dumps(v), 2)
+            args[k] = zlib.compress(cpickle.dumps(v), 2)
             size += len(args[k])
         # Ok go for it!
 
@@ -226,7 +225,7 @@ class HTTPClient(object):
         # c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             f.close()
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))

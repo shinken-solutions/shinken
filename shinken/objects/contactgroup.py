@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -28,7 +27,7 @@
 # Contactgroups are groups for contacts
 # They are just used for the config read and explode by elements
 
-from itemgroup import Itemgroup, Itemgroups
+from .itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import IntegerProp, StringProp
 from shinken.log import logger

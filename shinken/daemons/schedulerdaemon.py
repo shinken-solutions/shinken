@@ -26,10 +26,9 @@ import os
 import signal
 import time
 import traceback
-import cPickle
+from shinken.imports import cpickle as cPickle
 import zlib
 import base64
-import sys
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -575,6 +574,6 @@ class Shinken(BaseSatellite):
             self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s", self.uri)
             self.do_mainloop()
-        except Exception, exp:
+        except Exception:
             self.print_unrecoverable(traceback.format_exc())
             raise

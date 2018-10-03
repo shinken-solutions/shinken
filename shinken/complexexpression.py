@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from shinken.log import logger
 from shinken.util import strip_and_uniq
 
 
@@ -197,7 +198,7 @@ class ComplexExpressionFactory(object):
                 # that should not be good in fact !
                 if stacked_par == 1 and tmp != '':
                     # TODO : real error
-                    print "ERROR : bad expression near", tmp
+                    logger.error("ERROR : bad expression near: %s" % tmp)
                     continue
 
                 # If we are already in a par, add this (
@@ -214,7 +215,7 @@ class ComplexExpressionFactory(object):
 
                 if stacked_par < 0:
                     # TODO : real error
-                    print "Error : bad expression near", tmp, "too much ')'"
+                    logger.error("Error : bad expression near %s: too much ')' " % tmp)
                     continue
 
                 if stacked_par == 0:
