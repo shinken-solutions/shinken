@@ -36,7 +36,8 @@ try:
 except ImportError:
     fcntl = None
 
-from shinken.log import logger
+from .log import logger
+from .util import string_decode
 
 __all__ = ('Action',)
 
@@ -159,12 +160,9 @@ class __Action(object):
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
         # Force strings to be unicode from here
-        if isinstance(self.output, str):
-            self.output = self.output.decode('utf8', 'ignore')
-        if isinstance(self.long_output, str):
-            self.long_output = self.long_output.decode('utf8', 'ignore')
-        if isinstance(self.perf_data, str):
-            self.perf_data = self.perf_data.decode('utf8', 'ignore')
+        self.output = string_decode(self.output)
+        self.long_output = string_decode(self.long_output)
+        self.perf_data = string_decode(self.perf_data)
 
 
     def check_finished(self, max_plugins_output_length):

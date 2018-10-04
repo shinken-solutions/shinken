@@ -30,6 +30,11 @@ import json
 import platform
 import traceback
 
+PY3 = sys.version_info >= (3,)
+if PY3:
+    basestring = str
+    unicode = str
+    
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
@@ -954,3 +959,28 @@ def free_memory():
     except Exception:
         logger.error("Failed to free memory")
         logger.debug(traceback.format_exc())
+
+
+# Bytes to unicode
+def string_decode(s):
+    return bytes_to_unicode(s)
+
+
+# Bytes to unicode
+def bytes_to_unicode(s):
+    if isinstance(s, str) and not PY3:  # python3 already is unicode in str
+        return s.decode('utf8', 'ignore')
+    if PY3 and isinstance(s, bytes):
+        return s.decode('utf8', 'ignore')
+    return s
+
+
+# Unicode to bytes
+def string_encode(s):
+    return unicode_to_bytes(s)
+
+
+def unicode_to_bytes(s):
+    if isinstance(s, str) and PY3:
+        return s.encode('utf8', 'ignore')
+    return s

@@ -495,7 +495,7 @@ class ShinkenTest(unittest.TestCase):
 
     def print_header(self):
         print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
-        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + ('%s' % self.id()).center(78) + "#")
         print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def xtest_conf_is_correct(self):

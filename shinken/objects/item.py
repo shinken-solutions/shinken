@@ -30,7 +30,7 @@ import time
 import itertools
 from copy import copy
 
-from shinken.util import safe_print
+from shinken.util import safe_print, PY3, basestring
 from shinken.commandcall import CommandCall
 from shinken.property import (StringProp, ListProp, BoolProp,
                               IntegerProp, ToGuessProp, PythonizeError)
@@ -128,7 +128,7 @@ class Item(object):
 
             if (isinstance(val, list) and
                     len(val) >= 1 and
-                    isinstance(val[0], unicode) and
+                    isinstance(val[0], basestring) and
                     len(val[0]) >= 1 and
                     val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
@@ -939,7 +939,10 @@ class Items(object):
 
 
     def __iter__(self):
-        return self.items.itervalues()
+        if not PY3:
+            return self.items.itervalues()
+        for item in self.items.values():
+            yield item
 
 
     def __len__(self):
@@ -1000,8 +1003,8 @@ class Items(object):
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.old_properties_names_to_new()
 
 
@@ -1053,8 +1056,8 @@ class Items(object):
     # graph too
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             self.linkify_item_templates(i)
         for i in self:
             i.tags = self.get_all_tags(i)
@@ -1138,8 +1141,8 @@ class Items(object):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1158,8 +1161,8 @@ class Items(object):
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_customs_properties_by_inheritance(0)
 
 
@@ -1456,7 +1459,7 @@ class Items(object):
                 except KeyError:
                     pass
             elif h == '*':
-                [hnames.add(h.host_name) for h in hosts.items.itervalues()
+                [hnames.add(h.host_name) for h in hosts.items.values()
                  if getattr(h, 'host_name', '')]
             # Else it's a host to add, but maybe it's ALL
             else:

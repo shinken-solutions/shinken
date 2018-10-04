@@ -22,9 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.autoslots import AutoSlots
-from shinken.property import StringProp, BoolProp, IntegerProp
-
+from .autoslots import AutoSlots
+from .property import StringProp, BoolProp, IntegerProp
+from .util import basestring
 
 class DummyCommandCall(object):
     """Ok, slots are fun: you cannot set the __autoslots__

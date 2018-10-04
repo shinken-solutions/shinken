@@ -80,7 +80,7 @@ from shinken.log import logger
 from shinken.property import (UnusedProp, BoolProp, IntegerProp, CharProp,
                               StringProp, LogLevelProp, ListProp, ToGuessProp)
 from shinken.daemon import get_cur_user, get_cur_group
-from shinken.util import jsonify_r
+from shinken.util import jsonify_r, string_decode, string_encode
 
 
 no_longer_used_txt = ('This parameter is not longer take from the main file, but must be defined '
@@ -887,7 +887,7 @@ class Config(Item):
                 continue
 
             for line in buf:
-                line = line.decode('utf8', 'replace')
+                line = string_decode(line)
                 res.write(line)
                 if line.endswith('\n'):
                     line = line[:-1]
@@ -904,7 +904,7 @@ class Config(Item):
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'", cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        res.write(fd.read().decode('utf8', 'replace'))
+                        res.write(string_decode(fd.read()))
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
@@ -938,7 +938,7 @@ class Config(Item):
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' %
                                               (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
-                                    res.write(fd.read().decode('utf8', 'replace'))
+                                    res.write(string_decode(fd.read()))
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
@@ -1322,7 +1322,7 @@ class Config(Item):
         if os.name == 'nt' or not self.use_multiprocesses_serializer:
             logger.info('Using the default serialization pass')
             for r in self.realms:
-                for (i, conf) in r.confs.iteritems():
+                for (i, conf) in r.confs.items():
                     # Remember to protect the local conf hostgroups too!
                     conf.hostgroups.prepare_for_sending()
                     logger.debug('[%s] Serializing the configuration %d', r.get_name(), i)
@@ -1349,7 +1349,7 @@ class Config(Item):
             q = m.list()
             for r in self.realms:
                 processes = []
-                for (i, conf) in r.confs.iteritems():
+                for (i, conf) in r.confs.items():
                     # This function will be called by the children, and will give
                     # us the pickle result
                     def Serialize_config(q, rname, i, conf):
@@ -2250,7 +2250,7 @@ class Config(Item):
                     i = old_pack
                 else:  # take a new one
                     # print 'take a new id for pack', [h.get_name() for h in pack]
-                    i = rr.next()
+                    i = next(rr)
 
                 for elt in pack:
                     # print 'We got the element', elt.get_full_name(), ' in pack', i, packindices

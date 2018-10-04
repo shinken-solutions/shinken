@@ -626,7 +626,7 @@ class Scheduler(object):
 
         # If poller want to do checks
         if do_checks:
-            for c in sorted(self.checks.itervalues(), key=get_prio):
+            for c in sorted(self.checks.values(), key=get_prio):
                 if max_actions is not None and len(res) >= max_actions:
                     break
                 #  If the command is untagged, and the poller too, or if both are tagged
@@ -647,7 +647,7 @@ class Scheduler(object):
 
         # If reactionner want to notify too
         if do_actions:
-            for a in sorted(self.actions.itervalues(), key=get_prio):
+            for a in sorted(self.actions.values(), key=get_prio):
                 if max_actions is not None and len(res) >= max_actions:
                     break
                 is_master = (a.is_a == 'notification' and not a.contact)
@@ -1642,7 +1642,7 @@ class Scheduler(object):
             all_commands[cmd] = (old_u_time, old_s_time)
         # now sort it
         p = []
-        for (c, e) in all_commands.iteritems():
+        for (c, e) in all_commands.items():
             u_time, s_time = e
             p.append({'cmd': c, 'u_time': u_time, 's_time': s_time})
         def p_sort(e1, e2):

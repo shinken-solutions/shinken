@@ -34,6 +34,7 @@ import re
 import time
 
 from shinken.borg import Borg
+from .util import unicode
 
 
 class MacroResolver(Borg):

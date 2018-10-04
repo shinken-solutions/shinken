@@ -26,7 +26,6 @@ import os
 import sys
 import time
 import traceback
-import cPickle
 import base64
 import zlib
 import threading
@@ -34,6 +33,7 @@ import copy
 from multiprocessing import active_children
 from collections import deque
 
+from shinken.imports import cpickle as cPickle
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids, get_memory, parse_memory_expr, free_memory

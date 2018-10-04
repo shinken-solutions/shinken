@@ -43,6 +43,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory
 from shinken.log import logger
+from shinken.util import string_decode
 
 # on system time change just reevaluate the following attributes:
 on_time_change_update = ('last_notification', 'last_state_change', 'last_hard_state_change')
@@ -810,21 +811,17 @@ class SchedulingItem(Item):
 
         # Protect against bad type output
         # if str, go in unicode
-        if isinstance(c.output, str):
-            c.output = c.output.decode('utf8', 'ignore')
-            c.long_output = c.long_output.decode('utf8', 'ignore')
+        c.output = string_decode(c.output)
+        c.long_output = string_decode(c.long_output)
+        c.perf_data = string_decode(c.perf_data)
 
         # Same for current output
         # TODO: remove in future version, this is need only for
         # migration from old shinken version, that got output as str
         # and not unicode
         # if str, go in unicode
-        if isinstance(self.output, str):
-            self.output = self.output.decode('utf8', 'ignore')
-            self.long_output = self.long_output.decode('utf8', 'ignore')
-
-        if isinstance(c.perf_data, str):
-            c.perf_data = c.perf_data.decode('utf8', 'ignore')
+        self.output = string_decode(self.output)
+        self.long_output = string_decode(self.long_output)
 
         # We check for stalking if necessary
         # so if check is here

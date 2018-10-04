@@ -1364,8 +1364,8 @@ class Services(Items):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1383,21 +1383,21 @@ class Services(Items):
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_customs_properties_by_inheritance(0)
 
 
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             self.linkify_item_templates(i)
 
         # Then we set the tags issued from the built templates
         # for i in self:
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.tags = self.get_all_tags(i)
 
 

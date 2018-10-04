@@ -27,8 +27,8 @@ import os
 import time
 import socket
 import traceback
-import cStringIO
-import cPickle
+from shinken.imports import StringIO as cStringIO
+from shinken.imports import cpickle as cPickle
 import json
 
 from shinken.objects.config import Config
@@ -141,7 +141,7 @@ class IForArbiter(Interface):
                             try:
                                 json.dumps(v)
                                 e[prop] = v
-                            except Exception, exp:
+                            except Exception as exp:
                                 logger.debug('%s', exp)
                 lst.append(e)
         return res
@@ -511,7 +511,7 @@ class Arbiter(Daemon):
                 _t = time.time()
                 try:
                     r = inst.get_objects()
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("Instance %s raised an exception %s. Log and continue to run",
                                  inst.get_name(), str(exp))
                     output = cStringIO.StringIO()
@@ -563,47 +563,6 @@ class Arbiter(Daemon):
         f.close()
 
 
-    def go_migrate(self):
-        print "***********" * 5
-        print "WARNING : this feature is NOT supported in this version!"
-        print "***********" * 5
-
-        migration_module_name = self.migrate.strip()
-        mig_mod = self.conf.modules.find_by_name(migration_module_name)
-        if not mig_mod:
-            print "Cannot find the migration module %s. Please configure it" % migration_module_name
-            sys.exit(2)
-
-        print self.modules_manager.instances
-        # Ok now all we need is the import module
-        self.modules_manager.set_modules([mig_mod])
-        self.do_load_modules()
-        print self.modules_manager.instances
-        if len(self.modules_manager.instances) == 0:
-            print "Error during the initialization of the import module. Bailing out"
-            sys.exit(2)
-        print "Configuration migrating in progress..."
-        mod = self.modules_manager.instances[0]
-        f = getattr(mod, 'import_objects', None)
-        if not f or not callable(f):
-            print "Import module is missing the import_objects function. Bailing out"
-            sys.exit(2)
-
-        objs = {}
-        types = ['hosts', 'services', 'commands', 'timeperiods', 'contacts']
-        for t in types:
-            print "New type", t
-            objs[t] = []
-            for i in getattr(self.conf, t):
-                d = i.get_raw_import_values()
-                if d:
-                    objs[t].append(d)
-            f(objs)
-        # Ok we can exit now
-        sys.exit(0)
-
-
-
     # Main loop function
     def main(self):
         try:
@@ -638,11 +597,11 @@ class Arbiter(Daemon):
 
             # And go for the main loop
             self.do_mainloop()
-        except SystemExit, exp:
+        except SystemExit as exp:
             # With a 2.4 interpreter the sys.exit() in load_config_file
             # ends up here and must be handled.
             sys.exit(exp.code)
-        except Exception, exp:
+        except Exception:
             self.print_unrecoverable(traceback.format_exc())
             raise
 
