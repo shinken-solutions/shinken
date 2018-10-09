@@ -212,7 +212,7 @@ Save the file.
 Restarting Shinken 
 ===================
 
-Once you've added the new host and service definitions to the "switch.cfg" file, you're ready to start monitoring the router/switch. To do this, you'll need to :ref:`verify your configuration <runningshinken/verifyconfig>` and :ref:`restart Sinken <runningshinken/startstop>`.
+Once you've added the new host and service definitions to the "switch.cfg" file, you're ready to start monitoring the router/switch. To do this, you'll need to :ref:`verify your configuration <runningshinken/verifyconfig>` and :ref:`restart Shinken <runningshinken/startstop>`.
 
 If the verification process produces any errors messages, fix your configuration file before continuing. Make sure that you don't (re)start Shinken until the verification process completes without any errors!
 
