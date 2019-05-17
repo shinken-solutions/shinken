@@ -142,7 +142,6 @@ class Escalation(Item):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True
         cls = self.__class__
 
         # If we got the _time parameters, we are time based. Unless, we are not :)
@@ -155,37 +154,48 @@ class Escalation(Item):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.info('%s: I do not have %s', self.get_name(), prop)
-                    state = False  # Bad boy...
+                    self.configuration_errors.append(
+                        '%s: I do not have %s' % (self.get_name(), prop)
+                    )
 
-        # Raised all previously saw errors like unknown contacts and co
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.info(err)
 
         # Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
-            logger.info('%s: I do not have contacts nor contact_groups', self.get_name())
-            state = False
+            self.configuration_errors.append(
+                '%s: I do not have contacts nor contact_groups' % (
+                    self.get_name()
+                )
+            )
 
         # If time_based or not, we do not check all properties
         if self.time_based:
             if not hasattr(self, 'first_notification_time'):
-                logger.info('%s: I do not have first_notification_time', self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    '%s: I do not have first_notification_time' % (
+                        self.get_name()
+                    )
+                )
             if not hasattr(self, 'last_notification_time'):
-                logger.info('%s: I do not have last_notification_time', self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    '%s: I do not have last_notification_time' % (
+                        self.get_name()
+                    )
+                )
         else:  # we check classical properties
             if not hasattr(self, 'first_notification'):
-                logger.info('%s: I do not have first_notification', self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    '%s: I do not have first_notification' % (
+                        self.get_name()
+                    )
+                )
             if not hasattr(self, 'last_notification'):
-                logger.info('%s: I do not have last_notification', self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    '%s: I do not have last_notification' % (
+                        self.get_name()
+                    )
+                )
 
-        return state
+        return not self.has_errors()
 
 
 class Escalations(Items):

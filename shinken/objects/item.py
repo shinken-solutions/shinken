@@ -424,21 +424,13 @@ Like temporary attributes such as "imported_from", etc.. """
     # Check is required prop are set:
     # template are always correct
     def is_correct(self):
-        state = True
         properties = self.__class__.properties
-
-        # Raised all previously saw errors like unknown contacts and co
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                logger.warning("[item::%s] %s property is missing", self.get_name(), prop)
-                state = False
+                self.configuration_errors.append("[item::%s] %s property is missing" % (self.get_name(), prop))
 
-        return state
+        return not self.has_errors()
 
 
     # This function is used by service and hosts
@@ -727,6 +719,8 @@ Like temporary attributes such as "imported_from", etc.. """
         host_name = getattr(self, 'host_name', None)
         return '%s(host_name=%s)' % (name or 'no-name', host_name or '')
 
+    def has_errors(self):
+        return bool(self.configuration_errors)
 
 
 class Items(object):
@@ -1067,8 +1061,6 @@ class Items(object):
 
 
     def is_correct(self):
-        # we are ok at the beginning. Hope we still ok at the end...
-        r = True
         # Some class do not have twins, because they do not have names
         # like servicedependencies
         twins = getattr(self, 'twins', None)
@@ -1076,20 +1068,13 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                logger.warning("[items] %s.%s is duplicated from %s",
-                               i.__class__.my_type,
-                               i.get_name(),
-                               getattr(i, 'imported_from', "unknown source"))
-
-
-        # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
-        for err in self.configuration_warnings:
-            logger.warning("[items] %s", err)
-
-        for err in self.configuration_errors:
-            logger.error("[items] %s", err)
-            r = False
+                self.configuration_warnings.append(
+                    "[items] %s.%s is duplicated from %s" % (
+                        i.__class__.my_type,
+                        i.get_name(),
+                        getattr(i, 'imported_from', "unknown source")
+                    )
+                )
 
         # Then look for individual ok
         for i in self:
@@ -1102,11 +1087,13 @@ class Items(object):
 
             # Now other checks
             if not i.is_correct():
+                self.configuration_errors.extend(i.configuration_errors)
                 n = getattr(i, 'imported_from', "unknown source")
-                logger.error("[items] In %s is incorrect ; from %s", i.get_name(), n)
-                r = False
+                self.configuration_errors.append(
+                    "[items] In %s is incorrect ; from %s" % (i.get_name(), n)
+                )
 
-        return r
+        return not self.has_errors()
 
 
     def remove_templates(self):
@@ -1216,7 +1203,7 @@ class Items(object):
                     else:
                         err = ("the result modulation '%s' defined on the %s "
                                "'%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name()))
-                        i.configuration_warnings.append(err)
+                        i.configuration_errors.append(err)
                         continue
                 i.resultmodulations = new_resultmodulations
 
@@ -1535,9 +1522,15 @@ class Items(object):
 
         # and raise errors about it
         for item in items_in_loops:
-            logger.error("The %s object '%s'  is part of a circular parent/child chain!",
-                         item.my_type,
-                         item.get_name())
+            self.configuration_errors.append(
+                "The %s object '%s' is part of a circular parent/child chain!"
+                % (
+                    item.my_type, item.get_name()
+                )
+            )
             r = False
 
         return r
+
+    def has_errors(self):
+        return bool(self.configuration_errors)

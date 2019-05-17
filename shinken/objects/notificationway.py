@@ -160,15 +160,7 @@ class NotificationWay(Item):
     # Check is required prop are set:
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True
         cls = self.__class__
-
-        # Raised all previously saw errors like unknown commands or timeperiods
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.error("[item::%s] %s", self.get_name(), err)
-
 
         # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
@@ -182,54 +174,64 @@ class NotificationWay(Item):
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[notificationway::%s] %s property not set",
-                                   self.get_name(), prop)
-                    state = False  # Bad boy...
+                    self.configuration_errors.append(
+                        "[notificationway::%s] %s property not set" % (
+                            self.get_name(), prop
+                        )
+                    )
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'service_notification_commands'):
-            logger.warning("[notificationway::%s] do not have any "
-                           "service_notification_commands defined", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "[notificationway::%s] do not have any "
+                "service_notification_commands defined" % self.get_name()
+            )
         else:
             for cmd in self.service_notification_commands:
                 if cmd is None:
-                    logger.warning("[notificationway::%s] a "
-                                   "service_notification_command is missing", self.get_name())
-                    state = False
+                    self.configuration_errors.append(
+                        "[notificationway::%s] a service_notification_command"
+                        "is missing" % self.get_name()
+                    )
                 if not cmd.is_valid():
-                    logger.warning("[notificationway::%s] a "
-                                   "service_notification_command is invalid", self.get_name())
-                    state = False
+                    self.configuration_errors.append(
+                        "[notificationway::%s] a service_notification_command"
+                        "is invalid" % self.get_name()
+                    )
 
         if getattr(self, 'service_notification_period', None) is None:
-            logger.warning("[notificationway::%s] the "
-                           "service_notification_period is invalid", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "[notificationway::%s] the service_notification_period "
+                "is invalid" % self.get_name()
+            )
 
         # Now host part
         if not hasattr(self, 'host_notification_commands'):
-            logger.warning("[notificationway::%s] do not have any "
-                           "host_notification_commands defined", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "[notificationway::%s] do not have any "
+                "host_notification_commands defined" % self.get_name()
+            )
         else:
             for cmd in self.host_notification_commands:
                 if cmd is None:
-                    logger.warning("[notificationway::%s] a "
-                                   "host_notification_command is missing", self.get_name())
-                    state = False
+                    self.configuration_errors.append(
+                        "[notificationway::%s] a host_notification_command "
+                        "is missing" % self.get_name()
+                    )
                 if not cmd.is_valid():
-                    logger.warning("[notificationway::%s] a host_notification_command "
-                                   "is invalid (%s)", cmd.get_name(), str(cmd.__dict__))
-                    state = False
+                    self.configuration_errors.append(
+                        "[notificationway::%s] a host_notification_command "
+                        "is invalid (%s)" % (cmd.get_name(), str(cmd.__dict__))
+                    )
 
         if getattr(self, 'host_notification_period', None) is None:
-            logger.warning("[notificationway::%s] the host_notification_period "
-                           "is invalid", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "[notificationway::%s] the host_notification_period "
+                "is invalid" % self.get_name()
+            )
 
-        return state
+        return not self.has_errors()
 
 
     # In the scheduler we need to relink the commandCall with

@@ -170,35 +170,41 @@ class Contact(Item):
     # Check is required prop are set:
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True
         cls = self.__class__
 
         # All of the above are checks in the notificationways part
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("[contact::%s] %s property not set", self.get_name(), prop)
-                    state = False  # Bad boy...
+                    self.configuration_errors.append(
+                        "[contact::%s] %s property not set" % (
+                            self.get_name(), prop
+                        )
+                    )
 
         # There is a case where there is no nw: when there is not special_prop defined
         # at all!!
         if self.notificationways == []:
             for p in _special_properties:
                 if not hasattr(self, p):
-                    logger.error("[contact::%s] %s property is missing", self.get_name(), p)
-                    state = False
+                    self.configuration_errors.append(
+                        "[contact::%s] %s property is missing" % (
+                            self.get_name(), p
+                        )
+                    )
 
         if hasattr(self, 'contact_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
-                    logger.error("[contact::%s] %s character not allowed in contact_name",
-                                 self.get_name(), c)
-                    state = False
+                    self.configuration_errors.append(
+                        "[contact::%s] %s character not allowed in "
+                        "contact_name" % (self.get_name(), c)
+                    )
         else:
             if hasattr(self, 'alias'):  # take the alias if we miss the contact_name
                 self.contact_name = self.alias
 
-        return state
+        return not self.has_errors()
 
     # Raise a log entry when a downtime begins
     # CONTACT DOWNTIME ALERT:

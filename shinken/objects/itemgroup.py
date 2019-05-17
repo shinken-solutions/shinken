@@ -126,20 +126,15 @@ class Itemgroup(Item):
     # a item group is correct if all members actually exists,
     # so if unknown_members is still []
     def is_correct(self):
-        res = True
-
         if self.unknown_members:
             for m in self.unknown_members:
-                logger.error("[itemgroup::%s] as %s, got unknown member %s",
-                             self.get_name(), self.__class__.my_type, m)
-            res = False
+                self.configuration_errors.append(
+                    "[itemgroup::%s] as %s, got unknown member %s" % (
+                        self.get_name(), self.__class__.my_type, m
+                    )
+                )
 
-        if self.configuration_errors != []:
-            for err in self.configuration_errors:
-                logger.error("[itemgroup] %s", err)
-            res = False
-
-        return res
+        return not self.has_errors()
 
 
     def has(self, prop):
