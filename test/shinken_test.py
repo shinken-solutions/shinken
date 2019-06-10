@@ -371,7 +371,7 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
+        for a in sorted(actions.values(), key=lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -462,7 +462,7 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(broks, lambda x, y: x.id - y.id)
+        broks = sorted(broks, key=lambda x, y: x.id - y.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
