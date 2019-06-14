@@ -1464,11 +1464,9 @@ class Config(Item):
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    self.configuration_warnings.append(
+                    logger.warning(
                         "The parameter %s is useless and can be removed "
-                        "from the configuration (Reason: %s)" % (
-                            prop, entry.text
-                        )
+                        "from the configuration (Reason: %s)", prop, entry.text
                     )
 
 
@@ -1486,17 +1484,17 @@ class Config(Item):
                 unmanaged.append(s)
         if len(unmanaged) != 0:
             mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
-            self.configuration_warnings.append(
+            logger.warning(
                 "The following parameter(s) are not currently managed."
             )
 
             for s in unmanaged:
                 logger.info(s)
 
-            self.configuration_warnings.append(
+            logger.warning(
                 "Unmanaged configuration statement, do you really need it?"
                 "Ask for it on the developer mailinglist %s or submit a pull "
-                "request on the Shinken github " % mailing_list_uri
+                "request on the Shinken github ", mailing_list_uri
             )
 
 
