@@ -33,8 +33,8 @@ function launch_and_assert {
     SCRIPT=$1
     # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
     # so we must combine them in the end
-    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken ./$SCRIPT > /tmp/test.running 2>&1)
     printf " - %-60s" $SCRIPT
+    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken ./$SCRIPT > /tmp/test.running 2>&1)
     if [ $? != 0 ] ; then
         printf "\033[31m[ FAILED ]\033[0m\n"
 	    echo "Error: the test $SCRIPT failed:"
