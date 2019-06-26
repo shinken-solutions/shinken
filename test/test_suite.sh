@@ -9,13 +9,13 @@ if [ "$TEST_SUITE" == "PYTHON" ]; then
    # Get back in test to exec unit tests
    cd test
 
-   apt-get update && apt-get install -y  python-pip
-   apt-get update && apt-get install -y  python-pycurl
-   pip install -r ../requirements.txt
-   pip install coveralls
+   sudo apt-get update && sudo apt-get install -y  python-pip
+   sudo apt-get update && sudo apt-get install -y  python-pycurl
+   sudo pip install -r ../requirements.txt
+   sudo pip install coveralls
    #pip install nose-cov
-   apt-get update && apt-get install -y python-nose
-   apt-get update && apt-get install -y python-unittest2
+   sudo apt-get update && sudo apt-get install -y python-nose
+   sudo apt-get update && sudo apt-get install -y python-unittest2
    #pip install unittest2
 
    echo "Test launch for Python"
