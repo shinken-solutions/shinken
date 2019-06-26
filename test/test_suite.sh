@@ -15,8 +15,8 @@ if [ "$TEST_SUITE" == "PYTHON" ]; then
    sudo pip install coveralls
    #pip install nose-cov
    sudo apt-get update && sudo apt-get install -y python-nose
-   sudo apt-get update && sudo apt-get install -y python-unittest2
-   #pip install unittest2
+   #sudo apt-get update && sudo apt-get install -y python-unittest2
+   sudo pip install unittest2
 
    echo "Test launch for Python"
    # Now all is launched via
