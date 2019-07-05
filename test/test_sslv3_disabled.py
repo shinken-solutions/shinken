@@ -67,6 +67,8 @@ class testSchedulerInit(ShinkenTest):
         if not hasattr(ssl, 'SSLContext'):
             print 'BAD ssl version for testing, bailing out'
             return
+        if not hasattr(ssl, 'PROTOCOL_SSLv3'):
+            return
         ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv3)
         ctx.check_hostname=False
         ctx.verify_mode=ssl.CERT_NONE
