@@ -33,7 +33,8 @@ chmod a+x *sh libexec/* ../libexec/*
 dos2unix *sh libexec/*  ../libexec/*
 
 rm -f var/lib/shinken/modules
-mkdir -p var/lib/shinken/modules
+mkdir -p var/lib/shinken/
+ln -s ../../../../modules/  var/lib/shinken/modules
 
 # Be sure that the symlink is done for the test conf in symlinks (to manage
 # push from a windows dev host)
