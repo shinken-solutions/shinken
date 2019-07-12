@@ -339,17 +339,13 @@ class ModulesManager(object):
 
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
-        return [inst
-                for inst in self.instances
-                if not inst.is_external and phase in inst.phases
-                and inst not in self.to_restart]
+        return [inst for inst in self.instances
+                if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def get_external_instances(self, phase=None):
-        return [inst
-                for inst in self.instances
-                if inst.is_external and phase in inst.phases
-                and inst not in self.to_restart]
+        return [inst for inst in self.instances
+                if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def get_external_to_queues(self):

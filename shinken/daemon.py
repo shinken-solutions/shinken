@@ -727,6 +727,8 @@ class Daemon(object):
         # a socket of your http server alive
         def _create_manager(self):
             manager = SyncManager(('127.0.0.1', 0))
+        
+        
             def close_http_daemon(daemon):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase
@@ -734,6 +736,8 @@ class Daemon(object):
                 except Exception, exp:
                     pass
                 daemon.shutdown()
+        
+        
             # Some multiprocessing lib got problems with start() that cannot take args
             # so we must look at it before
             startargs = inspect.getargspec(manager.start)
