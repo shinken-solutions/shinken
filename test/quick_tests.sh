@@ -69,7 +69,7 @@ coveralls
 
 echo "Launchng pep8 now"
 cd ..
-pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203,E129 --exclude='*.pyc,*~' shinken/*
+pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203,E129 --exclude='*.pyc,*~,shinken/misc/*,shinken/webui/*' shinken/*
 if [ $? != 0 ] ; then
    printf "PEP8 compliant: \033[31m[ FAILED ]\033[0m\n"
    exit 1
