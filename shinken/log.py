@@ -234,8 +234,6 @@ class Log(logging.Logger):
         logging.Logger.error(self, *args, **kwargs)
 
 
-
-
 # --- create the main logger ---
 logging.setLoggerClass(Log)
 logger = logging.getLogger('Shinken')

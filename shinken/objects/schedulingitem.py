@@ -1134,8 +1134,8 @@ class SchedulingItem(Item):
 
     def update_event_and_problem_id(self):
         OK_UP = self.__class__.ok_up  # OK for service, UP for host
-        if (self.state != self.last_state and self.last_state != 'PENDING'
-                or self.state != OK_UP and self.last_state == 'PENDING'):
+        if (self.state != self.last_state and self.last_state != 'PENDING' or
+                self.state != OK_UP and self.last_state == 'PENDING'):
             SchedulingItem.current_event_id += 1
             self.last_event_id = self.current_event_id
             self.current_event_id = SchedulingItem.current_event_id

@@ -1647,12 +1647,16 @@ class Scheduler(object):
         for (c, e) in all_commands.iteritems():
             u_time, s_time = e
             p.append({'cmd': c, 'u_time': u_time, 's_time': s_time})
+
+
         def p_sort(e1, e2):
             if e1['u_time'] > e2['u_time']:
                 return 1
             if e1['u_time'] < e2['u_time']:
                 return -1
             return 0
+
+
         p.sort(p_sort)
         # takethe first 10 ones for the put
         res['commands'] = p[:10]
@@ -1708,9 +1712,9 @@ class Scheduler(object):
             self.load_one_min.update_load(self.sched_daemon.sleep_time)
 
             # load of the scheduler is the percert of time it is waiting
-            l = min(100, 100.0 - self.load_one_min.get_load() * 100)
+            load = min(100, 100.0 - self.load_one_min.get_load() * 100)
             logger.debug("Load: (sleep) %.2f (average: %.2f) -> %d%%",
-                         self.sched_daemon.sleep_time, self.load_one_min.get_load(), l)
+                         self.sched_daemon.sleep_time, self.load_one_min.get_load(), load)
 
             self.sched_daemon.sleep_time = 0.0
 

@@ -159,8 +159,8 @@ class IForArbiter(Interface):
             return []
         res = []
         for obj in objs:
-            l = jsonify_r(obj)
-            res.append(l)
+            ln = jsonify_r(obj)
+            res.append(ln)
         return res
     get_objects_properties.doc = doc
 

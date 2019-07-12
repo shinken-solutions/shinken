@@ -228,9 +228,9 @@ class Escalations(Items):
     def linkify_es_by_h(self, hosts):
         for es in self:
             # If no host, no hope of having a service
-            if (not hasattr(es, 'host_name') or es.host_name.strip() == ''
-                    or (hasattr(es, 'service_description')
-                        and es.service_description.strip() != '')):
+            if (not hasattr(es, 'host_name') or es.host_name.strip() == '' or
+                    (hasattr(es, 'service_description') and
+                        es.service_description.strip() != '')):
                 continue
             # I must be NOT a escalation on for service
             for hname in strip_and_uniq(es.host_name.split(',')):

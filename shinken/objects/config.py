@@ -1398,12 +1398,16 @@ class Config(Item):
             # Now pickle the whole configuration into one big pickle object, for the arbiter spares
             whole_queue = m.list()
             t0 = time.time()
+
+
             # The function that just compute the whole conf pickle string, but n a children
             def create_whole_conf_pack(whole_queue, self):
                 logger.debug("[config] sub processing the whole configuration pack creation")
                 whole_queue.append(cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL))
                 logger.debug("[config] sub processing the whole configuration pack creation "
                              "finished")
+
+
             # Go for it
             p = Process(target=create_whole_conf_pack,
                         args=(whole_queue, self),
@@ -2475,6 +2479,7 @@ def lazy():
         n = str(n)
         Config.properties['$USER' + str(n) + '$'] = StringProp(default='')
         Config.macros['USER' + str(n)] = '$USER' + n + '$'
+
 
 lazy()
 del lazy

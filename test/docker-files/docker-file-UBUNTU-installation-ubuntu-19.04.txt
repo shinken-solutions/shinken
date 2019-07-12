@@ -1,9 +1,6 @@
-FROM ubuntu:17.10
+FROM ubuntu:19.04
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-# Fev 2019: this version is moved to old-releases
-RUN         sed 's/archive/old-releases/' -i /etc/apt/sources.list
-RUN         sed 's/security/old-releases/' -i /etc/apt/sources.list
 
 RUN        apt-get update && apt-get install -y python
 RUN        apt-get install -y python-setuptools

@@ -57,7 +57,7 @@ except Exception, exp:
 # Try to print strings, but if there is an utf8 error, go in simple ascii mode
 # (Like if the terminal do not have en_US.UTF8 as LANG for example)
 def safe_print(*args):
-    l = []
+    lst = []
     for e in args:
         # If we got an str, go in unicode, and if we cannot print
         # utf8, go in ascii mode
@@ -67,19 +67,19 @@ def safe_print(*args):
             else:
                 s = e.decode('ascii', 'replace').encode('ascii', 'replace').\
                     decode('ascii', 'replace')
-            l.append(s)
+            lst.append(s)
         # Same for unicode, but skip the unicode pass
         elif isinstance(e, unicode):
             if safe_stdout:
                 s = e
             else:
                 s = e.encode('ascii', 'replace')
-            l.append(s)
+            lst.append(s)
         # Other types can be directly convert in unicode
         else:
-            l.append(unicode(e))
+            lst.append(unicode(e))
     # Ok, now print it :)
-    print u' '.join(l)
+    print u' '.join(lst)
 
 
 def split_semicolon(line, maxsplit=None):
@@ -464,17 +464,17 @@ def nighty_five_percent(t):
     t2 = copy.copy(t)
     t2.sort()
 
-    l = len(t)
+    l_t = len(t)
 
     # If void tab, wtf??
-    if l == 0:
+    if l_t == 0:
         return (None, None, None)
 
     t_reduce = t2
     # only take a part if we got more
     # than 100 elements, or it's a non sense
-    if l > 100:
-        offset = int(l * 0.05)
+    if l_t > 100:
+        offset = int(l_t * 0.05)
         t_reduce = t_reduce[offset:-offset]
 
     reduce_len = len(t_reduce)
@@ -551,6 +551,7 @@ def apply_change_recursive_pattern_change(s, rule):
     if t == []:
         return s
     return apply_change_recursive_pattern_change(s, t)
+
 
 # For service generator, get dict from a _custom properties
 # as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$

@@ -201,10 +201,8 @@ class Dispatcher:
                     for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
-                        if (len(r.to_satellites_managed_by[kind][cfg_id])
-                                < r.get_nb_of_must_have_satellites(kind)):
-                            logger.warning("Missing satellite %s for configuration %d:",
-                                           kind, cfg_id)
+                        if (len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind)):
+                            logger.warning("Missing satellite %s for configuration %d:" % (kind, cfg_id))
 
                             # TODO: less violent! Must only resent to who need?
                             # must be caught by satellite who sees that
@@ -225,8 +223,8 @@ class Dispatcher:
                                                r.get_name(), kind, satellite.get_name())
                                 continue
                             if not satellite.alive or (
-                                    satellite.reachable
-                                    and not satellite.do_i_manage(cfg_id, push_flavor)):
+                                    satellite.reachable and not
+                                    satellite.do_i_manage(cfg_id, push_flavor)):
                                 logger.warning('[%s] The %s %s seems to be down, '
                                                'I must re-dispatch its role to someone else.',
                                                r.get_name(), kind, satellite.get_name())
@@ -411,7 +409,7 @@ class Dispatcher:
                             'accept_passive_unknown_check_results':
                                 sched.accept_passive_unknown_check_results,
                             'harakiri_threshold': sched.harakiri_threshold,
-                            # shiken.io part
+                            # shinken.io part
                             'api_key': self.conf.api_key,
                             'secret': self.conf.secret,
                             'http_proxy': self.conf.http_proxy,
