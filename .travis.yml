@@ -20,7 +20,7 @@ python:
 
 env:
   # Python:
-  - TEST_SUITE=PYTHON
+  - TEST_SUITE=UNIT-TEST
   # Then installations on various distro
   - TEST_SUITE=CENTOS
   - TEST_SUITE=DEBIAN

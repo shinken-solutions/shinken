@@ -60,8 +60,8 @@ function try_installation {
    fi
 
    SHA=`echo $BUILD|cut -d':' -f2`
-
-   docker run --interactive -a stdout -a stderr --rm=true  "$SHA" 2>>$LOG >>$LOG
+#2>>$LOG >>$LOG
+   docker run --interactive -a stdout -a stderr --rm=true  "$SHA"
    if [ $? != 0 ]; then
        print_color "ERROR: $DOCKER_FILE" "red"
        printf "  Cannot run. Look at $LOG\n"

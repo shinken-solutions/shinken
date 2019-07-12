@@ -24,7 +24,7 @@ There are 2 cases:
 
 In the first case, you need to add more pollers. In the second, you need to add more schedulers. In this last case, you should also add more pollers (more launch need more pollers) but that's not compulsory.
 
-But I already ear you asking "How to add new satellites?". That's very simple: You start by installing the application on a new server (don't forget the sinken user + application files). Let say that this new server is called server-2 and has the IP 192.168.0.2 (remember that the "master" is called server-1 with 192.168.0.1 as IP). 
+But I already ear you asking "How to add new satellites?". That's very simple: You start by installing the application on a new server (don't forget the shinken user + application files). Let say that this new server is called server-2 and has the IP 192.168.0.2 (remember that the "master" is called server-1 with 192.168.0.1 as IP). 
 
 Now you need to launch the scheduler and pollers (or just one of them if you want):
 

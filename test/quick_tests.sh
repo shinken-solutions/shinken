@@ -29,12 +29,24 @@ rm -f coverage.xml
 rm -f .coverage*
 
 
+chmod a+x *sh libexec/* ../libexec/*
+dos2unix *sh libexec/*  ../libexec/*
+
+rm -f var/lib/shinken/modules
+mkdir -p var/lib/shinken/
+ln -s ../../../../modules/  var/lib/shinken/modules
+
+# Be sure that the symlink is done for the test conf in symlinks (to manage
+# push from a windows dev host)
+rm -f etc/conf_in_symlinks/links/link
+ln -sf ../dest etc/conf_in_symlinks/links/link
+
 function launch_and_assert {
     SCRIPT=$1
     # notice: the nose-cov is used because it is compatible with --processes, but produce a .coverage by process
     # so we must combine them in the end
-    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken ./$SCRIPT > /tmp/test.running 2>&1)
     printf " - %-60s" $SCRIPT
+    output=$(nosetests -xv --process-restartworker --processes=1 --process-timeout=999999999  --with-cov --cov=shinken  ./$SCRIPT > /tmp/test.running 2>&1)
     if [ $? != 0 ] ; then
         printf "\033[31m[ FAILED ]\033[0m\n"
 	    echo "Error: the test $SCRIPT failed:"
@@ -57,12 +69,11 @@ coveralls
 
 echo "Launchng pep8 now"
 cd ..
-pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203,E129 --exclude='*.pyc,*~' shinken/*
+pep8 --max-line-length=140 --ignore=E303,E302,E301,E241,W293,W291,E221,E126,E203,E129,E402 --exclude='*.pyc,*~,shinken/misc/*,shinken/webui/*' shinken/*
 if [ $? != 0 ] ; then
    printf "PEP8 compliant: \033[31m[ FAILED ]\033[0m\n"
    exit 1
 fi
-
 
 
 

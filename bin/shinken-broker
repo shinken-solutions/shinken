@@ -91,7 +91,7 @@ def main():
     else:
         # For perf tuning:
         import cProfile
-        cProfile.run('''daemon.main()''', opts.profile)
+        cProfile.runctx('''daemon.main()''', globals(), locals(), opts.profile)
 
 
 if __name__ == '__main__':

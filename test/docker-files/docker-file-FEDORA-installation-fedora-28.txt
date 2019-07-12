@@ -1,0 +1,15 @@
+FROM fedora:28
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python
+RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install libcurl-devel
+#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install gcc
+#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install gcc-c++
+#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install redhat-rpm-config
+RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python-devel
+RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python-pycurl
+
+ADD        . /root/shinken-framework
+
+ENTRYPOINT    test/test_one_linux_installation.sh
+WORKDIR       /root/shinken-framework

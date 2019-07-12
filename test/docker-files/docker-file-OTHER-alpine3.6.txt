@@ -1,0 +1,17 @@
+FROM alpine:3.6
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        apk update
+RUN        apk add bash
+RUN        apk add python
+RUN        apk add gcc linux-headers musl-dev libgcc libgc++ g++
+RUN        apk add curl-dev
+RUN        apk add py-crypto
+RUN        apk add py-jinja2
+RUN        apk add py-setuptools python-dev
+RUN        apk add py-curl
+
+ADD        . /root/shinken-framework
+
+WORKDIR       /root/shinken-framework
+ENTRYPOINT    test/test_one_linux_installation.sh

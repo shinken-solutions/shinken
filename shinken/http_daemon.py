@@ -349,6 +349,8 @@ class HTTPDaemon(object):
                 print "Registering", fname, args, obj
                 self.registered_fun_names.append(fname)
                 self.registered_fun[fname] = (f)
+
+
                 # WARNING : we MUST do a 2 levels function here, or the f_wrapper
                 # will be uniq and so will link to the last function again
                 # and again
@@ -357,7 +359,7 @@ class HTTPDaemon(object):
                         t0 = time.time()
                         args_time = aqu_lock_time = calling_time = json_time = 0
                         need_lock = getattr(f, 'need_lock', True)
-
+        
                         # Warning : put the bottle.response set inside the wrapper
                         # because outside it will break bottle
                         d = {}
@@ -380,17 +382,17 @@ class HTTPDaemon(object):
                                     raise Exception('Missing argument %s' % aname)
                                 v = default_args[aname]
                             d[aname] = v
-
+        
                         t1 = time.time()
                         args_time = t1 - t0
-
+        
                         if need_lock:
                             logger.debug("HTTP: calling lock for %s", fname)
                             lock.acquire()
-
+        
                         t2 = time.time()
                         aqu_lock_time = t2 - t1
-
+        
                         try:
                             ret = f(**d)
                         # Always call the lock release if need
@@ -398,15 +400,15 @@ class HTTPDaemon(object):
                             # Ok now we can release the lock
                             if need_lock:
                                 lock.release()
-
+        
                         t3 = time.time()
                         calling_time = t3 - t2
-
+        
                         encode = getattr(f, 'encode', 'json').lower()
                         j = json.dumps(ret)
                         t4 = time.time()
                         json_time = t4 - t3
-
+        
                         global_time = t4 - t0
                         logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s]"
                                      "[calling:%s] [json:%s] [global:%s]",
@@ -418,8 +420,10 @@ class HTTPDaemon(object):
                         # increase the stats timers
                         for (k, _t) in lst:
                             statsmgr.timing('http.%s.%s' % (fname, k), _t, 'perf')
-
+        
                         return j
+    
+    
                     # Ok now really put the route in place
                     bottle.route('/' + fname, callback=f_wrapper,
                                  method=getattr(f, 'method', 'get').upper())
@@ -428,6 +432,8 @@ class HTTPDaemon(object):
                     if fname_dash != fname:
                         bottle.route('/' + fname_dash, callback=f_wrapper,
                                      method=getattr(f, 'method', 'get').upper())
+
+
                 register_callback(fname, args, f, obj, self.lock)
 
             # Add a simple / page
