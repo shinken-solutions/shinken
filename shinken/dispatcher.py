@@ -224,7 +224,7 @@ class Dispatcher:
                                 continue
                             if not satellite.alive or (
                                     satellite.reachable and not
-                            satellite.do_i_manage(cfg_id, push_flavor)):
+                                    satellite.do_i_manage(cfg_id, push_flavor)):
                                 logger.warning('[%s] The %s %s seems to be down, '
                                                'I must re-dispatch its role to someone else.',
                                                r.get_name(), kind, satellite.get_name())
