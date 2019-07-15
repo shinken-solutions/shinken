@@ -219,7 +219,7 @@ class Arbiter(Daemon):
         brokers = self.conf.brokers
         for brk in [b for b in brokers if b.manage_arbiters and b.alive]:
             while len(self.broks) > 0:
-                if brk.broks_batch > 0:
+                if brk.broks_batch == 0:
                     count = len(self.broks)
                 else:
                     count = min(brk.broks_batch, len(self.broks))
