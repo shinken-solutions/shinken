@@ -107,6 +107,9 @@ def main():
                       dest="arb_name",
                       help="Give the arbiter name to use. Optionnal, will use the hostaddress "
                            "if not provide to find it.")
+    parser.add_option("--dump_conf",
+                      dest="dump_config_file",
+                      help="dump config as json to a file")
 
     opts, args = parser.parse_args()
 
