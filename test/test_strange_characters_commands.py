@@ -56,11 +56,11 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         #self.assertEqual('UP', host.state)
         #self.assertEqual('HARD', host.state_type)
         print svc.check_command
-        self.assertEqual(0, len(svc.checks_in_progress))
+        self.assertEqual(0, len(svc.get_checks_in_progress()))
         svc.launch_check(time.time())
         print svc.checks_in_progress
-        self.assertEqual(1, len(svc.checks_in_progress))
-        c = svc.checks_in_progress.pop()
+        self.assertEqual(1, len(svc.get_checks_in_progress()))
+        c = svc.get_checks_in_progress().pop()
         #print c
         c.execute()
         time.sleep(0.5)

@@ -176,6 +176,7 @@ class Arbiter(Daemon):
                                       debug, debug_file)
 
         self.graceful_enabled = False
+        self.aggressive_memory_management = False
         self.config_files = config_files
         self.verify_only = verify_only
         self.analyse = analyse

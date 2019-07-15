@@ -576,7 +576,6 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('resultmodulations', []),
         ('business_impact_modulations', []),
         ('escalations', []),
-        ('maintenance_period', ''),
         ('business_impact', 2),
         ('trigger', ''),
         ('trigger_name', ''),
@@ -600,6 +599,12 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('snapshot_criteria', ['d','u']),
         ('business_rule_host_notification_options', []),
         ('business_rule_service_notification_options', []),
+        ('maintenance_period', ''),
+        ('maintenance_checks_enabled', False),
+        ('maintenance_check_command', ''),
+        ('maintenance_check_period', ''),
+        ('maintenance_check_interval', 0),
+        ('maintenance_retry_interval', 0),
         ('priority', 100),
         ])
 
@@ -879,7 +884,6 @@ class TestService(PropertiesTester, ShinkenTest):
         ('resultmodulations', []),
         ('business_impact_modulations', []),
         ('escalations', []),
-        ('maintenance_period', ''),
         ('duplicate_foreach', ''),
         ('default_value', ''),
         ('business_impact', 2),
@@ -906,6 +910,12 @@ class TestService(PropertiesTester, ShinkenTest):
         ('business_rule_host_notification_options', []),
         ('business_rule_service_notification_options', []),
         ('host_dependency_enabled', True),
+        ('maintenance_period', ''),
+        ('maintenance_checks_enabled', False),
+        ('maintenance_check_command', ''),
+        ('maintenance_check_period', ''),
+        ('maintenance_check_interval', 0),
+        ('maintenance_retry_interval', 0),
         ('priority', 100),
         ])
 

@@ -224,11 +224,13 @@ class Regenerator(object):
 
             # Now link Command() objects
             self.linkify_a_command(h, 'check_command')
+            self.linkify_a_command(h, 'maintenance_check_command')
             self.linkify_a_command(h, 'event_handler')
 
             # Now link timeperiods
             self.linkify_a_timeperiod_by_name(h, 'notification_period')
             self.linkify_a_timeperiod_by_name(h, 'check_period')
+            self.linkify_a_timeperiod_by_name(h, 'maintenance_check_period')
             self.linkify_a_timeperiod_by_name(h, 'maintenance_period')
 
             # And link contacts too
@@ -289,12 +291,14 @@ class Regenerator(object):
 
             # Now link Command() objects
             self.linkify_a_command(s, 'check_command')
+            self.linkify_a_command(s, 'maintenance_check_command')
             self.linkify_a_command(s, 'event_handler')
 
             # Now link timeperiods
             self.linkify_a_timeperiod_by_name(s, 'notification_period')
             self.linkify_a_timeperiod_by_name(s, 'check_period')
             self.linkify_a_timeperiod_by_name(s, 'maintenance_period')
+            self.linkify_a_timeperiod_by_name(s, 'maintenance_check_period')
 
             # And link contacts too
             self.linkify_contacts(s, 'contacts')
@@ -845,10 +849,11 @@ class Regenerator(object):
     def manage_update_host_status_brok(self, b):
         # There are some properties that should not change and are already linked
         # so just remove them
-        clean_prop = ['id', 'check_command', 'hostgroups',
-                      'contacts', 'notification_period', 'contact_groups',
-                      'check_period', 'event_handler',
-                      'maintenance_period', 'realm', 'customs', 'escalations']
+        clean_prop = ['id', 'check_command', 'maintenance_check_command',
+                      'hostgroups', 'contacts', 'notification_period',
+                      'contact_groups', 'check_period', 'event_handler',
+                      'maintenance_period', 'maintenance_check_period',
+                      'realm', 'customs', 'escalations']
 
         # some are only use when a topology change happened
         toplogy_change = b.data['topology_change']
@@ -888,10 +893,11 @@ class Regenerator(object):
     def manage_update_service_status_brok(self, b):
         # There are some properties that should not change and are already linked
         # so just remove them
-        clean_prop = ['id', 'check_command', 'servicegroups',
-                      'contacts', 'notification_period', 'contact_groups',
-                      'check_period', 'event_handler',
-                      'maintenance_period', 'customs', 'escalations']
+        clean_prop = ['id', 'check_command', 'maintenance_check_command',
+                      'servicegroups', 'contacts', 'notification_period',
+                      'contact_groups', 'check_period', 'event_handler',
+                      'maintenance_period', 'maintenance_check_period',
+                      'customs', 'escalations']
 
         # some are only use when a topology change happened
         toplogy_change = b.data['topology_change']

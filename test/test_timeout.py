@@ -123,7 +123,7 @@ class TestTimeout(ShinkenTest):
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.checks_in_progress
-        cs = svc.checks_in_progress
+        cs = svc.get_checks_in_progress()
         self.assertEqual(1, len(cs))
         c = cs.pop()
         print c

@@ -643,7 +643,7 @@ class Broker(BaseSatellite):
         self.schedulers.clear()
         self.pollers.clear()
         self.reactionners.clear()
-        self.broks = self.broks[:]
+        self.broks = deque(self.broks)
         self.broks_internal_raised = self.broks_internal_raised[:]
         with self.arbiter_broks_lock:
             self.arbiter_broks = self.arbiter_broks[:]

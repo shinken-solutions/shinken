@@ -1553,7 +1553,7 @@ class ExternalCommandManager:
 
             i = host.launch_check(now, force=True)
             c = None
-            for chk in host.checks_in_progress:
+            for chk in host.get_checks_in_progress():
                 if chk.id == i:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
@@ -1593,7 +1593,7 @@ class ExternalCommandManager:
 
             c = None
             i = service.launch_check(now, force=True)
-            for chk in service.checks_in_progress:
+            for chk in service.get_checks_in_progress():
                 if chk.id == i:
                     c = chk
             # Should not be possible to not find the check, but if so, don't crash
