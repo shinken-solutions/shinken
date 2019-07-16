@@ -104,7 +104,23 @@ class TestConfig(ShinkenTest):
         # We take the EMAIL test because SMS got the night ony, so we take a very low value for criticity here
         self.assertEqual(False, email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) )
 
+        # Test the heritage for notification ways
+        host_template = self.sched.hosts.find_by_name("test_host_contact_template")
+        commands_contact_template_1 = host_template.contacts[0].get_notification_commands('host')
+        commands_contact_template_2 = host_template.contacts[1].get_notification_commands('host')
 
+        resp = sorted([sorted([command.get_name() for command in commands_contact_template_1]),
+                       sorted([command.get_name() for command in commands_contact_template_2])])
 
+        self.assertEqual([['notify-host', 'notify-host-work'], ['notify-host-sms', 'notify-host-work']], resp)
+
+        commands_contact_template_1 = host_template.contacts[0].get_notification_commands('service')
+        commands_contact_template_2 = host_template.contacts[1].get_notification_commands('service')
+
+        resp = sorted([sorted([command.get_name() for command in commands_contact_template_1]),
+                       sorted([command.get_name() for command in commands_contact_template_2])])
+
+        self.assertEqual([['notify-service', 'notify-service-work'], ['notify-service-sms', 'notify-service-work']],
+                         resp)
 if __name__ == '__main__':
     unittest.main()
