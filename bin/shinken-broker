@@ -75,11 +75,11 @@ def main():
                       dest="do_replace",
                       help="Replace previous running broker")
     parser.add_option('--debugfile', dest='debug_file',
-                      help=("Debug file. Default: not used "
-                            "(why debug a bug free program? :) )"))
+                      help=("Enable debug log and save it to a file. "
+                            "Default: not used"))
     parser.add_option("-p", "--profile",
                       dest="profile",
-                      help="Dump a profile file. Need the python cProfile librairy")
+                      help="Dump a profile file. Need the python cProfile library")
 
     opts, args = parser.parse_args()
     if args:

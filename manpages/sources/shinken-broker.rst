@@ -45,5 +45,5 @@ OPTIONS
   -h, --help                                    Show this help message
   --version                                     Show program's version number 
   --debugfile=DEBUGFILE                         Enable debug logging to *DEBUGFILE*
-  -p PROFILE, --profile=PROFILE                 Dump a profile file. Need the python cProfile librairy
+  -p PROFILE, --profile=PROFILE                 Dump a profile file. Need the python cProfile library
 

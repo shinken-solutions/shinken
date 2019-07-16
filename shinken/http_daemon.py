@@ -173,9 +173,9 @@ class WSGIREFAdapter (bottle.ServerAdapter):
 
         if use_ssl:
             if not ssl:
-                logger.error("Missing python-openssl librairy,"
+                logger.error("Missing python-openssl library,"
                              "please install it to open a https backend")
-                raise Exception("Missing python-openssl librairy, "
+                raise Exception("Missing python-openssl library, "
                                 "please install it to open a https backend")
             srv.socket = ssl.wrap_socket(srv.socket,
                                          keyfile=ssl_key, certfile=ssl_cert, server_side=True)
