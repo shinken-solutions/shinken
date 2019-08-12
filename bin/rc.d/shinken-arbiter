@@ -32,7 +32,7 @@ shinken_checkconfig() {
 	echo -n "Performing sanity check on shinken configuration: "
         ${command} -v -c ${shinken_arbiter_configfile} >${shinken_error_log} 2>&1
         if [ $? -ne 0 ]; then
-		echo "FAILED, check /tmp/shinken-arbiter.log"
+		echo "FAILED, check ${shinken_error_log}"
 		return 1
 	else
 		echo "OK"
