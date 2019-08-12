@@ -16,6 +16,7 @@ command="/usr/local/bin/shinken-arbiter"
 command_interpreter="/usr/local/bin/python2.7"
 command_args="-d -c ${shinken_arbiter_configfile} > /dev/null 2>&1"
 pidfile="/var/run/shinken/arbiterd.pid"
+shinken_error_log="/tmp/shinken-arbiter.log"
 
 restart_precmd="shinken_checkconfig"
 configtest_cmd="shinken_checkconfig"
@@ -29,12 +30,13 @@ load_rc_config "${name}"
 
 shinken_checkconfig() {
 	echo -n "Performing sanity check on shinken configuration: "
-	${command} -v -c ${shinken_arbiter_configfile} >/dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		echo "FAILED"
+        ${command} -v -c ${shinken_arbiter_configfile} >${shinken_error_log} 2>&1
+        if [ $? -ne 0 ]; then
+		echo "FAILED, check /tmp/shinken-arbiter.log"
 		return 1
 	else
 		echo "OK"
+		rm ${shinken_error_log}
 	fi
 }
 
