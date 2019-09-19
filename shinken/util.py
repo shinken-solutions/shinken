@@ -34,6 +34,9 @@ PY3 = sys.version_info >= (3,)
 if PY3:
     basestring = str
     unicode = str
+else:
+    basestring = basestring
+    unicode = unicode
     
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
