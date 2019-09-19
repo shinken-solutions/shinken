@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import subprocess
 from time import sleep
@@ -52,7 +54,7 @@ class testSchedulerInit(ShinkenTest):
             proc.terminate()  # make sure the proc has exited..
             proc.wait()
         except Exception as err:
-            print("prob on terminate and wait subproc: %s" % err)
+            print(("prob on terminate and wait subproc: %s" % err))
         data = {}
         data['out'] = proc.stdout.read()
         data['err'] = proc.stderr.read()
@@ -63,7 +65,7 @@ class testSchedulerInit(ShinkenTest):
         proc = getattr(self, 'arb_proc', None)
         if proc:
             self._get_subproc_data(proc)  # so to terminate / wait it..
-            print "HEHE", proc.__dict__
+            print("HEHE", proc.__dict__)
 
     def test_scheduler_init(self):
 
@@ -89,7 +91,7 @@ class testSchedulerInit(ShinkenTest):
         # notice: set this process master with preexec_fn=os.setsid so when we kill it
         # it will also kill sons
         args = ["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
-        print "Launching sub arbiter with", args
+        print("Launching sub arbiter with", args)
         proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     preexec_fn=os.setsid)
 
@@ -110,16 +112,16 @@ class testSchedulerInit(ShinkenTest):
 
 
         # Test that use_ssl parameter generates the good uri
-        print d.pollers
-        if d.pollers[d.pollers.keys()[0]]['use_ssl']:
-            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'https://localhost:7771/'
+        print(d.pollers)
+        if d.pollers[list(d.pollers.keys())[0]]['use_ssl']:
+            assert d.pollers[list(d.pollers.keys())[0]]['uri'] == 'https://localhost:7771/'
         else:
-            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'http://localhost:7771/'
+            assert d.pollers[list(d.pollers.keys())[0]]['uri'] == 'http://localhost:7771/'
 
 
         # Test receivers are init like pollers
         assert d.reactionners != {}  # Previously this was {} for ever
-        assert d.reactionners[d.reactionners.keys()[0]]['uri'] == 'http://localhost:7769/' # Test dummy value
+        assert d.reactionners[list(d.reactionners.keys())[0]]['uri'] == 'http://localhost:7769/' # Test dummy value
 
         # I want a simple init
         d.must_run = False
@@ -127,14 +129,14 @@ class testSchedulerInit(ShinkenTest):
         d.sched.run()
 
         # Test con key is missing or not. Passive daemon should have one
-        assert 'con' not in d.pollers[d.pollers.keys()[0]] # Ensure con key is not here, deamon is not passive so we did not try to connect
-        assert d.reactionners[d.reactionners.keys()[0]]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
+        assert 'con' not in d.pollers[list(d.pollers.keys())[0]] # Ensure con key is not here, deamon is not passive so we did not try to connect
+        assert d.reactionners[list(d.reactionners.keys())[0]]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
 
         # "Clean" shutdown
         sleep(2)
         try:
             pid = int(open("tmp/arbiterd.pid").read())
-            print ("KILLING %d" % pid)*50
+            print(("KILLING %d" % pid)*50)
             os.kill(int(open("tmp/arbiterd.pid").read()), 2)
             d.do_stop()
         except Exception as err:

@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 #time.time = original_time_time
 #time.sleep = original_time_sleep
@@ -35,7 +37,7 @@ class TestMaintPeriod(ShinkenTest):
 
     def test_check_defined_maintenance_period(self):
         a_24_7 = self.sched.timeperiods.find_by_name("24x7")
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         test_router_0 = self.sched.hosts.find_by_name("test_router_0")
         test_host_0 = self.sched.hosts.find_by_name("test_host_0")
         test_nobody = self.sched.hosts.find_by_name("test_nobody")
@@ -82,20 +84,20 @@ class TestMaintPeriod(ShinkenTest):
             x = time.gmtime(now)
 
         now = time.time()
-        print "now it is", time.asctime(time.localtime(now))
+        print("now it is", time.asctime(time.localtime(now)))
         nowday = time.strftime("%A", time.localtime(now + 60)).lower()
         soonstart = time.strftime("%H:%M", time.localtime(now + 60))
         soonend = time.strftime("%H:%M", time.localtime(now + 180))
 
         range = "%s %s-%s" % (nowday, soonstart, soonend)
-        print "range is ", range
+        print("range is ", range)
         t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, range)
         t_next = t.get_next_valid_time_from_t(now)
-        print "planned start", time.asctime(time.localtime(t_next))
+        print("planned start", time.asctime(time.localtime(t_next)))
         t_next = t.get_next_invalid_time_from_t(t_next + 1)
-        print "planned stop ", time.asctime(time.localtime(t_next))
+        print("planned stop ", time.asctime(time.localtime(t_next)))
         svc3.maintenance_period = t
 
         self.assertFalse(svc3.in_maintenance)
@@ -104,22 +106,22 @@ class TestMaintPeriod(ShinkenTest):
         # it is now 10 seconds before the full minute. run for 30 seconds
         # in 1-second-intervals. this should be enough to trigger the downtime
         # in 10 seconds from now the downtime starts
-        print "scheduler_loop start", time.asctime()
+        print("scheduler_loop start", time.asctime())
         self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
-        print "scheduler_loop end  ", time.asctime()
+        print("scheduler_loop end  ", time.asctime())
 
         self.assertTrue(hasattr(svc3, 'in_maintenance'))
         self.assertEqual(1, len(self.sched.downtimes))
         try:
-            print "........................................."
-            print self.sched.downtimes[1]
-            print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
-            print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
+            print(".........................................")
+            print(self.sched.downtimes[1])
+            print("downtime starts", time.asctime(self.sched.downtimes[1].start_time))
+            print("downtime ends  ", time.asctime(self.sched.downtimes[1].end_time))
         except Exception:
-            print "looks like there is no downtime"
+            print("looks like there is no downtime")
             pass
         self.assertEqual(1, len(svc3.downtimes))
-        self.assertIn(svc3.downtimes[0], self.sched.downtimes.values())
+        self.assertIn(svc3.downtimes[0], list(self.sched.downtimes.values()))
         self.assertTrue(svc3.in_scheduled_downtime)
         self.assertTrue(svc3.downtimes[0].fixed)
         self.assertTrue(svc3.downtimes[0].is_in_effect)

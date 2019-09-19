@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -31,7 +33,7 @@ class TestInheritanceAndPlus(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         linux = self.sched.hostgroups.find_by_name('linux')
         self.assertIsNot(linux, None)
@@ -44,13 +46,13 @@ class TestInheritanceAndPlus(ShinkenTest):
         host2 = self.sched.hosts.find_by_name("test-server2")
         # HOST 1 is lin-servers,dmz, so should be in linux AND DMZ group
         for hg in host1.hostgroups:
-            print hg.get_name()
+            print(hg.get_name())
         self.assertIn(linux.get_name(), [hg.get_name() for hg in host1.hostgroups])
         self.assertIn(dmz.get_name(), [hg.get_name() for hg in host1.hostgroups])
 
         # HOST2 is in lin-servers,dmz and +mysql, so all three of them
         for hg in host2.hostgroups:
-            print hg.get_name()
+            print(hg.get_name())
         self.assertIn(linux.get_name(), [hg.get_name() for hg in host2.hostgroups])
         self.assertIn(dmz.get_name(), [hg.get_name() for hg in host2.hostgroups])
         self.assertIn(mysql.get_name(), [hg.get_name() for hg in host2.hostgroups])

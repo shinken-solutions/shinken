@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -35,7 +37,7 @@ class TestNotifMacros(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         #now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -48,13 +50,13 @@ class TestNotifMacros(ShinkenTest):
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         # Should got a notif here
-        self.assertGreater(len(svc.notifications_in_progress.values()), 0)
+        self.assertGreater(len(list(svc.notifications_in_progress.values())), 0)
         #n = svc.notifications_in_progress.values()[0]
         got_notif = False
         r = 'plugins/macros_check.sh "_HOSTADMINEMAIL=" "monemail@masociete.domain" ' \
             '"_HOSTCOMPANYNAME=" "masociete" "_CONTACTTESTC=" "sender@masociete.domain" "toto"'
         for a in self.sched.actions.values():
-            print a.command
+            print(a.command)
             if a.command == r:
                 got_notif = True
         self.assertTrue(got_notif)

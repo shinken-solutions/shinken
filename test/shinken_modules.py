@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import re
 import copy
@@ -54,7 +56,7 @@ class ShinkenModulesTest(ShinkenTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
+        ids = list(self.sched.brokers['Default-Broker']['broks'].keys())
         ids.sort()
         for brok_id in ids:
             brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
@@ -108,7 +110,7 @@ class ShinkenModulesTest(ShinkenTest):
                     f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
+            print("errors during load", s)
         del self.livestatus_broker.debug_output
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
@@ -158,7 +160,7 @@ class TestConfig(ShinkenModulesTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
-        ids = self.sched.brokers['Default-Broker']['broks'].keys()
+        ids = list(self.sched.brokers['Default-Broker']['broks'].keys())
         ids.sort()
         for brok_id in ids:
             brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
@@ -208,8 +210,8 @@ class TestConfig(ShinkenModulesTest):
             return cmp(data1, data2) == 0
 
     def show_broks(self, title):
-        print
-        print "--- ", title
+        print()
+        print("--- ", title)
         for brok in sorted(self.sched.broks, lambda x, y: x.id - y.id):
             if re.compile('^service_').match(brok.type):
                 pass
@@ -218,6 +220,6 @@ class TestConfig(ShinkenModulesTest):
         self.update_broker()
         request = 'GET services\nColumns: service_description is_executing\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
+        print(response)
 
 

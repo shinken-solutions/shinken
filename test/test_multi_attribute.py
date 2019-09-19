@@ -22,6 +22,7 @@
 # This file is used to test multi valued attribute feature.
 #
 
+from __future__ import absolute_import
 import re
 from shinken_test import unittest, ShinkenTest
 

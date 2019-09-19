@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -31,7 +33,7 @@ class TestDefinitionOrder(ShinkenTest):
         self.setup_with_file('etc/shinken_definition_order.cfg')
 
     def test_definition_order(self):
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         svc_specific = self.sched.services.find_srv_by_name_and_hostname("test_host_specific", "ZE-SERVICE")
         svc_generic  = self.sched.services.find_srv_by_name_and_hostname("test_host_generic", "ZE-SERVICE")
@@ -39,10 +41,10 @@ class TestDefinitionOrder(ShinkenTest):
         self.assertIsNot(svc_specific, None)
         self.assertIsNot(svc_generic, None)
 
-        print svc_generic.check_command.command.command_name
+        print(svc_generic.check_command.command.command_name)
         self.assertEqual('general', svc_generic.check_command.command.command_name)
         
-        print svc_specific.check_command.command.command_name
+        print(svc_specific.check_command.command.command_name)
         self.assertEqual('specific', svc_specific.check_command.command.command_name)
         
         

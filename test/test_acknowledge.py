@@ -22,6 +22,8 @@
 # This file is used to test acknowledge of problems
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -216,7 +218,7 @@ class TestAcks(ShinkenTest):
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notif
         self.show_actions()
-        print(self.count_actions())
+        print((self.count_actions()))
         self.assertEqual(2, self.count_actions())  # evt, recovery notif zombie
         self.assertFalse(svc.problem_has_been_acknowledged)
         self.assertEqual(0, svc.current_notification_number)
@@ -508,7 +510,7 @@ class TestAcks(ShinkenTest):
         self.assertEqual(2, self.count_logs())  # alert, eventhndlr, notification
         self.show_actions()
 
-        print(self.count_actions())
+        print((self.count_actions()))
         self.assertEqual(1, self.count_actions())  # evt, no more notif
         self.assertFalse(host.problem_has_been_acknowledged)
         self.assertEqual(0, host.current_notification_number)
@@ -608,7 +610,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assertEqual(3, self.count_logs())  # alert, eventhndlr, notification
-        print(self.count_actions())
+        print((self.count_actions()))
         self.show_actions()
         self.assertEqual(2, self.count_actions())  # evt,  recovery notif zombie
         self.assertFalse(host.problem_has_been_acknowledged)

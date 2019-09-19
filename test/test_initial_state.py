@@ -22,6 +22,7 @@
 # This file is used to test object properties overriding.
 #
 
+from __future__ import absolute_import
 from shinken_test import unittest, ShinkenTest
 import re
 

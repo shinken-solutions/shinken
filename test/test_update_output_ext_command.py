@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -32,7 +34,7 @@ class TestUpdateOutputExtCommand(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -44,7 +46,7 @@ class TestUpdateOutputExtCommand(ShinkenTest):
         cmd = "[%lu] PROCESS_SERVICE_OUTPUT;test_host_0;test_ok_0;My ass is cool | toto=30%%" % now
         self.sched.run_external_command(cmd)
         self.scheduler_loop(2, [])
-        print svc.perf_data
+        print(svc.perf_data)
         self.assertEqual('toto=30%', svc.perf_data)
 
 if __name__ == '__main__':

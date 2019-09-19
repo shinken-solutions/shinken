@@ -23,6 +23,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -36,7 +38,7 @@ class TestConfig(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -52,10 +54,10 @@ class TestConfig(ShinkenTest):
         self.assertEqual('HARD', host.state_type)
 
         for n in svc.notifications_in_progress.values():
-            print "HEHE"
-            print n.__dict__
+            print("HEHE")
+            print(n.__dict__)
             n.execute()
-            print n.exit_status
+            print(n.exit_status)
             n.output = u'I love myself $£¤'
             self.sched.put_results(n)
 

@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -30,7 +32,7 @@ class TestConfig(ShinkenTest):
 
     def test_illegal_caracter_in_names(self):
         illegal_caracts = self.sched.conf.illegal_object_name_chars
-        print "Illegal caracters: %s" % illegal_caracts
+        print("Illegal caracters: %s" % illegal_caracts)
         host = self.sched.hosts.find_by_name("test_host_0")
         # should be correct
         self.assertTrue(host.is_correct())

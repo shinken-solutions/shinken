@@ -408,7 +408,7 @@ for o in not_allowed_options:
     if o in sys.argv:
         sys.argv.remove(o)
 
-required_pkgs = ['pycurl']
+required_pkgs = ['pycurl', 'six']
 setup(
     name="Shinken",
     version="2.4.3",

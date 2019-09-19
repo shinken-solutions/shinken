@@ -23,10 +23,11 @@
 Test shinken.logging
 """
 
+from __future__ import absolute_import
 import sys
 import os
 import time
-import cPickle
+import six.moves.cPickle
 from cStringIO import StringIO
 
 from tempfile import NamedTemporaryFile
@@ -117,8 +118,8 @@ class LogCollectMixin:
         for obj in collector.list:
             self.assertIsInstance(obj, Brok)
             self.assertEqual(obj.type, 'log')
-            data = cPickle.loads(obj.data)
-            self.assertEqual(data.keys(), ['log'])
+            data = six.moves.cPickle.loads(obj.data)
+            self.assertEqual(list(data.keys()), ['log'])
             yield data['log']
 
     def _prepare_logging(self):

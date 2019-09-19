@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -36,12 +38,12 @@ class TestConfig(ShinkenTest):
         # in the main config file
         #
         for s in self.sched.services:
-            print s.get_full_name()
+            print(s.get_full_name())
         NRPE = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "NRPE")
         self.assertIsNot(NRPE, None)
         Load = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "Load")
         self.assertIsNot(Load, None)
-        print Load.act_depend_of
+        print(Load.act_depend_of)
         self.assertIn(NRPE, [e[0] for e in Load.act_depend_of])
 
 

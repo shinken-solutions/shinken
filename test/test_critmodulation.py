@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -35,11 +37,11 @@ class TestCritMod(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get our criticity modulation"
+        print("Get our criticity modulation")
         cm = self.sched.conf.businessimpactmodulations.find_by_name('CritMod')
         self.assertIsNot(cm, None)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        print svc.business_impact_modulations
+        print(svc.business_impact_modulations)
         self.assertIn(cm, svc.business_impact_modulations)
 
 

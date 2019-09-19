@@ -4,6 +4,8 @@
 # This file is used to test host- and service-downtimes.
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 import sys
 from sys import __stdout__
 from functools import partial
@@ -54,6 +56,8 @@ from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 from shinken.daemons.receiverdaemon import Receiver
 from logging import ERROR
+import six
+from six.moves import range
 
 # Modules are by default on the ../modules
 myself = os.path.abspath(__file__)
@@ -96,9 +100,9 @@ def safe_print(*args, **kw):
     if kw:
         raise ValueError('unhandled named/keyword argument(s): %r' % kw)
     #
-    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+    make_in_data_gen = lambda: ( a if isinstance(a, six.text_type)
                                 else
-                            unicode(str(a), in_bytes_encoding, 'replace')
+                            six.text_type(str(a), in_bytes_encoding, 'replace')
                         for a in args )
 
     possible_codings = ( out_encoding, )
@@ -314,7 +318,7 @@ class ShinkenTest(unittest.TestCase):
             obj.checks_in_progress = []
         for loop in range(1, count + 1):
             if verbose is True:
-                print("processing check %s" % loop)
+                print(("processing check %s" % loop))
             for ref in reflist:
                 (obj, exit_status, output) = ref
                 obj.update_in_checking()
@@ -371,15 +375,15 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(actions.values(), key=lambda x, y: x.id - y.id):
+        for a in sorted(list(actions.values()), key=lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
                 else:
                     ref = "host: %s svc: %s" % (a.ref.host.get_name(), a.ref.get_name())
-                print("NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status))
+                print(("NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status)))
             elif a.is_a == 'eventhandler':
-                print("EVENTHANDLER: %s" % a)
+                print(("EVENTHANDLER: %s" % a))
         print("--- actions >>>----------------------------------")
 
 
@@ -406,7 +410,7 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        return len(actions.values())
+        return len(list(actions.values()))
 
 
     def clear_logs(self):
@@ -439,9 +443,9 @@ class ShinkenTest(unittest.TestCase):
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
-                print("%s (%s): %s" % (lognum, brok.id, brok.data['log']))
+                print(("%s (%s): %s" % (lognum, brok.id, brok.data['log'])))
                 if index == lognum:
-                    print(brok.data['log'])
+                    print((brok.data['log']))
                     if re.search(regex, brok.data['log']):
                         return
                 lognum += 1
@@ -494,9 +498,9 @@ class ShinkenTest(unittest.TestCase):
         return res
 
     def print_header(self):
-        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
-        print("#" + ('%s' % self.id()).center(78) + "#")
-        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
+        print(("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"))
+        print(("#" + ('%s' % self.id()).center(78) + "#"))
+        print(("#" + " " * 78 + "#\n" + "#" * 80 + "\n"))
 
     def xtest_conf_is_correct(self):
         self.print_header()

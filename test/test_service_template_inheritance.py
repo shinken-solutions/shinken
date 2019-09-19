@@ -22,6 +22,8 @@
 # This file is used to test attribute inheritance and the right order
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -39,7 +41,7 @@ class TestConfig(ShinkenTest):
         self.assertFalse(svc2.action_url)
         self.assertEqual(False, svc2.process_perf_data)
 
-        print svc1.tags
+        print(svc1.tags)
         self.assertIn('no-graph', svc1.tags)
         self.assertIn('base-service-prod', svc1.tags)
 

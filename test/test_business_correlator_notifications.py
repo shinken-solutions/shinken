@@ -22,6 +22,7 @@
 # This file is used to test business rules smart notifications behaviour.
 #
 
+from __future__ import absolute_import
 import time
 from shinken_test import unittest, ShinkenTest, time_hacker
 

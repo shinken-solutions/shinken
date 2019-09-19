@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -31,7 +33,7 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/shinken_bad_timeperiods.cfg')
 
     def test_bad_timeperiod(self):
-        print "Get the bad timeperiod"
+        print("Get the bad timeperiod")
         tp = self.conf.timeperiods.find_by_name("24x7")
         self.assertEqual(True, tp.is_correct())
         tp = self.conf.timeperiods.find_by_name("24x7_bad")

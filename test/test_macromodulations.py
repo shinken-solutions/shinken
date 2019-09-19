@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -35,11 +37,11 @@ class TestMacroModulations(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("host_modulated")
         self.assertIsNot(host, None)
-        print host.macromodulations
+        print(host.macromodulations)
 
         mod = self.sched.macromodulations.find_by_name("MODULATION")
         self.assertIsNot(mod, None)
@@ -48,7 +50,7 @@ class TestMacroModulations(ShinkenTest):
 
         c = None
         for c in host.checks_in_progress:
-            print c.command
+            print(c.command)
             # THE hst got 2 modulations. The first with the value MODULATED
             # and the second with NOT_THE_GOOD. Both are currently active, but we want the firt one
             self.assertEqual('plugins/nothing MODULATED', c.command)

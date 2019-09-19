@@ -22,6 +22,7 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import
 from shinken_test import *
 import time
 

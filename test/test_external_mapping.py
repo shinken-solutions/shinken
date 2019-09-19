@@ -21,6 +21,8 @@
 Test libexec/external_mapping.py
 """
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import time
 import subprocess
@@ -36,7 +38,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error: you need the json or simplejson module"
+        print("Error: you need the json or simplejson module")
         raise
                                                 
 external_mapping = os.path.join(os.path.dirname(__file__),

@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -29,7 +31,7 @@ class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_satellite_failed_check(self):
-        print "Create a Scheduler dummy"
+        print("Create a Scheduler dummy")
         r = self.conf.realms.find_by_name('Default')
 
         creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0',
@@ -44,7 +46,7 @@ class TestConfig(ShinkenTest):
         s.realm = r
         # Lie: we start at true here
         s.alive = True
-        print s.__dict__
+        print(s.__dict__)
 
         # Should be attempt = 0
         self.assertEqual(0, s.attempt)

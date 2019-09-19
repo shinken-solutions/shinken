@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -35,7 +37,7 @@ class TestBadEscaOnGroups(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -46,7 +48,7 @@ class TestBadEscaOnGroups(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-        print svc.escalations
+        print(svc.escalations)
 
         self.assertGreater(len(svc.escalations), 0)
         es = svc.escalations.pop()

@@ -23,6 +23,7 @@ Test shinken.property
 """
 
 
+from __future__ import absolute_import
 import __import_shinken
 
 import shinken

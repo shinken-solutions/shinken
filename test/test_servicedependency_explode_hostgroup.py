@@ -23,6 +23,8 @@
 #
 
 #It's ugly I know....
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -39,7 +41,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
         self.assertEqual(len(svc.act_depend_of_me), 2)
 

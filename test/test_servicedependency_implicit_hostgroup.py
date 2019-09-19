@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -34,7 +36,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX")
@@ -50,14 +52,14 @@ class TestServiceDepAndGroups(ShinkenTest):
         self.assertIsNot(svc_snmp2, None)
 
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
-        print svc_postfix_fathers
+        print(svc_postfix_fathers)
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assertIn('test_router_0/SNMP', svc_postfix_fathers)
         self.assertIn('test_host_0/SNMP', svc_postfix_fathers)
 
         # Now look for the routers services
         svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
-        print svc_cpu_fathers
+        print(svc_cpu_fathers)
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assertIn('test_router_0/SNMP', svc_cpu_fathers)
         self.assertIn('test_host_0/SNMP', svc_cpu_fathers)
@@ -69,7 +71,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX_BYSSH")
         self.assertIsNot(svc_postfix, None)
@@ -81,13 +83,13 @@ class TestServiceDepAndGroups(ShinkenTest):
         self.assertIsNot(svc_cpu, None)
 
         svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
-        print svc_postfix_fathers
+        print(svc_postfix_fathers)
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assertIn('test_host_0/SSH', svc_postfix_fathers)
 
         # Now look for the routers services
         svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
-        print svc_cpu_fathers
+        print(svc_cpu_fathers)
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assertIn('test_host_0/SSH', svc_cpu_fathers)
 

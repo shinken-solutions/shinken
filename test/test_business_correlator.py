@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 import re
 from shinken_test import *
 
@@ -37,7 +39,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -70,7 +72,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertIn(svc_bd2, svc_cor.parent_dependencies)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -137,7 +139,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -162,7 +164,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('&', bp_rule.operand)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -243,7 +245,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -292,7 +294,7 @@ class TestBusinesscorrel(ShinkenTest):
                 self.assertEqual(('1', '2', '2'), bp_rule.of_values)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -372,7 +374,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -411,7 +413,7 @@ class TestBusinesscorrel(ShinkenTest):
                 self.assertEqual(('1', '2', '2'), bp_rule.of_values)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('host', sons[0].operand)
@@ -426,7 +428,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -451,7 +453,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('|', bp_rule.operand)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -469,7 +471,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -483,7 +485,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -499,7 +501,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -513,7 +515,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -529,7 +531,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -543,7 +545,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -560,7 +562,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(2, state)
 
         # And now we must be CRITICAL/SOFT!
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -574,14 +576,14 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('CRITICAL', svc_cor.state)
         self.assertEqual('SOFT', svc_cor.state_type)
         self.assertEqual(0, svc_cor.last_hard_state_id)
 
         # OK, re recheck again, GO HARD!
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -595,7 +597,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('CRITICAL', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -612,7 +614,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(1, state)
 
         # And in a HARD
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -626,17 +628,17 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('WARNING', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
         self.assertEqual(1, svc_cor.last_hard_state_id)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
 
-        print "IMPACT:", svc_bd2.impacts
+        print("IMPACT:", svc_bd2.impacts)
         for i in svc_bd2.impacts:
-            print i.get_name()
+            print(i.get_name())
 
         # Assert that Simple_Or Is an impact of the problem bd2
         self.assertIn(svc_cor, svc_bd2.impacts)
@@ -656,13 +658,13 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assertEqual('|', bp_rule.operand)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
         all_elt = bp_rule.list_all_elements()
 
         self.assertIn(svc_bd2, all_elt)
         self.assertIn(svc_bd1, all_elt)
 
-        print "DBG: bd2 depend_on_me", svc_bd2.act_depend_of_me
+        print("DBG: bd2 depend_on_me", svc_bd2.act_depend_of_me)
 
     # We will try a full ERP rule and
     # schedule a real check and see if it's good
@@ -671,7 +673,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -708,7 +710,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('&', bp_rule.operand)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 3 sons, each 3 rules
         self.assertEqual(3, len(sons))
         bd_node = sons[0]
@@ -726,7 +728,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -740,7 +742,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "Look at svc_cor state", svc_cor.state
+        print("Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -756,7 +758,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "Launch internal check"
+        print("Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -770,7 +772,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -786,7 +788,7 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assertEqual(0, state)
 
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -800,7 +802,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -817,7 +819,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(2, state)
 
         # And now we must be CRITICAL/SOFT!
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -831,14 +833,14 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('CRITICAL', svc_cor.state)
         self.assertEqual('SOFT', svc_cor.state_type)
         self.assertEqual(0, svc_cor.last_hard_state_id)
 
         # OK, re recheck again, GO HARD!
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -852,7 +854,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('CRITICAL', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -869,7 +871,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(1, state)
 
         # And in a HARD
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -883,17 +885,17 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('WARNING', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
         self.assertEqual(1, svc_cor.last_hard_state_id)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
 
-        print "IMPACT:", svc_bd2.impacts
+        print("IMPACT:", svc_bd2.impacts)
         for i in svc_bd2.impacts:
-            print i.get_name()
+            print(i.get_name())
 
         # Assert that Simple_Or Is an impact of the problem bd2
         self.assertIn(svc_cor, svc_bd2.impacts)
@@ -903,7 +905,7 @@ class TestBusinesscorrel(ShinkenTest):
         # And now all is green :)
         self.scheduler_loop(2, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | value1=1 value2=2']])
 
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -917,7 +919,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -932,7 +934,7 @@ class TestBusinesscorrel(ShinkenTest):
         # And now all is green :)
         self.scheduler_loop(2, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2'], [svc_web1, 2, 'CRITICAL | value1=1 value2=2']])
 
-        print "ERP: Launch internal check"
+        print("ERP: Launch internal check")
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assertEqual(True, c.internal)
@@ -946,7 +948,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should have no more the check
         self.assertEqual(0, len(svc_cor.actions))
 
-        print "ERP: Look at svc_cor state", svc_cor.state
+        print("ERP: Look at svc_cor state", svc_cor.state)
         # What is the svc_cor state now?
         self.assertEqual('OK', svc_cor.state)
         self.assertEqual('HARD', svc_cor.state_type)
@@ -965,7 +967,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -1007,7 +1009,7 @@ class TestBusinesscorrel(ShinkenTest):
             self.assertEqual(('100%', '20%', '20%'), bp_rule.of_values)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(5, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -1079,7 +1081,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         # Must be WARNING (worse no 0 value for both, like for AND rule)
         state = bp_rule.get_state()
-        print "state", state
+        print("state", state)
         self.assertEqual(1, state)
 
         # Ok now more fun, with changing of_values and states
@@ -1163,7 +1165,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -1188,7 +1190,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('&', bp_rule.operand)
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         self.assertEqual('service', sons[0].operand)
@@ -1272,7 +1274,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -1314,7 +1316,7 @@ class TestBusinesscorrel(ShinkenTest):
 
 
         sons = bp_rule.sons
-        print "Sons,", sons
+        print("Sons,", sons)
         # We've got 2 sons, 2 services nodes
         self.assertEqual(2, len(sons))
         # Son0 is (test_host_0,db1| (test_host_0,db2 & (test_host_0,lvs1|test_host_0,lvs2) ) )
@@ -1405,9 +1407,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(1, state)
 
         # We should got now svc_bd2 and svc_bd1 as root problems
-        print "Root problems"
+        print("Root problems")
         for p in svc_cor.source_problems:
-            print p.get_full_name()
+            print(p.get_full_name())
         self.assertIn(svc_bd1, svc_cor.source_problems)
         self.assertIn(svc_bd2, svc_cor.source_problems)
 
@@ -1424,9 +1426,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual(2, state)
 
         # Now our root problem is router
-        print "Root problems"
+        print("Root problems")
         for p in svc_cor.source_problems:
-            print p.get_full_name()
+            print(p.get_full_name())
         self.assertIn(router, svc_cor.source_problems)
 
 
@@ -1446,7 +1448,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_darthelmet")
         host.checks_in_progress = []
@@ -1467,7 +1469,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('HARD', A.state_type)
 
         state = bp_rule.get_state()
-        print "WTF0", state
+        print("WTF0", state)
         self.assertEqual(0, state)
 
         # Now we set the A as soft/DOWN
@@ -1488,7 +1490,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         # The rule must still be a 2 (or inside)
         state = bp_rule.get_state()
-        print "WFT", state
+        print("WFT", state)
         self.assertEqual(2, state)
 
         # Now we also set B as DOWN/HARD, should get back to 0!
@@ -1518,7 +1520,7 @@ class TestConfigBroken(ShinkenTest):
         # the arbiter to output an error message and exit
         # in a controlled manner.
         #
-        print "conf_is_correct", self.conf.conf_is_correct
+        print("conf_is_correct", self.conf.conf_is_correct)
         self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks

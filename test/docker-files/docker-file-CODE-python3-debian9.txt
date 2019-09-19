@@ -2,16 +2,21 @@ FROM       naparuba/debian-9-python3
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 
-RUN        apt-get install -y python3-setuptools
-RUN         apt-get install -y python3-pycurl
-RUN         apt-get install -y procps
-RUN         apt-get install -y python3-cherrypy3
-RUN         apt-get install -y python3-unittest2
-RUN         apt-get install -y dos2unix
-RUN         apt-get install -y python3-pip
+RUN        apt-get update && apt-get install -y python3-setuptools
+RUN        apt-get update &&  apt-get install -y python3-pycurl
+RUN        apt-get update &&  apt-get install -y procps
+RUN        apt-get update &&  apt-get install -y python3-cherrypy3
+RUN        apt-get update &&  apt-get install -y python3-unittest2
+RUN        apt-get update &&  apt-get install -y dos2unix
+RUN        apt-get update &&  apt-get install -y python3-pip
+RUN        apt-get update &&  apt-get install -y python3-six
 RUN         pip3 install pep8
 
 ADD        . /root/shinken-framework
 
+
 WORKDIR       /root/shinken-framework/test
+
+RUN        chmod a+x *
+RUN        dos2unix *
 ENTRYPOINT    ./quick_tests.sh

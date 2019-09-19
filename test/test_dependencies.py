@@ -22,6 +22,8 @@
 # This file is used to test host- and service-downtimes.
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 sys.setcheckinterval(10000)
 
@@ -98,9 +100,9 @@ class TestConfig(ShinkenTest):
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
         #self.assertTrue(host_A in [x[0] for x in host_C.chk_depend_of])
-        print host_C.act_depend_of
-        print host_C.chk_depend_of
-        print host_C.chk_depend_of_me
+        print(host_C.act_depend_of)
+        print(host_C.chk_depend_of)
+        print(host_C.chk_depend_of_me)
         self.assertIn(host_B, [x[0] for x in host_C.act_depend_of])
         self.assertIn(host_A, [x[0] for x in host_C.act_depend_of])
         self.assertIn(host_A, [x[0] for x in host_B.act_depend_of])
@@ -139,10 +141,10 @@ class TestConfig(ShinkenTest):
         host_C = self.sched.hosts.find_by_name("test_host_C")
         host_D = self.sched.hosts.find_by_name("test_host_D")
 
-        print "A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of])
-        print "B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of])
-        print "C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of])
-        print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
+        print("A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of]))
+        print("B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of]))
+        print("C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of]))
+        print("D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of]))
 
         self.assertEqual([], host_A.act_depend_of)
         self.assertIn(host_A, [x[0] for x in host_B.act_depend_of])
@@ -160,10 +162,10 @@ class TestConfig(ShinkenTest):
         svc_parent = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_parent_svc")
         svc_son = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_son_svc")
 
-        print "DumP", self.conf.servicedependencies
+        print("DumP", self.conf.servicedependencies)
 
         # the most important: test_parent is in the chk_depend_of-list of test_son
-        print "Dep: ", svc_son.act_depend_of
+        print("Dep: ", svc_son.act_depend_of)
         self.assertEqual([x[1] for x in svc_son.act_depend_of if x[0] is svc_parent], [['u', 'c', 'w']] )
 
     def test_host_non_inherits_dependencies(self):
@@ -178,16 +180,16 @@ class TestConfig(ShinkenTest):
         host_D = self.sched.hosts.find_by_name("test_host_D")
         host_E = self.sched.hosts.find_by_name("test_host_E")
 
-        print "A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of])
-        print "B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of])
-        print "C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of])
-        print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
-        print "E depends on", ",".join([x[0].get_name() for x in host_E.chk_depend_of])
+        print("A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of]))
+        print("B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of]))
+        print("C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of]))
+        print("D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of]))
+        print("E depends on", ",".join([x[0].get_name() for x in host_E.chk_depend_of]))
 
         host_C.state = 'DOWN'
-        print "D state", host_D.state
-        print "E dep", host_E.chk_depend_of
-        print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
+        print("D state", host_D.state)
+        print("E dep", host_E.chk_depend_of)
+        print("I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False))
         # If I ask D for dep, he should raise Nothing if we do not want parents.
         self.assertFalse(host_D.do_i_raise_dependency('d', inherit_parents=False) )
         # But he should raise a problem (C here) of we ask for its parents

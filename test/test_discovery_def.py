@@ -22,7 +22,10 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
+from six.moves import range
 
 
 class TestDiscoveryConf(ShinkenTest):
@@ -66,7 +69,7 @@ class TestDiscoveryConf(ShinkenTest):
 
         # But NOT this one
         l = {'openports': '80', 'os': 'windows'}
-        print "Should NOT match"
+        print("Should NOT match")
         self.assertEqual(False, genhttpnowin.is_matching_disco_datas(l))
 
         # Now look for strict rule application
@@ -91,14 +94,14 @@ class TestDiscoveryConf(ShinkenTest):
         self.assertIsNotNone(nmap.discoveryrun_command)
         # Launch it
         nmap.launch()
-        for i in xrange(1, 5):
+        for i in range(1, 5):
             nmap.check_finished()
             if nmap.is_finished():
                 break
             time.sleep(1)
-        print "Exit status", nmap.current_launch.exit_status
-        print "Output", nmap.current_launch.output
-        print "LongOutput", nmap.current_launch.long_output
+        print("Exit status", nmap.current_launch.exit_status)
+        print("Output", nmap.current_launch.output)
+        print("LongOutput", nmap.current_launch.long_output)
 
 
     def test_look_for_host_discorule(self):
@@ -127,8 +130,8 @@ class TestDiscoveryConf(ShinkenTest):
         l = {'openports': '80'}
         self.assertEqual(True, genhttp.is_matching_disco_datas(l))
 
-        print "Writing properties"
-        print genhttp.writing_properties
+        print("Writing properties")
+        print(genhttp.writing_properties)
 
 
 
@@ -161,8 +164,8 @@ class TestDiscoveryConf(ShinkenTest):
         l = {'openports': '80'}
         self.assertEqual(True, genhttp.is_matching_disco_datas(l))
 
-        print "Writing properties"
-        print genhttp.writing_properties
+        print("Writing properties")
+        print(genhttp.writing_properties)
         
         
 
@@ -170,7 +173,7 @@ class TestDiscoveryConf(ShinkenTest):
     def test_discorun_matches(self):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
         self.assertIsNotNone(linux)
-        print linux.__dict__
+        print(linux.__dict__)
         self.assertEqual({u'osvendor': u'linux'}, linux.matches)
 
         key = 'osvendor'

@@ -22,7 +22,10 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
+from six.moves import range
 
 
 class TestFlapping(ShinkenTest):
@@ -35,7 +38,7 @@ class TestFlapping(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         router = self.sched.hosts.find_by_name("test_router_0")
@@ -45,23 +48,23 @@ class TestFlapping(ShinkenTest):
         self.assertEqual('HARD', host.state_type)
         self.assertTrue(svc.flap_detection_enabled)
 
-        print 'A' * 41, svc.low_flap_threshold
+        print('A' * 41, svc.low_flap_threshold)
         self.assertEqual(-1, svc.low_flap_threshold)
 
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "******* Current flap change lsit", svc.flapping_changes
+        print("******* Current flap change lsit", svc.flapping_changes)
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "****** Current flap change lsit", svc.flapping_changes
+        print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
-            print "I:", i
+            print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
-            print "******* Current flap change lsit", svc.flapping_changes
+            print("******* Current flap change lsit", svc.flapping_changes)
             self.scheduler_loop(1, [[svc, 2, 'Crit']])
-            print "****** Current flap change lsit", svc.flapping_changes
-            print "In flapping?", svc.is_flapping
+            print("****** Current flap change lsit", svc.flapping_changes)
+            print("In flapping?", svc.is_flapping)
 
         # Should get in flapping now
         self.assertTrue(svc.is_flapping)
@@ -71,15 +74,15 @@ class TestFlapping(ShinkenTest):
 
         # Now we put it as back :)
         # 10 is not enouth to get back as normal
-        for i in xrange(1, 11):
+        for i in range(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
-            print "In flapping?", svc.is_flapping
+            print("In flapping?", svc.is_flapping)
         self.assertTrue(svc.is_flapping)
 
         # 10 others can be good (near 4.1 %)
-        for i in xrange(1, 11):
+        for i in range(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
-            print "In flapping?", svc.is_flapping
+            print("In flapping?", svc.is_flapping)
         self.assertFalse(svc.is_flapping)
         self.assert_any_log_match('SERVICE FLAPPING ALERT.*;STOPPED')
         self.assert_any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP')
@@ -88,18 +91,18 @@ class TestFlapping(ShinkenTest):
 
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "******* Current flap change lsit", svc.flapping_changes
+        print("******* Current flap change lsit", svc.flapping_changes)
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "****** Current flap change lsit", svc.flapping_changes
+        print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
-            print "I:", i
+            print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
-            print "******* Current flap change lsit", svc.flapping_changes
+            print("******* Current flap change lsit", svc.flapping_changes)
             self.scheduler_loop(1, [[svc, 2, 'Crit']])
-            print "****** Current flap change lsit", svc.flapping_changes
-            print "In flapping?", svc.is_flapping
+            print("****** Current flap change lsit", svc.flapping_changes)
+            print("In flapping?", svc.is_flapping)
 
         # Should get in flapping now
         self.assertTrue(svc.is_flapping)
@@ -120,18 +123,18 @@ class TestFlapping(ShinkenTest):
 
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "******* Current flap change lsit", svc.flapping_changes
+        print("******* Current flap change lsit", svc.flapping_changes)
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
-        print "****** Current flap change lsit", svc.flapping_changes
+        print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
-            print "I:", i
+            print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
-            print "******* Current flap change lsit", svc.flapping_changes
+            print("******* Current flap change lsit", svc.flapping_changes)
             self.scheduler_loop(1, [[svc, 2, 'Crit']])
-            print "****** Current flap change lsit", svc.flapping_changes
-            print "In flapping?", svc.is_flapping
+            print("****** Current flap change lsit", svc.flapping_changes)
+            print("In flapping?", svc.is_flapping)
 
         # Should get in flapping now
         self.assertTrue(svc.is_flapping)

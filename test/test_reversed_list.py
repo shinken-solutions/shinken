@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 from shinken_test import ShinkenTest, unittest
 from shinken.misc.regenerator import Regenerator
 from shinken.brok import Brok

@@ -23,7 +23,10 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
+import six
 
 
 
@@ -41,7 +44,7 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -55,22 +58,22 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         #self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         #self.assertEqual('UP', host.state)
         #self.assertEqual('HARD', host.state_type)
-        print svc.check_command
+        print(svc.check_command)
         self.assertEqual(0, len(svc.checks_in_progress))
         svc.launch_check(time.time())
-        print svc.checks_in_progress
+        print(svc.checks_in_progress)
         self.assertEqual(1, len(svc.checks_in_progress))
         c = svc.checks_in_progress.pop()
         #print c
         c.execute()
         time.sleep(0.5)
         c.check_finished(8000)
-        print c.status
+        print(c.status)
         self.assertEqual('done', c.status)
         self.assertEqual(u'£°é§', c.output)
-        print "Done with good output, that's great"
+        print("Done with good output, that's great")
         svc.consume_result(c)
-        self.assertEqual(unicode('£°é§'.decode('utf8')), svc.output)
+        self.assertEqual(six.text_type('£°é§'.decode('utf8')), svc.output)
 
 
 

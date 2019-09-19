@@ -21,6 +21,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 import unittest2 as unittest
 
 import string
@@ -71,9 +73,9 @@ class TestEndParsingType(unittest.TestCase):
             return str
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def add(self, b):
         if isinstance(b, Brok):
@@ -135,7 +137,7 @@ class TestEndParsingType(unittest.TestCase):
                             #print("TESTING %s with value %s" % (prop, value))
                             self.assertIsInstance(value, self.map_type(obj.properties[prop]))
                         else:
-                            print("Skipping %s " % prop)
+                            print(("Skipping %s " % prop))
                 #print "==="
 
         # Manual check of several attr for self.conf.contacts
@@ -146,10 +148,10 @@ class TestEndParsingType(unittest.TestCase):
                     value = getattr(contact, prop)
                     # We should get ride of None, maybe use the "neutral" value for type
                     if value is not None:
-                        print("TESTING %s with value %s" % (prop, value))
+                        print(("TESTING %s with value %s" % (prop, value)))
                         self.assertIsInstance(value, self.map_type(contact.properties[prop]))
                     else:
-                        print("Skipping %s " % prop)
+                        print(("Skipping %s " % prop))
 
         # Same here
         for notifway in self.conf.notificationways:
@@ -158,10 +160,10 @@ class TestEndParsingType(unittest.TestCase):
                     value = getattr(notifway, prop)
                     # We should get ride of None, maybe use the "neutral" value for type
                     if value is not None:
-                        print("TESTING %s with value %s" % (prop, value))
+                        print(("TESTING %s with value %s" % (prop, value)))
                         self.assertIsInstance(value, self.map_type(notifway.properties[prop]))
                     else:
-                        print("Skipping %s " % prop)
+                        print(("Skipping %s " % prop))
 
 if __name__ == '__main__':
     unittest.main()

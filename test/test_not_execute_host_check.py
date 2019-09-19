@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
 from shinken_test import *
 
 
@@ -36,14 +38,14 @@ class TestNoHostCheck(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
-        print host.checks_in_progress
+        print(host.checks_in_progress)
         self.assertEqual(0, len(host.checks_in_progress))
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        print svc.checks_in_progress
+        print(svc.checks_in_progress)
         self.assertNotEqual(len(svc.checks_in_progress), 0)
 
         # Now launch passive checks
@@ -52,7 +54,7 @@ class TestNoHostCheck(ShinkenTest):
 
         self.scheduler_loop(2, [])
 
-        print "Output", host.output
+        print("Output", host.output)
         self.assertEqual('bobo', host.output)
 
         # Now disable passive host check
@@ -66,7 +68,7 @@ class TestNoHostCheck(ShinkenTest):
         self.scheduler_loop(2, [])
 
         # This should NOT change this time
-        print "Output", host.output
+        print("Output", host.output)
         self.assertEqual('bobo', host.output)
 
 
