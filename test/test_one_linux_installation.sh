@@ -22,6 +22,7 @@ echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪
 # Try to start daemon, but we don't want systemd hook there
 SYSTEMCTL_SKIP_REDIRECT=1 /etc/init.d/shinken start
 if [ $? != 0 ]; then
+   cat /tmp/bad_start_*
    echo "ERROR: daemon start failed!"
    exit 2
 fi
