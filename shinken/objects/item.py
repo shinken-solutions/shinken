@@ -939,8 +939,6 @@ class Items(object):
 
 
     def __iter__(self):
-        if not PY3:
-            return self.items.itervalues()
         for item in self.items.values():
             yield item
 

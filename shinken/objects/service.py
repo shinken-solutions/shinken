@@ -1002,7 +1002,7 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        naglog_result('critical', 'SERVICE ALERT: %s;%s;%s;%s;%d;%s'
+        naglog_result('info', 'SERVICE ALERT: %s;%s;%s;%s;%d;%s'
                                   % (self.host.get_name(), self.get_name(),
                                      self.state, self.state_type,
                                      self.attempt, self.output))
@@ -1038,7 +1038,7 @@ class Service(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            naglog_result('critical', "SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
+            naglog_result('info', "SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s"
                                       % (contact.get_name(),
                                          self.host.get_name(), self.get_name(), state,
                                          command.get_name(), self.output))
@@ -1047,7 +1047,7 @@ class Service(SchedulingItem):
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            naglog_result('critical', "SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
+            naglog_result('info', "SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s"
                                       % (self.host.get_name(), self.get_name(),
                                          self.state, self.state_type,
                                          self.attempt, command.get_name()))
@@ -1057,7 +1057,7 @@ class Service(SchedulingItem):
     # SERVICE SNAPSHOT: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_snapshot_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            naglog_result('critical', "SERVICE SNAPSHOT: %s;%s;%s;%s;%s;%s"
+            naglog_result('info', "SERVICE SNAPSHOT: %s;%s;%s;%s;%s;%s"
                           % (self.host.get_name(), self.get_name(),
                              self.state, self.state_type, self.attempt, command.get_name()))
 
@@ -1066,7 +1066,7 @@ class Service(SchedulingItem):
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED;
     # Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STARTED; "
+        naglog_result('info', "SERVICE FLAPPING ALERT: %s;%s;STARTED; "
                                   "Service appears to have started flapping "
                                   "(%.1f%% change >= %.1f%% threshold)"
                                   % (self.host.get_name(), self.get_name(),
@@ -1077,7 +1077,7 @@ class Service(SchedulingItem):
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED;
     # Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        naglog_result('critical', "SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
+        naglog_result('info', "SERVICE FLAPPING ALERT: %s;%s;STOPPED; "
                                   "Service appears to have stopped flapping "
                                   "(%.1f%% change < %.1f%% threshold)"
                                   % (self.host.get_name(), self.get_name(),
@@ -1093,7 +1093,7 @@ class Service(SchedulingItem):
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED;
     # Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
+        naglog_result('info', "SERVICE DOWNTIME ALERT: %s;%s;STARTED; "
                                   "Service has entered a period of scheduled "
                                   "downtime" % (self.host.get_name(), self.get_name()))
 
@@ -1101,7 +1101,7 @@ class Service(SchedulingItem):
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED;
     # Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        naglog_result('critical', "SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
+        naglog_result('info', "SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service "
                                   "has exited from a period of scheduled downtime"
                       % (self.host.get_name(), self.get_name()))
 
@@ -1110,7 +1110,7 @@ class Service(SchedulingItem):
     # Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
         naglog_result(
-            'critical', "SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
+            'info', "SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; "
                         "Scheduled downtime for service has been cancelled."
             % (self.host.get_name(), self.get_name()))
 

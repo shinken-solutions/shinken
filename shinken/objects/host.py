@@ -1067,7 +1067,7 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        naglog_result('critical',
+        naglog_result('info',
                       'HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(),
                                                       self.state, self.state_type,
                                                       self.attempt, self.output))

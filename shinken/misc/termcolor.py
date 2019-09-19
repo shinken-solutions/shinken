@@ -25,7 +25,12 @@
 
 from __future__ import print_function
 import os
+import sys
 
+PY3 = sys.version_info >= (3,)
+if PY3:
+    basestring = str
+    unicode = str
 
 __ALL__ = ['colored', 'cprint']
 
