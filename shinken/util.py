@@ -45,7 +45,6 @@ try:
 except ImportError:
     resource = None
 
-from shinken.macroresolver import MacroResolver
 from shinken.log import logger
 
 try:
@@ -368,6 +367,7 @@ def to_svc_hst_distinct_lists(ref, tab):
 # Will expand the value with macros from the
 # host/service ref before brok it
 def expand_with_macros(ref, value):
+    from shinken.macroresolver import MacroResolver
     return MacroResolver().resolve_simple_macros_in_string(value, ref.get_data_for_checks())
 
 
