@@ -28,6 +28,7 @@
  them into independent parts. The main user of this is Arbiter, but schedulers
  use it too (but far less)"""
 
+import io
 import re
 import sys
 import string
@@ -68,7 +69,7 @@ from .hostextinfo import HostExtInfo, HostsExtInfo
 from .serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from .trigger import Triggers
 from .pack import Packs
-from shinken.util import split_semicolon
+from shinken.util import split_semicolon, unicode_to_bytes, bytes_to_unicode
 from shinken.objects.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.objects.reactionnerlink import ReactionnerLink, ReactionnerLinks
@@ -876,7 +877,7 @@ class Config(Item):
                 logger.info("[config] opening '%s' configuration file", file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
-                fd = open(file, 'rU')
+                fd = io.open(file, mode='rU', encoding='utf8')
                 buf = fd.readlines()
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
@@ -900,11 +901,12 @@ class Config(Item):
                         cfg_file_name = os.path.join(self.config_base_dir, elts[1])
                     cfg_file_name = cfg_file_name.strip()
                     try:
-                        fd = open(cfg_file_name, 'rU')
+                        fd = io.open(cfg_file_name, mode='rU', encoding='utf8')
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'", cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        res.write(string_decode(fd.read()))
+                        txt = fd.read()
+                        res.write(txt)
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
@@ -937,8 +939,8 @@ class Config(Item):
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' %
                                               (os.path.join(root, file)) + os.linesep)
-                                    fd = open(os.path.join(root, file), 'rU')
-                                    res.write(string_decode(fd.read()))
+                                    fd = io.open(os.path.join(root, file), mode='rU', encoding='utf8')
+                                    res.write(fd.read())
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
@@ -2456,11 +2458,12 @@ class Config(Item):
         else:
             close = False
         f.write(
-            json.dumps(
+            unicode_to_bytes(json.dumps(
                 dmp,
                 indent=4,
                 separators=(',', ': '),
                 sort_keys=True
+            )
             )
         )
         if close is True:

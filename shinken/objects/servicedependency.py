@@ -128,7 +128,7 @@ class Servicedependencies(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        servicedeps = self.items.keys()
+        servicedeps = list(self.items.keys())  # python3
         for id in servicedeps:
             sd = self.items[id]
             # Have we to explode the hostgroup into many service?

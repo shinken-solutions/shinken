@@ -30,6 +30,7 @@ from __future__ import absolute_import
 from shinken_test import *
 
 
+
 class TestBadServiceInterval(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_bad_service_interval.cfg')
@@ -37,7 +38,7 @@ class TestBadServiceInterval(ShinkenTest):
     def test_bad_conf(self):
         self.assertFalse(self.conf.conf_is_correct)
         self.assert_any_log_match("services conf incorrect!!")
-        self.assert_any_log_match("Error while pythonizing parameter 'check_interval': invalid literal for float\(\): 1,555")
+        self.assert_any_log_match("Error while pythonizing parameter 'check_interval'")
 
 if __name__ == '__main__':
     unittest.main()

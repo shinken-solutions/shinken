@@ -553,7 +553,7 @@ class Scheduler(object):
     # we take the sons and we put them into our actions queue
     def scatter_master_notifications(self):
         now = time.time()
-        for a in self.actions.values():
+        for a in list(self.actions.values()):  #copy the values becausee we will add new ones
             # We only want notifications
             if a.is_a != 'notification':
                 continue
@@ -1432,7 +1432,7 @@ class Scheduler(object):
 
         # Downtimes are usually accompanied by a comment.
         # An exiting downtime also invalidates it's comment.
-        for c in self.comments.values():
+        for c in list(self.comments.values()):  # copy because we inser
             if c.can_be_deleted is True:
                 ref = c.ref
                 self.del_comment(c.id)

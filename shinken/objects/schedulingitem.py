@@ -670,7 +670,7 @@ class SchedulingItem(Item):
     # We do not need ours currents pending notifications,
     # so we zombify them and clean our list
     def remove_in_progress_notifications(self):
-        for n in self.notifications_in_progress.values():
+        for n in list(self.notifications_in_progress.values()):  # copy to avoid insert problems
             self.remove_in_progress_notification(n)
 
 

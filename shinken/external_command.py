@@ -27,7 +27,7 @@ import os
 import time
 import re
 
-from shinken.util import to_int, to_bool, split_semicolon
+from shinken.util import to_int, to_bool, split_semicolon, bytes_to_unicode
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
@@ -506,7 +506,7 @@ class ExternalCommandManager:
                 args = r['args']
                 logger.debug("Got commands %s %s", c_name, str(args))
                 f = getattr(self, c_name)
-                apply(f, args)
+                f(* args)
             else:
                 command = r['cmd']
                 self.dispatch_global_command(command)
@@ -1540,8 +1540,8 @@ class ExternalCommandManager:
         if self.conf.log_passive_checks:
             naglog_result(
                 'info', 'PASSIVE HOST CHECK: %s;%d;%s'
-                % (host.get_name().decode('utf8', 'ignore'),
-                   status_code, plugin_output.decode('utf8', 'ignore'))
+                % (bytes_to_unicode(host.get_name()),
+                   status_code, bytes_to_unicode(plugin_output))
             )
         now = time.time()
         cls = host.__class__

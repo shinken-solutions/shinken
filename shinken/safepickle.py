@@ -22,6 +22,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 try:
     import cPickle as cpickle
 except ImportError:
@@ -29,17 +30,16 @@ except ImportError:
 from .imports import StringIO
 
 
-
 # Unpickle but strip and remove all __reduce__ things
 # so we don't allow external code to be executed
 # Code from Graphite::carbon project
 class SafeUnpickler(object):
     PICKLE_SAFE = {
-        'copy_reg': set(['_reconstructor']),
+        'copy_reg'   : set(['_reconstructor']),
         '__builtin__': set(['object', 'set']),
     }
-
-
+    
+    
     @classmethod
     def find_class(cls, module, name):
         if module not in cls.PICKLE_SAFE and not module.startswith('shinken.'):
@@ -50,10 +50,15 @@ class SafeUnpickler(object):
             raise ValueError('Attempting to unpickle unsafe class %s/%s' %
                              (module, name))
         return getattr(mod, name)
-
-
+    
+    
     @classmethod
     def loads(cls, pickle_string):
+        # TODO: fix this
+        return cpickle.loads(pickle_string)
+        
+        from .util import bytes_to_unicode  # loop imports
+        pickle_string = bytes_to_unicode(pickle_string)
         pickle_obj = cpickle.Unpickler(StringIO(pickle_string))
-        pickle_obj.find_global = cls.find_class
+        setattr(pickle_obj, 'find_global', cls.find_class)
         return pickle_obj.load()

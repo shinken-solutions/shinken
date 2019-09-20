@@ -215,7 +215,7 @@ class TestAction(ShinkenTest):
 
         self.wait_finished(a)
         self.assertEqual('done', a.status)
-        print("FUck", a.status, a.output)
+        print('OUTPUT: %s' % a.output)
         if sys.version_info < (2, 7):
             # cygwin: /bin/sh: -c: line 0: unexpected EOF while looking for matching'
             # ubuntu: /bin/sh: Syntax error: Unterminated quoted string
@@ -235,17 +235,18 @@ class TestAction(ShinkenTest):
         a.env = {}
 
         if os.name == 'nt':
-            a.command = r"""python -c 'print "A"*1000000'"""
+            a.command = r"""python -c 'print("A"*1000000)'"""
             # FROM NOW IT4S FAIL ON WINDOWS :(
             return
         else:
-            a.command = r"""python -u -c 'print "A"*100000'"""
+            a.command = r"""python -u -c 'print("A"*100000)'"""
         print("EXECUTE")
         a.execute()
         print("EXECUTE FINISE")
         self.assertEqual('launched', a.status)
         # Give also the max output we want for the command
         self.wait_finished(a, 10000000000)
+        self.assertEqual("A" * 100000, a.output)
         print("Status?", a.exit_status)
         self.assertEqual(0, a.exit_status)
         print("Output", len(a.output))

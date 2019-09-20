@@ -83,7 +83,7 @@ class Hostdependencies(Items):
 
         # Then for every host create a copy of the dependency with just the host
         # because we are adding services, we can't just loop in it
-        hostdeps = self.items.keys()
+        hostdeps = list(self.items.keys())
         for id in hostdeps:
             hd = self.items[id]
             # We explode first the dependent (son) part

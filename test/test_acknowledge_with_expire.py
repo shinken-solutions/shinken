@@ -30,9 +30,8 @@ from shinken_test import *
 time_hacker.set_real_time()
 
 
-
 class TestAcksWithExpire(ShinkenTest):
-
+    
     def test_ack_hard_service_with_expire(self):
         self.print_header()
         now = time.time()
@@ -42,20 +41,20 @@ class TestAcksWithExpire(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         # initialize host/service state
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
         print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
-
-        #--------------------------------------------------------------
+        
+        # --------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
@@ -63,20 +62,20 @@ class TestAcksWithExpire(ShinkenTest):
         self.assert_log_match(5, 'SERVICE NOTIFICATION')
         self.show_and_clear_logs()
         self.show_actions()
-
-        #--------------------------------------------------------------
+        
+        # --------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
         self.show_and_clear_logs()
         self.show_actions()
-
-        #--------------------------------------------------------------
+        
+        # --------------------------------------------------------------
         # admin wakes up and acknowledges the problem
         # the ACK is the only log message
         # a master notification is still around, but can't be sent
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         self.assertFalse(svc.problem_has_been_acknowledged)
         now = time.time()
         cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;test_host_0;test_ok_0;1;1;0;%d;lausser;blablub" % (now, int(now) + 5)
@@ -89,19 +88,19 @@ class TestAcksWithExpire(ShinkenTest):
         self.assertEqual(1, self.count_actions())
         self.show_and_clear_logs()
         self.show_actions()
-
-        #--------------------------------------------------------------
+        
+        # --------------------------------------------------------------
         # Wait 4 remove acknowledgement
         # now notifications are sent again
-        #--------------------------------------------------------------
+        # --------------------------------------------------------------
         time.sleep(5)
         # Wait a bit
         self.sched.check_for_expire_acknowledge()
         self.assertFalse(svc.problem_has_been_acknowledged)
-
-        #now = time.time()
-        #cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
-        #self.sched.run_external_command(cmd)
+        
+        # now = time.time()
+        # cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
+        # self.sched.run_external_command(cmd)
         self.sched.get_new_actions()
         self.worker_loop()
         self.show_logs()

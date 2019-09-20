@@ -142,9 +142,9 @@ def jsonify_r(obj):
             return obj
         except Exception as exp:
             return None
-    properties = cls.properties.keys()
+    properties = list(cls.properties.keys())
     if hasattr(cls, 'running_properties'):
-        properties += cls.running_properties.keys()
+        properties += list(cls.running_properties.keys())
     for prop in properties:
         if not hasattr(obj, prop):
             continue

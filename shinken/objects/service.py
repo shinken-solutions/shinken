@@ -990,9 +990,9 @@ class Service(SchedulingItem):
 
     # The last time when the state was not OK
     def last_time_non_ok_or_up(self):
-        non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
+        non_ok_times = list(filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
                                                                 self.last_time_critical,
-                                                                self.last_time_unknown])
+                                                                self.last_time_unknown]))
         if len(non_ok_times) == 0:
             last_time_non_ok = 0  # program_start would be better
         else:

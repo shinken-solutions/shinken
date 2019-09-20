@@ -37,7 +37,7 @@ except ImportError:
     fcntl = None
 
 from .log import logger
-from .util import string_decode
+from .util import string_decode, bytes_to_unicode
 
 __all__ = ('Action',)
 
@@ -56,7 +56,8 @@ def no_block_read(output):
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     try:
-        return output.read()
+        r = output.read()
+        return bytes_to_unicode(r) if r is not None else ''
     except Exception:
         return ''
 
@@ -101,7 +102,7 @@ class __Action(object):
         # instance).
         local_env = os.environ.copy()
         for p in self.env:
-            local_env[p] = self.env[p].encode('utf8').rstrip('\x00')
+            local_env[p] = bytes_to_unicode(self.env[p]).rstrip('\x00')
         return local_env
 
 
@@ -286,7 +287,7 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go
             # in a shell mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-
+            self.command = bytes_to_unicode(self.command)
             # 2.7 and higher Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
@@ -294,9 +295,9 @@ if os.name != 'nt':
                 cmd = self.command.encode('utf8', 'ignore')
             else:
                 try:
-                    cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                    cmd = shlex.split(bytes_to_unicode(self.command))
                 except Exception as exp:
-                    self.output = 'Not a valid shell command: ' + exp.__str__()
+                    self.output = 'Not a valid shell command: %s' % exp
                     self.exit_status = 3
                     self.status = 'done'
                     self.execution_time = time.time() - self.check_time
@@ -315,8 +316,7 @@ if os.name != 'nt':
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
             except OSError as exp:
-                logger.error("Fail launching command: %s %s %s",
-                             self.command, exp, force_shell)
+                logger.error("Fail launching command: %s %s %s",  self.command, exp, force_shell)
                 # Maybe it's just a shell we try to exec. So we must retry
                 if (not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error'):
                     return self.execute__(True)
@@ -328,6 +328,10 @@ if os.name != 'nt':
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
+            except UnicodeEncodeError as exp:
+                logger.error("Fail launching command: %s %s %s, we are restarting it with a shell to allow such characters", self.command, exp, force_shell)
+                if not force_shell:
+                    return self.execute__(True)
 
 
         def kill__(self):
