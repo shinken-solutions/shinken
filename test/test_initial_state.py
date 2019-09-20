@@ -107,8 +107,7 @@ class TestInitialStateBadConf(ShinkenTest):
         [b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
-        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of u, d', log)]) )
-        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of c, u, w, o', log)]) )
+        self.assertEqual(2, len([log for log in logs if re.search('invalid initial_state: a, should be one of ', log)]) )
 
 if __name__ == '__main__':
     unittest.main()

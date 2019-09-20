@@ -187,7 +187,7 @@ class Regenerator(object):
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:
+        except Exception as exp:
             logger.error("[Regen] Warning all done: %s" % exp)
             return
 
@@ -546,7 +546,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result:: Not good!  %s" % exp)
             return
         # logger.debug("Creating a host: %s in instance %d" % (hname, inst_id))
@@ -572,7 +572,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[regen] host_check_result:: Not good!   %s" % exp)
             return
 
@@ -598,7 +598,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_services = self.inp_services[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result  Not good!  %s" % exp)
             return
         # logger.debug("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
@@ -624,7 +624,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] manage_initial_servicegroup_status_brok:: Not good!  %s" % exp)
             return
 
@@ -703,7 +703,7 @@ class Regenerator(object):
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] manage_initial_contactgroup_status_brok Not good!  %s" % exp)
             return
 
