@@ -481,7 +481,7 @@ class ShinkenTest(unittest.TestCase):
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
-                print('COMPARE WITH %s' % brok.data['log'])
+
                 if re.search(regex, brok.data['log']):
                     self.assertTrue(not assert_not,
                                     "Found matching log line:\n"

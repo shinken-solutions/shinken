@@ -26,6 +26,11 @@
 import os
 import time
 import re
+import sys
+
+PY3 = sys.version_info >= (3,)
+if PY3:
+    long = int
 
 from shinken.util import to_int, to_bool, split_semicolon, bytes_to_unicode
 from shinken.downtime import Downtime
@@ -1580,9 +1585,9 @@ class ExternalCommandManager:
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
             naglog_result('info', 'PASSIVE SERVICE CHECK: %s;%s;%d;%s'
-                          % (service.host.get_name().decode('utf8', 'ignore'),
-                             service.get_name().decode('utf8', 'ignore'),
-                             return_code, plugin_output.decode('utf8', 'ignore')))
+                          % (bytes_to_unicode(service.host.get_name()),
+                             bytes_to_unicode(service.get_name()),
+                             return_code, bytes_to_unicode(plugin_output)))
         now = time.time()
         cls = service.__class__
         # If globally disable OR locally, do not launch

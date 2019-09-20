@@ -1417,7 +1417,7 @@ class Scheduler(object):
 
         # A loop where those downtimes are removed
         # which were marked for deletion (mostly by dt.exit())
-        for dt in self.downtimes.values():
+        for dt in list(self.downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_downtime(dt.id)

@@ -137,7 +137,7 @@ class HTTPClient(object):
         try:
             c.perform()
         except pycurl.error as error:
-            errno, errstr = error
+            errstr = error
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
         # Do NOT close the connection, we want a keep alive
@@ -186,7 +186,7 @@ class HTTPClient(object):
         try:
             c.perform()
         except pycurl.error as error:
-            errno, errstr = error
+            errstr = error
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         
         r = c.getinfo(pycurl.HTTP_CODE)
@@ -236,7 +236,7 @@ class HTTPClient(object):
         try:
             c.perform()
         except pycurl.error as error:
-            errno, errstr = error
+            errstr = error
             f.close()
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         

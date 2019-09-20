@@ -59,6 +59,13 @@ except Exception as exp:
 
 
 
+def my_sort(lst, cmp_f):
+    if not PY3:
+        lst = sorted(lst, cmp=cmp_f)
+    else:
+        from functools import cmp_to_key
+        lst = sorted(lst, key=cmp_to_key(cmp_f))
+    return lst
 
 # ########## Strings #############
 # Try to print strings, but if there is an utf8 error, go in simple ascii mode
