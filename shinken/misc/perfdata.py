@@ -90,7 +90,7 @@ class PerfDatas:
                 self.metrics[m.name] = m
 
     def __iter__(self):
-        return self.metrics.itervalues()
+        return self.metrics.values()
 
     def __len__(self):
         return len(self.metrics)

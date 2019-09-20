@@ -258,7 +258,7 @@ class BaseSatellite(Daemon):
     # for me it's the ids of my schedulers
     def what_i_managed(self):
         r = {}
-        for (k, v) in self.schedulers.iteritems():
+        for (k, v) in self.schedulers.items():
             r[k] = v['push_flavor']
         return r
 

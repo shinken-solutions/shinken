@@ -27,8 +27,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 from shinken_test import *
 from shinken.db import DB
+import sys
 
-
+# No more DB, to delete
+sys.exit(0)
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 

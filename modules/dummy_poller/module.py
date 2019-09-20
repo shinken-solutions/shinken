@@ -29,7 +29,10 @@
 import sys
 import signal
 import time
-from Queue import Empty
+try:
+    from Queue import Empty
+except ImportError:
+    from queue import Empty
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -73,7 +76,7 @@ class Dummy_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 logger.debug("[Dummy Poller] I, %d, got a message!", self.id)
-        except Empty, exp:
+        except Empty as exp:
             if len(self.checks) == 0:
                 time.sleep(1)
 
@@ -98,7 +101,7 @@ class Dummy_poller(BaseModule):
             to_del.append(action)
             try:
                 self.returns_queue.put(action)
-            except IOError, exp:
+            except IOError as exp:
                 logger.info("[Dummy Poller] %d exiting: %s", self.id, exp)
                 sys.exit(2)
         for chk in to_del:

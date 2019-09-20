@@ -438,7 +438,7 @@ class Scheduler(object):
         # For broks and actions, it's more simple
         # or brosk, manage global but also all brokers queue
         b_lists = [self.broks]
-        for (bname, e) in self.brokers.iteritems():
+        for (bname, e) in self.brokers.items():
             b_lists.append(e['broks'])
         nb_broks_drops = 0
         for broks in b_lists:
@@ -1424,7 +1424,7 @@ class Scheduler(object):
                 broks.append(ref.get_update_status_brok())
 
         # Same for contact downtimes:
-        for dt in self.contact_downtimes.values():
+        for dt in list(self.contact_downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_contact_downtime(dt.id)
@@ -1439,7 +1439,7 @@ class Scheduler(object):
                 broks.append(ref.get_update_status_brok())
 
         # Check start and stop times
-        for dt in self.downtimes.values():
+        for dt in list(self.downtimes.values()):
             if dt.real_end_time < now:
                 # this one has expired
                 broks.extend(dt.exit())  # returns downtimestop notifications

@@ -244,7 +244,7 @@ class Stats(object):
                 self.stats = {}
 
                 if len(stats) != 0:
-                    s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
+                    s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.items()])
                 # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
                 # to find the data after this
                 if not self.is_shinkenio_enabled():
@@ -252,7 +252,7 @@ class Stats(object):
                     continue
 
                 metrics = []
-                for (k, e) in stats.iteritems():
+                for (k, e) in stats.items():
                     nk = '%s.%s.%s' % (self.type, self.name, k)
                     _min, _max, nb, _sum = e
                     _avg = float(_sum) / nb

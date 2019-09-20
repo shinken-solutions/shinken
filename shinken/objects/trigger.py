@@ -62,7 +62,7 @@ class Trigger(Item):
         self = ctx
 
         # Ok we can declare for this trigger call our functions
-        for (n, f) in trigger_functions.iteritems():
+        for (n, f) in trigger_functions.items():
             locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")

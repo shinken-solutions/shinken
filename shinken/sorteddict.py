@@ -59,7 +59,7 @@ class SortedDict(dict):
     @dictdoc
     def __repr__(self):
         return 'SortedDict({%s})' % ', '.join('%r: %r' % item
-                                              for item in self.iteritems())
+                                              for item in self.items())
 
     @dictdoc
     def __str__(self):
@@ -93,7 +93,7 @@ class SortedDict(dict):
         return (self[key] for key in self.iterkeys(reverse))
 
     def iteritems(self, reverse=False):
-        '''D.iteritems() -> an iterator over (key, value) pairs sorted by keys
+        '''D.items() -> an iterator over (key, value) pairs sorted by keys
         (add reverse=True for reverse ordering).'''
         return ((key, self[key]) for key in self.iterkeys(reverse))
 
@@ -110,7 +110,7 @@ class SortedDict(dict):
     def items(self, reverse=False):
         '''D.items() -> a list of (key, value) pairs sorted by keys
         (add reverse=True for reverse ordering).'''
-        return list(self.iteritems(reverse))
+        return list(self.items(reverse))
 
     @dictdoc
     def clear(self):

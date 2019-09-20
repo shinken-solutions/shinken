@@ -23,6 +23,11 @@
 #
 
 from __future__ import absolute_import
+
+# No more db mist in core
+import sys
+sys.exit(0)
+
 from shinken_test import *
 try:
     from shinken.db_mysql import DBMysql

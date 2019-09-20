@@ -30,6 +30,7 @@ import inspect
 import json
 import zlib
 import threading
+import traceback
 try:
     import ssl
 except ImportError:
@@ -53,7 +54,6 @@ except ImportError:
     SSL = None
     pyOpenSSLAdapterSafe = None
 
-from wsgiref import simple_server
 
 
 # load global helper objects for logs and stats computation
@@ -114,6 +114,7 @@ class CherryPyBackend(object):
             msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
             raise PortNotFree(msg)
         except Exception as e:
+            logger.error('Error: the http port cannot be open: %s' % traceback.format_exc())
             # must be a problem with pyro workdir:
             raise InvalidWorkDir(e)
 
@@ -148,122 +149,6 @@ class CherryPyBackend(object):
                 pass
 
 
-# WSGIRef is the default HTTP server, it CAN manage HTTPS, but at a Huge cost for the client,
-# because it's only HTTP1.0
-# so no Keep-Alive, and in HTTPS it's just a nightmare
-class WSGIREFAdapter (bottle.ServerAdapter):
-    def run(self, handler):
-        daemon_thread_pool_size = self.options['daemon_thread_pool_size']
-        from wsgiref.simple_server import WSGIRequestHandler
-        LoggerHandler = WSGIRequestHandler
-        if self.quiet:
-            class QuietHandler(WSGIRequestHandler):
-                def log_request(*args, **kw):
-                    pass
-            LoggerHandler = QuietHandler
-
-        srv = simple_server.make_server(self.host, self.port, handler, handler_class=LoggerHandler)
-        logger.info('Initializing a wsgiref backend with %d threads', daemon_thread_pool_size)
-        use_ssl = self.options['use_ssl']
-        ca_cert = self.options['ca_cert']
-        ssl_cert = self.options['ssl_cert']
-        ssl_key = self.options['ssl_key']
-
-        if use_ssl:
-            if not ssl:
-                logger.error("Missing python-openssl librairy,"
-                             "please install it to open a https backend")
-                raise Exception("Missing python-openssl librairy, "
-                                "please install it to open a https backend")
-            srv.socket = ssl.wrap_socket(srv.socket,
-                                         keyfile=ssl_key, certfile=ssl_cert, server_side=True)
-        return srv
-
-
-class WSGIREFBackend(object):
-    def __init__(self, host, port, use_ssl, ca_cert, ssl_key,
-                 ssl_cert, hard_ssl_name_check, daemon_thread_pool_size):
-        self.daemon_thread_pool_size = daemon_thread_pool_size
-        try:
-            self.srv = bottle.run(host=host, port=port,
-                                  server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl,
-                                  ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert,
-                                  daemon_thread_pool_size=daemon_thread_pool_size)
-        except socket.error as exp:
-            msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
-            raise PortNotFree(msg)
-        except Exception as e:
-            # must be a problem with pyro workdir:
-            raise e
-
-
-    def get_sockets(self):
-        if self.srv.socket:
-            return [self.srv.socket]
-        else:
-            return []
-
-
-    def get_socks_activity(self, socks, timeout):
-        try:
-            ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error as e:
-            errnum, _ = e
-            if errnum == errno.EINTR:
-                return []
-            raise
-        return ins
-
-
-    # We are asking us to stop, so we close our sockets
-    def stop(self):
-        for s in self.get_sockets():
-            try:
-                s.close()
-            except Exception:
-                pass
-            self.srv.socket = None
-
-
-    # Manually manage the number of threads
-    def run(self):
-        # Ok create the thread
-        nb_threads = self.daemon_thread_pool_size
-        # Keep a list of our running threads
-        threads = []
-        logger.info('Using a %d http pool size', nb_threads)
-        while True:
-            # We must not run too much threads, so we will loop until
-            # we got at least one free slot available
-            free_slots = 0
-            while free_slots <= 0:
-                to_del = [t for t in threads if not t.is_alive()]
-                for t in to_del:
-                    t.join()
-                    threads.remove(t)
-                free_slots = nb_threads - len(threads)
-                if free_slots <= 0:
-                    time.sleep(0.01)
-
-            socks = self.get_sockets()
-            # Blocking for 0.1 s max here
-            ins = self.get_socks_activity(socks, 0.1)
-            if len(ins) == 0:  # trivial case: no fd activity:
-                continue
-            # If we got activity, Go for a new thread!
-            for sock in socks:
-                if sock in ins:
-                    # GO!
-                    t = threading.Thread(None, target=self.handle_one_request_thread,
-                                         name='http-request', args=(sock,))
-                    # We don't want to hang the master thread just because this one is still alive
-                    t.daemon = True
-                    t.start()
-                    threads.append(t)
-
-
-    def handle_one_request_thread(self, sock):
-        self.srv.handle_request()
 
 
 
@@ -289,17 +174,9 @@ class HTTPDaemon(object):
             self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
             logger.info("Opening HTTP socket at %s", self.uri)
 
-            # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
-            __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = \
-                lambda x: x.client_address[0]
-
-            if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
-                self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
-                                           ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
-            else:
-                self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
-                                          ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
-
+            self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key, ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+            print('HTTP backend: %s' % self.srv)
+            
             self.lock = threading.RLock()
 
 

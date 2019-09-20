@@ -124,7 +124,7 @@ class LogEvent:
                     self.data['attempts'] = int(self.data['attempts'])
 
     def __iter__(self):
-        return self.data.iteritems()
+        return self.data.items()
 
     def __len__(self):
         return len(self.data)

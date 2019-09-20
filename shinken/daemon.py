@@ -183,7 +183,7 @@ class Interface(object):
     doc = 'List the api methods and their parameters'
     def api_full(self):
         res = {}
-        for (fname, f) in self.app.http_daemon.registered_fun.iteritems():
+        for (fname, f) in self.app.http_daemon.registered_fun.items():
             fclean = fname.replace('_', '-')
             argspec = inspect.getargspec(f)
             args = [a for a in argspec.args if a != 'self']
@@ -191,7 +191,7 @@ class Interface(object):
             e = {}
             # Get a string about the args and co
             _s_nondef_args = ', '.join([a for a in args if a not in defaults])
-            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.iteritems()])
+            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.items()])
             _s_args = ''
             if _s_nondef_args:
                 _s_args += _s_nondef_args
@@ -1055,10 +1055,7 @@ class Daemon(object):
             self.http_daemon.run()
         except Exception as exp:
             logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
-            output = cStringIO.StringIO()
-            traceback.print_exc(file=output)
-            logger.error("Back trace of this error: %s", output.getvalue())
-            output.close()
+            logger.error("Back trace of this error: %s", traceback.format_exc())
             self.do_stop()
             # Hard mode exit from a thread
             os._exit(2)

@@ -323,7 +323,7 @@ class SatelliteLink(Item):
 
             # Ok protect against json that is chaning keys as string instead of int
             tab_cleaned = {}
-            for (k, v) in tab.iteritems():
+            for (k, v) in tab.items():
                 try:
                     tab_cleaned[int(k)] = v
                 except ValueError:
