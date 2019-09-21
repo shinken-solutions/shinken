@@ -31,8 +31,8 @@ from shinken_test import *
 class TestServicegroup(ShinkenTest):
     def setUp(self):
         self.setup_with_file("etc/shinken_servicegroups_generated.cfg")
-
-
+    
+    
     def test_servicegroup(self):
         self.assertEqual(True, self.conf.conf_is_correct)
         sgs = []
@@ -40,14 +40,14 @@ class TestServicegroup(ShinkenTest):
             sg = self.sched.servicegroups.find_by_name(name)
             sgs.append(sg)
             self.assertIsNot(sg, None)
-
+        
         svc3 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc3")
         svc4 = self.sched.services.find_srv_by_name_and_hostname("fake host", "fake svc4")
         self.assertIn(svc3, sgs[0].members)
         self.assertIn(svc3, sgs[1].members)
         self.assertIn(svc4, sgs[2].members)
         self.assertIn(svc4, sgs[3].members)
-
+        
         self.assertIn(sgs[0].get_name(), [sg.get_name() for sg in svc3.servicegroups])
         self.assertIn(sgs[1].get_name(), [sg.get_name() for sg in svc3.servicegroups])
         self.assertIn(sgs[2].get_name(), [sg.get_name() for sg in svc4.servicegroups])

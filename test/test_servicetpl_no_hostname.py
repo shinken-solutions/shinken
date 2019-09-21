@@ -28,10 +28,11 @@ from shinken_test import *
 
 
 class TestsericeTplNoHostname(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_servicetpl_no_hostname.cfg')
-
+    
+    
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path

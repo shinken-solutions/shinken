@@ -28,10 +28,11 @@ from shinken_test import *
 
 
 class TestSnapshot(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_snapshot.cfg')
-
+    
+    
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
@@ -51,10 +52,10 @@ class TestSnapshot(ShinkenTest):
         
         self.assert_any_log_match('HOST SNAPSHOT.*')
         self.assert_log_match(2, 'HOST SNAPSHOT.*')
-
+        
         self.assert_any_log_match('SERVICE SNAPSHOT.*')
         self.assert_log_match(4, 'SERVICE SNAPSHOT.*')
-
+        
         self.show_and_clear_logs()
         
         broks = self.sched.broks
@@ -63,6 +64,7 @@ class TestSnapshot(ShinkenTest):
         print(types)
         self.assertIn('service_snapshot', types)
         self.assertIn('host_snapshot', types)
+
 
 if __name__ == '__main__':
     unittest.main()

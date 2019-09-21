@@ -30,6 +30,7 @@ import time
 import re
 import itertools
 import uuid
+from six import add_metaclass
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -52,11 +53,11 @@ from shinken.log import logger, naglog_result
 from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_host_name
 
-
+@add_metaclass(AutoSlots)
 class Service(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
+    #__metaclass__ = AutoSlots
 
     # Every service have a unique ID, and 0 is always special in
     # database and co...

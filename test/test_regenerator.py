@@ -136,7 +136,7 @@ class TestRegenerator(ShinkenTest):
             b = svc.get_initial_status_brok()
             b.prepare()
             s = Service({})
-            for (prop, value) in six.iteritems(b.data):
+            for (prop, value) in b.data.items():
                 setattr(s, prop, value)
         t1 = time.time()
         print("Bench end:", t1 - t0)

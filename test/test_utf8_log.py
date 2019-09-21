@@ -31,10 +31,11 @@ from six import unichr
 
 
 class TestConfig(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
-
+    
+    
     # Try to raise an utf8 log message
     def test_utf8log(self):
         sutf = 'h\351h\351'  # Latin Small Letter E with acute in Latin-1
@@ -43,7 +44,6 @@ class TestConfig(ShinkenTest):
         logger.info(sutf8)
         s = unichr(40960) + u'abcd' + unichr(1972)
         logger.info(s)
-
 
 
 if __name__ == '__main__':

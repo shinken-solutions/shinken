@@ -27,12 +27,14 @@ from shinken_test import *
 
 
 class TestUnknownEventHandler(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_uknown_event_handler.cfg')
-
+    
+    
     def test_dummy(self):
         self.assertFalse(self.conf.conf_is_correct)
+
 
 if __name__ == '__main__':
     unittest.main()

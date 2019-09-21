@@ -30,7 +30,8 @@ from shinken_test import *
 class TestStarMemberGroup(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_startmember_group.cfg')
-
+    
+    
     # Check if service apply on a hostgroup * is good or not
     def test_starmembergroupdef(self):
         hg = self.sched.conf.hostgroups.find_by_name('ping-servers')
@@ -40,7 +41,7 @@ class TestStarMemberGroup(ShinkenTest):
         r = self.sched.conf.hosts.find_by_name('test_router_0')
         self.assertIn(h, hg.members)
         self.assertIn(r, hg.members)
-
+        
         s = self.sched.conf.services.find_srv_by_name_and_hostname('test_host_0', 'PING')
         self.assertIsNot(s, None)
 

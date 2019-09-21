@@ -27,10 +27,11 @@ from shinken_test import *
 
 
 class TestTemplateLoop(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_template_loop.cfg')
-
+    
+    
     def test_dummy(self):
         self.assertFalse(self.conf.conf_is_correct)
 

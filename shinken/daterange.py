@@ -53,7 +53,7 @@ def find_day_by_weekday_offset(year, month, weekday, offset):
     # ok go for it
     nb_found = 0
     try:
-        for i in xrange(0, offset + 1):
+        for i in range(0, offset + 1):
             # in cal 0 mean "there are no day here :)"
             if cal[i][weekday_id] != 0:
                 nb_found += 1

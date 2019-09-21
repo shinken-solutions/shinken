@@ -538,7 +538,7 @@ def got_generation_rule_pattern_change(xy_couples):
     if xy_couples == []:
         return []
     (x, y) = xy_cpl[0]
-    for i in xrange(x, y + 1):
+    for i in range(x, y + 1):
         n = got_generation_rule_pattern_change(xy_cpl[1:])
         if n != []:
             for e in n:

@@ -30,7 +30,8 @@ from shinken_test import *
 class TestStarInGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/shinken_star_in_hostgroups.cfg')
-
+    
+    
     # If we reach a good start, we are ok :)
     # the bug was that an * hostgroup expand get all host_name != ''
     # without looking at register 0 or not
@@ -49,7 +50,7 @@ class TestStarInGroups(ShinkenTest):
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
         self.assertIsNot(svc, None)
-
+        
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST_HNAME_STAR")
         self.assertIsNot(svc, None)
 

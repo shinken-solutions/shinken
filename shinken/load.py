@@ -72,6 +72,6 @@ class Load:
 if __name__ == '__main__':
     l = Load()
     t = time.time()
-    for i in xrange(1, 300):
+    for i in range(1, 300):
         l.update_load(1)
         time.sleep(5)

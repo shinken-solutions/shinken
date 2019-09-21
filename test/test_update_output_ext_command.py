@@ -28,7 +28,7 @@ from shinken_test import *
 
 
 class TestUpdateOutputExtCommand(ShinkenTest):
-
+    
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
@@ -42,12 +42,13 @@ class TestUpdateOutputExtCommand(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-
+        
         cmd = "[%lu] PROCESS_SERVICE_OUTPUT;test_host_0;test_ok_0;My ass is cool | toto=30%%" % now
         self.sched.run_external_command(cmd)
         self.scheduler_loop(2, [])
         print(svc.perf_data)
         self.assertEqual('toto=30%', svc.perf_data)
+
 
 if __name__ == '__main__':
     unittest.main()

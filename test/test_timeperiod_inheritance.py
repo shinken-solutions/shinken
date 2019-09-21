@@ -28,10 +28,11 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-
+    
     def setUp(self):
         self.setup_with_file('etc/shinken_timeperiod_inheritance.cfg')
-
+    
+    
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
@@ -41,7 +42,7 @@ class TestConfig(ShinkenTest):
         now = time.time()
         tp = self.sched.timeperiods.find_by_name("24x7")
         print("TP", tp.__dict__)
-
+        
         # sunday should be inherited from templates
         print("Check for sunday in the timeperiod")
         got_sunday = False

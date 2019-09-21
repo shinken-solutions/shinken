@@ -1208,7 +1208,7 @@ class Satellite(BaseSatellite):
             self.modules_manager.start_external_instances()
 
             # Allocate Mortal Threads
-            for _ in xrange(1, self.max_workers):
+            for _ in range(1, self.max_workers):
                 to_del = []
                 for mod in self.q_by_mod:
                     try:
