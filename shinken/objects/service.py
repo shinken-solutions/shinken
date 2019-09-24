@@ -55,9 +55,6 @@ from shinken.util import filter_service_by_host_name
 
 @add_metaclass(AutoSlots)
 class Service(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    #__metaclass__ = AutoSlots
 
     # Every service have a unique ID, and 0 is always special in
     # database and co...
@@ -570,18 +567,7 @@ class Service(SchedulingItem):
 
     @property
     def unique_key(self):  # actually only used for (un)indexitem() via name_property..
-        return (self.host_name, self.service_description)
-
-    @property
-    def display_name(self):
-        display_name = getattr(self, '_display_name', None)
-        if not display_name:
-            return self.service_description
-        return display_name
-
-    @display_name.setter
-    def display_name(self, display_name):
-        self._display_name = display_name
+        return '%s/%s' % (self.host_name, self.service_description)
 
     # Give a nice name output
     def get_name(self):
@@ -1413,7 +1399,7 @@ class Services(Items):
 
     # Search a service by it's name and hot_name
     def find_srv_by_name_and_hostname(self, host_name, sdescr):
-        key = (host_name, sdescr)
+        key = '%s/%s' % (host_name, sdescr)
         return self.name_to_item.get(key, None)
 
     # Make link between elements:

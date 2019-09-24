@@ -1093,13 +1093,6 @@ class Items(object):
 
         # Then look for individual ok
         for i in self:
-            # Alias and display_name hook hook
-            prop_name = getattr(self.__class__, 'name_property', None)
-            if prop_name and not hasattr(i, 'alias') and hasattr(i, prop_name):
-                setattr(i, 'alias', getattr(i, prop_name))
-            if prop_name and getattr(i, 'display_name', '') == '' and hasattr(i, prop_name):
-                setattr(i, 'display_name', getattr(i, prop_name))
-
             # Now other checks
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")

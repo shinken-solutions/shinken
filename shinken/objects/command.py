@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from six import add_metaclass
+
 from .item import Item, Items
 from shinken.property import StringProp, IntegerProp, BoolProp
 from shinken.autoslots import AutoSlots
@@ -33,12 +35,10 @@ from shinken.autoslots import AutoSlots
 class DummyCommand(object):
     pass
 
-
+# AutoSlots create the __slots__ with properties and
+# running_properties names
+@add_metaclass(AutoSlots)
 class Command(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 0
     my_type = "command"
 

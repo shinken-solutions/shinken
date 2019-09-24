@@ -27,18 +27,17 @@ about the configuration part. Parameters are merged in Service so it's
 no use in running part
 """
 
+from six import add_metaclass
 
 from .item import Item, Items
 
 from shinken.autoslots import AutoSlots
 from shinken.property import StringProp, ListProp
 
-
+# AutoSlots create the __slots__ with properties and
+# running_properties names
+@add_metaclass(AutoSlots)
 class ServiceExtInfo(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 1  # zero is reserved for host (primary node for parents)
     my_type = 'serviceextinfo'
 

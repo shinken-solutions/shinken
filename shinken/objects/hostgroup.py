@@ -97,6 +97,13 @@ class Hostgroup(Itemgroup):
         return self.get_hosts()
 
 
+    def is_correct(self):
+        r = super(Hostgroup, self).is_correct()
+        # Set display_name if need
+        if getattr(self, 'alias', '') == '':
+            self.alias = getattr(self, 'hostgroup_name', '')
+        return r
+
 class Hostgroups(Itemgroups):
     name_property = "hostgroup_name"  # is used for finding hostgroups
     inner_class = Hostgroup

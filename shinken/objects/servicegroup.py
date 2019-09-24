@@ -103,6 +103,13 @@ class Servicegroup(Itemgroup):
             return ''
 
 
+    def is_correct(self):
+        r = super(Servicegroup, self).is_correct()
+        # Set display_name if need
+        if getattr(self, 'alias', '') == '':
+            self.alias = getattr(self, 'servicegroup_name', '')
+        return r
+
 class Servicegroups(Itemgroups):
     name_property = "servicegroup_name"  # is used for finding servicegroup
     inner_class = Servicegroup

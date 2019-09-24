@@ -31,6 +31,7 @@ scheduling/consume check smart things :)
 import time
 import itertools
 import uuid
+from six import add_metaclass
 
 from .item import Items
 from .schedulingitem import SchedulingItem
@@ -46,12 +47,10 @@ from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
 
-
+# AutoSlots create the __slots__ with properties and
+# running_properties names
+@add_metaclass(AutoSlots)
 class Host(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
@@ -753,6 +752,12 @@ class Host(SchedulingItem):
                                  self.get_name(), c)
                     state = False
 
+        # Set display_name if need
+        if getattr(self, 'display_name', '') == '':
+            self.display_name = getattr(self, 'host_name', '')
+        if getattr(self, 'alias', '') == '':
+            self.alias = getattr(self, 'host_name', '')
+            
         return state
 
 

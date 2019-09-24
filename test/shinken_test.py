@@ -57,7 +57,7 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 from shinken.daemons.receiverdaemon import Receiver
-from logging import ERROR
+from logging import ERROR, DEBUG
 import six
 from six.moves import range
 
