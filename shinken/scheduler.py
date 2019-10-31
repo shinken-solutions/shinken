@@ -1132,6 +1132,8 @@ class Scheduler(object):
                     # raises the downtime id to do not overlap
                     Downtime.id = max(Downtime.id, dt.id + 1)
                     self.add(dt)
+                # Re-celculates downtime state
+                h.reset_ack_and_downtimes_state()
                 for c in h.comments:
                     c.ref = h
                     self.add(c)
@@ -1194,6 +1196,8 @@ class Scheduler(object):
                     # raises the downtime id to do not overlap
                     Downtime.id = max(Downtime.id, dt.id + 1)
                     self.add(dt)
+                # Re-celculates downtime state
+                s.reset_ack_and_downtimes_state()
                 for c in s.comments:
                     c.ref = s
                     self.add(c)

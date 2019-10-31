@@ -262,7 +262,7 @@ class Service(SchedulingItem):
         'maintenance_period':
             StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'maintenance_checks_enabled':
-            BoolProp(default=False, fill_brok=['full_status'], retention=True),
+            BoolProp(default=False, fill_brok=['full_status']),
         'maintenance_check_period':
             StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'maintenance_check_interval':
@@ -366,7 +366,7 @@ class Service(SchedulingItem):
         'percent_state_change':
             FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'problem_has_been_acknowledged':
-            BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
+            BoolProp(default=False, fill_brok=['full_status', 'check_result']),
         'acknowledgement':
             StringProp(default=None, retention=True),
         'acknowledgement_type':
@@ -396,7 +396,7 @@ class Service(SchedulingItem):
         'check_flapping_recovery_notification':
             BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'scheduled_downtime_depth':
-            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status']),
         'pending_flex_downtime':
             IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'timeout':
@@ -425,7 +425,7 @@ class Service(SchedulingItem):
                                        retention=True,
                                        retention_preparation=to_list_of_names),
         'in_scheduled_downtime': BoolProp(
-            default=False, fill_brok=['full_status', 'check_result'], retention=True),
+            default=False, fill_brok=['full_status', 'check_result']),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
         'actions':            ListProp(default=[]),  # put here checks and notif raised
         'broks':              ListProp(default=[]),  # and here broks raised
