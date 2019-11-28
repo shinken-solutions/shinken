@@ -63,6 +63,9 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     output = Popen(list_host_cmd, stdout=PIPE).communicate()
 
     parts = output[0].split(':')
+    if len(parts) < 2:
+        return []
+    
     hsts_raw = parts[1].split('|')[0]
     hsts_raw_lst = hsts_raw.split(',')
 
