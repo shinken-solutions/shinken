@@ -225,7 +225,7 @@ def create_txt_message(msg):
 
     txt_content = '\r\n'.join(txt_content)
 
-    msgText = MIMEText(txt_content, 'text')
+    msgText = MIMEText(txt_content, 'plain')
     msg.attach(msgText)
 
     return msg
