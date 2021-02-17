@@ -1505,10 +1505,10 @@ class Services(Items):
                 # Looks for corresponding services
                 services = self.get_ovr_services_from_expression(host, sdescr)
                 if not services:
-                    err = "Error: trying to override property '%s' on " \
+                    err = "Warn: trying to override property '%s' on " \
                           "service identified by '%s' " \
                           "but it's unknown for this host" % (prop, sdescr)
-                    host.configuration_errors.append(err)
+                    host.configuration_warnings.append(err)
                     continue
                 value = Service.properties[prop].pythonize(value)
                 for service in services:

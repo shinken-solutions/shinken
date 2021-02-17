@@ -2063,6 +2063,28 @@ class Config(Item):
             logger.error(err)
 
 
+    def get_least_loaded_scheduler_id(self, scheduler_ids, distribution):
+        """
+        Returns the scheduler id having the lowest number of objects to manage
+
+        :param dict distribution: The packs distribution
+        :rtype: int
+        :return: The least weighted scheduler id
+        """
+        distribution_ids = distribution.values()
+        # Scheduler not having config yet have precedence
+        no_conf = [i for i in scheduler_ids if i not in distribution_ids]
+        if no_conf:
+            return random.choice(no_conf)
+        # Returns the scheduler id having the least managed objects
+        weighted_ids = dict(
+            [
+                (distribution_ids.count(i), i)
+                for i in set(distribution_ids)
+            ]
+        )
+        return weighted_ids[min(weighted_ids.keys())]
+
     # Create packs of hosts and services so in a pack,
     # all dependencies are resolved
     # It create a graph. All hosts are connected to their
@@ -2185,7 +2207,7 @@ class Config(Item):
             # So dispatching is loadbalanced in a realm
             # but add a entry in the roundrobin tourniquet for
             # every weight point schedulers (so Weight round robin)
-            weight_list = []
+            weight_dict = {}
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
 
@@ -2211,9 +2233,8 @@ class Config(Item):
                 packindices[s.id] = packindex
                 packindex += 1
                 for i in xrange(0, s.weight):
-                    weight_list.append(s.id)
-
-            rr = itertools.cycle(weight_list)
+                    weight_dict[len(weight_dict)] = s.id
+            weight_scheduler_ids = weight_dict.keys()
 
             # We must have nb_schedulers packs
             for i in xrange(0, nb_schedulers):
@@ -2255,16 +2276,20 @@ class Config(Item):
                     i = old_pack
                 else:  # take a new one
                     # print 'take a new id for pack', [h.get_name() for h in pack]
-                    i = rr.next()
+                    i = self.get_least_loaded_scheduler_id(weight_scheduler_ids, assoc)
 
                 for elt in pack:
                     # print 'We got the element', elt.get_full_name(), ' in pack', i, packindices
-                    packs[packindices[i]].append(elt)
+                    scheduler_id = weight_dict[i]
+                    packs[packindices[scheduler_id]].append(elt)
                     assoc[elt.get_name()] = i
+                    for svc in elt.services:
+                        assoc[svc.get_full_name()] = i
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
+
         logger.info("Total number of hosts : %d",
                     nb_elements_all_realms)
         if len(self.hosts) != nb_elements_all_realms:
