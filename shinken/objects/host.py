@@ -258,7 +258,7 @@ class Host(SchedulingItem):
         'maintenance_period':
             StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'maintenance_checks_enabled':
-            BoolProp(default=False, fill_brok=['full_status'], retention=True),
+            BoolProp(default=False, fill_brok=['full_status']),
         'maintenance_check_period':
             StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'maintenance_check_interval':
@@ -375,7 +375,7 @@ class Host(SchedulingItem):
             FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
 
         'problem_has_been_acknowledged':
-            BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
+            BoolProp(default=False, fill_brok=['full_status', 'check_result']),
 
         'acknowledgement':
             StringProp(default=None, retention=True),
@@ -420,7 +420,7 @@ class Host(SchedulingItem):
             BoolProp(default=True, fill_brok=['full_status'], retention=True),
 
         'scheduled_downtime_depth':
-            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status']),
 
         'pending_flex_downtime':
             IntegerProp(default=0, fill_brok=['full_status'], retention=True),
@@ -460,7 +460,7 @@ class Host(SchedulingItem):
             StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
         'in_scheduled_downtime':
-            BoolProp(default=False, fill_brok=['full_status', 'check_result'], retention=True),
+            BoolProp(default=False, fill_brok=['full_status', 'check_result']),
 
         'in_scheduled_downtime_during_last_check':
             BoolProp(default=False, retention=True),

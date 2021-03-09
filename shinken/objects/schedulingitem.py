@@ -842,6 +842,22 @@ class SchedulingItem(Item):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
+    # Force the evaluation of scheduled_downtime_depth and in_scheduled_downtime
+    # attributes
+    def reset_ack_and_downtimes_state(self):
+        self.scheduled_downtime_depth = 0
+        for dt in self.downtimes:
+            if dt.in_scheduled_downtime():
+                self.scheduled_downtime_depth += 1
+        if self.scheduled_downtime_depth > 0:
+            self.is_in_scheduled_downtime = True
+        else:
+            self.is_in_scheduled_downtime = False
+        if getattr(self, "acknowledgement", None) is not None:
+            self.problem_has_been_acknowledged = True
+        else:
+            self.problem_has_been_acknowledged = False
+
     # Whenever a non-ok hard state is reached, we must check whether this
     # host/service has a flexible downtime waiting to be activated
     def check_for_flexible_downtime(self):

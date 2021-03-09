@@ -2,7 +2,7 @@
 
 
 # Travis: only need to run the installation once, it it not link to a specific python version. They don't need to use CPU for nothing ;)
-if [ "$TEST_SUITE" == "PYTHON" ]; then
+if [ "$TEST_SUITE" == "UNIT-TEST" ]; then
    echo "Installing dependencies for Python Unit tests"
    cd ..
    ./test/setup_test.sh
