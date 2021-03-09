@@ -89,7 +89,7 @@ Shinken has a lot of featuress, we started to list some of them in the last para
   But Shinken is even more:
 
   * Realm concept: you can monitor independent environments / customers.
-  * DMZ monitroing: some daemon have passive facilities, so that firewalls don't block monitoring.
+  * DMZ monitoring: some daemon have passive facilities, so that firewalls don't block monitoring.
   * Business impacts:  Shinken can differentiate impact of a critical alert on a toaster versus the web store.
   * Efficient correlation between parent-child relationship and business process rules.
   * High availability:  daemons can have spare ones.
