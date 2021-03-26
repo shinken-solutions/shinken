@@ -17,7 +17,7 @@ import random
 import copy
 import locale
 
-import unittest2 as unittest
+import unittest
 
 
 # import the shinken library from the parent directory

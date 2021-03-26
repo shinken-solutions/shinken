@@ -13,7 +13,6 @@ RUN        pip install Crypto
 RUN        pip install pygments
 RUN        pip install coveralls
 RUN        pip install nose-cov
-RUN        pip install unittest2
 RUN        apt-get install -y python-cherrypy3
 RUN        pip install rsa
 # The internal yaml seems to not be used, thanks nose

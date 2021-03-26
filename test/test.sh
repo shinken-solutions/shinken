@@ -6,5 +6,5 @@ echo "$PWD"
 
 for ii in $(ls -1 test_*py) ; do
     echo "Launching Test $ii"
-    python $ii
+    python2 $ii
 done

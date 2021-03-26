@@ -118,12 +118,14 @@ class Config(Item):
         'modules_dir':
             StringProp(default='/var/lib/shinken/modules'),
 
+        'conflict_policy':
+            StringProp(default='loose'),
+
         'use_local_log':
             BoolProp(default=True),
 
         'log_level':
             LogLevelProp(default='WARNING'),
-
 
         'local_log':
             StringProp(default='/var/log/shinken/arbiterd.log'),
@@ -798,6 +800,9 @@ class Config(Item):
         self.triggers = Triggers({})
         self.packs_dirs = []
         self.packs = Packs({})
+        # Initialize conflict_policy soon as it's required during object lists
+        # creation.
+        self.conflict_policy = self.properties["conflict_policy"].default
 
     def get_name(self):
         return 'global configuration file'
@@ -962,6 +967,11 @@ class Config(Item):
                         continue
                     # Ok it's a valid one, I keep it
                     self.triggers_dirs.append(trig_dir_name)
+                # Early read conflict_policy because it's necessary when
+                # parsing configuration files
+                elif re.search("^conflict_policy", line):
+                    elts = line.split('=', 1)
+                    self.conflict_policy = elts[1]
 
         config = res.getvalue()
         res.close()
@@ -1125,7 +1135,7 @@ class Config(Item):
             o.old_properties_names_to_new()
             lst.append(o)
         # we create the objects Class and we set it in prop
-        setattr(self, prop, clss(lst, initial_index))
+        setattr(self, prop, clss(lst, initial_index, self.conflict_policy))
 
 
     # Here arbiter and modules objects should be prepare and link
