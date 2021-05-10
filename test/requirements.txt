@@ -1,6 +1,5 @@
 # this is the requirements dedicated to tests.
 -r ../requirements.txt
-unittest2
 mock
 coveralls==0.5
 nose-cov==1.6

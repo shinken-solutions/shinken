@@ -730,7 +730,8 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
 class Items(object):
-    def __init__(self, items, index_items=True):
+    def __init__(self, items, index_items=True, conflict_policy="loose"):
+        self.conflict_policy = conflict_policy
         self.items = {}
         self.name_to_item = {}
         self.templates = {}
@@ -803,11 +804,22 @@ class Items(object):
         else:
             # Don't know which one to keep, lastly defined has precedence
             objcls = getattr(self.inner_class, "my_type", "[unknown]")
-            mesg = "duplicate %s name %s%s, using lastly defined. You may " \
-                   "manually set the definition_order parameter to avoid " \
-                   "this message." % \
-                   (objcls, name, self.get_source(item))
-            item.configuration_warnings.append(mesg)
+            if objcls == "service":
+                objname = "%s/%s" % (item.host_name, item.service_description)
+            else:
+                objname = item.get_name()
+            if self.conflict_policy == "strict":
+                mesg = "duplicate %s name %s%s. "\
+                        "You have to manually set the definition_order " \
+                        "parameter to avoid this error." % \
+                       (objcls, objname, self.get_source(item))
+                item.configuration_errors.append(mesg)
+            else:
+                mesg = "duplicate %s name %s%s, using lastly defined. "\
+                        "You may manually set the definition_order " \
+                        "parameter to avoid this message." % \
+                       (objcls, objname, self.get_source(item))
+                item.configuration_warnings.append(mesg)
         if item.is_tpl():
             self.remove_template(existing)
         else:

@@ -667,3 +667,19 @@ Default:
 
 
 On some distributions, dealing with large configuration can result in memory leaks when the new configuration is sent, because of an inneficient memory cleanup in the python interpreter. This options enables a more aggressive memory routine that forces unused memory to be freed.
+
+Object name conflict policy
+---------------------------
+
+::
+
+  conflict_policy=[loose/strict]
+
+Default:
+
+::
+
+  conflict_policy=loose
+
+
+When more than one object are created with the same name and no definition order has been specified, the default behavior is to raise a warning message, and keep the last definition. When enabling strict conflict naming policy, this results in an error that prevents the configuration from being loaded. This is typically used to enforce more precise  objects definition, and avoid silent collisions lading to unexpected behavior.
