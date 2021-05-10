@@ -1,11 +1,11 @@
 .. _architecture/problems-and-impacts:
 
 ============================================
-Problems and impacts correlation management 
+Problems and impacts correlation management
 ============================================
 
 
-What is this correlation ? 
+What is this correlation ?
 ===========================
 
 The main role of this feature is to allow users to have the same correlation views in the console than they got in the notifications.
@@ -29,10 +29,10 @@ It"s important to see that such state change do not interfere with the HARD/SOFT
 Here gateway is already in DOWN/HARD. We can see that all servers do not have an output: they are not already checked, but we already set the UNREACHABLE state. When they will be checks, there will be an output and they will keep this state.
 
 
-How to enable it? 
+How to enable it?
 ==================
 
-It's quite easy, all you need is to enable the parameter 
+It's quite easy, all you need is to enable the parameter
 
 ::
 
@@ -41,7 +41,7 @@ It's quite easy, all you need is to enable the parameter
 See :ref:`enable_problem_impacts_states_change <configuration/configmain#enable_problem_impacts_states_change>` for more information about it.
 
 
-Dynamic Business Impact 
+Dynamic Business Impact
 ========================
 
 There is a good thing about problems and impacts when you do not identify a parent devices Business Impact: your problem will dynamically inherit the maximum business impact of the failed child!
@@ -55,3 +55,15 @@ There are 2 nights:
   * the second night, the switch got a problem, but this time it impacts the production environment! This time, the computed impact is set at 5 (the one of the max impact, here the production application), so it's higher than the min_criticity of the contact, so the notification is send. The admin is awaken, and can solve this problem before too many users are impacted :)
 
 
+Enforce problem/impact state calculation
+=========================================
+
+The problem/impact calculation that defines if a failed check is the root cause of the problem or is an impact is done when a new check result arrives. When the scheduler restarts or receives a new configuration, it may save an restore the previous objects state from the retention data. There's situations where the problem/impact attributes can get back to their default value, even if an object state is not OK. By default, the attributes are only recalculated when a new check result arrives.
+
+It's possible to enforce the problem/impact processing of all the objects after the retention data has been loaded. To enable this feature you only have to enable the parameter
+
+::
+
+  enable_problem_impacts_states_reprocessing=1
+
+See :ref:`enable_problem_impacts_states_reprocessing <configuration/configmain#enable_problem_impacts_states_reprocessing>` for more information about it.

@@ -567,6 +567,9 @@ class Config(Item):
         'enable_problem_impacts_states_change':
             BoolProp(default=False, class_inherit=[(Host, None), (Service, None)]),
 
+        'enable_problem_impacts_states_reprocessing':
+            BoolProp(default=False, class_inherit=[(Host, None), (Service, None)]),
+
         # More a running value in fact
         'resource_macros_names':
             ListProp(default=[]),

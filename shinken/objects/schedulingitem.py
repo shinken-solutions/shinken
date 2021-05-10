@@ -252,14 +252,27 @@ class SchedulingItem(Item):
                                 )
         return None
 
-    # Raise all impact from my error. I'm setting myself
-    # as a problem, and I register myself as this in all
-    # hosts/services that depend_on_me. So they are now my
-    # impacts
-    def set_myself_as_problem(self):
-        now = time.time()
+    def set_myself_as_problem(self, send_brok=True):
+        """
+        Raise all impact from my error. I'm setting myself as a problem, and
+        I register myself as this in all hosts/services that depend_on_me.
+        So they are now my impacts.
 
-        self.is_problem = True
+        This method may be called to correctly reinitialize the object state
+        after the retention data has been loaded. In such a situation, a
+        brok shold not be emitted if the state is modified. The send_brok
+        variable reflects this.
+
+        :param bool send_brok: Should a brok be emitted if the object state
+                               is modified.
+        """
+        now = time.time()
+        updated = False
+
+        if self.is_problem is False:
+            self.is_problem = True
+            updated = True
+
         # we should warn potentials impact of our problem
         # and they should be cool to register them so I've got
         # my impacts list
@@ -271,21 +284,22 @@ class SchedulingItem(Item):
                     # now check if we should bailout because of a
                     # not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
-                        new_impacts = impact.register_a_problem(self)
+                        new_impacts = impact.register_a_problem(self, send_brok)
                         impacts.extend(new_impacts)
 
         # Only update impacts and create new brok if impacts changed.
         s_impacts = set(impacts)
-        if s_impacts == set(self.impacts):
-            return
-        self.impacts = list(s_impacts)
+        if s_impacts != set(self.impacts):
+            self.impacts = list(s_impacts)
 
-        # We can update our business_impact value now
-        self.update_business_impact_value()
+            # We can update our business_impact value now
+            self.update_business_impact_value()
+            updated = True
 
-        # And we register a new broks for update status
-        b = self.get_update_status_brok()
-        self.broks.append(b)
+        if send_brok is True and updated is True:
+            # And we register a new broks for update status
+            b = self.get_update_status_brok()
+            self.broks.append(b)
 
     # We update our 'business_impact' value with the max of
     # the impacts business_impact if we got impacts. And save our 'configuration'
@@ -323,15 +337,25 @@ class SchedulingItem(Item):
         if self.my_own_business_impact != -1 and not in_modulation:
             self.business_impact = self.my_own_business_impact
 
-    # Look for my impacts, and remove me from theirs problems list
-    def no_more_a_problem(self):
+    def no_more_a_problem(self, send_brok=True):
+        """
+        Look for my impacts, and remove me from theirs problems list
+
+        This method may be called to correctly reinitialize the object state
+        after the retention data has been loaded. In such a situation, a
+        brok shold not be emitted if the state is modified. The send_brok
+        variable reflects this.
+
+        :param bool send_brok: Should a brok be emitted if the object state
+                               is modified.
+        """
         was_pb = self.is_problem
         if self.is_problem:
             self.is_problem = False
 
             # we warn impacts that we are no more a problem
             for impact in self.impacts:
-                impact.deregister_a_problem(self)
+                impact.deregister_a_problem(self, send_brok)
 
             # we can just drop our impacts list
             self.impacts = []
@@ -341,16 +365,26 @@ class SchedulingItem(Item):
 
         # If we were a problem, we say to everyone
         # our new status, with good business_impact value
-        if was_pb:
+        if send_brok is True and was_pb:
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
 
-    # Call recursively by potentials impacts so they
-    # update their source_problems list. But do not
-    # go below if the problem is not a real one for me
-    # like If I've got multiple parents for examples
-    def register_a_problem(self, pb):
+    def register_a_problem(self, pb, send_brok=True):
+        """
+        Call recursively by potentials impacts so they update their
+        source_problems list. But do not go below if the problem is not a
+        real one for me like If I've got multiple parents for examples.
+
+        This method may be called to correctly reinitialize the object state
+        after the retention data has been loaded. In such a situation, a
+        brok shold not be emitted if the state is modified. The send_brok
+        variable reflects this.
+
+        :param Item pb: The source problem
+        :param bool send_brok: Should a brok be emitted if the object state
+                               is modified.
+        """
         # Maybe we already have this problem? If so, bailout too
         if pb in self.source_problems:
             return []
@@ -364,33 +398,33 @@ class SchedulingItem(Item):
         impacts = []
         # Ok, if we are impacted, we can add it in our
         # problem list
-        # TODO: remove this unused check
-        if self.is_impact:
-            # Maybe I was a problem myself, now I can say: not my fault!
-            if self.is_problem:
-                self.no_more_a_problem()
 
-            # Ok, we are now an impact, we should take the good state
-            # but only when we just go in impact state
-            if not was_an_impact:
-                self.set_impact_state()
+        # Maybe I was a problem myself, now I can say: not my fault!
+        if self.is_problem:
+            self.no_more_a_problem()
 
-            # Ok now we can be a simple impact
-            impacts.append(self)
-            if pb not in self.source_problems:
-                self.source_problems.append(pb)
-            # we should send this problem to all potential impact that
-            # depend on us
-            for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
-                # Check if the status is ok for impact
-                for s in status:
-                    if self.is_state(s):
-                        # now check if we should bailout because of a
-                        # not good timeperiod for dep
-                        if tp is None or tp.is_time_valid(now):
-                            new_impacts = impact.register_a_problem(pb)
-                            impacts.extend(new_impacts)
+        # Ok, we are now an impact, we should take the good state
+        # but only when we just go in impact state
+        if not was_an_impact:
+            self.set_impact_state()
 
+        # Ok now we can be a simple impact
+        impacts.append(self)
+        if pb not in self.source_problems:
+            self.source_problems.append(pb)
+        # we should send this problem to all potential impact that
+        # depend on us
+        for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
+            # Check if the status is ok for impact
+            for s in status:
+                if self.is_state(s):
+                    # now check if we should bailout because of a
+                    # not good timeperiod for dep
+                    if tp is None or tp.is_time_valid(now):
+                        new_impacts = impact.register_a_problem(pb)
+                        impacts.extend(new_impacts)
+
+        if send_brok is True:
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
@@ -398,10 +432,20 @@ class SchedulingItem(Item):
         # now we return all impacts (can be void of course)
         return impacts
 
-    # Just remove the problem from our problems list
-    # and check if we are still 'impacted'. It's not recursif because problem
-    # got the list of all its impacts
-    def deregister_a_problem(self, pb):
+    def deregister_a_problem(self, pb, send_brok=True):
+        """
+        Just remove the problem from our problems list
+        and check if we are still 'impacted'. It's not recursif because problem
+        got the list of all its impacts
+
+        This method may be called to correctly reinitialize the object state
+        after the retention data has been loaded. In such a situation, a
+        brok shold not be emitted if the state is modified. The send_brok
+        variable reflects this.
+
+        :param bool send_brok: Should a brok be emitted if the object state
+                               is modified.
+        """
         self.source_problems.remove(pb)
 
         # For know if we are still an impact, maybe our dependencies
@@ -842,9 +886,33 @@ class SchedulingItem(Item):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
-    # Force the evaluation of scheduled_downtime_depth and in_scheduled_downtime
-    # attributes
-    def reset_ack_and_downtimes_state(self):
+    def reprocess_state(self):
+        """
+        Resets object state after retention has been reloaded
+        """
+        # Processes the downtime depth from the currently active downtimes
+        self.reprocess_ack_and_downtimes_state()
+        # Enforces the problem/impact attributes processing if the feature is
+        # enabled
+
+        enable_problem_impact = getattr(
+            self,
+            "enable_problem_impacts_states_change",
+            False
+        )
+        reprocess_problem_impact = getattr(
+            self,
+            "enable_problem_impacts_states_reprocessing",
+            False
+        )
+        if enable_problem_impact is True and reprocess_problem_impact is True:
+            self.reprocess_problem_impact_state()
+
+    def reprocess_ack_and_downtimes_state(self):
+        """
+        Force the evaluation of scheduled_downtime_depth and in_scheduled_downtime
+        attributes
+        """
         self.scheduled_downtime_depth = 0
         for dt in self.downtimes:
             if dt.in_scheduled_downtime():
@@ -857,6 +925,19 @@ class SchedulingItem(Item):
             self.problem_has_been_acknowledged = True
         else:
             self.problem_has_been_acknowledged = False
+
+    def reprocess_problem_impact_state(self):
+        """
+        Resets the problem/impact related attributes, which are reprocess to their
+        default value after the retention data has been reloaded.
+        """
+        no_action = self.is_no_action_dependent()
+
+        if not no_action and self.state_id != 0 and self.state_type == "HARD":
+            self.set_myself_as_problem(False)
+        # We recheck just for network_dep. Maybe we are just unreachable
+        # and we need to override the state_id
+        self.check_and_set_unreachability()
 
     # Whenever a non-ok hard state is reached, we must check whether this
     # host/service has a flexible downtime waiting to be activated
@@ -1045,6 +1126,7 @@ class SchedulingItem(Item):
             # We recheck just for network_dep. Maybe we are just unreachable
             # and we need to override the state_id
             self.check_and_set_unreachability()
+
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
             # print "Case 1 (OK following a previous OK):
