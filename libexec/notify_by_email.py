@@ -205,6 +205,9 @@ def create_mail(format):
     logging.debug('Subject: %s' % (opts.prefix + get_mail_subject(opts.notification_object)))
     msg['Subject'] = opts.prefix + get_mail_subject(opts.notification_object)
 
+    msg['Precedence'] = 'bulk'
+    msg['Auto-Submitted'] = 'auto-generated'
+
     return msg
 
 #############################################################################
