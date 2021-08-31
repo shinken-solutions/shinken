@@ -209,6 +209,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('cleaning_queues_interval', 900),
         ('disable_old_nagios_parameters_whining', False),
         ('enable_problem_impacts_states_change', False),
+        ('enable_problem_impacts_states_reprocessing', False),
         ('resource_macros_names', []),
 
         # SSL part
