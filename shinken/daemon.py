@@ -77,7 +77,7 @@ try:
 
     def get_all_groups():
         return getgrall()
-except ImportError, exp:  # Like in nt system or Android
+except ImportError as exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
         return "shinken"
@@ -333,7 +333,7 @@ class Daemon(object):
     def request_stop(self):
         self.unlink()
         self.do_stop()
-        # Brok facilities are no longer available simply print the message to STDOUT
+        # Brok facilities are no longer available simply print(the message to STDOUT)
         msg = "Stopping daemon. Exiting"
         logger.info(msg)
         print(msg)
@@ -362,7 +362,7 @@ class Daemon(object):
                                  stderr=subprocess.STDOUT,
                                  preexec_fn=os.setsid,
                                  env=env)
-        except Exception, e:
+        except Exception as e:
             logger.error("Failed to spawn child [pid=%s] [retcode=%s] [err=%s]" %
                          p.pid, p.returncode, e)
             return False
@@ -371,7 +371,7 @@ class Daemon(object):
             raw_conf = cPickle.dumps(self.new_conf)
             p.stdin.write(raw_conf)
             p.stdin.close()
-        except Exception, e:
+        except Exception as e:
             stdout = p.stdout.read()
             logger.error("Failed to send configuration to spawned child "
                          "[pid=%s] [retcode=%s] [err=%s] stdout=[%s]",
@@ -506,7 +506,7 @@ class Daemon(object):
             if not os.path.exists(self.workdir):
                 self.__create_directory(self.workdir)
             os.chdir(self.workdir)
-        except Exception, e:
+        except Exception as e:
             raise InvalidWorkDir(e)
         self.debug_output.append("Successfully changed to workdir: %s" % (self.workdir))
 
@@ -515,7 +515,7 @@ class Daemon(object):
         logger.debug("Unlinking %s", self.pidfile)
         try:
             os.unlink(self.pidfile)
-        except Exception, e:
+        except Exception as e:
             logger.error("Got an error unlinking our pidfile: %s", e)
 
 
@@ -526,7 +526,7 @@ class Daemon(object):
             try:
                 # self.local_log_fd = self.log.register_local_log(self.local_log)
                 self.local_log_fd = logger.register_local_log(self.local_log)
-            except IOError, exp:
+            except IOError as exp:
                 logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
                 sys.exit(2)
             logger.info("Using the local log file '%s'", self.local_log)
@@ -673,7 +673,7 @@ class Daemon(object):
         # Now the fork/setsid/fork..
         try:
             pid = os.fork()
-        except OSError, e:
+        except OSError as e:
             raise Exception("%s [%d]" % (e.strerror, e.errno))
 
         if pid != 0:
@@ -733,7 +733,7 @@ class Daemon(object):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase
                     daemon.lock.release()
-                except Exception, exp:
+                except Exception as exp:
                     pass
                 daemon.shutdown()
         
@@ -851,7 +851,7 @@ class Daemon(object):
             return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error, e:
+        except select.error as e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []
@@ -889,7 +889,7 @@ class Daemon(object):
     def find_uid_from_name(self):
         try:
             return getpwnam(self.user)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The user %s is unknown", self.user)
             return None
 
@@ -897,7 +897,7 @@ class Daemon(object):
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The group %s is unknown", self.group)
             return None
 
@@ -941,7 +941,7 @@ class Daemon(object):
             logger.info('Trying to initialize additional groups for the daemon')
             try:
                 os.initgroups(self.user, gid)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting '
                                'with initgroups (%s)', e.strerror)
         elif hasattr(os, 'setgroups'):
@@ -949,14 +949,14 @@ class Daemon(object):
                      [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
             try:
                 os.setgroups(groups)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting '
                                'with setgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
-        except OSError, e:
+        except OSError as e:
             logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting",
                          self.user, self.group, e.strerror, e.errno)
             sys.exit(2)
@@ -978,7 +978,7 @@ class Daemon(object):
                     if key in properties:
                         value = properties[key].pythonize(value)
                     setattr(self, key, value)
-            except ConfigParser.InterpolationMissingOptionError, e:
+            except ConfigParser.InterpolationMissingOptionError as e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
                 logger.error("Incorrect or missing variable '%s' in config file : %s",
@@ -996,14 +996,14 @@ class Daemon(object):
     # Some paths can be relatives. We must have a full path by taking
     # the config file by reference
     def relative_paths_to_full(self, reference_path):
-        # print "Create relative paths with", reference_path
+        # print("Create relative paths with", reference_path)
         properties = self.__class__.properties
         for prop, entry in properties.items():
             if isinstance(entry, ConfigPathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     new_path = os.path.join(reference_path, path)
-                    # print "DBG: changing", entry, "from", path, "to", new_path
+                    # print("DBG: changing", entry, "from", path, "to", new_path)
                     path = new_path
                 setattr(self, prop, path)
                 # print "Setting %s for %s" % (path, prop)
@@ -1059,7 +1059,7 @@ class Daemon(object):
         # finish
         try:
             self.http_daemon.run()
-        except Exception, exp:
+        except Exception as exp:
             logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)

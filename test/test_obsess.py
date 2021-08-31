@@ -114,10 +114,10 @@ class TestConfig(ShinkenTest):
         self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [[router, 0, 'OK']])
         self.show_actions()
-        print "host", host.obsess_over
-        print "rout", router.obsess_over
-        print "host", host.obsess_over_host
-        print "rout", router.obsess_over_host
+        print("host", host.obsess_over)
+        print("rout", router.obsess_over)
+        print("host", host.obsess_over_host)
+        print("rout", router.obsess_over_host)
         self.assertEqual(0, self.count_actions())
         self.assertTrue(host.obsess_over_host)
         self.assertFalse(router.obsess_over_host)

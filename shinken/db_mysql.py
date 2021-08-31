@@ -75,9 +75,9 @@ class DBMysql(DB):
             self.db_cursor.execute(query)
             self.db.commit()
             return True
-        except IntegrityError, exp:
+        except IntegrityError as exp:
             logger.warning("[MysqlDB] A query raised an integrity error: %s, %s", query, exp)
             return False
-        except ProgrammingError, exp:
+        except ProgrammingError as exp:
             logger.warning("[MysqlDB] A query raised a programming error: %s, %s", query, exp)
             return False

@@ -70,34 +70,34 @@ class Converter(object):
 
 if __name__ == '__main__':
     if (len(sys.argv) < 2):
-        print "usage: sql2mdb shinken-specifig.cfg"
+        print("usage: sql2mdb shinken-specifig.cfg")
         sys.exit(1)
     conv = Converter(sys.argv[1])
-    print conv.mod_mongodb
-    print conv.mod_sqlite
-    print conv.mod_sqlite.archive_path
+    print(conv.mod_mongodb)
+    print(conv.mod_sqlite)
+    print(conv.mod_sqlite.archive_path)
     conv.mod_sqlite.use_aggressie_sql = False
 
     try:
         conv.mod_sqlite.open()
-    except Exception, e:
-        print "problem opening the sqlite db", e
+    except Exception as e:
+        print("problem opening the sqlite db", e)
         sys.exit(1)
     try:
         conv.mod_mongodb.open()
-    except Exception, e:
+    except Exception as e:
         conv.mod_sqlite.close()
-        print "problem opening the mongodb", e
+        print("problem opening the mongodb", e)
         sys.exit(1)
 
     for dateobj, handle, archive, fromtime, totime in conv.mod_sqlite.log_db_relevant_files(0, time.time()):
         try:
             if handle == "main":
-                print "attach %s" % archive
+                print("attach %s" % archive)
                 dbresult = conv.mod_sqlite.execute('SELECT * FROM logs', [], row_factory)
             else:
                 conv.mod_sqlite.commit()
-                print "attach %s" % archive
+                print("attach %s" % archive)
                 conv.mod_sqlite.execute_attach("ATTACH DATABASE '%s' AS %s" % (archive, handle))
                 dbresult = conv.mod_sqlite.execute('SELECT * FROM %s.logs' % (handle,), [], row_factory)
                 conv.mod_sqlite.execute("DETACH DATABASE %s" % handle)
@@ -106,14 +106,14 @@ if __name__ == '__main__':
                 values = res.as_dict()
                 try:
                     conv.mod_mongodb.db[conv.mod_mongodb.collection].insert(values)
-                except Exception, e:
-                    print "problem opening the mongodb", e
+                except Exception as e:
+                    print("problem opening the mongodb", e)
                     time.sleep(5)
                     conv.mod_mongodb.db[conv.mod_mongodb.collection].insert(values)
             print "wrote %d records" % len(dbresult)
 
-        except LiveStatusLogStoreError, e:
-            print "An error occurred:", e.args[0]
+        except LiveStatusLogStoreError as e:
+            print("An error occurred:", e.args[0])
     conv.mod_sqlite.close()
     conv.mod_mongodb.close()
 

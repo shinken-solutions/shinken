@@ -57,7 +57,7 @@ if not, they must drop their checks """
     def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'],
                    reactionner_tags=['None'], worker_name='none',
                    module_types=['fork'], max_actions=None):
-        # print "We ask us checks"
+        # print("We ask us checks")
         do_checks = (do_checks == 'True')
         do_actions = (do_actions == 'True')
         if max_actions is not None:
@@ -212,13 +212,13 @@ class Injector(Interface):
 
         # first we need to get a real code object
         import marshal
-        print "Calling Inject mode"
+        print("Calling Inject mode")
         code = marshal.loads(bincode)
         result = None
         exec code
         try:
             return result
-        except NameError, exp:
+        except NameError as exp:
             return None
 '''
 
@@ -512,7 +512,7 @@ class Shinken(BaseSatellite):
         # We must update our Config dict macro with good value
         # from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
-        # print "DBG: got macros", self.sched.conf.macros
+        # print("DBG: got macros", self.sched.conf.macros)
 
         # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
@@ -575,6 +575,6 @@ class Shinken(BaseSatellite):
             self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s", self.uri)
             self.do_mainloop()
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise

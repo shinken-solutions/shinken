@@ -723,7 +723,7 @@ class Host(SchedulingItem):
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[host::%s] %s", self.get_name(), err)
 
@@ -958,7 +958,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         incl = True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid include expression: %s: %s" % (d, e))
             return not incl
@@ -968,7 +968,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         return True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid exclude expression: %s: %s" % (d, e))
         return False
@@ -1519,7 +1519,7 @@ class Hosts(Items):
                 else:
                     err = "the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
                     self.configuration_warnings.append(err)
-            # print "Me,", h.host_name, "define my parents", new_parents
+            # print("Me,", h.host_name, "define my parents", new_parents)
             # We find the id, we replace the names
             h.parents = new_parents
 
@@ -1531,7 +1531,7 @@ class Hosts(Items):
             if getattr(r, 'default', False):
                 default_realm = r
         # if default_realm is None:
-        #    print "Error: there is no default realm defined!"
+        #    print("Error: there is no default realm defined!")
         for h in self:
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
@@ -1602,7 +1602,7 @@ class Hosts(Items):
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
-                print cw
+                print(cw)
 
 
     # Create dependencies:

@@ -289,7 +289,7 @@ class Contacts(Items):
                     setattr(c, p, c.properties[p].default)
 
             if need_notificationway:
-                # print "Create notif way with", params
+                # print("Create notif way with", params)
                 cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
                 nw_name = cname + '_inner_notificationway'
                 notificationways.new_inner_member(nw_name, params)

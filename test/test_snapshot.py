@@ -35,7 +35,7 @@ class TestSnapshot(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("GotSNAP")
         host.checks_in_progress = []
@@ -58,7 +58,7 @@ class TestSnapshot(ShinkenTest):
         broks = self.sched.broks
         [b.prepare() for b in broks]
         types = set([b.type for b in broks])
-        print types
+        print(types)
         self.assertIn('service_snapshot', types)
         self.assertIn('host_snapshot', types)
 

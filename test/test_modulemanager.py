@@ -49,13 +49,13 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.start_external_instances()
         print "I correctly loaded the modules: %s " % ([inst.get_name() for inst in self.modulemanager.instances])
 
-        print "*** First kill ****"
+        print("*** First kill ****")
         # Now I will try to kill the livestatus module
         ls = self.modulemanager.instances[0]
         ls._BaseModule__kill()
 
         time.sleep(1)
-        print "Check alive?"
+        print("Check alive?")
         print "Is alive?", ls.process.is_alive()
         # Should be dead
         self.assertFalse(ls.process.is_alive())
@@ -103,9 +103,9 @@ class TestModuleManager(ShinkenTest):
         self.assertTrue(ls.process.is_alive())
 
         # And we clear all now
-        print "Ask to die"
+        print("Ask to die")
         self.modulemanager.stop_all()
-        print "Died"
+        print("Died")
 
 
 

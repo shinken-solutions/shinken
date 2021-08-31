@@ -40,14 +40,14 @@ class TestDisableActiveChecks(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
 
-        print "Checks in progress", host.checks_in_progress
+        print("Checks in progress", host.checks_in_progress)
         c = host.get_checks_in_progress().pop()
-        print c.__dict__
-        print c.status
+        print(c.__dict__)
+        print(c.status)
 
         self.scheduler_loop(1, [[host, 0, 'I set this host UP | value1=1 value2=2']])
         self.assertEqual('UP', host.state)
@@ -58,13 +58,13 @@ class TestDisableActiveChecks(ShinkenTest):
         self.sched.external_command.DISABLE_HOST_CHECK(host)
 
         c = host.get_checks_in_progress().pop()
-        print c.__dict__
-        print c.status
+        print(c.__dict__)
+        print(c.status)
         self.assertEqual('waitconsume', c.status)
         self.scheduler_loop(2, [])
 
-        print host.state
-        print host.output
+        print(host.state)
+        print(host.output)
         self.assertEqual(last_output, host.output)
 
         print len(host.get_checks_in_progress())

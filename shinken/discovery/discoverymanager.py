@@ -124,15 +124,15 @@ class DiscoveredHost(object):
                     # If the d do not already have this prop,
                     # create list
                     if kprop not in d:
-                        print 'New prop', kprop
+                        print('New prop', kprop)
                         d[kprop] = []
 
                 elif not k.startswith('-'):
                     kprop = k
                     if kprop not in d:
-                        print 'New prop', kprop
+                        print('New prop', kprop)
                     else:
-                        print 'Prop', kprop, 'reset with new value'
+                        print('Prop', kprop, 'reset with new value')
                     d[kprop] = []
 
                 for prop in string.split(v, ','):
@@ -142,7 +142,7 @@ class DiscoveredHost(object):
                         if len(d[kprop]) > 0:
                             print 'Already got', ','.join(d[kprop]), 'add', prop
                         else:
-                            print 'Add', prop
+                            print('Add', prop)
                         d[kprop].append(prop)
 
             # Now look for - (rem) property
@@ -162,7 +162,7 @@ class DiscoveredHost(object):
                 d[k] = ','.join(d[k])
 
         self.properties = d
-        print 'Update our properties', self.name, d
+        print('Update our properties', self.name, d)
 
         # For macro-resolving, we should have our macros too
         self.customs = {}
@@ -206,7 +206,7 @@ class DiscoveredHost(object):
 
     # Now we try to match all our hosts with the rules
     def match_rules(self):
-        print 'And our data?', self.data
+        print('And our data?', self.data)
         for r in self.rules:
             # If the rule was already successfully for this host, skip it
             if r in self.matched_rules:
@@ -215,22 +215,22 @@ class DiscoveredHost(object):
             print 'Looking for match with a new rule', r.get_name(), 'for the host', self.name
             if r.is_matching_disco_datas(self.data):
                 self.matched_rules.append(r)
-                print "Generating a new rule", self.name, r.writing_properties
+                print("Generating a new rule", self.name, r.writing_properties)
         self.update_properties()
 
 
 
     def read_disco_buf(self, buf):
-        print 'Read buf in', self.name
+        print('Read buf in', self.name)
         for l in buf.split('\n'):
-            # print ""
+            # print("")
             # If it's not a disco line, bypass it
             if not re.search('::', l):
                 continue
-            # print "line", l
+            # print("line", l)
             elts = l.split('::', 1)
             if len(elts) <= 1:
-                # print "Bad discovery data"
+                # print("Bad discovery data")
                 continue
             name = elts[0].strip()
 
@@ -246,7 +246,7 @@ class DiscoveredHost(object):
             # Maybe it's not me?
             if name != self.name:
                 if not self.merge:
-                    print 'Bad data for me? I bail out data!'
+                    print('Bad data for me? I bail out data!')
                     data = ''
                 else:
                     print 'Bad data for me? Let\'s switch !'
@@ -262,7 +262,7 @@ class DiscoveredHost(object):
 
             key = elts[0].strip()
             value = elts[1].strip()
-            print "INNER -->", name, key, value
+            print("INNER -->", name, key, value)
             self.data[key] = value
 
 
@@ -276,7 +276,7 @@ class DiscoveredHost(object):
     def wait_for_runners_ends(self):
         all_ok = False
         while not all_ok:
-            print 'Loop wait runner for', self.name
+            print('Loop wait runner for', self.name)
             all_ok = True
             for r in self.in_progress_runners:
                 if not r.is_finished():
@@ -294,15 +294,15 @@ class DiscoveredHost(object):
             if r.is_finished():
                 print'Get output', self.name, r.discoveryrun_name, r.current_launch
                 if r.current_launch.exit_status != 0:
-                    print "Error on run"
+                    print("Error on run")
         raw_disco_data = '\n'.join(r.get_output() for r in self.in_progress_runners
                                    if r.is_finished())
         if len(raw_disco_data) != 0:
-            print "Got Raw disco data", raw_disco_data
+            print("Got Raw disco data", raw_disco_data)
         else:
-            print "Got no data!"
+            print("Got no data!")
             for r in self.in_progress_runners:
-                print "DBG", r.current_launch
+                print("DBG", r.current_launch)
         # Now get the data for me :)
         self.read_disco_buf(raw_disco_data)
 
@@ -385,7 +385,7 @@ class DiscoveryManager:
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.dbmod:
                 if Connection is None:
-                    print "ERROR : cannot use Mongodb database : please install the pymongo library"
+                    print("ERROR : cannot use Mongodb database : please install the pymongo library")
                     break
                 # Now try to connect
                 try:
@@ -394,7 +394,7 @@ class DiscoveryManager:
                     self.dbconnection = Connection(uri)
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
-                except Exception, exp:
+                except Exception as exp:
                     logger.error('Database init : %s', exp)
 
 
@@ -403,19 +403,19 @@ class DiscoveryManager:
         if not self.backend or not isinstance(self.backend, basestring):
             return
 
-        print "Doing backend init"
+        print("Doing backend init")
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.backend:
                 print "We found our backend", mod.get_name()
                 self.backend = mod
         if not self.backend:
-            print "ERROR : cannot find the module %s" % self.backend
+            print("ERROR : cannot find the module %s" % self.backend)
             sys.exit(2)
         self.modules_manager = ModulesManager('discovery', self.modules_path, [])
         self.modules_manager.set_modules([mod])
         self.modules_manager.load_and_init()
         self.backend = self.modules_manager.instances[0]
-        print "We got our backend!", self.backend
+        print("We got our backend!", self.backend)
 
 
 
@@ -425,12 +425,12 @@ class DiscoveryManager:
         while still_loop:
             i += 1
             print '\n'
-            print 'LOOP' * 10, i
+            print('LOOP' * 10, i)
             still_loop = False
             for (name, dh) in self.disco_data.iteritems():
                 dh.update_properties()
                 to_run = dh.get_to_run()
-                print 'Still to run for', name, to_run
+                print('Still to run for', name, to_run)
                 if dh.need_to_run():
                     still_loop = True
                     dh.launch_runners()
@@ -443,14 +443,14 @@ class DiscoveryManager:
     def read_disco_buf(self):
         buf = self.raw_disco_data
         for l in buf.split('\n'):
-            # print ""
+            # print("")
             # If it's not a disco line, bypass it
             if not re.search('::', l):
                 continue
-            # print "line", l
+            # print("line", l)
             elts = l.split('::', 1)
             if len(elts) <= 1:
-                # print "Bad discovery data"
+                # print("Bad discovery data")
                 continue
             name = elts[0].strip()
 
@@ -482,7 +482,7 @@ class DiscoveryManager:
             dh = self.disco_data[name]
             key = elts[0].strip()
             value = elts[1].strip()
-            print "-->", name, key, value
+            print("-->", name, key, value)
             dh.data[key] = value
 
 
@@ -499,7 +499,7 @@ class DiscoveryManager:
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
-                    print "Generating", name, r.writing_properties
+                    print("Generating", name, r.writing_properties)
             dh.update_properties()
 
 
@@ -510,11 +510,11 @@ class DiscoveryManager:
         if '*' in self.runners:
             return True
 
-        # print self.runners
+        # print(self.runners)
         # If we match the name, ok
         for r in self.runners:
             r_name = r.strip()
-            # print "Look", r_name, name
+            # print("Look", r_name, name)
             if r_name == name:
                 return True
 
@@ -530,7 +530,7 @@ class DiscoveryManager:
         allowed_runners = self.allowed_runners()
 
         if len(allowed_runners) == 0:
-            print "ERROR : there is no matching runners selected!"
+            print("ERROR : there is no matching runners selected!")
             return
 
         for r in allowed_runners:
@@ -573,17 +573,17 @@ class DiscoveryManager:
     def get_runners_outputs(self):
         for r in self.allowed_runners():
             if r.is_finished():
-                print r.discoveryrun_name, r.current_launch
+                print(r.discoveryrun_name, r.current_launch)
                 if r.current_launch.exit_status != 0:
-                    print "Error on run"
+                    print("Error on run")
         self.raw_disco_data = '\n'.join(r.get_output() for r in self.allowed_runners()
                                         if r.is_finished())
         if len(self.raw_disco_data) != 0:
-            print "Got Raw disco data", self.raw_disco_data
+            print("Got Raw disco data", self.raw_disco_data)
         else:
-            print "Got no data!"
+            print("Got no data!")
             for r in self.allowed_runners():
-                print "DBG", r.current_launch
+                print("DBG", r.current_launch)
 
 
     # Write all configuration we've got
@@ -596,7 +596,7 @@ class DiscoveryManager:
             # If we didn't work in the last loop, bail out
             if not managed_element:
                 still_duplicate_items = False
-            print "LOOP"
+            print("LOOP")
             managed_element = False
             for name in self.disco_data:
                 if name in items_to_del:
@@ -630,7 +630,7 @@ class DiscoveryManager:
         # New loop to reflect changes in self.disco_data since it isn't possible
         # to modify a dict object when reading it.
         for name in self.disco_data:
-            print "Writing", name, "configuration"
+            print("Writing", name, "configuration")
             self.write_host_config(name)
             self.write_service_config(name)
 
@@ -642,7 +642,7 @@ class DiscoveryManager:
         d = dh.get_final_properties()
         final_host = dh.name
 
-        print "Will generate a host", d
+        print("Will generate a host", d)
         # Maybe we do not got a directory output, but
         # a bdd one.
         if self.output_dir:
@@ -659,17 +659,17 @@ class DiscoveryManager:
     # in the file
     def write_host_config_to_file(self, host, d):
         p = os.path.join(self.output_dir, host)
-        print "Want to create host path", p
+        print("Want to create host path", p)
         try:
             os.mkdir(p)
-        except OSError, exp:
+        except OSError as exp:
             # If directory already exist, it's not a problem
             if not exp.errno != '17':
                 print "Cannot create the directory '%s' : '%s'" % (p, exp)
                 return
         cfg_p = os.path.join(p, host + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
-            print "The file '%s' already exists" % cfg_p
+            print("The file '%s' already exists" % cfg_p)
             return
 
         buf = self.get_cfg_bufer(d, 'host')
@@ -679,7 +679,7 @@ class DiscoveryManager:
             fd = open(cfg_p, 'w')
             fd.write(buf)
             fd.close()
-        except OSError, exp:
+        except OSError as exp:
             print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
             return
 
@@ -696,13 +696,13 @@ class DiscoveryManager:
                         srv_rules[desc] = []
                     srv_rules[desc].append(r)
 
-        # print "Generate services for", host
-        # print srv_rules
+        # print("Generate services for", host)
+        # print(srv_rules)
         for (desc, rules) in srv_rules.items():
             d = {'service_description': desc, 'host_name': host}
             for r in rules:
                 d.update(r.writing_properties)
-            print "Generating", desc, d
+            print("Generating", desc, d)
 
             # Maybe we do not got a directory output, but
             # a bdd one.
@@ -718,12 +718,12 @@ class DiscoveryManager:
         # The host conf should already exist
         cfg_host_p = os.path.join(p, host + '.cfg')
         if not os.path.exists(cfg_host_p):
-            print "No host configuration available, I bail out"
+            print("No host configuration available, I bail out")
             return
 
         cfg_p = os.path.join(p, desc + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
-            print "The file '%s' already exists" % cfg_p
+            print("The file '%s' already exists" % cfg_p)
             return
 
         buf = self.get_cfg_bufer(d, 'service')
@@ -733,7 +733,7 @@ class DiscoveryManager:
             fd = open(cfg_p, 'w')
             fd.write(buf)
             fd.close()
-        except OSError, exp:
+        except OSError as exp:
             print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
             return
 
@@ -769,12 +769,12 @@ class DiscoveryManager:
             for t in [self.db.hosts, self.db.discovered_hosts]:
                 r = table.find({'_id': host})
                 if r.count() > 0:
-                    print "This is not a new host on", self.db.hosts
+                    print("This is not a new host on", self.db.hosts)
                     return
 
-        print "Saving in database", d
+        print("Saving in database", d)
         d['_id'] = host
         d['_discovery_state'] = 'discovered'
         table.save(d)
-        print "saved"
+        print("saved")
         del d['_id']

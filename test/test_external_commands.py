@@ -139,7 +139,7 @@ class TestConfig(ShinkenTest):
         self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
-        print "Is the last check agree?", past, router.last_chk
+        print("Is the last check agree?", past, router.last_chk)
         self.assertEqual(router.last_chk, past)
 
         # Now an even earlier check, should NOT be take
@@ -152,7 +152,7 @@ class TestConfig(ShinkenTest):
         self.assertEqual('Bob is not happy', router.output)
         print "perf (%s)" % router.perf_data
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
-        print "Is the last check agree?", very_past, router.last_chk
+        print("Is the last check agree?", very_past, router.last_chk)
         self.assertEqual(router.last_chk, past)
 
         # Now with crappy characters, like é
@@ -168,7 +168,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] ACKNOWLEDGE_HOST_PROBLEM;test_router_0;2;1;1;Big brother;test' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        print "Host state", host.state, host.problem_has_been_acknowledged
+        print("Host state", host.state, host.problem_has_been_acknowledged)
         self.assertEqual('DOWN', host.state)
         self.assertEqual(True, host.problem_has_been_acknowledged)
 
@@ -176,7 +176,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        print "Host state", host.state, host.problem_has_been_acknowledged
+        print("Host state", host.state, host.problem_has_been_acknowledged)
         self.assertEqual('DOWN', host.state)
         self.assertEqual(False, host.problem_has_been_acknowledged)
 

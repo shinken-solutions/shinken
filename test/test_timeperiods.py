@@ -35,7 +35,7 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         # Get the 12 of july 2010 at 15:00, monday
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_12
+        print(july_the_12)
 
         # First a false test, no results
         t = Timeperiod()
@@ -50,7 +50,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print t_next
+        print(t_next)
         self.assertEqual("Tue Jul 13 16:30:00 2010", t_next)
 
     def test_simple_with_multiple_time(self):
@@ -59,7 +59,7 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         # Get the 12 of july 2010 at 15:00, monday
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_12
+        print(july_the_12)
 
         # First a false test, no results
         t = Timeperiod()
@@ -75,7 +75,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "RES:", t_next
+        print("RES:", t_next)
         self.assertEqual("Tue Jul 13 00:00:00 2010", t_next)
 
         # Now ask about at 00:00 time?
@@ -86,7 +86,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "Next?", t_next
+        print("Next?", t_next)
         self.assertEqual("Tue Jul 13 00:00:00 2010", t_next)
 
     def test_simple_with_multiple_time_mutltiple_days(self):
@@ -95,7 +95,7 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         # Get the 12 of july 2010 at 15:00, monday
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_12
+        print(july_the_12)
 
         # First a false test, no results
         t = Timeperiod()
@@ -114,15 +114,15 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "RES:", t_next
+        print("RES:", t_next)
         self.assertEqual("Mon Jul 12 21:30:00 2010", t_next)
         # what about the next invalid?
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print "RES:", t_next_inv
+        print("RES:", t_next_inv)
         self.assertEqual("Mon Jul 12 15:00:00 2010", t_next_inv)
         # what about a valid time and ask next invalid? Like at 22:00h?
-        print "GO" * 10
+        print("GO" * 10)
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 22:00:00", "%d %b %Y %H:%M:%S"))
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
@@ -139,11 +139,11 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "Next?", t_next
+        print("Next?", t_next)
         self.assertEqual("Mon Jul 12 00:00:00 2010", t_next)
 
         # Now look for the never case
-        print "24x7" * 10
+        print("24x7" * 10)
         t = self.conf.timeperiods.find_by_name('24x7')
         self.assertIsNot(t, None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
@@ -157,7 +157,7 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         # Get the 12 of july 2010 at 15:00, monday
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_12
+        print(july_the_12)
 
         # First a false test, no results
         t = Timeperiod()
@@ -172,7 +172,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print t_next
+        print(t_next)
         self.assertEqual("Tue Jul 13 16:30:00 2010", t_next)
 
         # Now we add this timeperiod an exception
@@ -187,7 +187,7 @@ class TestTimeperiods(ShinkenTest):
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "T nxt with exclude:", t_next
+        print("T nxt with exclude:", t_next)
         self.assertEqual("Tue Jul 13 21:00:01 2010", t_next)
 
     def test_dayweek_timeperiod_with_exclude(self):
@@ -202,7 +202,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 2 16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "T next", t_next
+        print("T next", t_next)
         self.assertEqual("Tue Jul 13 16:30:00 2010", t_next)
 
         # Now we add this timeperiod an exception
@@ -217,9 +217,9 @@ class TestTimeperiods(ShinkenTest):
         t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
 
-        print "T next raw", t_next
+        print("T next raw", t_next)
         t_next = time.asctime(time.localtime(t_next))
-        print "TOTO T next", t_next
+        print("TOTO T next", t_next)
 
         self.assertEqual('Tue Jul 13 23:58:01 2010', t_next)
 
@@ -244,7 +244,7 @@ class TestTimeperiods(ShinkenTest):
         t2 = Timeperiod()
         t2.timeperiod_name = 'T2'
         t2.resolve_daterange(t2.dateranges, 'april 1 - august 16 00:00-24:00')
-        #print t2.__dict__
+        #print(t2.__dict__)
         t.exclude = [t2]
         # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
@@ -256,7 +256,7 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
 
-        print "T next raw JEAN", t_next
+        print("T next raw JEAN", t_next)
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
 
@@ -269,13 +269,13 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
 
         # Then a funny daterange
-        print "Testing daterange", 'tuesday -1 - monday 1  16:30-24:00'
+        print("Testing daterange", 'tuesday -1 - monday 1  16:30-24:00')
         t = Timeperiod()
         t.timeperiod_name = 'T1'
         t.resolve_daterange(t.dateranges, 'tuesday -1 - monday 1  16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "Next without exclude", t_next
+        print("Next without exclude", t_next)
         self.assertEqual("Tue Jul 27 16:30:00 2010", t_next)
 
         # Now we add this timeperiod an exception
@@ -285,7 +285,7 @@ class TestTimeperiods(ShinkenTest):
         t2 = Timeperiod()
         t2.timeperiod_name = 'T2'
         t2.resolve_daterange(t2.dateranges, 'april 1 - august 16 00:00-24:00')
-        #print t2.__dict__
+        #print(t2.__dict__)
         t.exclude = [t2]
         # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
@@ -297,7 +297,7 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
 
-        print "T next raw JEAN2", t_next
+        print("T next raw JEAN2", t_next)
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
 
@@ -310,13 +310,13 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
 
         # Then a funny daterange
-        print "Testing daterange", 'tuesday -1 - monday 1  16:30-24:00'
+        print("Testing daterange", 'tuesday -1 - monday 1  16:30-24:00')
         t = Timeperiod()
         t.timeperiod_name = 'T1'
         t.resolve_daterange(t.dateranges, 'tuesday -1 - monday 1  16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "Next without exclude", t_next
+        print("Next without exclude", t_next)
         self.assertEqual("Tue Jul 27 16:30:00 2010", t_next)
 
         # Now we add this timeperiod an exception
@@ -344,12 +344,12 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
 
-        print "T next raw", t_next
+        print("T next raw", t_next)
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
 
         self.assertEqual('Tue Oct 26 16:30:00 2010', t_next)
-        print "Finish this Funky test :)"
+        print("Finish this Funky test :)")
 
     def test_monweekday_timeperiod_with_exclude(self):
         self.print_header()
@@ -358,13 +358,13 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
 
         # Then a funny daterange
-        print "Testing daterange", 'tuesday -1 july - monday 1 august  16:30-24:00'
+        print("Testing daterange", 'tuesday -1 july - monday 1 august  16:30-24:00')
         t = Timeperiod()
         t.timeperiod_name = 'T1'
         t.resolve_daterange(t.dateranges, 'tuesday -1 july - monday 1 september  16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "Next without exclude", t_next
+        print("Next without exclude", t_next)
         self.assertEqual("Tue Jul 27 16:30:00 2010", t_next)
 
         # Now we add this timeperiod an exception
@@ -373,7 +373,7 @@ class TestTimeperiods(ShinkenTest):
         t2 = Timeperiod()
         t2.timeperiod_name = 'T2'
         t2.resolve_daterange(t2.dateranges, 'thursday 1 april - monday 3 august 00:00-24:00')
-        print t2.dateranges[0].__dict__
+        print(t2.dateranges[0].__dict__)
         t.exclude = [t2]
         # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
@@ -385,7 +385,7 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
 
-        print "T next raw", t_next
+        print("T next raw", t_next)
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
 
@@ -397,7 +397,7 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         # Get the 13 of july 2010 at 15:00, tuesday
         july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_13
+        print(july_the_13)
 
         # Now we add this timeperiod an exception
         t2 = Timeperiod()
@@ -410,7 +410,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'wednesday 00:00-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_13)
         t_next = time.asctime(time.localtime(t_next))
-        print "T next", t_next
+        print("T next", t_next)
         self.assertEqual("Wed Jul 14 00:00:00 2010", t_next)
 
     def test_dayweek_exclusion_timeperiod_with_day_range(self):
@@ -418,7 +418,7 @@ class TestTimeperiods(ShinkenTest):
         t = Timeperiod()
         # Get the 13 of july 2010 at 15:00, tuesday
         july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_13
+        print(july_the_13)
 
         # Now we add this timeperiod an exception
         t2 = Timeperiod()
@@ -433,8 +433,8 @@ class TestTimeperiods(ShinkenTest):
         now = time.time()
         now = time.asctime(time.localtime(now))
 
-        print "T next", t_next
-    #    print "T now", now
+        print("T next", t_next)
+    #    print("T now", now)
     #    self.assertEqual(now, t_next)
         self.assertEqual("Wed Jul 14 00:00:01 2010", t_next)
 
@@ -444,7 +444,7 @@ class TestTimeperiods(ShinkenTest):
 
         # Get the 13 of july 2010 at 15:00, tuesday
         july_the_13 = time.mktime(time.strptime("13 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
-        print july_the_13
+        print(july_the_13)
 
         t = Timeperiod()
         t.timeperiod_name = 'test_next_invalid_day'
@@ -453,7 +453,7 @@ class TestTimeperiods(ShinkenTest):
 
         t_next_invalid = t.get_next_invalid_time_from_t(july_the_13)
         t_next_invalid = time.asctime(time.localtime(t_next_invalid))
-        print "T next invalid", t_next_invalid
+        print("T next invalid", t_next_invalid)
         self.assertEqual("Wed Jul 14 00:00:01 2010", t_next_invalid)
 
 

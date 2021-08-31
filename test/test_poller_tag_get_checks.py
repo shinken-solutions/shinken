@@ -42,17 +42,17 @@ class TestPollerTagGetchecks(ShinkenTest):
         host.schedule()
         self.assertEqual('mytestistrue', host.check_command.command.poller_tag)
         for a in host.actions:
-            print "Tag", a.poller_tag
+            print("Tag", a.poller_tag)
             a.t_to_go = 0
         svc.schedule()
         for a in svc.actions:
-            print "Tag", a.poller_tag
+            print("Tag", a.poller_tag)
             a.t_to_go = 0
         # the scheduler need to get this new checks in its own queues
         self.sched.get_new_actions()
         # Ask for untag checks only
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'])
-        print "Got untaggued_checks", untaggued_checks
+        print("Got untaggued_checks", untaggued_checks)
         self.assertGreater(len(untaggued_checks), 0)
         for c in untaggued_checks:
             # Should be the service one, but not the host one
@@ -78,22 +78,22 @@ class TestPollerTagGetchecks(ShinkenTest):
         host.schedule()
         self.assertEqual('mytestistrue', host.check_command.command.poller_tag)
         for a in host.actions:
-            print "Tag", a.poller_tag
+            print("Tag", a.poller_tag)
             a.t_to_go = 0
         svc.schedule()
         for a in svc.actions:
-            print "Tag", a.poller_tag
+            print("Tag", a.poller_tag)
             a.t_to_go = 0
         # the scheduler need to get this new checks in its own queues
         self.sched.get_new_actions()
 
         # Ask for badly named module type
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
-        print "Got untaggued_checks for forks", untaggued_checks
+        print("Got untaggued_checks for forks", untaggued_checks)
         self.assertGreater(len(untaggued_checks), 0)
         print "NB CHECKS", len(untaggued_checks)
         for c in untaggued_checks:
-            print c.command
+            print(c.command)
             # Should be the service one, but not the host one
             self.assertTrue(c.command.startswith('plugins/test_servicecheck.pl') or c.command.startswith('plugins/test_hostcheck.pl'))
 

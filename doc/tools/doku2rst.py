@@ -478,7 +478,7 @@ for root, dirs, files in os.walk(input_folder):
 
 
 # echo 
-print "mv ../source/raws/about.rst ../source/01_about/"
-print "mv ../source/raws/ch07.rst ../source/02_gettingstarted/"
-print "mv ../source/raws/part-problemsandimpacts.rst ../source/06_advancedtopics/"
+print("mv ../source/raws/about.rst ../source/01_about/")
+print("mv ../source/raws/ch07.rst ../source/02_gettingstarted/")
+print("mv ../source/raws/part-problemsandimpacts.rst ../source/06_advancedtopics/")
 

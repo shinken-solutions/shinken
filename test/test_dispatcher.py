@@ -122,7 +122,7 @@ class TestDispatcher(ShinkenTest):
         for r in self.conf.realms:
             print r.get_name()
         r = self.conf.realms.find_by_name('All')
-        print "The dispatcher", self.dispatcher
+        print("The dispatcher", self.dispatcher)
         # dummy for the arbiter
         for a in self.conf.arbiters:
             a.__class__ = GoodArbiter
@@ -130,10 +130,10 @@ class TestDispatcher(ShinkenTest):
         for t in elts_types:
             lst = getattr(self.conf, t)
             for s in lst:
-                print "TAG s", s
+                print("TAG s", s)
                 s.realm = r
 
-        print "Preparing schedulers"
+        print("Preparing schedulers")
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assertIsNot(scheduler1, None)
         scheduler1.__class__ = GoodScheduler
@@ -141,7 +141,7 @@ class TestDispatcher(ShinkenTest):
         self.assertIsNot(scheduler2, None)
         scheduler2.__class__ = BadScheduler
 
-        print "Preparing pollers"
+        print("Preparing pollers")
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
         self.assertIsNot(poller1, None)
         poller1.__class__ = GoodPoller
@@ -149,7 +149,7 @@ class TestDispatcher(ShinkenTest):
         self.assertIsNot(poller2, None)
         poller2.__class__ = BadPoller
 
-        print "Preparing reactionners"
+        print("Preparing reactionners")
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
         self.assertIsNot(reactionner1, None)
         reactionner1.__class__ = GoodReactionner
@@ -157,7 +157,7 @@ class TestDispatcher(ShinkenTest):
         self.assertIsNot(reactionner2, None)
         reactionner2.__class__ = BadReactionner
 
-        print "Preparing brokers"
+        print("Preparing brokers")
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
         self.assertIsNot(broker1, None)
         broker1.__class__ = GoodBroker
@@ -206,7 +206,7 @@ class TestDispatcher(ShinkenTest):
         self.assertEqual(False, broker2.reachable)
         ### Now add another attempt, still alive, but attemp=2/3
 
-        print "CheckAlive " * 10
+        print("CheckAlive " * 10)
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -251,7 +251,7 @@ class TestDispatcher(ShinkenTest):
         self.assertEqual(False, broker2.reachable)
 
         ### Now we get BAD, We go DEAD for N2!
-        print "CheckAlive " * 10
+        print("CheckAlive " * 10)
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -320,11 +320,11 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.setup_with_file('etc/shinken_dispatcher_multibrokers.cfg')
 
     def test_simple_dispatch(self):
-        print "The dispatcher", self.dispatcher
+        print("The dispatcher", self.dispatcher)
         # dummy for the arbiter
         for a in self.conf.arbiters:
             a.__class__ = GoodArbiter
-        print "Preparing schedulers"
+        print("Preparing schedulers")
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assertIsNot(scheduler1, None)
         scheduler1.__class__ = GoodScheduler
@@ -332,7 +332,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assertIsNot(scheduler2, None)
         scheduler2.__class__ = GoodScheduler
 
-        print "Preparing pollers"
+        print("Preparing pollers")
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
         self.assertIsNot(poller1, None)
         poller1.__class__ = GoodPoller
@@ -340,7 +340,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assertIsNot(poller2, None)
         poller2.__class__ = BadPoller
 
-        print "Preparing reactionners"
+        print("Preparing reactionners")
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
         self.assertIsNot(reactionner1, None)
         reactionner1.__class__ = GoodReactionner
@@ -348,7 +348,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assertIsNot(reactionner2, None)
         reactionner2.__class__ = BadReactionner
 
-        print "Preparing brokers"
+        print("Preparing brokers")
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
         self.assertIsNot(broker1, None)
         broker1.__class__ = GoodBroker
@@ -397,7 +397,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assertEqual(True, broker2.reachable)
 
         ### Now add another attempt, still alive, but attemp=2/3
-        print "CheckAlive " * 10
+        print("CheckAlive " * 10)
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -441,7 +441,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assertEqual(True, broker2.reachable)
 
         ### Now we get BAD, We go DEAD for N2!
-        print "CheckAlive " * 10
+        print("CheckAlive " * 10)
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:

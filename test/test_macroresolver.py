@@ -50,7 +50,7 @@ class TestMacroResolver(ShinkenTest):
         (svc, hst) = self.get_hst_svc()
         data = svc.get_data_for_checks()
         com = mr.resolve_command(svc.check_command, data)
-        print com
+        print(com)
         self.assertEqual("plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue", com)
 
 
@@ -65,7 +65,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$TOTALHOSTSUP$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing 1', com)
 
 
@@ -79,7 +79,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTREALM$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing Default', com)
 
 
@@ -90,7 +90,7 @@ class TestMacroResolver(ShinkenTest):
         (svc, hst) = self.get_hst_svc()
         data = svc.get_data_for_checks()
         illegal_macro_output_chars = self.sched.conf.illegal_macro_output_chars
-        print "Illegal macros caracters:", illegal_macro_output_chars
+        print("Illegal macros caracters:", illegal_macro_output_chars)
         hst.output = 'monculcestdupoulet'
         dummy_call = "special_macro!$HOSTOUTPUT$"
 
@@ -98,7 +98,7 @@ class TestMacroResolver(ShinkenTest):
             hst.output = 'monculcestdupoulet' + c
             cc = CommandCall(self.conf.commands, dummy_call)
             com = mr.resolve_command(cc, data)
-            print com
+            print(com)
             self.assertEqual('plugins/nothing monculcestdupoulet', com)
 
     def test_env_macros(self):
@@ -108,7 +108,7 @@ class TestMacroResolver(ShinkenTest):
         data.append(self.conf)
 
         env = mr.get_env_macros(data)
-        print "Env:", env        
+        print("Env:", env        )
         self.assertNotEqual(env, {})
         self.assertEqual('test_host_0', env['NAGIOS_HOSTNAME'])
         self.assertEqual('0.0', env['NAGIOS_SERVICEPERCENTCHANGE'])
@@ -129,7 +129,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$INTERESTINGVARIABLE$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print "CUCU", com
+        print("CUCU", com)
         self.assertEqual('plugins/nothing interestingvalue', com)
 
         # Look for multiple = in lines, should split the first
@@ -137,7 +137,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$ANOTHERVALUE$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print "CUCU", com
+        print("CUCU", com)
         self.assertEqual('plugins/nothing blabla=toto', com)
 
 
@@ -154,7 +154,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTSTATE:test_host_0$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing UP', com)
 
         # Call with a void host name, means : myhost
@@ -162,7 +162,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTSTATE:$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing UP', com)
 
         # Now with a service, for our implicit host state
@@ -170,7 +170,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTSTATE:test_host_0$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing UP', com)
                                                         
                                         
@@ -179,7 +179,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTSTATE:$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing UP', com)
 
         # Now prepare another service
@@ -191,7 +191,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$SERVICEOUTPUT:test_host_0:test_another_service$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing you should not pass', com)
 
         # Ok now with a host implicit way
@@ -199,7 +199,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$SERVICEOUTPUT::test_another_service$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing you should not pass', com)
                                                 
                                                 
@@ -214,7 +214,7 @@ class TestMacroResolver(ShinkenTest):
         dummy_call = "special_macro!$HOSTADDRESS6$"
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
-        print com
+        print(com)
         self.assertEqual('plugins/nothing ::1', com)
 
         

@@ -126,7 +126,7 @@ class TestEndParsingType(unittest.TestCase):
 
         for objs in [self.conf.arbiters]:
             for obj in objs:
-                #print "=== obj : %s ===" % obj.__class__
+                #print("=== obj : %s ===" % obj.__class__)
                 for prop in obj.properties:
                     if hasattr(obj, prop):
                         value = getattr(obj, prop)
@@ -136,7 +136,7 @@ class TestEndParsingType(unittest.TestCase):
                             self.assertIsInstance(value, self.map_type(obj.properties[prop]))
                         else:
                             print("Skipping %s " % prop)
-                #print "==="
+                #print("===")
 
         # Manual check of several attr for self.conf.contacts
         # because contacts contains unicode attr

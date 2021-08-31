@@ -35,13 +35,13 @@ class NSCA_client():
         This is the main function that is called in the CONFIGURATION
         phase.
         """
-        print "[Dummy] ask me for objects to return"
+        print("[Dummy] ask me for objects to return")
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
         r['hosts'].append(h)
-        print "[Dummy] Returning to Arbiter the hosts:", r
+        print("[Dummy] Returning to Arbiter the hosts:", r)
         return r
 
     def send_init_packet(self, socket):
@@ -92,7 +92,7 @@ class NSCA_client():
             extcmd = ("[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n"
                       % (timestamp, hostname, service, rc, output))
 
-        print "want to send", extcmd
+        print("want to send", extcmd)
 
         #e = ExternalCommand(extcmd)
         #self.from_q.put(e)
@@ -115,12 +115,12 @@ class NSCA_client():
         IVs = {}
 
         init = server.recv(size)
-        print "got init", init
+        print("got init", init)
 
         #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         (iv, t) = struct.unpack("!128sI", init)
-        print "IV", iv
-        print "T", t
+        print("IV", iv)
+        print("T", t)
 
         version = 0
         pad1 = 0
@@ -157,7 +157,7 @@ class NSCA_client():
         raise SystemExit(0)
 
         while not self.interrupted:
-            print "Loop"
+            print("Loop")
             inputready, outputready, exceptready = select.select(input, [], [], 1)
 
             for s in inputready:
@@ -183,8 +183,8 @@ class NSCA_client():
                                           output)
                         try:
                             s.shutdown(2)
-                        except Exception, exp:
-                            print exp
+                        except Exception as exp:
+                            print(exp)
                         s.close()
                         input.remove(s)
 

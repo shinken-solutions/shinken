@@ -76,6 +76,6 @@ class Serviceescalations(Items):
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
-            # print "Creation an escalation with:", creation_dict
+            # print("Creation an escalation with:", creation_dict)
             s = Escalation(creation_dict)
             escalations.add_escalation(s)

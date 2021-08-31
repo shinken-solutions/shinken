@@ -35,7 +35,7 @@ class TestMaintPeriod(ShinkenTest):
 
     def test_check_defined_maintenance_period(self):
         a_24_7 = self.sched.timeperiods.find_by_name("24x7")
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         test_router_0 = self.sched.hosts.find_by_name("test_router_0")
         test_host_0 = self.sched.hosts.find_by_name("test_host_0")
         test_nobody = self.sched.hosts.find_by_name("test_nobody")
@@ -88,7 +88,7 @@ class TestMaintPeriod(ShinkenTest):
         soonend = time.strftime("%H:%M", time.localtime(now + 180))
 
         range = "%s %s-%s" % (nowday, soonstart, soonend)
-        print "range is ", range
+        print("range is ", range)
         t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, range)
@@ -111,12 +111,12 @@ class TestMaintPeriod(ShinkenTest):
         self.assertTrue(hasattr(svc3, 'in_maintenance'))
         self.assertEqual(1, len(self.sched.downtimes))
         try:
-            print "........................................."
-            print self.sched.downtimes[1]
+            print(".........................................")
+            print(self.sched.downtimes[1])
             print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
             print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
         except Exception:
-            print "looks like there is no downtime"
+            print("looks like there is no downtime")
             pass
         self.assertEqual(1, len(svc3.downtimes))
         self.assertIn(svc3.downtimes[0], self.sched.downtimes.values())

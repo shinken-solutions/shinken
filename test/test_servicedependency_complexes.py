@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         self.assertIsNot(NRPE, None)
         Load = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "Load")
         self.assertIsNot(Load, None)
-        print Load.act_depend_of
+        print(Load.act_depend_of)
         self.assertIn(NRPE, [e[0] for e in Load.act_depend_of])
 
 

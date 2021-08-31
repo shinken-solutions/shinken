@@ -119,7 +119,7 @@ class Discoveryrun(MatchingItem):
 
     def check_finished(self):
         max_output = 10 ** 9
-        # print "Max output", max_output
+        # print("Max output", max_output)
         self.current_launch.check_finished(max_output)
 
     # Look if the current launch is done or not

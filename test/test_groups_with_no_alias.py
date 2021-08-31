@@ -35,16 +35,16 @@ class TestGroupwithNoAlias(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         hg = self.sched.hostgroups.find_by_name("NOALIAS")
         self.assertIsNot(hg, None)
-        print hg.__dict__
+        print(hg.__dict__)
         self.assertEqual("NOALIAS", hg.alias)
 
         sg = self.sched.servicegroups.find_by_name("NOALIAS")
         self.assertIsNot(sg, None)
-        print sg.__dict__
+        print(sg.__dict__)
         self.assertEqual("NOALIAS", sg.alias)
 
 

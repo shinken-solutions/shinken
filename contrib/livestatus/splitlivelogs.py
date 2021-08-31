@@ -66,7 +66,7 @@ if __name__ == '__main__':
         dbh.log_db_do_archive()
         dbh.close()
     else:
-        print "database %s does not exist" % opts.database
+        print("database %s does not exist" % opts.database)
 
 
 # For perf tuning:

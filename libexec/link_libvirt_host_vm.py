@@ -63,17 +63,17 @@ def main(uris, output_file, ignore):
         signal.alarm(10) # triger alarm in 10 seconds
         try:
             conn = libvirt.openReadOnly(uri)
-        except libvirt.libvirtError, e:
+        except libvirt.libvirtError as e:
             print "Libvirt connection error: `%s'" % e.message.replace("\r", "")
-            print "Let's try next URI"
+            print("Let's try next URI")
             continue
         except TimeoutException:
-            print "Libvirt Request timeout"
-            print "Let's try next URI"
+            print("Libvirt Request timeout")
+            print("Let's try next URI")
             continue
-        except Exception, e:
+        except Exception as e:
             print "Unknown Error: %s" % str(e)
-            print "Let's try next URI..."
+            print("Let's try next URI...")
             continue
             
         hypervisor = conn.getHostname()
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         parser.error("does not take any positional arguments")
 
     if opts.uris is None:
-        print "At least one URI is mandatory"
+        print("At least one URI is mandatory")
         sys.exit(2)
 
     main(**vars(opts))

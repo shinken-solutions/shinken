@@ -65,7 +65,7 @@ else:
 
 def debuging(txt):
     if debug:
-        print txt
+        print(txt)
 
 if opts.network:
     network = True

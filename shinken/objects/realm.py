@@ -300,7 +300,7 @@ class Realm(Itemgroup):
             c = r.give_satellite_cfg()
             cfg['reactionners'][r.id] = c
 
-        # print "***** Preparing a satellites conf for a scheduler", cfg
+        # print("***** Preparing a satellites conf for a scheduler", cfg)
         return cfg
 
 

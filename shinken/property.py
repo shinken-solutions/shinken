@@ -138,7 +138,7 @@ class UnusedProp(Property):
 
     # Since this property is not used, there is no use for other
     # parameters than 'text'.
-    # 'text' a some usage text if present, will print it to explain
+    # 'text' a some usage text if present, will print(it to explain)
     # why it's no more useful
     def __init__(self, text=None):
 

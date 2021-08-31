@@ -50,7 +50,7 @@ try:
     def get_cur_group():
         return grp.getgrgid(os.getgid()).gr_name
 
-except ImportError, exp:  # Like in nt system or Android
+except ImportError as exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
         return os.getlogin()
@@ -107,7 +107,7 @@ class template_Daemon_Bad_Start():
 
 
     def test_bad_piddir(self):
-        print "Testing bad pidfile ..."
+        print("Testing bad pidfile ...")
         d = self.get_daemon()
         d.workdir = tempfile.mkdtemp()
         d.pidfile = os.path.join('/proc/DONOTEXISTS', "daemon.pid")

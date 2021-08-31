@@ -698,7 +698,7 @@ class Service(SchedulingItem):
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[service::%s] %s", desc, err)
 
@@ -1564,7 +1564,7 @@ class Services(Items):
                           (self.get_name(), hst_name)
                     s.configuration_warnings.append(err)
                     continue
-            except AttributeError, exp:
+            except AttributeError as exp:
                 pass  # Will be catch at the is_correct moment
 
     # We look for servicegroups property in services and

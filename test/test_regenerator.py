@@ -36,10 +36,10 @@ class TestRegenerator(ShinkenTest):
 
     def look_for_same_values(self):
         # Look at Regenerator values
-        print "Hosts:", self.rg.hosts.__dict__
+        print("Hosts:", self.rg.hosts.__dict__)
         for h in self.rg.hosts:
             orig_h = self.sched.hosts.find_by_name(h.host_name)
-            print h.state, orig_h.state
+            print(h.state, orig_h.state)
             # Look for same states
             self.assertEqual(orig_h.state, h.state)
             self.assertEqual(orig_h.state_type, h.state_type)
@@ -54,10 +54,10 @@ class TestRegenerator(ShinkenTest):
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
                 self.assertTrue(same_pbs)
 
-        print "Services:", self.rg.services.__dict__
+        print("Services:", self.rg.services.__dict__)
         for s in self.rg.services:
             orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
-            print s.state, orig_s.state
+            print(s.state, orig_s.state)
             self.assertEqual(orig_s.state, s.state)
             self.assertEqual(orig_s.state_type, s.state_type)
             # Look for same impacts too
@@ -88,7 +88,7 @@ class TestRegenerator(ShinkenTest):
         # Got the initial creation ones
         t0 = time.time()
         for b in self.sched.broks:
-            print "Manage b", b.type
+            print("Manage b", b.type)
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
@@ -97,7 +97,7 @@ class TestRegenerator(ShinkenTest):
 
         self.look_for_same_values()
 
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
@@ -113,20 +113,20 @@ class TestRegenerator(ShinkenTest):
 
         t0 = time.time()
         for b in self.sched.broks:
-            print "Manage b", b.type
+            print("Manage b", b.type)
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
-        print 'Time', t1 - t0
+        print('Time', t1 - t0)
         del self.sched.broks[:]
 
         self.look_for_same_values()
 
-        print 'Time', t1 - t0
+        print('Time', t1 - t0)
 
         b = svc.get_initial_status_brok()
         b.prepare()
-        print "GO BENCH!"
+        print("GO BENCH!")
         t0 = time.time()
         for i in xrange(1, 1000):
             b = svc.get_initial_status_brok()
@@ -135,7 +135,7 @@ class TestRegenerator(ShinkenTest):
             for (prop, value) in b.data.iteritems():
                 setattr(s, prop, value)
         t1 = time.time()
-        print "Bench end:", t1 - t0
+        print("Bench end:", t1 - t0)
 
         times = {}
         sizes = {}
@@ -156,11 +156,11 @@ class TestRegenerator(ShinkenTest):
                     sizes[prop] += len(tmp)
                     times[prop] += time.time() - t0
 
-        print "Times"
+        print("Times")
         for (k, v) in times.iteritems():
             print "\t%s: %s" % (k, v)
         print "\n\n"
-        print "Sizes"
+        print("Sizes")
         for (k, v) in sizes.iteritems():
             print "\t%s: %s" % (k, v)
         print "\n"
@@ -183,7 +183,7 @@ class TestRegenerator(ShinkenTest):
         # Got the initial creation ones
         t0 = time.time()
         for b in self.sched.broks:
-            print "Manage b", b.type
+            print("Manage b", b.type)
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()

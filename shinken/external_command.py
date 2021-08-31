@@ -448,7 +448,7 @@ class ExternalCommandManager:
                 try:
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError, exp:
+                except OSError as exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
@@ -481,7 +481,7 @@ class ExternalCommandManager:
         # Maybe the command is invalid. Bailout
         try:
             command = excmd.cmd_line
-        except AttributeError, exp:
+        except AttributeError as exp:
             logger.debug("resolve_command:: error with command %s: %s", excmd, exp)
             return
 
@@ -603,7 +603,7 @@ class ExternalCommandManager:
         part1 = elts[0]
 
         elts2 = part1.split(' ')
-        # print "Elts2:", elts2
+        # print("Elts2:", elts2)
         if len(elts2) != 2:
             logger.debug("Malformed command '%s'", command)
             return None
@@ -649,8 +649,8 @@ class ExternalCommandManager:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers", c_name)
                 return {'global': True, 'cmd': command}
 
-        # print "Is global?", c_name, entry['global']
-        # print "Mode:", self.mode
+        # print("Is global?", c_name, entry['global'])
+        # print("Mode:", self.mode)
         # print "This command have arguments:", entry['args'], len(entry['args'])
 
         args = []

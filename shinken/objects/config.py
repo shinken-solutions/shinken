@@ -104,7 +104,7 @@ class Config(Item):
     #  same name
     # *unused: just to warn the user that the option he use is no more used
     #  in Shinken
-    # *usage_text: if present, will print it to explain why it's no more useful
+    # *usage_text: if present, will print(it to explain why it's no more useful)
     properties = {
         'prefix':
             StringProp(default='/usr/local/shinken/'),
@@ -889,7 +889,7 @@ class Config(Item):
                 buf = fd.readlines()
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
-            except IOError, exp:
+            except IOError as exp:
                 logger.error("[config] cannot open config file '%s' for reading: %s", file, exp)
                 # The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
@@ -917,7 +917,7 @@ class Config(Item):
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open config file '%s' for reading: %s",
                                      cfg_file_name, exp)
                         # The configuration is invalid because we have a bad file!
@@ -951,7 +951,7 @@ class Config(Item):
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
-                                except IOError, exp:
+                                except IOError as exp:
                                     logger.error("Cannot open config file '%s' for reading: %s",
                                                  os.path.join(root, file), exp)
                                     # The configuration is invalid
@@ -1065,7 +1065,7 @@ class Config(Item):
         objectscfg[tmp_type].append(tmp)
         objects = {}
 
-        # print "Params", params
+        # print("Params", params)
         self.load_params(params)
         # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
@@ -1162,7 +1162,7 @@ class Config(Item):
         self.modules.fill_default()
 
 
-        # print "****************** Linkify ******************"
+        # print("****************** Linkify ******************")
         self.arbiters.linkify(self.modules)
         self.modules.linkify()
 
@@ -1194,7 +1194,7 @@ class Config(Item):
         self.linkify_one_command_with_commands(self.commands, 'global_host_event_handler')
         self.linkify_one_command_with_commands(self.commands, 'global_service_event_handler')
 
-        # print "Hosts"
+        # print("Hosts")
         # link hosts with timeperiods and commands
         self.hosts.linkify(self.timeperiods, self.commands,
                            self.contacts, self.realms,
@@ -1207,11 +1207,11 @@ class Config(Item):
         self.hostsextinfo.merge(self.hosts)
 
         # Do the simplify AFTER explode groups
-        # print "Hostgroups"
+        # print("Hostgroups")
         # link hostgroups with hosts
         self.hostgroups.linkify(self.hosts, self.realms)
 
-        # print "Services"
+        # print("Services")
         # link services with other objects
         self.services.linkify(self.hosts, self.commands,
                               self.timeperiods, self.contacts,
@@ -1223,7 +1223,7 @@ class Config(Item):
 
         self.servicesextinfo.merge(self.services)
 
-        # print "Service groups"
+        # print("Service groups")
         # link servicegroups members with services
         self.servicegroups.linkify(self.hosts, self.services)
 
@@ -1236,41 +1236,41 @@ class Config(Item):
         # Link with timeperiods
         self.macromodulations.linkify(self.timeperiods)
 
-        # print "Contactgroups"
+        # print("Contactgroups")
         # link contacgroups with contacts
         self.contactgroups.linkify(self.contacts)
 
-        # print "Contacts"
+        # print("Contacts")
         # link contacts with timeperiods and commands
         self.contacts.linkify(self.timeperiods, self.commands,
                               self.notificationways)
 
-        # print "Timeperiods"
+        # print("Timeperiods")
         # link timeperiods with timeperiods (exclude part)
         self.timeperiods.linkify()
 
-        # print "Servicedependency"
+        # print("Servicedependency")
         self.servicedependencies.linkify(self.hosts, self.services,
                                          self.timeperiods)
 
-        # print "Hostdependency"
+        # print("Hostdependency")
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
-        # print "Resultmodulations"
+        # print("Resultmodulations")
         self.resultmodulations.linkify(self.timeperiods)
 
         self.businessimpactmodulations.linkify(self.timeperiods)
 
-        # print "Escalations"
+        # print("Escalations")
         self.escalations.linkify(self.timeperiods, self.contacts,
                                  self.services, self.hosts)
 
         # Link discovery commands
         self.discoveryruns.linkify(self.commands)
 
-        # print "Realms"
+        # print("Realms")
         self.realms.linkify()
 
-        # print "Schedulers and satellites"
+        # print("Schedulers and satellites")
         # Link all links with realms
         # self.arbiters.linkify(self.modules)
         self.schedulers.linkify(self.realms, self.modules)
@@ -1445,7 +1445,7 @@ class Config(Item):
             m.shutdown()
 
 
-    # It's used to warn about useless parameter and print why it's not use.
+    # It's used to warn about useless parameter and print(why it's not use.)
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
             properties = self.__class__.properties
@@ -1488,32 +1488,32 @@ class Config(Item):
     # (for host group ones)
     def explode(self):
         # first elements, after groups
-        # print "Contacts"
+        # print("Contacts")
         self.contacts.explode(self.contactgroups, self.notificationways)
-        # print "Contactgroups"
+        # print("Contactgroups")
         self.contactgroups.explode()
 
-        # print "Hosts"
+        # print("Hosts")
         self.hosts.explode(self.hostgroups, self.contactgroups, self.triggers)
 
-        # print "Hostgroups"
+        # print("Hostgroups")
         self.hostgroups.explode()
 
-        # print "Services"
+        # print("Services")
         # print "Initially got nb of services: %d" % len(self.services.items)
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
                               self.servicegroups, self.servicedependencies,
                               self.triggers)
         # print "finally got nb of services: %d" % len(self.services.items)
-        # print "Servicegroups"
+        # print("Servicegroups")
         self.servicegroups.explode()
 
-        # print "Timeperiods"
+        # print("Timeperiods")
         self.timeperiods.explode()
 
         self.hostdependencies.explode(self.hostgroups)
 
-        # print "Servicedependency"
+        # print("Servicedependency")
         self.servicedependencies.explode(self.hostgroups)
 
         # Serviceescalations hostescalations will create new escalations
@@ -1523,7 +1523,7 @@ class Config(Item):
                                  self.contactgroups)
 
         # Now the architecture part
-        # print "Realms"
+        # print("Realms")
         self.realms.explode()
 
 
@@ -1538,15 +1538,15 @@ class Config(Item):
     # So elements will have their configured properties
     def apply_inheritance(self):
         # inheritance properties by template
-        # print "Hosts"
+        # print("Hosts")
         self.hosts.apply_inheritance()
-        # print "Contacts"
+        # print("Contacts")
         self.contacts.apply_inheritance()
-        # print "Services"
+        # print("Services")
         self.services.apply_inheritance()
-        # print "Servicedependencies"
+        # print("Servicedependencies")
         self.servicedependencies.apply_inheritance()
-        # print "Hostdependencies"
+        # print("Hostdependencies")
         self.hostdependencies.apply_inheritance()
         # Also timeperiods
         self.timeperiods.apply_inheritance()
@@ -1563,7 +1563,7 @@ class Config(Item):
 
     # Use to apply implicit inheritance
     def apply_implicit_inheritance(self):
-        # print "Services"
+        # print("Services")
         self.services.apply_implicit_inheritance(self.hosts)
 
 
@@ -2061,7 +2061,7 @@ class Config(Item):
 
 
 
-    # Add an error in the configuration error list so we can print them
+    # Add an error in the configuration error list so we can print(them)
     # all in one place
     def add_error(self, txt):
         err = txt
@@ -2276,10 +2276,10 @@ class Config(Item):
                         valid_value = True
                         continue
                     if old_i == old_pack:
-                        # print 'I found a match between elements', old_i
+                        # print('I found a match between elements', old_i)
                         valid_value = True
                     if old_i != old_pack:
-                        # print 'Outch found a change sorry', old_i, old_pack
+                        # print('Outch found a change sorry', old_i, old_pack)
                         valid_value = False
                 # print 'Is valid?', elt.get_name(), valid_value, old_pack
                 i = None
@@ -2318,7 +2318,7 @@ class Config(Item):
     # New confs are independent with checks. The only communication
     # That can be need is macro in commands
     def cut_into_parts(self):
-        # print "Scheduler configured:", self.schedulers
+        # print("Scheduler configured:", self.schedulers)
         # I do not care about alive or not. User must have set a spare if need it
         nb_parts = len([s for s in self.schedulers if not s.spare])
 
@@ -2331,7 +2331,7 @@ class Config(Item):
         # theses configurations)
         self.confs = {}
         for i in xrange(0, nb_parts):
-            # print "Create Conf:", i, '/', nb_parts -1
+            # print("Create Conf:", i, '/', nb_parts -1)
             cur_conf = self.confs[i] = Config()
 
             # Now we copy all properties of conf into the new ones
@@ -2339,7 +2339,7 @@ class Config(Item):
                 if entry.managed and not isinstance(entry, UnusedProp):
                     val = getattr(self, prop)
                     setattr(cur_conf, prop, val)
-                    # print "Copy", prop, val
+                    # print("Copy", prop, val)
 
             # we need a deepcopy because each conf
             # will have new hostgroups
@@ -2395,9 +2395,9 @@ class Config(Item):
 
         # We've nearly have hosts and services. Now we want REALS hosts (Class)
         # And we want groups too
-        # print "Finishing packs"
+        # print("Finishing packs")
         for i in self.confs:
-            # print "Finishing pack Nb:", i
+            # print("Finishing pack Nb:", i)
             cfg = self.confs[i]
 
             # Create ours classes

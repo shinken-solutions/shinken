@@ -35,7 +35,7 @@ class TestConfig(ShinkenTest):
         # host_name instead and should nto be an error
         now = time.time()
         router = self.sched.hosts.find_by_name("test_router_0")
-        print "router adress:", router.address
+        print("router adress:", router.address)
         self.assertEqual('test_router_0', router.address)
 
 if __name__ == '__main__':

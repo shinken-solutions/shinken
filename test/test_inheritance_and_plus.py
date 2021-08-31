@@ -31,7 +31,7 @@ class TestInheritanceAndPlus(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         linux = self.sched.hostgroups.find_by_name('linux')
         self.assertIsNot(linux, None)

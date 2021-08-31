@@ -33,7 +33,7 @@ class TestNoNotificationPeriod(ShinkenTest):
     # no notification period should do a 24x7 like period
     # so a None, but always valid in create_notification
     def test_no_notification_period(self):
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

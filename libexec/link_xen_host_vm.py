@@ -71,8 +71,8 @@ def write_output(path,r):
         f.write(buf)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s wrote" % path
-    except IOError, exp:
+        print("File %s wrote" % path)
+    except IOError as exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))
 
 def con_poolmaster(xs, user, password):
@@ -80,7 +80,7 @@ def con_poolmaster(xs, user, password):
     s = XenAPI.Session("http://%s" % xs)
     s.xenapi.login_with_password(user,password)
     return s
-  except XenAPI.Failure, msg:
+  except XenAPI.Failure as msg:
      if  msg.details[0] == "HOST_IS_SLAVE":
         host = msg.details[1]
         s = XenAPI.Session("http://%s" % host)
@@ -118,7 +118,7 @@ def main(output, user, password, rules, xenserver):
   print "Created %d links" % len(r)
 
   write_output(output, r)
-  print "Finished!"
+  print("Finished!")
 
 if __name__ == "__main__":
     # Manage the options

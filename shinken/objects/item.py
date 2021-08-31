@@ -468,7 +468,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                # print prop, ":", v
+                # print(prop, ":", v)
                 r[prop] = v
         return r
 
@@ -1095,7 +1095,7 @@ class Items(object):
 
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[items] %s", err)
 
@@ -1451,7 +1451,7 @@ class Items(object):
             try:
                 hnames_list.extend(
                     self.get_hosts_from_hostgroups(hgnames, hostgroups))
-            except ValueError, e:
+            except ValueError as e:
                 item.configuration_errors.append(str(e))
 
         # Expands host names

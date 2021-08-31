@@ -42,7 +42,7 @@ def get_instance(mod_conf):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_broker(BaseModule):
 
     def __init__(self, mod_conf, foo):

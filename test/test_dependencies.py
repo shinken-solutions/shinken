@@ -98,9 +98,9 @@ class TestConfig(ShinkenTest):
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
         #self.assertTrue(host_A in [x[0] for x in host_C.chk_depend_of])
-        print host_C.act_depend_of
-        print host_C.chk_depend_of
-        print host_C.chk_depend_of_me
+        print(host_C.act_depend_of)
+        print(host_C.chk_depend_of)
+        print(host_C.chk_depend_of_me)
         self.assertIn(host_B, [x[0] for x in host_C.act_depend_of])
         self.assertIn(host_A, [x[0] for x in host_C.act_depend_of])
         self.assertIn(host_A, [x[0] for x in host_B.act_depend_of])
@@ -160,10 +160,10 @@ class TestConfig(ShinkenTest):
         svc_parent = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_parent_svc")
         svc_son = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_son_svc")
 
-        print "DumP", self.conf.servicedependencies
+        print("DumP", self.conf.servicedependencies)
 
         # the most important: test_parent is in the chk_depend_of-list of test_son
-        print "Dep: ", svc_son.act_depend_of
+        print("Dep: ", svc_son.act_depend_of)
         self.assertEqual([x[1] for x in svc_son.act_depend_of if x[0] is svc_parent], [['u', 'c', 'w']] )
 
     def test_host_non_inherits_dependencies(self):
@@ -185,8 +185,8 @@ class TestConfig(ShinkenTest):
         print "E depends on", ",".join([x[0].get_name() for x in host_E.chk_depend_of])
 
         host_C.state = 'DOWN'
-        print "D state", host_D.state
-        print "E dep", host_E.chk_depend_of
+        print("D state", host_D.state)
+        print("E dep", host_E.chk_depend_of)
         print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
         # If I ask D for dep, he should raise Nothing if we do not want parents.
         self.assertFalse(host_D.do_i_raise_dependency('d', inherit_parents=False) )

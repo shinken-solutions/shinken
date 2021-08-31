@@ -33,7 +33,7 @@ class TestSchedCleanQueues(ShinkenTest):
     # Try to generate a bunch of external commands
     # and see if they are drop like it should
     def test_sched_clean_queues(self):
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

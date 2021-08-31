@@ -168,8 +168,8 @@ class TestHost(ShinkenTest):
         self.assertIn(h, r.childs)
         # and the reverse
         self.assertIn(r, h.parents)
-        print "r.childs", r.childs
-        print "h.childs", h.childs
+        print("r.childs", r.childs)
+        print("h.childs", h.childs)
 
         # And also in the parent/childs dep list
         self.assertIn(h, r.child_dependencies)

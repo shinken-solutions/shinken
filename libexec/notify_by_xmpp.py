@@ -47,12 +47,12 @@ opts, args = parser.parse_args()
 
 conf = ConfigParser.ConfigParser(defaults=defaults)
 if not opts.authfile or not os.path.exists(opts.authfile):
-   print "no config/auth file specified, can't continue"
+   print("no config/auth file specified, can't continue")
    sys.exit(1)
 
 conf.read(opts.authfile)
 if not conf.has_section('xmpp_account') or not conf.has_option('xmpp_account', 'username') or not conf.has_option('xmpp_account', 'password'):
-    print "cannot find at least one of: config section 'xmpp_account' or username or password"
+    print("cannot find at least one of: config section 'xmpp_account' or username or password")
     sys.exit(1)
 server = conf.get('xmpp_account', 'server')
 username = conf.get('xmpp_account', 'username')
@@ -62,7 +62,7 @@ port = conf.get('xmpp_account', 'port')
 
 
 if len(args) < 1:
-    print "xmppsend message [to whom, multiple args]"
+    print("xmppsend message [to whom, multiple args]")
     sys.exit(1)
 
 msg = args[0]

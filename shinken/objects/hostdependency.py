@@ -152,7 +152,7 @@ class Hostdependencies(Items):
                     hd.configuration_errors.append(err)
                 hd.host_name = h
                 hd.dependent_host_name = dh
-            except AttributeError, exp:
+            except AttributeError as exp:
                 err = "Error: the host dependency miss a property '%s'" % exp
                 hd.configuration_errors.append(err)
 
@@ -164,7 +164,7 @@ class Hostdependencies(Items):
                 tp_name = hd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
                 hd.dependency_period = tp
-            except AttributeError, exp:
+            except AttributeError as exp:
                 logger.error("[hostdependency] fail to linkify by timeperiod: %s", exp)
 
     # We backport host dep to host. So HD is not need anymore

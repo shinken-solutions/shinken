@@ -44,7 +44,7 @@ def get_instance(mod_conf):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_scheduler(BaseModule):
 
     def __init__(self, mod_conf, foo):
@@ -70,7 +70,7 @@ class Dummy_scheduler(BaseModule):
 #    #When you are in "external" mode, that is the main loop of your process
 #    def main(self):
 #        while True:
-#            print "Raise a external command as example"
+#            print("Raise a external command as example")
 #            e = ExternalCommand('Viva la revolution')
 #            self.return_queue.put(e)
 #            time.sleep(1)

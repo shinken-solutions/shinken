@@ -35,13 +35,13 @@ class TestHostDepWithNodepname(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         h2 = self.sched.hosts.find_by_name("test_host_1")
         self.assertIsNot(h2, None)
         # Should got a link between host and h2
-        print h2.act_depend_of
+        print(h2.act_depend_of)
         self.assertGreater(len(h2.act_depend_of), 0)
         l = h2.act_depend_of[0]
         h = l[0]  # the host that h2 depend on

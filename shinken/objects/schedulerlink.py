@@ -66,7 +66,7 @@ class SchedulerLink(SatelliteLink):
         logger.debug("[SchedulerLink] Sending %d commands", len(commands))
         try:
             self.con.post('run_external_commands', {'cmds': commands})
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             logger.debug(exp)
             return False

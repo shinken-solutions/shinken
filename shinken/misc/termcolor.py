@@ -128,7 +128,7 @@ def colored(text, color=None, on_color=None, attrs=None):
 def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
     """Print colorize text.
 
-    It accepts arguments of print function.
+    It accepts arguments of print(function.)
     """
 
     if isinstance(text, unicode):

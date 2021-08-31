@@ -33,7 +33,7 @@ class TestStarMemberGroup(ShinkenTest):
     def test_starmembergroupdef(self):
         hg = self.sched.conf.hostgroups.find_by_name('ping-servers')
         self.assertIsNot(hg, None)
-        print hg.members
+        print(hg.members)
         h = self.sched.conf.hosts.find_by_name('test_host_0')
         r = self.sched.conf.hosts.find_by_name('test_router_0')
         self.assertIn(h, hg.members)

@@ -268,7 +268,7 @@ class Dispatcher:
                         # I do not care about order not send or not. If not,
                         # The next loop will resent it
                     # else:
-                    #    print "No conf"
+                    #    print("No conf")
 
         # I ask satellites which sched_id they manage. If I do not agree, I ask
         # them to remove it

@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
         # The service is apply with a host_group on "test_host_0","test_host_1"
         # but have a host_name with !"test_host_1" so there will be just "test_host_0"
         # defined on the end
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

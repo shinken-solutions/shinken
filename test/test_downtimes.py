@@ -49,7 +49,7 @@ class TestDowntime(ShinkenTest):
         time.sleep(20)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
 
-        print "downtime was scheduled. check its activity and the comment"
+        print("downtime was scheduled. check its activity and the comment")
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
@@ -63,7 +63,7 @@ class TestDowntime(ShinkenTest):
 
         self.scheduler_loop(1, [[svc, 0, 'OK']])
 
-        print "good check was launched, downtime must be active"
+        print("good check was launched, downtime must be active")
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
@@ -87,7 +87,7 @@ class TestDowntime(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
 
         print "bad check was launched (HARD;2), downtime must be active"
-        print svc.downtimes[0]
+        print(svc.downtimes[0])
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
@@ -227,7 +227,7 @@ class TestDowntime(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-        print "test_schedule_fixed_host_downtime initialized"
+        print("test_schedule_fixed_host_downtime initialized")
         self.show_logs()
         self.show_actions()
         self.assertEqual(0, self.count_logs())
@@ -242,13 +242,13 @@ class TestDowntime(ShinkenTest):
 
         self.sched.run_external_command(cmd)
         self.sched.update_downtimes_and_comments()
-        print "Launch scheduler loop"
+        print("Launch scheduler loop")
         self.scheduler_loop(1, [], do_sleep=False)  # push the downtime notification
         self.show_actions()
-        print "Launch worker loop"
+        print("Launch worker loop")
         #self.worker_loop()
         self.show_actions()
-        print "After both launchs"
+        print("After both launchs")
         time.sleep(20)
         #----------------------------------------------------------------
         # check if a downtime object exists (scheduler and host)
@@ -305,9 +305,9 @@ class TestDowntime(ShinkenTest):
         # we have a notification, but this is blocked. it will stay in
         # the actions queue because we have a notification_interval.
         # it's called notif" because it is a master notification
-        print "DBG: host", host.state, host.state_type
+        print("DBG: host", host.state, host.state_type)
         self.scheduler_loop(1, [[host, 2, 'DOWN']], do_sleep=True)
-        print "DBG2: host", host.state, host.state_type
+        print("DBG2: host", host.state, host.state_type)
         self.show_logs()
         self.show_actions()
         self.assertEqual(0, self.count_logs())     #
@@ -378,7 +378,7 @@ class TestDowntime(ShinkenTest):
         # check that the host has a downtime, _not_ the service
         # check logs, (no) notifications and eventhandlers
         #----------------------------------------------------------------
-        print "now the service goes critical"
+        print("now the service goes critical")
         self.scheduler_loop(4, [[svc, 2, 'CRITICAL']], do_sleep=True)
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(0, len(svc.downtimes))
@@ -394,7 +394,7 @@ class TestDowntime(ShinkenTest):
         # the host comes UP again
         # check log messages, (no) notifications and eventhandlers
         #----------------------------------------------------------------
-        print "now the host comes up"
+        print("now the host comes up")
         self.scheduler_loop(2, [[host, 0, 'UP']], do_sleep=True)
         self.show_logs()
         self.show_actions()

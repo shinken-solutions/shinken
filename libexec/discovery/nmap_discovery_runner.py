@@ -86,12 +86,12 @@ else:
 if args:
     targets.extend(args)
 
-print "Got our target", targets
+print("Got our target", targets)
 
 
 def debug(txt):
     if verbose:
-        print txt
+        print(txt)
 
 
 # Says if a host is up or not
@@ -192,7 +192,7 @@ class DetectedHost:
                 self.os = (os, osgen, os_type, vendor)
                 break
 
-        print "Will dump", self.os
+        print("Will dump", self.os)
 
         # Ok, unknown os... not good
         if self.os == ('', '', '', ''):
@@ -258,31 +258,31 @@ class DetectedHost:
 if not simulate:
     (_, tmppath) = tempfile.mkstemp()
 
-    print "propose a tmppath", tmppath
+    print("propose a tmppath", tmppath)
 
     # Fred : command launched depending on os detection
     # cmd = "nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
     cmd = DEFAULT_CMD % (' '.join(targets), min_rate, max_retries, tmppath)
-    print "Launching command,", cmd
+    print("Launching command,", cmd)
     try:
         nmap_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             close_fds=False, shell=True)
-    except OSError, exp:
-        print "Debug: Error in launching command:", cmd, exp
+    except OSError as exp:
+        print("Debug: Error in launching command:", cmd, exp)
         sys.exit(2)
 
-    print "Try to communicate"
+    print("Try to communicate")
     (stdoutdata, stderrdata) = nmap_process.communicate()
 
     if nmap_process.returncode != 0:
-        print "Error: the nmap return an error: '%s'" % stderrdata
+        print("Error: the nmap return an error: '%s'" % stderrdata)
         sys.exit(2)
 
-    # Fred : no need to print nmap result catched ...
+    # Fred : no need to print(nmap result catched ...)
     # print "Got it", (stdoutdata, stderrdata)
-    print "Got it !"
+    print("Got it !")
 
     xml_input = tmppath
 else:  # simulate mode
@@ -291,7 +291,7 @@ else:  # simulate mode
 tree = ElementTree()
 try:
     tree.parse(xml_input)
-except IOError, exp:
+except IOError as exp:
     print "Error opening file '%s': %s" % (xml_input, exp)
     sys.exit(2)
 
@@ -309,10 +309,10 @@ for h in hosts:
 
     # Now we get the ipaddr and the mac vendor
     # for future VMWare matching
-    #print h.__dict__
+    #print(h.__dict__)
     addrs = h.findall('address')
     for addr in addrs:
-        #print "Address", addr.__dict__
+        #print("Address", addr.__dict__)
         addrtype = addr.attrib['addrtype']
         if addrtype == 'ipv4':
             dh.ip = addr.attrib['addr']
@@ -325,14 +325,14 @@ for h in hosts:
     for h_name in host_names:
         h_names = h_name.findall('hostname')
         for h_n in h_names:
-            #print 'hname', h_n.__dict__
-            #print 'Host name', h_n.attrib['name']
+            #print('hname', h_n.__dict__)
+            #print('Host name', h_n.attrib['name'])
             dh.set_host_name(h_n.attrib['name'])
 
-    # Now print the traceroute
+    # Now print(the traceroute)
     traces = h.findall('trace')
     for trace in traces:
-        #print trace.__dict__
+        #print(trace.__dict__)
         hops = trace.findall('hop')
         #print "Number of hops", len(hops)
         distance = len(hops)
@@ -341,8 +341,8 @@ for h in hosts:
                 ttl = int(hop.attrib['ttl'])
                 #We search for the direct father
                 if ttl == distance-1:
-                    #print ttl
-                    #print "Super hop", hop.__dict__
+                    #print(ttl)
+                    #print("Super hop", hop.__dict__)
                     # Get the host name if possible, if not
                     # take the IP
                     if 'host' in hop.attrib:
@@ -354,7 +354,7 @@ for h in hosts:
     ios = h.find('os')
     # Fred : if no OS detected by nmap (localhost on Windows does not detect OS !)
     if ios:
-        #print os.__dict__
+        #print(os.__dict__)
         cls = ios.findall('osclass')
 	# if no osclass found, try bellow the osmatch element (nmap recent versions)
 	if len(cls) == 0:
@@ -362,13 +362,13 @@ for h in hosts:
 		cls = _os.findall('osclass') if _os else []
 
         for c in cls:
-            #print "Class", c.__dict__
+            #print("Class", c.__dict__)
             family = c.attrib['osfamily']
             accuracy = c.attrib['accuracy']
             osgen = c.attrib.get('osgen', '')
             os_type = c.attrib.get('type', '')
             vendor = c.attrib.get('vendor', '')
-            #print "Type:", family, osgen, accuracy
+            #print("Type:", family, osgen, accuracy)
             dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
         # Ok we can compute our OS now :)
         dh.compute_os()
@@ -379,7 +379,7 @@ for h in hosts:
         osgen = 'Unknown'
         os_type = 'Unknown'
         vendor = 'Unknown'
-        #print "Type:", family, osgen, accuracy
+        #print("Type:", family, osgen, accuracy)
         dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
         dh.compute_os()
 
@@ -388,15 +388,15 @@ for h in hosts:
     for ap in allports:
         ports = ap.findall('port')
         for p in ports:
-            #print "Port", p.__dict__
+            #print("Port", p.__dict__)
             p_id = p.attrib['portid']
             s = p.find('state')
-            #print s.__dict__
+            #print(s.__dict__)
             state = s.attrib['state']
             if state == 'open':
                 dh.open_ports.append(int(p_id))
 
-    #print dh.__dict__
+    #print(dh.__dict__)
     all_hosts.append(dh)
     #print "\n\n"
 
@@ -409,7 +409,7 @@ for h in all_hosts:
 
     debug("Doing name %s" % name)
     #path = os.path.join(output_dir, name+'.discover')
-    #print "Want path", path
+    #print("Want path", path)
     #f = open(path, 'wb')
     #cPickle.dump(h, f)
     #f.close()
@@ -422,9 +422,9 @@ for h in all_hosts:
     #c.write_host_configuration()
     #print "Host config", c.get_cfg_for_host()
     #c.write_services_configuration()
-    #print "Service config"
+    #print("Service config")
     #print c.get_cfg_for_services()
-    #print c.__dict__
+    #print(c.__dict__)
     print '\n'.join(h.get_discovery_output())
     #print "\n\n\n"
 

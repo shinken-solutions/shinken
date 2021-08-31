@@ -31,7 +31,7 @@ class TestSystemTimeChange(ShinkenTest):
 
     def set_time(self, d):
         cmd = 'sudo date -s "%s"' % d
-        print "CMD,", cmd
+        print("CMD,", cmd)
         # NB: disabled for now because we test in a totally direct way
         #a = commands.getstatusoutput(cmd)
         # Check the time is set correctly!
@@ -42,12 +42,12 @@ class TestSystemTimeChange(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         host = self.sched.hosts.find_by_name("test_host_0")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         now = time.time()
         now_str = time.asctime(time.localtime(now))
-        print "Now:", now
+        print("Now:", now)
         print "Now:", time.asctime(time.localtime(now))
         tomorow = time.asctime(time.localtime(now + 86400))
         yesterday = time.asctime(time.localtime(now - 86400))

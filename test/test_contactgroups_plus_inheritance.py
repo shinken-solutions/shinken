@@ -33,13 +33,13 @@ class TestPlusInInheritance(ShinkenTest):
 
     def _dump(self, h):
         print "Dumping host", h.get_name()
-        print h.contact_groups
+        print(h.contact_groups)
         for c in h.contacts:
             print "->",c.get_name()
     
     def _dump_svc(self,s):
         print "Dumping Service", s.get_name()
-        print "  contact_groups : %s " % s.contact_groups
+        print("  contact_groups : %s " % s.contact_groups)
         for c in s.contacts:
             print "->",c.get_name()
 

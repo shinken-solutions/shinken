@@ -30,7 +30,7 @@ class TestConfig(ShinkenTest):
 
     def test_illegal_caracter_in_names(self):
         illegal_caracts = self.sched.conf.illegal_object_name_chars
-        print "Illegal caracters: %s" % illegal_caracts
+        print("Illegal caracters: %s" % illegal_caracts)
         host = self.sched.hosts.find_by_name("test_host_0")
         # should be correct
         self.assertTrue(host.is_correct())

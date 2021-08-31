@@ -35,7 +35,7 @@ class TestConfig(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host1 = self.sched.hosts.find_by_name("ht34-peret-2-dif0")
         host2 = self.sched.hosts.find_by_name("ht34-peret-2-dif1")

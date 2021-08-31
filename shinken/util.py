@@ -46,7 +46,7 @@ from shinken.log import logger
 try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
-except Exception, exp:
+except Exception as exp:
     logger.error('Encoding detection error= %s', exp)
     safe_stdout = False
 
@@ -54,7 +54,7 @@ except Exception, exp:
 
 
 # ########## Strings #############
-# Try to print strings, but if there is an utf8 error, go in simple ascii mode
+# Try to print(strings, but if there is an utf8 error, go in simple ascii mode)
 # (Like if the terminal do not have en_US.UTF8 as LANG for example)
 def safe_print(*args):
     lst = []
@@ -78,7 +78,7 @@ def safe_print(*args):
         # Other types can be directly convert in unicode
         else:
             lst.append(unicode(e))
-    # Ok, now print it :)
+    # Ok, now print(it :))
     print u' '.join(lst)
 
 
@@ -133,7 +133,7 @@ def jsonify_r(obj):
         try:
             json.dumps(obj)
             return obj
-        except Exception, exp:
+        except Exception as exp:
             return None
     properties = cls.properties.keys()
     if hasattr(cls, 'running_properties'):
@@ -150,7 +150,7 @@ def jsonify_r(obj):
                 v = sorted(v)
             json.dumps(v)
             res[prop] = v
-        except Exception, exp:
+        except Exception as exp:
             if isinstance(v, list):
                 lst = []
                 for _t in v:
@@ -542,12 +542,12 @@ def got_generation_rule_pattern_change(xy_couples):
 # rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
 # output = Unit 3 Port 2 Admin 1
 def apply_change_recursive_pattern_change(s, rule):
-    # print "Try to change %s" % s, 'with', rule
+    # print("Try to change %s" % s, 'with', rule)
     # new_s = s
     (i, m, t) = rule
     # print "replace %s by %s" % (r'%s' % m, str(i)), 'in', s
     s = s.replace(r'%s' % m, str(i))
-    # print "And got", s
+    # print("And got", s)
     if t == []:
         return s
     return apply_change_recursive_pattern_change(s, t)
@@ -697,7 +697,7 @@ def get_key_value_sequence(entry, default_value=None):
             # There were no wildcards
             array2.append(r)
     # t1 = time.time()
-    # print "***********Diff", t1 -t0
+    # print("***********Diff", t1 -t0)
 
     return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
 

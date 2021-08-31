@@ -46,9 +46,9 @@ class TestFreshness(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         # We do not want to be just a string but a real command
-        print "Additonal freshness latency", svc.__class__.additional_freshness_latency
+        print("Additonal freshness latency", svc.__class__.additional_freshness_latency)
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
-        print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
+        print("Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness)
         # By default check fresh ness is set at false, so no new checks
         self.assertEqual(0, len(svc.actions))
         svc.do_check_freshness()
@@ -61,7 +61,7 @@ class TestFreshness(ShinkenTest):
         # Now we active it, with a too small value (now - 10s is still higer than now - (1 - 15, the addition time)
         # So still no check
         svc.freshness_threshold = 1
-        print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
+        print("Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness)
         svc.do_check_freshness()
         self.assertEqual(0, len(svc.actions))
 

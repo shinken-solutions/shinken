@@ -48,7 +48,7 @@ class TestConfig(ShinkenTest):
 
         self.scheduler_loop(5, [[svc, 2, 'CRITICAL']])
         self.assert_any_log_match('EVENT HANDLER')
-        print "MY Actions", self.sched.actions
+        print("MY Actions", self.sched.actions)
 
 
 

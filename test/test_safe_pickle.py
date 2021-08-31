@@ -53,14 +53,14 @@ class TestSafePickle(ShinkenTest):
     def test_safe_pickle(self):
         global should_not_change
 
-        print "Creating payload"
+        print("Creating payload")
         buf = pickle.dumps(SadPanda(), 0)
         should_not_change = False
-        print "Payload", buf
+        print("Payload", buf)
         #self.assertEqual('HARD', host.state_type)
-        print "Now loading payload"
+        print("Now loading payload")
         pickle.loads(buf)
-        print should_not_change
+        print(should_not_change)
         self.assertTrue(should_not_change)
         
         # reset and try our fix
@@ -69,7 +69,7 @@ class TestSafePickle(ShinkenTest):
         def launch_safe_pickle():
             SafeUnpickler.loads(buf)
         self.assertRaises(ValueError, launch_safe_pickle)
-        print should_not_change
+        print(should_not_change)
         self.assertFalse(should_not_change)
         
         

@@ -35,16 +35,16 @@ class TestConfig(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the Timeperiods"
+        print("Get the Timeperiods")
         now = time.time()
         tp = self.sched.timeperiods.find_by_name("24x7")
-        print "TP", tp.__dict__
+        print("TP", tp.__dict__)
 
         # sunday should be inherited from templates
-        print "Check for sunday in the timeperiod"
+        print("Check for sunday in the timeperiod")
         got_sunday = False
         for dr in tp.dateranges:
-            print dr.__dict__
+            print(dr.__dict__)
             if hasattr(dr, 'day') and dr.day == 'sunday':
                 got_sunday = True
         self.assertEqual(True, got_sunday)

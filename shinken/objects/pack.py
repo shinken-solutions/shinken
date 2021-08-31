@@ -69,7 +69,7 @@ class Packs(Items):
                         fd = open(p, 'rU')
                         buf = fd.read()
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open pack file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
@@ -99,5 +99,5 @@ class Packs(Items):
                 p.path += '/'
             # Ok, add it
             self[p.id] = p
-        except ValueError, exp:
+        except ValueError as exp:
             logger.error("[Pack] error in loading pack file '%s': '%s'", name, exp)

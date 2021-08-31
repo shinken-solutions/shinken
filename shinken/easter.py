@@ -72,7 +72,7 @@ def naheulbeuk():
 def what_it_make_me_think(subject):
     import hashlib
     if hashlib.md5(subject.lower()).hexdigest() == '6376e9755f8047391621b577ae03966a':
-        print "Thanks to %s now I feel like this:  https://youtu.be/efTZslkr5Fs?t=60" % subject
+        print("Thanks to %s now I feel like this:  https://youtu.be/efTZslkr5Fs?t=60" % subject)
 
 
 def dark():

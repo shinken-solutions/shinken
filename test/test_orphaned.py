@@ -36,7 +36,7 @@ class TestOrphaned(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -53,10 +53,10 @@ class TestOrphaned(ShinkenTest):
         #self.assertEqual('HARD', host.state_type)
 
         svc.schedule()
-        print svc.actions
+        print(svc.actions)
         self.sched.get_new_actions()
         for c in self.sched.checks.values():
-            print c
+            print(c)
             # simulate a orphaned situation
             c.t_to_go = now - 301
             c.status = 'inpoller'

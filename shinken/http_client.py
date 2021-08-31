@@ -127,7 +127,7 @@ class HTTPClient(object):
         c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
@@ -226,7 +226,7 @@ class HTTPClient(object):
         # c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             f.close()
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))

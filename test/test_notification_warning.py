@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         time.sleep(0.2)
         if n.status is not 'done':
             n.check_finished(8000)
-        print n.__dict__
+        print(n.__dict__)
         self.sched.actions[n.id] = n
         self.sched.put_results(n)
         # Should have raised something like "Warning: the notification command 'BADCOMMAND' raised an error (exit code=2): '[Errno 2] No such file or directory'"

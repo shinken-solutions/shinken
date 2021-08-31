@@ -46,7 +46,7 @@ def serve(port):
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
 
 def do_serve(port='8080'):
@@ -74,7 +74,7 @@ def _compile():
         s = 'sphinx-build -b html -d %s %s %s' % (doctrees_dir, source_dir, html_dir)
         args = s.split(' ')
         main(args)
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
     return
 

@@ -37,7 +37,7 @@ try:
 except (SyntaxError, ImportError), exp:
     # Outch can't import a cprint, do a simple print
     def cprint(s, color='', end=''):
-        print s
+        print(s)
 
 
 # obj = None

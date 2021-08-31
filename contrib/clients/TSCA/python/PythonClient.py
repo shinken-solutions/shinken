@@ -27,8 +27,8 @@ try:
     from org.shinken_monitoring.tsca import StateService
     from org.shinken_monitoring.tsca.ttypes import *
 except:
-    print "Can't import tsca stub."
-    print "Have you run thrift --gen py ../../../../shinken/modules/tsca/tsca.thrift ?"
+    print("Can't import tsca stub.")
+    print("Have you run thrift --gen py ../../../../shinken/modules/tsca/tsca.thrift ?")
     sys.exit(1)
 
 from thrift import Thrift
@@ -77,5 +77,5 @@ try:
     # Close!
     transport.close()
 
-except Thrift.TException, tx:
-    print '%s' % tx.message
+except Thrift.TException as tx:
+    print('%s' % tx.message)

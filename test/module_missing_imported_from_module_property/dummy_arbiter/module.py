@@ -46,7 +46,7 @@ def get_instance(plugin):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_arbiter(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)

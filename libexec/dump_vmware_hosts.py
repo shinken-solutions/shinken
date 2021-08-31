@@ -82,7 +82,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
 # For a specific host, ask all VM on it to the VCenter
 def get_vm_of_host(check_esx_path, vcenter, host, user, password):
-    print "Listing host", host
+    print("Listing host", host)
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
                    '-l', 'runtime', '-s', 'list']
@@ -128,8 +128,8 @@ def write_output(elements, path, rules):
             f.write('%s\n' % e)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s wrote" % path
-    except IOError, exp:
+        print("File %s wrote" % path)
+    except IOError as exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))
 
 
@@ -150,7 +150,7 @@ def main(check_esx_path, vcenter, user, password, output, rules, vm_only, esx_on
     write_output(vms, output, rules)
 
     print "Created %d hosts" % len(vms)
-    print "Finished!"
+    print("Finished!")
 
 
 # Here we go!

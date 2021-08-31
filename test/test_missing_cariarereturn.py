@@ -35,7 +35,7 @@ class TestConfig(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
         self.assertIsNot(svc, None)

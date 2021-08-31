@@ -573,7 +573,7 @@ class SchedulingItem(Item):
                     if i is not None:
                         checks.append(i)
                 # else:
-                # print "DBG: **************** The state is FRESH",
+                # print("DBG: **************** The state is FRESH",)
                 # dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
 
@@ -838,8 +838,8 @@ class SchedulingItem(Item):
         rt = event_handler.reactionner_tag
         e = EventHandler(cmd, timeout=cls.event_handler_timeout,
                          ref=self, reactionner_tag=rt)
-        # print "DBG: Event handler call created"
-        # print "DBG: ",e.__dict__
+        # print("DBG: Event handler call created")
+        # print("DBG: ",e.__dict__)
         self.raise_event_handler_log_entry(event_handler)
 
         # ok we can put it in our temp action queue
@@ -1200,7 +1200,7 @@ class SchedulingItem(Item):
 
         # NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
-            # print "Case 4: NON-OK follows OK: code:%s last_state:%s" %
+            # print("Case 4: NON-OK follows OK: code:%s last_state:%s" %)
             #  (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
@@ -1268,7 +1268,7 @@ class SchedulingItem(Item):
                 # not restart notifications)
                 if self.state != self.last_state:
                     self.update_hard_unknown_phase_state()
-                    # print self.last_state, self.last_state_type, self.state_type, self.state
+                    # print(self.last_state, self.last_state_type, self.state_type, self.state)
                     if not self.in_hard_unknown_reach_phase and not \
                             self.was_in_hard_unknown_reach_phase:
                         self.unacknowledge_problem_if_not_sticky()
@@ -1800,7 +1800,7 @@ class SchedulingItem(Item):
 
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
-            # print "Got rule", elts, cmd
+            # print("Got rule", elts, cmd)
             self.got_business_rule = True
             rule = ''
             if len(elts) >= 2:
@@ -1819,7 +1819,7 @@ class SchedulingItem(Item):
 
                 fact = DependencyNodeFactory(self)
                 node = fact.eval_cor_pattern(rule, hosts, services, running)
-                # print "got node", node
+                # print("got node", node)
                 self.processed_business_rule = rule
                 self.business_rule = node
 
@@ -1916,7 +1916,7 @@ class SchedulingItem(Item):
     # We ask us to manage our own internal check,
     # like a business based one
     def manage_internal_check(self, hosts, services, c):
-        # print "DBG, ask me to manage a check!"
+        # print("DBG, ask me to manage a check!")
         if c.command.startswith('bp_'):
             try:
                 # Re evaluate the business rule to take into account macro
@@ -1927,7 +1927,7 @@ class SchedulingItem(Item):
                 self.create_business_rules(hosts, services, running=True)
                 state = self.business_rule.get_state()
                 c.output = self.get_business_rule_output()
-            except Exception, e:
+            except Exception as e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
                 logger.debug("[%s] Error while re-evaluating business rule:\n%s",
@@ -1946,7 +1946,7 @@ class SchedulingItem(Item):
         c.long_output = c.output
         c.check_time = time.time()
         c.exit_status = state
-        # print "DBG, setting state", state
+        # print("DBG, setting state", state)
 
 
     # If I'm a business rule service/host, I register myself to the
@@ -1979,7 +1979,7 @@ class SchedulingItem(Item):
         for t in self.triggers:
             try:
                 t.eval(self)
-            except Exception, exp:
+            except Exception as exp:
                 logger.error(
                     "We got an exception from a trigger on %s for %s",
                     self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())

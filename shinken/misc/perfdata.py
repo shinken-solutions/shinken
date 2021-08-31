@@ -41,7 +41,7 @@ metric_pattern = \
 def guess_int_or_float(val):
     try:
         return to_best_int_float(val)
-    except Exception, exp:
+    except Exception as exp:
         return None
 
 
@@ -51,7 +51,7 @@ class Metric:
         self.name = self.value = self.uom = \
             self.warning = self.critical = self.min = self.max = None
         s = s.strip()
-        # print "Analysis string", s
+        # print("Analysis string", s)
         r = metric_pattern.match(s)
         if r:
             # Get the name but remove all ' in it
@@ -62,9 +62,9 @@ class Metric:
             self.critical = guess_int_or_float(r.group(5))
             self.min = guess_int_or_float(r.group(6))
             self.max = guess_int_or_float(r.group(7))
-            # print 'Name', self.name
-            # print "Value", self.value
-            # print "Res", r
+            # print('Name', self.name)
+            # print("Value", self.value)
+            # print("Res", r)
             # print r.groups()
             if self.uom == '%':
                 self.min = 0

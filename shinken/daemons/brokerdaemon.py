@@ -60,7 +60,7 @@ class IStats(Interface):
         for inst in insts:
             try:
                 res.append({'module_name': inst.get_name(), 'queue_size': inst.to_q.qsize()})
-            except Exception, exp:
+            except Exception as exp:
                 res.append({'module_name': inst.get_name(), 'queue_size': 0})
 
         return res
@@ -224,15 +224,15 @@ class Broker(BaseSatellite):
         # Ok, we can now update it
         links[id]['last_connection'] = time.time()
 
-        # DBG: print "Init connection with", links[id]['uri']
+        # DBG: print("Init connection with", links[id]['uri'])
         running_id = links[id]['running_id']
-        # DBG: print "Running id before connection", running_id
+        # DBG: print("Running id before connection", running_id)
         uri = links[id]['uri']
         try:
             con = links[id]['con'] = HTTPClient(uri=uri,
                                                 strong_ssl=links[id]['hard_ssl_name_check'],
                                                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
@@ -260,11 +260,11 @@ class Broker(BaseSatellite):
                     con.get('fill_initial_broks', {'bname': self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
-        except KeyError, exp:
+        except KeyError as exp:
             logger.info("the %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             traceback.print_stack()
@@ -281,7 +281,7 @@ class Broker(BaseSatellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception, exp:
+            except Exception as exp:
                 logger.debug(str(exp.__dict__))
                 logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later",
                                mod.get_name(), str(exp))
@@ -344,7 +344,7 @@ class Broker(BaseSatellite):
                         _t = base64.b64decode(tmp_broks)
                         _t = zlib.decompress(_t)
                         tmp_broks = cPickle.loads(_t)
-                    except (TypeError, zlib.error, cPickle.PickleError), exp:
+                    except (TypeError, zlib.error, cPickle.PickleError) as exp:
                         logger.error('Cannot load broks data from %s : %s',
                                      links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
@@ -357,21 +357,21 @@ class Broker(BaseSatellite):
                 else:  # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
-            except KeyError, exp:
+            except KeyError as exp:
                 logger.debug("Key error for get_broks : %s", str(exp))
                 self.pynag_con_init(sched_id, type=type)
-            except HTTPExceptions, exp:
+            except HTTPExceptions as exp:
                 logger.warning("Connection problem to the %s %s: %s",
                                type, links[sched_id]['name'], str(exp))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
-            except AttributeError, exp:
+            except AttributeError as exp:
                 logger.warning("The %s %s should not be initialized: %s",
                                type, links[sched_id]['name'], str(exp))
             # scheduler must not have checks
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
-            except Exception, x:
+            except Exception as x:
                 logger.error(str(x))
                 logger.error(traceback.format_exc())
                 sys.exit(1)
@@ -863,6 +863,6 @@ class Broker(BaseSatellite):
             # Now the main loop
             self.do_mainloop()
 
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise

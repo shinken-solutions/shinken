@@ -138,10 +138,10 @@ class MacroResolver(Borg):
                 return unicode(value())
             else:
                 return unicode(value)
-        except AttributeError, exp:
+        except AttributeError as exp:
             # Return no value
             return ''
-        except UnicodeError, exp:
+        except UnicodeError as exp:
             if isinstance(value, str):
                 return unicode(value, 'utf8', errors='ignore')
             else:
@@ -200,7 +200,7 @@ class MacroResolver(Borg):
 
             # We can get out if we do not have macros this loop
             still_got_macros = (len(macros) != 0)
-            # print "Still go macros:", still_got_macros
+            # print("Still go macros:", still_got_macros)
 
             # Put in the macros the type of macro for all macros
             self._get_type_of_macro(macros, clss)
@@ -328,7 +328,7 @@ class MacroResolver(Borg):
         # Len 3 == service, 2 = all others types...
         if nb_parts == 3:
             val = ''
-            # print "Got a Service on demand asking...", elts
+            # print("Got a Service on demand asking...", elts)
             (host_name, service_description) = (elts[1], elts[2])
             # host_name can be void, so it's the host in data
             # that is important. We use our self.host_class to
@@ -343,7 +343,7 @@ class MacroResolver(Borg):
                 cls = s.__class__
                 prop = cls.macros[macro_name]
                 val = self._get_value_from_element(s, prop)
-                # print "Got val:", val
+                # print("Got val:", val)
                 return val
         # Ok, service was easy, now hard part
         else:

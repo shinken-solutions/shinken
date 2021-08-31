@@ -33,7 +33,7 @@ class TestCssInCommands(ShinkenTest):
     def test_dummy(self):
         r = self.conf.conf_is_correct
         self.assertTrue(r)
-        print r
+        print(r)
 
 
 if __name__ == '__main__':

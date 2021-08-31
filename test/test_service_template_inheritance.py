@@ -39,7 +39,7 @@ class TestConfig(ShinkenTest):
         self.assertFalse(svc2.action_url)
         self.assertEqual(False, svc2.process_perf_data)
 
-        print svc1.tags
+        print(svc1.tags)
         self.assertIn('no-graph', svc1.tags)
         self.assertIn('base-service-prod', svc1.tags)
 

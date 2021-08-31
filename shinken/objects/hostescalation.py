@@ -70,6 +70,6 @@ class Hostescalations(Items):
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
 
-        # print "All escalations"
+        # print("All escalations")
         # for es in escalations:
-        #    print es
+        #    print(es)

@@ -112,10 +112,10 @@ class CherryPyBackend(object):
                                   server=CherryPyServer, quiet=False, use_ssl=use_ssl,
                                   ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert,
                                   daemon_thread_pool_size=daemon_thread_pool_size)
-        except socket.error, exp:
+        except socket.error as exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
             raise PortNotFree(msg)
-        except Exception, e:
+        except Exception as e:
             # must be a problem with pyro workdir:
             raise InvalidWorkDir(e)
 
@@ -132,7 +132,7 @@ class CherryPyBackend(object):
             return
         try:
             self.srv.stop()
-        except Exception, exp:
+        except Exception as exp:
             logger.warning('Cannot stop the CherryPy backend : %s', exp)
 
 
@@ -140,7 +140,7 @@ class CherryPyBackend(object):
     def run(self):
         try:
             self.srv.start()
-        except socket.error, exp:
+        except socket.error as exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
             raise PortNotFree(msg)
         finally:
@@ -191,10 +191,10 @@ class WSGIREFBackend(object):
                                   server=WSGIREFAdapter, quiet=True, use_ssl=use_ssl,
                                   ca_cert=ca_cert, ssl_key=ssl_key, ssl_cert=ssl_cert,
                                   daemon_thread_pool_size=daemon_thread_pool_size)
-        except socket.error, exp:
+        except socket.error as exp:
             msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
             raise PortNotFree(msg)
-        except Exception, e:
+        except Exception as e:
             # must be a problem with pyro workdir:
             raise e
 
@@ -209,7 +209,7 @@ class WSGIREFBackend(object):
     def get_socks_activity(self, socks, timeout):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error, e:
+        except select.error as e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []
@@ -324,8 +324,8 @@ class HTTPDaemon(object):
                 methods_in = [m.__name__ for m in obj.__class__.__dict__.values()
                               if inspect.isfunction(m)]
                 methods = [m for m in methods if m[0] in methods_in]
-                print "picking only bound methods of class and not parents"
-            print "List to register :%s" % methods
+                print("picking only bound methods of class and not parents")
+            print("List to register :%s" % methods)
             for (fname, f) in methods:
                 if fname.startswith('_'):
                     continue
@@ -346,7 +346,7 @@ class HTTPDaemon(object):
                 # remove useless self in args, because we alredy got a bonded method f
                 if 'self' in args:
                     args.remove('self')
-                print "Registering", fname, args, obj
+                print("Registering", fname, args, obj)
                 self.registered_fun_names.append(fname)
                 self.registered_fun[fname] = (f)
 
@@ -461,7 +461,7 @@ class HTTPDaemon(object):
         def get_socks_activity(self, timeout):
             try:
                 ins, _, _ = select.select(self.get_sockets(), [], [], timeout)
-            except select.error, e:
+            except select.error as e:
                 errnum, _ = e
                 if errnum == errno.EINTR:
                     return []

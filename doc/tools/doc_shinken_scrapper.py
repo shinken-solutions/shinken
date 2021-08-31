@@ -28,7 +28,7 @@ def parse_level(level, root=""):
         title = item.find("./div//strong")
         if not title is None:
             new_root = root + ":" + title.text
-            print "Browse namespace : %s" % new_root
+            print("Browse namespace : %s" % new_root)
             data = {'call': 'index',
                     'idx' : new_root,
                     }
@@ -36,7 +36,7 @@ def parse_level(level, root=""):
             ajax_res = StringIO(raw_ajax_res.content)
             ajax_parser = etree.HTMLParser()
             ajax_tree = etree.parse(ajax_res, ajax_parser)
-#            print raw_ajax_res.content
+#            print(raw_ajax_res.content)
             parse_level(ajax_tree, new_root)
 #            http://www.shinken-monitoring.org/wiki/lib/exe/ajax.php
 #            print title.getparent().getparent()
@@ -51,8 +51,8 @@ def parse_level(level, root=""):
                 tmp_root = tmp_root[1:]
             try:
                 os.makedirs(os.path.join('pages', application_name, tmp_root).replace(":", "/"))
-            except OSError, e:
-                #print e
+            except OSError as e:
+                #print(e)
                 pass
             file_name = os.path.join('pages', application_name, tmp_root, page_name + ".txt")
             file_name = file_name.replace(":", "/")
@@ -70,7 +70,7 @@ def parse_level(level, root=""):
             # Change media links
 #            modified_page_raw = modified_page_raw.replace("{{:official:images:", "{{%s:official:" % application_name)
             for k, v in replace_dict.items():
-                #print k, v
+                #print(k, v)
 #                if v.find("images/") != -1 or k.find("images/"):
 #                    import pdb;pdb.set_trace()
                 modified_page_raw = modified_page_raw.replace(k, v.replace("/", ":"))
@@ -87,7 +87,7 @@ def parse_level(level, root=""):
 #            if modified_page_raw.find("{{/") != -1:
 #                import pdb;pdb.set_trace()
             f = open(file_name, "w")
-            print "    Writing file : %s" % file_name
+            print("    Writing file : %s" % file_name)
             f.write(modified_page_raw)
             f.close()
 
@@ -117,13 +117,13 @@ def find_media(raw_data):
             media_folder = 'media/' + application_name + "/" + os.path.dirname(media)
             try:
                 os.makedirs(media_folder)
-            except OSError, e:
-                #print e
+            except OSError as e:
+                #print(e)
                 pass 
             media_res = requests.get(media_url)
             media_file = os.path.join(media_folder, os.path.basename(media))
-            print "        Writing media : %s" % media_file
-#            print media_res.content
+            print("        Writing media : %s" % media_file)
+#            print(media_res.content)
             f = open(media_file, "w")
             f.write(media_res.content)
             f.close()
@@ -145,12 +145,12 @@ for p, tmp_root in lonely_pages:
     page_raw_res = requests.get(p)
     try:
         os.makedirs(os.path.join('pages', application_name, tmp_root).replace(":", "/"))
-    except OSError, e:
-        #print e
+    except OSError as e:
+        #print(e)
         pass
     file_name = os.path.join('pages', application_name, tmp_root, page_name + ".txt")
     file_name = file_name.replace(":", "/")
-   #print file_name
+   #print(file_name)
     replace_dict = find_media(page_raw_res.content)
     # Change links
     modified_page_raw = page_raw_res.content
@@ -161,7 +161,7 @@ for p, tmp_root in lonely_pages:
     modified_page_raw = modified_page_raw.replace("[[:", "[[:%s:" % application_name)
     # Change media links
     for k, v in replace_dict.items():
-     #   print k, v
+     #   print(k, v)
         modified_page_raw = modified_page_raw.replace(k, v.replace("/", ":"))
     modified_page_raw = modified_page_raw.replace(":images/", ":images/:")
 
@@ -170,7 +170,7 @@ for p, tmp_root in lonely_pages:
     modified_page_raw = modified_page_raw.replace(":shinken:shinken:", ":shinken:")
 
     f = open(file_name, "w")
-    print "    Writing file : %s" % file_name
+    print("    Writing file : %s" % file_name)
     f.write(modified_page_raw)
     f.close()
 

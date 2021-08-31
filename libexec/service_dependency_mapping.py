@@ -81,7 +81,7 @@ class ShinkenAdmin():
         self.arb.update_infos()
         if not self.arb.reachable:
             sys.exit("Connection to the arbiter got a problem")
-        print "Connection OK"
+        print("Connection OK")
     
     def getconf(self, config):
         '''
@@ -118,9 +118,9 @@ class ShinkenAdmin():
             except KeyError:
                 dependent_host_name = parent_host_name
             if verbose:
-                print ""
-                print 'Service dependency host_name', parent_host_name
-                print 'Service dependency dependent_host_name', dependent_host_name
+                print("")
+                print('Service dependency host_name', parent_host_name)
+                print('Service dependency dependent_host_name', dependent_host_name)
 
             # Make list before process them by splitting comma separated values.
             dep['service_description'] = self.split_and_merge(dep['service_description'])
@@ -138,16 +138,16 @@ class ShinkenAdmin():
             dependent_tuples = self.split_and_merge(dependent_svc_tuples, split=False)
 
             if verbose:
-                print 'Parent service dependencies tuples list', parent_svc_tuples
-                print 'Dependent service dependencies tuples list', dependent_svc_tuples
+                print('Parent service dependencies tuples list', parent_svc_tuples)
+                print('Dependent service dependencies tuples list', dependent_svc_tuples)
 
             # Process !
             for parent_tuples in parent_svc_tuples:
                 r.append(self.make_all_dep_tuples(hosts, parent_tuples, dependent_tuples))
 
         if verbose:
-            print ""
-            print "Result:", r
+            print("")
+            print("Result:", r)
         return r
 
     def make_all_dep_tuples(self, hosts, parent_tuples=[()], dependent_tuples=[[()]] ):
@@ -231,8 +231,8 @@ class ShinkenAdmin():
         # Get needed conf
         hosts, svc_dep = self.getconf(config)
         if verbose:
-            print "Hosts:", hosts
-            print "Service Dep:", svc_dep
+            print("Hosts:", hosts)
+            print("Service Dep:", svc_dep)
 
         # Make the map
         r = self.load_svc_mapping(hosts, svc_dep, verbose)
@@ -247,8 +247,8 @@ class ShinkenAdmin():
             f.write(buf)
             f.close()
             shutil.move(output_file + '.tmp', output_file)
-            print "File %s wrote" % output_file
-        except IOError, exp:
+            print("File %s wrote" % output_file)
+        except IOError as exp:
             sys.exit("Error writing the file %s: %s" % (output_file, exp))
         jsonmappingfile = open(output_file, 'w')
         try:

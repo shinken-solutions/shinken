@@ -252,7 +252,7 @@ class Scheduler(object):
                 s = 'BROK: %s:%s\n' % (b.id, b.type)
                 f.write(s)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
 
@@ -265,7 +265,7 @@ class Scheduler(object):
             f.write('Scheduler config DUMP at %d\n' % time.time())
             self.conf.dump(f)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
     # Load the external command
@@ -325,7 +325,7 @@ class Scheduler(object):
 
 
     def add_EventHandler(self, action):
-        # print "Add an event Handler", elt.id
+        # print("Add an event Handler", elt.id)
         self.actions[action.id] = action
 
 
@@ -388,7 +388,7 @@ class Scheduler(object):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("The instance %s raise an exception %s."
                                  "I disable it and set it to restart it later",
                                  inst.get_name(), str(exp))
@@ -547,7 +547,7 @@ class Scheduler(object):
                 # and so ask for the problem to raise too
                 if new != was:
                     # print "The elements", i.get_name(),
-                    # print "change it's business_impact value from", was, "to", new
+                    # print("change it's business_impact value from", was, "to", new)
                     self.get_and_register_status_brok(elt)
 
 
@@ -714,10 +714,10 @@ class Scheduler(object):
                     logger.warning("The notification command '%s' raised an error "
                                    "(exit code=%d): '%s'", c.command, c.exit_status, c.output)
 
-            except KeyError, exp:  # bad number for notif, not that bad
+            except KeyError as exp:  # bad number for notif, not that bad
                 logger.warning('put_results:: get unknown notification : %s ', str(exp))
 
-            except AttributeError, exp:  # bad object, drop it
+            except AttributeError as exp:  # bad object, drop it
                 logger.warning('put_results:: get bad notification : %s ', str(exp))
         elif c.is_a == 'check':
             try:
@@ -728,7 +728,7 @@ class Scheduler(object):
                     c.exit_status = self.conf.timeout_exit_status
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-            except KeyError, exp:
+            except KeyError as exp:
                 pass
 
 
@@ -802,7 +802,7 @@ class Scheduler(object):
         try:
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -810,11 +810,11 @@ class Scheduler(object):
         try:
             # initial ping must be quick
             con.get('ping')
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
-        except KeyError, exp:
+        except KeyError as exp:
             logger.warning("The %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -837,11 +837,11 @@ class Scheduler(object):
                     logger.debug("Sending %s actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -864,11 +864,11 @@ class Scheduler(object):
                     logger.debug("Sending %d actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -899,7 +899,7 @@ class Scheduler(object):
                     # now go the cpickle pass, and catch possible errors from it
                     try:
                         results = cPickle.loads(results)
-                    except Exception, exp:
+                    except Exception as exp:
                         logger.error('Cannot load passive results from satellite %s : %s',
                                      p['name'], str(exp))
                         continue
@@ -911,11 +911,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
@@ -941,11 +941,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -1294,7 +1294,7 @@ class Scheduler(object):
             self.put_results(c)
 
         # Then we consume them
-        # print "**********Consume*********"
+        # print("**********Consume*********")
         for c in self.checks.values():
             if c.status == 'waitconsume':
                 item = c.ref
@@ -1320,7 +1320,7 @@ class Scheduler(object):
     # Called every 1sec to delete all checks in a zombie state
     # zombie = not useful anymore
     def delete_zombie_checks(self):
-        # print "**********Delete zombies checks****"
+        # print("**********Delete zombies checks****")
         id_to_del = []
         for c in self.checks.values():
             if c.status == 'zombie':
@@ -1334,7 +1334,7 @@ class Scheduler(object):
     # Called every 1sec to delete all actions in a zombie state
     # zombie = not useful anymore
     def delete_zombie_actions(self):
-        # print "**********Delete zombies actions****"
+        # print("**********Delete zombies actions****")
         id_to_del = []
         for a in self.actions.values():
             if a.status == 'zombie':
@@ -1500,7 +1500,7 @@ class Scheduler(object):
 
     # Raises checks for no fresh states for services and hosts
     def check_freshness(self):
-        # print "********** Check freshness******"
+        # print("********** Check freshness******")
         for elt in self.iter_hosts_and_services():
             c = elt.do_check_freshness()
             if c is not None:
@@ -1713,7 +1713,7 @@ class Scheduler(object):
         self.load_one_min = Load(initial_value=1)
         logger.debug("First loop at %d", time.time())
         while self.must_run:
-            # print "Loop"
+            # print("Loop")
             # Before answer to brokers, we send our broks to modules
             # Ok, go to send our broks to our external modules
             # self.send_broks_to_modules()
@@ -1771,7 +1771,7 @@ class Scheduler(object):
             if lat_avg is not None:
                 logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f", lat_avg, lat_min, lat_max)
 
-            # print "Notifications:", nb_notifications
+            # print("Notifications:", nb_notifications)
             now = time.time()
 
             if self.nb_checks_send != 0:

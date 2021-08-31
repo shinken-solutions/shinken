@@ -127,7 +127,7 @@ class SatelliteLink(Item):
             self.con.post('put_conf', {'conf': conf}, wait='long')
             print "PUT CONF SUCESS", self.get_name()
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
             return False
@@ -230,7 +230,7 @@ class SatelliteLink(Item):
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -240,7 +240,7 @@ class SatelliteLink(Item):
         try:
             r = self.con.get('wait_new_conf')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -265,7 +265,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -285,7 +285,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -301,7 +301,7 @@ class SatelliteLink(Item):
         try:
             self.con.get('remove_from_conf', {'sched_id': sched_id})
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -337,7 +337,7 @@ class SatelliteLink(Item):
                           self.get_name(), tab
             # We can update our list now
             self.managed_confs = tab_cleaned
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             print "EXCEPTION INwhat_i_managed", str(exp)
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
@@ -369,7 +369,7 @@ class SatelliteLink(Item):
             self.con.get('ping')
             self.con.post('push_broks', {'broks': broks}, wait='long')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -391,7 +391,7 @@ class SatelliteLink(Item):
                 self.con = None
                 return []
             return tab
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return []
         except AttributeError:

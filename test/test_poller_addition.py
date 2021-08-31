@@ -124,11 +124,11 @@ class TestPollerAddition(ShinkenTest):
         self.setup_with_file('etc/shinken_dispatcher.cfg')
 
     def test_simple_dispatch_and_addition(self):
-        print "The dispatcher", self.dispatcher
+        print("The dispatcher", self.dispatcher)
         # dummy for the arbiter
         for a in self.conf.arbiters:
             a.__class__ = GoodArbiter
-        print "Preparing schedulers"
+        print("Preparing schedulers")
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assertIsNot(scheduler1, None)
         scheduler1.__class__ = GoodScheduler
@@ -136,7 +136,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(scheduler2, None)
         scheduler2.__class__ = BadScheduler
 
-        print "Preparing pollers"
+        print("Preparing pollers")
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
         self.assertIsNot(poller1, None)
         poller1.__class__ = GoodPoller
@@ -144,7 +144,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(poller2, None)
         poller2.__class__ = BadPoller
 
-        print "Preparing reactionners"
+        print("Preparing reactionners")
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
         self.assertIsNot(reactionner1, None)
         reactionner1.__class__ = GoodReactionner
@@ -152,7 +152,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(reactionner2, None)
         reactionner2.__class__ = BadReactionner
 
-        print "Preparing brokers"
+        print("Preparing brokers")
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
         self.assertIsNot(broker1, None)
         broker1.__class__ = GoodBroker

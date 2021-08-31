@@ -35,7 +35,7 @@ class TestRealms(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         realm1 = self.conf.realms.find_by_name('realm1')
         self.assertIsNot(realm1, None)
@@ -55,7 +55,7 @@ class TestRealms(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         realm1 = self.conf.realms.find_by_name('realm1')
@@ -108,7 +108,7 @@ class TestRealms(ShinkenTest):
         europe.prepare_for_satellites_conf()
         paris.prepare_for_satellites_conf()
 
-        print world.__dict__
+        print(world.__dict__)
         # broker should be in the world level
         self.assertIs(bworld in world.potential_brokers, True)
         # in europe too

@@ -44,7 +44,7 @@ class TestAcksWithExpire(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assertEqual(0, svc.current_notification_number)
 
@@ -54,7 +54,7 @@ class TestAcksWithExpire(ShinkenTest):
         # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
-        print "- 2 x BAD get hard -------------------------------------"
+        print("- 2 x BAD get hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assertEqual(1, svc.current_notification_number)
         self.assertEqual(3, self.count_actions())
@@ -65,7 +65,7 @@ class TestAcksWithExpire(ShinkenTest):
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
-        print "- 2 x BAD stay hard -------------------------------------"
+        print("- 2 x BAD stay hard -------------------------------------")
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=False)
         self.show_and_clear_logs()
         self.show_actions()

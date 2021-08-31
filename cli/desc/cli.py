@@ -47,7 +47,7 @@ def serve(port):
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
 
 def do_desc(cls='host'):
@@ -59,7 +59,7 @@ def do_desc(cls='host'):
         if v.has_default:
             print k, '(%s)' % v.default
         else:
-            print k
+            print(k)
 
 
 

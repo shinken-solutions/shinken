@@ -10,4 +10,4 @@ srv2::osversion=7
 srv2::macvendor=VMware
 srv2::openports=80,135,139,445
 """
-print s
+print(s)

@@ -61,7 +61,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host states as UP
         #--------------------------------------------------------------
-        print "- 4 x UP -------------------------------------"
+        print("- 4 x UP -------------------------------------")
         self.scheduler_loop(1, [[host_router_0, 0, 'UP'], [host_router_1, 0, 'UP'], [host_0, 0, 'UP'], [host_1, 0, 'UP']], do_sleep=False)
 
         for h in all_hosts:
@@ -71,14 +71,14 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # Now we add some problems to routers
         #--------------------------------------------------------------
-        print "- routers get DOWN /SOFT-------------------------------------"
+        print("- routers get DOWN /SOFT-------------------------------------")
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         # Max attempt is at 5, should be soft now
         for h in all_routers:
             self.assertEqual('DOWN', h.state)
             self.assertEqual('SOFT', h.state_type)
 
-        print "- routers get DOWN /HARD-------------------------------------"
+        print("- routers get DOWN /HARD-------------------------------------")
         # Now put 4 more checks so we get DOWN/HARD
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
@@ -124,7 +124,7 @@ class TestProblemImpact(ShinkenTest):
             self.assertEqual('UNREACHABLE', s.state)
             # And check the services are impacted too
             for svc in s.services:
-                print "Service state", svc.state
+                print("Service state", svc.state)
                 self.assertEqual('UNKNOWN', svc.state)
                 self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
                 self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
@@ -140,7 +140,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # One router get UP now
         #--------------------------------------------------------------
-        print "- 1 X UP for a router ------------------------------"
+        print("- 1 X UP for a router ------------------------------")
         # Ok here the problem/impact propagation is Checked. Now what
         # if one router get back? :)
         self.scheduler_loop(1, [[host_router_0, 0, 'UP']], do_sleep=False)
@@ -162,7 +162,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # The other router get UP :)
         #--------------------------------------------------------------
-        print "- 1 X UP for the last router ------------------------------"
+        print("- 1 X UP for the last router ------------------------------")
         # What is the last router get back? :)
         self.scheduler_loop(1, [[host_router_1, 0, 'UP']], do_sleep=False)
 
@@ -229,7 +229,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host states as UP
         #--------------------------------------------------------------
-        print "- 4 x UP -------------------------------------"
+        print("- 4 x UP -------------------------------------")
         self.scheduler_loop(1, [[host_router_0, 0, 'UP'], [host_router_1, 0, 'UP'], [host_0, 0, 'UP'], [host_1, 0, 'UP']], do_sleep=False)
 
         for h in all_hosts:
@@ -239,14 +239,14 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # Now we add some problems to routers
         #--------------------------------------------------------------
-        print "- routers get DOWN /SOFT-------------------------------------"
+        print("- routers get DOWN /SOFT-------------------------------------")
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         # Max attempt is at 5, should be soft now
         for h in all_routers:
             self.assertEqual('DOWN', h.state)
             self.assertEqual('SOFT', h.state_type)
 
-        print "- routers get DOWN /HARD-------------------------------------"
+        print("- routers get DOWN /HARD-------------------------------------")
         # Now put 4 more checks so we get DOWN/HARD
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
@@ -292,7 +292,7 @@ class TestProblemImpact(ShinkenTest):
             self.assertEqual('UNREACHABLE', s.state)
             # And check the services are impacted too
             for svc in s.services:
-                print "Service state", svc.state
+                print("Service state", svc.state)
                 self.assertEqual('UNKNOWN', svc.state)
                 self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
                 self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
@@ -330,7 +330,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # One router get UP now
         #--------------------------------------------------------------
-        print "- 1 X UP for a router ------------------------------"
+        print("- 1 X UP for a router ------------------------------")
         # Ok here the problem/impact propagation is Checked. Now what
         # if one router get back? :)
         self.scheduler_loop(1, [[host_router_0, 0, 'UP']], do_sleep=False)
@@ -352,7 +352,7 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # The other router get UP :)
         #--------------------------------------------------------------
-        print "- 1 X UP for the last router ------------------------------"
+        print("- 1 X UP for the last router ------------------------------")
         # What is the last router get back? :)
         self.scheduler_loop(1, [[host_router_1, 0, 'UP']], do_sleep=False)
 
