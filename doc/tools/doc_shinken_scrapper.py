@@ -39,7 +39,7 @@ def parse_level(level, root=""):
 #            print(raw_ajax_res.content)
             parse_level(ajax_tree, new_root)
 #            http://www.shinken-monitoring.org/wiki/lib/exe/ajax.php
-#            print title.getparent().getparent()
+#            print(title.getparent().getparent())
         else:
 #            import pdb;pdb.set_trace()
             page_name = item.find("./div//a").text
@@ -113,7 +113,7 @@ def find_media(raw_data):
             replace_dict[media] = media.replace("/", ":")
 
 
-            print "        Get media : %s - %s" % (media, media_url)
+            print("        Get media : %s - %s" % (media, media_url))
             media_folder = 'media/' + application_name + "/" + os.path.dirname(media)
             try:
                 os.makedirs(media_folder)

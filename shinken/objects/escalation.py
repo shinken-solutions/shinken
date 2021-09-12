@@ -220,9 +220,9 @@ class Escalations(Items):
                     for sname in strip_and_uniq(sdesc.split(',')):
                         s = services.find_srv_by_name_and_hostname(hname, sname)
                         if s is not None:
-                            # print "Linking service", s.get_name(), 'with me', es.get_name()
+                            # print("Linking service", s.get_name(), 'with me', es.get_name())
                             s.escalations.append(es)
-                            # print "Now service", s.get_name(), 'have', s.escalations
+                            # print("Now service", s.get_name(), 'have', s.escalations)
 
     # Will register escalations into host.escalations
     def linkify_es_by_h(self, hosts):
@@ -236,9 +236,9 @@ class Escalations(Items):
             for hname in strip_and_uniq(es.host_name.split(',')):
                 h = hosts.find_by_name(hname)
                 if h is not None:
-                    # print "Linking host", h.get_name(), 'with me', es.get_name()
+                    # print("Linking host", h.get_name(), 'with me', es.get_name())
                     h.escalations.append(es)
-                    # print "Now host", h.get_name(), 'have', h.escalations
+                    # print("Now host", h.get_name(), 'have', h.escalations)
 
     # We look for contacts property in contacts and
     def explode(self, hosts, hostgroups, contactgroups):

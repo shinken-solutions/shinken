@@ -70,7 +70,7 @@ if not, they must drop their checks """
         res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags,
                                          reactionner_tags, worker_name,
                                          module_types, max_actions)
-        # print "Sending %d checks" % len(res)
+        # print("Sending %d checks" % len(res))
         self.app.nb_checks_send += len(res)
 
         return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
@@ -467,7 +467,7 @@ class Shinken(BaseSatellite):
 
         # First mix conf and override_conf to have our definitive conf
         for prop in self.override_conf:
-            # print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
+            # print("Overriding the property %s with value %s" % (prop, self.override_conf[prop]))
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
 

@@ -47,7 +47,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus
         self.modulemanager.start_external_instances()
-        print "I correctly loaded the modules: %s " % ([inst.get_name() for inst in self.modulemanager.instances])
+        print("I correctly loaded the modules: %s " % ([inst.get_name() for inst in self.modulemanager.instances]))
 
         print("*** First kill ****")
         # Now I will try to kill the livestatus module
@@ -56,7 +56,7 @@ class TestModuleManager(ShinkenTest):
 
         time.sleep(1)
         print("Check alive?")
-        print "Is alive?", ls.process.is_alive()
+        print("Is alive?", ls.process.is_alive())
         # Should be dead
         self.assertFalse(ls.process.is_alive())
         self.modulemanager.check_alive_instances()
@@ -65,7 +65,7 @@ class TestModuleManager(ShinkenTest):
         # In fact it's too early, so it won't do it
 
         # Here the inst should still be dead
-        print "Is alive?", ls.process.is_alive()
+        print("Is alive?", ls.process.is_alive())
         self.assertFalse(ls.process.is_alive())
 
         # So we lie
@@ -76,7 +76,7 @@ class TestModuleManager(ShinkenTest):
         # In fact it's too early, so it won't do it
 
         # Here the inst should be alive again
-        print "Is alive?", ls.process.is_alive()
+        print("Is alive?", ls.process.is_alive())
         self.assertTrue(ls.process.is_alive())
 
         # should be nothing more in to_restart of
@@ -91,7 +91,7 @@ class TestModuleManager(ShinkenTest):
         # Should be too early
         self.modulemanager.check_alive_instances()
         self.modulemanager.try_to_restart_deads()
-        print "Is alive or not", ls.process.is_alive()
+        print("Is alive or not", ls.process.is_alive())
         self.assertFalse(ls.process.is_alive())
         # We lie for the test again
         ls.last_init_try = -5
@@ -99,7 +99,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.try_to_restart_deads()
 
         # Here the inst should be alive again
-        print "Is alive?", ls.process.is_alive()
+        print("Is alive?", ls.process.is_alive())
         self.assertTrue(ls.process.is_alive())
 
         # And we clear all now

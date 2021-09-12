@@ -1500,11 +1500,11 @@ class Config(Item):
         self.hostgroups.explode()
 
         # print("Services")
-        # print "Initially got nb of services: %d" % len(self.services.items)
+        # print("Initially got nb of services: %d" % len(self.services.items))
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
                               self.servicegroups, self.servicedependencies,
                               self.triggers)
-        # print "finally got nb of services: %d" % len(self.services.items)
+        # print("finally got nb of services: %d" % len(self.services.items))
         # print("Servicegroups")
         self.servicegroups.explode()
 
@@ -2214,7 +2214,7 @@ class Config(Item):
         # Count the numbers of elements in all the realms, to compare it the total number of hosts
         nb_elements_all_realms = 0
         for r in self.realms:
-            # print "Load balancing realm", r.get_name()
+            # print("Load balancing realm", r.get_name())
             packs = {}
             # create roundrobin iterator for id of cfg
             # So dispatching is loadbalanced in a realm
@@ -2263,15 +2263,15 @@ class Config(Item):
                 valid_value = False
                 old_pack = -1
                 for elt in pack:
-                    # print 'Look for host', elt.get_name(), 'in assoc'
+                    # print('Look for host', elt.get_name(), 'in assoc')
                     old_i = assoc.get(elt.get_name(), -1)
-                    # print 'Founded in ASSOC: ', elt.get_name(),old_i
+                    # print('Founded in ASSOC: ', elt.get_name(),old_i)
                     # Maybe it's a new, if so, don't count it
                     if old_i == -1:
                         continue
                     # Maybe it is the first we look at, if so, take it's value
                     if old_pack == -1 and old_i != -1:
-                        # print 'First value set', elt.get_name(), old_i
+                        # print('First value set', elt.get_name(), old_i)
                         old_pack = old_i
                         valid_value = True
                         continue
@@ -2281,18 +2281,18 @@ class Config(Item):
                     if old_i != old_pack:
                         # print('Outch found a change sorry', old_i, old_pack)
                         valid_value = False
-                # print 'Is valid?', elt.get_name(), valid_value, old_pack
+                # print('Is valid?', elt.get_name(), valid_value, old_pack)
                 i = None
                 # If it's a valid sub pack and the pack id really exist, use it!
                 if valid_value and old_pack in packindices:
-                    # print 'Use a old id for pack', old_pack, [h.get_name() for h in pack]
+                    # print('Use a old id for pack', old_pack, [h.get_name() for h in pack])
                     i = old_pack
                 else:  # take a new one
-                    # print 'take a new id for pack', [h.get_name() for h in pack]
+                    # print('take a new id for pack', [h.get_name() for h in pack])
                     i = self.get_least_loaded_scheduler_id(weight_scheduler_ids, assoc)
 
                 for elt in pack:
-                    # print 'We got the element', elt.get_full_name(), ' in pack', i, packindices
+                    # print('We got the element', elt.get_full_name(), ' in pack', i, packindices)
                     scheduler_id = weight_dict[i]
                     packs[packindices[scheduler_id]].append(elt)
                     assoc[elt.get_name()] = i

@@ -187,9 +187,9 @@ class TestConfig(ShinkenModulesTest):
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
         len2 = len(text2.split("\n"))
-        #print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
-        #print "text1 //%s//" % sorted(text1.split("\n"))
-        #print "text2 //%s//" % sorted(text2.split("\n"))
+        #print("%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2))
+        #print("text1 //%s//" % sorted(text1.split("\n")))
+        #print("text2 //%s//" % sorted(text2.split("\n")))
         if sorted1 == sorted2 and len1 == len2:
             return True
         else:

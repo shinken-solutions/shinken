@@ -205,7 +205,7 @@ class ComplexExpressionFactory(object):
                 if stacked_par > 1:
                     tmp += c
                     # o = self.eval_cor_pattern(tmp)
-                    # print "1( I've %s got new sons" % pattern , o
+                    # print("1( I've %s got new sons" % pattern , o)
                     # node.sons.append(o)
 
             elif c == ')':

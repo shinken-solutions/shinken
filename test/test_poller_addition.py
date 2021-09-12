@@ -35,7 +35,7 @@ class GoodArbiter(ArbiterLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def have_conf(self, i):
@@ -49,7 +49,7 @@ class GoodScheduler(SchedulerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def have_conf(self, i):
@@ -61,7 +61,7 @@ class GoodScheduler(SchedulerLink):
 
 class BadScheduler(SchedulerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
     def have_conf(self, i):
@@ -72,7 +72,7 @@ class GoodPoller(PollerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -81,7 +81,7 @@ class GoodPoller(PollerLink):
 
 class BadPoller(PollerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 
@@ -89,7 +89,7 @@ class GoodReactionner(ReactionnerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -98,7 +98,7 @@ class GoodReactionner(ReactionnerLink):
 
 class BadReactionner(ReactionnerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 
@@ -106,7 +106,7 @@ class GoodBroker(BrokerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -115,7 +115,7 @@ class GoodBroker(BrokerLink):
 
 class BadBroker(BrokerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 

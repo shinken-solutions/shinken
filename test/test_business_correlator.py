@@ -632,11 +632,11 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('HARD', svc_cor.state_type)
         self.assertEqual(1, svc_cor.last_hard_state_id)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
 
         print("IMPACT:", svc_bd2.impacts)
         for i in svc_bd2.impacts:
-            print i.get_name()
+            print(i.get_name())
 
         # Assert that Simple_Or Is an impact of the problem bd2
         self.assertIn(svc_cor, svc_bd2.impacts)
@@ -656,7 +656,7 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assertEqual('|', bp_rule.operand)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
         all_elt = bp_rule.list_all_elements()
 
         self.assertIn(svc_bd2, all_elt)
@@ -889,11 +889,11 @@ class TestBusinesscorrel(ShinkenTest):
         self.assertEqual('HARD', svc_cor.state_type)
         self.assertEqual(1, svc_cor.last_hard_state_id)
 
-        print "All elements", bp_rule.list_all_elements()
+        print("All elements", bp_rule.list_all_elements())
 
         print("IMPACT:", svc_bd2.impacts)
         for i in svc_bd2.impacts:
-            print i.get_name()
+            print(i.get_name())
 
         # Assert that Simple_Or Is an impact of the problem bd2
         self.assertIn(svc_cor, svc_bd2.impacts)
@@ -1407,7 +1407,7 @@ class TestBusinesscorrel(ShinkenTest):
         # We should got now svc_bd2 and svc_bd1 as root problems
         print("Root problems")
         for p in svc_cor.source_problems:
-            print p.get_full_name()
+            print(p.get_full_name())
         self.assertIn(svc_bd1, svc_cor.source_problems)
         self.assertIn(svc_bd2, svc_cor.source_problems)
 
@@ -1426,7 +1426,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Now our root problem is router
         print("Root problems")
         for p in svc_cor.source_problems:
-            print p.get_full_name()
+            print(p.get_full_name())
         self.assertIn(router, svc_cor.source_problems)
 
 

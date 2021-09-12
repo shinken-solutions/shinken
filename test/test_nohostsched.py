@@ -52,7 +52,7 @@ class TestHostspecialSched(ShinkenTest):
         self.assertEqual('HARD', host.state_type)
         # Reschedule the host as a normal way
         host.schedule()
-        print "Final", host.next_chk, host.is_in_checking()
+        print("Final", host.next_chk, host.is_in_checking())
         print("Next check?", host.next_chk - now)
         print("Next check should be still < 300", host.next_chk - now)
         self.assertLess(host.next_chk - now, 301)

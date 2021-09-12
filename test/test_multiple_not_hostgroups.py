@@ -33,8 +33,8 @@ class TestMultipleNotHG(ShinkenTest):
     def test_dummy(self):
 
         for s in self.sched.services:
-            print "SERVICES", s.get_full_name()
-        
+            print("SERVICES", s.get_full_name())
+
         svc = self.sched.services.find_srv_by_name_and_hostname("hst_in_BIG", "THE_SERVICE")
         self.assertIsNot(svc, None)
 

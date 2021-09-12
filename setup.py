@@ -188,7 +188,7 @@ try:
     import shinken
     
     is_update = True
-    print "Previous Shinken lib detected (%s)" % shinken.__file__
+    print("Previous Shinken lib detected (%s)" % shinken.__file__)
 except ImportError:
     pass
 
@@ -227,7 +227,7 @@ if is_install and not root and not is_update and pwd and not opts.skip_build:
     gid = get_gid(group)
     
     if uid is None or gid is None:
-        print "Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user, group, user)
+        print("Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user, group, user))
         sys.exit(2)
 
 # setup() will warn about unknown parameter we already managed

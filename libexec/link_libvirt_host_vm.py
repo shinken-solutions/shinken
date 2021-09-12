@@ -30,8 +30,8 @@ import signal
 
 import libvirt
 
-class TimeoutException(Exception): 
-    pass 
+class TimeoutException(Exception):
+    pass
 
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
@@ -57,14 +57,14 @@ def main(uris, output_file, ignore):
 
     if ignore:
         ignored_doms = ignore.split(",")
-        
+
     for uri in uris.split(","):
-        signal.signal(signal.SIGALRM, timeout_handler) 
+        signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(10) # triger alarm in 10 seconds
         try:
             conn = libvirt.openReadOnly(uri)
         except libvirt.libvirtError as e:
-            print "Libvirt connection error: `%s'" % e.message.replace("\r", "")
+            print("Libvirt connection error: `%s'" % e.message.replace("\r", ""))
             print("Let's try next URI")
             continue
         except TimeoutException:
@@ -72,10 +72,10 @@ def main(uris, output_file, ignore):
             print("Let's try next URI")
             continue
         except Exception as e:
-            print "Unknown Error: %s" % str(e)
+            print("Unknown Error: %s" % str(e))
             print("Let's try next URI...")
             continue
-            
+
         hypervisor = conn.getHostname()
         # List all VM (stopped and started)
         for dom in [conn.lookupByName(name) for name in conn.listDefinedDomains()]\

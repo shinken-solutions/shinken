@@ -79,7 +79,7 @@ def safe_print(*args):
         else:
             lst.append(unicode(e))
     # Ok, now print(it :))
-    print u' '.join(lst)
+    print(u' '.join(lst))
 
 
 def split_semicolon(line, maxsplit=None):
@@ -165,7 +165,7 @@ def jsonify_r(obj):
                         lst.append(getattr(_t, t + '_name'))
                     else:
                         pass
-                        # print "CANNOT MANAGE OBJECT", _t, type(_t), t
+                        # print("CANNOT MANAGE OBJECT", _t, type(_t), t)
                 res[prop] = lst
             else:
                 t = getattr(v.__class__, 'my_type', '')
@@ -178,7 +178,7 @@ def jsonify_r(obj):
                 if t and hasattr(v, t + '_name'):
                     res[prop] = getattr(v, t + '_name')
                 # else:
-                #    print "CANNOT MANAGE OBJECT", v, type(v), t
+                #    print("CANNOT MANAGE OBJECT", v, type(v), t)
     return res
 
 # ################################## TIME ##################################
@@ -545,7 +545,7 @@ def apply_change_recursive_pattern_change(s, rule):
     # print("Try to change %s" % s, 'with', rule)
     # new_s = s
     (i, m, t) = rule
-    # print "replace %s by %s" % (r'%s' % m, str(i)), 'in', s
+    # print("replace %s by %s" % (r'%s' % m, str(i)), 'in', s)
     s = s.replace(r'%s' % m, str(i))
     # print("And got", s)
     if t == []:

@@ -213,7 +213,7 @@ class Regenerator(object):
 
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
-            # print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            # print("Linking %s groups %s" % (h.get_name(), h.hostgroups))
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
                 hgname = hgname.strip()
@@ -447,7 +447,7 @@ class Regenerator(object):
             setattr(o, prop, [])
 
         new_v = []
-        # print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        # print("Linkify Dict SRV/Host", v, o.get_name(), prop)
         for name in v['services']:
             elts = name.split('/')
             hname = elts[0]

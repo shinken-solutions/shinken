@@ -45,7 +45,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        print "Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command)
+        print("Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command))
         # We do not want to be just a string but a real command
         self.assertNotIsInstance(svc.__class__.perfdata_command, str)
         print(svc.__class__.perfdata_command.__class__.my_type)
@@ -75,7 +75,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        print "Host perfdata command", host.__class__.perfdata_command, type(host.__class__.perfdata_command)
+        print("Host perfdata command", host.__class__.perfdata_command, type(host.__class__.perfdata_command))
         # We do not want to be just a string but a real command
         self.assertNotIsInstance(host.__class__.perfdata_command, str)
         print(host.__class__.perfdata_command.__class__.my_type)
@@ -107,7 +107,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        print "Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command)
+        print("Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command))
         # We do not want to be just a string but a real command
         self.assertNotIsInstance(svc.__class__.perfdata_command, str)
         print(svc.__class__.perfdata_command.__class__.my_type)
@@ -128,7 +128,7 @@ class TestConfig(ShinkenTest):
 
         self.assertEqual('DISK OK - free space: / 3326 MB (56%);', svc.output.strip())
         self.assertEqual(u'/=2643MB;5948;5958;0;5968 /boot=68MB;88;93;0;98 /home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980', svc.perf_data.strip())
-        print svc.long_output.split('\n')
+        print(svc.long_output.split('\n'))
         self.assertEqual(u"""/ 15272 MB (77%);
 /boot 68 MB (69%);
 /home 69357 MB (27%);

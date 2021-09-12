@@ -35,11 +35,11 @@ except ImportError:
 
 VERSION = '0.1.1'
 # Fred : command launched depending on os detection
-if os.name != 'nt': 
+if os.name != 'nt':
     DEFAULT_CMD = "sudo nmap %s -sU -sS --min-rate %d --max-retries %d -T4 -O -oX %s"
 else:
     DEFAULT_CMD = "nmap %s -sU -sS --min-rate %d --max-retries %d -T4 -O -oX %s"
-    
+
 parser = optparse.OptionParser(
     "%prog [options] -t nmap scanning targets",
     version="%prog " + VERSION)
@@ -187,7 +187,7 @@ class DetectedHost:
 
         # now get the entry with the max value, the first one
         for (os, osgen, accuracy, os_type, vendor) in self.os_possibilities:
-            print "Can be", (os, osgen, accuracy, os_type, vendor)
+            print("Can be", (os, osgen, accuracy, os_type, vendor))
             if accuracy == max_accuracy:
                 self.os = (os, osgen, os_type, vendor)
                 break
@@ -281,7 +281,7 @@ if not simulate:
         sys.exit(2)
 
     # Fred : no need to print(nmap result catched ...)
-    # print "Got it", (stdoutdata, stderrdata)
+    # print("Got it", (stdoutdata, stderrdata))
     print("Got it !")
 
     xml_input = tmppath
@@ -292,7 +292,7 @@ tree = ElementTree()
 try:
     tree.parse(xml_input)
 except IOError as exp:
-    print "Error opening file '%s': %s" % (xml_input, exp)
+    print("Error opening file '%s': %s" % (xml_input, exp))
     sys.exit(2)
 
 hosts = tree.findall('host')
@@ -334,7 +334,7 @@ for h in hosts:
     for trace in traces:
         #print(trace.__dict__)
         hops = trace.findall('hop')
-        #print "Number of hops", len(hops)
+        #print("Number of hops", len(hops))
         distance = len(hops)
         if distance >= 2:
             for hop in hops:
@@ -398,7 +398,7 @@ for h in hosts:
 
     #print(dh.__dict__)
     all_hosts.append(dh)
-    #print "\n\n"
+    #print("\n\n")
 
 
 
@@ -420,13 +420,13 @@ for h in all_hosts:
     #c.fill_ports_services()
     #c.fill_system_services()
     #c.write_host_configuration()
-    #print "Host config", c.get_cfg_for_host()
+    #print("Host config", c.get_cfg_for_host())
     #c.write_services_configuration()
     #print("Service config")
-    #print c.get_cfg_for_services()
+    #print(c.get_cfg_for_services())
     #print(c.__dict__)
-    print '\n'.join(h.get_discovery_output())
-    #print "\n\n\n"
+    print('\n'.join(h.get_discovery_output()))
+    #print("\n\n\n")
 
 
 # Try to remove the temppath

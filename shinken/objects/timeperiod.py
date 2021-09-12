@@ -327,7 +327,7 @@ class Timeperiod(Item):
         return local_min
 
     def get_next_invalid_time_from_t(self, t):
-        # print '\n\n', self.get_name(), 'Search for next invalid from',
+        # print('\n\n', self.get_name(), 'Search for next invalid from',)
         # time.asctime(time.localtime(t)), t
         t = int(t)
         original_t = t
@@ -346,41 +346,41 @@ class Timeperiod(Item):
         res = None
         # Loop for all minutes...
         while still_loop:
-            # print "Invalid loop with", time.asctime(time.localtime(local_min))
+            # print("Invalid loop with", time.asctime(time.localtime(local_min)))
 
             dr_mins = []
             # val_valids = []
             # val_inval = []
             # But maybe we can find a better solution with next invalid of standard dateranges
-            # print self.get_name(),
+            # print(self.get_name(),)
             # "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
-                # print self.get_name(),
+                # print(self.get_name(),)
                 # "Search a next invalid from DR", time.asctime(time.localtime(local_min))
                 # print(dr.__dict__)
                 m = dr.get_next_invalid_time_from_t(local_min)
 
-                # print self.get_name(), "Dr", dr.__dict__,
+                # print(self.get_name(), "Dr", dr.__dict__,)
                 # "give me next invalid", time.asctime(time.localtime(m))
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
                     # if not self.is_time_valid(m):
-                    #     print "Final: Got a next invalid at", time.asctime(time.localtime(m))
+                    #     print("Final: Got a next invalid at", time.asctime(time.localtime(m)))
                     dr_mins.append(m)
                     # if not self.is_time_valid(m):
                     #    val_inval.append(m)
                     # else:
                     #    val_valids.append(m)
-                    #    print "Add a m", time.asctime(time.localtime(m))
+                    #    print("Add a m", time.asctime(time.localtime(m)))
                     # else:
                     #     print(dr.__dict__)
-                    #     print "FUCK bad result\n\n\n"
+                    #     print("FUCK bad result\n\n\n")
             # print("Inval")
             # for v in val_inval:
-            #    print "\t", time.asctime(time.localtime(v))
+            #    print("\t", time.asctime(time.localtime(v)))
             # print("Valid")
             # for v in val_valids:
-            #    print "\t", time.asctime(time.localtime(v))
+            #    print("\t", time.asctime(time.localtime(v)))
 
             if dr_mins != []:
                 local_min = min(dr_mins)
@@ -396,7 +396,7 @@ class Timeperiod(Item):
                 #  time.asctime(time.localtime(local_min)),
                 #  "is valid", self.is_time_valid(local_min)
 
-            # print self.get_name(),
+            # print(self.get_name(),)
             # 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid
             if not self.is_time_valid(local_min):
@@ -415,7 +415,7 @@ class Timeperiod(Item):
             if local_min is not None:
                 # Now check if local_min is not valid
                 for tp in self.exclude:
-                    # print self.get_name(),
+                    # print(self.get_name(),)
                     # "we check for invalid",
                     # time.asctime(time.localtime(local_min)), 'with tp', tp.name
                     if tp.is_time_valid(local_min):
@@ -432,7 +432,7 @@ class Timeperiod(Item):
                 if res is None or local_min < res:
                     res = local_min
 
-        # print "Finished Return the next invalid", time.asctime(time.localtime(local_min))
+        # print("Finished Return the next invalid", time.asctime(time.localtime(local_min)))
         # Ok, we update the cache...
         self.invalid_cache[original_t] = local_min
         return local_min
@@ -601,7 +601,7 @@ class Timeperiod(Item):
         if res is not None:
             # print("Good catch 8")
             (swday, swday_offset, smon, ewday, ewday_offset, emon, other) = res.groups()
-            # print "Debug:", (swday, swday_offset, smon, ewday, ewday_offset, emon, other)
+            # print("Debug:", (swday, swday_offset, smon, ewday, ewday_offset, emon, other))
             dateranges.append(
                 MonthWeekDayDaterange(0, smon, 0, swday, swday_offset,
                                       0, emon, 0, ewday, ewday_offset, 0, other)
@@ -867,15 +867,15 @@ if __name__ == '__main__':
         # t.resolve_daterange(t.exclude, 'monday 00:00-19:00')
         # t.check_valid_for_today()
         now = time.time()
-        # print "Is valid NOW?", t.is_time_valid(now)
+        # print("Is valid NOW?", t.is_time_valid(now))
         t_next = t.get_next_valid_time_from_t(now + 5 * 60)
         if t_next is not None:
-            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<=="
+            print("Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<==")
         else:
             print("===> No future time!!!")
-        # print "End date:", t.get_end_time()
-        # print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
-        print str(t) + '\n\n'
+        # print("End date:", t.get_end_time())
+        # print("Next valid", time.asctime(time.localtime(t.get_next_valid_time())))
+        print(str(t) + '\n\n')
 
     print("*************************************************************")
     t3 = Timeperiod()
@@ -893,8 +893,8 @@ if __name__ == '__main__':
     t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
 
-    print "Mon T", str(t) + '\n\n'
+    print("Mon T", str(t) + '\n\n')
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
-    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<=="
-    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<=="
+    print("Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<==")
+    print("Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<==")

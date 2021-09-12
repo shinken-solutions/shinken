@@ -38,7 +38,7 @@ class TestConfig(ShinkenTest):
 
     def send_cmd(self, line):
         s = '[%d] %s\n' % (int(time.time()), line)
-        print "Writing %s in %s" % (s, self.conf.command_file)
+        print("Writing %s in %s" % (s, self.conf.command_file))
         fd = open(self.conf.command_file, 'wb')
         fd.write(s)
         fd.close()
@@ -77,7 +77,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', host.state)
         self.assertEqual('Bob is not happy', host.output)
-        print "perf (%s)" % host.perf_data
+        print("perf (%s)" % host.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', host.perf_data)
 
         # The same with a service
@@ -87,7 +87,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('WARNING', svc.state)
         self.assertEqual('Bobby is not happy', svc.output)
-        print "perf (%s)" % svc.perf_data
+        print("perf (%s)" % svc.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
         # ACK SERVICE
@@ -137,7 +137,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
         self.assertEqual('Bob is not happy', router.output)
-        print "perf (%s)" % router.perf_data
+        print("perf (%s)" % router.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print("Is the last check agree?", past, router.last_chk)
         self.assertEqual(router.last_chk, past)
@@ -150,7 +150,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
         self.assertEqual('Bob is not happy', router.output)
-        print "perf (%s)" % router.perf_data
+        print("perf (%s)" % router.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
         print("Is the last check agree?", very_past, router.last_chk)
         self.assertEqual(router.last_chk, past)

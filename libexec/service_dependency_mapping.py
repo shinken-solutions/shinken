@@ -73,7 +73,7 @@ class ShinkenAdmin():
         '''
     
         if verbose:
-            print "Connection to %s:%s" % (self.addr, self.port)
+            print("Connection to %s:%s" % (self.addr, self.port))
         ArbiterLink.use_ssl = False
         self.arb = ArbiterLink({'arbiter_name': self.arb_name, 'address': self.addr, 'port': self.port})
         self.arb.fill_default()

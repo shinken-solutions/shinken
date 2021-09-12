@@ -531,7 +531,7 @@ class Scheduler(object):
                 new = elt.business_impact
                 # Ok, the business_impact change, we can update the broks
                 if new != was:
-                    # print "The elements", i.get_name(), "change it's business_impact value"
+                    # print("The elements", i.get_name(), "change it's business_impact value")
                     self.get_and_register_status_brok(elt)
 
         # When all impacts and classic elements are updated,
@@ -546,7 +546,7 @@ class Scheduler(object):
                 # Maybe one of the impacts change it's business_impact to a high value
                 # and so ask for the problem to raise too
                 if new != was:
-                    # print "The elements", i.get_name(),
+                    # print("The elements", i.get_name(),)
                     # print("change it's business_impact value from", was, "to", new)
                     self.get_and_register_status_brok(elt)
 

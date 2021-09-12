@@ -82,7 +82,7 @@ class TestMaintPeriod(ShinkenTest):
             x = time.gmtime(now)
 
         now = time.time()
-        print "now it is", time.asctime(time.localtime(now))
+        print("now it is", time.asctime(time.localtime(now)))
         nowday = time.strftime("%A", time.localtime(now + 60)).lower()
         soonstart = time.strftime("%H:%M", time.localtime(now + 60))
         soonend = time.strftime("%H:%M", time.localtime(now + 180))
@@ -93,9 +93,9 @@ class TestMaintPeriod(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, range)
         t_next = t.get_next_valid_time_from_t(now)
-        print "planned start", time.asctime(time.localtime(t_next))
+        print("planned start", time.asctime(time.localtime(t_next)))
         t_next = t.get_next_invalid_time_from_t(t_next + 1)
-        print "planned stop ", time.asctime(time.localtime(t_next))
+        print("planned stop ", time.asctime(time.localtime(t_next)))
         svc3.maintenance_period = t
 
         self.assertFalse(svc3.in_maintenance)
@@ -104,17 +104,17 @@ class TestMaintPeriod(ShinkenTest):
         # it is now 10 seconds before the full minute. run for 30 seconds
         # in 1-second-intervals. this should be enough to trigger the downtime
         # in 10 seconds from now the downtime starts
-        print "scheduler_loop start", time.asctime()
+        print("scheduler_loop start", time.asctime())
         self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
-        print "scheduler_loop end  ", time.asctime()
+        print("scheduler_loop end  ", time.asctime())
 
         self.assertTrue(hasattr(svc3, 'in_maintenance'))
         self.assertEqual(1, len(self.sched.downtimes))
         try:
             print(".........................................")
             print(self.sched.downtimes[1])
-            print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
-            print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
+            print("downtime starts", time.asctime(self.sched.downtimes[1].start_time))
+            print("downtime ends  ", time.asctime(self.sched.downtimes[1].end_time))
         except Exception:
             print("looks like there is no downtime")
             pass

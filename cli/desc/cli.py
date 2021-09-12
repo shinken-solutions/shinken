@@ -57,7 +57,7 @@ def do_desc(cls='host'):
     for k in prop_names:
         v = properties[k]
         if v.has_default:
-            print k, '(%s)' % v.default
+            print(k, '(%s)' % v.default)
         else:
             print(k)
 

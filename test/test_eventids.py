@@ -32,10 +32,10 @@ from shinken.objects.schedulingitem import SchedulingItem
 class TestConfig(ShinkenTest):
 
     def print_ids(self, host, svc, router):
-        print "global: cei,lei,cpi,lpi = %d,%d" % (SchedulingItem.current_event_id, SchedulingItem.current_problem_id)
-        print "service: cei,lei,cpi,lpi = %d,%d,%d,%d" % (svc.current_event_id, svc.last_event_id, svc.current_problem_id, svc.last_problem_id)
-        print "host:    cei,lei,cpi,lpi = %d,%d,%d,%d" % (host.current_event_id, host.last_event_id, host.current_problem_id, host.last_problem_id)
-        print "router:  cei,lei,cpi,lpi = %d,%d,%d,%d" % (router.current_event_id, router.last_event_id, router.current_problem_id, router.last_problem_id)
+        print("global: cei,lei,cpi,lpi = %d,%d" % (SchedulingItem.current_event_id, SchedulingItem.current_problem_id))
+        print("service: cei,lei,cpi,lpi = %d,%d,%d,%d" % (svc.current_event_id, svc.last_event_id, svc.current_problem_id, svc.last_problem_id))
+        print("host:    cei,lei,cpi,lpi = %d,%d,%d,%d" % (host.current_event_id, host.last_event_id, host.current_problem_id, host.last_problem_id))
+        print("router:  cei,lei,cpi,lpi = %d,%d,%d,%d" % (router.current_event_id, router.last_event_id, router.current_problem_id, router.last_problem_id))
 
     def test_global_counters(self):
         self.print_header()

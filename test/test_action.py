@@ -40,7 +40,7 @@ class TestAction(ShinkenTest):
         while True:
             # Do the job
             if a.status == 'launched':
-                #print a.process.poll()
+                #print(a.process.poll())
                 a.check_finished(size)
                 time.sleep(0.01)
             #print(a.status)
@@ -246,7 +246,7 @@ class TestAction(ShinkenTest):
         self.wait_finished(a, 10000000000)
         print("Status?", a.exit_status)
         self.assertEqual(0, a.exit_status)
-        print "Output", len(a.output)
+        print("Output", len(a.output))
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
         self.assertEqual("A"*100000, a.output)

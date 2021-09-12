@@ -139,7 +139,7 @@ def main(check_esx_path, vcenter, user, password, output, rules):
             res[host] = lst
 
     r = create_all_links(res, rules)
-    print "Created %d links" % len(r)
+    print("Created %d links" % len(r))
 
     write_output(r, output)
     print("Finished!")

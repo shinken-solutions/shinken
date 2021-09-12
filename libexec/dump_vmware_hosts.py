@@ -64,7 +64,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
     parts = output[0].split(':')
     if len(parts) == 1 or not '|' in parts[1]:
-        print "ERROR : there was an error with the esx3.pl command. Plase fix it : '%s'" % " ".join(parts)
+        print("ERROR : there was an error with the esx3.pl command. Plase fix it : '%s'" % " ".join(parts))
         sys.exit(2)
     hsts_raw = parts[1].split('|')[0]
     hsts_raw_lst = hsts_raw.split(',')
@@ -139,7 +139,7 @@ def main(check_esx_path, vcenter, user, password, output, rules, vm_only, esx_on
     hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
     if esx_only:
         write_output(hosts, output, rules)
-        print "Created %d hosts" % len(hosts)
+        print("Created %d hosts" % len(hosts))
         sys.exit(0)
 
     vms = []
@@ -149,7 +149,7 @@ def main(check_esx_path, vcenter, user, password, output, rules, vm_only, esx_on
             vms.extend(lst)
     write_output(vms, output, rules)
 
-    print "Created %d hosts" % len(vms)
+    print("Created %d hosts" % len(vms))
     print("Finished!")
 
 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
                       help="Dump only the ESX hosts")
     parser.add_option('--vm', default='', dest='vm_only', action='store_true',
                       help="Dump only the VM hosts")
-    
+
 
     opts, args = parser.parse_args()
     if args:

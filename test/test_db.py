@@ -44,8 +44,8 @@ class TestConfig(ShinkenTest):
         q = self.db.create_insert_query('instances', data)
         #print("Q", q)
         c = u"INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )"
-        print type(q), type(c)
-        print len(q), len(c)
+        print(type(q), type(c))
+        print(len(q), len(c))
 
         self.assertEqual(c, q)
 

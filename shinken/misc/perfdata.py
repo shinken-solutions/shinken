@@ -65,7 +65,7 @@ class Metric:
             # print('Name', self.name)
             # print("Value", self.value)
             # print("Res", r)
-            # print r.groups()
+            # print(r.groups())
             if self.uom == '%':
                 self.min = 0
                 self.max = 100

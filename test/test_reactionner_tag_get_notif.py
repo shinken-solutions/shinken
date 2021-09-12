@@ -50,7 +50,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
 
         to_del = []
         for a in self.sched.actions.values():
-            print "\n\nA?", a, "\nZZZ%sZZZ" % a.command
+            print("\n\nA?", a, "\nZZZ%sZZZ" % a.command)
             # Set them go NOW
             a.t_to_go = now
             # In fact they are already launched, so we-reenabled them :)
@@ -70,12 +70,12 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
                 print('TAG: %s' % a.reactionner_tag)
                 self.assertEqual('eventtag', a.reactionner_tag)
 
-        print "\n\n"
+        print("\n\n")
         for _i in to_del:
             print("DELETING", self.sched.actions[_i])
             del self.sched.actions[_i]
 
-        print "NOW ACTION!"*20,'\n\n'
+        print("NOW ACTION!"*20,'\n\n')
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones

@@ -74,7 +74,7 @@ class TestDowntime(ShinkenTest):
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
 
-        print "bad check was launched (SOFT;1), downtime must be active"
+        print("bad check was launched (SOFT;1), downtime must be active")
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
         self.assertIn(svc.downtimes[0], self.sched.downtimes.values())
@@ -86,7 +86,7 @@ class TestDowntime(ShinkenTest):
         # now the state changes to hard
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
 
-        print "bad check was launched (HARD;2), downtime must be active"
+        print("bad check was launched (HARD;2), downtime must be active")
         print(svc.downtimes[0])
         self.assertEqual(1, len(self.sched.downtimes))
         self.assertEqual(1, len(svc.downtimes))
@@ -265,15 +265,15 @@ class TestDowntime(ShinkenTest):
         self.assertEqual(host.comments[0].id, host.downtimes[0].comment_id)
         self.show_logs()
         self.show_actions()
-        print "*****************************************************************************************************************************************************************Log matching:", self.get_log_match("STARTED*")
+        print("*****************************************************************************************************************************************************************Log matching:", self.get_log_match("STARTED*"))
         self.show_actions()
         self.assertEqual(2, self.count_logs())    # start downt, notif downt
-        print self.count_actions() # notif" down is removed, so only donwtime
+        print(self.count_actions()) # notif" down is removed, so only donwtime
         self.assertEqual(1, self.count_actions())
         self.scheduler_loop(1, [], do_sleep=False)
         self.show_logs()
         self.show_actions()
-        
+
         self.assertEqual(2, self.count_logs())    # start downt, notif downt
         self.clear_logs()
         self.clear_actions()

@@ -651,7 +651,7 @@ class ExternalCommandManager:
 
         # print("Is global?", c_name, entry['global'])
         # print("Mode:", self.mode)
-        # print "This command have arguments:", entry['args'], len(entry['args'])
+        # print("This command have arguments:", entry['args'], len(entry['args']))
 
         args = []
         i = 1
@@ -1747,11 +1747,11 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(host)
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
-            
+
         data = {
             'host_name': host.get_name(),
             'start_time': start_time,
-            'end_time': end_time, 
+            'end_time': end_time,
             'fixed': fixed,
             'trigger_id': trigger_id,
             'duration': duration,
@@ -1807,12 +1807,12 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(service)
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
-            
+
         data = {
             'host_name': service.host_name,
             'service_description': service.service_description,
             'start_time': start_time,
-            'end_time': end_time, 
+            'end_time': end_time,
             'fixed': fixed,
             'trigger_id': trigger_id,
             'duration': duration,

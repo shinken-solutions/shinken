@@ -53,14 +53,14 @@ class TestComplexHostgroups(ShinkenTest):
         for h in hsts:
             svc = self.find_service(h.host_name, desc)
             if svc is None:
-                print "Error: the host %s is missing service %s!!" % (h.host_name, desc)
+                print("Error: the host %s is missing service %s!!" % (h.host_name, desc))
                 r = False
 
         for h in self.sched.hosts:
             if h not in hsts:
                 svc = self.find_service(h.host_name, desc)
                 if svc is not None:
-                    print "Error: the host %s got the service %s!!" % (h.host_name, desc)
+                    print("Error: the host %s got the service %s!!" % (h.host_name, desc))
                     r = False
         return r
 
@@ -83,14 +83,14 @@ class TestComplexHostgroups(ShinkenTest):
         hg_file = self.find_hostgroup('file')
         print("HG Linux", hg_linux)
         for h in hg_linux:
-            print "H", h.get_name()
+            print("H", h.get_name())
 
         self.assertIn(test_linux_web_prod_0, hg_linux.members)
         self.assertNotIn(test_linux_web_prod_0, hg_file.members)
 
         # First the service define for linux only
         svc = self.find_service('test_linux_web_prod_0', 'linux_0')
-        print "Service Linux only", svc.get_dbg_name()
+        print("Service Linux only", svc.get_dbg_name())
         r = self.srv_define_only_on('linux_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_linux_file_prod_0])
         self.assertEqual(True, r)
 
@@ -107,15 +107,15 @@ class TestComplexHostgroups(ShinkenTest):
         r = self.srv_define_only_on('linux_OR_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0])
         self.assertEqual(True, r)
 
-        print "(linux|web),file"
+        print("(linux|web),file")
         r = self.srv_define_only_on('linux_OR_web_PAR_file0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0, test_linux_file_prod_0])
         self.assertEqual(True, r)
 
-        print "(linux|web)&prod"
+        print("(linux|web)&prod")
         r = self.srv_define_only_on('linux_OR_web_PAR_AND_prod0', [test_linux_web_prod_0, test_win_web_prod_0, test_linux_file_prod_0])
         self.assertEqual(True, r)
 
-        print "(linux|web)&(*&!prod)"
+        print("(linux|web)&(*&!prod)")
         r = self.srv_define_only_on('linux_OR_web_PAR_AND_NOT_prod0', [test_linux_web_qual_0, test_win_web_qual_0])
         self.assertEqual(True, r)
 
@@ -123,11 +123,11 @@ class TestComplexHostgroups(ShinkenTest):
         r = self.srv_define_only_on('name-with-minus-in-it', [test_linux_web_prod_0])
         self.assertEqual(True, r)
 
-        print "(linux|web)&prod AND not test_linux_file_prod_0"
+        print("(linux|web)&prod AND not test_linux_file_prod_0")
         r = self.srv_define_only_on('linux_OR_web_PAR_AND_prod0_AND_NOT_test_linux_file_prod_0', [test_linux_web_prod_0, test_win_web_prod_0])
         self.assertEqual(True, r)
 
-        print "win&((linux|web)&prod) AND not test_linux_file_prod_0"
+        print("win&((linux|web)&prod) AND not test_linux_file_prod_0")
         r = self.srv_define_only_on('WINDOWS_AND_linux_OR_web_PAR_AND_prod0_AND_NOT_test_linux_file_prod_0', [test_win_web_prod_0])
         self.assertEqual(True, r)
 

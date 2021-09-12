@@ -82,7 +82,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
                      '-l', 'runtime', '-s', 'listhost']
 
     print("Got host list")
-    print ' '.join(list_host_cmd)
+    print(' '.join(list_host_cmd))
     p = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE)
     output = p.communicate()
 
@@ -112,7 +112,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
                    '-l', 'runtime', '-s', 'list']
-    print ' '.join(list_vm_cmd)
+    print(' '.join(list_vm_cmd))
     p = Popen(list_vm_cmd, stdout=PIPE)
     output = p.communicate()
 
@@ -145,15 +145,15 @@ def print_all_links(res, rules):
     r = []
     for host in res:
         host_name = _apply_rules(host, rules)
-        print "%s::esxhostname=%s" % (host_name, host_name)
+        print("%s::esxhostname=%s" % (host_name, host_name))
         print("%s::isesxhost=1" % host_name)
         for vm in res[host]:
             # First we apply rules on the names
             vm_name = _apply_rules(vm, rules)
             #v = (('host', host_name),('host', vm_name))
-            print "%s::vmname=%s" % (vm_name, vm_name)
+            print("%s::vmname=%s" % (vm_name, vm_name))
             print("%s::isesxvm=1" % vm_name)
-            print "%s::esxhost=%s" % (vm_name, host_name)
+            print("%s::esxhost=%s" % (vm_name, host_name))
             #r.append(v)
     return r
 

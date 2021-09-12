@@ -67,8 +67,8 @@ class TestDisableActiveChecks(ShinkenTest):
         print(host.output)
         self.assertEqual(last_output, host.output)
 
-        print len(host.get_checks_in_progress())
-        print host.is_in_checking()
+        print(len(host.get_checks_in_progress()))
+        print(host.is_in_checking())
         self.assertEqual(False, host.is_in_checking())
 
 

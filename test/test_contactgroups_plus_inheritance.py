@@ -32,16 +32,16 @@ class TestPlusInInheritance(ShinkenTest):
         self.setup_with_file('etc/shinken_contactgroups_plus_inheritance.cfg')
 
     def _dump(self, h):
-        print "Dumping host", h.get_name()
+        print("Dumping host", h.get_name())
         print(h.contact_groups)
         for c in h.contacts:
-            print "->",c.get_name()
-    
+            print("->",c.get_name())
+
     def _dump_svc(self,s):
-        print "Dumping Service", s.get_name()
+        print("Dumping Service", s.get_name())
         print("  contact_groups : %s " % s.contact_groups)
         for c in s.contacts:
-            print "->",c.get_name()
+            print("->",c.get_name())
 
     def test_contactgroups_plus_inheritance(self):
         host0 = self.sched.hosts.find_by_name("test_host_0")
@@ -70,7 +70,7 @@ class TestPlusInInheritance(ShinkenTest):
         self.assertIn("test_contact_1", [c .get_name() for c in host5.contacts])
         self.assertIn("test_contact_2", [c .get_name() for c in host5.contacts])
 
-        
+
         host6 = self.sched.hosts.find_by_name("test_host_6")
         self._dump(host6)
         self.assertIn("test_contact_1", [c .get_name() for c in host6.contacts])

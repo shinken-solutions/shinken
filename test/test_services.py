@@ -36,7 +36,7 @@ class TestService(ShinkenTest):
     # Look if get_*_name return the good result
     def test_get_name(self):
         svc = self.get_svc()
-        print svc.get_dbg_name()
+        print(svc.get_dbg_name())
         self.assertEqual('test_ok_0', svc.get_name())
         self.assertEqual('test_host_0/test_ok_0', svc.get_dbg_name())
 
@@ -56,8 +56,8 @@ class TestService(ShinkenTest):
         svc.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-            ## print getattr(svc_copy, p)
-            ## print getattr(svc, p)
+            ## print(getattr(svc_copy, p))
+            ## print(getattr(svc, p))
             self.assertEqual(getattr(svc, p), getattr(svc_copy, p) )
 
 
@@ -109,7 +109,7 @@ class TestService(ShinkenTest):
     def test_display_name(self):
         svc = self.get_svc()
         print('Display name', svc.display_name, 'toto')
-        print 'Full name', svc.get_full_name()
+        print('Full name', svc.get_full_name())
         self.assertEqual(u'test_ok_0', svc.display_name)
 
     def test_states_from_exit_status(self):

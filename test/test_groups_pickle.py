@@ -31,23 +31,23 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/shinken_groups_pickle.cfg')
 
     def test_dispatch(self):
-        
-        
+
+
         sub_confs = self.conf.confs
-        print "NB SUB CONFS", len(sub_confs)
-        
+        print("NB SUB CONFS", len(sub_confs))
+
         vcfg = None
         # Find where hr1 is
         for cfg in sub_confs.values():
             if 'HR1' in [h.get_name() for h in cfg.hosts]:
-                print 'FOUNCED', len(cfg.hosts)
+                print('FOUNCED', len(cfg.hosts))
                 vcfg = cfg
-                
+
 
         # Look ifthe hg in the conf is valid
         vhg = vcfg.hostgroups.find_by_name('everyone')
         self.assert_(len(vhg.members) == 1)
-        
+
         hr1 = [h for h in vcfg.hosts if h.get_name() == "HR1"][0]
         print(hr1.hostgroups)
         hg1 = None
@@ -56,7 +56,7 @@ class TestConfig(ShinkenTest):
                 hg1 = hg
 
 
-                
+
         print("Founded hostgroup", hg1)
         print('There should be only one host there')
         self.assert_(len(hg1.members) == 1)

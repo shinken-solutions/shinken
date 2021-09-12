@@ -688,7 +688,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
         self.triggers.extend([self.trigger_name])
-        # print "I am linking my triggers", self.get_full_name(), self.triggers
+        # print("I am linking my triggers", self.get_full_name(), self.triggers)
         new_triggers = []
         for tname in self.triggers:
             if tname == '':
@@ -1403,11 +1403,11 @@ class Items(object):
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
-        # print "\n"*10, "looking for expression", expr
+        # print("\n"*10, "looking for expression", expr)
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        # print "\n"*10, "looking for expression", expr
+        # print("\n"*10, "looking for expression", expr)
         if look_in == 'hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
         else:  # templates

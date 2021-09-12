@@ -2016,7 +2016,7 @@ class FapwsServer(ServerAdapter):
         # fapws3 never releases the GIL. Complain upstream. I tried. No luck.
         if 'BOTTLE_CHILD' in os.environ and not self.quiet:
             print("WARNING: Auto-reloading does not work with Fapws3.")
-            print "         (Fapws3 breaks python thread support)"
+            print("         (Fapws3 breaks python thread support)")
         evwsgi.set_base_module(base)
 
         def app(environ, start_response):
@@ -2244,8 +2244,8 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         raise RuntimeError("Server must be a subclass of ServerAdapter")
     server.quiet = server.quiet or quiet
     if not server.quiet and not os.environ.get('BOTTLE_CHILD'):
-        print "Bottle server starting up (using %s)..." % repr(server)
-        print "Listening on http://%s:%d/" % (server.host, server.port)
+        print("Bottle server starting up (using %s)..." % repr(server))
+        print("Listening on http://%s:%d/" % (server.host, server.port))
         print("Use Ctrl-C to quit.")
         print
     try:

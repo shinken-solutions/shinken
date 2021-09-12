@@ -273,7 +273,7 @@ class DictProp(Property):
             return val
         
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
-        print ">>>", dict([split(kv) for kv in to_split(val)])
+        print(">>>", dict([split(kv) for kv in to_split(val)]))
         return dict([split(kv) for kv in to_split(val)])
 
 

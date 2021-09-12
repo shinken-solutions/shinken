@@ -198,7 +198,7 @@ class TestNotif(ShinkenTest):
         # 1 notification was sent, so current_notification_number is 1
         #-----------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=1)
-        print "Counted actions", self.count_actions()
+        print("Counted actions", self.count_actions())
         self.assertEqual(2, self.count_actions())
         # 1 master, 1 child
         self.assertEqual(1, svc.current_notification_number)

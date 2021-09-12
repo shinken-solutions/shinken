@@ -91,7 +91,7 @@ class TestPollerTagGetchecks(ShinkenTest):
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
         print("Got untaggued_checks for forks", untaggued_checks)
         self.assertGreater(len(untaggued_checks), 0)
-        print "NB CHECKS", len(untaggued_checks)
+        print("NB CHECKS", len(untaggued_checks))
         for c in untaggued_checks:
             print(c.command)
             # Should be the service one, but not the host one

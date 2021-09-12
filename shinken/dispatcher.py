@@ -118,7 +118,7 @@ class Dispatcher:
     # checks alive elements
     def check_alive(self):
         for elt in self.elements:
-            # print "Updating elements", elt.get_name(), elt.__dict__
+            # print("Updating elements", elt.get_name(), elt.__dict__)
             elt.update_infos()
 
             # Not alive needs new need_conf
@@ -131,7 +131,7 @@ class Dispatcher:
             # If not me, but not the master too
             if arb != self.arbiter and arb.spare:
                 arb.update_infos()
-                # print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
+                # print("Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__)
 
 
     # Check if all active items are still alive
@@ -258,7 +258,7 @@ class Dispatcher:
                 # If element has a conf, I do not care, it's a good dispatch
                 # If dead: I do not ask it something, it won't respond..
                 if elt.conf is None and elt.reachable:
-                    # print "Ask", elt.get_name() , 'if it got conf'
+                    # print("Ask", elt.get_name() , 'if it got conf')
                     if elt.have_conf():
                         logger.warning("The element %s have a conf and should "
                                        "not have one! I ask it to idle now",
@@ -281,7 +281,7 @@ class Dispatcher:
                 if len(cfg_ids) != 0:
                     id_to_delete = []
                     for cfg_id in cfg_ids:
-                        # DBG print kind, ":", satellite.get_name(), "manage cfg id:", cfg_id
+                        # DBG print(kind, ":", satellite.get_name(), "manage cfg id:", cfg_id)
                         # Ok, we search for realms that have the conf
                         for r in self.realms:
                             if cfg_id in r.confs:
@@ -471,7 +471,7 @@ class Dispatcher:
             if self.dispatch_ok:
                 for sched in self.schedulers.items.values():
                     if sched.conf is None:
-                        # print "Tagging sched", sched.get_name(),
+                        # print("Tagging sched", sched.get_name(),)
                         # "so it do not ask anymore for conf"
                         sched.need_conf = False
 

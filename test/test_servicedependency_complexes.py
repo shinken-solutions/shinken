@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
         # in the main config file
         #
         for s in self.sched.services:
-            print s.get_full_name()
+            print(s.get_full_name())
         NRPE = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "NRPE")
         self.assertIsNot(NRPE, None)
         Load = self.sched.services.find_srv_by_name_and_hostname("myspecifichost", "Load")

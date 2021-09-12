@@ -74,5 +74,5 @@ if __name__ == '__main__':
     t = time.time()
     for i in xrange(1, 300):
         load.update_load(1)
-        print '[', int(time.time() - t), ']', load.get_load(), load.exp
+        print('[', int(time.time() - t), ']', load.get_load(), load.exp)
         time.sleep(5)

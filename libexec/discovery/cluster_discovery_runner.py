@@ -2,7 +2,7 @@
 # Copyright (C) 2009-2012:
 #    Camille, VACQUIE
 #    Romain, FORLOT, romain.forlot@sydel.fr
-# 
+#
 # This file is part of Shinken.
 #
 # Shinken is free software: you can redistribute it and/or modify
@@ -104,7 +104,7 @@ oid_hacmp_clusterName = ".1.3.6.1.4.1.2.3.1.2.1.5.1.2"
 
 ##############
 #  functions #
-############## 
+##############
 
 ### Search for cluster solution, between safekit or hacmp, presents on the target
 def get_cluster_discovery(oid):
@@ -119,10 +119,10 @@ def get_cluster_discovery_output(list):
     if list :
         for elt in list:
             names.append(elt)
-        print "%s::%s=1"%(hostname, clSolution)# To add tag
-        print "%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# Host macros by Safekit modules
-    else : 
-        print "%s::%s=0"%(hostname, clSolution)# No cluster detected
+        print("%s::%s=1"%(hostname, clSolution)# To add tag)
+        print("%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# Host macros by Safekit modules)
+    else :
+        print("%s::%s=0"%(hostname, clSolution)# No cluster detected)
 
 ###############
 #  execution  #

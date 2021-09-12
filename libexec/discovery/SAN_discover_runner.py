@@ -153,7 +153,7 @@ def get_controllers_ip(san_profile, keep_on_same_network=False):
 def get_discovery_output(sanname, ctrlIP):
     i = 1
     for ip in ctrlIP:
-        print '%s::_ctrl%d=%s'%(sanname, i, ip)
+        print('%s::_ctrl%d=%s'%(sanname, i, ip))
         i += 1
 
 ###############

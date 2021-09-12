@@ -35,7 +35,7 @@ class TestHost(ShinkenTest):
     # Look if get_*_name return the good result
     def test_get_name(self):
         hst = self.get_hst()
-        print hst.get_dbg_name()
+        print(hst.get_dbg_name())
         self.assertEqual('test_host_0', hst.get_name())
         self.assertEqual('test_host_0', hst.get_dbg_name())
 
@@ -55,8 +55,8 @@ class TestHost(ShinkenTest):
         hst.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-            ## print getattr(hst_copy, p)
-            ## print getattr(hst, p)
+            ## print(getattr(hst_copy, p))
+            ## print(getattr(hst, p))
             self.assertEqual(getattr(hst, p), getattr(hst_copy, p) )
 
 

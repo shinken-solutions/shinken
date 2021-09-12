@@ -40,10 +40,10 @@ class TestHostDepWithMultipleNames(ShinkenTest):
         # Now the more complex one
         for son in [svn1, svn2, svn3]:
             for father in [nas1, nas2]:
-                print 'Checking if', father.get_name(), 'is the father of', son.get_name()
+                print('Checking if', father.get_name(), 'is the father of', son.get_name())
                 print(son.act_depend_of)
                 for e in son.act_depend_of:
-                    print e[0].get_name()
+                    print(e[0].get_name())
                 self.assertIn(father, [e[0] for e in son.act_depend_of])
 
 if __name__ == '__main__':

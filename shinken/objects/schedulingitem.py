@@ -317,7 +317,7 @@ class SchedulingItem(Item):
             now = time.time()
             period = cm.modulation_period
             if period is None or period.is_time_valid(now):
-                # print "My self", self.get_name(), "go from crit",
+                # print("My self", self.get_name(), "go from crit",)
                 # self.business_impact, "to crit", cm.business_impact
                 self.business_impact = cm.business_impact
                 in_modulation = True
@@ -1129,7 +1129,7 @@ class SchedulingItem(Item):
 
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
-            # print "Case 1 (OK following a previous OK):
+            # print("Case 1 (OK following a previous OK):)
             # code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
             # action in return can be notification or other checks (dependencies)
@@ -1145,7 +1145,7 @@ class SchedulingItem(Item):
         # OK following a NON-OK.
         elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
-            # print "Case 2 (OK following a NON-OK):
+            # print("Case 2 (OK following a NON-OK):)
             #  code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
@@ -1177,7 +1177,7 @@ class SchedulingItem(Item):
         # Volatile part
         # Only for service
         elif c.exit_status != 0 and getattr(self, 'is_volatile', False):
-            # print "Case 3 (volatile only)"
+            # print("Case 3 (volatile only)")
             # There are no repeated attempts, so the first non-ok results
             # in a hard state
             self.attempt = 1
@@ -1231,7 +1231,7 @@ class SchedulingItem(Item):
         # check at self.max_check_attempts
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
-            # print "Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" %
+            # print("Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" %)
             # (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
                 if not c.is_dependent():
@@ -1677,7 +1677,7 @@ class SchedulingItem(Item):
                       dependency_check=True)
 
             self.actions.append(c)
-            # print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
+            # print("Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id))
             return c.id
 
         if force or check_variant != self.default_check_variant or \
@@ -1953,11 +1953,11 @@ class SchedulingItem(Item):
     # elements I will depend on, so They will have ME as an impact
     def create_business_rules_dependencies(self):
         if self.got_business_rule:
-            # print "DBG: ask me to register me in my dependencies", self.get_name()
+            # print("DBG: ask me to register me in my dependencies", self.get_name())
             elts = self.business_rule.list_all_elements()
             # I will register myself in this
             for e in elts:
-                # print "I register to the element", e.get_name()
+                # print("I register to the element", e.get_name())
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
                 # Enforces child hosts/services notification options if told to

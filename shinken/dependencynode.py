@@ -87,7 +87,7 @@ class DependencyNode(object):
     # calculation is needed
     def get_simple_node_state(self):
         state = self.sons[0].last_hard_state_id
-        # print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
+        # print("Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name()))
         # Make DOWN look as CRITICAL (2 instead of 1)
         if self.operand == 'host' and state == 1:
             state = 2
@@ -304,7 +304,7 @@ class DependencyNodeFactory(object):
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:
-            # print "Match the of: thing N=", m.groups()
+            # print("Match the of: thing N=", m.groups())
             node.operand = 'of:'
             g = m.groups()
             # We can have a Aof: rule, or a multiple A,B,Cof: rule.

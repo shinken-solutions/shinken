@@ -77,7 +77,7 @@ p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
-    print "Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata)
+    print("Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata))
     raise SystemExit(2)
 
 disks = []
@@ -100,8 +100,8 @@ for line in stdoutdata.splitlines():
 
 if len(disks) > 0:
     print("%s::shares_detected=1" % hostname)
-    print "%s::_shares=%s" % (hostname, ','.join(disks))
+    print("%s::_shares=%s" % (hostname, ','.join(disks)))
 
 if len(printers) > 0:
     print("%s::printers_detected=1" % hostname)
-    print "%s::_printers=%s" % (hostname, ','.join(printers))
+    print("%s::_printers=%s" % (hostname, ','.join(printers)))

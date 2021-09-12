@@ -72,12 +72,12 @@ msg = msg.replace('\\n', '\n')
 c = xmpp.Client(server=server, port=port, debug=[])
 con  = c.connect()
 if not con:
-    print "Error: could not connect to server: %s:%s" % (c.Server, c.Port)
+    print("Error: could not connect to server: %s:%s" % (c.Server, c.Port))
     sys.exit(1)
 
 auth = c.auth(user=username, password=password, resource=resource)
 if not auth:
-    print "Error: Could not authenticate to server: %s:%s" % (c.Server, c.Port)
+    print("Error: Could not authenticate to server: %s:%s" % (c.Server, c.Port))
     sys.exit(1)
 
 if len(args) < 2:

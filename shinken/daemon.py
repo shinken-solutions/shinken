@@ -1006,7 +1006,7 @@ class Daemon(object):
                     # print("DBG: changing", entry, "from", path, "to", new_path)
                     path = new_path
                 setattr(self, prop, path)
-                # print "Setting %s for %s" % (path, prop)
+                # print("Setting %s for %s" % (path, prop))
 
 
     def manage_signal(self, sig, frame):

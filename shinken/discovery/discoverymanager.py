@@ -140,7 +140,7 @@ class DiscoveredHost(object):
                     # checks that prop does not already exist and adds
                     if prop not in d[kprop]:
                         if len(d[kprop]) > 0:
-                            print 'Already got', ','.join(d[kprop]), 'add', prop
+                            print('Already got', ','.join(d[kprop]), 'add', prop)
                         else:
                             print('Add', prop)
                         d[kprop].append(prop)
@@ -153,7 +153,7 @@ class DiscoveredHost(object):
                         for prop in string.split(v, ','):
                             prop = prop.strip()
                             if prop in d[kprop]:
-                                print 'Already got', ','.join(d[kprop]), 'rem', prop
+                                print('Already got', ','.join(d[kprop]), 'rem', prop)
                                 d[kprop].remove(prop)
 
         # Change join prop list in string with a ',' separator
@@ -186,14 +186,14 @@ class DiscoveredHost(object):
         for r in self.runners:
             # If we already launched it, we don't want it :)
             if r in self.launched_runners:
-                print 'Sorry', r.get_name(), 'was already launched'
+                print('Sorry', r.get_name(), 'was already launched')
                 continue
             # First level discovery are for large scan, so not for here
             if r.is_first_level():
-                print 'Sorry', r.get_name(), 'is first level'
+                print('Sorry', r.get_name(), 'is first level')
                 continue
             # And of course it must match our data
-            print 'Is ', r.get_name(), 'matching??', r.is_matching_disco_datas(self.properties)
+            print('Is ', r.get_name(), 'matching??', r.is_matching_disco_datas(self.properties))
             if r.is_matching_disco_datas(self.properties):
                 self.in_progress_runners.append(r)
 
@@ -210,9 +210,9 @@ class DiscoveredHost(object):
         for r in self.rules:
             # If the rule was already successfully for this host, skip it
             if r in self.matched_rules:
-                print 'We already apply the rule', r.get_name(), 'for the host', self.name
+                print('We already apply the rule', r.get_name(), 'for the host', self.name)
                 continue
-            print 'Looking for match with a new rule', r.get_name(), 'for the host', self.name
+            print('Looking for match with a new rule', r.get_name(), 'for the host', self.name)
             if r.is_matching_disco_datas(self.data):
                 self.matched_rules.append(r)
                 print("Generating a new rule", self.name, r.writing_properties)
@@ -249,7 +249,7 @@ class DiscoveredHost(object):
                     print('Bad data for me? I bail out data!')
                     data = ''
                 else:
-                    print 'Bad data for me? Let\'s switch !'
+                    print('Bad data for me? Let\'s switch !')
                     self.name = name
 
             # Now get key,values
@@ -268,7 +268,7 @@ class DiscoveredHost(object):
 
     def launch_runners(self):
         for r in self.in_progress_runners:
-            print "I", self.name, " is launching", r.get_name(), "with a %d seconds timeout" % 3600
+            print("I", self.name, " is launching", r.get_name(), "with a %d seconds timeout" % 3600)
             r.launch(timeout=3600, ctx=[self])
             self.launched_runners.append(r)
 
@@ -280,11 +280,11 @@ class DiscoveredHost(object):
             all_ok = True
             for r in self.in_progress_runners:
                 if not r.is_finished():
-                    # print "Check finished of", r.get_name()
+                    # print("Check finished of", r.get_name())
                     r.check_finished()
                 b = r.is_finished()
                 if not b:
-                    # print r.get_name(), "is not finished"
+                    # print(r.get_name(), "is not finished")
                     all_ok = False
             time.sleep(0.1)
 
@@ -393,7 +393,7 @@ class DiscoveryManager:
                     database = mod.database
                     self.dbconnection = Connection(uri)
                     self.db = getattr(self.dbconnection, database)
-                    print "Connection to Mongodb:%s:%s is OK" % (uri, database)
+                    print("Connection to Mongodb:%s:%s is OK" % (uri, database))
                 except Exception as exp:
                     logger.error('Database init : %s', exp)
 
@@ -406,7 +406,7 @@ class DiscoveryManager:
         print("Doing backend init")
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.backend:
-                print "We found our backend", mod.get_name()
+                print("We found our backend", mod.get_name())
                 self.backend = mod
         if not self.backend:
             print("ERROR : cannot find the module %s" % self.backend)
@@ -424,7 +424,7 @@ class DiscoveryManager:
         i = 0
         while still_loop:
             i += 1
-            print '\n'
+            print('\n')
             print('LOOP' * 10, i)
             still_loop = False
             for (name, dh) in self.disco_data.iteritems():
@@ -492,7 +492,7 @@ class DiscoveryManager:
             for r in self.discoveryrules:
                 # If the rule was already successfully for this host, skip it
                 if r in dh.matched_rules:
-                    print 'We already apply the rule', r.get_name(), 'for the host', name
+                    print('We already apply the rule', r.get_name(), 'for the host', name)
                     continue
                 if r.is_matching_disco_datas(dh.data):
                     dh.matched_rules.append(r)
@@ -534,7 +534,7 @@ class DiscoveryManager:
             return
 
         for r in allowed_runners:
-            print "I'm launching %s with a %d seconds timeout" % \
+            print("I'm launching %s with a %d seconds timeout" % \)
                   (r.get_name(), self.conf.runners_timeout)
             r.launch(timeout=self.conf.runners_timeout)
 
@@ -546,11 +546,11 @@ class DiscoveryManager:
             all_ok = True
             for r in self.allowed_runners():
                 if not r.is_finished():
-                    #print "Check finished of", r.get_name()
+                    #print("Check finished of", r.get_name())
                     r.check_finished()
                 b = r.is_finished()
                 if not b:
-                    #print r.get_name(), "is not finished"
+                    #print(r.get_name(), "is not finished")
                     all_ok = False
             '''
             all_ok = self.is_all_ok()
@@ -561,11 +561,11 @@ class DiscoveryManager:
         all_ok = True
         for r in self.allowed_runners():
             if not r.is_finished():
-                # print "Check finished of", r.get_name()
+                # print("Check finished of", r.get_name())
                 r.check_finished()
             b = r.is_finished()
             if not b:
-                # print r.get_name(), "is not finished"
+                # print(r.get_name(), "is not finished")
                 all_ok = False
         return all_ok
 
@@ -665,7 +665,7 @@ class DiscoveryManager:
         except OSError as exp:
             # If directory already exist, it's not a problem
             if not exp.errno != '17':
-                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                print("Cannot create the directory '%s' : '%s'" % (p, exp))
                 return
         cfg_p = os.path.join(p, host + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
@@ -680,7 +680,7 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError as exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print("Cannot create the file '%s' : '%s'" % (cfg_p, exp))
             return
 
 
@@ -734,7 +734,7 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError as exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print("Cannot create the file '%s' : '%s'" % (cfg_p, exp))
             return
 
 
@@ -761,7 +761,7 @@ class DiscoveryManager:
         cur = table.find({'host_name': host})
         exists = cur.count() > 0
         if exists and not self.overwrite:
-            print "The host '%s' already exists in the database table %s" % (host, table)
+            print("The host '%s' already exists in the database table %s" % (host, table))
             return
 
         # It can be the same check if db_direct_insert but whatever

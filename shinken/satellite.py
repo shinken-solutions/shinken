@@ -173,7 +173,7 @@ class ISchedulers(Interface):
     def get_returns(self, sched_id):
         # print("A scheduler ask me the returns", sched_id)
         ret = self.app.get_return_for_passive(int(sched_id))
-        # print "Send mack", len(ret), "returns"
+        # print("Send mack", len(ret), "returns")
         return cPickle.dumps(ret)
     get_returns.doc = doc
 

@@ -110,7 +110,7 @@ if __name__ == '__main__':
                     print("problem opening the mongodb", e)
                     time.sleep(5)
                     conv.mod_mongodb.db[conv.mod_mongodb.collection].insert(values)
-            print "wrote %d records" % len(dbresult)
+            print("wrote %d records" % len(dbresult))
 
         except LiveStatusLogStoreError as e:
             print("An error occurred:", e.args[0])

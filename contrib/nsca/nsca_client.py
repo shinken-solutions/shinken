@@ -146,7 +146,7 @@ class NSCA_client():
             "!hhIIh64s128s512sh",
             version, pad1, crc32, timestamp, rc, hostname_dirty,
             service_dirty, output_dirty, pad2)
-        print "Create packent len", len(init_packet)
+        print("Create packent len", len(init_packet))
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty,
         # output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 

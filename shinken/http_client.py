@@ -140,7 +140,7 @@ class HTTPClient(object):
         else:
             # Manage special return of pycurl
             ret = json.loads(response.getvalue().replace('\\/', '/'))
-            # print "GOT RAW RESULT", ret, type(ret)
+            # print("GOT RAW RESULT", ret, type(ret))
             return ret
 
 

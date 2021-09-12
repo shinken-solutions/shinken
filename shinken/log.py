@@ -85,7 +85,7 @@ class ColorStreamHandler(StreamHandler):
                       'WARNING': 'yellow', 'CRITICAL': 'magenta', 'ERROR': 'red'}
             cprint(msg, colors[record.levelname])
         except UnicodeEncodeError:
-            print msg.encode('ascii', 'ignore')
+            print(msg.encode('ascii', 'ignore'))
         except Exception:
             self.handleError(record)
 

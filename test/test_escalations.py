@@ -367,7 +367,7 @@ class TestEscalations(ShinkenTest):
         # to level2 is asking for it. If it don't, the standard was 1 day!
         for n in svc.notifications_in_progress.values():
             next = svc.get_next_notification_time(n)
-            print abs(next - now)
+            print(abs(next - now))
             # Check if we find the next notification for the next hour,
             # and not for the next day like we ask before
             self.assertLess(abs(next - now - 3600), 10)
@@ -431,7 +431,7 @@ class TestEscalations(ShinkenTest):
         print(svc.notifications_in_progress)
         # Should be far away
         for n in svc.notifications_in_progress.values():
-            print n, n.t_to_go, time.time(), n.t_to_go - time.time()
+            print(n, n.t_to_go, time.time(), n.t_to_go - time.time())
             # Should be "near" one day now, so 84000s
             self.assertLess(8300 < abs(n.t_to_go - time.time()), 85000)
         # And so no notification
@@ -553,15 +553,15 @@ class TestEscalations(ShinkenTest):
         # We check that we really raise the notif number too
         self.assertGreater(svc.current_notification_number, cnn)
         cnn = svc.current_notification_number
-        
+
         # Ok we should have one notification
         next_notifications = svc.notifications_in_progress.values()
-        print "LEN", len(next_notifications)
+        print("LEN", len(next_notifications))
         for n in next_notifications:
             print(n)
         self.assertEqual(1, len(next_notifications))
         n = next_notifications.pop()
-        print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
+        print("Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations)
         # Should be in the escalation ToLevel2-shortinterval
         self.assertIn('ToLevel2-shortinterval', n.already_start_escalations)
 
@@ -591,7 +591,7 @@ class TestEscalations(ShinkenTest):
         next_notifications = svc.notifications_in_progress.values()
         self.assertEqual(1, len(next_notifications))
         n = next_notifications.pop()
-        print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
+        print("Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations)
         # Should be in the escalation ToLevel2-shortinterval
         self.assertIn('ToLevel2-shortinterval', n.already_start_escalations)
         self.assertIn('ToLevel3-shortinterval', n.already_start_escalations)
@@ -602,7 +602,7 @@ class TestEscalations(ShinkenTest):
         self.assert_any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;')
         self.show_and_clear_logs()
 
-        print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
+        print("Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations)
 
         # Now way a little bit, and with such low value, the escalation3 value must be ok for this test to pass
         time.sleep(5)

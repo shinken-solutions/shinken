@@ -45,12 +45,12 @@ class TestRegenerator(ShinkenTest):
             self.assertEqual(orig_h.state_type, h.state_type)
             # Look for same impacts
             for i in h.impacts:
-                print "Got impact", i.get_name()
+                print("Got impact", i.get_name())
                 same_impacts = i.get_name() in [j.get_name() for j in orig_h.impacts]
                 self.assertTrue(same_impacts)
             # And look for same source problems
             for i in h.source_problems:
-                print "Got source pb", i.get_name()
+                print("Got source pb", i.get_name())
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
                 self.assertTrue(same_pbs)
 
@@ -62,12 +62,12 @@ class TestRegenerator(ShinkenTest):
             self.assertEqual(orig_s.state_type, s.state_type)
             # Look for same impacts too
             for i in s.impacts:
-                print "Got impact", i.get_name()
+                print("Got impact", i.get_name())
                 same_impacts = i.get_name() in [j.get_name() for j in orig_s.impacts]
                 self.assertTrue(same_impacts)
             # And look for same source problems
             for i in s.source_problems:
-                print "Got source pb", i.get_name()
+                print("Got source pb", i.get_name())
                 same_pbs = i.get_name() in [j.get_name() for j in orig_s.source_problems]
                 self.assertTrue(same_pbs)
             # Look for same host
@@ -92,7 +92,7 @@ class TestRegenerator(ShinkenTest):
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
-        print 'First inc', t1 - t0, len(self.sched.broks)
+        print('First inc', t1 - t0, len(self.sched.broks))
         del self.sched.broks[:]
 
         self.look_for_same_values()
@@ -158,13 +158,13 @@ class TestRegenerator(ShinkenTest):
 
         print("Times")
         for (k, v) in times.iteritems():
-            print "\t%s: %s" % (k, v)
-        print "\n\n"
+            print("\t%s: %s" % (k, v))
+        print("\n\n")
         print("Sizes")
         for (k, v) in sizes.iteritems():
-            print "\t%s: %s" % (k, v)
-        print "\n"
-        print "total time", time.time() - start
+            print("\t%s: %s" % (k, v))
+        print("\n")
+        print("total time", time.time() - start)
 
     def test_regenerator_load_from_scheduler(self):
         #
@@ -187,7 +187,7 @@ class TestRegenerator(ShinkenTest):
             b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
-        print 'First inc', t1 - t0, len(self.sched.broks)
+        print('First inc', t1 - t0, len(self.sched.broks))
         del self.sched.broks[:]
 
         self.look_for_same_values()

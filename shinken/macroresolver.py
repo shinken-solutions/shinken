@@ -259,7 +259,7 @@ class MacroResolver(Borg):
         # We now replace the big dirty token we made by only a simple $
         c_line = c_line.replace("DOUBLEDOLLAR", "$")
 
-        # print "Retuning c_line", c_line.strip()
+        # print("Retuning c_line", c_line.strip())
         return c_line.strip()
 
     # Resolve a command with macro by looking at data classes.macros
@@ -321,7 +321,7 @@ class MacroResolver(Borg):
 
     # Resolve on-demand macro, quite hard in fact
     def _resolve_ondemand(self, macro, data):
-        # print "\nResolving macro", macro
+        # print("\nResolving macro", macro)
         elts = macro.split(':')
         nb_parts = len(elts)
         macro_name = elts[0]

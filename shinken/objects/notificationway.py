@@ -257,6 +257,6 @@ class NotificationWays(Items):
         if name is None:
             name = NotificationWay.id
         params['notificationway_name'] = name
-        # print "Asking a new inner notificationway from name %s with params %s" % (name, params)
+        # print("Asking a new inner notificationway from name %s with params %s" % (name, params))
         nw = NotificationWay(params)
         self.add_item(nw)

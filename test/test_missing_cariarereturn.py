@@ -40,7 +40,7 @@ class TestConfig(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST")
         self.assertIsNot(svc, None)
         self.assertGreaterEqual(len(svc.get_checks_in_progress()), 1)
-        print svc.get_checks_in_progress()[0].command
+        print(svc.get_checks_in_progress()[0].command)
         self.assertEqual('plugins/nothing BLABLA', svc.get_checks_in_progress()[0].command)
 
 

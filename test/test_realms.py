@@ -84,12 +84,12 @@ class TestRealms(ShinkenTest):
     def test_realm_stripping_before_sending(self):
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
         self.assertIsNot(test_host_realm1, None)
-        print type(test_host_realm1.realm)
+        print(type(test_host_realm1.realm))
         self.assertTrue(isinstance(test_host_realm1.realm, basestring))
 
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         self.assertIsNot(in_realm2, None)
-        print type(in_realm2.realm)
+        print(type(in_realm2.realm))
         self.assertTrue(isinstance(in_realm2.realm, basestring))
 
 

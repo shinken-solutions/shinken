@@ -149,4 +149,4 @@ def unix_md5_crypt(pw, salt, magic=None):
 md5crypt = unix_md5_crypt
 
 if __name__ == "__main__":
-    print unix_md5_crypt("cat", "hat")
+    print(unix_md5_crypt("cat", "hat"))

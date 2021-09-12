@@ -71,9 +71,9 @@ class TestEndParsingType(unittest.TestCase):
             return str
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def add(self, b):
         if isinstance(b, Brok):

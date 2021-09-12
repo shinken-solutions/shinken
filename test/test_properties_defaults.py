@@ -60,7 +60,7 @@ class PropertiesTester(object):
                           msg='property %r not found in %s' % (name, self.item.my_type))
             if hasattr(item.properties[name], 'default'):
                 if item.properties[name].default != value:
-                    print "%s, %s: %s, %s" % (name, value, item.properties[name].default, value)
+                    print("%s, %s: %s, %s" % (name, value, item.properties[name].default, value))
                 self.assertEqual(item.properties[name].default, value)
 
     def test_all_props_are_tested(self):

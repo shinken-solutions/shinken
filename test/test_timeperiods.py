@@ -69,7 +69,7 @@ class TestTimeperiods(ShinkenTest):
         self.assertIs(None, t_next)
 
         # Then a simple same day
-        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
+        print("Cheking validity for", time.asctime(time.localtime(july_the_12)))
         t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
@@ -109,7 +109,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         # monday          00:00-07:00,21:30-24:00
         # tuesday         00:00-07:00,21:30-24:00
-        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
+        print("Cheking validity for", time.asctime(time.localtime(july_the_12)))
         t.resolve_daterange(t.dateranges, 'monday 00:00-07:00,21:30-24:00')
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
@@ -126,12 +126,12 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 22:00:00", "%d %b %Y %H:%M:%S"))
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print "RES:", t_next_inv #, t.is_time_valid(july_the_12)
+        print("RES:", t_next_inv #, t.is_time_valid(july_the_12))
         self.assertEqual("Tue Jul 13 07:01:00 2010", t_next_inv)
 
         # Now ask about at 00:00 time?
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 00:00:00", "%d %b %Y %H:%M:%S"))
-        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
+        print("Cheking validity for", time.asctime(time.localtime(july_the_12)))
         # Then a simple same day
         t = Timeperiod()
         t.timeperiod_name = ''
@@ -148,7 +148,7 @@ class TestTimeperiods(ShinkenTest):
         self.assertIsNot(t, None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print "RES:", t_next_inv #, t.is_time_valid(july_the_12)
+        print("RES:", t_next_inv #, t.is_time_valid(july_the_12))
         self.assertEqual('Wed Jul 13 00:01:00 2011', t_next_inv)
 
     def test_simple_timeperiod_with_exclude(self):
@@ -250,14 +250,14 @@ class TestTimeperiods(ShinkenTest):
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
-        #print "Check from", time.asctime(time.localtime(july_the_12))
+        #print("Check from", time.asctime(time.localtime(july_the_12)))
         #t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
-        #print "T2 next valid", time.asctime(time.localtime(t_exclude))
-        print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
+        #print("T2 next valid", time.asctime(time.localtime(t_exclude)))
+        print("Next invalid T2", time.asctime(time.localtime(t_exclude_inv)))
 
         print("T next raw JEAN", t_next)
-        print "T next?", time.asctime(time.localtime(t_next))
+        print("T next?", time.asctime(time.localtime(t_next)))
         t_next = time.asctime(time.localtime(t_next))
 
         self.assertEqual('Tue Sep 14 16:30:00 2010', t_next)
@@ -291,14 +291,14 @@ class TestTimeperiods(ShinkenTest):
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
-        #print "Check from", time.asctime(time.localtime(july_the_12))
+        #print("Check from", time.asctime(time.localtime(july_the_12)))
         #t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
-        #print "T2 next valid", time.asctime(time.localtime(t_exclude))
-        print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
+        #print("T2 next valid", time.asctime(time.localtime(t_exclude)))
+        print("Next invalid T2", time.asctime(time.localtime(t_exclude_inv)))
 
         print("T next raw JEAN2", t_next)
-        print "T next?", time.asctime(time.localtime(t_next))
+        print("T next?", time.asctime(time.localtime(t_next)))
         t_next = time.asctime(time.localtime(t_next))
 
         self.assertEqual('Tue Aug 31 16:30:00 2010', t_next)
@@ -338,14 +338,14 @@ class TestTimeperiods(ShinkenTest):
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
-        #print "Check from", time.asctime(time.localtime(july_the_12))
+        #print("Check from", time.asctime(time.localtime(july_the_12)))
         #t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
-        #print "T2 next valid", time.asctime(time.localtime(t_exclude))
-        print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
+        #print("T2 next valid", time.asctime(time.localtime(t_exclude)))
+        print("Next invalid T2", time.asctime(time.localtime(t_exclude_inv)))
 
         print("T next raw", t_next)
-        print "T next?", time.asctime(time.localtime(t_next))
+        print("T next?", time.asctime(time.localtime(t_next)))
         t_next = time.asctime(time.localtime(t_next))
 
         self.assertEqual('Tue Oct 26 16:30:00 2010', t_next)
@@ -379,14 +379,14 @@ class TestTimeperiods(ShinkenTest):
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
-        #print "Check from", time.asctime(time.localtime(july_the_12))
+        #print("Check from", time.asctime(time.localtime(july_the_12)))
         #t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
-        #print "T2 next valid", time.asctime(time.localtime(t_exclude))
-        print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
+        #print("T2 next valid", time.asctime(time.localtime(t_exclude)))
+        print("Next invalid T2", time.asctime(time.localtime(t_exclude_inv)))
 
         print("T next raw", t_next)
-        print "T next?", time.asctime(time.localtime(t_next))
+        print("T next?", time.asctime(time.localtime(t_next)))
         t_next = time.asctime(time.localtime(t_next))
 
         self.assertEqual('Tue Aug 17 16:30:00 2010', t_next)
@@ -404,7 +404,7 @@ class TestTimeperiods(ShinkenTest):
         t2.timeperiod_name = ''
         t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-24:00')
         t.exclude = [t2]
-	
+
         t.resolve_daterange(t.dateranges, 'monday 00:00-24:00')
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-24:00')
         t.resolve_daterange(t.dateranges, 'wednesday 00:00-24:00')
