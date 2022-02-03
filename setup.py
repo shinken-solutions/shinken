@@ -411,7 +411,7 @@ for o in not_allowed_options:
 required_pkgs = ['pycurl']
 setup(
     name="Shinken",
-    version="2.4.3",
+    version="2.4.4",
     packages=find_packages(),
     package_data={'': package_data},
     description="Shinken is a monitoring framework compatible with Nagios configuration and plugins",
