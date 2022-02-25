@@ -680,7 +680,6 @@ class Service(SchedulingItem):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True
         cls = self.__class__
 
         source = getattr(self, 'imported_from', 'unknown')
@@ -694,19 +693,11 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
-                    state = False  # Bad boy...
-
-        # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
-        for err in self.configuration_warnings:
-            logger.warning("[service::%s] %s", desc, err)
-
-        # Raised all previously saw errors like unknown contacts and co
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.error("[service::%s] %s", self.get_full_name(), err)
+                    self.configuration_errors.append(
+                        "The service %s on host '%s' does not have %s" % (
+                            desc, hname, prop
+                        )
+                    )
 
         # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -714,8 +705,10 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.warning("The service '%s' in the host '%s' does not have "
-                           "contacts nor contact_groups in '%s'", desc, hname, source)
+            self.configuration_warnings.append(
+                "The service '%s' in the host '%s' does not have "
+                "contacts nor contact_groups in '%s'" % (desc, hname, source)
+            )
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
@@ -723,46 +716,58 @@ class Service(SchedulingItem):
 
         # If we got an event handler, it should be valid
         if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
-            logger.error("%s: my event_handler %s is invalid",
-                         self.get_name(), self.event_handler.command)
-            state = False
+            self.configuration_errors.append(
+                "%s: my event_handler %s is invalid" % (
+                    self.get_name(), self.event_handler.command)
+            )
 
         if not hasattr(self, 'check_command'):
-            logger.error("%s: I've got no check_command", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "%s: I've got no check_command" % (self.get_name())
+            )
+
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.error("%s: my check_command %s is invalid",
-                             self.get_name(), self.check_command.command)
-                state = False
+                self.configuration_errors.append(
+                    "%s: my check_command %s is invalid" % (
+                        self.get_name(), self.check_command.command)
+                )
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.error("%s: my business rule is invalid", self.get_name(),)
+                    self.configuration_errors.append(
+                        "%s: my business rule is invalid" % (self.get_name())
+                    )
                     for bperror in self.business_rule.configuration_errors:
-                        logger.error("%s: %s", self.get_name(), bperror)
-                    state = False
+                        self.configuration_errors.append("%s: %s" % (self.get_name(), bperror))
         if not hasattr(self, 'notification_interval') \
                 and self.notifications_enabled is True:
-            logger.error("%s: I've got no notification_interval but "
-                         "I've got notifications enabled", self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "%s: I've got no notification_interval but "
+                "I've got notifications enabled" % (self.get_name())
+            )
         if not self.host_name:
-            logger.error("The service '%s' is not bound do any host.", desc)
-            state = False
+            self.configuration_errors.append(
+                "The service '%s' is not bound do any host." % (desc)
+            )
         elif self.host is None:
-            logger.error("The service '%s' got an unknown host_name '%s'.", desc, self.host_name)
-            state = False
+            self.configuration_errors.append(
+                "The service '%s' got an unknown host_name '%s'." % (
+                    desc, self.host_name
+                )
+            )
 
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.error("%s: My service_description got the "
-                                 "character %s that is not allowed.", self.get_name(), c)
-                    state = False
-        return state
+                    self.configuration_errors.append(
+                        "%s: My service_description got the "
+                        "character %s that is not allowed." % (self.get_name(), c)
+                    )
+
+        return not self.has_errors()
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
@@ -891,19 +896,16 @@ class Service(SchedulingItem):
             if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
                 err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % \
                       (self.duplicate_foreach.strip(), host.get_name(), entry)
-                logger.warning(err)
                 host.configuration_errors.append(err)
             elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
                 err = "The custom property '%s 'of the host '%s' has empty " \
                       "values %s but the service %s has no default_value" % \
                       (self.duplicate_foreach.strip(),
                        host.get_name(), entry, self.service_description)
-                logger.warning(err)
                 host.configuration_errors.append(err)
             elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
                 err = "The custom property '%s' of the host '%s' has an invalid node range %s" % \
                       (self.duplicate_foreach.strip(), host.get_name(), entry)
-                logger.warning(err)
                 host.configuration_errors.append(err)
 
         return duplicates
@@ -1051,12 +1053,14 @@ class Service(SchedulingItem):
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        logger.warning("The results of service '%s' on host '%s' are stale "
-                       "by %s (threshold=%s).  I'm forcing an immediate check "
-                       "of the service.",
-                       self.get_name(), self.host.get_name(),
-                       format_t_into_dhms_format(t_stale_by),
-                       format_t_into_dhms_format(t_threshold))
+        self.configuration_warnings.append(
+            "The results of service '%s' on host '%s' are stale "
+            "by %s (threshold=%s).  I'm forcing an immediate check "
+            "of the service." % (self.get_name(),
+                                 self.host.get_name(),
+                                 format_t_into_dhms_format(t_stale_by),
+                                 format_t_into_dhms_format(t_threshold))
+        )
 
     # Raise a log entry with a Notification alert like
     # SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
@@ -1117,9 +1121,12 @@ class Service(SchedulingItem):
 
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
-        logger.warning("I cannot schedule the check for the service '%s' on "
-                       "host '%s' because there is not future valid time",
-                       self.get_name(), self.host.get_name())
+        self.configuration_warnings.append(
+            "I cannot schedule the check for the service '%s' on "
+            "host '%s' because there is not future valid time" % (
+                self.get_name(), self.host.get_name()
+            )
+        )
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED;

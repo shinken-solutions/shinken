@@ -447,6 +447,9 @@ class Arbiter(Daemon):
         logger.info("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
+        # Display warnings, no matter if config was correct or not
+        self.conf.show_warnings()
+
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:

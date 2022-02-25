@@ -129,7 +129,10 @@ class SatelliteLink(Item):
             return True
         except HTTPExceptions, exp:
             self.con = None
-            logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
+            self.configuration_errors.append(
+                "Failed sending configuration for %s: %s" % (self.get_name(),
+                                                             str(exp))
+            )
             return False
 
 
@@ -163,7 +166,9 @@ class SatelliteLink(Item):
         # We are dead now. Must raise
         # a brok to say it
         if was_alive:
-            logger.warning("Setting the satellite %s to a dead state.", self.get_name())
+            self.configuration_warnings.append(
+                "Setting the satellite %s to a dead state." % self.get_name()
+            )
             b = self.get_update_status_brok()
             self.broks.append(b)
 
@@ -176,8 +181,12 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            logger.warning("Add failed attempt to %s (%d/%d) %s",
-                           self.get_name(), self.attempt, self.max_check_attempts, reason)
+            self.configuration_warnings.append(
+                "Add failed attempt to %s (%d/%d) %s" % (
+                    self.get_name(),
+                    self.attempt,
+                    self.max_check_attempts, reason)
+            )
 
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:

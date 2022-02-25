@@ -443,17 +443,20 @@ class Timeperiod(Item):
     # We are correct only if our daterange are
     # and if we have no unmatch entries
     def is_correct(self):
-        b = True
         for dr in self.dateranges:
             d = dr.is_correct()
             if not d:
-                logger.error("[timeperiod::%s] invalid daterange ", self.get_name())
-            b &= d
+                self.configuration_errors.append(
+                    "[timeperiod::%s] invalid daterange " % self.get_name()
+                )
 
         # Warn about non correct entries
         for e in self.invalid_entries:
-            logger.warning("[timeperiod::%s] invalid entry '%s'", self.get_name(), e)
-        return b
+            self.configuration_warnings.append(
+                "[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e)
+            )
+
+        return not self.has_errors()
 
     def __str__(self):
         s = ''
@@ -747,12 +750,18 @@ class Timeperiod(Item):
                 if tp is not None:
                     new_exclude.append(tp)
                 else:
-                    logger.error("[timeentry::%s] unknown %s timeperiod", self.get_name(), tp_name)
+                    self.configuration_errors.append(
+                        "[timeentry::%s] unknown %s timeperiod" % (
+                            self.get_name(), tp_name
+                        )
+                    )
         self.exclude = new_exclude
 
     def check_exclude_rec(self):
         if self.rec_tag:
-            logger.error("[timeentry::%s] is in a loop in exclude parameter", self.get_name())
+            self.configuration_errors.append(
+                "[timeentry::%s] is in a loop in exclude parameter" % self.get_name()
+            )
             return False
         self.rec_tag = True
         for tp in self.exclude:

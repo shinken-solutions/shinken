@@ -61,28 +61,22 @@ class MacroModulation(Item):
 
     # Should have all properties, or a void macro_period
     def is_correct(self):
-        state = True
         cls = self.__class__
-
-        # Raised all previously saw errors like unknown commands or timeperiods
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning(
-                        "[macromodulation::%s] %s property not set", self.get_name(), prop
+                    self.configuration_errors.append(
+                        "[macromodulation::%s] %s property not set" % (
+                            self.get_name(), prop
+                        )
                     )
-                    state = False  # Bad boy...
 
         # Ok just put None as modulation_period, means 24x7
         if not hasattr(self, 'modulation_period'):
             self.modulation_period = None
 
-        return state
+        return not self.has_errors()
 
 
 class MacroModulations(Items):

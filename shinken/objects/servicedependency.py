@@ -254,7 +254,11 @@ class Servicedependencies(Items):
                 sd.service_description = s
 
             except AttributeError as err:
-                logger.error("[servicedependency] fail to linkify by service %s: %s", sd, err)
+                self.configuration_errors.append(
+                    "[servicedependency] fail to linkify by service %s: %s" % (
+                        sd, err
+                    )
+                )
                 to_del.append(sd)
 
         for sd in to_del:
@@ -269,7 +273,9 @@ class Servicedependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
             except AttributeError, exp:
-                logger.error("[servicedependency] fail to linkify by timeperiods: %s", exp)
+                self.configuration_errors.append(
+                    "[servicedependency] fail to linkify by timeperiods: %s" % exp
+                )
 
     # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):

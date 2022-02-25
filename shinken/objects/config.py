@@ -799,6 +799,7 @@ class Config(Item):
         random.seed(time.time())
         self.magic_hash = random.randint(1, 100000)
         self.configuration_errors = []
+        self.configuration_warnings = []
         self.triggers_dirs = []
         self.triggers = Triggers({})
         self.packs_dirs = []
@@ -827,10 +828,16 @@ class Config(Item):
             elts = elt.split('=', 1)
             if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
-                logger.error("[config] the parameter %s is malformed! (no = sign)", elts[0])
+                self.configuration_errors.append(
+                    "[config] the parameter %s is malformed! (no = sign)" %
+                    elts[0]
+                )
             elif elts[1] == '':
                 self.conf_is_correct = False
-                logger.error("[config] the parameter %s is malformed! (no value after =)", elts[0])
+                self.configuration_errors.append(
+                    "[config] the parameter %s is malformed! "
+                    "(no value after =)" % elts[0]
+                )
             else:
                 clean_p[elts[0]] = elts[1]
 
@@ -845,14 +852,18 @@ class Config(Item):
             if key in self.properties:
                 val = self.properties[key].pythonize(clean_params[key])
             elif key in self.running_properties:
-                logger.warning("using a the running property %s in a config file", key)
+                self.configuration_warnings.append(
+                    "using a the running property %s in a config file" % key
+                )
                 val = self.running_properties[key].pythonize(clean_params[key])
             elif key.startswith('$') or key in ['cfg_file', 'cfg_dir']:
                 # it's a macro or a useless now param, we don't touch this
                 val = value
             else:
-                logger.warning("Guessing the property %s type because it is not in "
-                               "%s object properties", key, self.__class__.__name__)
+                self.configuration_warnings.append(
+                    "Guessing the property %s type because it is not in "
+                    "%s object properties" % (key, self.__class__.__name__)
+                )
                 val = ToGuessProp.pythonize(clean_params[key])
 
             setattr(self, key, val)
@@ -890,7 +901,11 @@ class Config(Item):
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
             except IOError, exp:
-                logger.error("[config] cannot open config file '%s' for reading: %s", file, exp)
+                self.configuration_errors.append(
+                    "[config] cannot open config file '%s' for reading: %s" % (
+                        file, exp
+                    )
+                )
                 # The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
@@ -918,8 +933,11 @@ class Config(Item):
                         res.write(os.linesep)
                         fd.close()
                     except IOError, exp:
-                        logger.error("Cannot open config file '%s' for reading: %s",
-                                     cfg_file_name, exp)
+                        self.configuration_errors.append(
+                            "Cannot open config file '%s' for reading: %s" % (
+                                cfg_file_name, exp
+                            )
+                        )
                         # The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
@@ -930,7 +948,10 @@ class Config(Item):
                         cfg_dir_name = os.path.join(self.config_base_dir, elts[1])
                     # Ok, look if it's really a directory
                     if not os.path.isdir(cfg_dir_name):
-                        logger.error("Cannot open config dir '%s' for reading", cfg_dir_name)
+                        self.configuration_errors.append(
+                            "Cannot open config dir '%s' for reading" %
+                            cfg_dir_name
+                        )
                         self.conf_is_correct = False
 
                     # Look for .pack file into it :)
@@ -952,8 +973,12 @@ class Config(Item):
                                     res.write(os.linesep)
                                     fd.close()
                                 except IOError, exp:
-                                    logger.error("Cannot open config file '%s' for reading: %s",
-                                                 os.path.join(root, file), exp)
+                                    self.configuration_errors.append(
+                                        "Cannot open config file '%s' for "
+                                        "reading: %s" % (
+                                            os.path.join(root, file), exp
+                                        )
+                                    )
                                     # The configuration is invalid
                                     # because we have a bad file!
                                     self.conf_is_correct = False
@@ -965,7 +990,10 @@ class Config(Item):
                         trig_dir_name = os.path.join(self.config_base_dir, elts[1])
                     # Ok, look if it's really a directory
                     if not os.path.isdir(trig_dir_name):
-                        logger.error("Cannot open triggers dir '%s' for reading", trig_dir_name)
+                        self.configuration_errors.append(
+                            "Cannot open triggers dir '%s' for reading" %
+                            trig_dir_name
+                        )
                         self.conf_is_correct = False
                         continue
                     # Ok it's a valid one, I keep it
@@ -1147,7 +1175,9 @@ class Config(Item):
         """ Prepare the arbiter for early operations """
 
         if len(self.arbiters) == 0:
-            logger.warning("There is no arbiter, I add one in localhost:7770")
+            self.configuration_warnings.append(
+                "There is no arbiter, I add one in localhost:7770"
+            )
             a = ArbiterLink({'arbiter_name': 'Default-Arbiter',
                              'host_name': socket.gethostname(),
                              'address': 'localhost', 'port': '7770',
@@ -1451,8 +1481,10 @@ class Config(Item):
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    logger.warning("The parameter %s is useless and can be removed "
-                                   "from the configuration (Reason: %s)", prop, entry.text)
+                    logger.warning(
+                        "The parameter %s is useless and can be removed "
+                        "from the configuration (Reason: %s)", prop, entry.text
+                    )
 
 
     # It's used to raise warning if the user got parameter
@@ -1469,14 +1501,18 @@ class Config(Item):
                 unmanaged.append(s)
         if len(unmanaged) != 0:
             mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
-            logger.warning("The following parameter(s) are not currently managed.")
+            logger.warning(
+                "The following parameter(s) are not currently managed."
+            )
 
             for s in unmanaged:
                 logger.info(s)
 
-            logger.warning("Unmanaged configuration statement, do you really need it?"
-                           "Ask for it on the developer mailinglist %s or submit a pull "
-                           "request on the Shinken github ", mailing_list_uri)
+            logger.warning(
+                "Unmanaged configuration statement, do you really need it?"
+                "Ask for it on the developer mailinglist %s or submit a pull "
+                "request on the Shinken github ", mailing_list_uri
+            )
 
 
     # Overrides specific instances properties
@@ -1633,7 +1669,9 @@ class Config(Item):
             # so all hosts without realm will be link with it
             default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
-            logger.warning("No realms defined, I add one at %s", default.get_name())
+            self.configuration_warnings.append(
+                "No realms defined, I add one at %s" % default.get_name()
+            )
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
@@ -1646,22 +1684,30 @@ class Config(Item):
     # with defaults values
     def fill_default_satellites(self):
         if len(self.schedulers) == 0:
-            logger.warning("No scheduler defined, I add one at localhost:7768")
+            self.configuration_warnings.append(
+                "No scheduler defined, I add one at localhost:7768"
+            )
             s = SchedulerLink({'scheduler_name': 'Default-Scheduler',
                                'address': 'localhost', 'port': '7768'})
             self.schedulers = SchedulerLinks([s])
         if len(self.pollers) == 0:
-            logger.warning("No poller defined, I add one at localhost:7771")
+            self.configuration_warnings.append(
+                "No poller defined, I add one at localhost:7771"
+            )
             p = PollerLink({'poller_name': 'Default-Poller',
                             'address': 'localhost', 'port': '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
-            logger.warning("No reactionner defined, I add one at localhost:7769")
+            self.configuration_warnings.append(
+                "No reactionner defined, I add one at localhost:7769"
+            )
             r = ReactionnerLink({'reactionner_name': 'Default-Reactionner',
                                  'address': 'localhost', 'port': '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
-            logger.warning("No broker defined, I add one at localhost:7772")
+            self.configuration_warnings.append(
+                "No broker defined, I add one at localhost:7772"
+            )
             b = BrokerLink({'broker_name': 'Default-Broker',
                             'address': 'localhost', 'port': '7772',
                             'manage_arbiters': '1'})
@@ -1821,18 +1867,26 @@ class Config(Item):
 
         # We add them to the brokers if we need it
         if mod_to_add != []:
-            logger.warning("I autogenerated some Broker modules, please look at your configuration")
+            self.configuration_warnings.append(
+                "I autogenerated some Broker modules, please look at your configuration"
+            )
             for m in mod_to_add:
-                logger.warning("The module %s is autogenerated", m.module_name)
+                self.configuration_warnings.append(
+                    "The module %s is autogenerated" % m.module_name
+                )
                 for b in self.brokers:
                     b.modules.append(m)
 
         # Then for schedulers
         if mod_to_add_to_schedulers != []:
-            logger.warning("I autogenerated some Scheduler modules, "
-                           "please look at your configuration")
+            self.configuration_warnings.append(
+                "I autogenerated some Scheduler modules, "
+                "please look at your configuration"
+            )
             for m in mod_to_add_to_schedulers:
-                logger.warning("The module %s is autogenerated", m.module_name)
+                self.configuration_warnings.append(
+                    "The module %s is autogenerated" % m.module_name
+                )
                 for b in self.schedulers:
                     b.modules.append(m)
 
@@ -1861,10 +1915,14 @@ class Config(Item):
 
         # We add them to the brokers if we need it
         if mod_to_add != []:
-            logger.warning("I autogenerated some Arbiter modules, "
-                           "please look at your configuration")
+            self.configuration_warnings.append(
+                "I autogenerated some Arbiter modules, "
+                "please look at your configuration"
+            )
             for (mod, data) in mod_to_add:
-                logger.warning("Module %s was autogenerated", data['module_name'])
+                self.configuration_warnings.append(
+                    "Module %s was autogenerated" % data['module_name']
+                )
                 for a in self.arbiters:
                     a.modules = getattr(a, 'modules', []) + [data['module_name']]
                 self.modules.add_item(mod)
@@ -1908,7 +1966,9 @@ class Config(Item):
     def check_error_on_hard_unmanaged_parameters(self):
         r = True
         if self.use_regexp_matching:
-            logger.error("use_regexp_matching parameter is not managed.")
+            self.configuration_errors.append(
+                "use_regexp_matching parameter is not managed."
+            )
             r &= False
         # if self.ochp_command != '':
         #      logger.error("ochp_command parameter is not managed.")
@@ -1933,7 +1993,7 @@ class Config(Item):
             logger.info('Checking global parameters...')
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
-            logger.error("Check global parameters failed")
+            self.configuration_errors.append("Check global parameters failed")
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
@@ -1942,29 +2002,46 @@ class Config(Item):
                 logger.info('Checking %s...', x)
 
             cur = getattr(self, x)
+
+            self.configuration_warnings.extend(cur.configuration_warnings)
+            self.configuration_warnings = list(
+                set(self.configuration_warnings))
+
             if not cur.is_correct():
+                self.configuration_errors.extend(cur.configuration_errors)
+                self.configuration_errors = list(set(self.configuration_errors))
+
                 r = False
-                logger.error("\t%s conf incorrect!!", x)
+                self.configuration_errors.append("\t%s conf incorrect!!" % x)
             if self.read_config_silent == 0:
                 logger.info('\tChecked %d %s', len(cur), x)
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents("self", "parents"):
             r = False
-            logger.error("Hosts: detected loop in parents ; conf incorrect")
+            self.configuration_errors.append(
+                "Hosts: detected loop in parents ; conf incorrect"
+            )
 
         for x in ('servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
                   'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
                   'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try:
                 cur = getattr(self, x)
+
+                self.configuration_warnings.extend(cur.configuration_warnings)
+                self.configuration_warnings = list(
+                    set(self.configuration_warnings))
             except AttributeError:
                 continue
             if self.read_config_silent == 0:
                 logger.info('Checking %s...', x)
             if not cur.is_correct():
+                self.configuration_errors.extend(cur.configuration_errors)
+                self.configuration_errors = list(set(self.configuration_errors))
+
                 r = False
-                logger.error("\t%s conf incorrect!!", x)
+                self.configuration_errors.append("\t%s conf incorrect!!" % x)
             if self.read_config_silent == 0:
                 logger.info('\tChecked %d %s', len(cur), x)
 
@@ -1974,8 +2051,6 @@ class Config(Item):
             rea = s.realm
             if rea:
                 if len(rea.potential_brokers) == 0:
-                    logger.error("The scheduler %s got no broker in its realm or upper",
-                                 s.get_name())
                     self.add_error("Error: the scheduler %s got no broker in its realm "
                                    "or upper" % s.get_name())
                     r = False
@@ -1994,13 +2069,11 @@ class Config(Item):
                 pollers_tag.add(t)
         if not hosts_tag.issubset(pollers_tag):
             for tag in hosts_tag.difference(pollers_tag):
-                logger.error("Hosts exist with poller_tag %s but no poller got this tag", tag)
                 self.add_error("Error: hosts exist with poller_tag %s but no poller "
                                "got this tag" % tag)
                 r = False
         if not services_tag.issubset(pollers_tag):
             for tag in services_tag.difference(pollers_tag):
-                logger.error("Services exist with poller_tag %s but no poller got this tag", tag)
                 self.add_error("Error: services exist with poller_tag %s but no poller "
                                "got this tag" % tag)
                 r = False
@@ -2022,15 +2095,12 @@ class Config(Item):
                             continue
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
-                            logger.error("Business_rule '%s' got hosts from another realm: %s",
-                                         e.get_full_name(), elt_r)
                             self.add_error("Error: Business_rule '%s' got hosts from another "
                                            "realm: %s" % (e.get_full_name(), elt_r))
                             r = False
 
         if len([realm for realm in self.realms if hasattr(realm, 'default') and realm.default]) > 1:
             err = "Error : More than one realm are set to the default realm"
-            logger.error(err)
             self.add_error(err)
             r = False
 
@@ -2075,6 +2145,9 @@ class Config(Item):
         for err in self.configuration_errors:
             logger.error(err)
 
+    def show_warnings(self):
+        for warn in self.configuration_warnings:
+            logger.warning(warn)
 
     def get_least_loaded_scheduler_id(self, scheduler_ids, distribution):
         """
@@ -2306,11 +2379,10 @@ class Config(Item):
         logger.info("Total number of hosts : %d",
                     nb_elements_all_realms)
         if len(self.hosts) != nb_elements_all_realms:
-            logger.warning("There are %d hosts defined, and %d hosts dispatched in the realms. "
-                           "Some hosts have been ignored", len(self.hosts), nb_elements_all_realms)
-            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. "
-                           "Some hosts have been "
-                           "ignored" % (len(self.hosts), nb_elements_all_realms))
+            self.configuration_warnings.append(
+                "There are %d hosts defined, and %d hosts dispatched in the realms. "
+                "Some hosts have been "
+                "ignored" % (len(self.hosts), nb_elements_all_realms))
 
 
     # Use the self.conf and make nb_parts new confs.

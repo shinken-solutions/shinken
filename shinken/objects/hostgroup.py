@@ -82,7 +82,11 @@ class Hostgroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            logger.error("[hostgroup::%s] got a loop in hostgroup definition", self.get_name())
+            self.configuration_errors.append(
+                "[hostgroup::%s] got a loop in hostgroup definition" % (
+                    self.get_name()
+                )
+            )
             return self.get_hosts()
 
         # Ok, not a loop, we tag it and continue
@@ -181,8 +185,12 @@ class Hostgroups(Itemgroups):
                     h.realm = hg.realm
                 else:
                     if h.realm != hg.realm:
-                        logger.warning("[hostgroups] host %s it not in the same realm than it's "
-                                       "hostgroup %s", h.get_name(), hg.get_name())
+                        self.configuration_warnings.append(
+                            "[hostgroups] host %s it not in the same realm "
+                            "than it's hostgroup %s" % (
+                                h.get_name(), hg.get_name()
+                            )
+                        )
 
     # Add a host string to a hostgroup member
     # if the host group do not exist, create it

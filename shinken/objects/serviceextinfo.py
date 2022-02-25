@@ -89,10 +89,7 @@ class ServiceExtInfo(Item):
     # Check is required prop are set:
     # host_name is needed
     def is_correct(self):
-        state = True
-        cls = self.__class__
-
-        return state
+        return True
 
     # For get a nice name
     def get_name(self):

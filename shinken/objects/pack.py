@@ -78,13 +78,16 @@ class Packs(Items):
     # Create a pack from the string buf, and get a real object from it
     def create_pack(self, buf, name):
         if not json:
-            logger.warning("[Pack] cannot load the pack file '%s': missing json lib", name)
+            self.configuration_warnings.append(
+                "[Pack] cannot load the pack file '%s': missing json lib" % name
+            )
             return
         # Ok, go compile the code
         try:
             d = json.loads(buf)
             if 'name' not in d:
-                logger.error("[Pack] no name in the pack '%s'", name)
+                self.configuration_errors.append(
+                    "[Pack] no name in the pack '%s'" % (name))
                 return
             p = Pack({})
             p.pack_name = d['name']
@@ -100,4 +103,5 @@ class Packs(Items):
             # Ok, add it
             self[p.id] = p
         except ValueError, exp:
-            logger.error("[Pack] error in loading pack file '%s': '%s'", name, exp)
+            self.configuration_errors.append("[Pack] error in loading pack "
+                                             "file '%s': '%s'" % (name, exp))

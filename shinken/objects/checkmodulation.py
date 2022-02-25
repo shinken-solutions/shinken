@@ -64,41 +64,37 @@ class CheckModulation(Item):
 
     # Should have all properties, or a void check_period
     def is_correct(self):
-        state = True
         cls = self.__class__
-
-        # Raised all previously saw errors like unknown commands or timeperiods
-        if self.configuration_errors != []:
-            state = False
-            for err in self.configuration_errors:
-                logger.error("[item::%s] %s", self.get_name(), err)
 
         for prop, entry in cls.properties.items():
             if prop not in cls._special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.warning("[checkmodulation::%s] %s property not set",
-                                   self.get_name(), prop)
-                    state = False  # Bad boy...
+                    self.configuration_errors.append(
+                        "[checkmodulation::%s] %s property not set" % (
+                            self.get_name(), prop)
+                    )
 
         # Ok now we manage special cases...
         # Service part
         if not hasattr(self, 'check_command'):
-            logger.warning("[checkmodulation::%s] do not have any check_command defined",
-                           self.get_name())
-            state = False
+            self.configuration_errors.append(
+                "[checkmodulation::%s] do not have any check_command defined" % (self.get_name())
+            )
         else:
             if self.check_command is None:
-                logger.warning("[checkmodulation::%s] a check_command is missing", self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    "[checkmodulation::%s] a check_command is missing" % (self.get_name())
+                )
             if not self.check_command.is_valid():
-                logger.warning("[checkmodulation::%s] a check_command is invalid", self.get_name())
-                state = False
+                self.configuration_errors.append(
+                    "[checkmodulation::%s] a check_command is invalid" % (self.get_name())
+                )
 
         # Ok just put None as check_period, means 24x7
         if not hasattr(self, 'check_period'):
             self.check_period = None
 
-        return state
+        return not self.has_errors()
 
 
     # In the scheduler we need to relink the commandCall with
