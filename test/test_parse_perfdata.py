@@ -45,16 +45,6 @@ class TestParsePerfdata(ShinkenTest):
         self.assertEqual(0, m.min)
         self.assertEqual(1982, m.max)
 
-        s = 'ramused=90%;85;95;;'
-        m = Metric(s)
-        self.assertEqual('ramused', m.name)
-        self.assertEqual(90, m.value)
-        self.assertEqual('%', m.uom)
-        self.assertEqual(85, m.warning)
-        self.assertEqual(95, m.critical)
-        self.assertEqual(0, m.min)
-        self.assertEqual(100, m.max)
-
         s = 'ramused=1009MB;;;0;1982 swapused=540MB;;;; memused=90%'
         p = PerfDatas(s)
         p.metrics
@@ -78,26 +68,6 @@ class TestParsePerfdata(ShinkenTest):
 
         self.assertEqual(3, len(p))
 
-        s = "'Physical Memory Used'=12085620736Bytes; 'Physical Memory Utilisation'=94%;80;90;"
-        p = PerfDatas(s)
-        p.metrics
-        m = p['Physical Memory Used']
-        self.assertEqual('Physical Memory Used', m.name)
-        self.assertEqual(12085620736, m.value)
-        self.assertEqual('Bytes', m.uom)
-        self.assertIs(None, m.warning)
-        self.assertIs(None, m.critical)
-        self.assertIs(None, m.min)
-        self.assertIs(None, m.max)
-
-        m = p['Physical Memory Utilisation']
-        self.assertEqual('Physical Memory Utilisation', m.name)
-        self.assertEqual(94, m.value)
-        self.assertEqual('%', m.uom)
-        self.assertEqual(80, m.warning)
-        self.assertEqual(90, m.critical)
-        self.assertEqual(0, m.min)
-        self.assertEqual(100, m.max)
 
         s = "'C: Space'=35.07GB; 'C: Utilisation'=87.7%;90;95;"
         p = PerfDatas(s)
@@ -146,6 +116,118 @@ class TestParsePerfdata(ShinkenTest):
         s = None
         p = PerfDatas(s)
         self.assertEqual(len(p), 0)
+
+    def test_parsing_perfdata_percentages(self):
+        # Test default min and max automatically supplied
+        s = 'ramused=90%;85;95;;'
+        m = Metric(s)
+        self.assertEqual('ramused', m.name)
+        self.assertEqual(90, m.value)
+        self.assertEqual('%', m.uom)
+        self.assertEqual(85, m.warning)
+        self.assertEqual(95, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(100, m.max)
+        #
+        # Test non-default min and max are handled
+        s = 'ramused=90%;85;95;10;95'
+        m = Metric(s)
+        self.assertEqual('ramused', m.name)
+        self.assertEqual(90, m.value)
+        self.assertEqual('%', m.uom)
+        self.assertEqual(85, m.warning)
+        self.assertEqual(95, m.critical)
+        self.assertEqual(10, m.min)
+        self.assertEqual(95, m.max)
+        #
+        # Test non-default min and max as floats are handled
+        s = 'ramused=90%;85;95;10.5;95.3'
+        m = Metric(s)
+        self.assertEqual('ramused', m.name)
+        self.assertEqual(90, m.value)
+        self.assertEqual('%', m.uom)
+        self.assertEqual(85, m.warning)
+        self.assertEqual(95, m.critical)
+        self.assertEqual(10.5, m.min)
+        self.assertEqual(95.3, m.max)
+
+    def test_parsing_perfdata_spaces(self):
+        s = "'Physical Memory Used'=12085620736Bytes; 'Physical Memory Utilisation'=94%;80;90;"
+        p = PerfDatas(s)
+        p.metrics
+        m = p['Physical Memory Used']
+        self.assertEqual('Physical Memory Used', m.name)
+        self.assertEqual(12085620736, m.value)
+        self.assertEqual('Bytes', m.uom)
+        self.assertIs(None, m.warning)
+        self.assertIs(None, m.critical)
+        self.assertIs(None, m.min)
+        self.assertIs(None, m.max)
+
+        m = p['Physical Memory Utilisation']
+        self.assertEqual('Physical Memory Utilisation', m.name)
+        self.assertEqual(94, m.value)
+        self.assertEqual('%', m.uom)
+        self.assertEqual(80, m.warning)
+        self.assertEqual(90, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(100, m.max)
+
+    def test_parsing_perfdata_quotes(self):
+        # Make sure outer quuotes get stripped, with or without space in name
+        s = "'ramused'=1009MB;;;0;1982 'ram is  used'=1009MB;;;0;1982"
+        p = PerfDatas(s)
+        m = p['ramused']
+        self.assertEqual('ramused', m.name)
+        self.assertEqual(1009, m.value)
+        self.assertEqual('MB', m.uom)
+        self.assertEqual(None, m.warning)
+        self.assertEqual(None, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(1982, m.max)
+
+        m = p['ram is  used']
+        self.assertEqual('ram is  used', m.name)
+        self.assertEqual(1009, m.value)
+        self.assertEqual('MB', m.uom)
+        self.assertEqual(None, m.warning)
+        self.assertEqual(None, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(1982, m.max)
+
+        # Confirm double quotes replace by single
+        s = "ram''used=1009MB;;;0;1982"
+        p = PerfDatas(s)
+        m = p["ram'used"]
+        self.assertEqual("ram'used", m.name)
+        self.assertEqual(1009, m.value)
+        self.assertEqual('MB', m.uom)
+        self.assertEqual(None, m.warning)
+        self.assertEqual(None, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(1982, m.max)
+
+        s = "ram''used''=1009MB;;;0;1982"
+        p = PerfDatas(s)
+        m = p["ram'used'"]
+        self.assertEqual("ram'used'", m.name)
+        self.assertEqual(1009, m.value)
+        self.assertEqual('MB', m.uom)
+        self.assertEqual(None, m.warning)
+        self.assertEqual(None, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(1982, m.max)
+
+        s = "ram'''used''=1009MB;;;0;1982"
+        p = PerfDatas(s)
+        m = p["ram''used'"]
+        self.assertEqual("ram''used'", m.name)
+        self.assertEqual(1009, m.value)
+        self.assertEqual('MB', m.uom)
+        self.assertEqual(None, m.warning)
+        self.assertEqual(None, m.critical)
+        self.assertEqual(0, m.min)
+        self.assertEqual(1982, m.max)
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,6 +34,8 @@ metric_pattern = \
         '^([^=]+)=([\d\.\-\+eE]+)([\w\/%]*)'
         ';?([\d\.\-\+eE:~@]+)?;?([\d\.\-\+eE:~@]+)?;?([\d\.\-\+eE]+)?;?([\d\.\-\+eE]+)?;?\s*'
     )
+quote_pattern = re.compile("^'(.+)'$")
+replace1_pattern = re.compile('\1')
 
 
 # If we can return an int or a float, or None
@@ -54,29 +56,34 @@ class Metric:
         # print "Analysis string", s
         r = metric_pattern.match(s)
         if r:
-            # Get the name but remove all ' in it
-            self.name = r.group(1).replace("'", "")
+            # Strip outer quotes, and replace double quotes with single
+            self.name = re.sub(r"^'(.+)'$", r'\1', r.group(1)).replace("''", "'")
             self.value = guess_int_or_float(r.group(2))
             self.uom = r.group(3)
             self.warning = guess_int_or_float(r.group(4))
             self.critical = guess_int_or_float(r.group(5))
-            self.min = guess_int_or_float(r.group(6))
-            self.max = guess_int_or_float(r.group(7))
+            self.min = self.min_supplied = guess_int_or_float(r.group(6))
+            self.max = self.max_supplied = guess_int_or_float(r.group(7))
             # print 'Name', self.name
             # print "Value", self.value
             # print "Res", r
             # print r.groups()
             if self.uom == '%':
-                self.min = 0
-                self.max = 100
+                self.min = 0 if self.min is None else self.min
+                self.max = 100 if self.max is None else self.max
 
     def __str__(self):
-        s = "%s=%s%s" % (self.name, self.value, self.uom)
-        if self.warning:
-            s = s + ";%s" % (self.warning)
-        if self.critical:
-            s = s + ";%s" % (self.critical)
-        return s
+        # Restore double quotes in nae
+        name = self.name.replace("'", "''")
+        # Quote whole name if it contains a space
+        if " " in name:
+            name = "'" + name + "'"
+        min = self.min_supplied
+        max = self.max_supplied
+        components = ["%s=%s%s" % (name, self.value, self.uom), self.warning, self.critical, min, max]
+        while components[-1] is None:
+            components.pop()
+        return ";".join(map(lambda v: "" if v is None else str(v), components))
 
 
 class PerfDatas:
@@ -101,3 +108,4 @@ class PerfDatas:
 
     def __contains__(self, key):
         return key in self.metrics
+
