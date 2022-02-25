@@ -80,11 +80,12 @@ Download last stable `Shinken tarball`_ archive (or get the latest `git snapshot
 
 ::
 
-  adduser shinken
-  wget http://www.shinken-monitoring.org/pub/shinken-2.4.tar.gz
-  tar -xvzf shinken-2.4.tar.gz
-  cd shinken-2.4
-  python setup.py install
+ # adduser shinken
+ # cd /home/shinken
+ # wget https://codeload.github.com/naparuba/shinken/tar.gz/2.4.3
+ # tar xf 2.4.3.tar.gz
+ # cd shinken-2.4.3/
+ # python setup.py install
 
 
 Shinken 2.X uses LSB path. If you want to stick to one directory installation you can of course.
@@ -112,6 +113,6 @@ Steps are basically the same as on Linux (Python install etc.) but in windows en
 .. _python-pycurl: http://pycurl.sourceforge.net/
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _git snapshot: https://github.com/naparuba/shinken/tarball/master
-.. _Shinken tarball: http://www.shinken-monitoring.org/pub/shinken-2.4.tar.gz
+.. _Shinken tarball: https://codeload.github.com/naparuba/shinken/tar.gz/2.4.3
 .. _install.d/README: https://github.com/naparuba/shinken/blob/master/install.d/README
 
