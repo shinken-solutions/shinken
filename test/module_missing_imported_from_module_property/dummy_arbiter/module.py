@@ -26,6 +26,8 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 from shinken.basemodule import BaseModule

@@ -23,6 +23,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -51,7 +53,7 @@ class TestConfig(ShinkenTest):
         self.assertEqual('UP', host.state)
         self.assertEqual('HARD', host.state_type)
 
-        for n in svc.notifications_in_progress.values():
+        for n in list(svc.notifications_in_progress.values()):
             print("HEHE")
             print(n.__dict__)
             n.execute()

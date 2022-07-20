@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import pycurl
 import os
@@ -36,7 +37,6 @@ from shinken.log import logger, cprint
 
 # Will be populated by the shinken CLI command
 CONFIG = None
-
 
 
 ############# ********************        PUBLISH           ****************###########
@@ -207,11 +207,11 @@ def print_search_matches(matches):
     names = [p['name'] for p in matches]
     names = list(set(names))
     names.sort()
-    
+
     for p in matches:
         name = p['name']
         ps[name] = p
-    
+
     for name in names:
         p = ps[name]
         user_id = p['user_id']
@@ -224,7 +224,7 @@ def print_search_matches(matches):
 
 
 def do_search(*look_at):
-    # test for  generic search 
+    # test for  generic search
     if  look_at == ('all',):
         matches = []
         look_at = ('pack',)
@@ -250,7 +250,7 @@ def inventor(look_at):
     inventory = CONFIG['paths']['inventory']
     logger.debug("dumping inventory %s", inventory)
     # get all sub-direcotries
- 
+
     for d in os.listdir(inventory):
         if os.path.exists(os.path.join(inventory, d, 'package.json')):
             if not look_at or d in look_at:
@@ -499,7 +499,7 @@ def install_package(pname, raw, update_only=False):
         shutil.copytree(p_doc, doc_dest)
         logger.info("Copy done in the doc directory %s", doc_dest)
 
-        
+
     if not update_only:
         # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
         p_pack = os.path.join(tmpdir, 'pack')
@@ -554,7 +554,7 @@ def install_package(pname, raw, update_only=False):
     cont = open(os.path.join(p_inv, 'content.json'), 'w')
     cont.write(json.dumps(package_content))
     cont.close()
-    
+
     # We now clean (rm) the tmpdir we don't need any more
     try:
         shutil.rmtree(tmpdir, ignore_errors=True)

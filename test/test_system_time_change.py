@@ -22,20 +22,13 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
-import commands
 
 
 class TestSystemTimeChange(ShinkenTest):
     # setUp is inherited from ShinkenTest
-
-    def set_time(self, d):
-        cmd = 'sudo date -s "%s"' % d
-        print("CMD,", cmd)
-        # NB: disabled for now because we test in a totally direct way
-        #a = commands.getstatusoutput(cmd)
-        # Check the time is set correctly!
-        #self.assertEqual(0, a[0])
 
     def test_system_time_change(self):
         #
@@ -65,7 +58,6 @@ class TestSystemTimeChange(ShinkenTest):
         print("Current Host last_state_change", time.asctime(time.localtime(host.last_state_change)))
 
         # Ok, start to check for bad time
-        self.set_time(tomorow)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(86400)
         self.assertEqual(86400, host.last_state_change - last_state_change )
@@ -73,14 +65,11 @@ class TestSystemTimeChange(ShinkenTest):
         print("Tomorow Host last_state_change", time.asctime(time.localtime(host.last_state_change)))
 
         # And now a huge change: yesterday (so a 2 day move)
-        self.set_time(yesterday)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(-86400 * 2)
         self.assertEqual(-86400*2, host.last_state_change - last_state_change )
         svc.compensate_system_time_change(-86400*2)
         print("Yesterday Host last_state_change", time.asctime(time.localtime(host.last_state_change)))
-
-        self.set_time(now_str)
 
         # Ok, now the scheduler and check things
         # Put checks in the scheduler
@@ -90,7 +79,6 @@ class TestSystemTimeChange(ShinkenTest):
         srv_to_go = srv_check.t_to_go
         print("current Host check", time.asctime(time.localtime(host_check.t_to_go)))
         print("current Service check", time.asctime(time.localtime(srv_check.t_to_go)))
-        self.set_time(tomorow)
         self.sched.sched_daemon.compensate_system_time_change(86400)
         print("Tomorow Host check", time.asctime(time.localtime(host_check.t_to_go)))
         print("Tomorow Service check", time.asctime(time.localtime(srv_check.t_to_go)))
@@ -100,7 +88,6 @@ class TestSystemTimeChange(ShinkenTest):
         # and yesterday
         host_to_go = host_check.t_to_go
         srv_to_go = srv_check.t_to_go
-        self.set_time(yesterday)
         self.sched.sched_daemon.compensate_system_time_change(-86400*2)
         print("Yesterday Host check", time.asctime(time.localtime(host_check.t_to_go)))
         print("Yesterday Service check", time.asctime(time.localtime(srv_check.t_to_go)))
@@ -109,9 +96,6 @@ class TestSystemTimeChange(ShinkenTest):
         self.assertEqual(srv_check.t_to_go, svc.next_chk)
         self.assertEqual(-86400*2, host_check.t_to_go - host_to_go )
         self.assertEqual(-86400*2, srv_check.t_to_go - srv_to_go )
-
-        self.set_time(now_str)
-
 
 
 if __name__ == '__main__':

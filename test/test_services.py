@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import copy
 from shinken_test import *
 
@@ -108,9 +110,7 @@ class TestService(ShinkenTest):
     # Look for display name setting
     def test_display_name(self):
         svc = self.get_svc()
-        print('Display name', svc.display_name, 'toto')
-        print('Full name', svc.get_full_name())
-        self.assertEqual(u'test_ok_0', svc.display_name)
+        self.assertEqual('test_ok_0', svc.display_name)
 
     def test_states_from_exit_status(self):
         svc = self.get_svc()

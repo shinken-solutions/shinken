@@ -30,13 +30,14 @@ will find all scheduling related functions, like the schedule
 or the consume_check. It's a very important class!
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 import random
 import time
 import traceback
 
-from item import Item
-
+from shinken.objects.item import Item
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
@@ -805,7 +806,7 @@ class SchedulingItem(Item):
     # We do not need ours currents pending notifications,
     # so we zombify them and clean our list
     def remove_in_progress_notifications(self):
-        for n in self.notifications_in_progress.values():
+        for n in list(self.notifications_in_progress.values()):
             self.remove_in_progress_notification(n)
 
 
@@ -1004,24 +1005,6 @@ class SchedulingItem(Item):
     # is_volatile: notif immediately (service only)
     def consume_state_result(self, c):
         OK_UP = self.__class__.ok_up  # OK for service, UP for host
-
-        # Protect against bad type output
-        # if str, go in unicode
-        if isinstance(c.output, str):
-            c.output = c.output.decode('utf8', 'ignore')
-            c.long_output = c.long_output.decode('utf8', 'ignore')
-
-        # Same for current output
-        # TODO: remove in future version, this is need only for
-        # migration from old shinken version, that got output as str
-        # and not unicode
-        # if str, go in unicode
-        if isinstance(self.output, str):
-            self.output = self.output.decode('utf8', 'ignore')
-            self.long_output = self.long_output.decode('utf8', 'ignore')
-
-        if isinstance(c.perf_data, str):
-            c.perf_data = c.perf_data.decode('utf8', 'ignore')
 
         # We check for stalking if necessary
         # so if check is here
@@ -1337,12 +1320,10 @@ class SchedulingItem(Item):
         # Get data from check
         self.last_maintenance_chk = int(c.check_time)
         self.maintenance_check_output = c.output
-        if isinstance(self.maintenance_check_output, str):
-            self.maintenance_check_output = self.maintenance_check_output.decode('utf8', 'ignore')
 
         # Item is in production
         if c.in_timeout is True:
-            logger.warn(
+            logger.warning(
                 "[%s] maintenance check went in timeout, result ignored" %
                 self.get_full_name())
         elif c.exit_status == 0:
@@ -1982,5 +1963,5 @@ class SchedulingItem(Item):
             except Exception as exp:
                 logger.error(
                     "We got an exception from a trigger on %s for %s",
-                    self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())
+                    self.get_full_name(), traceback.format_exc()
                 )

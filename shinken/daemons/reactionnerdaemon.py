@@ -36,6 +36,8 @@
 # The configuration consists of a list of Schedulers for which
 # the Reactionner will launch actions for.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 

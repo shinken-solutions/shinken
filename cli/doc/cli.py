@@ -21,14 +21,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-
 from shinken.log import logger
 
 # Will be populated by the shinken CLI command
 CONFIG = None
-
 
 
 ############# ********************        SERVE           ****************###########

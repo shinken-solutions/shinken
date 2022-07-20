@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
@@ -129,7 +130,7 @@ class Servicedependencies(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        servicedeps = self.items.keys()
+        servicedeps = list(self.items.keys())
         for id in servicedeps:
             sd = self.items[id]
             # Have we to explode the hostgroup into many service?

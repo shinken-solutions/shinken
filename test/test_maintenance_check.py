@@ -22,6 +22,8 @@
 # This file is used to test object properties overriding.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import unittest, ShinkenTest, time
 from shinken.objects.timeperiod import Timeperiod
 import re

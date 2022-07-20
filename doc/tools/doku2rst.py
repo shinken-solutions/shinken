@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 import os
 from urllib import urlretrieve
@@ -256,7 +258,7 @@ for root, dirs, files in os.walk(input_folder):
                 for link in links:
                     line = re.sub("\[\[https?://(.*?)\]\]", "`%s`_" % link[1], line, count=1, flags=0)
                     external_links[link[1]] = link[0] + "://" + link[1]
-            
+
             # Search internal links
             m = re.search("\[\[(.*?)\|(.*?)\]\]", line)
             if m:
@@ -434,7 +436,7 @@ for root, dirs, files in os.walk(input_folder):
                     nb_col = len(cells)
                 rows.append(cells)
                 # don't write this line
-                continue 
+                continue
             elif m2:
                 in_table = True
                 line = line.strip()[1:-1]
@@ -477,7 +479,7 @@ for root, dirs, files in os.walk(input_folder):
         fw.close()
 
 
-# echo 
+# echo
 print("mv ../source/raws/about.rst ../source/01_about/")
 print("mv ../source/raws/ch07.rst ../source/02_gettingstarted/")
 print("mv ../source/raws/part-problemsandimpacts.rst ../source/06_advancedtopics/")

@@ -22,14 +22,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import sys
 import time
 import traceback
-import cPickle
 import base64
 import zlib
 import threading
+import pickle
 import copy
 from multiprocessing import active_children
 from collections import deque
@@ -343,8 +345,8 @@ class Broker(BaseSatellite):
                     try:
                         _t = base64.b64decode(tmp_broks)
                         _t = zlib.decompress(_t)
-                        tmp_broks = cPickle.loads(_t)
-                    except (TypeError, zlib.error, cPickle.PickleError) as exp:
+                        tmp_broks = pickle.loads(_t)
+                    except (TypeError, zlib.error, pickle.PickleError) as exp:
                         logger.error('Cannot load broks data from %s : %s',
                                      links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
@@ -721,7 +723,7 @@ class Broker(BaseSatellite):
                 return
             self.setup_new_conf()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the http_daemon.
         # If so, we listen for it
         # When it pushes conf to us, we reinit connections
         self.watch_for_new_conf(0.0)

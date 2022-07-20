@@ -22,27 +22,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from Queue import Empty
 
 # In android, we should use threads, not process
-is_android = True
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 try:
     import android
+    is_android = True
 except ImportError:
     is_android = False
 
-if not is_android:
-    from multiprocessing import Process, Queue
-else:
-    from Queue import Queue
+if is_android:
     from threading import Thread as Process
+else:
+    from multiprocessing import Process
 
+import six
 import os
+import io
 import time
 import sys
 import signal
 import traceback
-import cStringIO
+import multiprocessing
+if six.PY2:
+    from Queue import Queue, Empty
+else:
+    from queue import Queue, Empty
 
 
 from shinken.log import logger, BrokHandler
@@ -75,7 +82,10 @@ class Worker(object):
         self._timeout = timeout
         self.s = None
         self.processes_by_worker = processes_by_worker
-        self._c = Queue()  # Private Control queue for the Worker
+        if is_android:
+            self._c = Queue()  # Private Control queue for the Worker
+        else:
+            self._c = multiprocessing.Queue()  # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
             target = self.work
@@ -234,7 +244,7 @@ class Worker(object):
             self.do_work(s, returns_queue, c)
         # Catch any exception, try to print(it and exit anyway)
         except Exception as exp:
-            output = cStringIO.StringIO()
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Worker '%d' exit with an unmanaged exception : %s",
                          self.id, output.getvalue())

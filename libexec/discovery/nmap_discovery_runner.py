@@ -21,6 +21,8 @@
 
 # sudo nmap 192.168.0.1 --min-rate 1000 --max-retries 0 -sU -sT -T4 -O --traceroute -oX toto.xml
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import optparse
 import sys
 import os

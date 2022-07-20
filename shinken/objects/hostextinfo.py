@@ -23,23 +23,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 """ This is the main class for the Host ext info. In fact it's mainly
 about the configuration part. Parameters are merged in Hosts so it's
 no use in running part
 """
 
-
-from item import Item, Items
-
+import six
+from shinken.objects.item import Item, Items
 from shinken.autoslots import AutoSlots
 from shinken.util import to_hostnames_list
 from shinken.property import StringProp, ListProp
 
 
-class HostExtInfo(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
+class HostExtInfo(six.with_metaclass(AutoSlots, Item)):
 
     id = 1  # zero is reserved for host (primary node for parents)
     my_type = 'hostextinfo'

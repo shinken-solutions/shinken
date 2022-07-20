@@ -23,15 +23,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import time
 import os
-import cStringIO
+import io
+import sys
 import tempfile
 import traceback
-import cPickle
+import pickle
 
 import threading
-from Queue import Empty
+if six.PY2:
+    from Queue import Empty
+else:
+    from queue import Empty
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
@@ -392,7 +399,7 @@ class Scheduler(object):
                     logger.error("The instance %s raise an exception %s."
                                  "I disable it and set it to restart it later",
                                  inst.get_name(), str(exp))
-                    output = cStringIO.StringIO()
+                    output = io.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Exception trace follows: %s", output.getvalue())
                     output.close()
@@ -440,7 +447,7 @@ class Scheduler(object):
         # For broks and actions, it's more simple
         # or brosk, manage global but also all brokers queue
         b_lists = [self.broks]
-        for (bname, e) in self.brokers.iteritems():
+        for (bname, e) in self.brokers.items():
             b_lists.append(e['broks'])
         nb_broks_drops = 0
         for broks in b_lists:
@@ -555,7 +562,7 @@ class Scheduler(object):
     # we take the sons and we put them into our actions queue
     def scatter_master_notifications(self):
         now = time.time()
-        for a in self.actions.values():
+        for a in list(self.actions.values()):
             # We only want notifications
             if a.is_a != 'notification':
                 continue
@@ -628,7 +635,7 @@ class Scheduler(object):
 
         # If poller want to do checks
         if do_checks:
-            for c in sorted(self.checks.itervalues(), key=get_prio):
+            for c in sorted(self.checks.values(), key=get_prio):
                 if max_actions is not None and len(res) >= max_actions:
                     break
                 #  If the command is untagged, and the poller too, or if both are tagged
@@ -649,7 +656,7 @@ class Scheduler(object):
 
         # If reactionner want to notify too
         if do_actions:
-            for a in sorted(self.actions.itervalues(), key=get_prio):
+            for a in sorted(self.actions.values(), key=get_prio):
                 if max_actions is not None and len(res) >= max_actions:
                     break
                 is_master = (a.is_a == 'notification' and not a.contact)
@@ -688,10 +695,6 @@ class Scheduler(object):
                     # sets the status to zombie, so we need to save it here.
                     timeout = True
                     execution_time = c.execution_time
-
-                # Add protection for strange charset
-                if isinstance(c.output, str):
-                    c.output = c.output.decode('utf8', 'ignore')
 
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
@@ -898,7 +901,7 @@ class Scheduler(object):
 
                     # now go the cpickle pass, and catch possible errors from it
                     try:
-                        results = cPickle.loads(results)
+                        results = pickle.loads(results)
                     except Exception as exp:
                         logger.error('Cannot load passive results from satellite %s : %s',
                                      p['name'], str(exp))
@@ -933,7 +936,7 @@ class Scheduler(object):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    results = cPickle.loads(str(results))
+                    results = pickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results", nb_received)
@@ -1441,14 +1444,14 @@ class Scheduler(object):
 
         # A loop where those downtimes are removed
         # which were marked for deletion (mostly by dt.exit())
-        for dt in self.downtimes.values():
+        for dt in list(self.downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_downtime(dt.id)
                 broks.append(ref.get_update_status_brok())
 
         # Same for contact downtimes:
-        for dt in self.contact_downtimes.values():
+        for dt in list(self.contact_downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_contact_downtime(dt.id)
@@ -1456,7 +1459,7 @@ class Scheduler(object):
 
         # Downtimes are usually accompanied by a comment.
         # An exiting downtime also invalidates it's comment.
-        for c in self.comments.values():
+        for c in list(self.comments.values()):
             if c.can_be_deleted is True:
                 ref = c.ref
                 self.del_comment(c.id)
@@ -1659,7 +1662,7 @@ class Scheduler(object):
             all_commands[cmd] = (old_u_time, old_s_time)
         # now sort it
         p = []
-        for (c, e) in all_commands.iteritems():
+        for (c, e) in all_commands.items():
             u_time, s_time = e
             p.append({'cmd': c, 'u_time': u_time, 's_time': s_time})
 

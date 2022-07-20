@@ -23,6 +23,8 @@ This script will take the sqlite database of the livestatus module and
 split up the contents in single datafiles (1 for each day of data found).
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 import optparse
 import os

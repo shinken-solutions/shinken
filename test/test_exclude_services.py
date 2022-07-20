@@ -21,6 +21,9 @@
 #
 # This file is used to test object properties overriding.
 #
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from functools import partial
 
 import re

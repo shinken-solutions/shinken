@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -47,7 +49,7 @@ class TestSchedCleanQueues(ShinkenTest):
 
         #host.__class__.obsess_over = True
         #host.obsess_over_host = True
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             host.get_obsessive_compulsive_processor_command()
         print("New len", len(host.actions))
         self.assertGreaterEqual(len(host.actions), 1000)
@@ -63,7 +65,7 @@ class TestSchedCleanQueues(ShinkenTest):
         self.assertLess(len(self.sched.actions), 30)
 
         # Now for Notifications and co
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             host.create_notifications('PROBLEM')
         self.sched.get_new_actions()
         print(len(self.sched.actions))
@@ -77,7 +79,7 @@ class TestSchedCleanQueues(ShinkenTest):
 
         #####  And now broks
         l = []
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             b = host.get_update_status_brok()
             l.append(b)
         host.broks = l

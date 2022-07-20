@@ -23,17 +23,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
-
-import cPickle
-
+import sys
+import pickle
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPExceptions
-
-
 
 
 class SatelliteLink(Item):
@@ -321,19 +320,19 @@ class SatelliteLink(Item):
 
             # Protect against bad return
             if not isinstance(tab, dict):
-                print("[%s]What i managed: Got exception: bad what_i_managed returns" % \)
-                      self.get_name(), tab
+                print("[%s]What i managed: Got exception: bad what_i_managed returns" %
+                      self.get_name(), tab)
                 self.con = None
                 self.managed_confs = {}
                 return
 
             # Ok protect against json that is chaning keys as string instead of int
             tab_cleaned = {}
-            for (k, v) in tab.iteritems():
+            for (k, v) in tab.items():
                 try:
                     tab_cleaned[int(k)] = v
                 except ValueError:
-                    print("[%s]What i managed: Got exception: bad what_i_managed returns" % \
+                    print("[%s]What i managed: Got exception: bad what_i_managed returns" %
                           self.get_name(), tab)
             # We can update our list now
             self.managed_confs = tab_cleaned
@@ -342,7 +341,7 @@ class SatelliteLink(Item):
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
             self.con = None
-            print("[%s]What i managed: Got exception: %s %s %s" % \
+            print("[%s]What i managed: Got exception: %s %s %s" %
                   (self.get_name(), exp, type(exp), exp.__dict__))
             self.managed_confs = {}
 
@@ -385,7 +384,7 @@ class SatelliteLink(Item):
         try:
             self.con.get('ping')
             tab = self.con.get('get_external_commands', wait='long')
-            tab = cPickle.loads(str(tab))
+            tab = pickle.loads(str(tab))
             # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None

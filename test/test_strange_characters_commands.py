@@ -23,6 +23,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -67,10 +69,10 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         c.check_finished(8000)
         print(c.status)
         self.assertEqual('done', c.status)
-        self.assertEqual(u'£°é§', c.output)
+        self.assertEqual('£°é§', c.output)
         print("Done with good output, that's great")
         svc.consume_result(c)
-        self.assertEqual(unicode('£°é§'.decode('utf8')), svc.output)
+        self.assertEqual('£°é§', svc.output)
 
 
 

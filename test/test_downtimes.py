@@ -22,6 +22,8 @@
 # This file is used to test host- and service-downtimes.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 #time.time = original_time_time

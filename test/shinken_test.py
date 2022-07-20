@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 #
 # This file is used to test host- and service-downtimes.
 #
@@ -11,7 +13,6 @@ from functools import partial
 import time
 import datetime
 import os
-import string
 import re
 import random
 import copy
@@ -97,7 +98,7 @@ def safe_print(*args, **kw):
     if kw:
         raise ValueError('unhandled named/keyword argument(s): %r' % kw)
     #
-    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+    make_in_data_gen = lambda: ( a if isinstance(a, str)
                                 else
                             unicode(str(a), in_bytes_encoding, 'replace')
                         for a in args )
@@ -107,9 +108,9 @@ def safe_print(*args, **kw):
         possible_codings += ( 'ascii', )
 
     for coding in possible_codings:
-        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
+        data = ' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
         try:
-            sys.stdout.write(data)
+            sys.stdout.write(data.decode("utf-8"))
             break
         except UnicodeError as err:
             # there might still have some problem with the underlying sys.stdout.
@@ -120,7 +121,7 @@ def safe_print(*args, **kw):
                 raise
             sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
                 coding, err))
-    sys.stdout.write(b'\n')
+    sys.stdout.write('\n')
 
 
 
@@ -398,7 +399,7 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
+        for a in sorted(actions.values(), key=lambda x: x.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -489,7 +490,7 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(broks, lambda x, y: x.id - y.id)
+        broks = sorted(broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -522,7 +523,7 @@ class ShinkenTest(unittest.TestCase):
 
     def print_header(self):
         print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
-        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + str.center(self.id(), 78) + "#")
         print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def xtest_conf_is_correct(self):

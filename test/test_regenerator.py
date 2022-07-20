@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 from shinken_test import ShinkenTest, unittest
@@ -128,22 +130,22 @@ class TestRegenerator(ShinkenTest):
         b.prepare()
         print("GO BENCH!")
         t0 = time.time()
-        for i in xrange(1, 1000):
+        for i in range(1, 1000):
             b = svc.get_initial_status_brok()
             b.prepare()
             s = Service({})
-            for (prop, value) in b.data.iteritems():
+            for (prop, value) in b.data.items():
                 setattr(s, prop, value)
         t1 = time.time()
         print("Bench end:", t1 - t0)
 
         times = {}
         sizes = {}
-        import cPickle
+        import pickle
         data = {}
         cls = svc.__class__
         start = time.time()
-        for i in xrange(1, 10000):
+        for i in range(1, 10000):
             for prop, entry in svc.__class__.properties.items():
                 # Is this property intended for brokking?
                 if 'full_status' in entry.fill_brok:
@@ -152,16 +154,16 @@ class TestRegenerator(ShinkenTest):
                         times[prop] = 0
                         sizes[prop] = 0
                     t0 = time.time()
-                    tmp = cPickle.dumps(data[prop], 0)
+                    tmp = pickle.dumps(data[prop], 0)
                     sizes[prop] += len(tmp)
                     times[prop] += time.time() - t0
 
         print("Times")
-        for (k, v) in times.iteritems():
+        for (k, v) in times.items():
             print("\t%s: %s" % (k, v))
         print("\n\n")
         print("Sizes")
-        for (k, v) in sizes.iteritems():
+        for (k, v) in sizes.items():
             print("\t%s: %s" % (k, v))
         print("\n")
         print("total time", time.time() - start)

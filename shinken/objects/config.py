@@ -28,47 +28,49 @@
  them into independent parts. The main user of this is Arbiter, but schedulers
  use it too (but far less)"""
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 import sys
 import string
 import os
+import io
 import socket
 import itertools
 import time
 import random
-import cPickle
 import tempfile
-from StringIO import StringIO
-from multiprocessing import Process, Manager
+import pickle
 import json
 
-from item import Item
-from timeperiod import Timeperiod, Timeperiods
-from service import Service, Services
-from command import Command, Commands
-from resultmodulation import Resultmodulation, Resultmodulations
-from businessimpactmodulation import Businessimpactmodulation, Businessimpactmodulations
-from escalation import Escalation, Escalations
-from serviceescalation import Serviceescalation, Serviceescalations
-from hostescalation import Hostescalation, Hostescalations
-from host import Host, Hosts
-from hostgroup import Hostgroup, Hostgroups
-from realm import Realm, Realms
-from contact import Contact, Contacts
-from contactgroup import Contactgroup, Contactgroups
-from notificationway import NotificationWay, NotificationWays
-from checkmodulation import CheckModulation, CheckModulations
-from macromodulation import MacroModulation, MacroModulations
-from servicegroup import Servicegroup, Servicegroups
-from servicedependency import Servicedependency, Servicedependencies
-from hostdependency import Hostdependency, Hostdependencies
-from module import Module, Modules
-from discoveryrule import Discoveryrule, Discoveryrules
-from discoveryrun import Discoveryrun, Discoveryruns
-from hostextinfo import HostExtInfo, HostsExtInfo
-from serviceextinfo import ServiceExtInfo, ServicesExtInfo
-from trigger import Triggers
-from pack import Packs
+from multiprocessing import Process, Manager
+from shinken.objects.item import Item
+from shinken.objects.timeperiod import Timeperiod, Timeperiods
+from shinken.objects.service import Service, Services
+from shinken.objects.command import Command, Commands
+from shinken.objects.resultmodulation import Resultmodulation, Resultmodulations
+from shinken.objects.businessimpactmodulation import Businessimpactmodulation, Businessimpactmodulations
+from shinken.objects.escalation import Escalation, Escalations
+from shinken.objects.serviceescalation import Serviceescalation, Serviceescalations
+from shinken.objects.hostescalation import Hostescalation, Hostescalations
+from shinken.objects.host import Host, Hosts
+from shinken.objects.hostgroup import Hostgroup, Hostgroups
+from shinken.objects.realm import Realm, Realms
+from shinken.objects.contact import Contact, Contacts
+from shinken.objects.contactgroup import Contactgroup, Contactgroups
+from shinken.objects.notificationway import NotificationWay, NotificationWays
+from shinken.objects.checkmodulation import CheckModulation, CheckModulations
+from shinken.objects.macromodulation import MacroModulation, MacroModulations
+from shinken.objects.servicegroup import Servicegroup, Servicegroups
+from shinken.objects.servicedependency import Servicedependency, Servicedependencies
+from shinken.objects.hostdependency import Hostdependency, Hostdependencies
+from shinken.objects.module import Module, Modules
+from shinken.objects.discoveryrule import Discoveryrule, Discoveryrules
+from shinken.objects.discoveryrun import Discoveryrun, Discoveryruns
+from shinken.objects.hostextinfo import HostExtInfo, HostsExtInfo
+from shinken.objects.serviceextinfo import ServiceExtInfo, ServicesExtInfo
+from shinken.objects.trigger import Triggers
+from shinken.objects.pack import Packs
 from shinken.util import split_semicolon
 from shinken.objects.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
@@ -527,7 +529,7 @@ class Config(Item):
             UnusedProp(text=None),
 
         'modified_attributes':
-            IntegerProp(default=0L),
+            IntegerProp(default=0),
         # '$USERn$: {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
@@ -874,7 +876,7 @@ class Config(Item):
 
     def read_config(self, files):
         # just a first pass to get the cfg_file and all files in a buf
-        res = StringIO()
+        res = io.StringIO()
 
         for file in files:
             # We add a \n (or \r\n) to be sure config files are separated
@@ -885,7 +887,7 @@ class Config(Item):
                 logger.info("[config] opening '%s' configuration file", file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
-                fd = open(file, 'rU')
+                fd = open(file, 'r')
                 buf = fd.readlines()
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
@@ -896,7 +898,6 @@ class Config(Item):
                 continue
 
             for line in buf:
-                line = line.decode('utf8', 'replace')
                 res.write(line)
                 if line.endswith('\n'):
                     line = line[:-1]
@@ -909,11 +910,11 @@ class Config(Item):
                         cfg_file_name = os.path.join(self.config_base_dir, elts[1])
                     cfg_file_name = cfg_file_name.strip()
                     try:
-                        fd = open(cfg_file_name, 'rU')
+                        fd = open(cfg_file_name, 'r')
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'", cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        res.write(fd.read().decode('utf8', 'replace'))
+                        res.write(fd.read())
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
@@ -946,8 +947,8 @@ class Config(Item):
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' %
                                               (os.path.join(root, file)) + os.linesep)
-                                    fd = open(os.path.join(root, file), 'rU')
-                                    res.write(fd.read().decode('utf8', 'replace'))
+                                    fd = open(os.path.join(root, file), 'r')
+                                    res.write(fd.read())
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
@@ -1336,18 +1337,18 @@ class Config(Item):
         if os.name == 'nt' or not self.use_multiprocesses_serializer:
             logger.info('Using the default serialization pass')
             for r in self.realms:
-                for (i, conf) in r.confs.iteritems():
+                for (i, conf) in r.confs.items():
                     # Remember to protect the local conf hostgroups too!
                     conf.hostgroups.prepare_for_sending()
                     logger.debug('[%s] Serializing the configuration %d', r.get_name(), i)
                     t0 = time.time()
-                    r.serialized_confs[i] = cPickle.dumps(conf, 0)  # cPickle.HIGHEST_PROTOCOL)
+                    r.serialized_confs[i] = pickle.dumps(conf, 0)  # pickle.HIGHEST_PROTOCOL)
                     logger.debug("[config] time to serialize the conf %s:%s is %s (size:%s)",
                                  r.get_name(), i, time.time() - t0, len(r.serialized_confs[i]))
                     logger.debug("PICKLE LEN : %d", len(r.serialized_confs[i]))
             # Now pickle the whole conf, for easy and quick spare send
             t0 = time.time()
-            whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+            whole_conf_pack = pickle.dumps(self, pickle.HIGHEST_PROTOCOL)
             logger.debug("[config] time to serialize the global conf : %s (size:%s)",
                          time.time() - t0, len(whole_conf_pack))
             self.whole_conf_pack = whole_conf_pack
@@ -1363,7 +1364,7 @@ class Config(Item):
             q = m.list()
             for r in self.realms:
                 processes = []
-                for (i, conf) in r.confs.iteritems():
+                for (i, conf) in r.confs.items():
                     # This function will be called by the children, and will give
                     # us the pickle result
                     def Serialize_config(q, rname, i, conf):
@@ -1371,7 +1372,7 @@ class Config(Item):
                         conf.hostgroups.prepare_for_sending()
                         logger.debug('[%s] Serializing the configuration %d', rname, i)
                         t0 = time.time()
-                        res = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
+                        res = pickle.dumps(conf, pickle.HIGHEST_PROTOCOL)
                         logger.debug("[config] time to serialize the conf %s:%s is %s (size:%s)",
                                      rname, i, time.time() - t0, len(res))
                         q.append((i, res))
@@ -1416,7 +1417,7 @@ class Config(Item):
             # The function that just compute the whole conf pickle string, but n a children
             def create_whole_conf_pack(whole_queue, self):
                 logger.debug("[config] sub processing the whole configuration pack creation")
-                whole_queue.append(cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL))
+                whole_queue.append(pickle.dumps(self, pickle.HIGHEST_PROTOCOL))
                 logger.debug("[config] sub processing the whole configuration pack creation "
                              "finished")
 
@@ -2084,7 +2085,7 @@ class Config(Item):
         :rtype: int
         :return: The least weighted scheduler id
         """
-        distribution_ids = distribution.values()
+        distribution_ids = list(distribution.values())
         # Scheduler not having config yet have precedence
         no_conf = [i for i in scheduler_ids if i not in distribution_ids]
         if no_conf:
@@ -2220,7 +2221,6 @@ class Config(Item):
             # So dispatching is loadbalanced in a realm
             # but add a entry in the roundrobin tourniquet for
             # every weight point schedulers (so Weight round robin)
-            weight_dict = {}
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
 
@@ -2240,17 +2240,15 @@ class Config(Item):
                 r.packs = []  # Dumb pack
                 continue
 
-            packindex = 0
             packindices = {}
-            for s in no_spare_schedulers:
-                packindices[s.id] = packindex
-                packindex += 1
-                for i in xrange(0, s.weight):
-                    weight_dict[len(weight_dict)] = s.id
-            weight_scheduler_ids = weight_dict.keys()
+            weight_scheduler_ids = []
+            for i, s in enumerate(no_spare_schedulers):
+                packindices[s.id] = i
+                for _ in range(0, s.weight):
+                    weight_scheduler_ids.append(s.id)
 
             # We must have nb_schedulers packs
-            for i in xrange(0, nb_schedulers):
+            for i in range(0, nb_schedulers):
                 packs[i] = []
 
             # Try to load the history association dict so we will try to
@@ -2258,42 +2256,11 @@ class Config(Item):
             assoc = {}
 
             # Now we explode the numerous packs into nb_packs reals packs:
-            # we 'load balance' them in a roundrobin way
+            # we 'load balance' them trying to equilibrate number of objects
+            # to check
             for pack in r.packs:
-                valid_value = False
-                old_pack = -1
+                scheduler_id = self.get_least_loaded_scheduler_id(weight_scheduler_ids, assoc)
                 for elt in pack:
-                    # print('Look for host', elt.get_name(), 'in assoc')
-                    old_i = assoc.get(elt.get_name(), -1)
-                    # print('Founded in ASSOC: ', elt.get_name(),old_i)
-                    # Maybe it's a new, if so, don't count it
-                    if old_i == -1:
-                        continue
-                    # Maybe it is the first we look at, if so, take it's value
-                    if old_pack == -1 and old_i != -1:
-                        # print('First value set', elt.get_name(), old_i)
-                        old_pack = old_i
-                        valid_value = True
-                        continue
-                    if old_i == old_pack:
-                        # print('I found a match between elements', old_i)
-                        valid_value = True
-                    if old_i != old_pack:
-                        # print('Outch found a change sorry', old_i, old_pack)
-                        valid_value = False
-                # print('Is valid?', elt.get_name(), valid_value, old_pack)
-                i = None
-                # If it's a valid sub pack and the pack id really exist, use it!
-                if valid_value and old_pack in packindices:
-                    # print('Use a old id for pack', old_pack, [h.get_name() for h in pack])
-                    i = old_pack
-                else:  # take a new one
-                    # print('take a new id for pack', [h.get_name() for h in pack])
-                    i = self.get_least_loaded_scheduler_id(weight_scheduler_ids, assoc)
-
-                for elt in pack:
-                    # print('We got the element', elt.get_full_name(), ' in pack', i, packindices)
-                    scheduler_id = weight_dict[i]
                     packs[packindices[scheduler_id]].append(elt)
                     assoc[elt.get_name()] = i
                     for svc in elt.services:
@@ -2330,7 +2297,7 @@ class Config(Item):
         # conf but without hosts and services (because they are dispatched between
         # theses configurations)
         self.confs = {}
-        for i in xrange(0, nb_parts):
+        for i in range(0, nb_parts):
             # print("Create Conf:", i, '/', nb_parts -1)
             cur_conf = self.confs[i] = Config()
 
@@ -2494,7 +2461,7 @@ class Config(Item):
         if f is None:
             d = tempfile.gettempdir()
             p = os.path.join(d, 'shinken-config-dump-%d' % time.time())
-            f = open(p, "wb")
+            f = open(p, "w")
             close = True
         else:
             close = False
@@ -2513,7 +2480,7 @@ class Config(Item):
 # ...
 def lazy():
     # let's compute the "USER" properties and macros..
-    for n in xrange(1, 256):
+    for n in range(1, 256):
         n = str(n)
         Config.properties['$USER' + str(n) + '$'] = StringProp(default='')
         Config.macros['USER' + str(n)] = '$USER' + n + '$'

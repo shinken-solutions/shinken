@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import sys
 import time
@@ -233,11 +235,11 @@ class TestAction(ShinkenTest):
         a.env = {}
 
         if os.name == 'nt':
-            a.command = r"""python -c 'print("A"*1000000'""")
+            a.command = """python3 -c 'print("A"*1000000)'"""
             # FROM NOW IT4S FAIL ON WINDOWS :(
             return
         else:
-            a.command = r"""python -u -c 'print("A"*100000'""")
+            a.command = """python3 -u -c 'print("A"*100000)'"""
         print("EXECUTE")
         a.execute()
         print("EXECUTE FINISE")

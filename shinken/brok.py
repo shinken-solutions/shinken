@@ -22,14 +22,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 from shinken.safepickle import SafeUnpickler
+import pickle
+import sys
+import io
 
 class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
     """
-    __slots__ = ('__dict__', 'id', 'type', 'data', 'prepared', 'instance_id')
+    __slots__ = ('__dict__', 'type', 'data', 'prepared', 'instance_id')
     id = 0
     my_type = 'brok'
 
@@ -37,7 +42,7 @@ class Brok:
         self.type = type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL)
+        self.data = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
         self.prepared = False
 
 
@@ -51,7 +56,10 @@ class Brok:
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
         if hasattr(self, 'prepared') and not self.prepared:
-            self.data = SafeUnpickler.loads(self.data)
+            if six.PY2:
+                self.data = SafeUnpickler.loads(self.data)
+            else:
+                self.data = SafeUnpickler(io.BytesIO(self.data)).load()
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True

@@ -22,13 +22,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import signal
 import time
 import traceback
-import cPickle
 import zlib
 import base64
+import pickle
 import sys
 
 from shinken.scheduler import Scheduler
@@ -73,8 +75,8 @@ if not, they must drop their checks """
         # print("Sending %d checks" % len(res))
         self.app.nb_checks_send += len(res)
 
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
-        # return zlib.compress(cPickle.dumps(res), 2)
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
+        # return zlib.compress(pickle.dumps(res), 2)
     get_checks.encode = 'raw'
 
 
@@ -122,8 +124,8 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
-        # return zlib.compress(cPickle.dumps(res), 2)
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
+        # return zlib.compress(pickle.dumps(res), 2)
     get_broks.encode = 'raw'
 
 
@@ -400,7 +402,7 @@ class Shinken(BaseSatellite):
                           statsd_pattern=statsd_pattern)
 
         t0 = time.time()
-        conf = cPickle.loads(conf_raw)
+        conf = pickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs", t0, time.time() - t0)
 
         if harakiri_threshold is not None:

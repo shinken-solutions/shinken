@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import subprocess
 from time import sleep
@@ -45,7 +47,7 @@ class testSchedulerInit(ShinkenTest):
 
     def create_daemon(self):
         cls = Shinken
-        return cls(daemons_config[cls], False, True, False, None, '')
+        return cls(daemons_config[cls], False, True, True, None, '')
 
     def _get_subproc_data(self, proc):
         try:
@@ -59,15 +61,9 @@ class testSchedulerInit(ShinkenTest):
         data['rc'] = proc.returncode
         return data
 
-    def tearDown(self):
-        proc = getattr(self, 'arb_proc', None)
-        if proc:
-            self._get_subproc_data(proc)  # so to terminate / wait it..
-            print("HEHE", proc.__dict__)
-
     def test_scheduler_init(self):
 
-        shinken_log.local_log = None  # otherwise get some "trashs" logs..
+        #shinken_log.local_log = None  # otherwise get some "trashs" logs..
         d = self.create_daemon()
 
         d.load_config_file()
@@ -90,7 +86,9 @@ class testSchedulerInit(ShinkenTest):
         # it will also kill sons
         args = ["../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
         print("Launching sub arbiter with", args)
-        proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        #proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        #            preexec_fn=os.setsid)
+        proc = self.arb_proc = subprocess.Popen(args,
                     preexec_fn=os.setsid)
 
         # Ok, now the conf
@@ -108,18 +106,17 @@ class testSchedulerInit(ShinkenTest):
         for fun in expected_list:
             assert(fun in reg_list)
 
-
         # Test that use_ssl parameter generates the good uri
-        print(d.pollers)
-        if d.pollers[d.pollers.keys()[0]]['use_ssl']:
-            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'https://localhost:7771/'
-        else:
-            assert d.pollers[d.pollers.keys()[0]]['uri'] == 'http://localhost:7771/'
-
+        for poller in d.pollers.values():
+            if poller['use_ssl']:
+                assert poller['uri'] == 'https://localhost:7771/'
+            else:
+                assert poller['uri'] == 'http://localhost:7771/'
 
         # Test receivers are init like pollers
         assert d.reactionners != {}  # Previously this was {} for ever
-        assert d.reactionners[d.reactionners.keys()[0]]['uri'] == 'http://localhost:7769/' # Test dummy value
+        for reactionner in d.reactionners.values():
+            assert reactionner['uri'] == 'http://localhost:7769/' # Test dummy value
 
         # I want a simple init
         d.must_run = False
@@ -127,17 +124,21 @@ class testSchedulerInit(ShinkenTest):
         d.sched.run()
 
         # Test con key is missing or not. Passive daemon should have one
-        assert 'con' not in d.pollers[d.pollers.keys()[0]] # Ensure con key is not here, deamon is not passive so we did not try to connect
-        assert d.reactionners[d.reactionners.keys()[0]]['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
+        for poller in d.pollers.values():
+            assert 'con' not in poller # Ensure con key is not here, deamon is not passive so we did not try to connect
+        for reactionner in d.reactionners.values():
+            assert reactionner['con'] is None  # Previously only pollers were init (sould be None), here daemon is passive
 
         # "Clean" shutdown
         sleep(2)
         try:
-            pid = int(open("tmp/arbiterd.pid").read())
-            print ("KILLING %d" % pid)*50
-            os.kill(int(open("tmp/arbiterd.pid").read()), 2)
+            with open("tmp/arbiterd.pid", "r") as f:
+                pid = int(f.read())
+            print("KILLING %d" % pid)
+            os.kill(pid, 2)
             d.do_stop()
         except Exception as err:
+            proc = getattr(self, 'arb_proc', None)
             data = self._get_subproc_data(proc)
             data.update(err=err)
             self.assertTrue(False,

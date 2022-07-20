@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 class DB(object):
     """DB is a generic class for SQL Database"""
@@ -33,11 +35,9 @@ class DB(object):
         """Get a unicode from a value"""
         # If raw string, go in unicode
         if isinstance(val, str):
-            val = val.decode('utf8', 'ignore').replace("'", "''")
-        elif isinstance(val, unicode):
             val = val.replace("'", "''")
         else:  # other type, we can str
-            val = unicode(str(val))
+            val = str(val)
             val = val.replace("'", "''")
         return val
 

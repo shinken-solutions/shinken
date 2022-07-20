@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -91,7 +93,7 @@ class TestDiscoveryConf(ShinkenTest):
         self.assertIsNotNone(nmap.discoveryrun_command)
         # Launch it
         nmap.launch()
-        for i in xrange(1, 5):
+        for i in range(1, 5):
             nmap.check_finished()
             if nmap.is_finished():
                 break
@@ -144,7 +146,7 @@ class TestDiscoveryConf(ShinkenTest):
 
         # Should not match this
         self.assertEqual(False, genhttp.is_matching(key, value) )
-        
+
         # But should match this one
         key = 'openports'
         value = '80'
@@ -163,8 +165,8 @@ class TestDiscoveryConf(ShinkenTest):
 
         print("Writing properties")
         print(genhttp.writing_properties)
-        
-        
+
+
 
 
     def test_discorun_matches(self):
@@ -189,7 +191,7 @@ class TestDiscoveryConf(ShinkenTest):
         self.assertEqual(True, linux.is_matching_disco_datas(l))
 
 
-    
+
 
 
 if __name__ == '__main__':

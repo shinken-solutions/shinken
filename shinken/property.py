@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 
 from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
@@ -241,37 +243,37 @@ class DictProp(Property):
             elts_prop = Property of dict members
         """
         super(DictProp, self).__init__(*args, **kwargs)
-        
+
         if elts_prop is not None and not issubclass(elts_prop, Property):
             raise TypeError("DictProp constructor only accept Property"
                             "sub-classes as elts_prop parameter")
         if elts_prop is not None:
             self.elts_prop = elts_prop()
-    
-    
+
+
     def pythonize(self, val):
         val = unique_value(val)
-        
-        
+
+
         def split(kv):
             m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
             if m is None:
                 raise ValueError
-            
+
             return (
                 m.group(1),
                 # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None
                 # else self.elts_prop.pythonize(m.group(2))
                 (self.elts_prop.pythonize(m.group(2)), m.group(2))[self.elts_prop is None]
             )
-        
-        
+
+
         if val is None:
             return (dict())
-        
+
         if self.elts_prop is None:
             return val
-        
+
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
         print(">>>", dict([split(kv) for kv in to_split(val)]))
         return dict([split(kv) for kv in to_split(val)])

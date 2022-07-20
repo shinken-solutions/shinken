@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 from shinken.util import filter_any, filter_none
 from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group,\

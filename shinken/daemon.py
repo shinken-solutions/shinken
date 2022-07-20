@@ -22,6 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import os
 import errno
 import stat
@@ -30,16 +33,20 @@ import time
 import signal
 import select
 import random
-import ConfigParser
 import threading
 import traceback
-import cStringIO
 import logging
 import inspect
-import cPickle
 import subprocess
+import pickle
 import socket
-from Queue import Empty
+import io
+if six.PY2:
+    import ConfigParser as configparser
+    from Queue import Empty
+else:
+    from queue import Empty
+    import configparser
 
 # Try to see if we are in an android device or not
 try:
@@ -93,7 +100,7 @@ except ImportError as exp:  # Like in nt system or Android
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
-UMASK = 027
+UMASK = 0o27
 from shinken.bin import VERSION
 
 """ TODO: Add some comment about this class for the doc"""
@@ -185,7 +192,7 @@ class Interface(object):
     doc = 'List the api methods and their parameters'
     def api_full(self):
         res = {}
-        for (fname, f) in self.app.http_daemon.registered_fun.iteritems():
+        for (fname, f) in self.app.http_daemon.registered_fun.items():
             fclean = fname.replace('_', '-')
             argspec = inspect.getargspec(f)
             args = [a for a in argspec.args if a != 'self']
@@ -193,7 +200,7 @@ class Interface(object):
             e = {}
             # Get a string about the args and co
             _s_nondef_args = ', '.join([a for a in args if a not in defaults])
-            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.iteritems()])
+            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.items()])
             _s_args = ''
             if _s_nondef_args:
                 _s_args += _s_nondef_args
@@ -368,7 +375,7 @@ class Daemon(object):
             return False
         logger.info("Reloading daemon [pid=%s]", p.pid)
         try:
-            raw_conf = cPickle.dumps(self.new_conf)
+            raw_conf = pickle.dumps(self.new_conf)
             p.stdin.write(raw_conf)
             p.stdin.close()
         except Exception as e:
@@ -422,7 +429,10 @@ class Daemon(object):
         if self.is_switched_process():
             logger.info("Loading configuration from parent")
             raw_config = sys.stdin.read()
-            new_conf = SafeUnpickler.loads(raw_config)
+            if six.PY2:
+                new_conf = SafeUnpickler.loads(raw_config)
+            else:
+                new_conf = SafeUnpickler(io.BytesIO(raw_config)).load()
             logger.info("Successfully loaded configuration from parent")
             logger.info("Waiting for parent to stop")
             self.wait_parent_exit()
@@ -727,8 +737,8 @@ class Daemon(object):
         # a socket of your http server alive
         def _create_manager(self):
             manager = SyncManager(('127.0.0.1', 0))
-        
-        
+
+
             def close_http_daemon(daemon):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase
@@ -736,11 +746,14 @@ class Daemon(object):
                 except Exception as exp:
                     pass
                 daemon.shutdown()
-        
-        
+
+
             # Some multiprocessing lib got problems with start() that cannot take args
             # so we must look at it before
-            startargs = inspect.getargspec(manager.start)
+            if six.PY2:
+                startargs = inspect.getargspec(manager.start)
+            else:
+                startargs = inspect.getfullargspec(manager.start)
             # startargs[0] will be ['self'] if old multiprocessing lib
             # and ['self', 'initializer', 'initargs'] in newer ones
             # note: windows do not like pickle http_daemon...
@@ -753,14 +766,14 @@ class Daemon(object):
 
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
     # and such things to have a true DAEMON :D
-    # use_pyro= open the TCP port for communication
+    # bind_port= open the TCP port for communication
     # fake= use for test to do not launch runonly feature, like the stats reaper thread
-    def do_daemon_init_and_start(self, use_pyro=True, fake=False):
+    def do_daemon_init_and_start(self, bind_port=True, fake=False):
         self.change_to_workdir()
         self.change_to_user_group()
         self.check_parallel_run()
-        if use_pyro:
-            self.setup_pyro_daemon()
+        if bind_port:
+            self.setup_daemon()
 
         # Setting log level
         logger.setLevel(self.log_level)
@@ -793,7 +806,7 @@ class Daemon(object):
 
         # Now start the http_daemon thread
         self.http_thread = None
-        if use_pyro:
+        if bind_port:
             # Directly acquire it, so the http_thread will wait for us
             self.http_daemon.lock.acquire()
             self.http_thread = threading.Thread(None, self.http_daemon_thread, 'http_thread')
@@ -804,8 +817,7 @@ class Daemon(object):
         # profiler.start()
 
 
-    # TODO: we do not use pyro anymore, change the function name....
-    def setup_pyro_daemon(self):
+    def setup_daemon(self):
         if hasattr(self, 'use_ssl'):  # "common" daemon
             ssl_conf = self
         else:
@@ -968,7 +980,7 @@ class Daemon(object):
     def parse_config_file(self):
         properties = self.__class__.properties
         if self.config_file is not None:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
                 logger.error("Bad or missing config file: %s ", self.config_file)
@@ -978,7 +990,7 @@ class Daemon(object):
                     if key in properties:
                         value = properties[key].pythonize(value)
                     setattr(self, key, value)
-            except ConfigParser.InterpolationMissingOptionError as e:
+            except configparser.InterpolationMissingOptionError as e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
                 logger.error("Incorrect or missing variable '%s' in config file : %s",
@@ -1061,7 +1073,7 @@ class Daemon(object):
             self.http_daemon.run()
         except Exception as exp:
             logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
-            output = cStringIO.StringIO()
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this error: %s", output.getvalue())
             output.close()
@@ -1070,7 +1082,7 @@ class Daemon(object):
             os._exit(2)
 
 
-    # Wait up to timeout to handle the pyro daemon requests.
+    # Wait up to timeout to handle the http daemon requests.
     # If suppl_socks is given it also looks for activity on that list of fd.
     # Returns a 3-tuple:
     # If timeout: first arg is 0, second is [], third is possible system time change value

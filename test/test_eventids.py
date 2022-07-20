@@ -25,6 +25,8 @@
 # $HOSTEVENTID$, $HOSTPROBLEMID$ etc.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.schedulingitem import SchedulingItem
 

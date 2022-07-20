@@ -23,6 +23,8 @@
 # This file is used to test timeperiods
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.timeperiod import Timeperiod
 
@@ -126,7 +128,7 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 22:00:00", "%d %b %Y %H:%M:%S"))
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print("RES:", t_next_inv #, t.is_time_valid(july_the_12))
+        print("RES:", t_next_inv) #, t.is_time_valid(july_the_12))
         self.assertEqual("Tue Jul 13 07:01:00 2010", t_next_inv)
 
         # Now ask about at 00:00 time?
@@ -148,7 +150,7 @@ class TestTimeperiods(ShinkenTest):
         self.assertIsNot(t, None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print("RES:", t_next_inv #, t.is_time_valid(july_the_12))
+        print("RES:", t_next_inv) #, t.is_time_valid(july_the_12))
         self.assertEqual('Wed Jul 13 00:01:00 2011', t_next_inv)
 
     def test_simple_timeperiod_with_exclude(self):

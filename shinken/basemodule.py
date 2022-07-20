@@ -26,6 +26,8 @@
 that shinken modules will subclass
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import signal
 import time

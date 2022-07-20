@@ -22,6 +22,8 @@
 # This file is used to test host- and service-downtimes.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.serviceescalation import Serviceescalation
 
@@ -555,7 +557,7 @@ class TestEscalations(ShinkenTest):
         cnn = svc.current_notification_number
 
         # Ok we should have one notification
-        next_notifications = svc.notifications_in_progress.values()
+        next_notifications = list(svc.notifications_in_progress.values())
         print("LEN", len(next_notifications))
         for n in next_notifications:
             print(n)
@@ -588,7 +590,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
 
         # Ok we should have one notification
-        next_notifications = svc.notifications_in_progress.values()
+        next_notifications = list(svc.notifications_in_progress.values())
         self.assertEqual(1, len(next_notifications))
         n = next_notifications.pop()
         print("Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations)

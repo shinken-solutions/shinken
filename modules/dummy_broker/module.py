@@ -25,6 +25,8 @@
 
 # This Class is an example of a broker  module
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
@@ -54,9 +56,9 @@ class Dummy_broker(BaseModule):
         logger.info("[Dummy Broker] Initialization of the dummy broker module")
 
 
-      
-    # An host check have just arrived, we UPDATE data info with this                                                                                                      
+
+    # An host check have just arrived, we UPDATE data info with this
 #    def manage_brok(self, b):
 #        #Do things
 #        pass
-    
+

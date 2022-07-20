@@ -28,11 +28,14 @@ to look at the schedulingitem class that manage all
 scheduling/consume check smart things :)
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import time
 import itertools
 
-from item import Items
-from schedulingitem import SchedulingItem
+from shinken.objects.item import Items
+from shinken.objects.schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
@@ -46,10 +49,7 @@ from shinken.log import logger, naglog_result
 
 import uuid
 
-class Host(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
+class Host(six.with_metaclass(AutoSlots, SchedulingItem)):
 
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
@@ -276,7 +276,7 @@ class Host(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -1571,7 +1571,7 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        for t in self.templates.itervalues():
+        for t in self.templates.values():
             # items::explode_contact_groups_into_contacts
             # take all contacts from our contact_groups into our contact property
             self.explode_contact_groups_into_contacts(t, contactgroups)

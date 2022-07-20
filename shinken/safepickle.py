@@ -21,19 +21,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import pickle
 import sys
-import cPickle
-from cStringIO import StringIO
-
-
 
 # Unpickle but strip and remove all __reduce__ things
 # so we don't allow external code to be executed
 # Code from Graphite::carbon project
-class SafeUnpickler(object):
+class SafeUnpickler(pickle.Unpickler):
     PICKLE_SAFE = {
         'copy_reg': set(['_reconstructor']),
         '__builtin__': set(['object', 'set']),
+        'builtins': set(['object', 'set']),
     }
 
 
@@ -47,10 +47,3 @@ class SafeUnpickler(object):
             raise ValueError('Attempting to unpickle unsafe class %s/%s' %
                              (module, name))
         return getattr(mod, name)
-
-
-    @classmethod
-    def loads(cls, pickle_string):
-        pickle_obj = cPickle.Unpickler(StringIO(pickle_string))
-        pickle_obj.find_global = cls.find_class
-        return pickle_obj.load()

@@ -1,9 +1,9 @@
 #srvs = get_objects("test_h*_0/HTTP-*")
-#print "SERVICES", srvs
+#print("SERVICES", srvs)
 times = perfs("test_host_0/HTTP-*", 'time')
-print "Founded times", times
+print("Founded times", times)
 avg = sum(times)/len(times)
 
-print "AVG", avg
+print("AVG", avg)
 
 set_value(self, output='OK all is green', perfdata='avgtime=%dms' % avg, return_code=0)

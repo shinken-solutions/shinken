@@ -23,6 +23,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 from shinken.worker import Worker
@@ -81,7 +83,7 @@ class TestTimeout(ShinkenTest):
         w.c = control_queue
         # Now we simulate the Worker's work() routine. We can't call it
         # as w.work() because it is an endless loop
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             w.get_new_checks()
             # During the first loop the sleeping command is launched
             w.launch_new_checks()

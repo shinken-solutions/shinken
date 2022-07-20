@@ -23,6 +23,8 @@
 # This file is used to test attribute inheritance and the right order
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -91,14 +93,14 @@ class TestPlusInInheritance(ShinkenTest):
         self.assertIn("test_contact_2", [c .get_name() for c in svc3.contacts])
         self._dump_svc(svc3)
 
-	# Now Let's check multi level service inheritance
+        # Now Let's check multi level service inheritance
 
-	svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST-DESC4")
+        svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST-DESC4")
         self.assertIn("test_contact_1",  [c .get_name() for c in svc4.contacts])
         self.assertIn("test_contact_2",  [c .get_name() for c in svc4.contacts])
         self._dump_svc(svc4)
 
-	svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST-DESC4b")
+        svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "TEST-DESC4b")
         self.assertIn("test_contact_2",  [c .get_name() for c in svc5.contacts])
         self._dump_svc(svc5)
 

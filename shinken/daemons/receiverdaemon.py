@@ -23,15 +23,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import time
 import traceback
 import sys
 import base64
 import zlib
-import cPickle
-
-from multiprocessing import active_children
+import pickle
 
 
 from shinken.satellite import Satellite
@@ -65,7 +65,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
     # A broker ask us broks
     def get_broks(self, bname, broks_batch=0):
         res = self.app.get_broks(broks_batch)
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
     get_broks.encode = 'raw'
 
 # Our main APP class
@@ -352,7 +352,7 @@ class Receiver(Satellite):
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the http_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)

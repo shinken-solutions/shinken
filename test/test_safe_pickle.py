@@ -22,11 +22,14 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-import cPickle as pickle
+import six
 from shinken_test import *
-
 from shinken.safepickle import SafeUnpickler
+import pickle
+import sys
+import io
 
 
 should_not_change = False
@@ -47,9 +50,12 @@ class TestSafePickle(ShinkenTest):
 
 
     def launch_safe_pickle(self, buf):
-        SafeUnpickler.loads(buf)
-        
-        
+        if six.PY2:
+            SafeUnpickler.loads(buf)
+        else:
+            SafeUnpickler(io.BytesIO(v)).load()
+
+
     def test_safe_pickle(self):
         global should_not_change
 
@@ -62,16 +68,18 @@ class TestSafePickle(ShinkenTest):
         pickle.loads(buf)
         print(should_not_change)
         self.assertTrue(should_not_change)
-        
+
         # reset and try our fix
         should_not_change = False
-        #SafeUnpickler.loads(buf)
         def launch_safe_pickle():
-            SafeUnpickler.loads(buf)
+            if six.PY2:
+                SafeUnpickler.loads(buf)
+            else:
+                SafeUnpickler(io.BytesIO(buf)).load()
         self.assertRaises(ValueError, launch_safe_pickle)
         print(should_not_change)
         self.assertFalse(should_not_change)
-        
-        
+
+
 if __name__ == '__main__':
     unittest.main()

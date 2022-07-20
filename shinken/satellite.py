@@ -34,33 +34,28 @@ If Arbiter wants it to have a new conf, the satellite forgets the previous
  Schedulers (and actions into) and takes the new ones.
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-
+import six
+import sys
 # Try to see if we are in an android device or not
-is_android = True
 try:
     import android
+    is_android = True
 except ImportError:
     is_android = False
-
-from Queue import Empty
-
-if not is_android:
-    from multiprocessing import Queue, active_children, cpu_count
-else:
-    from Queue import Queue
 
 import os
 import copy
 import time
-import cPickle
+import pickle
 import traceback
 import zlib
 import base64
 import threading
+import multiprocessing
 
 from shinken.http_client import HTTPClient, HTTPExceptions
-
 from shinken.message import Message
 from shinken.worker import Worker
 from shinken.load import Load
@@ -68,6 +63,10 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.util import get_memory, parse_memory_expr, free_memory
 from shinken.stats import statsmgr
+if six.PY2:
+    from Queue import Empty, Queue
+else:
+    from queue import Empty, Queue
 
 
 # Class to tell that we are facing a non worker module
@@ -133,7 +132,7 @@ class IForArbiter(Interface):
     def get_external_commands(self):
         with self.app.external_commands_lock:
             cmds = self.app.get_external_commands()
-            raw = cPickle.dumps(cmds)
+            raw = pickle.dumps(cmds)
         return raw
     get_external_commands.need_lock = False
     get_external_commands.doc = doc
@@ -174,7 +173,7 @@ class ISchedulers(Interface):
         # print("A scheduler ask me the returns", sched_id)
         ret = self.app.get_return_for_passive(int(sched_id))
         # print("Send mack", len(ret), "returns")
-        return cPickle.dumps(ret)
+        return pickle.dumps(ret)
     get_returns.doc = doc
 
 
@@ -189,7 +188,7 @@ class IBroks(Interface):
     # poller or reactionner ask us actions
     def get_broks(self, bname, broks_batch=0):
         res = self.app.get_broks(broks_batch)
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
     get_broks.doc = doc
 
 
@@ -242,7 +241,7 @@ class BaseSatellite(Daemon):
         self.external_commands_lock = threading.RLock()
 
 
-    # The arbiter can resent us new conf in the pyro_daemon port.
+    # The arbiter can resent us new conf in the http_daemon port.
     # We do not want to loose time about it, so it's not a blocking
     # wait, timeout = 0s
     # If it send us a new conf, we reinit the connections of all schedulers
@@ -261,7 +260,7 @@ class BaseSatellite(Daemon):
     # for me it's the ids of my schedulers
     def what_i_managed(self):
         r = {}
-        for (k, v) in self.schedulers.iteritems():
+        for (k, v) in self.schedulers.items():
             r[k] = v['push_flavor']
         return r
 
@@ -301,7 +300,6 @@ class Satellite(BaseSatellite):
 
         self.returns_queue = None
         self.q_by_mod = {}
-
 
     # Wrapper function for the true con init
     def pynag_con_init(self, id):
@@ -343,7 +341,7 @@ class Satellite(BaseSatellite):
         try:
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
-        except (HTTPExceptions, cPickle.PicklingError, KeyError), exp:
+        except (HTTPExceptions, pickle.PicklingError, KeyError) as exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
                            self.name, sname, str(exp))
             sched['con'] = None
@@ -586,7 +584,7 @@ class Satellite(BaseSatellite):
         # In android, we are using threads, so there is not active_children call
         if not is_android:
             # Active children make a join with everyone, useful :)
-            active_children()
+            multiprocessing.active_children()
 
         w_to_del = []
         for w in self.workers.values():
@@ -755,7 +753,7 @@ class Satellite(BaseSatellite):
                     # Explicit pickle load
                     tmp = base64.b64decode(tmp)
                     tmp = zlib.decompress(tmp)
-                    tmp = cPickle.loads(str(tmp))
+                    tmp = pickle.loads(str(tmp))
                     logger.debug("Ask actions to %d, got %d", sched_id, len(tmp))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
@@ -852,7 +850,7 @@ class Satellite(BaseSatellite):
                 return
             self.setup_new_conf()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the http_daemon.
         # If so, we listen to it
         # When it push a conf, we reinit connections
         # Sleep in waiting a new conf :)
@@ -1092,14 +1090,14 @@ class Satellite(BaseSatellite):
         self.max_workers = g_conf['max_workers']
         if self.max_workers == 0 and not is_android:
             try:
-                self.max_workers = cpu_count()
+                self.max_workers = multiprocessing.cpu_count()
             except NotImplementedError:
                 self.max_workers = 4
         logger.info("[%s] Using max workers: %s", self.name, self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
-                self.min_workers = cpu_count()
+                self.min_workers = multiprocessing.cpu_count()
             except NotImplementedError:
                 self.min_workers = 4
         logger.info("[%s] Using min workers: %s", self.name, self.min_workers)
@@ -1211,7 +1209,7 @@ class Satellite(BaseSatellite):
             self.modules_manager.start_external_instances()
 
             # Allocate Mortal Threads
-            for _ in xrange(1, self.max_workers):
+            for _ in range(1, self.max_workers):
                 to_del = []
                 for mod in self.q_by_mod:
                     try:

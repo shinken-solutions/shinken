@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.trigger import Trigger
 
@@ -48,7 +50,7 @@ class TestTriggers(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "AVG-HTTP")
 
         srvs = []
-        for i in xrange(1, 4):
+        for i in range(1, 4):
             s = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "HTTP-" + str(i))
             s.output = 'Http ok'
             s.perf_data = 'time=%dms' % i

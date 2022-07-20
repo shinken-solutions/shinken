@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2009-2012:
 #    Romain, FORLOT, romain.forlot@sydel.fr
-# 
+#
 # This file is part of Shinken.
 #
 # Shinken is free software: you can redistribute it and/or modify
@@ -25,6 +25,8 @@
 #
 ###############################################################
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 ### modules import
 import optparse
 import re
@@ -32,7 +34,7 @@ import subprocess
 import socket
 import fcntl
 import struct
- 
+
 SIOCGIFNETMASK = 0x891b
 eth_dev_name='eth0'
 
@@ -40,7 +42,7 @@ eth_dev_name='eth0'
 #  menu  #
 ##########
 
-parser = optparse.OptionParser('%prog [options] -t target') 
+parser = optparse.OptionParser('%prog [options] -t target')
 cmd = { 'ibm_ds' : '/opt/IBM_DS/client/SMcli',
         'example' : '/path/to/cmd',
       }
@@ -89,14 +91,14 @@ SANvendor = { 'ibm_ds' : { 'add_cmd' : [ cmd['ibm_ds'], '-A', target ],
 
 ##############
 #  functions #
-############## 
+##############
 
 ### Code snippet to retrieve some system network informations
 def get_network_mask(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     netmask = fcntl.ioctl(s, SIOCGIFNETMASK, struct.pack('256s', ifname))[20:24]
     return socket.inet_ntoa(netmask)
- 
+
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     return socket.inet_ntoa(fcntl.ioctl(
@@ -117,7 +119,7 @@ def set_ip():
     adding = subprocess.Popen(' '.join(addip), stdout=subprocess.PIPE, shell=True)
     debuging(adding.communicate()[0])
     adding.wait()
-    
+
 def get_SAN_profile():
     sanprofile = v['getprofile_cmd']
     get_managed_dev = subprocess.Popen(sanprofile,stdout=subprocess.PIPE)
@@ -148,7 +150,7 @@ def get_controllers_ip(san_profile, keep_on_same_network=False):
                ctrl.pop(i)
             i += 1
     return ctrl
-    
+
 ### converts the listed files systems writing and display them on the standard output
 def get_discovery_output(sanname, ctrlIP):
     i = 1

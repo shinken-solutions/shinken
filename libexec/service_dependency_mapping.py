@@ -16,7 +16,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This program get hosts informations from running arbiter daemon and 
+This program get hosts informations from running arbiter daemon and
 get service dependencies definition from config pack flat files then
 dump services dependencies according to the config files to a json
 that can be loaded in hot_dependencies_arbiter module.
@@ -27,12 +27,13 @@ definition to hosts.
 
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from shinken.objects.arbiterlink import ArbiterLink
 import os, sys, optparse, cPickle, shutil
 import shinken.daemons.arbiterdaemon
 from shinken.arbiterlink import ArbiterLink
-from shinken.http_client import HTTPExceptions 
+from shinken.http_client import HTTPExceptions
 from shinken.log import logger
 from shinken.objects.config import Config
 
@@ -56,7 +57,7 @@ VERSION = '0.2'
 class ShinkenAdmin():
 
     def __init__(self):
-        self.arb = None 
+        self.arb = None
         self.conf = None
         self.addr = 'localhost'
         self.port = '7770'
@@ -71,7 +72,7 @@ class ShinkenAdmin():
         Ex: connect to localhost, port 7770
         > connect
         '''
-    
+
         if verbose:
             print("Connection to %s:%s" % (self.addr, self.port))
         ArbiterLink.use_ssl = False
@@ -82,7 +83,7 @@ class ShinkenAdmin():
         if not self.arb.reachable:
             sys.exit("Connection to the arbiter got a problem")
         print("Connection OK")
-    
+
     def getconf(self, config):
         '''
         Get the data in the arbiter for a table and some properties
@@ -104,7 +105,7 @@ class ShinkenAdmin():
 
     def load_svc_mapping(self, hosts, svc_dep, verbose=False):
         '''
-        Make tuples mapping service dependencies. Return a list of tuples 
+        Make tuples mapping service dependencies. Return a list of tuples
         and need hosts and service dependencies parameter.
         '''
         r = []

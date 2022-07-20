@@ -22,6 +22,8 @@
 # This file is used to test object properties overriding.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import unittest, ShinkenTest
 import re
 
@@ -106,8 +108,8 @@ class TestInitialStateBadConf(ShinkenTest):
         [b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
-        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of u, d', log)]) )
-        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of c, u, w, o', log)]) )
+        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of o, d, u', log)]) )
+        self.assertEqual(1, len([log for log in logs if re.search('invalid initial_state: a, should be one of o, w, c, u', log)]) )
 
 if __name__ == '__main__':
     unittest.main()

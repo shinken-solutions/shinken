@@ -22,6 +22,8 @@ This program use libvirt to put host parent-child relations in a json one so it
 can be loaded in hot_dependencies_arbiter module
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import timeit
 import os
 import sys

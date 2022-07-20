@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import os
 import re
@@ -66,7 +68,7 @@ class Packs(Items):
                 if re.search("\.pack$", file):
                     p = os.path.join(root, file)
                     try:
-                        fd = open(p, 'rU')
+                        fd = open(p, 'r')
                         buf = fd.read()
                         fd.close()
                     except IOError as exp:

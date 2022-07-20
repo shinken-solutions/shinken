@@ -2,6 +2,8 @@
 
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import sys
 import re
@@ -60,13 +62,13 @@ def generate_default_shinken_file():
     templatefile = "bin/default/shinken.in"
     build_base = 'build'
     outfile = os.path.join(build_base, "bin/default/shinken")
-    
+
     # print('generating %s from %s', outfile, templatefile)
-    
+
     mkpath(os.path.dirname(outfile))
-    
+
     bin_path = default_paths['bin']
-    
+
     # Read the template file
     f = open(templatefile)
     buf = f.read()
@@ -186,7 +188,7 @@ try:
     if '' in sys.path:
         sys.path.remove('')
     import shinken
-    
+
     is_update = True
     print("Previous Shinken lib detected (%s)" % shinken.__file__)
 except ImportError:
@@ -201,7 +203,7 @@ if '--update' in args or opts.upgrade or '--upgrade' in args:
         sys.argv.remove('--update')
     if '--upgrade' in args:
         sys.argv.remove('--upgrade')
-    
+
     print("Shinken Lib Updating process only")
     is_update = True
 
@@ -225,7 +227,7 @@ group = opts.group or 'shinken'
 if is_install and not root and not is_update and pwd and not opts.skip_build:
     uid = get_uid(user)
     gid = get_gid(group)
-    
+
     if uid is None or gid is None:
         print("Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user, group, user))
         sys.exit(2)
@@ -289,7 +291,7 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
              ]
         )
     ]
-    
+
     if is_install:
         # warning: The default file will be generated a bit later
         data_files.append(
@@ -359,14 +361,14 @@ if os.name != 'nt' and not is_update:
             user, group))
         data_files.append((os.path.join(default_paths['etc'], 'daemons'),
                            [outname]))
-    
+
     # And update the shinken.cfg file for all /usr/local/shinken/var
     # value with good one
     for name in ['shinken.cfg']:
         inname = os.path.join('etc', name)
         outname = os.path.join('build', name)
         print('updating path in %s', outname)
-        
+
         ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
         update_file_with_string(inname, outname,
                                 ["shinken_user=\w+", "shinken_group=\w+", "workdir=.+", "lock_file=.+", "local_log=.+", "modules_dir=.+", "pack_distribution_file=.+"],
@@ -436,11 +438,11 @@ setup(
     install_requires=[
         required_pkgs
     ],
-    
+
     extras_require={
         'setproctitle': ['setproctitle']
     },
-    
+
     data_files=data_files,
 )
 
@@ -449,7 +451,7 @@ if pwd and not root and is_install:
     # assume a posix system
     uid = get_uid(user)
     gid = get_gid(group)
-    
+
     if uid is not None and gid is not None:
         # recursivly changing permissions for etc/shinken and var/lib/shinken
         for c in ['etc', 'run', 'log', 'var', 'libexec']:
@@ -461,7 +463,7 @@ if pwd and not root and is_install:
             recursive_chown(os.path.join(default_paths['bin'], bs), uid, gid, user, group)
             _chmodplusx(os.path.join(default_paths['bin'], bs))
         _chmodplusx(default_paths['libexec'])
-    
+
     # If not exists, won't raise an error there
     _chmodplusx('/etc/init.d/shinken')
     for d in ['scheduler', 'broker', 'receiver', 'reactionner', 'poller', 'arbiter']:

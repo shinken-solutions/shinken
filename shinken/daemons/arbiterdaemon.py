@@ -22,14 +22,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 import os
 import time
 import socket
 import traceback
-import cStringIO
-import cPickle
+import pickle
 import json
+import io
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -520,7 +522,7 @@ class Arbiter(Daemon):
                 except Exception as exp:
                     logger.error("Instance %s raised an exception %s. Log and continue to run",
                                  inst.get_name(), str(exp))
-                    output = cStringIO.StringIO()
+                    output = io.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Back trace of this remove: %s", output.getvalue())
                     output.close()
@@ -665,7 +667,7 @@ class Arbiter(Daemon):
         conf = self.new_conf
         if not conf:
             return
-        conf = cPickle.loads(conf)
+        conf = pickle.loads(conf)
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf

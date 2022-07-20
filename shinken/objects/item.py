@@ -26,6 +26,9 @@
 """ This class is a base class for nearly all configuration
  elements like service, hosts or contacts.
 """
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import itertools
 from shinken.util import safe_print
@@ -47,7 +50,7 @@ from shinken.graph import Graph
 
 INHERITANCE_DEEP_LIMIT = 32
 
-class Item(object):
+class Item:
 
     properties = {
         'imported_from':            StringProp(default='unknown'),
@@ -101,7 +104,7 @@ class Item(object):
                 elif key.startswith('_'):  # custom macro, not need to detect something here
                     _t = params[key]
                     # If it's a string, directly use this
-                    if isinstance(_t, basestring):
+                    if isinstance(_t, str):
                         val = _t
                     # aa list for a custom macro is not managed (conceptually invalid)
                     # so take the first defined
@@ -129,7 +132,7 @@ class Item(object):
 
             if (isinstance(val, list) and
                     len(val) >= 1 and
-                    isinstance(val[0], unicode) and
+                    isinstance(val[0], str) and
                     len(val[0]) >= 1 and
                     val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
@@ -296,13 +299,12 @@ Like temporary attributes such as "imported_from", etc.. """
         for i in self.templates:
             value = i.get_property_by_inheritance(prop, deep_level + 1)
 
-            if value is not None and value != []:
+            if value:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
                 if isinstance(value, list) and value[0] == '+':
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
-                        value = list(value)
                         value = [x for x in value if x != '+']
                     still_loop = True
 
@@ -320,7 +322,6 @@ Like temporary attributes such as "imported_from", etc.. """
                         new_val.extend(value)
                         value = new_val
 
-
                 # Ok, we can set it
                 setattr(self, prop, value)
 
@@ -337,6 +338,7 @@ Like temporary attributes such as "imported_from", etc.. """
                             value.insert(0, '+')
                         setattr(self, prop, value)
                     return value
+
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
         # self.prop value after all
@@ -400,11 +402,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     def has_plus(self, prop):
-        try:
-            self.plus[prop]
-        except KeyError:
-            return False
-        return True
+        return prop in self.plus
 
 
     def get_all_plus_and_delete(self):
@@ -729,7 +727,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
 
-class Items(object):
+class Items:
     def __init__(self, items, index_items=True, conflict_policy="loose"):
         self.conflict_policy = conflict_policy
         self.items = {}
@@ -952,7 +950,7 @@ class Items(object):
 
 
     def __iter__(self):
-        return self.items.itervalues()
+        return iter(self.items.values())
 
 
     def __len__(self):
@@ -1013,8 +1011,8 @@ class Items(object):
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.old_properties_names_to_new()
 
 
@@ -1066,8 +1064,8 @@ class Items(object):
     # graph too
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             self.linkify_item_templates(i)
         for i in self:
             i.tags = self.get_all_tags(i)
@@ -1151,8 +1149,8 @@ class Items(object):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1171,8 +1169,8 @@ class Items(object):
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_customs_properties_by_inheritance(0)
 
 
@@ -1469,7 +1467,7 @@ class Items(object):
                 except KeyError:
                     pass
             elif h == '*':
-                [hnames.add(h.host_name) for h in hosts.items.itervalues()
+                [hnames.add(h.host_name) for h in hosts.items.values()
                  if getattr(h, 'host_name', '')]
             # Else it's a host to add, but maybe it's ALL
             else:

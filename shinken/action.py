@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import time
 import shlex
@@ -55,7 +57,7 @@ def no_block_read(output):
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     try:
-        return output.read()
+        return output.read().decode("utf-8")
     except Exception:
         return ''
 
@@ -66,26 +68,26 @@ class __Action(object):
     actions and checks.
     """
     id = 0
-    
-    
+
+
     # Ok when we load a previous created element, we should
     # not start at 0 for new object, so we must raise the Action.id
     # if need
     @staticmethod
     def assume_at_least_id(_id):
         Action.id = max(Action.id, _id)
-    
-    
+
+
     def set_type_active(self):
         "Dummy function, only useful for checks"
         pass
-    
-    
+
+
     def set_type_passive(self):
         "Dummy function, only useful for checks"
         pass
-    
-    
+
+
     def get_local_environnement(self):
         """
 
@@ -100,31 +102,31 @@ class __Action(object):
         # instance).
         local_env = os.environ.copy()
         for p in self.env:
-            local_env[p] = self.env[p].encode('utf8').rstrip('\x00')
+            local_env[p] = self.env[p].rstrip('\x00')
         return local_env
-    
-    
+
+
     def execute(self):
         """
         Start this action command. The command will be executed in a
         subprocess.
         """
-        
+
         self.status = 'launched'
         self.check_time = time.time()
         self.wait_time = 0.0001
         self.last_poll = self.check_time
         # Get a local env variables with our additional values
         self.local_env = self.get_local_environnement()
-        
+
         # Initialize stdout and stderr. we will read them in small parts
         # if the fcntl is available
         self.stdoutdata = ''
         self.stderrdata = ''
-        
+
         return self.execute__()  # OS specific part
-    
-    
+
+
     def get_outputs(self, out, max_plugins_output_length):
         # Squeeze all output after max_plugins_output_length
         out = out[:max_plugins_output_length]
@@ -158,34 +160,27 @@ class __Action(object):
                     self.perf_data += ' ' + elts[1].strip().replace('___PROTECT_PIPE___', '|')
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
-        # Force strings to be unicode from here
-        if isinstance(self.output, str):
-            self.output = self.output.decode('utf8', 'ignore')
-        if isinstance(self.long_output, str):
-            self.long_output = self.long_output.decode('utf8', 'ignore')
-        if isinstance(self.perf_data, str):
-            self.perf_data = self.perf_data.decode('utf8', 'ignore')
-    
-    
+
+
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
         # so we do not wait the same for an little check
         # than a long ping. So we do like TCP: slow start with *2
         # but do not wait more than 0.1s.
         self.last_poll = time.time()
-        
+
         _, _, child_utime, child_stime, _ = os.times()
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time * 2, 0.1)
             now = time.time()
-            
+
             # If the fcntl is available (unix) we try to read in a
             # asynchronous mode, so we won't block the PIPE at 64K buffer
             # (deadlock...)
             if fcntl:
                 self.stdoutdata += no_block_read(self.process.stdout)
                 self.stderrdata += no_block_read(self.process.stderr)
-            
+
             if (now - self.check_time) > self.timeout:
                 self.kill__()
                 self.status = 'timeout'
@@ -199,7 +194,7 @@ class __Action(object):
                 self.s_time = n_child_stime - child_stime
                 return
             return
-        
+
         # Get standards outputs from the communicate function if we do
         # not have the fcntl module (Windows, and maybe some special
         # unix like AIX)
@@ -210,19 +205,21 @@ class __Action(object):
             # polled it first. So finish the read.
             self.stdoutdata += no_block_read(self.process.stdout)
             self.stderrdata += no_block_read(self.process.stderr)
-        
+
         self.exit_status = self.process.returncode
-        
+
         # we should not keep the process now
+        self.process.stdout.close()
+        self.process.stderr.close()
         del self.process
-        
+
         # check if process was signaled #11 (SIGSEGV)
         if self.exit_status == -11:
             self.stderrdata += " signaled #11 (SIGSEGV)"
         # If abnormal termination of check and no error data, set at least exit status info as error information
         if not self.stderrdata.strip() and self.exit_status not in valid_exit_status:
             self.stderrdata += "Abnormal termination with code: %r" % (self.exit_status,)
-        
+
         # check for bad syntax in command line:
         if ('sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata or
                 ('sh: -c:' in self.stderrdata and ': Syntax' in self.stderrdata) or
@@ -233,28 +230,28 @@ class __Action(object):
             # a difference. (exit_group(1) vs. exit_group(257))
             self.stdoutdata = self.stdoutdata + self.stderrdata
             self.exit_status = 3
-        
+
         if self.exit_status not in valid_exit_status:
             self.exit_status = 3
-        
+
         if not self.stdoutdata.strip():
             self.stdoutdata = self.stderrdata
-        
+
         # Now grep what we want in the output
         self.get_outputs(self.stdoutdata, max_plugins_output_length)
-        
+
         # We can clean the useless properties now
         del self.stdoutdata
         del self.stderrdata
-        
+
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
         # Also get the system and user times
         _, _, n_child_utime, n_child_stime, _ = os.times()
         self.u_time = n_child_utime - child_utime
         self.s_time = n_child_stime - child_stime
-    
-    
+
+
     def copy_shell__(self, new_i):
         """
         Copy all attributes listed in 'only_copy_prop' from `self` to
@@ -263,8 +260,8 @@ class __Action(object):
         for prop in only_copy_prop:
             setattr(new_i, prop, getattr(self, prop))
         return new_i
-    
-    
+
+
     def got_shell_characters(self):
         for c in self.command:
             if c in shellchars:
@@ -278,9 +275,9 @@ class __Action(object):
 #
 
 if os.name != 'nt':
-    
+
     class Action(__Action):
-        
+
         # We allow direct launch only for 2.7 and higher version
         # because if a direct launch crash, under this the file handles
         # are not releases, it's not good.
@@ -288,25 +285,25 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go
             # in a shell mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            
+
             # 2.7 and higher Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7) or force_shell:
-                cmd = self.command.encode('utf8', 'ignore')
+                cmd = self.command
             else:
                 try:
-                    cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                    cmd = shlex.split(self.command)
                 except Exception as exp:
                     self.output = 'Not a valid shell command: ' + exp.__str__()
                     self.exit_status = 3
                     self.status = 'done'
                     self.execution_time = time.time() - self.check_time
                     return
-            
+
             # Now: GO for launch!
             # logger.debug("Launching: %s" % (self.command.encode('utf8', 'ignore')))
-            
+
             # The preexec_fn=os.setsid is set to give sons a same
             # process group. See
             # http://www.doughellmann.com/PyMOTW/subprocess/ for
@@ -326,12 +323,12 @@ if os.name != 'nt':
                 self.exit_status = 2
                 self.status = 'done'
                 self.execution_time = time.time() - self.check_time
-                
+
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
-        
-        
+
+
         def kill__(self):
             # We kill a process group because we launched them with
             # preexec_fn=os.setsid and so we can launch a whole kill
@@ -346,14 +343,14 @@ if os.name != 'nt':
 
 
 else:
-    
+
     import ctypes
-    
+
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
-    
-    
+
+
     class Action(__Action):
-        
+
         def execute__(self):
             # 2.7 and higher Python version need a list of args for cmd
             # 2.4->2.6 accept just the string command
@@ -361,14 +358,14 @@ else:
                 cmd = self.command
             else:
                 try:
-                    cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                    cmd = shlex.split(self.command)
                 except Exception as exp:
                     self.output = 'Not a valid shell command: ' + exp.__str__()
                     self.exit_status = 3
                     self.status = 'done'
                     self.execution_time = time.time() - self.check_time
                     return
-            
+
             try:
                 self.process = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -377,7 +374,7 @@ else:
                 logger.info("We kill the process: %s %s", exp, self.command)
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time
-        
-        
+
+
         def kill__(self):
             TerminateProcess(int(self.process._handle), -1)

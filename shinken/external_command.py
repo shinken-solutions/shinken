@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import time
 import re
@@ -446,7 +448,7 @@ class ExternalCommandManager:
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
                 try:
-                    os.mkfifo(self.pipe_path, 0660)
+                    os.mkfifo(self.pipe_path, 0o660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError as exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
@@ -506,7 +508,7 @@ class ExternalCommandManager:
                 args = r['args']
                 logger.debug("Got commands %s %s", c_name, str(args))
                 f = getattr(self, c_name)
-                apply(f, args)
+                f(*args)
             else:
                 command = r['cmd']
                 self.dispatch_global_command(command)
@@ -557,12 +559,12 @@ class ExternalCommandManager:
     def get_unknown_check_result_brok(cmd_line):
 
         match = re.match(
-            '^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;'
-            '([^\;]*);([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
+            r'^\[([0-9]{10})] PROCESS_(SERVICE)_CHECK_RESULT;'
+            r'([^\;]*);([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
         if not match:
             match = re.match(
-                '^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;'
-                '([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
+                r'^\[([0-9]{10})] PROCESS_(HOST)_CHECK_RESULT;'
+                r'([^\;]*);([^\;]*);([^\|]*)(?:\|(.*))?', cmd_line)
 
         if not match:
             return None
@@ -773,15 +775,15 @@ class ExternalCommandManager:
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODSATTR(self, contact, value):  # TODO
-        contact.modified_service_attributes = long(value)
+        contact.modified_service_attributes = int(value)
 
     # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODHATTR(self, contact, value):  # TODO
-        contact.modified_host_attributes = long(value)
+        contact.modified_host_attributes = int(value)
 
     # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODATTR(self, contact, value):
-        contact.modified_attributes = long(value)
+        contact.modified_attributes = int(value)
 
     # CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
@@ -877,7 +879,7 @@ class ExternalCommandManager:
 
     # CHANGE_HOST_MODATTR;<host_name>;<value>
     def CHANGE_HOST_MODATTR(self, host, value):
-        host.modified_attributes = long(value)
+        host.modified_attributes = int(value)
 
     # CHANGE_MAX_HOST_CHECK_ATTEMPTS;<host_name>;<check_attempts>
     def CHANGE_MAX_HOST_CHECK_ATTEMPTS(self, host, check_attempts):
@@ -953,7 +955,7 @@ class ExternalCommandManager:
         # This is not enough.
         # We need to also change each of the needed attributes.
         previous_value = service.modified_attributes
-        future_value = long(value)
+        future_value = int(value)
         changes = future_value ^ previous_value
 
         for modattr in [
@@ -1538,11 +1540,9 @@ class ExternalCommandManager:
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            naglog_result(
-                'info', 'PASSIVE HOST CHECK: %s;%d;%s'
-                % (host.get_name().decode('utf8', 'ignore'),
-                   status_code, plugin_output.decode('utf8', 'ignore'))
-            )
+            naglog_result('info', 'PASSIVE HOST CHECK: %s;%d;%s' % (
+                host.get_name(), status_code, plugin_output
+            ))
         now = time.time()
         cls = host.__class__
         # If globally disable OR locally, do not launch
@@ -1579,10 +1579,10 @@ class ExternalCommandManager:
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            naglog_result('info', 'PASSIVE SERVICE CHECK: %s;%s;%d;%s'
-                          % (service.host.get_name().decode('utf8', 'ignore'),
-                             service.get_name().decode('utf8', 'ignore'),
-                             return_code, plugin_output.decode('utf8', 'ignore')))
+            naglog_result('info', 'PASSIVE SERVICE CHECK: %s;%s;%d;%s' % (
+                service.host.get_name(), service.get_name(), return_code,
+                plugin_output
+                ))
         now = time.time()
         cls = service.__class__
         # If globally disable OR locally, do not launch
@@ -2042,7 +2042,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(FIFO_PATH):
         os.umask(0)
-        os.mkfifo(FIFO_PATH, 0660)
+        os.mkfifo(FIFO_PATH, 0o660)
         my_fifo = open(FIFO_PATH, 'w+')
         logger.debug("my_fifo: %s", my_fifo)
 

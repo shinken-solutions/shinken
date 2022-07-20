@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -40,7 +42,7 @@ class TestObjectsAndNotifWays(ShinkenTest):
         b = c_normal.get_initial_status_brok()
         b.prepare()
         print("B normal", b)
-        self.assertEqual([u'd', u'u', u'r', u'f', u's'], b.data['host_notification_options'])
+        self.assertEqual(['d', 'u', 'r', 'f', 's'], b.data['host_notification_options'])
         b2 = c_nw.get_initial_status_brok()
         b2.prepare()
         print("B nw", b2)

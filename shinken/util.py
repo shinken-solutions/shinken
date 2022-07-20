@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import re
 import copy
@@ -57,29 +59,7 @@ except Exception as exp:
 # Try to print(strings, but if there is an utf8 error, go in simple ascii mode)
 # (Like if the terminal do not have en_US.UTF8 as LANG for example)
 def safe_print(*args):
-    lst = []
-    for e in args:
-        # If we got an str, go in unicode, and if we cannot print
-        # utf8, go in ascii mode
-        if isinstance(e, str):
-            if safe_stdout:
-                s = unicode(e, 'utf8', errors='ignore')
-            else:
-                s = e.decode('ascii', 'replace').encode('ascii', 'replace').\
-                    decode('ascii', 'replace')
-            lst.append(s)
-        # Same for unicode, but skip the unicode pass
-        elif isinstance(e, unicode):
-            if safe_stdout:
-                s = e
-            else:
-                s = e.encode('ascii', 'replace')
-            lst.append(s)
-        # Other types can be directly convert in unicode
-        else:
-            lst.append(unicode(e))
-    # Ok, now print(it :))
-    print(u' '.join(lst))
+    print(' '.join(lst))
 
 
 def split_semicolon(line, maxsplit=None):
@@ -135,9 +115,9 @@ def jsonify_r(obj):
             return obj
         except Exception as exp:
             return None
-    properties = cls.properties.keys()
+    properties = list(cls.properties.keys())
     if hasattr(cls, 'running_properties'):
-        properties += cls.running_properties.keys()
+        properties.extend(list(cls.running_properties.keys()))
     for prop in properties:
         if not hasattr(obj, prop):
             continue
@@ -216,7 +196,7 @@ def get_sec_from_morning(t):
 
 # @memoized
 def get_start_of_day(year, month_id, day):
-    start_time = (year, month_id, day, 00, 00, 00, 0, 0, -1)
+    start_time = (year, month_id, day, 0, 0, 0, 0, 0, -1)
     try:
         start_time_epoch = time.mktime(start_time)
     except OverflowError:
@@ -371,7 +351,7 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     # Maybe we do not have a real object but already a string. If so
     # return the string
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         return obj
     return obj.get_name()
 
@@ -426,24 +406,22 @@ def scheduler_no_spare_first(x, y):
         return -1
 
 
-# -1 is x first, 0 equal, 1 is y first
-def alive_then_spare_then_deads(x, y):
-    # First are alive
-    if x.alive and not y.alive:
-        return -1
-    if y.alive and not x.alive:
-        return 0
-    # if not alive both, I really don't care...
-    if not x.alive and not y.alive:
-        return -1
-    # Ok, both are alive... now spare after no spare
-    if not x.spare:
-        return -1
-    # x is a spare, so y must be before, even if
-    # y is a spare
-    if not y.spare:
-        return 1
-    return 0
+def alive_then_spare_then_deads(satellites):
+    dead = []
+    alive = []
+    spare = []
+    for s in satellites:
+        if not s.alive:
+            dead.append(s)
+        elif s.spare:
+            spare.append(s)
+        else:
+            alive.append(s)
+    sorted_satellites = []
+    sorted_satellites.extend(alive)
+    sorted_satellites.extend(spare)
+    sorted_satellites.extend(dead)
+    return sorted_satellites
 
 
 # -1 is x first, 0 equal, 1 is y first
@@ -523,7 +501,7 @@ def got_generation_rule_pattern_change(xy_couples):
     if xy_couples == []:
         return []
     (x, y) = xy_cpl[0]
-    for i in xrange(x, y + 1):
+    for i in range(x, y + 1):
         n = got_generation_rule_pattern_change(xy_cpl[1:])
         if n != []:
             for e in n:

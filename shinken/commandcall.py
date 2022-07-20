@@ -22,11 +22,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 from shinken.autoslots import AutoSlots
 from shinken.property import StringProp, BoolProp, IntegerProp
 
 
-class DummyCommandCall(object):
+class DummyCommandCall():
     """Ok, slots are fun: you cannot set the __autoslots__
      on the same class you use, fun isn't it? So we define*
      a dummy useless class to get such :)
@@ -34,14 +37,10 @@ class DummyCommandCall(object):
     pass
 
 
-class CommandCall(DummyCommandCall):
+class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
     """This class is use when a service, contact or host define
     a command with args.
     """
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
     # __slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
     #              'reactionner_tag', 'module_type', '__dict__')
     id = 0
@@ -84,11 +83,11 @@ class CommandCall(DummyCommandCall):
             self.module_type = self.command.module_type
             self.enable_environment_macros = self.command.enable_environment_macros
             self.timeout = int(self.command.timeout)
-            if self.valid and poller_tag is 'None':
+            if self.valid and poller_tag == 'None':
                 # from command if not set
                 self.poller_tag = self.command.poller_tag
             # Same for reactionner tag
-            if self.valid and reactionner_tag is 'None':
+            if self.valid and reactionner_tag == 'None':
                 # from command if not set
                 self.reactionner_tag = self.command.reactionner_tag
             # Item priority has precedence if a value is explicitely set
@@ -141,11 +140,11 @@ class CommandCall(DummyCommandCall):
 
         # The command is a bit special, we just put it's name
         # or a '' if need
-        if self.command and not isinstance(self.command, basestring):
+        if self.command and not isinstance(self.command, str):
             res['command'] = self.command.get_name()
         # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
         # only take the value
-        elif self.command and isinstance(self.command, basestring):
+        elif self.command and isinstance(self.command, str):
             res['command'] = self.command
         else:
             res['command'] = ''

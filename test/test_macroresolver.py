@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.macroresolver import MacroResolver
 from shinken.commandcall import CommandCall
@@ -33,7 +35,7 @@ class TestMacroResolver(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/shinken_macroresolver.cfg')
-                
+
 
     def get_mr(self):
         mr = MacroResolver()
@@ -172,8 +174,8 @@ class TestMacroResolver(ShinkenTest):
         com = mr.resolve_command(cc, data)
         print(com)
         self.assertEqual('plugins/nothing UP', com)
-                                                        
-                                        
+
+
         # Now with a service, for our implicit host state
         data = svc.get_data_for_checks()
         dummy_call = "special_macro!$HOSTSTATE:$"
@@ -201,8 +203,8 @@ class TestMacroResolver(ShinkenTest):
         com = mr.resolve_command(cc, data)
         print(com)
         self.assertEqual('plugins/nothing you should not pass', com)
-                                                
-                                                
+
+
 
     # Look at on demand macros
     def test_hostadressX_macros(self):
@@ -217,7 +219,7 @@ class TestMacroResolver(ShinkenTest):
         print(com)
         self.assertEqual('plugins/nothing ::1', com)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

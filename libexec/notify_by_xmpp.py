@@ -28,6 +28,8 @@ defaults = {'server':'jabber.org',
 
 # until xmppony is inplace
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import warnings
 warnings.simplefilter("ignore")
 
@@ -91,4 +93,4 @@ else:
         c.send(Message(user, '%s' % msg))
 
 
-    
+

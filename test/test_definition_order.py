@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -35,17 +37,17 @@ class TestDefinitionOrder(ShinkenTest):
         now = time.time()
         svc_specific = self.sched.services.find_srv_by_name_and_hostname("test_host_specific", "ZE-SERVICE")
         svc_generic  = self.sched.services.find_srv_by_name_and_hostname("test_host_generic", "ZE-SERVICE")
-        
+
         self.assertIsNot(svc_specific, None)
         self.assertIsNot(svc_generic, None)
 
         print(svc_generic.check_command.command.command_name)
         self.assertEqual('general', svc_generic.check_command.command.command_name)
-        
+
         print(svc_specific.check_command.command.command_name)
         self.assertEqual('specific', svc_specific.check_command.command.command_name)
-        
-        
+
+
 
 if __name__ == '__main__':
     unittest.main()

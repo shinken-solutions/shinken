@@ -23,7 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
+import six
 
 from shinken.action import Action
 from shinken.brok import Brok
@@ -31,12 +34,8 @@ from shinken.property import BoolProp, IntegerProp, StringProp, FloatProp
 from shinken.autoslots import AutoSlots
 
 
-class Notification(Action):
+class Notification(six.with_metaclass(AutoSlots, Action)):
     """Please Add a Docstring to describe the class here"""
-
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     my_type = 'notification'
 

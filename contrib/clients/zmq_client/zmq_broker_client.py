@@ -33,6 +33,9 @@
 # python zmq_broker_client.py "json" "tcp://127.0.0.1:12345" "host"
 # python zmq_broker_client.py "msgpack" "ipc:///tmp/shinken_pub" ""
 # python zmq_broker_client.py "json" "tcp://172.23.2.189:9067" "log"
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import zmq
 import sys
 
@@ -63,7 +66,7 @@ if len(sys.argv) > 2:
 topic = ""
 if len(sys.argv) > 3:
 	topic = sys.argv[3]
-	
+
 # Subscribe
 context = zmq.Context()
 s_sub = context.socket(zmq.SUB)

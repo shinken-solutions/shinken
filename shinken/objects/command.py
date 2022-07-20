@@ -23,7 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
+from shinken.objects.item import Item, Items
 from shinken.brok import Brok
 from shinken.property import StringProp, IntegerProp, BoolProp
 from shinken.autoslots import AutoSlots
@@ -32,14 +35,11 @@ from shinken.autoslots import AutoSlots
 # Ok, slots are fun: you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
-class DummyCommand(object):
+class DummyCommand:
     pass
 
 
-class Command(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
+class Command(six.with_metaclass(AutoSlots, Item)):
 
     id = 0
     my_type = "command"

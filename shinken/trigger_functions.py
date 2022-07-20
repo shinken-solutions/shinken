@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import re
 
@@ -38,13 +40,12 @@ class declared(object):
     """
     def __init__(self, f):
         self.f = f
-        global functions
-        n = f.func_name
+        n = f.__name__
         # logger.debug("Initializing function %s %s" % (n, f))
         trigger_functions[n] = f
 
     def __call__(self, *args):
-        logger.debug("Calling %s with arguments %s", self.f.func_name, args)
+        logger.debug("Calling %s with arguments %s", self.f.__name__, args)
         return self.f(*args)
 
 @declared
@@ -183,7 +184,7 @@ def get_object(ref):
     """ Retrive object (service/host) from name
     """
     # Maybe it's already a real object, if so, return it :)
-    if not isinstance(ref, basestring):
+    if not isinstance(ref, str):
         return ref
 
     # Ok it's a string
@@ -201,7 +202,7 @@ def get_objects(ref):
         Retrive objects (service/host) from names
     """
     # Maybe it's already a real object, if so, return it :)
-    if not isinstance(ref, basestring):
+    if not isinstance(ref, str):
         return ref
 
     name = ref

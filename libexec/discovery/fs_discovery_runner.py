@@ -2,7 +2,7 @@
 # Copyright (C) 2009-2012:
 #    Camille, VACQUIE
 #    Romain, FORLOT, romain.forlot@sydel.fr
-# 
+#
 # This file is part of Shinken.
 #
 # Shinken is free software: you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 #
 ###############################################################
 #
-# First of all, the fs_discovery_runner.py script get the list 
-# of the files systems back from the nmap device list with SNMP 
+# First of all, the fs_discovery_runner.py script get the list
+# of the files systems back from the nmap device list with SNMP
 # protocol. The OID used by SNMP to recover datas is particular
 # to each OS type.
 # And then it converts the listed files systems writing and
@@ -34,6 +34,8 @@
 # Here the user name is myuser and his password is mypassword
 #
 ###############################################################
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 ### modules import
@@ -114,7 +116,7 @@ oid_hpux = ".1.3.6.1.4.1.11.2.3.1.2.2.1.10"# fileSystemName
 
 ##############
 #  functions #
-############## 
+##############
 
 ### Search for files systems presents on the target
 def get_fs_discovery(oid):

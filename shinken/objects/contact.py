@@ -23,8 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+from shinken.objects.item import Item, Items
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger, naglog_result
@@ -83,7 +84,7 @@ class Contact(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+        'modified_attributes': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 

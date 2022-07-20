@@ -21,6 +21,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import unittest
 
 import string
@@ -72,7 +74,7 @@ class TestEndParsingType(unittest.TestCase):
 
     def print_header(self):
         print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
-        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + self.id().center(78) + "#")
         print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def add(self, b):

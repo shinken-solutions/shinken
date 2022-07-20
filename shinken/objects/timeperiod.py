@@ -85,11 +85,12 @@
 #        MONTH DAY
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import re
 
-from item import Item, Items
-
+from shinken.objects.item import Item, Items
 from shinken.daterange import Daterange, CalendarDaterange
 from shinken.daterange import StandardDaterange, MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange, WeekDayDaterange

@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -54,7 +56,7 @@ class TestFlapping(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
         print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
             print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
@@ -71,13 +73,13 @@ class TestFlapping(ShinkenTest):
 
         # Now we put it as back :)
         # 10 is not enouth to get back as normal
-        for i in xrange(1, 11):
+        for i in range(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print("In flapping?", svc.is_flapping)
         self.assertTrue(svc.is_flapping)
 
         # 10 others can be good (near 4.1 %)
-        for i in xrange(1, 11):
+        for i in range(1, 11):
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
             print("In flapping?", svc.is_flapping)
         self.assertFalse(svc.is_flapping)
@@ -92,7 +94,7 @@ class TestFlapping(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
         print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
             print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])
@@ -124,7 +126,7 @@ class TestFlapping(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
         print("****** Current flap change lsit", svc.flapping_changes)
         # Ok, now go in flap!
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             "**************************************************"
             print("I:", i)
             self.scheduler_loop(1, [[svc, 0, 'Ok']])

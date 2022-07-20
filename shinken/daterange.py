@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import calendar
 import re
@@ -53,7 +55,7 @@ def find_day_by_weekday_offset(year, month, weekday, offset):
     # ok go for it
     nb_found = 0
     try:
-        for i in xrange(0, offset + 1):
+        for i in range(0, offset + 1):
             # in cal 0 mean "there are no day here :)"
             if cal[i][weekday_id] != 0:
                 nb_found += 1
@@ -279,7 +281,7 @@ class Daterange(object):
 
         # We search for the min of all tr.start > sec_from_morning
         # if it's the next day, use a start of the day search for timerange
-        if t < t_day:
+        if t_day and t < t_day:
             sec_from_morning = self.get_next_future_timerange_valid(t_day)
         else:  # t is in this day, so look from t (can be in the evening or so)
             sec_from_morning = self.get_next_future_timerange_valid(t)

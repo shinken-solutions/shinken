@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 import os
@@ -103,7 +103,7 @@ class DiscoveredHost(object):
     def update_properties(self, final_phase=False):
         d = {}
         if final_phase:
-            for (k, v) in self.data.iteritems():
+            for (k, v) in self.data.items():
                 if k.startswith('_'):
                     d[k] = v
         else:
@@ -117,7 +117,7 @@ class DiscoveredHost(object):
         self.matched_rules.sort(by_order)
 
         for r in self.matched_rules:
-            for k, v in r.writing_properties.iteritems():
+            for k, v in r.writing_properties.items():
                 # If it's a + (add) property, append
                 if k.startswith('+'):
                     kprop = k[1:]
@@ -146,7 +146,7 @@ class DiscoveredHost(object):
                         d[kprop].append(prop)
 
             # Now look for - (rem) property
-            for k, v in r.writing_properties.iteritems():
+            for k, v in r.writing_properties.items():
                 if k.startswith('-'):
                     kprop = k[1:]
                     if kprop in d:
@@ -157,7 +157,7 @@ class DiscoveredHost(object):
                                 d[kprop].remove(prop)
 
         # Change join prop list in string with a ',' separator
-        for (k, v) in d.iteritems():
+        for (k, v) in d.items():
             if isinstance(d[k], list):
                 d[k] = ','.join(d[k])
 
@@ -166,7 +166,7 @@ class DiscoveredHost(object):
 
         # For macro-resolving, we should have our macros too
         self.customs = {}
-        for (k, v) in self.properties.iteritems():
+        for (k, v) in self.properties.items():
             self.customs['_' + k.upper()] = v
 
 
@@ -400,7 +400,7 @@ class DiscoveryManager:
 
     # We try to init the backend if we got one
     def init_backend(self):
-        if not self.backend or not isinstance(self.backend, basestring):
+        if not self.backend or not isinstance(self.backend, str):
             return
 
         print("Doing backend init")
@@ -427,7 +427,7 @@ class DiscoveryManager:
             print('\n')
             print('LOOP' * 10, i)
             still_loop = False
-            for (name, dh) in self.disco_data.iteritems():
+            for (name, dh) in self.disco_data.items():
                 dh.update_properties()
                 to_run = dh.get_to_run()
                 print('Still to run for', name, to_run)
@@ -488,7 +488,7 @@ class DiscoveryManager:
 
     # Now we try to match all our hosts with the rules
     def match_rules(self):
-        for (name, dh) in self.disco_data.iteritems():
+        for (name, dh) in self.disco_data.items():
             for r in self.discoveryrules:
                 # If the rule was already successfully for this host, skip it
                 if r in dh.matched_rules:
@@ -609,7 +609,7 @@ class DiscoveryManager:
                     dhb = self.disco_data[oname]
                     # When same host but different properties are detected
                     if dha.name == dhb.name and dha.properties != dhb.properties:
-                        for (k, v) in dhb.properties.iteritems():
+                        for (k, v) in dhb.properties.items():
                             # Merge host macros if their properties are different
                             if k.startswith('_') and \
                                     k in dha.properties and dha.properties[k] != dhb.properties[k]:

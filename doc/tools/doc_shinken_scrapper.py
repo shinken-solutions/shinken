@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from StringIO import StringIO
 import os
 
@@ -119,7 +121,7 @@ def find_media(raw_data):
                 os.makedirs(media_folder)
             except OSError as e:
                 #print(e)
-                pass 
+                pass
             media_res = requests.get(media_url)
             media_file = os.path.join(media_folder, os.path.basename(media))
             print("        Writing media : %s" % media_file)
@@ -132,7 +134,7 @@ def find_media(raw_data):
 
 
 
-           
+
 parse_level(index)
 
 lonely_pages = [

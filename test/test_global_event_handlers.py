@@ -21,6 +21,8 @@
 # This file is used to test acknowledge of problems
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 

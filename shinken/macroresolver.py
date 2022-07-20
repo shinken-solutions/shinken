@@ -30,6 +30,8 @@
 # get the number of service in a host, you call a method to get the
 # len(host.services)
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 import time
 
@@ -135,15 +137,15 @@ class MacroResolver(Borg):
         try:
             value = getattr(elt, prop)
             if callable(value):
-                return unicode(value())
+                return str(value())
             else:
-                return unicode(value)
+                return str(value)
         except AttributeError as exp:
             # Return no value
             return ''
         except UnicodeError as exp:
             if isinstance(value, str):
-                return unicode(value, 'utf8', errors='ignore')
+                return str(value, 'utf8', errors='ignore')
             else:
                 return ''
 
@@ -371,7 +373,7 @@ class MacroResolver(Borg):
 
     # Get Fri 15 May 11:42:39 CEST 2009
     def _get_long_date_time(self):
-        return time.strftime("%a %d %b %H:%M:%S %Z %Y").decode('UTF-8', 'ignore')
+        return time.strftime("%a %d %b %H:%M:%S %Z %Y")
 
 
     # Get 10-13-2000 00:30:28
