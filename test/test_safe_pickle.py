@@ -31,8 +31,9 @@ import pickle
 import sys
 import io
 
-
 should_not_change = False
+
+
 def fff(b):
     global should_not_change
     should_not_change = b
@@ -63,7 +64,6 @@ class TestSafePickle(ShinkenTest):
         buf = pickle.dumps(SadPanda(), 0)
         should_not_change = False
         print("Payload", buf)
-        #self.assertEqual('HARD', host.state_type)
         print("Now loading payload")
         pickle.loads(buf)
         print(should_not_change)
@@ -71,14 +71,75 @@ class TestSafePickle(ShinkenTest):
 
         # reset and try our fix
         should_not_change = False
+
         def launch_safe_pickle():
             if six.PY2:
                 SafeUnpickler.loads(buf)
             else:
                 SafeUnpickler(io.BytesIO(buf)).load()
+
         self.assertRaises(ValueError, launch_safe_pickle)
-        print(should_not_change)
+        print (should_not_change)
         self.assertFalse(should_not_change)
+
+
+    # Thanks to security team @Dailymotion, we did have a RCE that ook like a return into libc
+    # exploit: they are using the bottle._load code (that blindly __import__) so the injected
+    # code will finally be executed. And as it's shinken.webui.bottle, it's ok with the
+    # safe_pickle filter. Smart ^^
+    def _test_safe_pickle_exploit_rce(self):
+        ###### Phase 1: can be exploited
+        # Arrange
+        rce_path = '/rce_exploited'
+        if rce_path in sys.path:
+            sys.path.remove(rce_path)
+
+        payload = """cshinken.webui.bottlewebui
+_load
+(S'sys:path.append("%s")'
+tR.""" % rce_path
+
+        # Act
+        print("Now loading payload")
+        pickle.loads(payload.encode("utf-8"))
+
+        # Assert
+        self.assertTrue(rce_path in sys.path)
+
+        ##### Phase 2: no more exploitable by calling the good one
+        # Arrange
+        sys.path.remove(rce_path)
+
+        def launch_safe_pickle():
+            if six.PY2:
+                SafeUnpickler.loads(buf)
+            else:
+                SafeUnpickler(io.BytesIO(buf)).load()
+
+        # Act
+        self.assertRaises(ValueError, launch_safe_pickle)
+
+        # Assert
+        self.assertTrue(rce_path not in sys.path)
+
+    # Thanks to security team @Dailymotion, we did have a RCE that ook like a return into libc
+    # exploit: they are using the bottle._load code (that blindly __import__) so the injected
+    # code will finally be executed. And as it's shinken.webui.bottle, it's ok with the
+    # safe_pickle filter. Smart ^^
+    def test_safe_pickle_exploit_rce_can_load(self):
+        ###### Phase 1: can be exploited
+        # Arrange
+
+        payload = pickle.dumps(Brok('void', {}))
+
+        # Act
+        if six.PY2:
+            b = SafeUnpickler.loads(payload)
+        else:
+            b = SafeUnpickler(io.BytesIO(payload)).load()
+
+        # Assert
+        self.assertTrue(isinstance(b, Brok))
 
 
 if __name__ == '__main__':

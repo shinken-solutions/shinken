@@ -3,14 +3,60 @@ Shinken ChangeLog
 ########################
 
 
-3.0.03 - X/X/2017
+2.4.4 - XX/02/2022
 -----------------
         CORE ENHANCEMENT
         Enh: (backport from Enterprise, internal ref #SEF-202) Big boost for the broker daemons, especially for very large setups and slow modules (yes Graphite, I'm looking at you).
         Enh: (backport from Enterprise ref:#SEF-103) Slight boost of startup time by remiving useless hash computation.
+        Enh: (Christophe Simon) Force problem/impact evaluation
+        Enh: (Christophe Simon) added strict object name conflict policy
+        Enh: (Christophe Simon) better objects balancing between schedulers (#1999)
+        Enh: (Christophe Simon) Maintenance checks (#1929)
+        Enh: (Nicolas DUPEUX) Add an option to dump configuration as build by shinken to a json file (#1954)
+        Enh: (Lionel Sausin) Add instructions to use --install-scripts in pip (#1890)
+        Enh: (Christophe Simon) extend duplicate_foreach to host/hostgroups (#1905)
+        Enh: (Christophe Simon) Made memory free an opt-in option
+        Enh: (Christophe Simon) Explicitly frees memory when receiving new conf
+        Enh: (Christophe Simon) Harmonized graceful restart
+        Enh: (David Durieux) Add support of proxy socks5 for shinken cli (#1583)
+        Enh: (Mateusz Korniak) Add info about exit error code when check finished with error/was signalled. (#1766)
 
         CORE FIXES
         Fix: (backport from Enterprise ref:#SEF-76) In some case, we can have "negative" value for downtime depth, and then the element will never exit from downtime.
+        Fix: Dailymotion team (Nicolas Perraud) found a way to bypass pickle.loads protection and execute code from daemon if you can exchange with it's internal port. Now we whitelist allowed class only :)
+        Fix: (Christophe Simon) Enforced downtime state after retention load
+        Fix: (V. D'AGOSTINO) Update about.rst to fix a typo
+        Fix: (Flavien Peyre) multiple notification way when using a contact template (#1867)
+        Fix: (Dani Rodríguez) Update typographic errors and explain things in the help messages (#1968)
+        Fix: (Dani Rodríguez) brok queues not producing broks (#1971)
+        Fix: (David Gil) Pin CherryPy dependpency < 9.0.0 (#1983)
+        Fix: (Vladimir Kazarin) Update dmz-monitoring.rst (#1980)
+        Fix: (Muhammad Zeeshan Qazi) #1961 : Replace #!/usr/bin/python to #!/usr/bin/python2 (#1979)
+        Fix: (Dani Rodríguez) Fixes calls to cProfile in shinken binaries (#1967)
+        Fix: (wilfriedroset) shinken typo (#1974)
+        Fix: (efficks) CherryPy >= 3 required (#1943)
+        Fix: (David Gil) osmatch in nmap discovery process (#1944)
+        Fix: (Konstantin Shalygin) modules_manager: ignore '.git' dir when load modules. (#1883)
+        Fix: (Christophe Simon) http_client exceptions management
+        Fix: (Christophe Simon) OSX (darwin) platform detection
+        Fix: (Christophe Simon) unicode string parisng in shinken cmdline
+        Fix: (Olivier Hanesse) missing ini file for shinken.io
+        Fix: (Olivier Hanesse) #1857 Set default value for proxy/proxy_socks5 for shinken cli
+        Fix: (Olivier Hanesse) #1845 Add missing paramter for statsd
+        Fix: (Nicolas Le Manchet) Improve systemd units reliability
+        Fix: (Frédéric MOHIER) Iterate correctly in the Services object (#1842)
+
+
+        MISC FIXES
+        Fix: (Yann 'Ze' Richard) missing email header to prevent "Out Of Office" messages (#2014)
+        Fix: (se4598*) #1951: Email notification in text mode (#1986)
+        Enh: (Arthur Lutz) starttls and username/password for SMTP
+        Fix: (George Shuklin) trace on sening smtp messages
+        Doc: (rdmo) than -> as
+        Doc: (dodofox) specify host inheritance for contact/contactgroup (#1872)
+        Doc: (Elliott Peay) Fix default reactionner port in docs
+        Fix: (Konstantin Shalygin) Encode attachment. (#1817)
+        Fix: (Marc Remy) Typo: Update some doc files. (#1821)
 
 
 2.4.3 - 10/03/2016
