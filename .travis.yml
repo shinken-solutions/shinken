@@ -37,6 +37,8 @@ env:
   - TEST_SUITE=UBUNTU
 
 before_install:
+  - sudo apt-get -y install python-six
+  - sudo apt-get -y install python3-six
   - sudo apt-get -y install python-pycurl
   - sudo apt-get -y install python3-pycurl
   - sudo apt-get -y install python-nose
