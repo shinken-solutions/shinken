@@ -2,8 +2,8 @@
 
 
 # Travis: only need to run the installation once, it it not link to a specific python version. They don't need to use CPU for nothing ;)
-if [ "X$TRAVIS_PYTHON_VERSION" == "X2.7" ]; then
-   echo "Skippping installation tests for travis 2.7 configuration, only need one launch (2.6)"
+if [ "X$TRAVIS_PYTHON_VERSION" != "X2.7" ]; then
+	echo "Skippping installation tests for travis other than 2.7 configuration (test run in seraparate docker instances)"
    exit 0
 fi
 

@@ -8,7 +8,6 @@ services:
 cache: pip
 
 python:
-python:
   - "2.7"
   - "3.4"
   - "3.5"
@@ -16,8 +15,6 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
-  - "3.10"
-  - "3.11"
 
 # command to install dependencies
 # some are only used for travis/coveralls so we are installing them here only
@@ -37,8 +34,8 @@ env:
   - TEST_SUITE=UBUNTU
 
 before_install:
-  - sudo apt-get -y install python-six
-  - sudo apt-get -y install python3-six
+  - sudo apt-get -y install python-setuptools
+  - sudo apt-get -y install python3-setuptools
   - sudo apt-get -y install python-pycurl
   - sudo apt-get -y install python3-pycurl
   - sudo apt-get -y install python-nose

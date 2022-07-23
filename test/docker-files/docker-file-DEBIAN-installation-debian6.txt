@@ -12,12 +12,17 @@ RUN        echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/90ign
 RUN        echo 'APT::Get::Assume-Yes "true";' >>/etc/apt/apt.conf.d/90ignore-release-date
 RUN        echo 'APT::Get::force-yes "true";' >>/etc/apt/apt.conf.d/90ignore-release-date
 
-
-RUN         apt-get update && apt-get install -y python
-RUN         apt-get install -y python-setuptools
-RUN         apt-get install -y python-pycurl
-RUN         apt-get install -y procps
-RUN         apt-get install -y python-cherrypy3
+RUN        apt-get update
+RUN        apt-get install -y python
+RUN        apt-get install -y python-setuptools
+RUN        apt-get install -y python-pycurl
+RUN        apt-get install -y python-cherrypy3
+RUN        apt-get install -y python-six
+RUN        apt-get install -y python3
+RUN        apt-get install -y python3-setuptools
+RUN        apt-get install -y python3-pycurl
+RUN        apt-get install -y python3-cherrypy3
+RUN        apt-get install -y python3-six
 
 ADD         . /root/shinken
 
