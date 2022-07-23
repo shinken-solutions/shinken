@@ -88,8 +88,7 @@ class TestAction(ShinkenTest):
         self.assertNotIn('TITI', a.get_local_environnement())
         a.env = {'TITI': 'est en vacance'}
         self.assertIn('TITI', a.get_local_environnement())
-        self.assertEqual(a.get_local_environnement()['TITI'],
-                         'est en vacance' )
+        self.assertEqual(a.get_local_environnement()['TITI'], 'est en vacance')
         a.execute()
         self.wait_finished(a)
         self.assertEqual(a.output, 'est en vacance')
@@ -167,7 +166,6 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -183,7 +181,6 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -199,7 +196,6 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -215,15 +211,8 @@ class TestAction(ShinkenTest):
 
         self.wait_finished(a)
         self.assertEqual('done', a.status)
-        print("FUck", a.status, a.output)
-        if sys.version_info < (2, 7):
-            # cygwin: /bin/sh: -c: line 0: unexpected EOF while looking for matching'
-            # ubuntu: /bin/sh: Syntax error: Unterminated quoted string
-            self.assertTrue(a.output.startswith("/bin/sh"))
-            self.assertEqual(3, a.exit_status)
-        else:
-            self.assertEqual('Not a valid shell command: No closing quotation', a.output)
-            self.assertEqual(3, a.exit_status)
+        self.assertEqual('Not a valid shell command: No closing quotation', a.output)
+        self.assertEqual(3, a.exit_status)
 
     # We got problems on LARGE output, more than 64K in fact.
     # We try to solve it with the fcntl and non blocking read
@@ -262,12 +251,11 @@ class TestAction(ShinkenTest):
         a.timeout = 10
         a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
 
-        a.command = u"/bin/echo Wiadomo\u015b\u0107"
+        a.command = "/bin/echo Wiadomo\u015b\u0107"
 
         a.execute()
         self.wait_finished(a)
-        #print(a.output)
-        self.assertEqual(a.output, u"Wiadomo\u015b\u0107")
+        self.assertEqual(a.output, "Wiadomo\u015b\u0107")
 
     def test_non_zero_exit_status_empty_output_but_non_empty_stderr(self):
         a = Action()

@@ -29,7 +29,7 @@ import time
 from shinken.log import logger
 
 """ TODO: Add some comment about this class for the doc"""
-class ContactDowntime:
+class ContactDowntime(object):
     id = 1
 
     # Just to list the properties we will send as pickle

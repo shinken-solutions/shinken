@@ -126,7 +126,7 @@ class Receiver(Satellite):
             self.broks.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command: %s", str(ExternalCommand.__dict__))
+            logger.debug("Enqueuing an external command: %s", ExternalCommand.__dict__)
             self.unprocessed_external_commands.append(elt)
 
 
@@ -151,8 +151,9 @@ class Receiver(Satellite):
             try:
                 mod.manage_brok(b)
             except Exception as exp:
-                logger.warning("The mod %s raise an exception: %s, I kill it",
-                               mod.get_name(), str(exp))
+                logger.warning(
+                    "The mod %s raise an exception: %s, I kill it",
+                    mod.get_name(), exp)
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 to_del.append(mod)
@@ -327,13 +328,16 @@ class Receiver(Satellite):
                     sent = True
                 # Not connected or sched is gone
                 except (HTTPExceptions, KeyError) as exp:
-                    logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ', type(exp), exp)
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError as exp:  # the scheduler must  not be initialized
-                    logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ', type(exp), exp)
                 except Exception as exp:
-                    logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
+                    logger.error(
+                        "A satellite raised an unknown exception: %s (%s)",
+                        exp, type(exp)
+                    )
                     raise
 
             # Wether we sent the commands or not, clean the scheduler list

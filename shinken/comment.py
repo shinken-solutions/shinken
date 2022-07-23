@@ -28,7 +28,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import time
 
 """ TODO: Add some comment about this class for the doc"""
-class Comment:
+class Comment(object):
     id = 1
 
     properties = {

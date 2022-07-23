@@ -429,10 +429,7 @@ class Daemon(object):
         if self.is_switched_process():
             logger.info("Loading configuration from parent")
             raw_config = sys.stdin.read()
-            if six.PY2:
-                new_conf = SafeUnpickler.loads(raw_config)
-            else:
-                new_conf = SafeUnpickler(io.BytesIO(raw_config)).load()
+            new_conf = SafeUnpickler(io.BytesIO(raw_config)).load()
             logger.info("Successfully loaded configuration from parent")
             logger.info("Waiting for parent to stop")
             self.wait_parent_exit()
@@ -829,14 +826,14 @@ class Daemon(object):
 
         # The SSL part
         if use_ssl:
-            ssl_cert = os.path.abspath(str(ssl_conf.server_cert))
+            ssl_cert = os.path.abspath(ssl_conf.server_cert)
             if not os.path.exists(ssl_cert):
                 logger.error('Error : the SSL certificate %s is missing (server_cert).'
                              'Please fix it in your configuration', ssl_cert)
                 sys.exit(2)
-            ca_cert = os.path.abspath(str(ssl_conf.ca_cert))
+            ca_cert = os.path.abspath(ssl_conf.ca_cert)
             logger.info("Using ssl ca cert file: %s", ca_cert)
-            ssl_key = os.path.abspath(str(ssl_conf.server_key))
+            ssl_key = os.path.abspath(ssl_conf.server_key)
             if not os.path.exists(ssl_key):
                 logger.error('Error : the SSL key %s is missing (server_key).'
                              'Please fix it in your configuration', ssl_key)
@@ -1022,7 +1019,7 @@ class Daemon(object):
 
 
     def manage_signal(self, sig, frame):
-        logger.debug("I'm process %d and I received signal %s", os.getpid(), str(sig))
+        logger.debug("I'm process %d and I received signal %s", os.getpid(), sig)
         if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
         elif sig == signal.SIGUSR2:  # if USR2, ask objects dump
@@ -1072,7 +1069,7 @@ class Daemon(object):
         try:
             self.http_daemon.run()
         except Exception as exp:
-            logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
+            logger.error('The HTTP daemon failed with the error %s, exiting', exp)
             output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this error: %s", output.getvalue())
@@ -1178,7 +1175,7 @@ class Daemon(object):
                     f(self)
                 except Exception as exp:
                     logger.warning('The instance %s raised an exception %s. I disabled it,'
-                                   'and set it to restart later', inst.get_name(), str(exp))
+                                   'and set it to restart later', inst.get_name(), exp)
                     self.modules_manager.set_to_restart(inst)
 
         statsmgr.timing('hook.%s' % hook_name, time.time() - _t, 'perf')
@@ -1235,7 +1232,7 @@ class Daemon(object):
                     o = queue.get(block=False)
                 except (Empty, IOError, EOFError) as err:
                     if not isinstance(err, Empty):
-                        logger.error("An external module queue got a problem '%s'", str(exp))
+                        logger.error("An external module queue got a problem '%s'", exp)
                     break
                 else:
                     had_some_objects = True

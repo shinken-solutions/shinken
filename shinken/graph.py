@@ -26,7 +26,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-class Graph:
+class Graph(object):
     """Graph is a class to make graph things like DFS checks or accessibility
     Why use an atomic bomb when a little hammer is enough?
 

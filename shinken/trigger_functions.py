@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import time
 import re
 
@@ -184,7 +185,7 @@ def get_object(ref):
     """ Retrive object (service/host) from name
     """
     # Maybe it's already a real object, if so, return it :)
-    if not isinstance(ref, str):
+    if not isinstance(ref, six.string_types):
         return ref
 
     # Ok it's a string
@@ -202,7 +203,7 @@ def get_objects(ref):
         Retrive objects (service/host) from names
     """
     # Maybe it's already a real object, if so, return it :)
-    if not isinstance(ref, str):
+    if not isinstance(ref, six.string_types):
         return ref
 
     name = ref

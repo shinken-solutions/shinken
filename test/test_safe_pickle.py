@@ -51,10 +51,7 @@ class TestSafePickle(ShinkenTest):
 
 
     def launch_safe_pickle(self, buf):
-        if six.PY2:
-            SafeUnpickler.loads(buf)
-        else:
-            SafeUnpickler(io.BytesIO(v)).load()
+        SafeUnpickler(io.BytesIO(buf)).load()
 
 
     def test_safe_pickle(self):
@@ -73,10 +70,7 @@ class TestSafePickle(ShinkenTest):
         should_not_change = False
 
         def launch_safe_pickle():
-            if six.PY2:
-                SafeUnpickler.loads(buf)
-            else:
-                SafeUnpickler(io.BytesIO(buf)).load()
+            SafeUnpickler(io.BytesIO(buf)).load()
 
         self.assertRaises(ValueError, launch_safe_pickle)
         print (should_not_change)
@@ -87,7 +81,11 @@ class TestSafePickle(ShinkenTest):
     # exploit: they are using the bottle._load code (that blindly __import__) so the injected
     # code will finally be executed. And as it's shinken.webui.bottle, it's ok with the
     # safe_pickle filter. Smart ^^
-    def _test_safe_pickle_exploit_rce(self):
+    def test_safe_pickle_exploit_rce(self):
+        if six.PY3:
+            # We use standard bottle package in python3
+            return
+
         ###### Phase 1: can be exploited
         # Arrange
         rce_path = '/rce_exploited'
@@ -98,10 +96,11 @@ class TestSafePickle(ShinkenTest):
 _load
 (S'sys:path.append("%s")'
 tR.""" % rce_path
+        payload = payload.encode("utf-8")
 
         # Act
         print("Now loading payload")
-        pickle.loads(payload.encode("utf-8"))
+        pickle.loads(payload)
 
         # Assert
         self.assertTrue(rce_path in sys.path)
@@ -111,10 +110,7 @@ tR.""" % rce_path
         sys.path.remove(rce_path)
 
         def launch_safe_pickle():
-            if six.PY2:
-                SafeUnpickler.loads(buf)
-            else:
-                SafeUnpickler(io.BytesIO(buf)).load()
+            SafeUnpickler(io.BytesIO(payload)).load()
 
         # Act
         self.assertRaises(ValueError, launch_safe_pickle)
@@ -133,10 +129,7 @@ tR.""" % rce_path
         payload = pickle.dumps(Brok('void', {}))
 
         # Act
-        if six.PY2:
-            b = SafeUnpickler.loads(payload)
-        else:
-            b = SafeUnpickler(io.BytesIO(payload)).load()
+        b = SafeUnpickler(io.BytesIO(payload)).load()
 
         # Assert
         self.assertTrue(isinstance(b, Brok))

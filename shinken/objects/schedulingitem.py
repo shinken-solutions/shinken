@@ -117,7 +117,7 @@ class SchedulingItem(Item):
                 self.state_id = mapping[init_state]["state_id"]
             else:
                 err = "invalid initial_state: %s, should be one of %s" % (
-                    init_state, ", ".join(mapping.keys()))
+                    init_state, ", ".join(sorted(mapping.keys())))
                 self.configuration_errors.append(err)
 
         # Enforced check output

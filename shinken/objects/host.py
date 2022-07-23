@@ -814,7 +814,7 @@ class Host(six.with_metaclass(AutoSlots, SchedulingItem)):
         for hg in self.hostgroups:
             # naglog_result('info', 'get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
             # groupname = "%s [%s]" % (hg.alias, hg.get_name())
-            groupname = "%s" % (hg.alias)
+            groupname = hg.alias
         return groupname
 
 

@@ -51,7 +51,7 @@ class HTTPException(Exception):
 
 HTTPExceptions = (HTTPException,)
 
-class FileReader:
+class FileReader(object):
     def __init__(self, fp):
         self.fp = fp
     def read_callback(self, size):
@@ -128,7 +128,7 @@ class HTTPClient(object):
         else:
             c.setopt(c.TIMEOUT, self.data_timeout)
 
-        c.setopt(c.URL, str(self.uri + path + '?' + urlencode(args)))
+        c.setopt(c.URL, self.uri + path + '?' + urlencode(args))
         # Ok now manage the response
         response = io.BytesIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
@@ -176,7 +176,7 @@ class HTTPClient(object):
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
         c.setopt(c.HTTPPOST, list(args.items()))
-        c.setopt(c.URL, str(self.uri + path))
+        c.setopt(c.URL, self.uri + path)
         # Ok now manage the response
         response = io.BytesIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
@@ -225,7 +225,7 @@ class HTTPClient(object):
         # if proxy:
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
-        c.setopt(c.URL, str(self.uri + path))
+        c.setopt(c.URL, self.uri + path)
         c.setopt(c.VERBOSE, 0)
         # Ok now manage the response
         response = io.BytesIO()

@@ -23,9 +23,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import unittest
-
-import string
 
 from shinken_test import time_hacker
 from shinken.log import logger
@@ -46,10 +45,10 @@ class TestEndParsingType(unittest.TestCase):
             return list
 
         if isinstance(obj, StringProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, UnusedProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, BoolProp):
             return bool
@@ -61,16 +60,16 @@ class TestEndParsingType(unittest.TestCase):
             return float
 
         if isinstance(obj, CharProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, DictProp):
             return dict
 
         if isinstance(obj, AddrProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, ToGuessProp):
-            return str
+            return six.string_types
 
     def print_header(self):
         print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")

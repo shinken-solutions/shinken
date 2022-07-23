@@ -42,7 +42,7 @@ from shinken.misc.common import DICT_MODATTR
 
 
 """ TODO: Add some comment about this class for the doc"""
-class ExternalCommand:
+class ExternalCommand(object):
     my_type = 'externalcommand'
 
     def __init__(self, cmd_line):
@@ -50,7 +50,7 @@ class ExternalCommand:
 
 
 """ TODO: Add some comment about this class for the doc"""
-class ExternalCommandManager:
+class ExternalCommandManager(object):
 
     commands = {
         'CHANGE_CONTACT_MODSATTR':
@@ -451,7 +451,7 @@ class ExternalCommandManager:
                     os.mkfifo(self.pipe_path, 0o660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError as exp:
-                    self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
+                    self.error("Pipe creation failed (%s): %s" % (self.pipe_path, exp))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         return self.fifo
@@ -506,7 +506,7 @@ class ExternalCommandManager:
             if not is_global:
                 c_name = r['c_name']
                 args = r['args']
-                logger.debug("Got commands %s %s", c_name, str(args))
+                logger.debug("Got commands %s %s", c_name, args)
                 f = getattr(self, c_name)
                 f(*args)
             else:
@@ -645,7 +645,7 @@ class ExternalCommandManager:
             numargs += 1
         elts = split_semicolon(command, numargs)
 
-        logger.debug("mode= %s, global= %s", self.mode, str(entry['global']))
+        logger.debug("mode= %s, global= %s", self.mode, entry['global'])
         if self.mode == 'dispatcher' and entry['global']:
             if not internal:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers", c_name)
@@ -770,7 +770,7 @@ class ExternalCommandManager:
             # f = getattr(self, c_name)
             # apply(f, args)
         else:
-            logger.debug("Sorry, the arguments are not corrects (%s)", str(args))
+            logger.debug("Sorry, the arguments are not corrects (%s)", args)
             return None
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
@@ -1650,7 +1650,7 @@ class ExternalCommandManager:
                          " the error code '%d' and the text '%s'.", e.exit_status, e.output)
             return
         # Ok here the command succeed, we can now wait our death
-        naglog_result('info', "%s" % (e.output))
+        naglog_result('info', e.output)
 
     # RELOAD_CONFIG
     def RELOAD_CONFIG(self):
@@ -1674,7 +1674,7 @@ class ExternalCommandManager:
                          " with the error code '%d' and the text '%s'." % (e.exit_status, e.output))
             return
         # Ok here the command succeed, we can now wait our death
-        naglog_result('info', "%s" % (e.output))
+        naglog_result('info', e.output)
 
     # SAVE_STATE_INFORMATION
     def SAVE_STATE_INFORMATION(self):
@@ -2014,7 +2014,7 @@ class ExternalCommandManager:
             logger.debug("Sorry, the realm %s is unknown", realm_name)
             return
 
-        logger.debug("We found the realm: %s", str(r))
+        logger.debug("We found the realm: %s", r)
         # TODO: backport this in the config class?
         # We create the PollerLink object
         t = {'poller_name': poller_name, 'address': address, 'port': port}
@@ -2030,7 +2030,7 @@ class ExternalCommandManager:
         r.count_pollers()
         r.fill_potential_satellites_by_type('pollers')
         logger.debug("Poller %s added", poller_name)
-        logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
+        logger.debug("Potential %s", r.get_potential_satellites_by_type('poller'))
 
 
 if __name__ == '__main__':

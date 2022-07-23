@@ -55,9 +55,12 @@ class DependencyNode(object):
         self.not_value = False
 
     def __str__(self):
-        return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (self.operand, self.of_values,
-                                                            ','.join([str(s) for s in self.sons]),
-                                                            self.not_value)
+        return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (
+            self.operand,
+            self.of_values,
+            ','.join([str(s) for s in self.sons]),
+            self.not_value
+        )
 
 
     def get_reverse_state(self, state):
@@ -310,7 +313,7 @@ class DependencyNodeFactory(object):
             node.operand = 'of:'
             g = m.groups()
             # We can have a Aof: rule, or a multiple A,B,Cof: rule.
-            mul_of = (g[1] != u'' and g[2] != u'')
+            mul_of = (g[1] != '' and g[2] != '')
             # If multi got (A,B,C)
             if mul_of:
                 node.is_of_mul = True

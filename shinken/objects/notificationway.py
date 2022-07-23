@@ -222,8 +222,9 @@ class NotificationWay(Item):
                                    "host_notification_command is missing", self.get_name())
                     state = False
                 if not cmd.is_valid():
-                    logger.warning("[notificationway::%s] a host_notification_command "
-                                   "is invalid (%s)", cmd.get_name(), str(cmd.__dict__))
+                    logger.warning(
+                        "[notificationway::%s] a host_notification_command "
+                        "is invalid (%s)", cmd.get_name(), cmd.__dict__)
                     state = False
 
         if getattr(self, 'host_notification_period', None) is None:

@@ -43,7 +43,7 @@ random.seed()
 
 
 # Dispatcher Class
-class Dispatcher:
+class Dispatcher(object):
 
     # Load all elements, set them as not assigned
     # and add them to elements, so loop will be easier :)
@@ -519,7 +519,8 @@ class Dispatcher:
                                 r.get_name(), kind)
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (
-                                    satellite.get_name(), str(satellite.spare))
+                                    satellite.get_name(), satellite.spare
+                                )
                             logger.info(satellite_string)
 
                             # Now we dispatch cfg to every one ask for it

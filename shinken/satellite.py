@@ -331,8 +331,10 @@ class Satellite(BaseSatellite):
                 uri=uri, strong_ssl=sched['hard_ssl_name_check'],
                 timeout=timeout, data_timeout=data_timeout)
         except HTTPExceptions as exp:
-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
-                           self.name, sname, str(exp))
+            logger.warning(
+                "[%s] Scheduler %s is not initialized or has network problem: %s",
+                self.name, sname, exp
+            )
             sched['con'] = None
             return
 
@@ -342,8 +344,10 @@ class Satellite(BaseSatellite):
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
         except (HTTPExceptions, pickle.PicklingError, KeyError) as exp:
-            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
-                           self.name, sname, str(exp))
+            logger.warning(
+                "[%s] Scheduler %s is not initialized or has network problem: %s",
+                self.name, sname, exp
+            )
             sched['con'] = None
             return
 
@@ -431,11 +435,11 @@ class Satellite(BaseSatellite):
                         send_ok = con.post('put_results', {'results': ret})
                         # Not connected or sched is gone
                 except (HTTPExceptions, KeyError) as exp:
-                    logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
+                    logger.error('manage_returns exception:: %s,%s ', type(exp), exp)
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError as exp:  # the scheduler must  not be initialized
-                    logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
+                    logger.error('manage_returns exception:: %s,%s ', type(exp), exp)
                 except Exception as exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                     raise
@@ -460,7 +464,7 @@ class Satellite(BaseSatellite):
             return []
 
         sched = self.schedulers[sched_id]
-        logger.debug("Preparing to return %s", str(sched['wait_homerun']))
+        logger.debug("Preparing to return %s", sched['wait_homerun'])
 
         # prepare our return
         if self.results_batch > 0:
@@ -488,9 +492,11 @@ class Satellite(BaseSatellite):
         except OSError as exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
-                logger.critical("Got an exception (%s). If you are under Linux, "
-                                "please check that your /dev/shm directory exists and"
-                                " is read-write.", str(exp))
+                logger.critical(
+                    "Got an exception (%s). If you are under Linux, please "
+                    "check that your /dev/shm directory exists and  is read-write.",
+                    exp
+                )
             raise
 
         # If we are in the fork module, we do not specify a target
@@ -555,7 +561,7 @@ class Satellite(BaseSatellite):
             self.broks.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command '%s'", str(elt.__dict__))
+            logger.debug("Enqueuing an external command '%s'", elt.__dict__)
             with self.external_commands_lock:
                 self.external_commands.append(elt)
 
@@ -764,12 +770,12 @@ class Satellite(BaseSatellite):
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
             except (HTTPExceptions, KeyError) as exp:
-                logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
+                logger.debug('get_new_actions exception:: %s,%s ', type(exp), exp)
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
             except AttributeError as exp:
-                logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
+                logger.debug('get_new_actions exception:: %s,%s ', type(exp), exp)
             # What the F**k? We do not know what happened,
             # log the error message if possible.
             except Exception as exp:
@@ -1122,7 +1128,7 @@ class Satellite(BaseSatellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        logger.info("We have our schedulers: %s", str(self.schedulers))
+        logger.info("We have our schedulers: %s", self.schedulers)
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
@@ -1130,7 +1136,7 @@ class Satellite(BaseSatellite):
         for module in mods:
             # If we already got it, bypass
             if module.module_type not in self.q_by_mod:
-                logger.debug("Add module object %s", str(module))
+                logger.debug("Add module object %s", module)
                 self.modules_manager.modules.append(module)
                 logger.info("[%s] Got module: %s ", self.name, module.module_type)
                 self.q_by_mod[module.module_type] = {}

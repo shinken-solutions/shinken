@@ -26,7 +26,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-class Acknowledge:
+class Acknowledge(object):
     """
     Allows you to acknowledge the current problem for the specified service.
     By acknowledging the current problem, future notifications (for the same

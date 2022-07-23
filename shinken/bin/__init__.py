@@ -33,7 +33,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import sys
 
-VERSION = "3.0.0"
+VERSION = "3.0.0-RC1"
 
 
 # Make sure people are using Python 2.6 or higher

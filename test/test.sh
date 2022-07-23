@@ -1,6 +1,9 @@
 #!/bin/sh
 
 DIR=$(cd $(dirname "$0"); pwd)
+if [ -z "${PYTHON}" ]; then
+    PYTHON=python3
+fi
 cd $DIR
 echo "$PWD"
 
@@ -14,7 +17,7 @@ for ii in $(ls -1 test_*py) ; do
 		continue
 	fi
     echo "Launching Test $ii"
-    python3 $ii
+    ${PYTHON} $ii
 	if [ $? -eq 0 ]; then
 		echo $ii >> test.history
 	else

@@ -260,7 +260,7 @@ class Scheduler(object):
                 f.write(s)
             f.close()
         except Exception as exp:
-            logger.error("Error in writing the dump file %s : %s", p, str(exp))
+            logger.error("Error in writing the dump file %s : %s", p, exp)
 
 
     def dump_config(self):
@@ -273,7 +273,7 @@ class Scheduler(object):
             self.conf.dump(f)
             f.close()
         except Exception as exp:
-            logger.error("Error in writing the dump file %s : %s", p, str(exp))
+            logger.error("Error in writing the dump file %s : %s", p, exp)
 
     # Load the external command
     def load_external_command(self, e):
@@ -389,16 +389,17 @@ class Scheduler(object):
         for inst in self.sched_daemon.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
             logger.debug("hook_point: %s: %s %s",
-                         inst.get_name(), str(hasattr(inst, full_hook_name)), hook_name)
+                         inst.get_name(), hasattr(inst, full_hook_name), hook_name)
 
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
                 except Exception as exp:
-                    logger.error("The instance %s raise an exception %s."
-                                 "I disable it and set it to restart it later",
-                                 inst.get_name(), str(exp))
+                    logger.error(
+                        "The instance %s raise an exception %s." "I disable it "
+                        "and set it to restart it later", inst.get_name(), exp
+                    )
                     output = io.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Exception trace follows: %s", output.getvalue())
@@ -718,10 +719,10 @@ class Scheduler(object):
                                    "(exit code=%d): '%s'", c.command, c.exit_status, c.output)
 
             except KeyError as exp:  # bad number for notif, not that bad
-                logger.warning('put_results:: get unknown notification : %s ', str(exp))
+                logger.warning('put_results:: get unknown notification : %s ', exp)
 
             except AttributeError as exp:  # bad object, drop it
-                logger.warning('put_results:: get bad notification : %s ', str(exp))
+                logger.warning('put_results:: get bad notification : %s ', exp)
         elif c.is_a == 'check':
             try:
                 if c.status == 'timeout':
@@ -757,7 +758,7 @@ class Scheduler(object):
                 b = old_action.ref.get_snapshot_brok(old_action.output, old_action.exit_status)
                 self.add(b)
         else:
-            logger.error("The received result type in unknown! %s", str(c.is_a))
+            logger.error("The received result type in unknown! %s", c.is_a)
 
 
     # Get the good tabs for links regarding to the kind. If unknown, return None
@@ -806,7 +807,10 @@ class Scheduler(object):
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
         except HTTPExceptions as exp:
-            logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+            logger.warning(
+                "Connection problem to the %s %s: %s",
+                type, links[id]['name'], exp
+            )
             links[id]['con'] = None
             return
 
@@ -814,11 +818,16 @@ class Scheduler(object):
             # initial ping must be quick
             con.get('ping')
         except HTTPExceptions as exp:
-            logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+            logger.warning(
+                "Connection problem to the %s %s: %s",
+                type, links[id]['name'], exp
+            )
             links[id]['con'] = None
             return
         except KeyError as exp:
-            logger.warning("The %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
+            logger.warning(
+                "The %s '%s' is not initialized: %s",
+                type, links[id]['name'], exp)
             links[id]['con'] = None
             return
 
@@ -829,7 +838,7 @@ class Scheduler(object):
     def push_actions_to_passives_satellites(self):
         # We loop for our passive pollers or reactionners
         for p in filter(lambda p: p['passive'], self.pollers.values()):
-            logger.debug("I will send actions to the poller %s", str(p))
+            logger.debug("I will send actions to the poller %s", p)
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
@@ -841,11 +850,17 @@ class Scheduler(object):
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions as exp:
-                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "Connection problem to the %s %s: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
                 except KeyError as exp:
-                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "The %s '%s' is not initialized: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
             else:  # no connection? try to reconnect
@@ -854,7 +869,7 @@ class Scheduler(object):
         # TODO:factorize
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
-            logger.debug("I will send actions to the reactionner %s", str(p))
+            logger.debug("I will send actions to the reactionner %s", p)
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
@@ -868,11 +883,17 @@ class Scheduler(object):
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
                 except HTTPExceptions as exp:
-                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "Connection problem to the %s %s: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
                 except KeyError as exp:
-                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "The %s '%s' is not initialized: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
             else:  # no connection? try to reconnect
@@ -883,7 +904,7 @@ class Scheduler(object):
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
         for p in [p for p in self.pollers.values() if p['passive']]:
-            logger.debug("I will get actions from the poller %s", str(p))
+            logger.debug("I will get actions from the poller %s", p)
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
@@ -892,19 +913,13 @@ class Scheduler(object):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    try:
-                        results = str(results)
-                    except UnicodeEncodeError:  # ascii not working, switch to utf8 so
-                        # if not eally utf8 will be a real problem
-                        results = results.encode("utf8", 'ignore')
-                        # and data will be invalid, socatch by the pickle.
-
                     # now go the cpickle pass, and catch possible errors from it
                     try:
                         results = pickle.loads(results)
                     except Exception as exp:
-                        logger.error('Cannot load passive results from satellite %s : %s',
-                                     p['name'], str(exp))
+                        logger.error(
+                            'Cannot load passive results from satellite %s : %s',
+                            p['name'], exp)
                         continue
 
                     nb_received = len(results)
@@ -915,11 +930,17 @@ class Scheduler(object):
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
                 except HTTPExceptions as exp:
-                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "Connection problem to the %s %s: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     continue
                 except KeyError as exp:
-                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "The %s '%s' is not initialized: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     continue
             else:  # no connection, try reinit
@@ -927,7 +948,7 @@ class Scheduler(object):
 
         # We loop for our passive reactionners
         for p in [p for p in self.reactionners.values() if p['passive']]:
-            logger.debug("I will get actions from the reactionner %s", str(p))
+            logger.debug("I will get actions from the reactionner %s", p)
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
@@ -936,7 +957,7 @@ class Scheduler(object):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    results = pickle.loads(str(results))
+                    results = pickle.loads(results)
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results", nb_received)
@@ -945,11 +966,17 @@ class Scheduler(object):
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
                 except HTTPExceptions as exp:
-                    logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "Connection problem to the %s %s: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
                 except KeyError as exp:
-                    logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
+                    logger.warning(
+                        "The %s '%s' is not initialized: %s",
+                        type, p['name'], exp
+                    )
                     p['con'] = None
                     return
             else:  # no connection, try reinit
@@ -1207,7 +1234,7 @@ class Scheduler(object):
                                 self.services, self.servicegroups)
 
         self.conf.skip_initial_broks = getattr(self.conf, 'skip_initial_broks', False)
-        logger.debug("Skipping initial broks? %s", str(self.conf.skip_initial_broks))
+        logger.debug("Skipping initial broks? %s", self.conf.skip_initial_broks)
         if not self.conf.skip_initial_broks:
             for tab in initial_status_types:
                 for i in tab:

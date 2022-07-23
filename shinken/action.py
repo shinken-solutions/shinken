@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import os
 import time
 import shlex
@@ -167,6 +168,8 @@ class __Action(object):
         # so we do not wait the same for an little check
         # than a long ping. So we do like TCP: slow start with *2
         # but do not wait more than 0.1s.
+        if self.status != 'launched':
+            return
         self.last_poll = time.time()
 
         _, _, child_utime, child_stime, _ = os.times()
@@ -187,6 +190,8 @@ class __Action(object):
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
                 # Do not keep a pointer to the process
+                self.process.stdout.close()
+                self.process.stderr.close()
                 del self.process
                 # Get the user and system time
                 _, _, n_child_utime, n_child_stime, _ = os.times()
@@ -198,13 +203,13 @@ class __Action(object):
         # Get standards outputs from the communicate function if we do
         # not have the fcntl module (Windows, and maybe some special
         # unix like AIX)
-        if not fcntl:
-            (self.stdoutdata, self.stderrdata) = self.process.communicate()
-        else:
+        if fcntl:
             # The command was to quick and finished even before we can
             # polled it first. So finish the read.
             self.stdoutdata += no_block_read(self.process.stdout)
             self.stderrdata += no_block_read(self.process.stderr)
+        else:
+            self.stdoutdata, self.stderrdata = self.process.communicate()
 
         self.exit_status = self.process.returncode
 
@@ -278,28 +283,28 @@ if os.name != 'nt':
 
     class Action(__Action):
 
-        # We allow direct launch only for 2.7 and higher version
-        # because if a direct launch crash, under this the file handles
-        # are not releases, it's not good.
-        def execute__(self, force_shell=sys.version_info < (2, 7)):
+        def execute__(self, force_shell=False):
             # If the command line got shell characters, we should go
             # in a shell mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
 
-            # 2.7 and higher Python version need a list of args for cmd
-            # and if not force shell (if, it's useless, even dangerous)
-            # 2.4->2.6 accept just the string command
-            if sys.version_info < (2, 7) or force_shell:
-                cmd = self.command
-            else:
-                try:
-                    cmd = shlex.split(self.command)
-                except Exception as exp:
-                    self.output = 'Not a valid shell command: ' + exp.__str__()
-                    self.exit_status = 3
-                    self.status = 'done'
-                    self.execution_time = time.time() - self.check_time
-                    return
+            try:
+                if six.PY2:
+                    command = self.command.encode("utf-8")
+                else:
+                    command = self.command
+                if force_shell is False:
+                    command = shlex.split(command)
+                else:
+                    # In case of shell command, only check syntax, do not split
+                    # the chain
+                    shlex.split(command)
+            except Exception as exp:
+                self.output = 'Not a valid shell command: ' + exp.__str__()
+                self.exit_status = 3
+                self.status = 'done'
+                self.execution_time = time.time() - self.check_time
+                return
 
             # Now: GO for launch!
             # logger.debug("Launching: %s" % (self.command.encode('utf8', 'ignore')))
@@ -310,7 +315,7 @@ if os.name != 'nt':
             # detail about this.
             try:
                 self.process = subprocess.Popen(
-                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
             except OSError as exp:
@@ -319,6 +324,7 @@ if os.name != 'nt':
                 # Maybe it's just a shell we try to exec. So we must retry
                 if (not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error'):
                     return self.execute__(True)
+                self.process = None
                 self.output = exp.__str__()
                 self.exit_status = 2
                 self.status = 'done'
@@ -352,19 +358,14 @@ else:
     class Action(__Action):
 
         def execute__(self):
-            # 2.7 and higher Python version need a list of args for cmd
-            # 2.4->2.6 accept just the string command
-            if sys.version_info < (2, 7):
-                cmd = self.command
-            else:
-                try:
-                    cmd = shlex.split(self.command)
-                except Exception as exp:
-                    self.output = 'Not a valid shell command: ' + exp.__str__()
-                    self.exit_status = 3
-                    self.status = 'done'
-                    self.execution_time = time.time() - self.check_time
-                    return
+            try:
+                cmd = shlex.split(self.command)
+            except Exception as exp:
+                self.output = 'Not a valid shell command: ' + exp.__str__()
+                self.exit_status = 3
+                self.status = 'done'
+                self.execution_time = time.time() - self.check_time
+                return
 
             try:
                 self.process = subprocess.Popen(

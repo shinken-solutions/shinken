@@ -128,7 +128,7 @@ class SatelliteLink(Item):
             return True
         except HTTPExceptions as exp:
             self.con = None
-            logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
+            logger.error("Failed sending configuration for %s: %s", self.get_name(), exp)
             return False
 
 
@@ -337,7 +337,7 @@ class SatelliteLink(Item):
             # We can update our list now
             self.managed_confs = tab_cleaned
         except HTTPExceptions as exp:
-            print("EXCEPTION INwhat_i_managed", str(exp))
+            print("EXCEPTION INwhat_i_managed %s" % exp)
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
             self.con = None

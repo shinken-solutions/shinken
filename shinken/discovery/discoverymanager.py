@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import sys
 import os
 import re
@@ -307,7 +308,7 @@ class DiscoveredHost(object):
         self.read_disco_buf(raw_disco_data)
 
 
-class DiscoveryManager:
+class DiscoveryManager(object):
     def __init__(self, path, macros, overwrite, runners, output_dir=None,
                  dbmod='', db_direct_insert=False, only_new_hosts=False,
                  backend=None, modules_path='', merge=False, conf=None, first_level_only=False):
@@ -400,7 +401,7 @@ class DiscoveryManager:
 
     # We try to init the backend if we got one
     def init_backend(self):
-        if not self.backend or not isinstance(self.backend, str):
+        if not self.backend or not isinstance(self.backend, six.string_types):
             return
 
         print("Doing backend init")

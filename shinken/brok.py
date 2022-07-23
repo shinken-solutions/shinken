@@ -30,16 +30,16 @@ import pickle
 import sys
 import io
 
-class Brok:
+class Brok(object):
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
     """
-    __slots__ = ('__dict__', 'type', 'data', 'prepared', 'instance_id')
+    #__slots__ = ('id', 'type', 'data', 'prepared', 'instance_id')
     id = 0
     my_type = 'brok'
 
-    def __init__(self, type, data):
-        self.type = type
+    def __init__(self, _type, data):
+        self.type = _type
         self.id = self.__class__.id
         self.__class__.id += 1
         self.data = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
@@ -47,7 +47,7 @@ class Brok:
 
 
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        return str(self.__dict__)
 
 
     # We unserialize the data, and if some prop were
@@ -55,11 +55,30 @@ class Brok:
     def prepare(self):
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
-        if hasattr(self, 'prepared') and not self.prepared:
-            if six.PY2:
-                self.data = SafeUnpickler.loads(self.data)
-            else:
-                self.data = SafeUnpickler(io.BytesIO(self.data)).load()
+        if not self.prepared:
+            self.data = SafeUnpickler(io.BytesIO(self.data)).load()
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True
+
+#    # Call by pickle for dataify the ackn
+#    # because we DO NOT WANT REF in this pickleisation!
+#    def __getstate__(self):
+#        # id is not in *_properties
+#        res = {'id': self.id}
+#        for prop in ("data", "instance_id", "prepared", "type"):
+#            if hasattr(self, prop):
+#                res[prop] = getattr(self, prop)
+#        return res
+#
+#    # Inverted function of getstate
+#    def __setstate__(self, state):
+#        cls = self.__class__
+#
+#        for prop in ("id", "data", "instance_id", "prepared", "type"):
+#            if prop in state:
+#                setattr(self, prop, state[prop])
+#
+#        # to prevent from duplicating id in comments:
+#        if self.id >= cls.id:
+#            cls.id = self.id + 1

@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import time
 
 #from .action import Action
@@ -33,7 +34,7 @@ from shinken.property import IntegerProp, StringProp, FloatProp, BoolProp
 from shinken.autoslots import AutoSlots
 
 """ TODO: Add some comment about this class for the doc"""
-class EventHandler(Action, metaclass=AutoSlots):
+class EventHandler(six.with_metaclass(AutoSlots, Action)):
 
     my_type = 'eventhandler'
 

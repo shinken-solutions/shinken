@@ -48,7 +48,7 @@ def guess_int_or_float(val):
 
 
 # Class for one metric of a perf_data
-class Metric:
+class Metric(object):
     def __init__(self, s):
         self.name = self.value = self.uom = \
             self.warning = self.critical = self.min = self.max = None
@@ -81,7 +81,7 @@ class Metric:
         return s
 
 
-class PerfDatas:
+class PerfDatas(object):
     def __init__(self, s):
         s = s or ''
         elts = perfdata_split_pattern.findall(s)

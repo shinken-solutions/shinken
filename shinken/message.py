@@ -25,7 +25,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-class Message:
+class Message(object):
     """This is a simple message class for communications between actionners and
     workers
 

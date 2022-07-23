@@ -29,7 +29,7 @@ from shinken.autoslots import AutoSlots
 from shinken.property import StringProp, BoolProp, IntegerProp
 
 
-class DummyCommandCall():
+class DummyCommandCall(object):
     """Ok, slots are fun: you cannot set the __autoslots__
      on the same class you use, fun isn't it? So we define*
      a dummy useless class to get such :)
@@ -140,11 +140,11 @@ class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
 
         # The command is a bit special, we just put it's name
         # or a '' if need
-        if self.command and not isinstance(self.command, str):
+        if self.command and not isinstance(self.command, six.string_types):
             res['command'] = self.command.get_name()
         # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
         # only take the value
-        elif self.command and isinstance(self.command, str):
+        elif self.command and isinstance(self.command, six.string_types):
             res['command'] = self.command
         else:
             res['command'] = ''
@@ -169,8 +169,8 @@ class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
         """In 1.0 we move to a dict save. Before, it was
         a tuple save, like
         ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
-        'command_line': u'/usr/local/nagios/bin/rss-multiuser',
-        'module_type': 'fork', 'command_name': u'notify-by-rss'})
+        'command_line': '/usr/local/nagios/bin/rss-multiuser',
+        'module_type': 'fork', 'command_name': 'notify-by-rss'})
         """
         for d in state:
             for k, v in d.items():

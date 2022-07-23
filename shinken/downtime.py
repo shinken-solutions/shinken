@@ -45,7 +45,7 @@ from shinken.brok import Brok
 """
 
 
-class Downtime:
+class Downtime(object):
     id = 1
 
     # Just to list the properties we will send as pickle

@@ -474,12 +474,12 @@ class Shinken(BaseSatellite):
             setattr(self.conf, prop, val)
 
         if self.conf.use_timezone != '':
-            logger.debug("Setting our timezone to %s", str(self.conf.use_timezone))
+            logger.debug("Setting our timezone to %s", self.conf.use_timezone)
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
 
         if len(self.modules) != 0:
-            logger.debug("I've got %s modules", str(self.modules))
+            logger.debug("I've got %s modules", self.modules)
 
         # TODO: if scheduler had previous modules instanciated it must clean them!
         self.modules_manager.set_modules(self.modules)

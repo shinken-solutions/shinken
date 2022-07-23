@@ -48,7 +48,7 @@ except ImportError:
     try:
         from cherrypy.wsgiserver import CherryPyWSGIServer
     except ImportError:
-        cheery_wsgiserver = None
+        CherryPyWSGIServer = None
 try:
     from OpenSSL import SSL
     from cherrypy.wsgiserver.ssl_pyopenssl import pyOpenSSLAdapter
@@ -72,7 +72,10 @@ from shinken.stats import statsmgr
 from shinken.safepickle import SafeUnpickler
 
 # Let's load bottlecore! :)
-import bottle
+if six.PY2:
+    from shinken.webui import bottlecore as bottle
+else:
+    import bottle
 bottle.debug(True)
 
 
@@ -137,7 +140,7 @@ class CherryPyBackend(object):
                 daemon_thread_pool_size=daemon_thread_pool_size
             )
         except socket.error as exp:
-            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
+            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, exp)
             raise PortNotFree(msg)
         except Exception as e:
             # must be a problem with http workdir:
@@ -165,10 +168,12 @@ class CherryPyBackend(object):
         try:
             self.srv.start()
         except socket.error as exp:
-            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, str(exp))
+            msg = "Error: Sorry, the port %d is not free: %s" % (self.port, exp)
             # from None stops the processing of `exp`: prevents exception in
             # exception error
-            raise PortNotFree(msg) from None
+            # PY23COMPAT: raise from not supported in python2
+            #raise PortNotFree(msg) from None
+            six.raise_from(exp, None)
         finally:
             try:
                 self.srv.stop()
@@ -232,7 +237,7 @@ class WSGIREFBackend(object):
             def register_server(server):
                 self.srv = server
 
-            WSGIREFAdapter.run_callback = register_server
+            WSGIREFAdapter.run_callback = staticmethod(register_server)
 
             bottle.run(
                 host=host,
@@ -245,11 +250,8 @@ class WSGIREFBackend(object):
                 daemon_thread_pool_size=daemon_thread_pool_size
             )
         except socket.error as exp:
-            msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
+            msg = "Error: Sorry, the port %d is not free: %s" % (port, exp)
             raise PortNotFree(msg)
-        except Exception as e:
-            # must be a problem with http workdir:
-            raise e
 
 
     def get_sockets(self):
@@ -263,9 +265,13 @@ class WSGIREFBackend(object):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error as e:
-            if e.errno == errno.EINTR:
+            if six.PY2:
+                err, _ = e
+            else:
+                err = e.errno
+            if err == errno.EINTR:
                 return []
-            elif e.errno == errno.EBADF:
+            elif err == errno.EBADF:
                 logger.error('Failed to handle request: %s', e)
                 return []
             raise

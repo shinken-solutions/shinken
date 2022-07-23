@@ -130,13 +130,13 @@ class Broker(BaseSatellite):
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command '%s'", str(ExternalCommand.__dict__))
+            logger.debug("Enqueuing an external command '%s'", ExternalCommand.__dict__)
             self.external_commands.append(elt)
         # Maybe we got a Message from the modules, it's way to ask something
         # like from now a full data from a scheduler for example.
         elif cls_type == 'message':
             # We got a message, great!
-            logger.debug(str(elt.__dict__))
+            logger.debug(elt.__dict__)
             if elt.get_type() == 'NeedData':
                 data = elt.get_data()
                 # Full instance id means: I got no data for this scheduler
@@ -237,7 +237,10 @@ class Broker(BaseSatellite):
         except HTTPExceptions as exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+            logger.info(
+                "Connection problem to the %s %s: %s", type, links[id]['name'],
+                exp
+            )
             links[id]['con'] = None
             return
 
@@ -263,11 +266,15 @@ class Broker(BaseSatellite):
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
         except HTTPExceptions as exp:
-            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+            logger.info(
+                "Connection problem to the %s %s: %s",
+                type, links[id]['name'], exp)
             links[id]['con'] = None
             return
         except KeyError as exp:
-            logger.info("the %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
+            logger.info(
+                "the %s '%s' is not initialized: %s",
+                type, links[id]['name'], exp)
             links[id]['con'] = None
             traceback.print_stack()
             return
@@ -284,9 +291,10 @@ class Broker(BaseSatellite):
             try:
                 mod.manage_brok(b)
             except Exception as exp:
-                logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later",
-                               mod.get_name(), str(exp))
+                logger.debug(exp.__dict__)
+                logger.warning(
+                    "The mod %s raise an exception: %s, I'm tagging it to restart later",
+                   mod.get_name(), exp)
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 self.modules_manager.set_to_restart(mod)
@@ -360,21 +368,25 @@ class Broker(BaseSatellite):
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError as exp:
-                logger.debug("Key error for get_broks : %s", str(exp))
+                logger.debug("Key error for get_broks : %s", exp)
                 self.pynag_con_init(sched_id, type=type)
             except HTTPExceptions as exp:
-                logger.warning("Connection problem to the %s %s: %s",
-                               type, links[sched_id]['name'], str(exp))
+                logger.warning(
+                    "Connection problem to the %s %s: %s",
+                    type, links[sched_id]['name'], exp
+                )
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError as exp:
-                logger.warning("The %s %s should not be initialized: %s",
-                               type, links[sched_id]['name'], str(exp))
+                logger.warning(
+                    "The %s %s should not be initialized: %s",
+                    type, links[sched_id]['name'], exp
+                )
             # scheduler must not have checks
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
-            except Exception as x:
-                logger.error(str(x))
+            except Exception as e:
+                logger.error(x)
                 logger.error(traceback.format_exc())
                 sys.exit(1)
 

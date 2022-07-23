@@ -154,9 +154,9 @@ class IForArbiter(Interface):
     doc = 'Dump all objects of the type in [hosts, services, contacts, ' \
           'commands, hostgroups, servicegroups]'
     def get_objects_properties(self, table):
-        logger.debug('ASK:: table= %s', str(table))
+        logger.debug('ASK:: table= %s', table)
         objs = getattr(self.app.conf, table, None)
-        logger.debug("OBJS:: %s", str(objs))
+        logger.debug("OBJS:: %s", objs)
         if objs is None or len(objs) == 0:
             return []
         res = []
@@ -520,8 +520,10 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception as exp:
-                    logger.error("Instance %s raised an exception %s. Log and continue to run",
-                                 inst.get_name(), str(exp))
+                    logger.error(
+                        "Instance %s raised an exception %s. Log and continue to run",
+                         inst.get_name(), exp
+                    )
                     output = io.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Back trace of this remove: %s", output.getvalue())

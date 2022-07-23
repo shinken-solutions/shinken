@@ -25,6 +25,7 @@ Test shinken.logging
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import sys
 import os
 import time
@@ -173,7 +174,10 @@ class LogCollectMixin:
         for i, length in enumerate(lenlist):
             self.assertEqual(len(loglist[i]), length)
             if length != 0 and patterns[i]:
-                self.assertRegex(loglist[i][0], patterns[i])
+                if six.PY2:
+                    self.assertRegexpMatches(loglist[i][0], patterns[i])
+                else:
+                    self.assertRegex(loglist[i][0], patterns[i])
         return loglist
 
 

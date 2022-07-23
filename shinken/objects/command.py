@@ -35,7 +35,7 @@ from shinken.autoslots import AutoSlots
 # Ok, slots are fun: you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
-class DummyCommand:
+class DummyCommand(object):
     pass
 
 
@@ -143,8 +143,8 @@ class Command(six.with_metaclass(AutoSlots, Item)):
     # In 1.0 we move to a dict save. Before, it was
     # a tuple save, like
     # ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
-    # 'command_line': u'/usr/local/nagios/bin/rss-multiuser',
-    # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
+    # 'command_line': '/usr/local/nagios/bin/rss-multiuser',
+    # 'module_type': 'fork', 'command_name': 'notify-by-rss'})
     def __setstate_pre_1_0__(self, state):
         for d in state:
             for k, v in d.items():

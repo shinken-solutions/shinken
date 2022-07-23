@@ -23,6 +23,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import time
 import re
 import copy
@@ -351,7 +352,7 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     # Maybe we do not have a real object but already a string. If so
     # return the string
-    if isinstance(obj, str):
+    if isinstance(obj, six.string_types):
         return obj
     return obj.get_name()
 
@@ -524,7 +525,7 @@ def apply_change_recursive_pattern_change(s, rule):
     # new_s = s
     (i, m, t) = rule
     # print("replace %s by %s" % (r'%s' % m, str(i)), 'in', s)
-    s = s.replace(r'%s' % m, str(i))
+    s = s.replace(r'%s' % m, "%s" % i)
     # print("And got", s)
     if t == []:
         return s
@@ -569,7 +570,7 @@ def get_key_value_sequence(entry, default_value=None):
                     # If there are multiple values, loop over them
                     valnum = 1
                     for val in re.finditer(value_pattern, mat.group('values')):
-                        r['VALUE' + str(valnum)] = val.group('val')
+                        r['VALUE%s' % valnum] = val.group('val')
                         valnum += 1
                 else:
                     # Value syntax error

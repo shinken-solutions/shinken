@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # This file is used to test host- and service-downtimes.
 #
 
+import six
 import sys
 from sys import __stdout__
 from functools import partial
@@ -98,10 +99,11 @@ def safe_print(*args, **kw):
     if kw:
         raise ValueError('unhandled named/keyword argument(s): %r' % kw)
     #
-    make_in_data_gen = lambda: ( a if isinstance(a, str)
-                                else
-                            unicode(str(a), in_bytes_encoding, 'replace')
-                        for a in args )
+    make_in_data_gen = lambda: (
+            a if isinstance(a, six.string_types)
+            else ("%s" % a).encode(in_bytes_encoding, 'replace')
+            for a in args
+        )
 
     possible_codings = ( out_encoding, )
     if out_encoding != 'ascii':

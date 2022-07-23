@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import socket
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
@@ -39,7 +40,7 @@ class ArbiterLink(SatelliteLink):
     properties = SatelliteLink.properties.copy()
     properties.update({
         'arbiter_name':    StringProp(),
-        'host_name':       StringProp(default=socket.gethostname()),
+        'host_name':       StringProp(default=six.u(socket.gethostname())),
         'port':            IntegerProp(default=7770),
     })
 
@@ -54,11 +55,12 @@ class ArbiterLink(SatelliteLink):
     # If not look be our fqdn name, or if not, our hostname
     def is_me(self, lookup_name):
         logger.info("And arbiter is launched with the hostname:%s "
-                    "from an arbiter point of view of addr:%s", self.host_name, socket.getfqdn())
+                    "from an arbiter point of view of addr:%s",
+                    self.host_name, socket.getfqdn())
         if lookup_name:
             return lookup_name == self.get_name()
         else:
-            return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
+            return self.host_name in (socket.getfqdn(), socket.gethostname())
 
     def give_satellite_cfg(self):
         return {'port': self.port, 'address': self.address, 'name': self.arbiter_name,

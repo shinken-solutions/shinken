@@ -30,6 +30,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import re
 import sys
 import string
@@ -881,15 +882,15 @@ class Config(Item):
         for file in files:
             # We add a \n (or \r\n) to be sure config files are separated
             # if the previous does not finish with a line return
-            res.write(os.linesep)
-            res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
+            linesep = six.u(os.linesep)
+            res.write(linesep)
+            res.write('# IMPORTEDFROM=%s' % (file) + linesep)
             if self.read_config_silent == 0:
                 logger.info("[config] opening '%s' configuration file", file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
-                fd = open(file, 'r')
-                buf = fd.readlines()
-                fd.close()
+                with open(file, 'r') as f:
+                    buf = map(six.u, f.readlines())
                 self.config_base_dir = os.path.dirname(file)
             except IOError as exp:
                 logger.error("[config] cannot open config file '%s' for reading: %s", file, exp)
@@ -913,10 +914,13 @@ class Config(Item):
                         fd = open(cfg_file_name, 'r')
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'", cfg_file_name)
-                        res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        res.write(fd.read())
+                        res.write(linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + linesep)
+                        if six.PY2:
+                            res.write(fd.read().decode("utf-8"))
+                        else:
+                            res.write(fd.read())
                         # Be sure to add a line return so we won't mix files
-                        res.write(os.linesep)
+                        res.write(linesep)
                         fd.close()
                     except IOError as exp:
                         logger.error("Cannot open config file '%s' for reading: %s",
@@ -945,12 +949,12 @@ class Config(Item):
                                     logger.info("Processing object config file '%s'",
                                                 os.path.join(root, file))
                                 try:
-                                    res.write(os.linesep + '# IMPORTEDFROM=%s' %
-                                              (os.path.join(root, file)) + os.linesep)
+                                    res.write(linesep + '# IMPORTEDFROM=%s' %
+                                              (os.path.join(root, file)) + linesep)
                                     fd = open(os.path.join(root, file), 'r')
-                                    res.write(fd.read())
+                                    res.write(six.u(fd.read()))
                                     # Be sure to separate files data
-                                    res.write(os.linesep)
+                                    res.write(linesep)
                                     fd.close()
                                 except IOError as exp:
                                     logger.error("Cannot open config file '%s' for reading: %s",
@@ -1150,7 +1154,7 @@ class Config(Item):
         if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770")
             a = ArbiterLink({'arbiter_name': 'Default-Arbiter',
-                             'host_name': socket.gethostname(),
+                             'host_name': six.u(socket.gethostname()),
                              'address': 'localhost', 'port': '7770',
                              'spare': '0'})
             self.arbiters = ArbiterLinks([a])
@@ -2481,9 +2485,8 @@ class Config(Item):
 def lazy():
     # let's compute the "USER" properties and macros..
     for n in range(1, 256):
-        n = str(n)
-        Config.properties['$USER' + str(n) + '$'] = StringProp(default='')
-        Config.macros['USER' + str(n)] = '$USER' + n + '$'
+        Config.properties['$USER%s$' % n] = StringProp(default='')
+        Config.macros['USER%s' % n] = '$USER%s$' % n
 
 
 lazy()

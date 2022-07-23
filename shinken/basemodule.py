@@ -67,7 +67,7 @@ properties = {
 }
 
 
-class ModulePhases:
+class ModulePhases(object):
     """TODO: Add some comment about this class for the doc"""
     # TODO: why not use simply integers instead of string
     # to represent the different phases??

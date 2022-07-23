@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 from shinken_test import *
 
 
@@ -86,11 +87,11 @@ class TestRealms(ShinkenTest):
     def test_realm_stripping_before_sending(self):
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
         self.assertIsNot(test_host_realm1, None)
-        self.assertTrue(isinstance(test_host_realm1.realm, str))
+        self.assertTrue(isinstance(test_host_realm1.realm, six.string_types))
 
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         self.assertIsNot(in_realm2, None)
-        self.assertTrue(isinstance(in_realm2.realm, str))
+        self.assertTrue(isinstance(in_realm2.realm, six.string_types))
 
 
     def test_sub_realms_assignations(self):

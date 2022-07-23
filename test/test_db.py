@@ -69,7 +69,5 @@ class TestConfig(ShinkenTest):
         self.assertEqual(c.strip(), q.strip())
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

@@ -179,7 +179,7 @@ class ModulesManager(object):
             inst.init()
         except Exception as e:
             logger.error("The instance %s raised an exception %s, I remove it!",
-                         inst.get_name(), str(e))
+                         inst.get_name(), e)
             output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this remove: %s", output.getvalue())
