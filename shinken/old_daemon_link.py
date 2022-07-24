@@ -1,9 +1,8 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 import inspect
 import warnings
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 def deprecation(msg, stacklevel=4):

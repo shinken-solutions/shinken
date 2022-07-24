@@ -293,7 +293,7 @@ class DiscoveredHost(object):
     def get_runners_outputs(self):
         for r in self.in_progress_runners:
             if r.is_finished():
-                print'Get output', self.name, r.discoveryrun_name, r.current_launch
+                print('Get output', self.name, r.discoveryrun_name, r.current_launch)
                 if r.current_launch.exit_status != 0:
                     print("Error on run")
         raw_disco_data = '\n'.join(r.get_output() for r in self.in_progress_runners
@@ -535,8 +535,10 @@ class DiscoveryManager(object):
             return
 
         for r in allowed_runners:
-            print("I'm launching %s with a %d seconds timeout" % \)
-                  (r.get_name(), self.conf.runners_timeout)
+            print(
+                "I'm launching %s with a %d seconds timeout" %
+                (r.get_name(), self.conf.runners_timeout)
+            )
             r.launch(timeout=self.conf.runners_timeout)
 
 

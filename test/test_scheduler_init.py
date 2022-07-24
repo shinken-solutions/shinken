@@ -25,6 +25,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import signal
 import subprocess
 from time import sleep
 
@@ -86,10 +87,12 @@ class testSchedulerInit(ShinkenTest):
         # it will also kill sons
         args = [sys.executable, "../bin/shinken-arbiter.py", "-c", daemons_config[Arbiter][0], "-d"]
         print("Launching sub arbiter with", args)
-        #proc = self.arb_proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        #            preexec_fn=os.setsid)
-        proc = self.arb_proc = subprocess.Popen(args,
-                    preexec_fn=os.setsid)
+        self.arb_proc = subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid
+        )
 
         # Ok, now the conf
         d.wait_for_initial_conf(timeout=20)
@@ -135,10 +138,11 @@ class testSchedulerInit(ShinkenTest):
             with open("tmp/arbiterd.pid", "r") as f:
                 pid = int(f.read())
             print("KILLING %d" % pid)
-            os.kill(pid, 2)
             d.do_stop()
+            time.sleep(3)
+            os.kill(pid, signal.SIGTERM)
         except Exception as err:
-            proc = getattr(self, 'arb_proc', None)
+            proc = self.arb_proc
             data = self._get_subproc_data(proc)
             data.update(err=err)
             self.assertTrue(False,

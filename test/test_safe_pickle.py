@@ -24,7 +24,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import six
 from shinken_test import *
 from shinken.safepickle import SafeUnpickler
 import pickle
@@ -82,8 +81,10 @@ class TestSafePickle(ShinkenTest):
     # code will finally be executed. And as it's shinken.webui.bottle, it's ok with the
     # safe_pickle filter. Smart ^^
     def test_safe_pickle_exploit_rce(self):
-        if six.PY3:
-            # We use standard bottle package in python3
+        # Bottle shoult not be embedded anymore
+        try:
+            import shinken.webui.bottlewebui
+        except ImportError:
             return
 
         ###### Phase 1: can be exploited
