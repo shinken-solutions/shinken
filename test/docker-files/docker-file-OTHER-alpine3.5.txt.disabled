@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM alpine:3.5
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 RUN        apk update
@@ -9,6 +9,7 @@ RUN        apk add py-curl
 RUN        apk add py-pip
 RUN        apk add py-setuptools
 RUN        apk add py-six
+RUN        apk add shadow
 RUN        pip install cherrypy
 
 RUN        apk add python3

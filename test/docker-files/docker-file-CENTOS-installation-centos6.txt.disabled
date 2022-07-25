@@ -6,10 +6,14 @@ RUN        yum --nogpgcheck  -y install python-setuptools
 RUN        yum --nogpgcheck  -y install python-pycurl
 RUN        yum --nogpgcheck  -y install python-cherrypy
 RUN        yum --nogpgcheck  -y install python-six
+RUN        yum --nogpgcheck  -y install python-nose
+RUN        yum --nogpgcheck  -y install python-bottle
 RUN        yum --nogpgcheck  -y install python3-setuptools
 RUN        yum --nogpgcheck  -y install python3-pycurl
 RUN        yum --nogpgcheck  -y install python3-cherrypy
 RUN        yum --nogpgcheck  -y install python3-six
+RUN        yum --nogpgcheck  -y install python3-nose
+RUN        yum --nogpgcheck  -y install python3-bottle
 
 ADD        . /root/shinken-framework
 

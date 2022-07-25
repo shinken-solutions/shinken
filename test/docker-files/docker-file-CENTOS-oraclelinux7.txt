@@ -1,15 +1,13 @@
 FROM oraclelinux:7.2
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN        yum --nogpgcheck  -y  upgrade
-RUN        yum --nogpgcheck  -y install python-setuptools
+
+RUN        yum --nogpgcheck  -y upgrade
 RUN        yum --nogpgcheck  -y install python-pycurl
-RUN        yum --nogpgcheck  -y install python-cherrypy
+RUN        yum --nogpgcheck  -y install python-setuptools
 RUN        yum --nogpgcheck  -y install python-six
-RUN        yum --nogpgcheck  -y install python3-setuptools
-RUN        yum --nogpgcheck  -y install python3-pycurl
-RUN        yum --nogpgcheck  -y install python3-cherrypy
-RUN        yum --nogpgcheck  -y install python3-six
+RUN        pip install bottle
+RUN        pip install cherrypy
 
 ADD        . /root/shinken-framework
 

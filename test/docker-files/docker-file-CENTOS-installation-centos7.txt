@@ -1,19 +1,21 @@
 FROM centos:7
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN        yum --nogpgcheck  -y  upgrade
-RUN        yum --nogpgcheck  -y install python-setuptools
-RUN        yum --nogpgcheck  -y install python-pycurl
+RUN        yum --nogpgcheck  -y install epel-release
+RUN        yum --nogpgcheck  -y upgrade
+RUN        yum --nogpgcheck  -y install python2-bottle
 RUN        yum --nogpgcheck  -y install python-cherrypy
+RUN        yum --nogpgcheck  -y install python-pycurl
+RUN        yum --nogpgcheck  -y install python-setuptools
 RUN        yum --nogpgcheck  -y install python-six
-RUN        yum --nogpgcheck  -y install python3-setuptools
-RUN        yum --nogpgcheck  -y install python3-pycurl
-RUN        yum --nogpgcheck  -y install python3-cherrypy
-RUN        yum --nogpgcheck  -y install python3-six
+RUN        yum --nogpgcheck  -y install python3-bottle
+RUN        yum --nogpgcheck  -y install python3-pip
+RUN        yum --nogpgcheck  -y install python36-pycurl
+RUN        yum --nogpgcheck  -y install python36-setuptools
+RUN        yum --nogpgcheck  -y install python36-six
+RUN        pip3 install cherrypy
 
 ADD        . /root/shinken-framework
 
 WORKDIR    /root/shinken-framework
 ENTRYPOINT        test/test_one_linux_installation.sh
-
-

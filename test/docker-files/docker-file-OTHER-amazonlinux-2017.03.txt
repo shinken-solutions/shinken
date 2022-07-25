@@ -1,11 +1,14 @@
 FROM amazonlinux:2017.03
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN        yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python
-RUN        yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install shadow-utils
-# NOTE: python MUST have a number in amazon
-RUN        yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python27-setuptools
-RUN        yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install procps
+RUN        yum --nogpgcheck  -y install epel-release
+RUN        yum --nogpgcheck  -y upgrade
+RUN        yum --nogpgcheck  -y install python27-pycurl
+RUN        yum --nogpgcheck  -y install python27-setuptools
+RUN        yum --nogpgcheck  -y install python27-six
+RUN        yum --nogpgcheck  -y install python27-pip
+RUN        pip install bottle
+RUN        pip install cherrypy
 
 ADD        . /root/shinken-framework
 

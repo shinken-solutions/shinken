@@ -4,12 +4,18 @@ MAINTAINER Jean Gabes <naparuba@gmail.com>
 RUN        apk update
 RUN        apk add bash
 RUN        apk add python
-RUN        apk add gcc linux-headers musl-dev libgcc libgc++ g++
-RUN        apk add curl-dev
-RUN        apk add py2-crypto
-RUN        apk add py2-jinja2
-RUN        apk add py2-setuptools python2-dev
-RUN        apk add py2-curl
+RUN        apk add py-bottle
+RUN        apk add py-curl
+RUN        apk add py-pip
+RUN        apk add py-setuptools
+RUN        apk add py-six
+RUN        pip install cherrypy
+
+RUN        apk add python3
+RUN        apk add py3-bottle
+RUN        apk add py3-curl
+RUN        apk add py3-six
+RUN        pip3 install cherrypy
 
 ADD        . /root/shinken-framework
 

@@ -1,16 +1,20 @@
 FROM ubuntu:18.10
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
+RUN        sed 's/archive/old-releases/' -i /etc/apt/sources.list
+RUN        sed 's/security/old-releases/' -i /etc/apt/sources.list
 RUN        apt-get update
 RUN        apt-get install -y python
-RUN        apt-get install -y python-setuptools
-RUN        apt-get install -y python-pycurl
+RUN        apt-get install -y python-bottle
 RUN        apt-get install -y python-cherrypy3
+RUN        apt-get install -y python-pycurl
+RUN        apt-get install -y python-setuptools
 RUN        apt-get install -y python-six
 RUN        apt-get install -y python3
-RUN        apt-get install -y python3-setuptools
-RUN        apt-get install -y python3-pycurl
+RUN        apt-get install -y python3-bottle
 RUN        apt-get install -y python3-cherrypy3
+RUN        apt-get install -y python3-pycurl
+RUN        apt-get install -y python3-setuptools
 RUN        apt-get install -y python3-six
 
 ADD        . /root/shinken-framework

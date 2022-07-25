@@ -7,14 +7,31 @@ services:
 # Allow cache of downloads
 cache: pip
 
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
+jobs:
+  include:
+    # Test suite with different python versions
+    - python: "2.7"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.4"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.5"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.6"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.7"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.8"
+      env: TEST_SUITE=UNIT-TEST
+    - python: "3.9"
+      env: TEST_SUITE=UNIT-TEST
+    # Installation tests with various distributions
+    - python: "3.9"
+      env:
+        - TEST_SUITE=CENTOS
+        - TEST_SUITE=DEBIAN
+        - TEST_SUITE=FEDORA
+        - TEST_SUITE=OTHER
+        - TEST_SUITE=UBUNTU
 
 # command to install dependencies
 # some are only used for travis/coveralls so we are installing them here only
@@ -22,35 +39,16 @@ python:
 #  - ./test/setup_test.sh
 # command to run tests
 
-
-env:
-  # Python:
-  - TEST_SUITE=UNIT-TEST
-  # Then installations on various distro
-  - TEST_SUITE=CENTOS
-  - TEST_SUITE=DEBIAN
-  - TEST_SUITE=FEDORA
-  - TEST_SUITE=OTHER
-  - TEST_SUITE=UBUNTU
-
 before_install:
-  - sudo apt-get -y install python-setuptools
-  - sudo apt-get -y install python3-setuptools
-  - sudo apt-get -y install python-pycurl
-  - sudo apt-get -y install python3-pycurl
-  - sudo apt-get -y install python-nose
-  - sudo apt-get -y install python3-nose
-  - sudo apt-get -y install python-pip
-  - sudo apt-get -y install python3-pip
-  - sudo apt-get -y install libgnutls-dev
+  - sudo apt-get install debianutils
+
 addons:
   apt:
     update: true
 
 script:
-  - cd test
-  - chmod a+x *sh *py
-  - ./test_suite.sh
+  - chmod a+x test/*sh test/*py
+  - test/test_suite.sh
 
 # specific call to launch coverage data into coveralls.io
 #after_success:
