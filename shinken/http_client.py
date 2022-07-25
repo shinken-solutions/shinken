@@ -84,15 +84,29 @@ class HTTPClient(object):
         con.setopt(con.VERBOSE, 0)
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not
         # manage it
-        con.setopt(pycurl.HTTPHEADER, ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive'])
-        con.setopt(pycurl.USERAGENT, 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION))
+        headers = ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive']
+        user_agent = 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION)
+        # Manages bug described in https://github.com/pycurl/pycurl/issues/124
+        try:
+            con.setopt(pycurl.HTTPHEADER, headers)
+            con.setopt(pycurl.USERAGENT, user_agent)
+        except TypeError:
+            headers = [h.encode("utf-8") for h in headers]
+            user_agent = user_agent.encode("utf-8")
+            con.setopt(pycurl.HTTPHEADER, headers)
+            con.setopt(pycurl.USERAGENT, user_agent)
         con.setopt(pycurl.FOLLOWLOCATION, 1)
         con.setopt(pycurl.FAILONERROR, True)
         con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
         con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
 
         if proxy:
-            con.setopt(pycurl.PROXY, proxy)
+            # Manages bug described in https://github.com/pycurl/pycurl/issues/124
+            try:
+                con.setopt(pycurl.PROXY, proxy)
+            except TypeError:
+                proxy = proxy.encode("utf-8")
+                con.setopt(pycurl.PROXY, proxy)
 
         # Also set the SSL options to do not look at the certificates too much
         # unless the admin asked for it
