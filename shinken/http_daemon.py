@@ -71,11 +71,8 @@ from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.safepickle import SafeUnpickler
 
-# Let's load bottlecore! :)
-if six.PY2:
-    from shinken.webui import bottlecore as bottle
-else:
-    import bottle
+# Let's load bottle! :)
+import bottle
 bottle.debug(True)
 
 
@@ -126,7 +123,7 @@ class CherryPyBackend(object):
             def register_server(server):
                 self.srv = server
 
-            CherryPyServer.run_callback = register_server
+            CherryPyServer.run_callback = staticmethod(register_server)
 
             bottle.run(
                 host=host,
