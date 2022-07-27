@@ -320,7 +320,7 @@ do_status() {
         echo "$mod NOT RUNNING (pid file empty)"
         return 4
     fi
-    ps -p "$pid" >/dev/null 2>&1
+    kill -0 "$pid" >/dev/null 2>&1
     rc=$?
     if [ $rc != 0 ]; then
         echo_failed  "$mod NOT RUNNING (process $pid doesn't exist?)"
