@@ -25,14 +25,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import time
 import sys
-import pickle
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
 from shinken.http_client import HTTPClient, HTTPExceptions
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 
 class SatelliteLink(Item):

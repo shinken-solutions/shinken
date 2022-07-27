@@ -25,14 +25,17 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import os
 import time
 import traceback
 import sys
 import base64
 import zlib
-import pickle
-
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp

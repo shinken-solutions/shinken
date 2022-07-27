@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import os
 import sys
 import time
@@ -31,10 +32,14 @@ import traceback
 import base64
 import zlib
 import threading
-import pickle
 import copy
 from multiprocessing import active_children
 from collections import deque
+import io
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp

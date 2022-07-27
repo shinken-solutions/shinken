@@ -38,15 +38,16 @@ import traceback
 import logging
 import inspect
 import subprocess
-import pickle
 import socket
 import io
 if six.PY2:
     import ConfigParser as configparser
     from Queue import Empty
+    import cPickle as pickle
 else:
     from queue import Empty
     import configparser
+    import pickle
 
 # Try to see if we are in an android device or not
 try:

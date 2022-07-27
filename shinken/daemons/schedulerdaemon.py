@@ -24,14 +24,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import os
 import signal
 import time
 import traceback
 import zlib
 import base64
-import pickle
 import sys
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver

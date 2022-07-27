@@ -32,13 +32,14 @@ import io
 import sys
 import tempfile
 import traceback
-import pickle
 
 import threading
 if six.PY2:
     from Queue import Empty
+    import cPickle as pickle
 else:
     from queue import Empty
+    import pickle
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check

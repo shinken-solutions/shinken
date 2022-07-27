@@ -41,8 +41,11 @@ import itertools
 import time
 import random
 import tempfile
-import pickle
 import json
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from multiprocessing import Process, Manager
 from shinken.objects.item import Item

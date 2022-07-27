@@ -30,12 +30,13 @@ import zlib
 import base64
 import json
 import sys
-import pickle
 import io
 if six.PY2:
     from urllib import urlencode
+    import cPickle as pickle
 else:
     from urllib.parse import urlencode
+    import pickle
 
 # Pycurl part
 import pycurl

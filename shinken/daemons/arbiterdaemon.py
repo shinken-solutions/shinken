@@ -24,14 +24,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 import sys
 import os
 import time
 import socket
 import traceback
-import pickle
 import json
 import io
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager

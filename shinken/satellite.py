@@ -48,12 +48,15 @@ except ImportError:
 import os
 import copy
 import time
-import pickle
 import traceback
 import zlib
 import base64
 import threading
 import multiprocessing
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 from shinken.http_client import HTTPClient, HTTPExceptions
 from shinken.message import Message

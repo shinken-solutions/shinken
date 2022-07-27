@@ -26,7 +26,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import six
 from shinken.safepickle import SafeUnpickler
-import pickle
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 import sys
 import io
 
