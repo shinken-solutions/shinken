@@ -16,6 +16,8 @@ RUN        apt-get install -y python3-cherrypy3
 RUN        apt-get install -y python3-pycurl
 RUN        apt-get install -y python3-setuptools
 RUN        apt-get install -y python3-six
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 

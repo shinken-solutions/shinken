@@ -11,6 +11,8 @@ RUN        apk add py-six
 RUN        apk add shadow
 RUN        pip install bottle
 RUN        pip install cherrypy
+RUN        addgroup -S shinken
+RUN        adduser  -S -h /var/lib/shinken -D -G shinken shinken
 
 ADD        . /root/shinken-framework
 

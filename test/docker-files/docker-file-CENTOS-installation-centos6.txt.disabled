@@ -14,6 +14,8 @@ RUN        yum --nogpgcheck  -y install python3-cherrypy
 RUN        yum --nogpgcheck  -y install python3-six
 RUN        yum --nogpgcheck  -y install python3-nose
 RUN        yum --nogpgcheck  -y install python3-bottle
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 

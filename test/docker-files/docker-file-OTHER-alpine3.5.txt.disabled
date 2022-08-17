@@ -17,6 +17,8 @@ RUN        apk add py3-bottle
 RUN        apk add py3-curl
 RUN        apk add py3-six
 RUN        pip3 install cherrypy
+RUN        addgroup -S shinken
+RUN        adduser  -S -h /var/lib/shinken -D -G shinken shinken
 
 ADD        . /root/shinken-framework
 

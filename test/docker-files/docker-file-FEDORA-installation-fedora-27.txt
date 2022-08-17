@@ -11,6 +11,9 @@ RUN        dnf --nogpgcheck  -y install python3-cherrypy
 RUN        dnf --nogpgcheck  -y install python3-pycurl
 RUN        dnf --nogpgcheck  -y install python3-setuptools
 RUN        dnf --nogpgcheck  -y install python3-six
+RUN        dnf --nogpgcheck  -y install which
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 

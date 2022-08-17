@@ -92,16 +92,6 @@ def update_file_with_string(infilename, outfilename, matches, new_strings):
         f.write(buf)
 
 
-def append_file_with(infilename, outfilename, append_string):
-    with open(infilename, "r") as f:
-        buf = f.read()
-    ensure_dir_exist(outfilename)
-    with open(outfilename, "w") as f:
-        f.write(buf)
-        f.write('\n')
-        f.write(append_string)
-
-
 def recursive_chown(path, uid, gid, owner, group):
     print("Changing owner of %s to %s:%s" % (path, owner, group))
     os.chown(path, uid, gid)
@@ -271,7 +261,6 @@ if is_pip_real_install_step:
 
 # Delete command line parameters not managed by setup() that we already used
 # previously
-
 deleting_args = ['--owner', '--group', '--skip-build']
 largv = len(sys.argv)
 for i, arg in enumerate(reversed(sys.argv)):
@@ -415,11 +404,8 @@ else:
 # Packages definition
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
-# compute scripts
+# Compute scripts
 scripts = [s for s in glob('bin/shinken*') if not s.endswith('.py')]
-
-# Beware to install scripts in the bin dir
-data_files.append((default_paths['bin'], scripts))
 
 ###############################################################################
 #
@@ -469,15 +455,24 @@ if not is_virtualenv and not is_update:
 if not is_virtualenv and os.name != 'nt' and not is_update:
     # Adds daemons ini files
     for _file in daemonsini:
-        inifile = _file
+        inname = _file
         outname = os.path.join('build', _file)
+        modules_dir = os.path.join(default_paths['var'], 'modules')
         # force the user setting as it's not set by default
-        append_file_with(
-            inifile,
+        print('updating configuration file %s', outname)
+        update_file_with_string(
+            inname,
             outname,
-            "modules_dir=%s\nuser=%s\ngroup=%s\n" % (
-                os.path.join(default_paths['var'], 'modules'), user, group
-            )
+            [
+                "modules_dir=.*",
+                "#user=.*",
+                "#group=.*",
+            ],
+            [
+                "modules_dir=%s" % modules_dir,
+                "user=%s" % user,
+                "group=%s" % group,
+            ]
         )
         dirname = os.path.join(default_paths['etc'], 'daemons')
         data_files.append((dirname, [outname]))
@@ -487,7 +482,7 @@ if not is_virtualenv and os.name != 'nt' and not is_update:
     for name in ['shinken.cfg']:
         inname = os.path.join('etc', name)
         outname = os.path.join('build', name)
-        print('updating path in %s', outname)
+        print('updating configuration file %s', outname)
 
         ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
         update_file_with_string(
@@ -546,8 +541,9 @@ if os.getenv("DEBUG") == "1":
 
 ###############################################################################
 #
-# System checks
+# Preflight checks
 #
+###############################################################################
 
 # Maybe the user is unknown, but we are in a "classic" install, if so, bail out
 if not is_virtualenv and is_install and not root and not is_update and pwd and not opts.skip_build:
@@ -557,6 +553,12 @@ if not is_virtualenv and is_install and not root and not is_update and pwd and n
     if uid is None or gid is None:
         print("Error: the user/group %s/%s is unknown. Please create it first 'useradd %s'" % (user, group, user))
         sys.exit(2)
+
+###############################################################################
+#
+# Setup
+#
+###############################################################################
 
 setup(
     name="Shinken",
@@ -600,6 +602,7 @@ setup(
 #
 # Post install operations
 #
+###############################################################################
 
 # if root is set, it's for package, so NO chown
 if not is_virtualenv and pwd and not root and is_install:
@@ -612,16 +615,6 @@ if not is_virtualenv and pwd and not root and is_install:
         for c in ['etc', 'run', 'log', 'var', 'libexec']:
             p = default_paths[c]
             recursive_chown(p, uid, gid, user, group)
-        # Also change the rights of the shinken- scripts
-        for s in scripts:
-            bs = os.path.basename(s)
-            recursive_chown(os.path.join(default_paths['bin'], bs), uid, gid, user, group)
-            _chmodplusx(os.path.join(default_paths['bin'], bs))
         _chmodplusx(default_paths['libexec'])
-
-    # If not exists, won't raise an error there
-    _chmodplusx('/etc/init.d/shinken')
-    for d in ['scheduler', 'broker', 'receiver', 'reactionner', 'poller', 'arbiter']:
-        _chmodplusx('/etc/init.d/shinken-' + d)
 
 print("Shinken setup done")

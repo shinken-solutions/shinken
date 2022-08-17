@@ -3,6 +3,8 @@ MAINTAINER Jean Gabes <naparuba@gmail.com>
 
 RUN        yum --nogpgcheck  -y install epel-release
 RUN        yum --nogpgcheck  -y upgrade
+RUN        yum --nogpgcheck  -y install which
+RUN        yum --nogpgcheck  -y install shadow-utils
 RUN        yum --nogpgcheck  -y install python27-pycurl
 RUN        yum --nogpgcheck  -y install python27-setuptools
 RUN        yum --nogpgcheck  -y install python27-six
