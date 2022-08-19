@@ -37,34 +37,49 @@ import zlib
 import base64
 import threading
 import io
+
 try:
     import ssl
 except ImportError:
     ssl = None
+    SSLAdapter = None
+try:
+    from OpenSSL import SSL
+except ImportError:
+    SSL = None
+    SSLAdapter = None
 
 try:
     from cheroot.wsgi import Server as CherryPyWSGIServer
+    if SSL is not None:
+        from cheroot.ssl.pyopenssl import pyOpenSSLAdapter as SSLAdapter
 except ImportError:
     try:
         from cherrypy.wsgiserver import CherryPyWSGIServer
+        if SSL is not None:
+            if six.PY2:
+                from cherrypy.wsgiserver.ssl_pyopenssl import pyOpenSSLAdapter as SSLAdapter
+            else:
+                # A bug in CherryPy prevents from using pyOpenSSLAdapter
+                # with python3: https://github.com/cherrypy/cherrypy/issues/1399
+                # This has been fixed in cherrypy >= 9.0.0
+                # If performance is an issue, please consider upgrading cherrypy
+                from cherrypy.wsgiserver.ssl_builtin import BuiltinSSLAdapter as SSLAdapter
     except ImportError:
         CherryPyWSGIServer = None
-try:
-    from OpenSSL import SSL
-    from cherrypy.wsgiserver.ssl_pyopenssl import pyOpenSSLAdapter
+
+if CherryPyWSGIServer and SSLAdapter:
     # Create 'safe' SSL adapter by disabling SSLv2/SSLv3 connections
-    class pyOpenSSLAdapterSafe(pyOpenSSLAdapter):
+    class SafeSSLAdapter(SSLAdapter):
         def get_context(self):
-            c = pyOpenSSLAdapter.get_context(self)
+            c = SSLAdapter.get_context(self)
             c.set_options(SSL.OP_NO_SSLv2 |
                           SSL.OP_NO_SSLv3)
             return c
-except ImportError:
-    SSL = None
-    pyOpenSSLAdapterSafe = None
+else:
+    SafeSSLAdapter = None
 
 from wsgiref import simple_server
-
 
 # load global helper objects for logs and stats computation
 from shinken.log import logger
@@ -102,8 +117,8 @@ class CherryPyServer(bottle.ServerAdapter):
         ca_cert = self.options['ca_cert']
         ssl_cert = self.options['ssl_cert']
         ssl_key = self.options['ssl_key']
-        if SSL and pyOpenSSLAdapterSafe and use_ssl:
-            server.ssl_adapter = pyOpenSSLAdapterSafe(ssl_cert, ssl_key, ca_cert)
+        if SafeSSLAdapter and use_ssl:
+            server.ssl_adapter = SafeSSLAdapter(ssl_cert, ssl_key, ca_cert)
         if use_ssl:
             server.ssl_certificate = ssl_cert
             server.ssl_private_key = ssl_key
