@@ -174,7 +174,7 @@ class Stats(object):
     # Sends a metric to statsd daemon
     def send_metric(self, packet):
         try:
-            self.statsd_sock.sendto(packet, self.statsd_addr)
+            self.statsd_sock.sendto(packet.encode("utf-8"), self.statsd_addr)
         except (socket.error, socket.gaierror):
             # cannot send? ok not a huge problem here and cannot
             # log because it will be far too verbose :p

@@ -28,7 +28,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
+from shinken.serializer import serialize
 
 
 class SchedulerLink(SatelliteLink):
@@ -67,8 +68,8 @@ class SchedulerLink(SatelliteLink):
             return None
         logger.debug("[SchedulerLink] Sending %d commands", len(commands))
         try:
-            self.con.post('run_external_commands', {'cmds': commands})
-        except HTTPExceptions as exp:
+            self.con.put('run_external_commands', serialize(commands))
+        except HTTPException as exp:
             self.con = None
             logger.debug(exp)
             return False

@@ -36,7 +36,9 @@ import json
 import zlib
 import base64
 import threading
+import traceback
 import io
+from bottle import abort
 
 try:
     import ssl
@@ -84,7 +86,7 @@ from wsgiref import simple_server
 # load global helper objects for logs and stats computation
 from shinken.log import logger
 from shinken.stats import statsmgr
-from shinken.safepickle import SafeUnpickler
+from shinken.serializer import deserialize
 
 # Let's load bottle! :)
 import bottle
@@ -347,149 +349,168 @@ class WSGIREFBackend(object):
 
 
 class HTTPDaemon(object):
-        def __init__(self, host, port, http_backend, use_ssl, ca_cert,
-                     ssl_key, ssl_cert, hard_ssl_name_check,
-                     daemon_thread_pool_size):
-            self.port = port
-            self.host = host
-            self.srv = None
-            # Port = 0 means "I don't want HTTP server"
-            if self.port == 0:
-                return
+    def __init__(self, host, port, http_backend, use_ssl, ca_cert,
+                 ssl_key, ssl_cert, hard_ssl_name_check,
+                 daemon_thread_pool_size):
+        self.port = port
+        self.host = host
+        self.srv = None
+        # Port = 0 means "I don't want HTTP server"
+        if self.port == 0:
+            return
 
-            self.use_ssl = use_ssl
+        self.use_ssl = use_ssl
 
-            self.registered_fun = {}
-            self.registered_fun_names = []
-            self.registered_fun_defaults = {}
+        self.registered_fun = {}
+        self.registered_fun_names = []
+        self.registered_fun_defaults = {}
 
-            protocol = 'http'
-            if use_ssl:
-                protocol = 'https'
-            self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
-            logger.info("Opening HTTP socket at %s", self.uri)
+        protocol = 'http'
+        if use_ssl:
+            protocol = 'https'
+        self.uri = '%s://%s:%s' % (protocol, self.host, self.port)
+        logger.info("Opening HTTP socket at %s", self.uri)
 
-            if http_backend == 'cherrypy' or http_backend == 'auto' and CherryPyWSGIServer:
-                self.srv = CherryPyBackend(
-                    host,
-                    port,
-                    use_ssl,
-                    ca_cert,
-                    ssl_key,
-                    ssl_cert,
-                    hard_ssl_name_check,
-                    daemon_thread_pool_size
-                )
-            else:
-                logger.warning('Loading the old WSGI Backend. CherryPy >= 3 is recommanded instead')
-                self.srv = WSGIREFBackend(
-                    host,
-                    port,
-                    use_ssl,
-                    ca_cert,
-                    ssl_key,
-                    ssl_cert,
-                    hard_ssl_name_check,
-                    daemon_thread_pool_size
-                )
+        if http_backend == 'cherrypy' or http_backend == 'auto' and CherryPyWSGIServer:
+            self.srv = CherryPyBackend(
+                host,
+                port,
+                use_ssl,
+                ca_cert,
+                ssl_key,
+                ssl_cert,
+                hard_ssl_name_check,
+                daemon_thread_pool_size
+            )
+        else:
+            logger.warning('Loading the old WSGI Backend. CherryPy >= 3 is recommanded instead')
+            self.srv = WSGIREFBackend(
+                host,
+                port,
+                use_ssl,
+                ca_cert,
+                ssl_key,
+                ssl_cert,
+                hard_ssl_name_check,
+                daemon_thread_pool_size
+            )
 
-            self.lock = threading.RLock()
-
-
-        # Get the server socket but not if disabled or closed
-        def get_sockets(self):
-            if self.port == 0 or self.srv is None:
-                return []
-            return self.srv.get_sockets()
+        self.lock = threading.RLock()
 
 
-        def run(self):
-            self.srv.run()
+    # Get the server socket but not if disabled or closed
+    def get_sockets(self):
+        if self.port == 0 or self.srv is None:
+            return []
+        return self.srv.get_sockets()
 
 
-        def register(self, obj):
-            methods = inspect.getmembers(obj, predicate=inspect.ismethod)
-            merge = [fname for (fname, f) in methods if fname in self.registered_fun_names]
-            if merge != []:
-                methods_in = [
-                    m.__name__ for m in obj.__class__.__dict__.values()
-                    if inspect.isfunction(m)
-                ]
-                methods = [m for m in methods if m[0] in methods_in]
-                print("picking only bound methods of class and not parents")
-            for (fname, f) in methods:
-                if fname.startswith('_'):
-                    continue
-                # Get the args of the function to catch them in the queries
-                if six.PY2:
-                    argspec = inspect.getargspec(f)
-                    keywords = argspec.keywords
+    def run(self):
+        self.srv.run()
+
+
+    def _parse_request_params(self, method, request, args=[]):
+        """
+        Parses the incoming request, and process the callback parametrs
+
+        :param list args: The callback parameters
+        :rtype: mixed
+        :return: The callback parameters
+        """
+        if method in ('get', 'post'):
+            parms = {}
+            for arg in args:
+                val = None
+                if method == 'post':
+                    val = request.forms.get(arg, None)
+                elif method == 'get':
+                    val = request.GET.get(arg, None)
+                if val:
+                    parms[arg] = val
                 else:
-                    argspec = inspect.getfullargspec(f)
-                    keywords = argspec.varkw
-                args = argspec.args
-                varargs = argspec.varargs
-                defaults = argspec.defaults
-                # If we got some defauts, save arg=value so we can lookup
-                # for them after
-                if defaults:
-                    default_args = zip(argspec.args[-len(argspec.defaults):], argspec.defaults)
-                    _d = {}
-                    for (argname, defavalue) in default_args:
-                        _d[argname] = defavalue
-                    self.registered_fun_defaults[fname] = _d
-                # remove useless self in args, because we alredy got a bonded method f
-                if 'self' in args:
-                    args.remove('self')
-                #print("Registering", fname, args, obj)
-                self.registered_fun_names.append(fname)
-                self.registered_fun[fname] = (f)
+                    # Checks if the missing arg has a default value
+                    default_args = self.registered_fun_defaults.get(arg, {})
+                    if arg not in default_args:
+                        raise HTTPError('Missing argument %s' % arg)
+            return parms
+        elif method == 'put':
+            content = request.body
+            return deserialize(content)
+        else:
+            raise HTTPError('Unmanaged HTTP method: %s' % method)
 
 
-                # WARNING : we MUST do a 2 levels function here, or the f_wrapper
-                # will be uniq and so will link to the last function again
-                # and again
-                def register_callback(fname, args, f, obj, lock):
-                    def f_wrapper():
+    def register(self, obj):
+        methods = inspect.getmembers(obj, predicate=inspect.ismethod)
+        merge = [cbname for (cbname, callback) in methods if cbname in self.registered_fun_names]
+        if merge != []:
+            methods_in = [
+                m.__name__ for m in obj.__class__.__dict__.values()
+                if inspect.isfunction(m)
+            ]
+            methods = [m for m in methods if m[0] in methods_in]
+        for (cbname, callback) in methods:
+            if cbname.startswith('_'):
+                continue
+            # Get the args of the function to catch them in the queries
+            if six.PY2:
+                argspec = inspect.getargspec(callback)
+                keywords = argspec.keywords
+            else:
+                argspec = inspect.getfullargspec(callback)
+                keywords = argspec.varkw
+            args = argspec.args
+            varargs = argspec.varargs
+            defaults = argspec.defaults
+            # If we got some defauts, save arg=value so we can lookup
+            # for them after
+            if defaults:
+                default_args = zip(argspec.args[-len(argspec.defaults):], argspec.defaults)
+                _d = {}
+                for (argname, defavalue) in default_args:
+                    _d[argname] = defavalue
+                self.registered_fun_defaults[cbname] = _d
+            # remove useless self in args, because we alredy got a bonded method callback
+            if 'self' in args:
+                args.remove('self')
+            #print("Registering", cbname, args, obj)
+            self.registered_fun_names.append(cbname)
+            self.registered_fun[cbname] = (callback)
+
+            # WARNING : we MUST do a 2 levels function here, or the f_wrapper
+            # will be uniq and so will link to the last function again
+            # and again
+            def register_callback(cbname, args, callback, obj, lock):
+                def f_wrapper():
+                    try:
                         t0 = time.time()
                         args_time = aqu_lock_time = calling_time = json_time = 0
-                        need_lock = getattr(f, 'need_lock', True)
+                        need_lock = getattr(callback, 'need_lock', True)
 
                         # Warning : put the bottle.response set inside the wrapper
                         # because outside it will break bottle
-                        d = {}
-                        method = getattr(f, 'method', 'get').lower()
-                        for aname in args:
-                            v = None
-                            if method == 'post':
-                                v = bottle.request.forms.get(aname, None)
-                                # Post args are zlibed and pickled (but in
-                                # safemode)
-                                if v is not None:
-                                    v = zlib.decompress(base64.b64decode(v))
-                                    v = SafeUnpickler(io.BytesIO(v)).load()
-                            elif method == 'get':
-                                v = bottle.request.GET.get(aname, None)
-                            if v is None:
-                                # Maybe we got a default value?
-                                default_args = self.registered_fun_defaults.get(fname, {})
-                                if aname not in default_args:
-                                    raise Exception('Missing argument %s' % aname)
-                                v = default_args[aname]
-                            d[aname] = v
+                        method = getattr(callback, 'method', 'get').lower()
+                        params = self._parse_request_params(
+                            method,
+                            bottle.request,
+                            args
+                        )
 
                         t1 = time.time()
                         args_time = t1 - t0
 
                         if need_lock:
-                            logger.debug("HTTP: calling lock for %s", fname)
+                            logger.debug("HTTP: calling lock for %s", cbname)
                             lock.acquire()
 
                         t2 = time.time()
                         aqu_lock_time = t2 - t1
 
                         try:
-                            ret = f(**d)
+                            if method in ('get', 'post'):
+                                cbres = callback(**params)
+                            else:
+                                cbres = callback(params)
                         # Always call the lock release if need
                         finally:
                             # Ok now we can release the lock
@@ -499,69 +520,77 @@ class HTTPDaemon(object):
                         t3 = time.time()
                         calling_time = t3 - t2
 
-                        encode = getattr(f, 'encode', 'json').lower()
-                        j = json.dumps(ret)
-                        t4 = time.time()
-                        json_time = t4 - t3
-
-                        global_time = t4 - t0
-                        logger.debug("Debug perf: %s [args:%s] [aqu_lock:%s]"
-                                     "[calling:%s] [json:%s] [global:%s]",
-                                     fname, args_time, aqu_lock_time, calling_time, json_time,
-                                     global_time)
-                        lst = [('args', args_time), ('aqulock', aqu_lock_time),
-                               ('calling', calling_time), ('json', json_time),
-                               ('global', global_time)]
+                        global_time = t3 - t0
+                        logger.debug(
+                            "Debug perf: %s [args:%s] [aqu_lock:%s] "
+                            "[calling:%s] [global:%s]",
+                            cbname,
+                            args_time,
+                            aqu_lock_time,
+                            calling_time,
+                            global_time
+                        )
+                        lst = [
+                            ('args', args_time),
+                            ('aqulock', aqu_lock_time),
+                            ('calling', calling_time),
+                            ('global', global_time)
+                        ]
                         # increase the stats timers
                         for (k, _t) in lst:
-                            statsmgr.timing('http.%s.%s' % (fname, k), _t, 'perf')
+                            statsmgr.timing('http.%s.%s' % (cbname, k), _t, 'perf')
 
-                        return j
+                        return cbres
+                    except Exception as e:
+                        logger.error("HTTP Request error: %s", e)
+                        logger.error("function: %s", cbname)
+                        logger.error("object: %s", obj)
+                        logger.error(traceback.format_exc())
+                        abort(500, "Internal Server Error: %s\n. Please check server logs for more details" % e)
 
-
-                    # Ok now really put the route in place
-                    bottle.route('/' + fname, callback=f_wrapper,
-                                 method=getattr(f, 'method', 'get').upper())
-                    # and the name with - instead of _ if need
-                    fname_dash = fname.replace('_', '-')
-                    if fname_dash != fname:
-                        bottle.route('/' + fname_dash, callback=f_wrapper,
-                                     method=getattr(f, 'method', 'get').upper())
-
-
-                register_callback(fname, args, f, obj, self.lock)
-
-            # Add a simple / page
-            def slash():
-                return "OK"
-            bottle.route('/', callback=slash)
+                # Ok now really put the route in place
+                bottle.route('/' + cbname, callback=f_wrapper,
+                             method=getattr(callback, 'method', 'get').upper())
+                # and the name with - instead of _ if need
+                cbname_dash = cbname.replace('_', '-')
+                if cbname_dash != cbname:
+                    bottle.route('/' + cbname_dash, callback=f_wrapper,
+                                 method=getattr(callback, 'method', 'get').upper())
 
 
-        def unregister(self, obj):
-            return
+            register_callback(cbname, args, callback, obj, self.lock)
+
+        # Add a simple / page
+        def slash():
+            return "OK"
+        bottle.route('/', callback=slash)
 
 
-        def handleRequests(self, s):
-            self.srv.handle_request()
+    def unregister(self, obj):
+        return
 
 
-        # Close all sockets and delete the server object to be sure
-        # no one is still alive
-        def shutdown(self):
-            if self.srv is not None:
-                self.srv.stop()
-                self.srv = None
+    def handleRequests(self, s):
+        self.srv.handle_request()
 
 
-        def get_socks_activity(self, timeout):
-            try:
-                ins, _, _ = select.select(self.get_sockets(), [], [], timeout)
-            except select.error as e:
-                errnum, _ = e
-                if errnum == errno.EINTR:
-                    return []
-                raise
-            return ins
+    # Close all sockets and delete the server object to be sure
+    # no one is still alive
+    def shutdown(self):
+        if self.srv is not None:
+            self.srv.stop()
+            self.srv = None
+
+
+    def get_socks_activity(self, timeout):
+        try:
+            ins, _, _ = select.select(self.get_sockets(), [], [], timeout)
+        except select.error as e:
+            errnum, _ = e
+            if errnum == errno.EINTR:
+                return []
+            raise
+        return ins
 
 
 # TODO: clean this hack:

@@ -389,7 +389,7 @@ class ShinkenTest(unittest.TestCase):
             broks = self.broks
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
+                #brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
 
         print("--- logs >>>----------------------------------")
@@ -468,7 +468,7 @@ class ShinkenTest(unittest.TestCase):
         broks = sorted(self.sched.broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
+                #brok.prepare()
                 print("%s (%s): %s" % (lognum, brok.id, brok.data['log']))
                 if index == lognum:
                     print(brok.data['log'])
@@ -476,7 +476,7 @@ class ShinkenTest(unittest.TestCase):
                         return
                 lognum += 1
 
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         self.assertTrue(no_match, "%s found a matched log line in broks :\n"
                             "index=%s pattern=%r\n"
                             "broks_logs=[[[\n%s\n]]]" % (
@@ -495,7 +495,7 @@ class ShinkenTest(unittest.TestCase):
         broks = sorted(broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
+                #brok.prepare()
                 if re.search(regex, brok.data['log']):
                     self.assertTrue(not assert_not,
                                     "Found matching log line:\n"

@@ -29,7 +29,7 @@ import socket
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import IntegerProp, StringProp
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
 from shinken.log import logger
 
 
@@ -72,7 +72,7 @@ class ArbiterLink(SatelliteLink):
         try:
             self.con.get('do_not_run')
             return True
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -82,7 +82,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_list(daemon_type)
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return []
 
@@ -92,7 +92,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_status(daemon_type, name)
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return {}
 
@@ -102,7 +102,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get('get_all_states')
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return None
 
@@ -113,7 +113,7 @@ class ArbiterLink(SatelliteLink):
             print(properties)
             r = self.con.get('get_objects_properties', {'table': table, 'properties': properties})
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return None
 

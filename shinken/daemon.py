@@ -43,11 +43,9 @@ import io
 if six.PY2:
     import ConfigParser as configparser
     from Queue import Empty
-    import cPickle as pickle
 else:
     from queue import Empty
     import configparser
-    import pickle
 
 # Try to see if we are in an android device or not
 try:
@@ -68,8 +66,8 @@ from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, Int
     LogLevelProp
 from shinken.misc.common import setproctitle
 from shinken.profilermgr import profiler
-from shinken.safepickle import SafeUnpickler
 from shinken.util import get_memory
+from shinken.serializer import serialize, deserialize
 
 try:
     import pwd
@@ -150,7 +148,7 @@ class Interface(object):
     doc = 'Send a new configuration to the daemon (internal)'
     def put_conf(self, conf):
         self.app.new_conf = conf
-    put_conf.method = 'post'
+    put_conf.method = 'PUT'
     put_conf.doc = doc
 
 
@@ -376,7 +374,7 @@ class Daemon(object):
             return False
         logger.info("Reloading daemon [pid=%s]", p.pid)
         try:
-            raw_conf = pickle.dumps(self.new_conf)
+            raw_conf = serialize(self.new_conf)
             p.stdin.write(raw_conf)
             p.stdin.close()
         except Exception as e:
@@ -430,7 +428,7 @@ class Daemon(object):
         if self.is_switched_process():
             logger.info("Loading configuration from parent")
             raw_config = sys.stdin.read()
-            new_conf = SafeUnpickler(io.BytesIO(raw_config)).load()
+            new_conf = deserialize(raw_config)
             logger.info("Successfully loaded configuration from parent")
             logger.info("Waiting for parent to stop")
             self.wait_parent_exit()

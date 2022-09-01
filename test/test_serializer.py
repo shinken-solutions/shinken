@@ -24,26 +24,25 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
 from shinken_test import *
+from shinken.serializer import serialize, deserialize
+import pickle
+import sys
+import io
 
 
-class Testservice_without_host(ShinkenTest):
+class TestSerializer(ShinkenTest):
 
     def setUp(self):
-        self.setup_with_file('etc/shinken_service_without_host.cfg')
+        pass
 
-    def test_service_without_host_do_not_break(self):
-        self.assertIs(False, self.conf.conf_is_correct)
 
-        #[b.prepare() for b in self.broks]
-        logs = [b.data['log'] for b in self.broks if b.type == 'log']
-        self.assertLess(
-            0,
-            len([ log
-                    for log in logs
-                    if re.search("The service 'WillError' got an unknown host_name 'NOEXIST'",
-                            log)
-            ]))
+    def test_serializer(self):
+        ref = {"test": True}
+        payload = serialize(ref)
+        loaded = deserialize(payload)
+        self.assertEqual(ref, loaded)
 
 
 if __name__ == '__main__':

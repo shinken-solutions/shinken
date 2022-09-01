@@ -98,9 +98,9 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # Now check in the brok generation too
         host_router_0_brok = host_router_0.get_update_status_brok()
-        host_router_0_brok.prepare()
+        #host_router_0_brok.prepare()
         host_router_1_brok = host_router_1.get_update_status_brok()
-        host_router_1_brok.prepare()
+        #host_router_1_brok.prepare()
 
         # Should be problems and have sub servers as impacts
         for h in all_routers:
@@ -131,12 +131,12 @@ class TestProblemImpact(ShinkenTest):
                 self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
                 self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
-                brk_svc.prepare()
+                #brk_svc.prepare()
                 self.assertEqual(['test_router_0', 'test_router_1'], brk_svc.data['source_problems']['hosts'])
             for h in all_routers:
                 self.assertIn(h, s.source_problems)
                 brk_hst = s.get_update_status_brok()
-                brk_hst.prepare()
+                #brk_hst.prepare()
                 self.assertIn(h.get_dbg_name(), brk_hst.data['source_problems']['hosts'])
 
         #--------------------------------------------------------------
@@ -266,9 +266,9 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         # Now check in the brok generation too
         host_router_0_brok = host_router_0.get_update_status_brok()
-        host_router_0_brok.prepare()
+        #host_router_0_brok.prepare()
         host_router_1_brok = host_router_1.get_update_status_brok()
-        host_router_1_brok.prepare()
+        #host_router_1_brok.prepare()
 
         # Should be problems and have sub servers as impacts
         for h in all_routers:
@@ -299,12 +299,12 @@ class TestProblemImpact(ShinkenTest):
                 self.assertIn(svc.get_dbg_name(), host_router_0_brok.data['impacts']['services'])
                 self.assertIn(svc.get_dbg_name(), host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
-                brk_svc.prepare()
+                #brk_svc.prepare()
                 self.assertEqual(['test_router_0', 'test_router_1'], brk_svc.data['source_problems']['hosts'])
             for h in all_routers:
                 self.assertIn(h, s.source_problems)
                 brk_hst = s.get_update_status_brok()
-                brk_hst.prepare()
+                #brk_hst.prepare()
                 self.assertIn(h.get_dbg_name(), brk_hst.data['source_problems']['hosts'])
 
 

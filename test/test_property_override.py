@@ -107,7 +107,8 @@ class TestConfigBroken(ShinkenTest):
         self.assertFalse(self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
-        [b.prepare() for b in self.broks]
+        #:w
+        #[b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
         self.assertEqual(1, len([log for log in logs if re.search('Error: invalid service override syntax: fake', log)]) )
         self.assertEqual(1, len([log for log in logs if re.search("Warn: trying to override property 'retry_interval' on service identified by 'fakesrv' but it's unknown for this host", log)]) )

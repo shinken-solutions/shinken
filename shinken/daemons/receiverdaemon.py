@@ -32,19 +32,17 @@ import traceback
 import sys
 import base64
 import zlib
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
+from multiprocessing import active_children
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.external_command import ExternalCommand, ExternalCommandManager
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
 from shinken.daemon import Interface
 from shinken.stats import statsmgr
 from shinken.util import parse_memory_expr, free_memory
+from shinken.serializer import serialize
 
 class IStats(Interface):
     """
@@ -68,7 +66,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
     # A broker ask us broks
     def get_broks(self, bname, broks_batch=0):
         res = self.app.get_broks(broks_batch)
-        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
+        return serialize(res)
     get_broks.encode = 'raw'
 
 # Our main APP class
@@ -133,7 +131,9 @@ class Receiver(Satellite):
             self.unprocessed_external_commands.append(elt)
 
 
-    def push_host_names(self, sched_id, hnames):
+    def push_host_names(self, data):
+        sched_id = data["sched_id"]
+        hnames = data["hnames"]
         for h in hnames:
             self.host_assoc[h] = sched_id
 
@@ -327,10 +327,10 @@ class Receiver(Satellite):
                 logger.debug("Sending %d commands to scheduler %s", len(cmds), sched)
                 try:
                     # con.run_external_commands(cmds)
-                    con.post('run_external_commands', {'cmds': cmds})
+                    con.put('run_external_commands', serialize(cmds))
                     sent = True
                 # Not connected or sched is gone
-                except (HTTPExceptions, KeyError) as exp:
+                except (HTTPException, KeyError) as exp:
                     logger.debug('manage_returns exception:: %s,%s ', type(exp), exp)
                     self.pynag_con_init(sched_id)
                     return

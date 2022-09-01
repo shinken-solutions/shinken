@@ -76,8 +76,6 @@ class Comment(object):
     def __str__(self):
         return "Comment id=%d %s" % (self.id, self.comment)
 
-    # Call by pickle for dataify the ackn
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

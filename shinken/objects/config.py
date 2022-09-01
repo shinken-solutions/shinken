@@ -42,10 +42,6 @@ import time
 import random
 import tempfile
 import json
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
 from multiprocessing import Process, Manager
 from shinken.objects.item import Item
@@ -75,7 +71,6 @@ from shinken.objects.hostextinfo import HostExtInfo, HostsExtInfo
 from shinken.objects.serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from shinken.objects.trigger import Triggers
 from shinken.objects.pack import Packs
-from shinken.util import split_semicolon
 from shinken.objects.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.objects.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.objects.reactionnerlink import ReactionnerLink, ReactionnerLinks
@@ -87,7 +82,8 @@ from shinken.log import logger
 from shinken.property import (UnusedProp, BoolProp, IntegerProp, CharProp,
                               StringProp, LogLevelProp, ListProp, ToGuessProp)
 from shinken.daemon import get_cur_user, get_cur_group
-from shinken.util import jsonify_r
+from shinken.util import split_semicolon, jsonify_r
+from shinken.serializer import serialize
 
 
 no_longer_used_txt = ('This parameter is not longer take from the main file, but must be defined '
@@ -1349,13 +1345,11 @@ class Config(Item):
                     conf.hostgroups.prepare_for_sending()
                     logger.debug('[%s] Serializing the configuration %d', r.get_name(), i)
                     t0 = time.time()
-                    r.serialized_confs[i] = pickle.dumps(conf, 0)  # pickle.HIGHEST_PROTOCOL)
+                    r.serialized_confs[i] = serialize(conf)
                     logger.debug("[config] time to serialize the conf %s:%s is %s (size:%s)",
                                  r.get_name(), i, time.time() - t0, len(r.serialized_confs[i]))
-                    logger.debug("PICKLE LEN : %d", len(r.serialized_confs[i]))
-            # Now pickle the whole conf, for easy and quick spare send
             t0 = time.time()
-            whole_conf_pack = pickle.dumps(self, pickle.HIGHEST_PROTOCOL)
+            whole_conf_pack = serialize(self)
             logger.debug("[config] time to serialize the global conf : %s (size:%s)",
                          time.time() - t0, len(whole_conf_pack))
             self.whole_conf_pack = whole_conf_pack
@@ -1373,18 +1367,17 @@ class Config(Item):
                 processes = []
                 for (i, conf) in r.confs.items():
                     # This function will be called by the children, and will give
-                    # us the pickle result
                     def Serialize_config(q, rname, i, conf):
                         # Remember to protect the local conf hostgroups too!
                         conf.hostgroups.prepare_for_sending()
                         logger.debug('[%s] Serializing the configuration %d', rname, i)
                         t0 = time.time()
-                        res = pickle.dumps(conf, pickle.HIGHEST_PROTOCOL)
+                        res = serialize(conf)
                         logger.debug("[config] time to serialize the conf %s:%s is %s (size:%s)",
                                      rname, i, time.time() - t0, len(res))
                         q.append((i, res))
 
-                    # Prepare a sub-process that will manage the pickle computation
+                    # Prepare a sub-process that will manage the serialization computation
                     p = Process(target=Serialize_config,
                                 name="serializer-%s-%d" % (r.get_name(), i),
                                 args=(q, r.get_name(), i, conf))
@@ -1416,15 +1409,14 @@ class Config(Item):
                 for (i, cfg) in q:
                     r.serialized_confs[i] = cfg
 
-            # Now pickle the whole configuration into one big pickle object, for the arbiter spares
             whole_queue = m.list()
             t0 = time.time()
 
 
-            # The function that just compute the whole conf pickle string, but n a children
+            # The function that just compute the whole conf serialized string, but n a children
             def create_whole_conf_pack(whole_queue, self):
                 logger.debug("[config] sub processing the whole configuration pack creation")
-                whole_queue.append(pickle.dumps(self, pickle.HIGHEST_PROTOCOL))
+                whole_queue.append(serialize(self))
                 logger.debug("[config] sub processing the whole configuration pack creation "
                              "finished")
 

@@ -25,11 +25,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import six
-from shinken.safepickle import SafeUnpickler
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
+from shinken.serializer import serialize, deserialize
 import sys
 import io
 
@@ -45,8 +41,10 @@ class Brok(object):
         self.type = _type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
-        self.prepared = False
+        #self.data = serialize(data)
+        self.data = data
+        #self.prepared = False
+        self.prepared = True
 
 
     def __str__(self):
@@ -56,16 +54,20 @@ class Brok(object):
     # We unserialize the data, and if some prop were
     # add after the serialize pass, we integer them in the data
     def prepare(self):
+        # It's no more necessary to deseriazie the brok's data, as all broks
+        # are already serialized/deserialiazed wthen they are transported.
+        # For compatibilty reasons, this method remains, but does nothing.
+        pass
+
+        # serialized when
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
-        if not self.prepared:
-            self.data = SafeUnpickler(io.BytesIO(self.data)).load()
-            if hasattr(self, 'instance_id'):
-                self.data['instance_id'] = self.instance_id
-        self.prepared = True
+#        if not self.prepared:
+#            self.data = deserialize(self.data)
+#            if hasattr(self, 'instance_id'):
+#                self.data['instance_id'] = self.instance_id
+#        self.prepared = True
 
-#    # Call by pickle for dataify the ackn
-#    # because we DO NOT WANT REF in this pickleisation!
 #    def __getstate__(self):
 #        # id is not in *_properties
 #        res = {'id': self.id}
@@ -74,7 +76,6 @@ class Brok(object):
 #                res[prop] = getattr(self, prop)
 #        return res
 #
-#    # Inverted function of getstate
 #    def __setstate__(self, state):
 #        cls = self.__class__
 #

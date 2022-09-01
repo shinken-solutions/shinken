@@ -100,8 +100,6 @@ class ContactDowntime(object):
         self.ref.raise_cancel_downtime_log_entry()
         self.can_be_deleted = True
 
-    # Call by pickle to dataify the comment
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         # print("Asking a getstate for a downtime on", self.ref.get_dbg_name())
         cls = self.__class__

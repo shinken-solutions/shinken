@@ -34,7 +34,7 @@ class TestDefinitionOrder(ShinkenTest):
 
     def test_conflict_policy(self):
         self.assertFalse(self.conf.conf_is_correct)
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
         mesg = 'duplicate host name test_host_conflict'

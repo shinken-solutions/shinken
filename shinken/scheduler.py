@@ -36,10 +36,8 @@ import traceback
 import threading
 if six.PY2:
     from Queue import Empty
-    import cPickle as pickle
 else:
     from queue import Empty
-    import pickle
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
@@ -52,8 +50,9 @@ from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent, get_memory
+from shinken.serializer import deserialize
 from shinken.load import Load
-from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.http_client import HTTPClient, HTTPException
 from shinken.stats import statsmgr
 from shinken.misc.common import DICT_MODATTR
 
@@ -807,7 +806,7 @@ class Scheduler(object):
         try:
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             logger.warning(
                 "Connection problem to the %s %s: %s",
                 type, links[id]['name'], exp
@@ -818,7 +817,7 @@ class Scheduler(object):
         try:
             # initial ping must be quick
             con.get('ping')
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             logger.warning(
                 "Connection problem to the %s %s: %s",
                 type, links[id]['name'], exp
@@ -848,9 +847,14 @@ class Scheduler(object):
                 try:
                     # initial ping must be quick
                     logger.debug("Sending %s actions", len(lst))
-                    con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
+                    con.put(
+                        'push_actions',
+                        serialize(
+                            {'actions': lst, 'sched_id': self.instance_id}
+                        )
+                    )
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions as exp:
+                except HTTPException as exp:
                     logger.warning(
                         "Connection problem to the %s %s: %s",
                         type, p['name'], exp
@@ -881,9 +885,14 @@ class Scheduler(object):
                 try:
                     # initial ping must be quick
                     logger.debug("Sending %d actions", len(lst))
-                    con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
+                    con.put(
+                        'push_actions',
+                        serialize(
+                            {'actions': lst, 'sched_id': self.instance_id}
+                        )
+                    )
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions as exp:
+                except HTTPException as exp:
                     logger.warning(
                         "Connection problem to the %s %s: %s",
                         type, p['name'], exp
@@ -913,10 +922,9 @@ class Scheduler(object):
                     # initial ping must be quick
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    # now go the cpickle pass, and catch possible errors from it
+                    payload = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
                     try:
-                        results = pickle.loads(results)
+                        results = deserilize(payload)
                     except Exception as exp:
                         logger.error(
                             'Cannot load passive results from satellite %s : %s',
@@ -930,7 +938,7 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions as exp:
+                except HTTPException as exp:
                     logger.warning(
                         "Connection problem to the %s %s: %s",
                         type, p['name'], exp
@@ -957,8 +965,8 @@ class Scheduler(object):
                     # initial ping must be quick
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    results = pickle.loads(results)
+                    payload = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
+                    results = deserialize(payload)
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results", nb_received)
@@ -966,7 +974,7 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions as exp:
+                except HTTPException as exp:
                     logger.warning(
                         "Connection problem to the %s %s: %s",
                         type, p['name'], exp
@@ -1000,6 +1008,13 @@ class Scheduler(object):
     # Call by brokers to have broks
     # We give them, and clean them!
     def get_broks(self, bname, broks_batch=0):
+        if broks_batch:
+            try:
+                broks_batch = int(broks_batch)
+            except ValueError:
+                logger.error("Invalid broks_batch in get_broks, should be an "
+                             "integer. Igored.")
+                broks_batch = 0
         res = []
         if broks_batch == 0:
             count = len(self.broks)

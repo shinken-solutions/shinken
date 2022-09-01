@@ -127,8 +127,6 @@ class EventHandler(six.with_metaclass(AutoSlots, Action)):
         return self.id
 
 
-    # Call by pickle to dataify the comment
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

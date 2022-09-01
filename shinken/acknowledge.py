@@ -34,7 +34,7 @@ class Acknowledge(object):
     """
     id = 1
 
-    # Just to list the properties we will send as pickle
+    # Just to list the properties we will send as serialized object
     # so to others daemons, all but NOT REF
     properties = {
         'id': None,
@@ -75,8 +75,6 @@ class Acknowledge(object):
         self.author = author
         self.comment = comment
 
-    # Call by pickle for dataify the ackn
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

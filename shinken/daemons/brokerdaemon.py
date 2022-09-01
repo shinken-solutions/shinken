@@ -36,18 +36,15 @@ import copy
 from multiprocessing import active_children
 from collections import deque
 import io
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids, get_memory, parse_memory_expr, free_memory
+from shinken.serializer import serialize, deserialize, SerializeError
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
-from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.http_client import HTTPClient, HTTPException
 from shinken.daemon import Daemon, Interface
 
 
@@ -239,7 +236,7 @@ class Broker(BaseSatellite):
             con = links[id]['con'] = HTTPClient(uri=uri,
                                                 strong_ssl=links[id]['hard_ssl_name_check'],
                                                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             logger.info(
@@ -270,7 +267,7 @@ class Broker(BaseSatellite):
                     con.get('fill_initial_broks', {'bname': self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             logger.info(
                 "Connection problem to the %s %s: %s",
                 type, links[id]['name'], exp)
@@ -351,31 +348,29 @@ class Broker(BaseSatellite):
                     t0 = time.time()
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    tmp_broks = con.get(
+                    payload = con.get(
                         'get_broks',
                         {'bname': self.name, 'broks_batch': self.broks_batch},
                         wait='long')
                     try:
-                        _t = base64.b64decode(tmp_broks)
-                        _t = zlib.decompress(_t)
-                        tmp_broks = pickle.loads(_t)
-                    except (TypeError, zlib.error, pickle.PickleError) as exp:
+                        broks = deserialize(payload)
+                    except (TypeError, SerializeError) as exp:
                         logger.error('Cannot load broks data from %s : %s',
                                      links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
                         continue
-                    logger.debug("%s Broks get in %s", len(tmp_broks), time.time() - t0)
-                    for b in tmp_broks:
+                    logger.debug("%s Broks get in %s", len(broks), time.time() - t0)
+                    for b in broks:
                         b.instance_id = links[sched_id]['instance_id']
                     # Ok, we can add theses broks to our queues
-                    self.add_broks_to_queue(tmp_broks)
+                    self.add_broks_to_queue(broks)
                 else:  # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError as exp:
                 logger.debug("Key error for get_broks : %s", exp)
                 self.pynag_con_init(sched_id, type=type)
-            except HTTPExceptions as exp:
+            except HTTPException as exp:
                 logger.warning(
                     "Connection problem to the %s %s: %s",
                     type, links[sched_id]['name'], exp
@@ -391,7 +386,7 @@ class Broker(BaseSatellite):
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
             except Exception as e:
-                logger.error(x)
+                logger.error(e)
                 logger.error(traceback.format_exc())
                 sys.exit(1)
 
@@ -819,7 +814,7 @@ class Broker(BaseSatellite):
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
             # We un serialize the brok before consume it
-            b.prepare()
+            #b.prepare()
             _t = time.time()
             self.manage_brok(b)
             statsmgr.timing('core.broker.manage-brok', time.time() - _t, 'perf')

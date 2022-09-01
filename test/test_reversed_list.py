@@ -25,7 +25,7 @@ class TestReversedList(ShinkenTest):
         reg = Regenerator()
         data = {"instance_id": 0}
         b = Brok('program_status', data)
-        b.prepare()
+        #b.prepare()
         reg.manage_program_status_brok(b)
         reg.all_done_linking(0)
 

@@ -63,7 +63,7 @@ class SchedulingItem(Item):
     default_check_variant = "state"
     maintenance_downtime = None
 
-    # Call by pickle to data-ify the host
+    # Call by serialize to data-ify the host
     # we do a dict because list are too dangerous for
     # retention save and co :( even if it's more
     # extensive

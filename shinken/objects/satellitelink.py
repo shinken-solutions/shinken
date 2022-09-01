@@ -29,14 +29,11 @@ import six
 import time
 import sys
 from shinken.util import get_obj_name_two_args_and_void
+from shinken.serializer import serialize, deserialize
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
-from shinken.http_client import HTTPClient, HTTPExceptions
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
+from shinken.http_client import HTTPClient, HTTPException
 
 
 class SatelliteLink(Item):
@@ -109,11 +106,14 @@ class SatelliteLink(Item):
 
 
     def create_connection(self):
-        self.con = HTTPClient(address=self.arb_satmap['address'], port=self.arb_satmap['port'],
-                              timeout=self.timeout, data_timeout=self.data_timeout,
-                              use_ssl=self.use_ssl,
-                              strong_ssl=self.hard_ssl_name_check
-                              )
+        self.con = HTTPClient(
+            address=self.arb_satmap['address'],
+            port=self.arb_satmap['port'],
+            timeout=self.timeout,
+            data_timeout=self.data_timeout,
+            use_ssl=self.use_ssl,
+            strong_ssl=self.hard_ssl_name_check
+        )
         self.uri = self.con.uri
 
 
@@ -127,10 +127,11 @@ class SatelliteLink(Item):
 
         try:
             self.con.get('ping')
-            self.con.post('put_conf', {'conf': conf}, wait='long')
+            self.con.put('put_conf', serialize(conf), wait='long')
             print("PUT CONF SUCESS", self.get_name())
             return True
-        except HTTPExceptions as exp:
+        #except HTTPException as exp:
+        except Exception as exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s", self.get_name(), exp)
             return False
@@ -226,14 +227,14 @@ class SatelliteLink(Item):
                 self.add_failed_check_attempt()
                 return
 
-            r = self.con.get('ping')
+            r = self.con.get('ping').decode("utf-8")
 
             # Should return us pong string
             if r == 'pong':
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -243,7 +244,7 @@ class SatelliteLink(Item):
         try:
             r = self.con.get('wait_new_conf')
             return True
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -268,7 +269,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -283,12 +284,12 @@ class SatelliteLink(Item):
             return False
 
         try:
-            r = self.con.get('got_conf')
+            r = deserialize(self.con.get('got_conf'))
             # Protect against bad return
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -304,7 +305,7 @@ class SatelliteLink(Item):
         try:
             self.con.get('remove_from_conf', {'sched_id': sched_id})
             return True
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -319,7 +320,7 @@ class SatelliteLink(Item):
             return
 
         try:
-            tab = self.con.get('what_i_managed')
+            tab = deserialize(self.con.get('what_i_managed'))
             print("[%s]What i managed raw value is %s" % (self.get_name(), tab))
 
             # Protect against bad return
@@ -340,7 +341,7 @@ class SatelliteLink(Item):
                           self.get_name(), tab)
             # We can update our list now
             self.managed_confs = tab_cleaned
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             print("EXCEPTION INwhat_i_managed %s" % exp)
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
@@ -370,9 +371,9 @@ class SatelliteLink(Item):
         try:
             # Always do a simple ping to avoid a LOOOONG lock
             self.con.get('ping')
-            self.con.post('push_broks', {'broks': broks}, wait='long')
+            self.con.put('push_broks', serialize(broks), wait='long')
             return True
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -387,14 +388,16 @@ class SatelliteLink(Item):
 
         try:
             self.con.get('ping')
-            tab = self.con.get('get_external_commands', wait='long')
-            tab = pickle.loads(str(tab))
+            content = self.con.get('get_external_commands', wait='long')
+            #raw = zlib.decompress(base64.b64decode(content))
+            #raw = zlib.decompress(content)
+            commands = deserialize(content)
             # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None
                 return []
-            return tab
-        except HTTPExceptions as exp:
+            return commands
+        except HTTPException as exp:
             self.con = None
             return []
         except AttributeError:
@@ -454,8 +457,6 @@ class SatelliteLink(Item):
                 }
 
 
-    # Call by pickle for dataify the downtime
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

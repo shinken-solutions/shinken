@@ -29,10 +29,6 @@ import six
 import sys
 import os
 import time
-if sys.version.startswith("2.7"):
-    import cPickle as pickle
-else:
-    import pickle
 from io import StringIO
 
 from tempfile import NamedTemporaryFile
@@ -123,9 +119,8 @@ class LogCollectMixin:
         for obj in collector.list:
             self.assertIsInstance(obj, Brok)
             self.assertEqual(obj.type, 'log')
-            data = pickle.loads(obj.data)
-            self.assertEqual(list(data.keys()), ['log'])
-            yield data['log']
+            self.assertEqual(list(obj.data.keys()), ['log'])
+            yield obj.data['log']
 
     def _prepare_logging(self):
         self._collector = Collector()

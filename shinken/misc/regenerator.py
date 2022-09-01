@@ -106,7 +106,7 @@ class Regenerator(object):
         c = sched.conf
         # Simulate a drop conf
         b = sched.get_program_status_brok()
-        b.prepare()
+        #b.prepare()
         self.manage_program_status_brok(b)
 
         # Now we will lie and directly map our objects :)

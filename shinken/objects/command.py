@@ -115,8 +115,6 @@ class Command(six.with_metaclass(AutoSlots, Item)):
                 #    data[prop] = entry.default
 
 
-    # Call by pickle to dataify the comment
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

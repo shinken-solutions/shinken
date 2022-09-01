@@ -32,10 +32,6 @@ import traceback
 import zlib
 import base64
 import sys
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -44,8 +40,9 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
-from shinken.util import nighty_five_percent, parse_memory_expr, free_memory
+from shinken.util import nighty_five_percent, parse_memory_expr, free_memory, to_bool
 from shinken.stats import statsmgr
+from shinken.serializer import serialize, deserialize
 
 
 # Interface for Workers
@@ -60,12 +57,15 @@ if not, they must drop their checks """
     #    return self.running_id
 
     # poller or reactionner ask us actions
-    def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'],
-                   reactionner_tags=['None'], worker_name='none',
-                   module_types=['fork'], max_actions=None):
+    def get_checks(self, do_checks=False, do_actions=False, poller_tags='None',
+                   reactionner_tags='None', worker_name='none',
+                   module_types='fork', max_actions=None):
         # print("We ask us checks")
-        do_checks = (do_checks == 'True')
-        do_actions = (do_actions == 'True')
+        do_checks = to_bool(do_checks)
+        do_actions = to_bool(do_actions)
+        poller_tags = [t.strip() for t in poller_tags.split(",") if t.strip()]
+        reactionner_tags = [t.strip() for t in reactionner_tags.split(",") if t.strip()]
+        module_types = [t.strip() for t in module_types.split(",") if t.strip()]
         if max_actions is not None:
             try:
                 max_actions = int(max_actions)
@@ -79,8 +79,7 @@ if not, they must drop their checks """
         # print("Sending %d checks" % len(res))
         self.app.nb_checks_send += len(res)
 
-        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
-        # return zlib.compress(pickle.dumps(res), 2)
+        return serialize(res)
     get_checks.encode = 'raw'
 
 
@@ -97,8 +96,8 @@ if not, they must drop their checks """
 
         # for c in results:
         # self.sched.put_results(c)
-        return True
-    put_results.method = 'post'
+        return serialize(True)
+    put_results.method = 'PUT'
     put_results.need_lock = False
 
 
@@ -114,7 +113,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         if bname not in self.app.brokers:
             self.fill_initial_broks(bname)
 
-        if broks_batch > 0:
+        if broks_batch:
             try:
                 broks_batch = int(broks_batch)
             except ValueError:
@@ -128,8 +127,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
-        # return zlib.compress(pickle.dumps(res), 2)
+        return serialize(res)
     get_broks.encode = 'raw'
 
 
@@ -189,13 +187,13 @@ class IForArbiter(IArb):
     # it can send us global command, or specific ones
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
-    run_external_commands.method = 'POST'
+    run_external_commands.method = 'PUT'
 
 
     def put_conf(self, conf):
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
-    put_conf.method = 'POST'
+    put_conf.method = 'PUT'
 
 
     # Call by arbiter if it thinks we are running but we must not (like
@@ -406,7 +404,7 @@ class Shinken(BaseSatellite):
                           statsd_pattern=statsd_pattern)
 
         t0 = time.time()
-        conf = pickle.loads(conf_raw)
+        conf = deserialize(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs", t0, time.time() - t0)
 
         if harakiri_threshold is not None:

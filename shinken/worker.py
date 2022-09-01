@@ -97,7 +97,7 @@ class Worker(object):
         self.loaded_into = loaded_into
         if os.name != 'nt':
             self.http_daemon = http_daemon
-        else:  # windows forker do not like pickle http/lock
+        else:  # windows forker do not like serialize http/lock
             self.http_daemon = None
 
     def _prework(self, real_work, *args):

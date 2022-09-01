@@ -32,10 +32,6 @@ import socket
 import traceback
 import json
 import io
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -47,6 +43,7 @@ from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.property import BoolProp
 from shinken.util import jsonify_r, get_memory, free_memory
+from shinken.serializer import serialize, deserialize
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -70,7 +67,7 @@ class IForArbiter(Interface):
     def put_conf(self, conf):
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
-    put_conf.method = 'POST'
+    put_conf.method = 'PUT'
     put_conf.doc = doc
 
 
@@ -118,7 +115,7 @@ class IForArbiter(Interface):
     doc = 'Dummy call for the arbiter'
     # Dummy call. We are the master, we manage what we want
     def what_i_managed(self):
-        return {}
+        return serialize({})
     what_i_managed.need_lock = False
     what_i_managed.doc = doc
 
@@ -673,7 +670,7 @@ class Arbiter(Daemon):
         conf = self.new_conf
         if not conf:
             return
-        conf = pickle.loads(conf)
+        conf = deserialize(conf)
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf

@@ -91,7 +91,7 @@ class TestRegenerator(ShinkenTest):
         t0 = time.time()
         for b in self.sched.broks:
             print("Manage b", b.type)
-            b.prepare()
+            #b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print('First inc', t1 - t0, len(self.sched.broks))
@@ -116,7 +116,7 @@ class TestRegenerator(ShinkenTest):
         t0 = time.time()
         for b in self.sched.broks:
             print("Manage b", b.type)
-            b.prepare()
+            #b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print('Time', t1 - t0)
@@ -127,12 +127,12 @@ class TestRegenerator(ShinkenTest):
         print('Time', t1 - t0)
 
         b = svc.get_initial_status_brok()
-        b.prepare()
+        #b.prepare()
         print("GO BENCH!")
         t0 = time.time()
         for i in range(1, 1000):
             b = svc.get_initial_status_brok()
-            b.prepare()
+            #b.prepare()
             s = Service({})
             for (prop, value) in b.data.items():
                 setattr(s, prop, value)
@@ -186,7 +186,7 @@ class TestRegenerator(ShinkenTest):
         t0 = time.time()
         for b in self.sched.broks:
             print("Manage b", b.type)
-            b.prepare()
+            #b.prepare()
             self.rg.manage_brok(b)
         t1 = time.time()
         print('First inc', t1 - t0, len(self.sched.broks))

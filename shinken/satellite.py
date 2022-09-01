@@ -53,18 +53,15 @@ import zlib
 import base64
 import threading
 import multiprocessing
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
-from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.http_client import HTTPClient, HTTPException
 from shinken.message import Message
 from shinken.worker import Worker
 from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.util import get_memory, parse_memory_expr, free_memory
+from shinken.serializer import serialize, deserialize, SerializeError
 from shinken.stats import statsmgr
 if six.PY2:
     from Queue import Empty, Queue
@@ -98,7 +95,7 @@ class IForArbiter(Interface):
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
         logger.debug("The arbiter asked me what I manage. It's %s", self.app.what_i_managed())
-        return self.app.what_i_managed()
+        return serialize(self.app.what_i_managed())
     what_i_managed.need_lock = False
     what_i_managed.doc = doc
 
@@ -123,7 +120,7 @@ class IForArbiter(Interface):
     def push_broks(self, broks):
         with self.app.arbiter_broks_lock:
             self.app.arbiter_broks.extend(broks)
-    push_broks.method = 'post'
+    push_broks.method = 'PUT'
     # We are using a Lock just for NOT lock this call from the arbiter :)
     push_broks.need_lock = False
     push_broks.doc = doc
@@ -135,25 +132,27 @@ class IForArbiter(Interface):
     def get_external_commands(self):
         with self.app.external_commands_lock:
             cmds = self.app.get_external_commands()
-            raw = pickle.dumps(cmds)
-        return raw
+        return serialize(cmds)
     get_external_commands.need_lock = False
+    get_external_commands.encode = 'raw'
     get_external_commands.doc = doc
 
 
     doc = 'Does the daemon got configuration (receiver)'
     # NB: only useful for receiver
     def got_conf(self):
-        return self.app.cur_conf is not None
+        return serialize(self.app.cur_conf is not None)
     got_conf.need_lock = False
     got_conf.doc = doc
 
 
     doc = 'Push hostname/scheduler links (receiver in direct routing)'
     # Use by the receivers to got the host names managed by the schedulers
-    def push_host_names(self, sched_id, hnames):
-        self.app.push_host_names(sched_id, hnames)
-    push_host_names.method = 'post'
+    def push_host_names(self, data):
+        sched_id = data["sched_id"]
+        hnames = data["hnames"]
+        self.app.push_host_names({'sched_id': sched_id, 'hnames': hnames})
+    push_host_names.method = 'PUT'
     push_host_names.doc = doc
 
 
@@ -167,7 +166,7 @@ class ISchedulers(Interface):
     # A Scheduler send me actions to do
     def push_actions(self, actions, sched_id):
         self.app.add_actions(actions, int(sched_id))
-    push_actions.method = 'post'
+    push_actions.method = 'PUT'
     push_actions.doc = doc
 
     doc = 'Get the returns of the actions (internal)'
@@ -176,7 +175,7 @@ class ISchedulers(Interface):
         # print("A scheduler ask me the returns", sched_id)
         ret = self.app.get_return_for_passive(int(sched_id))
         # print("Send mack", len(ret), "returns")
-        return pickle.dumps(ret)
+        return serialize(ret)
     get_returns.doc = doc
 
 
@@ -191,7 +190,8 @@ class IBroks(Interface):
     # poller or reactionner ask us actions
     def get_broks(self, bname, broks_batch=0):
         res = self.app.get_broks(broks_batch)
-        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
+        return serialize(res)
+    get_broks.encode = 'raw'
     get_broks.doc = doc
 
 
@@ -333,7 +333,7 @@ class Satellite(BaseSatellite):
             sch_con = sched['con'] = HTTPClient(
                 uri=uri, strong_ssl=sched['hard_ssl_name_check'],
                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions as exp:
+        except HTTPException as exp:
             logger.warning(
                 "[%s] Scheduler %s is not initialized or has network problem: %s",
                 self.name, sname, exp
@@ -346,7 +346,7 @@ class Satellite(BaseSatellite):
         try:
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
-        except (HTTPExceptions, pickle.PicklingError, KeyError) as exp:
+        except (HTTPException, SerializeError, KeyError) as exp:
             logger.warning(
                 "[%s] Scheduler %s is not initialized or has network problem: %s",
                 self.name, sname, exp
@@ -435,9 +435,11 @@ class Satellite(BaseSatellite):
                 try:
                     con = sched['con']
                     if con is not None:  # None = not initialized
-                        send_ok = con.post('put_results', {'results': ret})
+                        send_ok = deserialize(
+                            con.put('put_results', serialize(ret))
+                        )
                         # Not connected or sched is gone
-                except (HTTPExceptions, KeyError) as exp:
+                except (HTTPException, KeyError) as exp:
                     logger.error('manage_returns exception:: %s,%s ', type(exp), exp)
                     self.pynag_con_init(sched_id)
                     return
@@ -571,6 +573,13 @@ class Satellite(BaseSatellite):
 
     # Someone ask us our broks. We send them, and clean the queue
     def get_broks(self, broks_batch=0):
+        if broks_batch:
+            try:
+                broks_batch = int(broks_batch)
+            except ValueError:
+                logger.error("Invalid broks_batch in get_broks, should be an "
+                             "integer. Igored.")
+                broks_batch = 0
         _type = self.__class__.my_type
         if broks_batch == 0:
             count = len(self.broks)
@@ -674,10 +683,10 @@ class Satellite(BaseSatellite):
     def _got_queue_from_action(self, a):
         # get the module name, if not, take fork
         mod = getattr(a, 'module_type', 'fork')
-        queues = self.q_by_mod[mod].items()
+        queues = list(self.q_by_mod[mod].items())
 
         # Maybe there is no more queue, it's very bad!
-        if len(queues) == 0:
+        if not queues:
             return (0, None)
 
         # if not get a round robin index to get a queue based
@@ -749,30 +758,28 @@ class Satellite(BaseSatellite):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     args = {
-                        'do_checks': do_checks, 'do_actions': do_actions,
-                        'poller_tags': self.poller_tags,
-                        'reactionner_tags': self.reactionner_tags,
+                        'do_checks': do_checks,
+                        'do_actions': do_actions,
+                        'poller_tags': ",".join(self.poller_tags),
+                        'reactionner_tags': ",".join(self.reactionner_tags),
                         'worker_name': self.name,
-                        'module_types': self.q_by_mod.keys(),
+                        'module_types': ",".join(self.q_by_mod.keys()),
                     }
                     slots = self.get_available_slots()
                     if slots is not None:
                         args['max_actions'] = slots
-                    tmp = con.get('get_checks', args, wait='long')
-                    # Explicit pickle load
-                    tmp = base64.b64decode(tmp)
-                    tmp = zlib.decompress(tmp)
-                    tmp = pickle.loads(str(tmp))
-                    logger.debug("Ask actions to %d, got %d", sched_id, len(tmp))
+                    raw = con.get('get_checks', args, wait='long')
+                    actions = deserialize(raw)
+                    logger.debug("Ask actions to %d, got %d", sched_id, len(actions))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
-                    self.add_actions(tmp, sched_id)
-                    count += len(tmp)
+                    self.add_actions(actions, sched_id)
+                    count += len(actions)
                 else:  # no con? make the connection
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (HTTPExceptions, KeyError) as exp:
+            except (HTTPException, KeyError) as exp:
                 logger.debug('get_new_actions exception:: %s,%s ', type(exp), exp)
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
@@ -1185,9 +1192,6 @@ class Satellite(BaseSatellite):
 
     def main(self):
         try:
-            for line in self.get_header():
-                logger.info(line)
-
             self.load_config_file()
 
             # Setting log level
@@ -1195,6 +1199,9 @@ class Satellite(BaseSatellite):
             # Force the debug level if the daemon is said to start with such level
             if self.debug:
                 logger.setLevel('DEBUG')
+
+            for line in self.get_header():
+                logger.info(line)
 
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()

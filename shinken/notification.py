@@ -210,8 +210,6 @@ class Notification(six.with_metaclass(AutoSlots, Action)):
         return b
 
 
-    # Call by pickle for dataify the comment
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

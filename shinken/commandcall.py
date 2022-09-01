@@ -127,9 +127,6 @@ class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
         return self.call
 
     def __getstate__(self):
-        """Call by pickle to dataify the comment
-        because we DO NOT WANT REF in this pickleisation!
-        """
         cls = self.__class__
         # id is not in *_properties
         res = {'id': self.id}
