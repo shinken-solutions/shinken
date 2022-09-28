@@ -26,6 +26,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import io
 import six
 import traceback
+import zlib
 if six.PY2:
     import cPickle as pickle
 else:
@@ -46,7 +47,7 @@ def serialize(obj):
     :terun: The serialized object
     """
     try:
-        return pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
+        return zlib.compress(pickle.dumps(obj, pickle.HIGHEST_PROTOCOL))
     except pickle.PickleError as e:
         logger.error("Failed to serialize object: %s", e)
         logger.error(traceback.format_exc())
@@ -63,9 +64,10 @@ def deserialize(payload):
     """
     try:
         if hasattr(payload, 'read'):
-            return SafeUnpickler(payload).load()
+            raw = zlib.decompress(payload.read())
         else:
-            return SafeUnpickler(io.BytesIO(payload)).load()
+            raw = zlib.decompress(payload)
+        return SafeUnpickler(io.BytesIO(raw)).load()
     except pickle.PickleError as e:
         logger.error("Failed to serialize payload: %s", e)
         logger.error(traceback.format_exc())
