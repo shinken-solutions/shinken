@@ -1,0 +1,16 @@
+[Unit]
+Description="Shinken - a modern, Nagios compatible monitoring framework"
+Documentation=http://www.shinken.io/
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+User=shinken
+Group=shinken
+EnvironmentFile=-/etc/default/shinken-scheduler
+ExecStart=shinken-scheduler -d -c $SCHEDULERCFG $DAEMON_ARGS
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

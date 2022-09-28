@@ -60,12 +60,12 @@ def ensure_dir_exist(f):
         os.makedirs(dirname)
 
 
-def generate_default_shinken_file():
+def generate_default_shinken_file(in_file):
     # The default file must have good values for the directories:
     # etc, var and where to push scripts that launch the app.
-    templatefile = "bin/default/shinken.in"
+    templatefile = os.path.join("bin/default", in_file)
     build_base = 'build'
-    outfile = os.path.join(build_base, "bin/default/shinken")
+    outfile = os.path.join(build_base, "bin/default", in_file.rstrip(".in"))
     mkpath(os.path.dirname(outfile))
     bin_path = default_paths['bin']
 
@@ -114,6 +114,17 @@ def get_gid(group_name):
         return grp.getgrnam(group_name)[2]
     except KeyError as exp:
         return None
+
+
+def get_init_system():
+    if not os.path.isfile("/proc/1/comm"):
+        return "sysv"
+    with open("/proc/1/comm", "r") as f:
+        init = f.read().strip()
+    if init == "systemd":
+        return init
+    else:
+        return "sysv"
 
 
 # Do a chmod -R +x
@@ -287,6 +298,15 @@ for o in not_allowed_options:
 # Packages definition
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 
+shinken_services = [
+    'arbiter',
+    'broker',
+    'poller',
+    'reactionner',
+    'receiver',
+    'scheduler'
+]
+
 # Installation files processing
 if 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {
@@ -298,28 +318,43 @@ if 'linux' in sys.platform or 'sunos5' in sys.platform:
         'log'    : "/var/log/shinken",
         'libexec': "/var/lib/shinken/libexec",
     }
-    data_files = [
-        (
-            os.path.join('/etc', 'init.d'),
-            [
-                'bin/init.d/shinken',
-                'bin/init.d/shinken-arbiter',
-                'bin/init.d/shinken-broker',
-                'bin/init.d/shinken-receiver',
-                'bin/init.d/shinken-poller',
-                'bin/init.d/shinken-reactionner',
-                'bin/init.d/shinken-scheduler',
-            ]
-        )
-    ]
-
-    if is_install:
-        # warning: The default file will be generated a bit later
-        data_files.append((
-            os.path.join('/etc', 'default'),
-            [
-                'build/bin/default/shinken'
+    if get_init_system() == "systemd":
+        init_files = [
+            'bin/systemd/shinken-%s.service' % service 
+            for service in shinken_services
+        ]
+        data_files = [
+            (
+                os.path.join('/etc', 'systemd', 'system'),
+                init_files
+            )
+        ]
+    else:
+        init_files = ['bin/init.d/shinken']
+        init_files.extend([
+            'bin/init.d/shinken-%s' % service for service in shinken_services
+        ])
+        data_files = [
+            (
+                os.path.join('/etc', 'init.d'),
+                init_files
+            )
+        ]
+    if not is_update:
+        if get_init_system() == "systemd":
+            # warning: The default file will be generated a bit later
+            data_files.append((
+                os.path.join('/etc', 'default'),
+                [
+                    'build/bin/default/shinken-%s' % service
+                    for service in shinken_services
                 ]
+            ))
+        else:
+            # warning: The default file will be generated a bit later
+            data_files.append((
+                os.path.join('/etc', 'default'),
+                ['build/bin/default/shinken']
             ))
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {
@@ -335,15 +370,16 @@ elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
         (
             '/usr/local/etc/rc.d',
             [
-                'bin/rc.d/shinken-arbiter',
-                'bin/rc.d/shinken-broker',
-                'bin/rc.d/shinken-receiver',
-                'bin/rc.d/shinken-poller',
-                'bin/rc.d/shinken-reactionner',
-                'bin/rc.d/shinken-scheduler',
+                'bin/init.d/shinken-%s' % service
+                for service in shinken_services
             ]
         )
-        ]
+    ]
+    if not is_update:
+        data_files.append((
+            os.path.join('/etc', 'default'),
+            ['build/bin/default/shinken']
+        ))
 elif sys.platform.startswith('win'):
     default_paths = {
         'bin'    : install_scripts or "c:\\shinken\\bin",
@@ -371,12 +407,14 @@ if is_virtualenv:
 else:
     # Modules, doc, inventory and cli are always installed
     paths = ('modules', 'doc', 'inventory', 'cli')
+    dist = {}
     for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
         for name in files:
             dirname = os.path.join(default_paths['var'], path)
-            data_files.append((
-                dirname, [os.path.join(path, name)]
-                ))
+            dist.setdefault(dirname, []).append(os.path.join(path, name))
+            #data_files.append((
+            #    dirname, [os.path.join(path, name)]
+            #))
 
     for path, subdirs, files in os.walk('share'):
         for name in files:
@@ -384,9 +422,10 @@ else:
                     default_paths['share'],
                     re.sub(r"^(share\/|share$)", "", path)
                 )
-            data_files.append((
-                dirname, [os.path.join(path, name)]
-                ))
+            dist.setdefault(dirname, []).append(os.path.join(path, name))
+            #data_files.append((
+            #    dirname, [os.path.join(path, name)]
+            #))
 
     for path, subdirs, files in os.walk('libexec'):
         for name in files:
@@ -394,10 +433,12 @@ else:
                 default_paths['libexec'],
                 re.sub(r"^(libexec\/|libexec$)", "", path)
             )
-            data_files.append((
-                dirname, [os.path.join(path, name)]
-                ))
+            dist.setdefault(dirname, []).append(os.path.join(path, name))
+            #data_files.append((
+            #    dirname, [os.path.join(path, name)]
+            #))
 
+    data_files.extend(dist.items())
     data_files.append((default_paths['run'], []))
     data_files.append((default_paths['log'], []))
 
@@ -415,7 +456,12 @@ scripts = [s for s in glob('bin/shinken*') if not s.endswith('.py')]
 # Only some platform are managed by the init.d scripts
 if not is_virtualenv and is_install and \
         ('linux' in sys.platform or 'sunos5' in sys.platform):
-    generate_default_shinken_file()
+    if get_init_system() == "systemd":
+        for service in shinken_services:
+            generate_default_shinken_file("shinken-%s.in" % service)
+    else:
+        generate_default_shinken_file("shinken.in")
+
 
 
 ###############################################################################
@@ -516,7 +562,7 @@ if not is_virtualenv and os.name != 'nt' and not is_update:
         data_files.append((default_paths['etc'], [outname]))
 
 
-if os.getenv("DEBUG") == "1":
+if os.getenv("DEBUG") == "1" or True:
     from pprint import pprint
     print("Argv")
     pprint(sys.argv)
