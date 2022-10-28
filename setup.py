@@ -26,6 +26,7 @@ except:
     sys.exit("Error: missing setuptools library")
 
 from distutils.dir_util import mkpath
+from itertools import chain
 from glob import glob
 import distutils.cmd
 import sys
@@ -140,16 +141,6 @@ def get_shinken_version():
         raise Exception("Failed to read shinken version")
     return version
 
-###############################################################################
-#
-# Command line parsing
-#
-
-root = None
-user = 'shinken'
-group = 'shinken'
-install_scripts = None
-is_virtualenv = os.getenv("VIRTUAL_ENV") is not None
 
 ###############################################################################
 #
@@ -180,7 +171,20 @@ shinken_services = [
 ]
 
 # Installation files processing
-if 'linux' in sys.platform or 'sunos5' in sys.platform:
+if os.getenv("VIRTUAL_ENV"):
+    root = os.getenv("VIRTUAL_ENV")
+    default_paths = {
+        'libexec':  os.path.join(root, "libexec", "shinken", "plugins"),
+        'modules':  os.path.join(root, "lib", "shinken", "modules"),
+        'share':    os.path.join(root, "share", "shinken"),
+        'examples': os.path.join(root, "share", "doc", "shinken", "examples"),
+        'doc':      os.path.join(root, "share", "doc", "shinken"),
+        'etc':      os.path.join(root, "etc", "shinken"),
+        'var':      os.path.join(root, "var", "lib", "shinken"),
+        'run':      os.path.join(root, "var", "run", "shinken"),
+        'log':      os.path.join(root, "var", "log", "shinken"),
+    }
+elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {
         'libexec':  "/usr/local/libexec/shinken/plugins",
         'modules':  "/usr/local/lib/shinken/modules",
@@ -188,7 +192,7 @@ if 'linux' in sys.platform or 'sunos5' in sys.platform:
         'examples': "/usr/local/share/doc/shinken/examples",
         'doc':      "/usr/local/share/doc/shinken",
         'etc':      "/etc/shinken",
-        'var':      "/var/lib/shinken/",
+        'var':      "/var/lib/shinken",
         'run':      "/var/run/shinken",
         'log':      "/var/log/shinken",
     }
@@ -295,7 +299,7 @@ for path, subdirs, files in os.walk('etc'):
 ###############################################################################
 
 # Modules, doc, inventory and cli are always installed
-paths = ('modules', 'inventory', 'cli')
+paths = ('inventory', 'cli')
 dist = {}
 for path, subdirs, files in chain.from_iterable(os.walk(patho) for patho in paths):
     for name in files:
@@ -319,6 +323,16 @@ for path, subdirs, files in os.walk('doc'):
         dirname = os.path.dirname(os.path.join(
             default_paths['doc'],
             re.sub(r"^(doc\/|doc$)", "", path)
+        ))
+        data_files.append((
+            dirname, [os.path.join(path, name)]
+        ))
+
+for path, subdirs, files in os.walk('modules'):
+    for name in files:
+        dirname = os.path.dirname(os.path.join(
+            default_paths['modules'],
+            re.sub(r"^(modules\/|modules$)", "", path)
         ))
         data_files.append((
             dirname, [os.path.join(path, name)]
