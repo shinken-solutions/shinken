@@ -3,7 +3,7 @@ Shinken ChangeLog
 ########################
 
 
-2.4.4 - XX/02/2022
+2.4.4 - 29/10/2022
 -----------------
         CORE ENHANCEMENT
         Enh: (backport from Enterprise, internal ref #SEF-202) Big boost for the broker daemons, especially for very large setups and slow modules (yes Graphite, I'm looking at you).
