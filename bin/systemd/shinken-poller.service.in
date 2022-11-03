@@ -8,8 +8,8 @@ After=network-online.target
 Type=forking
 User=shinken
 Group=shinken
-EnvironmentFile=-/etc/default/shinken-receiver
-ExecStart=shinken-receiver -d -c $RECEIVERCFG $DAEMON_ARGS
+EnvironmentFile=-$DEFAULT$/shinken-poller
+ExecStart=$BIN$/shinken-poller -d -c $POLLERCFG $DAEMON_ARGS
 KillMode=mixed
 
 [Install]

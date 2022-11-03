@@ -19,20 +19,18 @@ except ImportError:
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 
+from distutils.core import Command
+from itertools import chain
+from glob import glob
+import sys
+import os
+import re
+
 try:
     from setuptools import setup
     from setuptools import find_packages
 except:
     sys.exit("Error: missing setuptools library")
-
-from distutils.dir_util import mkpath
-from itertools import chain
-from glob import glob
-import distutils.cmd
-import sys
-import os
-import re
-
 
 try:
     python_version = sys.version_info
@@ -55,27 +53,6 @@ def ensure_dir_exist(f):
     dirname = os.path.dirname(f)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-
-
-def generate_default_shinken_file(in_file):
-    # The default file must have good values for the directories:
-    # etc, var and where to push scripts that launch the app.
-    templatefile = os.path.join("bin/default", in_file)
-    build_base = 'build'
-    outfile = os.path.join(build_base, "bin/default", in_file.rstrip(".in"))
-    mkpath(os.path.dirname(outfile))
-
-    # Read the template file
-    with open(templatefile, "r") as f:
-        buf = f.read()
-    # substitute
-    buf = buf.replace("$ETC$", default_paths['etc'])
-    buf = buf.replace("$VAR$", default_paths['var'])
-    buf = buf.replace("$RUN$", default_paths['run'])
-    buf = buf.replace("$LOG$", default_paths['log'])
-    # write out the new file
-    with open(outfile, "w") as f:
-        f.write(buf)
 
 
 def update_file_with_string(infilename, outfilename, matches, new_strings):
@@ -171,21 +148,10 @@ shinken_services = [
 ]
 
 # Installation files processing
-if os.getenv("VIRTUAL_ENV"):
-    root = os.getenv("VIRTUAL_ENV")
+if os.path.isfile('/etc/redhat-release'):
     default_paths = {
-        'libexec':  os.path.join(root, "libexec", "shinken", "plugins"),
-        'modules':  os.path.join(root, "lib", "shinken", "modules"),
-        'share':    os.path.join(root, "share", "shinken"),
-        'examples': os.path.join(root, "share", "doc", "shinken", "examples"),
-        'doc':      os.path.join(root, "share", "doc", "shinken"),
-        'etc':      os.path.join(root, "etc", "shinken"),
-        'var':      os.path.join(root, "var", "lib", "shinken"),
-        'run':      os.path.join(root, "var", "run", "shinken"),
-        'log':      os.path.join(root, "var", "log", "shinken"),
-    }
-elif 'linux' in sys.platform or 'sunos5' in sys.platform:
-    default_paths = {
+        'sysv':     "/etc/init.d",
+        'default':  "/etc/sysconfig",
         'libexec':  "/usr/local/libexec/shinken/plugins",
         'modules':  "/usr/local/lib/shinken/modules",
         'share':    "/usr/local/share/shinken",
@@ -196,8 +162,52 @@ elif 'linux' in sys.platform or 'sunos5' in sys.platform:
         'run':      "/var/run/shinken",
         'log':      "/var/log/shinken",
     }
+elif os.path.isfile('/etc/debian_version'):
+    default_paths = {
+        'sysv':     "/etc/init.d",
+        'default':  "/etc/default",
+        'libexec':  "/usr/local/libexec/shinken/plugins",
+        'modules':  "/usr/local/lib/shinken/modules",
+        'share':    "/usr/local/share/shinken",
+        'examples': "/usr/local/share/doc/shinken/examples",
+        'doc':      "/usr/local/share/doc/shinken",
+        'etc':      "/etc/shinken",
+        'var':      "/var/lib/shinken",
+        'run':      "/var/run/shinken",
+        'log':      "/var/log/shinken",
+    }
+elif 'linux' in sys.platform or 'sunos5' in sys.platform:
+    default_paths = {
+        'sysv':     "/etc/init.d",
+        'default':  "/etc/default",
+        'libexec':  "/usr/local/libexec/shinken/plugins",
+        'modules':  "/usr/local/lib/shinken/modules",
+        'share':    "/usr/local/share/shinken",
+        'examples': "/usr/local/share/doc/shinken/examples",
+        'doc':      "/usr/local/share/doc/shinken",
+        'etc':      "/etc/shinken",
+        'var':      "/var/lib/shinken",
+        'run':      "/var/run/shinken",
+        'log':      "/var/log/shinken",
+    }
+elif 'openbsd':
+    default_paths = {
+        'sysv':     "/etc/rc.d",
+        'default':  "/etc/default",
+        'libexec':  "/usr/local/libexec/shinken/plugins",
+        'modules':  "/usr/local/lib/shinken/modules",
+        'share':    "/usr/local/share/shinken",
+        'examples': "/usr/local/share/examples/shinken",
+        'doc':      "/usr/local/share/doc/shinken",
+        'etc':      "/etc/shinken",
+        'var':      "/var/lib/shinken",
+        'run':      "/var/run/shinken",
+        'log':      "/var/log/shinken",
+    }
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {
+        'sysv':     "/usr/local/etc/rc.d",
+        'default':  "/etc/default",
         'libexec':  "/usr/local/libexec/shinken/plugins",
         'modules':  "/usr/local/lib/shinken/modules",
         'share':    "/usr/local/share/shinken",
@@ -223,6 +233,21 @@ elif sys.platform.startswith('win'):
 else:
     raise Exception("Unsupported platform, sorry")
 
+if os.getenv("VIRTUAL_ENV"):
+    root = os.getenv("VIRTUAL_ENV")
+    default_paths.update({
+        'default':  os.path.join(root, "etc", "default"),
+        'libexec':  os.path.join(root, "libexec", "shinken", "plugins"),
+        'modules':  os.path.join(root, "lib", "shinken", "modules"),
+        'share':    os.path.join(root, "share", "shinken"),
+        'examples': os.path.join(root, "share", "doc", "shinken", "examples"),
+        'doc':      os.path.join(root, "share", "doc", "shinken"),
+        'etc':      os.path.join(root, "etc", "shinken"),
+        'var':      os.path.join(root, "var", "lib", "shinken"),
+        'run':      os.path.join(root, "var", "run", "shinken"),
+        'log':      os.path.join(root, "var", "log", "shinken"),
+    })
+
 ###############################################################################
 #
 # Init related files
@@ -231,27 +256,23 @@ else:
 
 if get_init_system() == "systemd":
     init_files = [
-        'bin/systemd/shinken-%s.service' % service
+        'bin/systemd/shinken-%s.service.in' % service
         for service in shinken_services
     ]
     data_files = [(
         os.path.join(default_paths['examples'], 'systemd'),
         init_files
     )]
-    # warning: The default file will be generated a bit later
     default_files = [
-        'build/bin/default/shinken-%s' % service
+        'bin/default/shinken-%s.in' % service
         for service in shinken_services
     ]
     data_files.append((
         os.path.join(default_paths['examples'], 'default'),
         default_files
     ))
-    if 'install' in sys.argv:
-        for service in shinken_services:
-            generate_default_shinken_file("shinken-%s.in" % service)
 elif get_init_system() == "sysv":
-    init_files = ['bin/init.d/shinken']
+    init_files = ['bin/init.d/shinken.in']
     init_files.extend([
         'bin/init.d/shinken-%s' % service for service in shinken_services
     ])
@@ -260,13 +281,11 @@ elif get_init_system() == "sysv":
         init_files
     )]
     # warning: The default file will be generated a bit later
-    default_files = ['build/bin/default/shinken']
+    default_files = ['bin/default/shinken.in']
     data_files.append((
         os.path.join(default_paths['examples'], 'default'),
         default_files
     ))
-    if 'install' in sys.argv:
-        generate_default_shinken_file("shinken.in")
 else:
     data_files = []
 
@@ -276,20 +295,15 @@ else:
 #
 ###############################################################################
 
+conf_files = []
 ## get all files + under-files in etc/ except daemons folder
 for path, subdirs, files in os.walk('etc'):
+    dirname = os.path.join(default_paths['examples'], path)
     if not files:
-        dirname = os.path.dirname( os.path.join(
-            default_paths['examples'],
-            path
-        ))
         data_files.append((dirname, []))
         continue
     for name in files:
-        dirname = os.path.dirname(os.path.join(
-            default_paths['examples'],
-            path
-        ))
+        conf_files.append(os.path.join(path, name))
         data_files.append((dirname, [os.path.join(path, name)]))
 
 ###############################################################################
@@ -363,7 +377,7 @@ data_files.append((default_paths['log'], []))
 #
 ###############################################################################
 
-class PostInstallCommand(distutils.cmd.Command):
+class post_install(Command):
     """
     A custom command to execute post-install actions
     """
@@ -372,11 +386,20 @@ class PostInstallCommand(distutils.cmd.Command):
             'processing and permissions enforcement'
     user_options = [
         # The format is (long option, short option, description).
+        ('install-conf', None, 'Install shinken configuration from examples'),
+        ('install-default', None, 'Install shinken default files from examples'),
+        ('install-init', None, 'Install shinken init files from examples'),
         (
             'confdir=',
             'c',
             'The configuration directory to alter (defaults to %s)' %
-            default_paths['examples']
+            default_paths['etc']
+        ),
+        (
+            'defaultdir=',
+            'f',
+            'The environment files director for init system (defaults to %s)' %
+            default_paths['default']
         ),
         ('user=', 'u', 'User to run Shinken under (defaults to shinken)'),
         ('group=', 'g', 'User to run Shinken under (defaults to shinken)'),
@@ -405,15 +428,21 @@ class PostInstallCommand(distutils.cmd.Command):
             default_paths['log']
         ),
     ]
+    boolean_options = ['install-conf', 'install-default', 'install-init']
 
     def initialize_options(self):
         """
         Set default values for options.
         """
         # Each user option must be listed here with their default value.
+        self.install_dir = None
+        self.install_conf = None
+        self.install_default = None
+        self.install_init = None
         self.user = 'shinken'
         self.group = 'shinken'
-        self.confdir = default_paths['examples']
+        self.confdir = default_paths['etc']
+        self.defaultdir = default_paths['default']
         self.modules = default_paths['modules']
         self.workdir = default_paths['var']
         self.lockdir = default_paths['run']
@@ -425,23 +454,105 @@ class PostInstallCommand(distutils.cmd.Command):
         """
         assert get_uid(self.user) is not None, ('Unknown user %s.' % self.user)
         assert get_gid(self.group) is not None, ('Unknown group %s.' % self.group)
+        self.set_undefined_options(
+            'install', ('install_scripts', 'install_dir'),
+        )
 
-    def run(self):
-        """
-        Run command.
-        """
-        templates = []
-        for path, subdirs, files in os.walk(self.confdir):
+    def generate_default_files(self):
+        # The default file must have good values for the directories:
+        # etc, var and where to push scripts that launch the app.
+        # The `default_files` variable has been set above while genetating the
+        # `data_files` list.
+        default_templates = [
+            os.path.join(default_paths['examples'], d.lstrip('bin/'))
+            for d in default_files
+        ]
+        for default_template in default_templates:
+            # Read the template file
+            with open(default_template, "r") as f:
+                buf = f.read()
+            # substitute
+            buf = buf.replace("$ETC$", self.confdir)
+            buf = buf.replace("$VAR$", self.workdir)
+            buf = buf.replace("$RUN$", self.lockdir)
+            buf = buf.replace("$LOG$", self.logdir)
+            # write out the new file
+            target = default_template.rstrip(".in")
+            with open(target, "w") as f:
+                f.write(buf)
+
+    def install_default_files(self):
+        for filename in [os.path.basename(i) for i in default_files]:
+            default_src = os.path.join(
+                default_paths['examples'],
+                'default',
+                filename).rstrip(".in")
+            default_dir = self.defaultdir
+            self.mkpath(default_dir)
+            self.copy_file(default_src, default_dir)
+
+    def generate_init_files(self):
+        # The default file must have good values for the directories:
+        # etc, var and where to push scripts that launch the app.
+        # The `default_files` variable has been set above while genetating the
+        # `data_files` list.
+        init_templates = [
+            os.path.join(default_paths['examples'], i.lstrip('bin/'))
+            for i in init_files
+        ]
+        for init_template in init_templates:
+            # Read the template file
+            with open(init_template, "r") as f:
+                buf = f.read()
+            # substitute
+            buf = buf.replace("$BIN$", self.install_dir.rstrip("/"))
+            buf = buf.replace("$DEFAULT$", default_paths["default"])
+            # write out the new file
+            target = init_template.rstrip(".in")
+            with open(target, "w") as f:
+                f.write(buf)
+
+    def install_init_files(self):
+        systemd_reload = False
+        for filename in [os.path.basename(i) for i in init_files]:
+            systemd_reload = True
+            if get_init_system() == "systemd":
+                init_src = os.path.join(
+                    default_paths['examples'],
+                    'systemd',
+                    filename).rstrip(".in")
+                init_dir = '/etc/systemd/system'
+                self.mkpath(init_dir)
+                self.copy_file(init_src, init_dir)
+
+            elif get_init_system() == "sysv":
+                init_src = os.path.join(
+                    default_paths['examples'],
+                    'init.d',
+                    filename).rstrip(".in")
+                init_dir = default_paths['sysv']
+                self.mkpath(init_dir)
+                init_file = os.path.join(
+                    init_dir,
+                    filename).rstrip(".in")
+                self.copy_file(init_src, init_dir)
+                os.chmod(init_file, 0o0755)
+        if systemd_reload:
+            self.spawn(["systemctl", "daemon-reload"])
+
+    def generate_conf_files(self):
+        conf_templates = []
+        conf_base = os.path.join(default_paths['examples'], 'etc')
+        for path, subdirs, files in os.walk(conf_base):
             for name in files:
                 if name.endswith(".in"):
-                    templates.append(os.path.join(path, name))
+                    conf_templates.append(os.path.join(path, name))
 
         # Processes template files expansion
-        modules_dir = os.path.join(default_paths['var'], 'modules')
-        for template in templates:
-            target = template.rstrip(".in")
+        for conf_template in conf_templates:
+            target = conf_template.rstrip(".in")
             update_file_with_string(
-                template,
+                conf_template,
                 target,
                 [
                     "modules_dir=.*",
@@ -454,7 +565,7 @@ class PostInstallCommand(distutils.cmd.Command):
                     "local_log=.+",
                 ],
                 [
-                    "modules_dir=%s" % modules_dir,
+                    "modules_dir=%s" % self.modules,
                     "user=%s" % self.user,
                     "group=%s" % self.group,
                     "shinken_user=%s" % self.user,
@@ -464,15 +575,45 @@ class PostInstallCommand(distutils.cmd.Command):
                     "local_log=%s/arbiterd.log" % self.logdir,
                 ]
             )
+
+    def install_conf_files(self):
+        for filename in conf_files:
+            print(filename)
+            if filename.endswith(".in"):
+                continue
+            conf_src = os.path.join(
+                default_paths['examples'],
+                filename)
+            conf_file = os.path.join(
+                self.confdir,
+                filename.lstrip('etc/')
+            )
+            conf_dir = os.path.dirname(conf_file)
+            self.mkpath(conf_dir)
+            self.copy_file(conf_src, conf_file)
+
+    def run(self):
+        """
+        Run command.
+        """
+        self.generate_conf_files()
         if os.name == 'nt':
             return
+        self.generate_default_files()
+        self.generate_init_files()
+        if self.install_conf:
+            self.install_conf_files()
+        if self.install_default:
+            self.install_default_files()
+        if self.install_init:
+            self.install_init_files()
         # Enforces files and directories ownership
         for c in ['run', 'log', 'var']:
             p = default_paths[c]
-            os.system("chown -R %s:%s %s" % (self.user, self.group, p))
+            self.spawn(["chown", "-R", "%s:%s" % (self.user, self.group), p])
         for c in ['libexec']:
             p = default_paths[c]
-            os.system("chmod -R +X %s" % p)
+            self.spawn(["chmod", "-R", "+X", p])
 
 
 ###############################################################################
@@ -497,6 +638,12 @@ if os.getenv("DEBUG") == "1":
     pprint(get_requirements())
     print("Data files")
     pprint(data_files)
+    print("Config files")
+    pprint(conf_files)
+    print("Default files")
+    pprint(default_files)
+    print("Init files")
+    pprint(init_files)
 
 ###############################################################################
 #
@@ -541,6 +688,6 @@ setup(
     },
     data_files=data_files,
     cmdclass={
-        'postinstall': PostInstallCommand,
+        'post_install': post_install,
     },
 )

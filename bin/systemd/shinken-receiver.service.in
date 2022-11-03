@@ -8,8 +8,8 @@ After=network-online.target
 Type=forking
 User=shinken
 Group=shinken
-EnvironmentFile=-/etc/default/shinken-reactionner
-ExecStart=shinken-reactionner -d -c $REACTIONNERCFG $DAEMON_ARGS
+EnvironmentFile=-$DEFAULT$/shinken-receiver
+ExecStart=$BIN$/shinken-receiver -d -c $RECEIVERCFG $DAEMON_ARGS
 KillMode=mixed
 
 [Install]

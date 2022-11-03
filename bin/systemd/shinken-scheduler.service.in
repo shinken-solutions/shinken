@@ -8,8 +8,8 @@ After=network-online.target
 Type=forking
 User=shinken
 Group=shinken
-EnvironmentFile=-/etc/default/shinken-poller
-ExecStart=shinken-poller -d -c $POLLERCFG $DAEMON_ARGS
+EnvironmentFile=-$DEFAULT$/shinken-scheduler
+ExecStart=$BIN$/shinken-scheduler -d -c $SCHEDULERCFG $DAEMON_ARGS
 KillMode=mixed
 
 [Install]

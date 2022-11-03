@@ -82,7 +82,7 @@ CMD=""
 SUBMODULES=""
 
 ## This permits to overhidde the default "default shinken cfg file":
-[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
+[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="$DEFAULT$/$NAME"
 ## so you can now do:
 ## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
 ## to easily use your own config
@@ -208,7 +208,7 @@ echo_failed() {
 
 
 # Load the VERBOSE setting and other rcS variables
-[ -f /etc/default/rcS ] && . /etc/default/rcS
+[ -f $DEFAULT$/rcS ] && . $DEFAULT$/rcS
 
 # Source function library.
 [ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
@@ -296,7 +296,7 @@ do_status() {
 #
 do_start() {
     mod=$1
-    modfilepath="shinken-${mod}"
+    modfilepath="$BIN$/shinken-${mod}"
 	if [ -z "$(which $modfilepath)" ]; then
         echo_failed "FAILED: did not find $mod file ($modfilepath) ; are you sure shinken-$mod is installed?"
         return 5

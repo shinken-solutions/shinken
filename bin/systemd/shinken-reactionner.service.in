@@ -8,8 +8,8 @@ After=network-online.target
 Type=forking
 User=shinken
 Group=shinken
-EnvironmentFile=-/etc/default/shinken-scheduler
-ExecStart=shinken-scheduler -d -c $SCHEDULERCFG $DAEMON_ARGS
+EnvironmentFile=-$DEFAULT$/shinken-reactionner
+ExecStart=$BIN$/shinken-reactionner -d -c $REACTIONNERCFG $DAEMON_ARGS
 KillMode=mixed
 
 [Install]

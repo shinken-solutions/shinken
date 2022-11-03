@@ -8,8 +8,8 @@ After=network-online.target
 Type=forking
 User=shinken
 Group=shinken
-EnvironmentFile=-/etc/default/shinken-arbiter
-ExecStart=shinken-arbiter -d -c $SHINKENCFG -c $SHINKENSPECIFICCFG $DEBUGCMD
+EnvironmentFile=-$DEFAULT$/shinken-arbiter
+ExecStart=$BIN$/shinken-arbiter -d -c $SHINKENCFG -c $SHINKENSPECIFICCFG $DEBUGCMD
 KillMode=mixed
 
 [Install]
