@@ -409,7 +409,7 @@ class HTTPDaemon(object):
         self.srv.run()
 
 
-    def _parse_request_params(self, method, request, args=[]):
+    def _parse_request_params(self, cbname, method, request, args=[]):
         """
         Parses the incoming request, and process the callback parametrs
 
@@ -429,20 +429,23 @@ class HTTPDaemon(object):
                     parms[arg] = val
                 else:
                     # Checks if the missing arg has a default value
-                    default_args = self.registered_fun_defaults.get(arg, {})
+                    default_args = self.registered_fun_defaults.get(cbname, {})
                     if arg not in default_args:
-                        raise HTTPError('Missing argument %s' % arg)
+                        abort(400, 'Missing argument %s. request=%s' % arg)
             return parms
         elif method == 'put':
             content = request.body
             return deserialize(content)
         else:
-            raise HTTPError('Unmanaged HTTP method: %s' % method)
+            abort(400, 'Unmanaged HTTP method: %s' % method)
 
 
     def register(self, obj):
         methods = inspect.getmembers(obj, predicate=inspect.ismethod)
-        merge = [cbname for (cbname, callback) in methods if cbname in self.registered_fun_names]
+        merge = [
+            cbname for (cbname, callback) in methods
+            if cbname in self.registered_fun_names
+        ]
         if merge != []:
             methods_in = [
                 m.__name__ for m in obj.__class__.__dict__.values()
@@ -465,7 +468,10 @@ class HTTPDaemon(object):
             # If we got some defauts, save arg=value so we can lookup
             # for them after
             if defaults:
-                default_args = zip(argspec.args[-len(argspec.defaults):], argspec.defaults)
+                default_args = zip(
+                    argspec.args[-len(argspec.defaults):],
+                    argspec.defaults
+                )
                 _d = {}
                 for (argname, defavalue) in default_args:
                     _d[argname] = defavalue
@@ -491,6 +497,7 @@ class HTTPDaemon(object):
                         # because outside it will break bottle
                         method = getattr(callback, 'method', 'get').lower()
                         params = self._parse_request_params(
+                            cbname,
                             method,
                             bottle.request,
                             args

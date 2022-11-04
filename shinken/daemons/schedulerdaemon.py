@@ -73,9 +73,15 @@ if not, they must drop their checks """
                 logger.error("Invalid max_actions in get_checks, should be an "
                              "integer. Igored.")
                 max_actions = None
-        res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags,
-                                         reactionner_tags, worker_name,
-                                         module_types, max_actions)
+        res = self.app.get_to_run_checks(
+            do_checks,
+            do_actions,
+            poller_tags,
+            reactionner_tags,
+            worker_name,
+            module_types,
+            max_actions
+        )
         # print("Sending %d checks" % len(res))
         self.app.nb_checks_send += len(res)
 
