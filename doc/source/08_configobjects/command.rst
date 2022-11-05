@@ -18,7 +18,7 @@ Definition Format
 
 Bold directives are required, while the others are optional.
 
-======================= ==================
+========================= ==================
 define command{
 **command_name**          ***command_name***
 **command_line**          ***command_line***
@@ -27,7 +27,7 @@ poller_tag                *poller_tag*
 reactionner_tag           *reactionner_tag*
 priority                  *priority*
 }
-================ ==================
+========================= ==================
 
 
 Example Definition

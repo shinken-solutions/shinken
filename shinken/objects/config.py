@@ -1012,29 +1012,29 @@ class Config(Item):
             line = split_semicolon(line)[0].strip()
 
             # A backslash means, there is more to come
-            if re.search("\\\s*$", line) is not None:
+            if re.search(r"\\\s*$", line) is not None:
                 continuation_line = True
-                line = re.sub("\\\s*$", "", line)
-                line = re.sub("^\s+", " ", line)
+                line = re.sub(r"\\\s*$", "", line)
+                line = re.sub(r"^\s+", " ", line)
                 tmp_line += line
                 continue
             elif continuation_line:
                 # Now the continuation line is complete
-                line = re.sub("^\s+", "", line)
+                line = re.sub(r"^\s+", "", line)
                 line = tmp_line + line
                 tmp_line = ''
                 continuation_line = False
             # } alone in a line means stop the object reading
-            if re.search("^\s*}\s*$", line) is not None:
+            if re.search(r"^\s*}\s*$", line) is not None:
                 in_define = False
 
             # { alone in a line can mean start object reading
-            if re.search("^\s*\{\s*$", line) is not None and almost_in_define:
+            if re.search(r"^\s*\{\s*$", line) is not None and almost_in_define:
                 almost_in_define = False
                 in_define = True
                 continue
 
-            if re.search("^\s*#|^\s*$|^\s*}", line) is not None:
+            if re.search(r"^\s*#|^\s*$|^\s*}", line) is not None:
                 pass
             # A define must be catch and the type save
             # The old entry must be save before

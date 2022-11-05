@@ -16,7 +16,7 @@ Simple Item class diagram :
                          shinken.objects.escalation.Escalation  shinken.objects.discoveryrun.Discoveryrun
                          shinken.objects.macromodulation.MacroModulation
                          shinken.objects.servicedependency.Servicedependency  shinken.objects.hostdependency.Hostdependency
-                         shinken.satellitelink.SatelliteLink  shinken.schedulerlink.SchedulerLink  shinken.arbiterlink.ArbiterLink  shinken.brokerlink.BrokerLink  shinken.receiverlink.ReceiverLink  shinken.pollerlink.PollerLink
+                         shinken.objects.SatelliteLink  shinken.schedulerlink.SchedulerLink  shinken.arbiterlink.ArbiterLink  shinken.brokerlink.BrokerLink  shinken.receiverlink.ReceiverLink  shinken.pollerlink.PollerLink
                          shinken.reactionnerlink.ReactionnerLink shinken.objects.matchingitem.MatchingItem
                          shinken.objects.hostextinfo.HostExtInfo  shinken.objects.trigger.Trigger
                          shinken.objects.itemgroup.Itemgroup  shinken.objects.contactgroup.Contactgroup  shinken.objects.hostgroup.Hostgroup
@@ -39,7 +39,7 @@ Simple Items class diagram :
                          shinken.objects.trigger.Triggers  shinken.objects.itemgroup.Itemgroups  shinken.objects.contactgroup.Contactgroups
                          shinken.objects.hostgroup.Hostgroups  shinken.objects.servicegroup.Servicegroups
                          shinken.objects.discoveryrule.Discoveryrules  shinken.objects.realm.Realms
-                         shinken.objects.businessimpactmodulation.Businessimpactmodulations  shinken.satellitelink.SatelliteLinks
+                         shinken.objects.businessimpactmodulation.Businessimpactmodulations  shinken.objects.SatelliteLinks
                          shinken.schedulerlink.SchedulerLinks  shinken.arbiterlink.ArbiterLinks
                          shinken.brokerlink.BrokerLinks  shinken.receiverlink.ReceiverLinks  shinken.pollerlink.PollerLinks
                          shinken.reactionnerlink.ReactionnerLinks

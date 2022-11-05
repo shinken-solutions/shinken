@@ -102,7 +102,7 @@ class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
         """
 
         # First protect
-        p_call = self.call.replace('\!', '___PROTECT_EXCLAMATION___')
+        p_call = self.call.replace(r'\!', '___PROTECT_EXCLAMATION___')
         tab = p_call.split('!')
         self.command = tab[0]
         # Reverse the protection

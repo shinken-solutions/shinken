@@ -305,7 +305,7 @@ class DependencyNodeFactory(object):
     # Checks if an expression is an Xof pattern, and parses its components if
     # so. In such a case, once parsed, returns the cleaned patten.
     def eval_xof_pattern(self, node, pattern):
-        p = "^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
+        p = r"^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:

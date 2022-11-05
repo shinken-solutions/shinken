@@ -1,8 +1,8 @@
 .. _advanced/maintenance-downtime:
 
-====================
+======================
  Maintenance Downtime
-====================
+======================
 
 
 Introduction

@@ -65,7 +65,7 @@ class Packs(Items):
         # Now walk for it
         for root, dirs, files in os.walk(path):
             for file in files:
-                if re.search("\.pack$", file):
+                if re.search(r"\.pack$", file):
                     p = os.path.join(root, file)
                     try:
                         fd = open(p, 'r')

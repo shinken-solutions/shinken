@@ -49,12 +49,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-def ensure_dir_exist(f):
-    dirname = os.path.dirname(f)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
-
 def update_file_with_string(infilename, outfilename, matches, new_strings):
     with open(infilename, "r") as f:
         buf = f.read()
