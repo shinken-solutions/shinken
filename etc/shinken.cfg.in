@@ -17,7 +17,7 @@ cfg_dir=hostgroups
 cfg_dir=contactgroups
 
 # And now real hosts, services, packs and discovered hosts
-# They are directory, and we will load all .cfg file into them, and 
+# They are directory, and we will load all .cfg file into them, and
 # their sub-directory
 cfg_dir=hosts
 cfg_dir=services

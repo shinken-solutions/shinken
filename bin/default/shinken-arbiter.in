@@ -24,9 +24,5 @@
 # Please update /etc/shinken instead of this one.
 SHINKENCFG="$ETC$/shinken.cfg"
 
-# We got 2 configs because tools like Centreon don't generate all
-# configuration (only the shinken.cfg part)
-SHINKENSPECIFICCFG="$ETC$/shinken-services.cfg"
-
 # Enable debug mode through DAEMON_ARGS
 #DAEMON_ARGS="--debug /var/log/shinken/arbiter-debug.log"

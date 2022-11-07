@@ -458,7 +458,7 @@ class post_install(Command):
         # The `default_files` variable has been set above while genetating the
         # `data_files` list.
         default_templates = [
-            os.path.join(default_paths['examples'], d.lstrip('bin/'))
+            os.path.join(default_paths['examples'], re.sub(r'^bin/', '', d))
             for d in default_files
         ]
         for default_template in default_templates:
@@ -471,16 +471,16 @@ class post_install(Command):
             buf = buf.replace("$RUN$", self.lockdir)
             buf = buf.replace("$LOG$", self.logdir)
             # write out the new file
-            target = default_template.rstrip(".in")
+            target = re.sub(r'\.in$', '', default_template)
             with open(target, "w") as f:
                 f.write(buf)
 
     def install_default_files(self):
         for filename in [os.path.basename(i) for i in default_files]:
-            default_src = os.path.join(
+            default_src = re.sub(r'\.in$', '', os.path.join(
                 default_paths['examples'],
                 'default',
-                filename).rstrip(".in")
+                filename))
             default_dir = self.defaultdir
             self.mkpath(default_dir)
             self.copy_file(default_src, default_dir)
@@ -491,7 +491,7 @@ class post_install(Command):
         # The `default_files` variable has been set above while genetating the
         # `data_files` list.
         init_templates = [
-            os.path.join(default_paths['examples'], i.lstrip('bin/'))
+            os.path.join(default_paths['examples'], re.sub(r'^bin/', '', i))
             for i in init_files
         ]
         for init_template in init_templates:
@@ -502,33 +502,32 @@ class post_install(Command):
             buf = buf.replace("$BIN$", self.install_dir.rstrip("/"))
             buf = buf.replace("$DEFAULT$", default_paths["default"])
             # write out the new file
-            target = init_template.rstrip(".in")
+            target = re.sub(r'\.in$', '', init_template)
             with open(target, "w") as f:
                 f.write(buf)
 
     def install_init_files(self):
         systemd_reload = False
         for filename in [os.path.basename(i) for i in init_files]:
-            systemd_reload = True
             if get_init_system() == "systemd":
-                init_src = os.path.join(
+                systemd_reload = True
+                init_src = re.sub(r'\.in$', '', os.path.join(
                     default_paths['examples'],
                     'systemd',
-                    filename).rstrip(".in")
+                    filename))
                 init_dir = '/etc/systemd/system'
                 self.mkpath(init_dir)
                 self.copy_file(init_src, init_dir)
-
             elif get_init_system() == "sysv":
-                init_src = os.path.join(
+                init_src = re.sub(r'\.in$', '', os.path.join(
                     default_paths['examples'],
                     'init.d',
-                    filename).rstrip(".in")
+                    filename))
                 init_dir = default_paths['sysv']
                 self.mkpath(init_dir)
-                init_file = os.path.join(
+                init_file = re.sub(r'\.in$', '', os.path.join(
                     init_dir,
-                    filename).rstrip(".in")
+                    filename))
                 self.copy_file(init_src, init_dir)
                 os.chmod(init_file, 0o0755)
         if systemd_reload:
@@ -544,7 +543,7 @@ class post_install(Command):
 
         # Processes template files expansion
         for conf_template in conf_templates:
-            target = conf_template.rstrip(".in")
+            target = re.sub(r'\.in$', '', conf_template)
             update_file_with_string(
                 conf_template,
                 target,
@@ -572,7 +571,6 @@ class post_install(Command):
 
     def install_conf_files(self):
         for filename in conf_files:
-            print(filename)
             if filename.endswith(".in"):
                 continue
             conf_src = os.path.join(
@@ -580,7 +578,7 @@ class post_install(Command):
                 filename)
             conf_file = os.path.join(
                 self.confdir,
-                filename.lstrip('etc/')
+                re.sub(r'^etc/', '', filename)
             )
             conf_dir = os.path.dirname(conf_file)
             self.mkpath(conf_dir)
@@ -630,6 +628,8 @@ if os.getenv("DEBUG") == "1":
     ))
     print("Requirements")
     pprint(get_requirements())
+    print("Default paths")
+    pprint(default_paths)
     print("Data files")
     pprint(data_files)
     print("Config files")

@@ -9,7 +9,7 @@ Type=forking
 User=shinken
 Group=shinken
 EnvironmentFile=-$DEFAULT$/shinken-arbiter
-ExecStart=$BIN$/shinken-arbiter -d -c $SHINKENCFG -c $SHINKENSPECIFICCFG $DEBUGCMD
+ExecStart=$BIN$/shinken-arbiter -d -c $SHINKENCFG $DEBUGCMD
 KillMode=mixed
 
 [Install]
