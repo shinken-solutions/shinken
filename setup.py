@@ -50,29 +50,53 @@ def read(fname):
 
 
 def update_file_with_string(infilename, outfilename, matches, new_strings):
+    """
+    Replaces strings by regex from infilename to outfilename
+
+    :param str infilename: The input file to read and replace strings in
+    :param str outfilename: The output file to write to
+    :param list matches: The regex matches to replace
+    :param list new_strings: String replacement per regex
+    """
     with open(infilename, "rb") as f:
-        buf = f.read().decode("utf-8")
-    for match, new_string in zip(matches, new_strings):
-        buf = re.sub(match, new_string, buf)
+        buf = []
+        for r in f:
+            r = r.decode("utf-8").strip()
+            for match, new_string in zip(matches, new_strings):
+                r = (re.sub(match, new_string, r))
+            buf.append(r)
     with open(outfilename, "wb") as f:
-        f.write(buf.encode("utf-8"))
+        f.write("\n".join(buf).encode("utf-8"))
 
 
-def get_uid(user_name):
+def get_uid(username):
+    """
+    Returns the username's uid, or None if it does not exist
+
+    :param str username: The username to look for
+    """
     try:
-        return pwd.getpwnam(user_name)[2]
+        return pwd.getpwnam(username)[2]
     except KeyError as exp:
         return None
 
 
-def get_gid(group_name):
+def get_gid(groupname):
+    """
+    Returns the group's gid, or None if it does not exist
+
+    :param str groupname: The username to look for
+    """
     try:
-        return grp.getgrnam(group_name)[2]
+        return grp.getgrnam(groupname)[2]
     except KeyError as exp:
         return None
 
 
 def get_init_system():
+    """
+    Return the init system name
+    """
     if os.name == 'nt':
         return None
     if not os.path.isfile("/proc/1/comm"):
@@ -86,6 +110,9 @@ def get_init_system():
 
 
 def get_requirements():
+    """
+    Reads requirements file
+    """
     req_path = os.path.join(
         os.path.dirname(__file__),
         "requirements.txt"
@@ -96,6 +123,9 @@ def get_requirements():
 
 
 def get_shinken_version():
+    """
+    Reads the shinken version
+    """
     version_path = os.path.join(
         os.path.dirname(__file__),
         "shinken",
@@ -451,6 +481,10 @@ class post_install(Command):
         )
 
     def generate_default_files(self):
+        """
+        Generate default/environment files sourced by init scripts or
+        systemd unit files from templates
+        """
         # The default file must have good values for the directories:
         # etc, var and where to push scripts that launch the app.
         # The `default_files` variable has been set above while genetating the
@@ -472,12 +506,17 @@ class post_install(Command):
             buf = buf.replace("$VAR$", self.workdir)
             buf = buf.replace("$RUN$", self.lockdir)
             buf = buf.replace("$LOG$", self.logdir)
+            buf = buf.replace("$SCRIPTS_BIN$", self.install_dir.rstrip("/"))
             # write out the new file
             target = re.sub(r'\.in$', '', default_template)
             with open(target, "wb") as f:
                 f.write(buf.encode("utf-8"))
 
     def install_default_files(self):
+        """
+        Install default/environment files sourced by init scripts or
+        systemd unit files previously generated
+        """
         for filename in [os.path.basename(i) for i in default_files]:
             default_src = re.sub(r'\.in$', '', os.path.join(
                 default_paths['examples'],
@@ -488,10 +527,9 @@ class post_install(Command):
             self.copy_file(default_src, default_dir)
 
     def generate_init_files(self):
-        # The default file must have good values for the directories:
-        # etc, var and where to push scripts that launch the app.
-        # The `default_files` variable has been set above while genetating the
-        # `data_files` list.
+        """
+        Generates the initscripts or systemd unit files from templates
+        """
         init_templates = [
             os.path.join(default_paths['examples'], re.sub(r'^bin/', '', i))
             for i in init_files
@@ -513,6 +551,10 @@ class post_install(Command):
                 f.write(buf.encode("utf-8"))
 
     def install_init_files(self):
+        """
+        Installs the init scripts or systemd unit files. When unit files
+        get modified, takes care to reload daemon files.
+        """
         systemd_reload = False
         for filename in [os.path.basename(i) for i in init_files]:
             if get_init_system() == "systemd":
@@ -540,6 +582,9 @@ class post_install(Command):
             self.spawn(["systemctl", "daemon-reload"])
 
     def generate_conf_files(self):
+        """
+        Generates shinken configuration files from templates
+        """
         conf_templates = []
         conf_base = os.path.join(default_paths['examples'], 'etc')
         for path, subdirs, files in os.walk(conf_base):
@@ -555,28 +600,33 @@ class post_install(Command):
                 conf_template,
                 target,
                 [
-                    "modules_dir=.*",
-                    "#user=.*",
-                    "#group=.*",
-                    "shinken_user=\w+",
-                    "shinken_group=\w+",
-                    "workdir=.+",
-                    "lock_file=.+",
-                    "local_log=.+",
+                    '^modules_dir=.*',
+                    '^#user=.*',
+                    '^#group=.*',
+                    '^shinken_user=\w+',
+                    '^shinken_group=\w+',
+                    '^workdir=.+',
+                    '^lock_file=.+',
+                    '^local_log=.+',
                 ],
                 [
-                    "modules_dir=%s" % self.modules,
-                    "user=%s" % self.user,
-                    "group=%s" % self.group,
-                    "shinken_user=%s" % self.user,
-                    "shinken_group=%s" % self.group,
-                    "workdir=%s" % self.workdir,
-                    "lock_file=%s/arbiterd.pid" % self.lockdir,
-                    "local_log=%s/arbiterd.log" % self.logdir,
+                    'modules_dir=%s' % self.modules,
+                    'user=%s' % self.user,
+                    'group=%s' % self.group,
+                    'shinken_user=%s' % self.user,
+                    'shinken_group=%s' % self.group,
+                    'workdir=%s' % self.workdir,
+                    'lock_file=%s/arbiterd.pid' % self.lockdir,
+                    'local_log=%s/arbiterd.log' % self.logdir,
                 ]
             )
 
     def install_conf_files(self):
+        """
+        Installs shinken configuration files previously generated
+
+        Template files are ignored.
+        """
         conf_files = []
         conf_base = os.path.join(default_paths['examples'], 'etc')
         for path, subdirs, files in os.walk(conf_base):
