@@ -50,12 +50,12 @@ def read(fname):
 
 
 def update_file_with_string(infilename, outfilename, matches, new_strings):
-    with open(infilename, "r") as f:
-        buf = f.read()
+    with open(infilename, "rb") as f:
+        buf = f.read().decode("utf-8")
     for match, new_string in zip(matches, new_strings):
         buf = re.sub(match, new_string, buf)
-    with open(outfilename, "w") as f:
-        f.write(buf)
+    with open(outfilename, "wb") as f:
+        f.write(buf.encode("utf-8"))
 
 
 def get_uid(user_name):
@@ -289,7 +289,6 @@ else:
 #
 ###############################################################################
 
-conf_files = []
 ## get all files + under-files in etc/ except daemons folder
 for path, subdirs, files in os.walk('etc'):
     dirname = os.path.join(default_paths['examples'], path)
@@ -297,7 +296,6 @@ for path, subdirs, files in os.walk('etc'):
         data_files.append((dirname, []))
         continue
     for name in files:
-        conf_files.append(os.path.join(path, name))
         data_files.append((dirname, [os.path.join(path, name)]))
 
 ###############################################################################
@@ -463,8 +461,12 @@ class post_install(Command):
         ]
         for default_template in default_templates:
             # Read the template file
-            with open(default_template, "r") as f:
-                buf = f.read()
+            # There can be unicode characters in files
+            # As setuptools does not support unicode in python2, for 2/3
+            # compatibility, read files in binary and decode them in unicode
+            # Do the contrary to write them.
+            with open(default_template, "rb") as f:
+                buf = f.read().decode("utf-8")
             # substitute
             buf = buf.replace("$ETC$", self.confdir)
             buf = buf.replace("$VAR$", self.workdir)
@@ -472,8 +474,8 @@ class post_install(Command):
             buf = buf.replace("$LOG$", self.logdir)
             # write out the new file
             target = re.sub(r'\.in$', '', default_template)
-            with open(target, "w") as f:
-                f.write(buf)
+            with open(target, "wb") as f:
+                f.write(buf.encode("utf-8"))
 
     def install_default_files(self):
         for filename in [os.path.basename(i) for i in default_files]:
@@ -496,15 +498,19 @@ class post_install(Command):
         ]
         for init_template in init_templates:
             # Read the template file
-            with open(init_template, "r") as f:
-                buf = f.read()
+            # There can be unicode characters in files
+            # As setuptools does not support unicode in python2, for 2/3
+            # compatibility, read files in binary and decode them in unicode
+            # Do the contrary to write them.
+            with open(init_template, "rb") as f:
+                buf = f.read().decode("utf-8")
             # substitute
             buf = buf.replace("$BIN$", self.install_dir.rstrip("/"))
             buf = buf.replace("$DEFAULT$", default_paths["default"])
             # write out the new file
             target = re.sub(r'\.in$', '', init_template)
-            with open(target, "w") as f:
-                f.write(buf)
+            with open(target, "wb") as f:
+                f.write(buf.encode("utf-8"))
 
     def install_init_files(self):
         systemd_reload = False
@@ -539,7 +545,8 @@ class post_install(Command):
         for path, subdirs, files in os.walk(conf_base):
             for name in files:
                 if name.endswith(".in"):
-                    conf_templates.append(os.path.join(path, name))
+                    conf_template = os.path.join(path, name)
+                    conf_templates.append(conf_template)
 
         # Processes template files expansion
         for conf_template in conf_templates:
@@ -570,19 +577,20 @@ class post_install(Command):
             )
 
     def install_conf_files(self):
+        conf_files = []
+        conf_base = os.path.join(default_paths['examples'], 'etc')
+        for path, subdirs, files in os.walk(conf_base):
+            for name in files:
+                if name.endswith(".in"):
+                    continue
+                conf_file = os.path.join(path, name)
+                conf_files.append(conf_file)
+
         for filename in conf_files:
-            if filename.endswith(".in"):
-                continue
-            conf_src = os.path.join(
-                default_paths['examples'],
-                filename)
-            conf_file = os.path.join(
-                self.confdir,
-                re.sub(r'^etc/', '', filename)
-            )
+            conf_file = filename.replace(conf_base, self.confdir)
             conf_dir = os.path.dirname(conf_file)
             self.mkpath(conf_dir)
-            self.copy_file(conf_src, conf_file)
+            self.copy_file(filename, conf_file)
 
     def run(self):
         """
@@ -632,8 +640,6 @@ if os.getenv("DEBUG") == "1":
     pprint(default_paths)
     print("Data files")
     pprint(data_files)
-    print("Config files")
-    pprint(conf_files)
     print("Default files")
     pprint(default_files)
     print("Init files")
