@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -33,7 +35,7 @@ class Testservice_without_host(ShinkenTest):
     def test_service_without_host_do_not_break(self):
         self.assertIs(False, self.conf.conf_is_correct)
 
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
         self.assertLess(
             0,

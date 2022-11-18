@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -34,7 +36,7 @@ class TestProtectEscalmationPoint(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -46,7 +48,7 @@ class TestProtectEscalmationPoint(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
 
-        print svc.check_command.args
+        print(svc.check_command.args)
         self.assertIn(u'ti!ti', svc.check_command.args)
 
 if __name__ == '__main__':

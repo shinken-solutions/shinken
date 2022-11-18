@@ -2,9 +2,9 @@ warn = get_custom(self.host, '_users_warn')
 crit = get_custom(self.host, '_users_crit')
 
 
-print "GOT", warn, crit
+print("GOT", warn, crit)
 
 users = perf(self, 'users')
-print "Founded users", users
+print("Founded users", users)
 
 set_value(self, output='OK all is green', perfdata='users=%d' % (users*2), return_code=0)

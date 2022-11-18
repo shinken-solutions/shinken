@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -39,9 +41,9 @@ class TestConfig(ShinkenTest):
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        print "All service of", "test_host_0"
+        print("All service of", "test_host_0")
         for s in host.services:
-            print s.get_name()
+            print(s.get_name())
         # We ask for 4 services with our disks :)
         svc_c = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C")
         svc_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service D")
@@ -85,9 +87,9 @@ class TestConfig(ShinkenTest):
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        print "All service of", "test_host_0"
+        print("All service of", "test_host_0")
         for s in host.services:
-            print s.get_name()
+            print(s.get_name())
         # We ask for 4 services with our disks :)
         svc_c = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT C")
         svc_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT D")
@@ -107,22 +109,22 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
 
-        print "All service of", "sw_0"
+        print("All service of", "sw_0")
         for s in host.services:
-            print s.get_name()
+            print(s.get_name())
 
         # We ask for our 6*46 + 6 services with our ports :)
         # _ports  Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
-        for unit_id in xrange(1, 7):
-            for port_id in xrange(0, 47):
+        for unit_id in range(1, 7):
+            for port_id in range(0, 47):
                 n = "Unit %d Port %d" % (unit_id, port_id)
-                print "Look for port", 'Generated Service ' + n
+                print("Look for port", 'Generated Service ' + n)
                 svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
                 self.assertIsNot(svc, None)
-        for unit_id in xrange(1, 7):
+        for unit_id in range(1, 7):
             port_id = 47
             n = "Unit %d Port %d" % (unit_id, port_id)
-            print "Look for port", 'Generated Service ' + n
+            print("Look for port", 'Generated Service ' + n)
             svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
             self.assertIsNot(svc, None)
 
@@ -132,9 +134,9 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
 
-        print "All service of", "sw_1"
+        print("All service of", "sw_1")
         for s in host.services:
-            print s.get_name()
+            print(s.get_name())
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/1')
         self.assertIsNot(svc, None)

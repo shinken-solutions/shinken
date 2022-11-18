@@ -31,6 +31,8 @@ for looking up and loading the module `shinken` from the directory one
 level above this module.
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 try:
     import shinken
 except ImportError:

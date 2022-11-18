@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.misc.logevent import LogEvent
 

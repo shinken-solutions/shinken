@@ -22,11 +22,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import socket
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import IntegerProp, StringProp
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
 from shinken.log import logger
 
 
@@ -37,7 +40,7 @@ class ArbiterLink(SatelliteLink):
     properties = SatelliteLink.properties.copy()
     properties.update({
         'arbiter_name':    StringProp(),
-        'host_name':       StringProp(default=socket.gethostname()),
+        'host_name':       StringProp(default=six.u(socket.gethostname())),
         'port':            IntegerProp(default=7770),
     })
 
@@ -52,11 +55,12 @@ class ArbiterLink(SatelliteLink):
     # If not look be our fqdn name, or if not, our hostname
     def is_me(self, lookup_name):
         logger.info("And arbiter is launched with the hostname:%s "
-                    "from an arbiter point of view of addr:%s", self.host_name, socket.getfqdn())
+                    "from an arbiter point of view of addr:%s",
+                    self.host_name, socket.getfqdn())
         if lookup_name:
             return lookup_name == self.get_name()
         else:
-            return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
+            return self.host_name in (socket.getfqdn(), socket.gethostname())
 
     def give_satellite_cfg(self):
         return {'port': self.port, 'address': self.address, 'name': self.arbiter_name,
@@ -68,7 +72,7 @@ class ArbiterLink(SatelliteLink):
         try:
             self.con.get('do_not_run')
             return True
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             self.con = None
             return False
 
@@ -78,7 +82,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_list(daemon_type)
             return r
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             self.con = None
             return []
 
@@ -88,7 +92,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_status(daemon_type, name)
             return r
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             self.con = None
             return {}
 
@@ -98,7 +102,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get('get_all_states')
             return r
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             self.con = None
             return None
 
@@ -106,10 +110,10 @@ class ArbiterLink(SatelliteLink):
         if self.con is None:
             self.create_connection()
         try:
-            print properties
+            print(properties)
             r = self.con.get('get_objects_properties', {'table': table, 'properties': properties})
             return r
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             self.con = None
             return None
 

@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 from shinken.util import filter_any, filter_none
 from shinken.util import filter_host_by_name, filter_host_by_regex, filter_host_by_group,\
@@ -53,9 +55,12 @@ class DependencyNode(object):
         self.not_value = False
 
     def __str__(self):
-        return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (self.operand, self.of_values,
-                                                            ','.join([str(s) for s in self.sons]),
-                                                            self.not_value)
+        return "Op:'%s' Val:'%s' Sons:'[%s]' IsNot:'%s'" % (
+            self.operand,
+            self.of_values,
+            ','.join([str(s) for s in self.sons]),
+            self.not_value
+        )
 
 
     def get_reverse_state(self, state):
@@ -73,7 +78,7 @@ class DependencyNode(object):
     # We will get the state of this node, by looking at the state of
     # our sons, and apply our operand
     def get_state(self):
-        # print "Ask state of me", self
+        # print("Ask state of me", self)
 
         # If we are a host or a service, wee just got the host/service
         # hard state
@@ -87,7 +92,7 @@ class DependencyNode(object):
     # calculation is needed
     def get_simple_node_state(self):
         state = self.sons[0].last_hard_state_id
-        # print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
+        # print("Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name()))
         # Make DOWN look as CRITICAL (2 instead of 1)
         if self.operand == 'host' and state == 1:
             state = 2
@@ -164,7 +169,7 @@ class DependencyNode(object):
         nb_warn = len([s for s in states if s == 1])
         nb_crit = len([s for s in states if s == 2])
 
-        # print "NB:", nb_ok, nb_warn, nb_crit
+        # print("NB:", nb_ok, nb_warn, nb_crit)
 
         # Ok and Crit apply with their own values
         # Warn can apply with warn or crit values
@@ -189,7 +194,7 @@ class DependencyNode(object):
         warn_apply = get_state_for(nb_sons, nb_warn + nb_crit, nb_search_warn)
         crit_apply = get_state_for(nb_sons, nb_crit, nb_search_crit)
 
-        # print "What apply?", ok_apply, warn_apply, crit_apply
+        # print("What apply?", ok_apply, warn_apply, crit_apply)
 
         # return the worst state that apply
         if crit_apply:
@@ -211,12 +216,12 @@ class DependencyNode(object):
         # ask a simple form Xof: or a multiple one A,B,Cof:
         # the simple should give OK, the mult should give the worst state
         if self.is_of_mul:
-            # print "Is mul, send 0"
+            # print("Is mul, send 0")
             if self.not_value:
                 return self.get_reverse_state(0)
             return 0
         else:
-            # print "not mul, return worst", worse_state
+            # print("not mul, return worst", worse_state)
             if 2 in states:
                 worst_state = 2
             else:
@@ -281,7 +286,7 @@ class DependencyNodeFactory(object):
     # the () will be eval in a recursiv way, only one level of ()
     def eval_cor_pattern(self, pattern, hosts, services, running=False):
         pattern = pattern.strip()
-        # print "***** EVAL ", pattern
+        # print("***** EVAL ", pattern)
         complex_node = False
 
         # Look if it's a complex pattern (with rule) or
@@ -300,15 +305,15 @@ class DependencyNodeFactory(object):
     # Checks if an expression is an Xof pattern, and parses its components if
     # so. In such a case, once parsed, returns the cleaned patten.
     def eval_xof_pattern(self, node, pattern):
-        p = "^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
+        p = r"^(-?\d+%?),*(-?\d*%?),*(-?\d*%?) *of: *(.+)"
         r = re.compile(p)
         m = r.search(pattern)
         if m is not None:
-            # print "Match the of: thing N=", m.groups()
+            # print("Match the of: thing N=", m.groups())
             node.operand = 'of:'
             g = m.groups()
             # We can have a Aof: rule, or a multiple A,B,Cof: rule.
-            mul_of = (g[1] != u'' and g[2] != u'')
+            mul_of = (g[1] != '' and g[2] != '')
             # If multi got (A,B,C)
             if mul_of:
                 node.is_of_mul = True
@@ -332,7 +337,7 @@ class DependencyNodeFactory(object):
         for c in pattern:
             if c == '(':
                 stacked_par += 1
-                # print "INCREASING STACK TO", stacked_par
+                # print("INCREASING STACK TO", stacked_par)
 
                 in_par = True
                 tmp = tmp.strip()
@@ -340,7 +345,7 @@ class DependencyNodeFactory(object):
                 # that should not be good in fact !
                 if stacked_par == 1 and tmp != '':
                     # TODO : real error
-                    print "ERROR : bad expression near", tmp
+                    print("ERROR : bad expression near", tmp)
                     continue
 
                 # If we are already in a par, add this (
@@ -349,16 +354,16 @@ class DependencyNodeFactory(object):
                     tmp += c
 
             elif c == ')':
-                # print "Need closeing a sub expression?", tmp
+                # print("Need closeing a sub expression?", tmp)
                 stacked_par -= 1
 
                 if stacked_par < 0:
                     # TODO : real error
-                    print "Error : bad expression near", tmp, "too much ')'"
+                    print("Error : bad expression near", tmp, "too much ')'")
                     continue
 
                 if stacked_par == 0:
-                    # print "THIS is closing a sub compress expression", tmp
+                    # print("THIS is closing a sub compress expression", tmp)
                     tmp = tmp.strip()
                     o = self.eval_cor_pattern(tmp, hosts, services, running)
                     # Maybe our son was notted
@@ -386,16 +391,16 @@ class DependencyNodeFactory(object):
             elif c == '!':
                 tmp = tmp.strip()
                 if tmp and tmp[0] != '!':
-                    print "Error : bad expression near", tmp, "wrong position for '!'"
+                    print("Error : bad expression near", tmp, "wrong position for '!'")
                     continue
                 # Flags next node not state
                 son_is_not = True
                 # DO NOT keep the c in tmp, we consumed it
 
-            # print "MATCHING", c, pattern
+            # print("MATCHING", c, pattern)
             elif c == '&' or c == '|':
                 # Oh we got a real cut in an expression, if so, cut it
-                # print "REAL & for cutting"
+                # print("REAL & for cutting")
                 tmp = tmp.strip()
                 # Look at the rule viability
                 if node.operand is not None and node.operand != 'of:' and c != node.operand:
@@ -405,7 +410,7 @@ class DependencyNodeFactory(object):
                 if node.operand != 'of:':
                     node.operand = c
                 if tmp != '':
-                    # print "Will analyse the current str", tmp
+                    # print("Will analyse the current str", tmp)
                     o = self.eval_cor_pattern(tmp, hosts, services, running)
                     # Maybe our son was notted
                     if son_is_not:
@@ -421,13 +426,13 @@ class DependencyNodeFactory(object):
         # Be sure to manage the trainling part when the line is done
         tmp = tmp.strip()
         if tmp != '':
-            # print "Managing trainling part", tmp
+            # print("Managing trainling part", tmp)
             o = self.eval_cor_pattern(tmp, hosts, services, running)
             # Maybe our son was notted
             if son_is_not:
                 o.not_value = True
                 son_is_not = False
-            # print "4end I've %s got new sons" % pattern , o
+            # print("4end I've %s got new sons" % pattern , o)
             node.sons.append(o)
 
         # We got our nodes, so we can update 0 values of of_values
@@ -443,7 +448,7 @@ class DependencyNodeFactory(object):
         node = DependencyNode()
         pattern = self.eval_xof_pattern(node, pattern)
 
-        # print "Try to find?", pattern
+        # print("Try to find?", pattern)
         # If it's a not value, tag the node and find
         # the name without this ! operator
         if pattern.startswith('!'):
@@ -483,7 +488,7 @@ class DependencyNodeFactory(object):
     # db1 service of the host db1, or just h1, that mean
     # the host h1.
     def find_object(self, pattern, hosts, services):
-        # print "Finding object", pattern
+        # print("Finding object", pattern)
         obj = None
         error = None
         is_service = False
@@ -533,7 +538,7 @@ class DependencyNodeFactory(object):
                 host_expr = elts[0]
                 filters.extend(self.get_host_filters(host_expr))
                 items = hosts.find_by_filter(filters)
-        except re.error, e:
+        except re.error as e:
             error = "Business rule uses invalid regex %s: %s" % (pattern, e)
         else:
             if not items:

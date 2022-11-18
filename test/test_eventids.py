@@ -25,6 +25,8 @@
 # $HOSTEVENTID$, $HOSTPROBLEMID$ etc.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.schedulingitem import SchedulingItem
 
@@ -32,10 +34,10 @@ from shinken.objects.schedulingitem import SchedulingItem
 class TestConfig(ShinkenTest):
 
     def print_ids(self, host, svc, router):
-        print "global: cei,lei,cpi,lpi = %d,%d" % (SchedulingItem.current_event_id, SchedulingItem.current_problem_id)
-        print "service: cei,lei,cpi,lpi = %d,%d,%d,%d" % (svc.current_event_id, svc.last_event_id, svc.current_problem_id, svc.last_problem_id)
-        print "host:    cei,lei,cpi,lpi = %d,%d,%d,%d" % (host.current_event_id, host.last_event_id, host.current_problem_id, host.last_problem_id)
-        print "router:  cei,lei,cpi,lpi = %d,%d,%d,%d" % (router.current_event_id, router.last_event_id, router.current_problem_id, router.last_problem_id)
+        print("global: cei,lei,cpi,lpi = %d,%d" % (SchedulingItem.current_event_id, SchedulingItem.current_problem_id))
+        print("service: cei,lei,cpi,lpi = %d,%d,%d,%d" % (svc.current_event_id, svc.last_event_id, svc.current_problem_id, svc.last_problem_id))
+        print("host:    cei,lei,cpi,lpi = %d,%d,%d,%d" % (host.current_event_id, host.last_event_id, host.current_problem_id, host.last_problem_id))
+        print("router:  cei,lei,cpi,lpi = %d,%d,%d,%d" % (router.current_event_id, router.last_event_id, router.current_problem_id, router.last_problem_id))
 
     def test_global_counters(self):
         self.print_header()
@@ -65,7 +67,7 @@ class TestConfig(ShinkenTest):
         # initialize host/service state
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=False)
-        print "- 1 x OK -------------------------------------"
+        print("- 1 x OK -------------------------------------")
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(0, host.current_event_id)
@@ -80,7 +82,7 @@ class TestConfig(ShinkenTest):
         # service reaches soft;1
         # svc: 1,0,1,0
         #--------------------------------------------------------------
-        print "- 1 x BAD get soft -------------------------------------"
+        print("- 1 x BAD get soft -------------------------------------")
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(0, host.current_event_id)
@@ -95,7 +97,7 @@ class TestConfig(ShinkenTest):
         # service reaches hard;2
         # svc: 1,0,1,0
         #--------------------------------------------------------------
-        print "- 1 x BAD get hard -------------------------------------"
+        print("- 1 x BAD get hard -------------------------------------")
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(0, host.current_event_id)
@@ -106,7 +108,7 @@ class TestConfig(ShinkenTest):
         self.assertEqual(0, svc.last_event_id)
         self.assertEqual(1, svc.current_problem_id)
         self.assertEqual(0, svc.last_problem_id)
-        print "- 5 x BAD repeat -------------------------------------"
+        print("- 5 x BAD repeat -------------------------------------")
         self.scheduler_loop(5, [[svc, 2, 'BAD']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(0, host.current_event_id)
@@ -133,7 +135,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # service fails again, ok->w->c
         #--------------------------------------------------------------
-        print "- 4 x BAD get hard with non-ok statechange -------------"
+        print("- 4 x BAD get hard with non-ok statechange -------------")
         self.scheduler_loop(2, [[svc, 1, 'BAD']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(0, host.current_event_id)
@@ -171,7 +173,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # mix in  two hosts
         #--------------------------------------------------------------
-        print "- 4 x BAD get hard with non-ok statechange -------------"
+        print("- 4 x BAD get hard with non-ok statechange -------------")
         self.scheduler_loop(2, [[router, 2, 'DOWN']], do_sleep=False)
         self.print_ids(host, svc, router)
         self.assertEqual(6, SchedulingItem.current_event_id)

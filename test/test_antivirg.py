@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 class TestConfig(ShinkenTest):
@@ -39,9 +41,9 @@ class TestConfig(ShinkenTest):
 
     def test_escaped_semicolon(self):
         """Check that it is possible to have a host with a semicolon in its hostname
-           
-           The consequences of this aren't tested. We try just to send a command but 
-           I think that others programs which send commands don't think to escape 
+
+           The consequences of this aren't tested. We try just to send a command but
+           I think that others programs which send commands don't think to escape
            the semicolon.
 
         """

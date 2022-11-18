@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -33,7 +35,7 @@ class TestCssInCommands(ShinkenTest):
     def test_dummy(self):
         r = self.conf.conf_is_correct
         self.assertTrue(r)
-        print r
+        print(r)
 
 
 if __name__ == '__main__':

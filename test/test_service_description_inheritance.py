@@ -21,6 +21,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -41,15 +43,15 @@ class TestServiceDescriptionInheritance(ShinkenTest):
             self.assertIsNotNone(svc)
 
     def test_service_description_inheritance_with_defined_value(self):
-	for hname in ["MYHOST4"]:
+        for hname in ["MYHOST4"]:
             svc = self.sched.services.find_srv_by_name_and_hostname(hname, "SUPER_SSH")
             self.assertIsNotNone(svc)
-	for hname in ["MYHOST5"]:
+        for hname in ["MYHOST5"]:
             svc = self.sched.services.find_srv_by_name_and_hostname(hname, "GOOD_SSH")
             self.assertIsNotNone(svc)
 
     def test_service_description_inheritance_with_duplicate(self):
-	for hname in ["MYHOST6"]:
+        for hname in ["MYHOST6"]:
             svc = self.sched.services.find_srv_by_name_and_hostname(hname, "sys: cpu1")
             self.assertIsNotNone(svc)
             svc1 = self.sched.services.find_srv_by_name_and_hostname(hname, "sys: /tmp")

@@ -22,6 +22,8 @@ This program use libvirt to put host parent-child relations in a json one so it
 can be loaded in hot_dependencies_arbiter module
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import timeit
 import os
 import sys
@@ -30,8 +32,8 @@ import signal
 
 import libvirt
 
-class TimeoutException(Exception): 
-    pass 
+class TimeoutException(Exception):
+    pass
 
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
@@ -57,25 +59,25 @@ def main(uris, output_file, ignore):
 
     if ignore:
         ignored_doms = ignore.split(",")
-        
+
     for uri in uris.split(","):
-        signal.signal(signal.SIGALRM, timeout_handler) 
+        signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(10) # triger alarm in 10 seconds
         try:
             conn = libvirt.openReadOnly(uri)
-        except libvirt.libvirtError, e:
-            print "Libvirt connection error: `%s'" % e.message.replace("\r", "")
-            print "Let's try next URI"
+        except libvirt.libvirtError as e:
+            print("Libvirt connection error: `%s'" % e.message.replace("\r", ""))
+            print("Let's try next URI")
             continue
         except TimeoutException:
-            print "Libvirt Request timeout"
-            print "Let's try next URI"
+            print("Libvirt Request timeout")
+            print("Let's try next URI")
             continue
-        except Exception, e:
-            print "Unknown Error: %s" % str(e)
-            print "Let's try next URI..."
+        except Exception as e:
+            print("Unknown Error: %s" % str(e))
+            print("Let's try next URI...")
             continue
-            
+
         hypervisor = conn.getHostname()
         # List all VM (stopped and started)
         for dom in [conn.lookupByName(name) for name in conn.listDefinedDomains()]\
@@ -114,7 +116,7 @@ if __name__ == "__main__":
         parser.error("does not take any positional arguments")
 
     if opts.uris is None:
-        print "At least one URI is mandatory"
+        print("At least one URI is mandatory")
         sys.exit(2)
 
     main(**vars(opts))

@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -36,7 +38,7 @@ class TestContactgroupWitoutMembers(ShinkenTest):
         # Look for the members of the test_contact_nomember
         cg = self.sched.conf.contactgroups.find_by_name('test_contact_nomember')
         self.assertIsNot(cg, None)
-        print cg.members
+        print(cg.members)
         self.assertEqual([], cg.members)
 
 

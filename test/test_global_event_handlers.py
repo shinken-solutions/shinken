@@ -21,6 +21,8 @@
 # This file is used to test acknowledge of problems
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -48,7 +50,7 @@ class TestConfig(ShinkenTest):
 
         self.scheduler_loop(5, [[svc, 2, 'CRITICAL']])
         self.assert_any_log_match('EVENT HANDLER')
-        print "MY Actions", self.sched.actions
+        print("MY Actions", self.sched.actions)
 
 
 

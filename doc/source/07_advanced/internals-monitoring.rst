@@ -216,23 +216,23 @@ Broks related metrics
 
 Broks transit from the satellites to broker using a pull strategy. So broks are made available on the satellites, and the active Broker fetches them. The exception is the Arbiter that sends its broks directly to the broker. The broks queue on the satellites are monitored through the metrics below.
 
-==================================== ======= ================================================== =====
-core.broker.get-new-broks.poller     timer   Time spent to fetch broks from poller              perf
-core.broker.get-new-broks.reactionnertimer   Time spent to fetch broks from reactionner         perf
-core.broker.get-new-broks.receiver   timer   Time spent to fetch broks from receiver            perf
-core.broker.get-new-broks.scheduler  timer   Time spent to fetch broks from scheduler           perf
-core.arbiter.broks.in.broker         counter Broks received by the Arbiter from the broker      queue
-core.arbiter.broks.in.poller         counter Broks received by the Arbiter from the poller      queue
-core.arbiter.broks.in.reactionner    counter Broks received by the Arbiter from the reactionner queue
-core.arbiter.broks.in.receiver       counter Broks received by the Arbiter from the receiver    queue
-core.arbiter.broks.in.scheduler      counter Broks received by the Arbiter from the scheduler   queue
-core.arbiter.broks.queue             counter The broks queue size on the Arbiter                queue
-core.broker.broks.queue              counter The broks queue size on the Broker                 queue
-core.poller.broks.queue              counter The broks queue size on the Poller                 queue
-core.reactionner.broks.queue         counter The broks queue size on the Poller                 queue
-core.receiver.broks.queue            counter The broks queue size on the Receiver               queue
-core.scheduler.broks.queue           counter The broks queue size on the Receiver               queue
-==================================== ======= ================================================== ======
+===================================== ======= ================================================== =====
+core.broker.get-new-broks.poller      timer   Time spent to fetch broks from poller              perf
+core.broker.get-new-broks.reactionner timer   Time spent to fetch broks from reactionner         perf
+core.broker.get-new-broks.receiver    timer   Time spent to fetch broks from receiver            perf
+core.broker.get-new-broks.scheduler   timer   Time spent to fetch broks from scheduler           perf
+core.arbiter.broks.in.broker          counter Broks received by the Arbiter from the broker      queue
+core.arbiter.broks.in.poller          counter Broks received by the Arbiter from the poller      queue
+core.arbiter.broks.in.reactionner     counter Broks received by the Arbiter from the reactionner queue
+core.arbiter.broks.in.receiver        counter Broks received by the Arbiter from the receiver    queue
+core.arbiter.broks.in.scheduler       counter Broks received by the Arbiter from the scheduler   queue
+core.arbiter.broks.queue              counter The broks queue size on the Arbiter                queue
+core.broker.broks.queue               counter The broks queue size on the Broker                 queue
+core.poller.broks.queue               counter The broks queue size on the Poller                 queue
+core.reactionner.broks.queue          counter The broks queue size on the Poller                 queue
+core.receiver.broks.queue             counter The broks queue size on the Receiver               queue
+core.scheduler.broks.queue            counter The broks queue size on the Receiver               queue
+===================================== ======= ================================================== =====
 
 core.broker.get-new-broks.poller
   Time spent by the Broker to download, decode and integrate broks downloaded from the Poller.
@@ -284,7 +284,7 @@ External commands related metrics
 
 The external commands may emitted by any service or module. They may also be externally received and transferred by the Arbiter or the Receiver. When an external command is emitted, it goes up to the Arbiter which is able to decide to which service it should be routed. Each service is monitorred its external command queue which are exosed by the metrics below.
 
-======================================== ===== ===================================================== ======
+======================================== ===== ===================================================== =====
 core.arbiter.external-commands.queue     gauge The external commands queue length on the Arbiter     queue
 core.broker.external-commands.queue      gauge The external commands queue length on the Broker      queue
 core.poller.external-commands.queue      gauge The external commands queue length on the Poller      queue
@@ -363,7 +363,7 @@ core.scheduler.hostgroups    gauge The number of Hostgroup objects managed by th
 core.scheduler.hosts         gauge The number of Host objects managed by the Scheduler         queue
 core.scheduler.servicegroups gauge The number of Servicegroup objects managed by the Scheduler queue
 core.scheduler.services      gauge The number of Service objects managed by the Scheduler      queue
-============================= ===== ========================================================== =====
+============================ ===== =========================================================== =====
 
 core.arbiter.commands
   The number of Command objects managed by the Arbiter

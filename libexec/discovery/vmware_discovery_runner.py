@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import shutil
 import optparse
@@ -53,9 +55,9 @@ def search_for_check_esx3():
                       'c:\\shinken\\libexec\\check_esx3.pl']
 
     for p in possible_paths:
-        print "Look for", p
+        print("Look for", p)
         if os.path.exists(p):
-            print "Found a check_esx3.pl at", p
+            print("Found a check_esx3.pl at", p)
             return p
     return None
 
@@ -81,14 +83,14 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     list_host_cmd = [check_esx_path, '-D', vcenter, '-u', user, '-p', password,
                      '-l', 'runtime', '-s', 'listhost']
 
-    print "Got host list"
-    print ' '.join(list_host_cmd)
+    print("Got host list")
+    print(' '.join(list_host_cmd))
     p = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE)
     output = p.communicate()
 
-    print "Exit status", p.returncode
+    print("Exit status", p.returncode)
     if p.returncode == 2:
-        print "Error: check_esx3.pl returnes an error:", output
+        print("Error: check_esx3.pl returnes an error:", output)
         raise SystemExit(2)
 
     parts = output[0].split(':')
@@ -108,17 +110,17 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
 def get_vm_of_host(check_esx_path, vcenter, host, user, password):
     """Get a list of all virtual machines on a specific host."""
-    print "Listing host", host
+    print("Listing host", host)
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
                    '-l', 'runtime', '-s', 'list']
-    print ' '.join(list_vm_cmd)
+    print(' '.join(list_vm_cmd))
     p = Popen(list_vm_cmd, stdout=PIPE)
     output = p.communicate()
 
-    print "Exit status", p.returncode
+    print("Exit status", p.returncode)
     if p.returncode == 2:
-        print "Error: check_esx3.pl returnes an error:", output
+        print("Error: check_esx3.pl returnes an error:", output)
         raise SystemExit(2)
 
     parts = output[0].split(':')
@@ -145,15 +147,15 @@ def print_all_links(res, rules):
     r = []
     for host in res:
         host_name = _apply_rules(host, rules)
-        print "%s::esxhostname=%s" % (host_name, host_name)
-        print "%s::isesxhost=1" % host_name
+        print("%s::esxhostname=%s" % (host_name, host_name))
+        print("%s::isesxhost=1" % host_name)
         for vm in res[host]:
             # First we apply rules on the names
             vm_name = _apply_rules(vm, rules)
             #v = (('host', host_name),('host', vm_name))
-            print "%s::vmname=%s" % (vm_name, vm_name)
-            print "%s::isesxvm=1" % vm_name
-            print "%s::esxhost=%s" % (vm_name, host_name)
+            print("%s::vmname=%s" % (vm_name, vm_name))
+            print("%s::isesxvm=1" % vm_name)
+            print("%s::esxhost=%s" % (vm_name, host_name))
             #r.append(v)
     return r
 
@@ -165,8 +167,8 @@ def write_output(r, path):
         f.write(buf)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s written" % path
-    except IOError, exp:
+        print("File %s written" % path)
+    except IOError as exp:
         raise SystemExit("Error writing the file %s: %s" % (path, exp))
 
 
@@ -183,7 +185,7 @@ def main(check_esx_path, vcenter, user, password, rules):
     print_all_links(res, rules)
 
     #write_output(r, output)
-    print "Finished!"
+    print("Finished!")
 
 
 if __name__ == "__main__":

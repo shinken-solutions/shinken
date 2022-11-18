@@ -28,8 +28,9 @@
 # Contactgroups are groups for contacts
 # They are just used for the config read and explode by elements
 
-from itemgroup import Itemgroup, Itemgroups
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+from shinken.objects.itemgroup import Itemgroup, Itemgroups
 from shinken.property import IntegerProp, StringProp
 from shinken.log import logger
 

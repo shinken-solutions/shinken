@@ -21,6 +21,9 @@
 #
 # This file is used to test reading and processing of config files
 #
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 from shinken_test import ShinkenTest, unittest
 from shinken.external_command import ExternalCommand
@@ -35,7 +38,7 @@ class GoodArbiter(ArbiterLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def have_conf(self, i):
@@ -49,7 +52,7 @@ class GoodScheduler(SchedulerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def have_conf(self, i):
@@ -61,7 +64,7 @@ class GoodScheduler(SchedulerLink):
 
 class BadScheduler(SchedulerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
     def have_conf(self, i):
@@ -72,7 +75,7 @@ class GoodPoller(PollerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -81,7 +84,7 @@ class GoodPoller(PollerLink):
 
 class BadPoller(PollerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 
@@ -89,7 +92,7 @@ class GoodReactionner(ReactionnerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -98,7 +101,7 @@ class GoodReactionner(ReactionnerLink):
 
 class BadReactionner(ReactionnerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 
@@ -106,7 +109,7 @@ class GoodBroker(BrokerLink):
 
     # To lie about satellites
     def ping(self):
-        print "Dummy OK for", self.get_name()
+        print("Dummy OK for", self.get_name())
         self.set_alive()
 
     def put_conf(self, conf):
@@ -115,7 +118,7 @@ class GoodBroker(BrokerLink):
 
 class BadBroker(BrokerLink):
     def ping(self):
-        print "Dummy bad ping", self.get_name()
+        print("Dummy bad ping", self.get_name())
         self.add_failed_check_attempt()
 
 
@@ -124,11 +127,11 @@ class TestPollerAddition(ShinkenTest):
         self.setup_with_file('etc/shinken_dispatcher.cfg')
 
     def test_simple_dispatch_and_addition(self):
-        print "The dispatcher", self.dispatcher
+        print("The dispatcher", self.dispatcher)
         # dummy for the arbiter
         for a in self.conf.arbiters:
             a.__class__ = GoodArbiter
-        print "Preparing schedulers"
+        print("Preparing schedulers")
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assertIsNot(scheduler1, None)
         scheduler1.__class__ = GoodScheduler
@@ -136,7 +139,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(scheduler2, None)
         scheduler2.__class__ = BadScheduler
 
-        print "Preparing pollers"
+        print("Preparing pollers")
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
         self.assertIsNot(poller1, None)
         poller1.__class__ = GoodPoller
@@ -144,7 +147,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(poller2, None)
         poller2.__class__ = BadPoller
 
-        print "Preparing reactionners"
+        print("Preparing reactionners")
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
         self.assertIsNot(reactionner1, None)
         reactionner1.__class__ = GoodReactionner
@@ -152,7 +155,7 @@ class TestPollerAddition(ShinkenTest):
         self.assertIsNot(reactionner2, None)
         reactionner2.__class__ = BadReactionner
 
-        print "Preparing brokers"
+        print("Preparing brokers")
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
         self.assertIsNot(broker1, None)
         broker1.__class__ = GoodBroker

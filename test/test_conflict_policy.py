@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -32,7 +34,7 @@ class TestDefinitionOrder(ShinkenTest):
 
     def test_conflict_policy(self):
         self.assertFalse(self.conf.conf_is_correct)
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
 
         mesg = 'duplicate host name test_host_conflict'

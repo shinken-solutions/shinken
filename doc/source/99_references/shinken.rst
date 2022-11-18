@@ -213,7 +213,7 @@ Simple Property class diagram :
 Simple SatelliteLink class diagram :
 
 .. inheritance-diagram:: shinken.objects.item.Item
-                         shinken.satellitelink.SatelliteLink  shinken.schedulerlink.SchedulerLink  shinken.arbiterlink.ArbiterLink
+                         shinken.objects.SatelliteLink  shinken.schedulerlink.SchedulerLink  shinken.arbiterlink.ArbiterLink
                          shinken.brokerlink.BrokerLink  shinken.receiverlink.ReceiverLink  shinken.pollerlink.PollerLink
                          shinken.reactionnerlink.ReactionnerLink
    :parts: 3

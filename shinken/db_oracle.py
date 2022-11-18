@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 # Failed to import will be catch by __init__.py
 from cx_Oracle import connect as connect_function
 from cx_Oracle import IntegrityError as IntegrityError_exp
@@ -71,25 +73,25 @@ class DBOracle(DB):
         try:
             self.db_cursor.execute(query)
             self.db.commit()
-        except IntegrityError_exp, exp:
+        except IntegrityError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise an integrity error: %s, %s",
                            query, exp)
-        except ProgrammingError_exp, exp:
+        except ProgrammingError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise a programming error: %s, %s",
                            query, exp)
-        except DatabaseError_exp, exp:
+        except DatabaseError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise a database error: %s, %s",
                            query, exp)
-        except InternalError_exp, exp:
+        except InternalError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise an internal error: %s, %s",
                            query, exp)
-        except DataError_exp, exp:
+        except DataError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise a data error: %s, %s",
                            query, exp)
-        except OperationalError_exp, exp:
+        except OperationalError_exp as exp:
             logger.warning("[DBOracle] Warning: a query raise an operational error: %s, %s",
                            query, exp)
-        except Exception, exp:
+        except Exception as exp:
             logger.warning("[DBOracle] Warning: a query raise an unknown error: %s, %s",
                            query, exp)
             logger.warning(exp.__dict__)

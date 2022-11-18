@@ -2,6 +2,8 @@
 #   Autor: David Hannequin <david.hannequin@gmail.com>
 #   Date: 24 Oct 2011
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import argparse
 import smtplib
 from email.mime.multipart import MIMEMultipart

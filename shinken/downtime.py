@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import datetime
 import time
 from shinken.comment import Comment
@@ -43,10 +45,10 @@ from shinken.brok import Brok
 """
 
 
-class Downtime:
+class Downtime(object):
     id = 1
 
-    # Just to list the properties we will send as pickle
+    # Just to list the properties we will send as serialized object
     # so to others daemons, so all but NOT REF
     properties = {
         'activate_me':        StringProp(default=[]),
@@ -248,8 +250,6 @@ class Downtime:
         return b
 
 
-    # Call by pickle for dataify the downtime
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

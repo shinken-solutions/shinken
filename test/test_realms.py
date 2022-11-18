@@ -22,6 +22,9 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 from shinken_test import *
 
 
@@ -35,7 +38,7 @@ class TestRealms(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         realm1 = self.conf.realms.find_by_name('realm1')
         self.assertIsNot(realm1, None)
@@ -55,7 +58,7 @@ class TestRealms(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         realm1 = self.conf.realms.find_by_name('realm1')
@@ -84,13 +87,11 @@ class TestRealms(ShinkenTest):
     def test_realm_stripping_before_sending(self):
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
         self.assertIsNot(test_host_realm1, None)
-        print type(test_host_realm1.realm)
-        self.assertTrue(isinstance(test_host_realm1.realm, basestring))
+        self.assertTrue(isinstance(test_host_realm1.realm, six.string_types))
 
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         self.assertIsNot(in_realm2, None)
-        print type(in_realm2.realm)
-        self.assertTrue(isinstance(in_realm2.realm, basestring))
+        self.assertTrue(isinstance(in_realm2.realm, six.string_types))
 
 
     def test_sub_realms_assignations(self):
@@ -108,14 +109,13 @@ class TestRealms(ShinkenTest):
         europe.prepare_for_satellites_conf()
         paris.prepare_for_satellites_conf()
 
-        print world.__dict__
         # broker should be in the world level
         self.assertIs(bworld in world.potential_brokers, True)
         # in europe too
         self.assertIs(bworld in europe.potential_brokers, True)
         # and in paris too
         self.assertIs(bworld in paris.potential_brokers, True)
-        
+
 
 
 if __name__ == '__main__':

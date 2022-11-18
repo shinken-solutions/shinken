@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import threading
 import time
 import json
@@ -142,7 +144,7 @@ class Stats(object):
         try:
             self.statsd_addr = (socket.gethostbyname(self.statsd_host), self.statsd_port)
             self.statsd_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        except (socket.error, socket.gaierror), exp:
+        except (socket.error, socket.gaierror) as exp:
             logger.error('Cannot create statsd socket: %s' % exp)
             return
 
@@ -159,7 +161,7 @@ class Stats(object):
                         metric=name,
                         name=self.name,
                         service=self.type)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Failed to build metric name, check your "
                                  "statsd_pattern parameter: %s" % e)
             elif self.prefix:
@@ -172,7 +174,7 @@ class Stats(object):
     # Sends a metric to statsd daemon
     def send_metric(self, packet):
         try:
-            self.statsd_sock.sendto(packet, self.statsd_addr)
+            self.statsd_sock.sendto(packet.encode("utf-8"), self.statsd_addr)
         except (socket.error, socket.gaierror):
             # cannot send? ok not a huge problem here and cannot
             # log because it will be far too verbose :p
@@ -244,7 +246,7 @@ class Stats(object):
                 self.stats = {}
 
                 if len(stats) != 0:
-                    s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
+                    s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.items()])
                 # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
                 # to find the data after this
                 if not self.is_shinkenio_enabled():
@@ -252,7 +254,7 @@ class Stats(object):
                     continue
 
                 metrics = []
-                for (k, e) in stats.iteritems():
+                for (k, e) in stats.items():
                     nk = '%s.%s.%s' % (self.type, self.name, k)
                     _min, _max, nb, _sum = e
                     _avg = float(_sum) / nb
@@ -289,10 +291,10 @@ class Stats(object):
                     try:
                         self.con.put('/api/v1/put/?api_key=%s' % (
                                      self.api_key), encrypted_text)
-                    except HTTPException, exp:
+                    except HTTPException as exp:
                         logger.error('Stats REAPER cannot put to the metric server %s' % exp)
-            except Exception, e:
-                logger.error("Reaper: %s", str(e))
+            except Exception as e:
+                logger.error("Reaper: %s", e)
                 logger.debug(traceback.format_exc())
             time.sleep(60)
 
@@ -316,8 +318,8 @@ class Stats(object):
                 for metric in metrics:
                     name, val, _type = metric
                     self.gauge(name, val, _type)
-            except Exception, e:
-                logger.error("Harvester: %s", str(e))
+            except Exception as e:
+                logger.error("Harvester: %s", e)
                 logger.debug(traceback.format_exc())
             time.sleep(self.statsd_interval)
 

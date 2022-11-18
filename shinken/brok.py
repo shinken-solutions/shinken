@@ -22,36 +22,67 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
-from shinken.safepickle import SafeUnpickler
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-class Brok:
+import six
+from shinken.serializer import serialize, deserialize
+import sys
+import io
+
+class Brok(object):
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
     """
-    __slots__ = ('__dict__', 'id', 'type', 'data', 'prepared', 'instance_id')
+    #__slots__ = ('id', 'type', 'data', 'prepared', 'instance_id')
     id = 0
     my_type = 'brok'
 
-    def __init__(self, type, data):
-        self.type = type
+    def __init__(self, _type, data):
+        self.type = _type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL)
-        self.prepared = False
+        #self.data = serialize(data)
+        self.data = data
+        #self.prepared = False
+        self.prepared = True
 
 
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        return str(self.__dict__)
 
 
     # We unserialize the data, and if some prop were
     # add after the serialize pass, we integer them in the data
     def prepare(self):
+        # It's no more necessary to deseriazie the brok's data, as all broks
+        # are already serialized/deserialiazed wthen they are transported.
+        # For compatibilty reasons, this method remains, but does nothing.
+        pass
+
+        # serialized when
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
-        if hasattr(self, 'prepared') and not self.prepared:
-            self.data = SafeUnpickler.loads(self.data)
-            if hasattr(self, 'instance_id'):
-                self.data['instance_id'] = self.instance_id
-        self.prepared = True
+#        if not self.prepared:
+#            self.data = deserialize(self.data)
+#            if hasattr(self, 'instance_id'):
+#                self.data['instance_id'] = self.instance_id
+#        self.prepared = True
+
+#    def __getstate__(self):
+#        # id is not in *_properties
+#        res = {'id': self.id}
+#        for prop in ("data", "instance_id", "prepared", "type"):
+#            if hasattr(self, prop):
+#                res[prop] = getattr(self, prop)
+#        return res
+#
+#    def __setstate__(self, state):
+#        cls = self.__class__
+#
+#        for prop in ("id", "data", "instance_id", "prepared", "type"):
+#            if prop in state:
+#                setattr(self, prop, state[prop])
+#
+#        # to prevent from duplicating id in comments:
+#        if self.id >= cls.id:
+#            cls.id = self.id + 1

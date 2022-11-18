@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
@@ -75,9 +77,9 @@ class DBMysql(DB):
             self.db_cursor.execute(query)
             self.db.commit()
             return True
-        except IntegrityError, exp:
+        except IntegrityError as exp:
             logger.warning("[MysqlDB] A query raised an integrity error: %s, %s", query, exp)
             return False
-        except ProgrammingError, exp:
+        except ProgrammingError as exp:
             logger.warning("[MysqlDB] A query raised a programming error: %s, %s", query, exp)
             return False

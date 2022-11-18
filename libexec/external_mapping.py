@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This file is part of Shinken.
 #
@@ -14,6 +14,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 """
 This program transforms a flat dependency file into a json one so it
@@ -61,7 +63,7 @@ def main(input_file, output_file, type):
     # Check if input_file is newer than output_file
     if os.path.exists(output_file):
         if os.path.getmtime(output_file) >= os.path.getmtime(input_file):
-            print "Nothing to do"
+            print("Nothing to do")
             return True
     r = []
     flatmappingfile = open(input_file)

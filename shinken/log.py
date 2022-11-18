@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
 import sys
 import os
@@ -30,14 +32,14 @@ import stat
 from logging import Handler, Formatter, StreamHandler, NOTSET, FileHandler
 from logging.handlers import TimedRotatingFileHandler
 
-from brok import Brok
+from shinken.brok import Brok
 
 try:
     from shinken.misc.termcolor import cprint
-except (SyntaxError, ImportError), exp:
+except (SyntaxError, ImportError) as exp:
     # Outch can't import a cprint, do a simple print
     def cprint(s, color='', end=''):
-        print s
+        print(s)
 
 
 # obj = None
@@ -85,7 +87,7 @@ class ColorStreamHandler(StreamHandler):
                       'WARNING': 'yellow', 'CRITICAL': 'magenta', 'ERROR': 'red'}
             cprint(msg, colors[record.levelname])
         except UnicodeEncodeError:
-            print msg.encode('ascii', 'ignore')
+            print(msg.encode('ascii', 'ignore'))
         except Exception:
             self.handleError(record)
 

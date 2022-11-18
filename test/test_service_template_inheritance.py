@@ -22,6 +22,8 @@
 # This file is used to test attribute inheritance and the right order
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -35,11 +37,11 @@ class TestConfig(ShinkenTest):
         # no-graph,base-service-prod
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_1")
         self.assertTrue(svc1.action_url.startswith("/"))
-        self.assertEqual(True, svc1.process_perf_data)
-        self.assertFalse(svc2.action_url)
-        self.assertEqual(False, svc2.process_perf_data)
+        self.assertTrue(svc1.process_perf_data)
+        self.assertEqual(svc2.action_url, '')
+        self.assertTrue(svc2.process_perf_data)
 
-        print svc1.tags
+        print(svc1.tags)
         self.assertIn('no-graph', svc1.tags)
         self.assertIn('base-service-prod', svc1.tags)
 

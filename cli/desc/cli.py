@@ -21,15 +21,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-
 from shinken.objects import Host
 from shinken.log import logger
 
 # Will be populated by the shinken CLI command
 CONFIG = None
-
 
 
 ############# ********************        SERVE           ****************###########
@@ -47,7 +46,7 @@ def serve(port):
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
 
 def do_desc(cls='host'):
@@ -57,9 +56,9 @@ def do_desc(cls='host'):
     for k in prop_names:
         v = properties[k]
         if v.has_default:
-            print k, '(%s)' % v.default
+            print(k, '(%s)' % v.default)
         else:
-            print k
+            print(k)
 
 
 

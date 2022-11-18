@@ -23,27 +23,32 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import zlib
+import base64
 import json
+import sys
+import io
+if six.PY2:
+    from urllib import urlencode
+else:
+    from urllib.parse import urlencode
 
 # Pycurl part
 import pycurl
 pycurl.global_init(pycurl.GLOBAL_ALL)
-import urllib
-from StringIO import StringIO
+PYCURL_VERSION = pycurl.version_info()[1]
 
 from shinken.bin import VERSION
 from shinken.log import logger
-PYCURL_VERSION = pycurl.version_info()[1]
 
 class HTTPException(Exception):
     pass
 
 
-HTTPExceptions = (HTTPException,)
-
-class FileReader:
+class FileReader(object):
     def __init__(self, fp):
         self.fp = fp
     def read_callback(self, size):
@@ -76,15 +81,29 @@ class HTTPClient(object):
         con.setopt(con.VERBOSE, 0)
         # Remove the Expect: 100-Continue default behavior of pycurl, because swsgiref do not
         # manage it
-        con.setopt(pycurl.HTTPHEADER, ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive'])
-        con.setopt(pycurl.USERAGENT, 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION))
+        headers = ['Expect:', 'Keep-Alive: 300', 'Connection: Keep-Alive']
+        user_agent = 'shinken:%s pycurl:%s' % (VERSION, PYCURL_VERSION)
+        # Manages bug described in https://github.com/pycurl/pycurl/issues/124
+        try:
+            con.setopt(pycurl.HTTPHEADER, headers)
+            con.setopt(pycurl.USERAGENT, user_agent)
+        except TypeError:
+            headers = [h.encode("utf-8") for h in headers]
+            user_agent = user_agent.encode("utf-8")
+            con.setopt(pycurl.HTTPHEADER, headers)
+            con.setopt(pycurl.USERAGENT, user_agent)
         con.setopt(pycurl.FOLLOWLOCATION, 1)
         con.setopt(pycurl.FAILONERROR, True)
         con.setopt(pycurl.CONNECTTIMEOUT, self.timeout)
         con.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_1)
 
         if proxy:
-            con.setopt(pycurl.PROXY, proxy)
+            # Manages bug described in https://github.com/pycurl/pycurl/issues/124
+            try:
+                con.setopt(pycurl.PROXY, proxy)
+            except TypeError:
+                proxy = proxy.encode("utf-8")
+                con.setopt(pycurl.PROXY, proxy)
 
         # Also set the SSL options to do not look at the certificates too much
         # unless the admin asked for it
@@ -120,36 +139,34 @@ class HTTPClient(object):
         else:
             c.setopt(c.TIMEOUT, self.data_timeout)
 
-        c.setopt(c.URL, str(self.uri + path + '?' + urllib.urlencode(args)))
+        c.setopt(c.URL, self.uri + path + '?' + urlencode(args))
         # Ok now manage the response
-        response = StringIO()
+        response = io.BytesIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
         c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
-        except pycurl.error, error:
-            errno, errstr = error
+        except pycurl.error as error:
+            errno, errstr = error.args
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
         # Do NOT close the connection, we want a keep alive
-
+        # c.close()
         if r != 200:
-            err = response.getvalue()
+            err = response.getvalue().decode("utf-8")
             logger.error("There was a critical error : %s", err)
             raise HTTPException('Connection error to %s : %s' % (self.uri, r))
-        else:
-            # Manage special return of pycurl
-            ret = json.loads(response.getvalue().replace('\\/', '/'))
-            # print "GOT RAW RESULT", ret, type(ret)
-            return ret
+        # Manage special return of pycurl
+        #ret = json.loads(.decode("utf-8").replace('\\/', '/'))
+        # print("GOT RAW RESULT", ret, type(ret))
+        return response.getvalue()
 
 
     # Try to get an URI path
     def post(self, path, args, wait='short'):
         size = 0
-        # Take args, pickle them and then compress the result
-        for (k, v) in args.iteritems():
-            args[k] = zlib.compress(cPickle.dumps(v), 2)
+        for (k, v) in args.items():
+            args[k] = serialize(v)
             size += len(args[k])
         # Ok go for it!
 
@@ -167,46 +184,43 @@ class HTTPClient(object):
         # if proxy:
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
-        postargs = [(k, v) for (k, v) in args.iteritems()]
-        c.setopt(c.HTTPPOST, postargs)
-        c.setopt(c.URL, str(self.uri + path))
+        c.setopt(c.HTTPPOST, list(args.items()))
+        c.setopt(c.URL, self.uri + path)
         # Ok now manage the response
-        response = StringIO()
+        response = io.BytesIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
         c.setopt(c.VERBOSE, 0)
         try:
             c.perform()
         except pycurl.error as error:
-            errno, errstr = error
+            errno, errstr = error.args
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
 
         r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connection
+        # Do NOT close the connection, we want a keep alive
         # c.close()
         if r != 200:
-            err = response.getvalue()
+            err = response.getvalue().decode("utf-8")
             logger.error("There was a critical error : %s", err)
             raise HTTPException('Connection error to %s : %s' % (self.uri, r))
-        else:
-            # Manage special return of pycurl
-            # ret  = json.loads(response.getvalue().replace('\\/', '/'))
-            ret = response.getvalue()
-            return ret
+        # Manage special return of pycurl
+        # ret  = json.loads(response.getvalue().replace('\\/', '/'))
+        return response.getvalue()
 
         # Should return us pong string
         return ret
 
 
     # Try to get an URI path
-    def put(self, path, v, wait='short'):
+    def put(self, path, content, wait='short'):
 
         c = self.put_con
-        filesize = len(v)
-        f = StringIO(v)
+        filesize = len(content)
+        payload = io.BytesIO(content)
 
         c.setopt(pycurl.INFILESIZE, filesize)
         c.setopt(pycurl.PUT, 1)
-        c.setopt(pycurl.READFUNCTION, FileReader(f).read_callback)
+        c.setopt(pycurl.READFUNCTION, FileReader(payload).read_callback)
 
         # For the TIMEOUT, it will depends if we are waiting for a long query or not
         # long:data_timeout, like for huge broks receptions
@@ -218,27 +232,23 @@ class HTTPClient(object):
         # if proxy:
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
-        c.setopt(c.URL, str(self.uri + path))
+        c.setopt(c.URL, self.uri + path)
         c.setopt(c.VERBOSE, 0)
         # Ok now manage the response
-        response = StringIO()
+        response = io.BytesIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
         # c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
-        except pycurl.error, error:
-            errno, errstr = error
-            f.close()
+        except pycurl.error as error:
+            errno, errstr = error.args
             raise HTTPException('Connection error to %s : %s' % (self.uri, errstr))
 
-        f.close()
         r = c.getinfo(pycurl.HTTP_CODE)
-        # Do NOT close the connection
+        # Do NOT close the connection, we want a keep alive
         # c.close()
         if r != 200:
-            err = response.getvalue()
+            err = response.getvalue().decode("utf-8")
             logger.error("There was a critical error : %s", err)
             raise HTTPException('Connection error to %s : %s' % (self.uri, r))
-        else:
-            ret = response.getvalue()
-            return ret
+        return response.getvalue()

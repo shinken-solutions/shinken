@@ -23,25 +23,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import os
 import time
 import traceback
 import sys
 import base64
 import zlib
-import cPickle
 
 from multiprocessing import active_children
-
-
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.external_command import ExternalCommand, ExternalCommandManager
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
 from shinken.daemon import Interface
 from shinken.stats import statsmgr
 from shinken.util import parse_memory_expr, free_memory
+from shinken.serializer import serialize
 
 class IStats(Interface):
     """
@@ -65,7 +66,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
     # A broker ask us broks
     def get_broks(self, bname, broks_batch=0):
         res = self.app.get_broks(broks_batch)
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return serialize(res)
     get_broks.encode = 'raw'
 
 # Our main APP class
@@ -126,11 +127,13 @@ class Receiver(Satellite):
             self.broks.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command: %s", str(ExternalCommand.__dict__))
+            logger.debug("Enqueuing an external command: %s", ExternalCommand.__dict__)
             self.unprocessed_external_commands.append(elt)
 
 
-    def push_host_names(self, sched_id, hnames):
+    def push_host_names(self, data):
+        sched_id = data["sched_id"]
+        hnames = data["hnames"]
         for h in hnames:
             self.host_assoc[h] = sched_id
 
@@ -150,9 +153,10 @@ class Receiver(Satellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception, exp:
-                logger.warning("The mod %s raise an exception: %s, I kill it",
-                               mod.get_name(), str(exp))
+            except Exception as exp:
+                logger.warning(
+                    "The mod %s raise an exception: %s, I kill it",
+                    mod.get_name(), exp)
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 to_del.append(mod)
@@ -323,17 +327,20 @@ class Receiver(Satellite):
                 logger.debug("Sending %d commands to scheduler %s", len(cmds), sched)
                 try:
                     # con.run_external_commands(cmds)
-                    con.post('run_external_commands', {'cmds': cmds})
+                    con.put('run_external_commands', serialize(cmds))
                     sent = True
                 # Not connected or sched is gone
-                except (HTTPExceptions, KeyError), exp:
-                    logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
+                except (HTTPException, KeyError) as exp:
+                    logger.debug('manage_returns exception:: %s,%s ', type(exp), exp)
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError, exp:  # the scheduler must  not be initialized
-                    logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
-                except Exception, exp:
-                    logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
+                except AttributeError as exp:  # the scheduler must  not be initialized
+                    logger.debug('manage_returns exception:: %s,%s ', type(exp), exp)
+                except Exception as exp:
+                    logger.error(
+                        "A satellite raised an unknown exception: %s (%s)",
+                        exp, type(exp)
+                    )
                     raise
 
             # Wether we sent the commands or not, clean the scheduler list
@@ -352,7 +359,7 @@ class Receiver(Satellite):
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the http_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)
@@ -368,9 +375,9 @@ class Receiver(Satellite):
 
         self.push_external_commands_to_schedulers()
 
-        # print "watch new conf 1: begin", len(self.broks)
+        # print("watch new conf 1: begin", len(self.broks))
         self.watch_for_new_conf(1.0)
-        # print "get enw broks watch new conf 1: end", len(self.broks)
+        # print("get enw broks watch new conf 1: end", len(self.broks))
 
         # Checks if memory consumption did not exceed allowed thresold
         self.check_memory_usage()
@@ -429,7 +436,7 @@ class Receiver(Satellite):
             # Now the main loop
             self.do_mainloop()
 
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise
 

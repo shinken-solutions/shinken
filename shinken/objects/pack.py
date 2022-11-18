@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import os
 import re
@@ -63,13 +65,13 @@ class Packs(Items):
         # Now walk for it
         for root, dirs, files in os.walk(path):
             for file in files:
-                if re.search("\.pack$", file):
+                if re.search(r"\.pack$", file):
                     p = os.path.join(root, file)
                     try:
-                        fd = open(p, 'rU')
+                        fd = open(p, 'r')
                         buf = fd.read()
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open pack file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue
@@ -99,5 +101,5 @@ class Packs(Items):
                 p.path += '/'
             # Ok, add it
             self[p.id] = p
-        except ValueError, exp:
+        except ValueError as exp:
             logger.error("[Pack] error in loading pack file '%s': '%s'", name, exp)

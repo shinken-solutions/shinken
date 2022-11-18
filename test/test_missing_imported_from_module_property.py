@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import time
 
@@ -47,7 +49,7 @@ class TestMissingimportedFrom(ShinkenTest):
     # in the arbiterdaemon part.
     def test_missing_imported_from(self):
         self.assertTrue(self.sched.conf.is_correct)
-    
+
 
 
 if __name__ == '__main__':

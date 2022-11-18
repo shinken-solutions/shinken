@@ -1,0 +1,16 @@
+[Unit]
+Description="Shinken - a modern, Nagios compatible monitoring framework"
+Documentation=http://www.shinken.io/
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+User=shinken
+Group=shinken
+EnvironmentFile=-$DEFAULT$/shinken-reactionner
+ExecStart=$BIN$/shinken-reactionner -d -c $REACTIONNERCFG $DAEMON_ARGS
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

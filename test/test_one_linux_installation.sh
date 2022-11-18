@@ -4,35 +4,58 @@ echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪
 
 # TODO: remove the useradd
 # note: -U, --user-group              create a group with the same name as the user  , need for opensuse
-useradd -U shinken
-if [ $? != 0 ]; then
-   # some dispo do not have the right command, like alpine linux
-   adduser -D shinken
+if ! id shinken &>/dev/null; then
+    useradd -U shinken
+    if [ $? != 0 ]; then
+       # some dispo do not have the right command, like alpine linux
+       adduser -D shinken
+    fi
 fi
 
-python setup.py install
+for PYTHON in python2 python3; do
+   if [ -z "$(which $PYTHON)" ]; then
+      continue
+   fi
+   echo "==============================================================================="
+   echo "| Testing installation with $PYTHON"
+   echo "==============================================================================="
+   $PYTHON setup.py install
 
-if [ $? != 0 ]; then
-   echo "ERROR: installation failed!"
-   exit 2
-fi
+   if [ $? != 0 ]; then
+      echo "ERROR: installation failed!"
+      exit 2
+   fi
 
 
-echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪   Starting       ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪  *************************"
-# Try to start daemon, but we don't want systemd hook there
-SYSTEMCTL_SKIP_REDIRECT=1 /etc/init.d/shinken start
-if [ $? != 0 ]; then
-   echo "ERROR: daemon start failed!"
-   exit 2
-fi
+   echo "************** ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪   Starting       ♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓ ♪  *************************"
+   # Try to start daemon, but we don't want systemd hook there
+   SYSTEMCTL_SKIP_REDIRECT=1 /etc/init.d/shinken start
+   if [ $? != 0 ]; then
+      echo "ERROR: daemon start failed!"
+	  for f in /tmp/bad_start_for_*; do
+         echo "**************************************************************************"
+         echo " Service start output file $f"
+         echo "**************************************************************************"
+		 cat $f
+         echo "**************************************************************************"
+		 echo
+		 echo
+      done
+      exit 2
+   fi
 
-/etc/init.d/shinken status
+   /etc/init.d/shinken status
 
-if [ $? != 0 ];then
-   echo "Shinken did fail to start"
-   ps -fu shinken
-   exit 2
-fi
+   if [ $? != 0 ];then
+      echo "Shinken did fail to start"
+      ps -fu shinken
+      exit 2
+   fi
+
+   /etc/init.d/shinken stop
+   pkill -9 -f shinken
+   sleep 3
+done
 
 echo "Seems to be ok"
 exit 0

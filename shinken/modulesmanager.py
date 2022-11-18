@@ -22,12 +22,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import time
 import sys
 import traceback
-import cStringIO
-import imp
+import io
 
 
 from os.path import join, isdir, abspath, dirname
@@ -35,7 +36,7 @@ from os import listdir
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
-from shinken.misc import importlib
+import importlib
 
 
 # We need to manage pre-2.0 module types with _ into the new 2.0 - mode
@@ -80,7 +81,7 @@ class ModulesManager(object):
 
 
     @classmethod
-    def try_best_load(cls, name, package=None):
+    def _try_load(cls, name, package=None):
         try:
             mod = importlib.import_module(name, package)
         except Exception as err:
@@ -99,45 +100,18 @@ class ModulesManager(object):
 
 
     @classmethod
-    def try_very_bad_load(cls, mod_dir):
-        prev_module = sys.modules.get('module')  # cache locally any previously imported 'module' ..
-        logger.warning(
-            "Trying to load %r as an (very-)old-style shinken \"module\" : "
-            "by adding its path to sys.path. This can be (very) bad in case "
-            "of name conflicts within the files part of %s and others "
-            "top-level python modules; I'll try to limit that.",
-            # by removing the mod_dir from sys.path after while.
-            mod_dir, mod_dir
-        )
-        sys.path.insert(0, mod_dir)
-        try:
-            return importlib.import_module('module')
-        except Exception as err:
-            logger.exception("Could not import bare 'module.py' from %s : %s", mod_dir, err)
-            return
-        finally:
-            sys.path.remove(mod_dir)
-            if prev_module is not None:  # and restore it after we have loaded our one (or not)
-                sys.modules['module'] = prev_module
-
-
-    @classmethod
     def try_load(cls, mod_name, mod_dir=None):
-        msg = ''
-        mod = cls.try_best_load(mod_name)
+        mod = cls._try_load(mod_name)
         if mod:
             msg = "Correctly loaded %s as a very-new-style shinken module :)"
-        else:
-            mod = cls.try_best_load('.module', mod_name)
-            if mod:
-                msg = "Correctly loaded %s as an old-new-style shinken module :|"
-            elif mod_dir:
-                mod = cls.try_very_bad_load(mod_dir)
-                if mod:
-                    msg = "Correctly loaded %s as a very old-style shinken module :s"
-        if msg:
             logger.info(msg, mod_name)
-        return mod
+            return mod
+        mod = cls._try_load('{}.module'.format(mod_name), mod_name)
+        if mod:
+            msg = "Correctly loaded %s as an old-new-style shinken module :|"
+            logger.info(msg, mod_name)
+            return mod
+        return None
 
 
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
@@ -146,12 +120,13 @@ class ModulesManager(object):
         if self.modules_path not in sys.path:
             sys.path.append(self.modules_path)
 
-        modules_files = [fname
-                         for fname in listdir(self.modules_path)
-                         if isdir(join(self.modules_path, fname))]
+        modules_dirs = [
+            fname for fname in listdir(self.modules_path)
+            if isdir(join(self.modules_path, fname))
+        ]
 
         del self.imported_modules[:]
-        for mod_name in modules_files:
+        for mod_name in modules_dirs:
             # No look to .git folder
             if mod_name == ".git":
                 logger.info("Found '.git' directory in modules, skip it.")
@@ -202,10 +177,10 @@ class ModulesManager(object):
                 inst.create_queues(self.manager)
 
             inst.init()
-        except Exception, e:
+        except Exception as e:
             logger.error("The instance %s raised an exception %s, I remove it!",
-                         inst.get_name(), str(e))
-            output = cStringIO.StringIO()
+                         inst.get_name(), e)
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this remove: %s", output.getvalue())
             output.close()
@@ -311,7 +286,7 @@ class ModulesManager(object):
                 queue_size = 0
                 try:
                     queue_size = inst.to_q.qsize()
-                except Exception, exp:
+                except Exception as exp:
                     pass
                 if queue_size > self.max_queue_size:
                     logger.error("The external module %s got a too high brok queue size (%s > %s)!",

@@ -23,6 +23,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.db import DB
 
@@ -37,15 +39,15 @@ class TestConfig(ShinkenTest):
         self.create_db()
         data = {'id': "1", "is_master": True, 'plop': "master of the universe"}
         q = self.db.create_insert_query('instances', data)
-        self.assertEqual("INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )", q)
+        self.assertEqual("INSERT INTO test_instances  (id , is_master , plop  ) VALUES ('1' , '1' , 'master of the universe'  )", q)
 
         # Now some UTF8 funny characters
-        data = {'id': "1", "is_master": True, 'plop': u'£°é§'}
+        data = {'id': "1", "is_master": True, 'plop': '£°é§'}
         q = self.db.create_insert_query('instances', data)
-        #print "Q", q
-        c = u"INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )"
-        print type(q), type(c)
-        print len(q), len(c)
+        #print("Q", q)
+        c = "INSERT INTO test_instances  (id , is_master , plop  ) VALUES ('1' , '1' , '£°é§'  )"
+        print(type(q), type(c))
+        print(len(q), len(c))
 
         self.assertEqual(c, q)
 
@@ -55,18 +57,16 @@ class TestConfig(ShinkenTest):
         where = {'id': "1", "is_master": True}
         q = self.db.create_update_query('instances', data, where)
         # beware of the last space
-        print "Q", q
-        self.assertEqual("UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ", q)
+        print("Q", q)
+        self.assertEqual("UPDATE test_instances set plop='master of the universe'  WHERE id='1' and is_master='1' ", q)
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': u'£°é§'}
         where = {'id': "£°é§", "is_master": True}
         q = self.db.create_update_query('instances', data, where)
-        #print "Q", q
-        c = u"UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
+        #print("Q", q)
+        c = "UPDATE test_instances set plop='£°é§'  WHERE id='£°é§' and is_master='1'"
         self.assertEqual(c.strip(), q.strip())
-
-
 
 
 if __name__ == '__main__':

@@ -22,6 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 from shinken.autoslots import AutoSlots
 from shinken.property import StringProp, BoolProp, IntegerProp
 
@@ -34,14 +37,10 @@ class DummyCommandCall(object):
     pass
 
 
-class CommandCall(DummyCommandCall):
+class CommandCall(six.with_metaclass(AutoSlots, DummyCommandCall)):
     """This class is use when a service, contact or host define
     a command with args.
     """
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
     # __slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
     #              'reactionner_tag', 'module_type', '__dict__')
     id = 0
@@ -84,11 +83,11 @@ class CommandCall(DummyCommandCall):
             self.module_type = self.command.module_type
             self.enable_environment_macros = self.command.enable_environment_macros
             self.timeout = int(self.command.timeout)
-            if self.valid and poller_tag is 'None':
+            if self.valid and poller_tag == 'None':
                 # from command if not set
                 self.poller_tag = self.command.poller_tag
             # Same for reactionner tag
-            if self.valid and reactionner_tag is 'None':
+            if self.valid and reactionner_tag == 'None':
                 # from command if not set
                 self.reactionner_tag = self.command.reactionner_tag
             # Item priority has precedence if a value is explicitely set
@@ -103,7 +102,7 @@ class CommandCall(DummyCommandCall):
         """
 
         # First protect
-        p_call = self.call.replace('\!', '___PROTECT_EXCLAMATION___')
+        p_call = self.call.replace(r'\!', '___PROTECT_EXCLAMATION___')
         tab = p_call.split('!')
         self.command = tab[0]
         # Reverse the protection
@@ -128,9 +127,6 @@ class CommandCall(DummyCommandCall):
         return self.call
 
     def __getstate__(self):
-        """Call by pickle to dataify the comment
-        because we DO NOT WANT REF in this pickleisation!
-        """
         cls = self.__class__
         # id is not in *_properties
         res = {'id': self.id}
@@ -141,11 +137,11 @@ class CommandCall(DummyCommandCall):
 
         # The command is a bit special, we just put it's name
         # or a '' if need
-        if self.command and not isinstance(self.command, basestring):
+        if self.command and not isinstance(self.command, six.string_types):
             res['command'] = self.command.get_name()
         # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
         # only take the value
-        elif self.command and isinstance(self.command, basestring):
+        elif self.command and isinstance(self.command, six.string_types):
             res['command'] = self.command
         else:
             res['command'] = ''
@@ -170,8 +166,8 @@ class CommandCall(DummyCommandCall):
         """In 1.0 we move to a dict save. Before, it was
         a tuple save, like
         ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
-        'command_line': u'/usr/local/nagios/bin/rss-multiuser',
-        'module_type': 'fork', 'command_name': u'notify-by-rss'})
+        'command_line': '/usr/local/nagios/bin/rss-multiuser',
+        'module_type': 'fork', 'command_name': 'notify-by-rss'})
         """
         for d in state:
             for k, v in d.items():

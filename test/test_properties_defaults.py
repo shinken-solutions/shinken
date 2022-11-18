@@ -23,6 +23,7 @@
 Test default values for item types.
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import __import_shinken
 from shinken.property import UnusedProp, none_object
@@ -55,12 +56,12 @@ class PropertiesTester(object):
 
     def test_default_values(self):
         item = self.item # shortcut
-        for name, value in self.properties.iteritems():
+        for name, value in self.properties.items():
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
             if hasattr(item.properties[name], 'default'):
                 if item.properties[name].default != value:
-                    print "%s, %s: %s, %s" % (name, value, item.properties[name].default, value)
+                    print("%s, %s: %s, %s" % (name, value, item.properties[name].default, value))
                 self.assertEqual(item.properties[name].default, value)
 
     def test_all_props_are_tested(self):
@@ -195,7 +196,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('use_regexp_matching', False),
         ('use_true_regexp_matching', None),
         ('broker_module', ''),
-        ('modified_attributes', 0L),
+        ('modified_attributes', 0),
         ('daemon_enabled', True),
         ('graceful_enabled', False),
         ('aggressive_memory_management', False),

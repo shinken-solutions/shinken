@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -37,24 +39,24 @@ class TestHostspecialSched(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("moncul")
         self.assertIsNot(host, None)
-        print "check", host.next_chk
-        print "Check in", host.next_chk - now
+        print("check", host.next_chk)
+        print("Check in", host.next_chk - now)
         self.assertLess(host.next_chk - now, 301)
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
-        print "Loop"
+        print("Loop")
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2']])
         self.assertEqual('UP', host.state)
         self.assertEqual('HARD', host.state_type)
         # Reschedule the host as a normal way
         host.schedule()
-        print "Final", host.next_chk, host.is_in_checking()
-        print "Next check?", host.next_chk - now
-        print "Next check should be still < 300", host.next_chk - now
+        print("Final", host.next_chk, host.is_in_checking())
+        print("Next check?", host.next_chk - now)
+        print("Next check should be still < 300", host.next_chk - now)
         self.assertLess(host.next_chk - now, 301)
         # but in 5min in fact, so more than 290,
         # something like 299.0

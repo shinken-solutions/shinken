@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 
 event_type_pattern = \
@@ -98,7 +100,7 @@ event_types = {
 
 # Class for parsing event logs
 # Populates self.data with the log type's properties
-class LogEvent:
+class LogEvent(object):
 
     def __init__(self, log):
         self.data = {}
@@ -124,7 +126,7 @@ class LogEvent:
                     self.data['attempts'] = int(self.data['attempts'])
 
     def __iter__(self):
-        return self.data.iteritems()
+        return iter(self.data.items())
 
     def __len__(self):
         return len(self.data)

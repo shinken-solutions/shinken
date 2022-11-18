@@ -22,6 +22,8 @@
 # This file is used to test object properties overriding.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import unittest, ShinkenTest, time
 from shinken.objects.timeperiod import Timeperiod
 import re
@@ -447,7 +449,7 @@ class TestMaintenaceCheck(ShinkenTest):
         ], do_sleep=True, sleep_time=1)
 
         # Get the arbiter's log broks
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         logs = [b.data['log'] for b in self.broks if b.type == 'log']
         self.assertEqual(3, len([log for log in logs if re.search('got an invalid return code', log)]))
 

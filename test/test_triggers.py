@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.objects.trigger import Trigger
 
@@ -38,8 +40,8 @@ class TestTriggers(ShinkenTest):
         # Go launch it!
         svc.eval_triggers()
         self.scheduler_loop(2, [])
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95%", svc.perf_data)
 
@@ -48,7 +50,7 @@ class TestTriggers(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "AVG-HTTP")
 
         srvs = []
-        for i in xrange(1, 4):
+        for i in range(1, 4):
             s = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "HTTP-" + str(i))
             s.output = 'Http ok'
             s.perf_data = 'time=%dms' % i
@@ -56,8 +58,8 @@ class TestTriggers(ShinkenTest):
         # Go launch it!
         svc.eval_triggers()
         self.scheduler_loop(4, [])
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("OK all is green", svc.output)
         self.assertEqual("avgtime=2ms", svc.perf_data)
 
@@ -69,18 +71,18 @@ class TestTriggers(ShinkenTest):
         # Go launch it!
         svc.eval_triggers()
         self.scheduler_loop(4, [])
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("OK all is green", svc.output)
         self.assertEqual("users=12", svc.perf_data)
 
     def test_in_conf_trigger(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "i_got_trigger")
-        print 'will run', svc.trigger
+        print('will run', svc.trigger)
         # Go!
         svc.eval_triggers()
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("New output", svc.output)
         self.assertEqual("New perf_data", svc.perf_data)
 
@@ -91,8 +93,8 @@ class TestTriggers(ShinkenTest):
         svc.perf_data = 'cpu=95%'
         # Go launch it!
         svc.eval_triggers()
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95%", svc.perf_data)
 
@@ -103,8 +105,8 @@ class TestTriggers(ShinkenTest):
         # Go launch it!
         host.eval_triggers()
         self.scheduler_loop(2, [])
-        print "Output", host.output
-        print "Perf_Data", host.perf_data
+        print("Output", host.output)
+        print("Perf_Data", host.perf_data)
         self.assertEqual("not good!", host.output)
         self.assertEqual("cpu=95", host.perf_data)
 
@@ -116,9 +118,9 @@ class TestTriggers(ShinkenTest):
         self.scheduler_loop(1, [(svc, 0, 'I am OK | cpu=95%')])
         seclen = len([b for b in self.sched.broks if b.type == 'service_check_result'])
         self.scheduler_loop(1, [])
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
-        print firstlen, seclen
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
+        print(firstlen, seclen)
 
         self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95", svc.perf_data)
@@ -133,8 +135,8 @@ class TestTriggers(ShinkenTest):
         svc.perf_data = 'cpu=95%'
         svc.eval_triggers()
         self.scheduler_loop(2, [])
-        print "Output", svc.output
-        print "Perf_Data", svc.perf_data
+        print("Output", svc.output)
+        print("Perf_Data", svc.perf_data)
         self.assertEqual("not good!", svc.output)
         self.assertEqual("cpu=95", svc.perf_data)
 
@@ -146,8 +148,8 @@ class TestTriggers(ShinkenTest):
         host.perf_data = 'cpu=95%'
         host.eval_triggers()
         self.scheduler_loop(2, [])
-        print "Output", host.output
-        print "Perf_Data", host.perf_data
+        print("Output", host.output)
+        print("Perf_Data", host.perf_data)
         self.assertEqual("not good!", host.output)
         self.assertEqual("cpu=95", host.perf_data)
 
@@ -161,13 +163,13 @@ class TestTriggers(ShinkenTest):
         t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
-        print r
+        print(r)
 
         code = '''self.output = "Moncul c'est du poulet" '''.replace(r'\n', '\n').replace(r'\t', '\t')
         t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
-        print "Service output", svc.output
+        print("Service output", svc.output)
         self.assertEqual("Moncul c'est du poulet", svc.output)
 
         code = '''self.output = "Moncul c'est du poulet2"
@@ -176,8 +178,8 @@ self.perf_data = "Moncul c'est du poulet3"
         t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
-        print "Service output", svc.output
-        print "Service perf_data", svc.perf_data
+        print("Service output", svc.output)
+        print("Service perf_data", svc.perf_data)
         self.assertEqual("Moncul c'est du poulet2", svc.output)
         self.assertEqual("Moncul c'est du poulet3", svc.perf_data)
 

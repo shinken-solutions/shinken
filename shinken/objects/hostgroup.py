@@ -23,7 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from itemgroup import Itemgroup, Itemgroups
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from shinken.objects.itemgroup import Itemgroup, Itemgroups
 
 from shinken.util import get_obj_name
 from shinken.property import StringProp, IntegerProp

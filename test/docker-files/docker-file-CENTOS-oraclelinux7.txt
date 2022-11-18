@@ -1,7 +1,24 @@
-FROM oraclelinux:7.2
+FROM oraclelinux:7.9
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
+
+RUN        yum --nogpgcheck  -y upgrade
+RUN        yum --nogpgcheck  -y install which
+RUN        yum --nogpgcheck  -y install oracle-epel-release-el7
+
+RUN        yum --nogpgcheck  -y install python-cherrypy
+RUN        yum --nogpgcheck  -y install python-pycurl
 RUN        yum --nogpgcheck  -y install python-setuptools
+RUN        yum --nogpgcheck  -y install python-six
+RUN        yum --nogpgcheck  -y install python2-bottle
+
+RUN        yum --nogpgcheck  -y install python3
+RUN        yum --nogpgcheck  -y install python36-pycurl
+RUN        yum --nogpgcheck  -y install python36-setuptools
+RUN        yum --nogpgcheck  -y install python36-six
+RUN        yum --nogpgcheck  -y install python36-bottle
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 

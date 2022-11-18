@@ -28,6 +28,8 @@ defaults = {'server':'jabber.org',
 
 # until xmppony is inplace
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import warnings
 warnings.simplefilter("ignore")
 
@@ -47,12 +49,12 @@ opts, args = parser.parse_args()
 
 conf = ConfigParser.ConfigParser(defaults=defaults)
 if not opts.authfile or not os.path.exists(opts.authfile):
-   print "no config/auth file specified, can't continue"
+   print("no config/auth file specified, can't continue")
    sys.exit(1)
 
 conf.read(opts.authfile)
 if not conf.has_section('xmpp_account') or not conf.has_option('xmpp_account', 'username') or not conf.has_option('xmpp_account', 'password'):
-    print "cannot find at least one of: config section 'xmpp_account' or username or password"
+    print("cannot find at least one of: config section 'xmpp_account' or username or password")
     sys.exit(1)
 server = conf.get('xmpp_account', 'server')
 username = conf.get('xmpp_account', 'username')
@@ -62,7 +64,7 @@ port = conf.get('xmpp_account', 'port')
 
 
 if len(args) < 1:
-    print "xmppsend message [to whom, multiple args]"
+    print("xmppsend message [to whom, multiple args]")
     sys.exit(1)
 
 msg = args[0]
@@ -72,12 +74,12 @@ msg = msg.replace('\\n', '\n')
 c = xmpp.Client(server=server, port=port, debug=[])
 con  = c.connect()
 if not con:
-    print "Error: could not connect to server: %s:%s" % (c.Server, c.Port)
+    print("Error: could not connect to server: %s:%s" % (c.Server, c.Port))
     sys.exit(1)
 
 auth = c.auth(user=username, password=password, resource=resource)
 if not auth:
-    print "Error: Could not authenticate to server: %s:%s" % (c.Server, c.Port)
+    print("Error: Could not authenticate to server: %s:%s" % (c.Server, c.Port))
     sys.exit(1)
 
 if len(args) < 2:
@@ -91,4 +93,4 @@ else:
         c.send(Message(user, '%s' % msg))
 
 
-    
+

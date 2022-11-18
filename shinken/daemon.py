@@ -22,6 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import os
 import errno
 import stat
@@ -30,16 +33,19 @@ import time
 import signal
 import select
 import random
-import ConfigParser
 import threading
 import traceback
-import cStringIO
 import logging
 import inspect
-import cPickle
 import subprocess
 import socket
-from Queue import Empty
+import io
+if six.PY2:
+    import ConfigParser as configparser
+    from Queue import Empty
+else:
+    from queue import Empty
+    import configparser
 
 # Try to see if we are in an android device or not
 try:
@@ -60,8 +66,8 @@ from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, Int
     LogLevelProp
 from shinken.misc.common import setproctitle
 from shinken.profilermgr import profiler
-from shinken.safepickle import SafeUnpickler
 from shinken.util import get_memory
+from shinken.serializer import serialize, deserialize
 
 try:
     import pwd
@@ -77,7 +83,7 @@ try:
 
     def get_all_groups():
         return getgrall()
-except ImportError, exp:  # Like in nt system or Android
+except ImportError as exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
         return "shinken"
@@ -93,7 +99,7 @@ except ImportError, exp:  # Like in nt system or Android
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
-UMASK = 027
+UMASK = 0o27
 from shinken.bin import VERSION
 
 """ TODO: Add some comment about this class for the doc"""
@@ -142,7 +148,7 @@ class Interface(object):
     doc = 'Send a new configuration to the daemon (internal)'
     def put_conf(self, conf):
         self.app.new_conf = conf
-    put_conf.method = 'post'
+    put_conf.method = 'PUT'
     put_conf.doc = doc
 
 
@@ -185,7 +191,7 @@ class Interface(object):
     doc = 'List the api methods and their parameters'
     def api_full(self):
         res = {}
-        for (fname, f) in self.app.http_daemon.registered_fun.iteritems():
+        for (fname, f) in self.app.http_daemon.registered_fun.items():
             fclean = fname.replace('_', '-')
             argspec = inspect.getargspec(f)
             args = [a for a in argspec.args if a != 'self']
@@ -193,7 +199,7 @@ class Interface(object):
             e = {}
             # Get a string about the args and co
             _s_nondef_args = ', '.join([a for a in args if a not in defaults])
-            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.iteritems()])
+            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.items()])
             _s_args = ''
             if _s_nondef_args:
                 _s_args += _s_nondef_args
@@ -333,7 +339,7 @@ class Daemon(object):
     def request_stop(self):
         self.unlink()
         self.do_stop()
-        # Brok facilities are no longer available simply print the message to STDOUT
+        # Brok facilities are no longer available simply print(the message to STDOUT)
         msg = "Stopping daemon. Exiting"
         logger.info(msg)
         print(msg)
@@ -362,16 +368,16 @@ class Daemon(object):
                                  stderr=subprocess.STDOUT,
                                  preexec_fn=os.setsid,
                                  env=env)
-        except Exception, e:
+        except Exception as e:
             logger.error("Failed to spawn child [pid=%s] [retcode=%s] [err=%s]" %
                          p.pid, p.returncode, e)
             return False
         logger.info("Reloading daemon [pid=%s]", p.pid)
         try:
-            raw_conf = cPickle.dumps(self.new_conf)
+            raw_conf = serialize(self.new_conf)
             p.stdin.write(raw_conf)
             p.stdin.close()
-        except Exception, e:
+        except Exception as e:
             stdout = p.stdout.read()
             logger.error("Failed to send configuration to spawned child "
                          "[pid=%s] [retcode=%s] [err=%s] stdout=[%s]",
@@ -422,7 +428,7 @@ class Daemon(object):
         if self.is_switched_process():
             logger.info("Loading configuration from parent")
             raw_config = sys.stdin.read()
-            new_conf = SafeUnpickler.loads(raw_config)
+            new_conf = deserialize(raw_config)
             logger.info("Successfully loaded configuration from parent")
             logger.info("Waiting for parent to stop")
             self.wait_parent_exit()
@@ -506,7 +512,7 @@ class Daemon(object):
             if not os.path.exists(self.workdir):
                 self.__create_directory(self.workdir)
             os.chdir(self.workdir)
-        except Exception, e:
+        except Exception as e:
             raise InvalidWorkDir(e)
         self.debug_output.append("Successfully changed to workdir: %s" % (self.workdir))
 
@@ -515,7 +521,7 @@ class Daemon(object):
         logger.debug("Unlinking %s", self.pidfile)
         try:
             os.unlink(self.pidfile)
-        except Exception, e:
+        except Exception as e:
             logger.error("Got an error unlinking our pidfile: %s", e)
 
 
@@ -526,7 +532,7 @@ class Daemon(object):
             try:
                 # self.local_log_fd = self.log.register_local_log(self.local_log)
                 self.local_log_fd = logger.register_local_log(self.local_log)
-            except IOError, exp:
+            except IOError as exp:
                 logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
                 sys.exit(2)
             logger.info("Using the local log file '%s'", self.local_log)
@@ -673,7 +679,7 @@ class Daemon(object):
         # Now the fork/setsid/fork..
         try:
             pid = os.fork()
-        except OSError, e:
+        except OSError as e:
             raise Exception("%s [%d]" % (e.strerror, e.errno))
 
         if pid != 0:
@@ -727,20 +733,23 @@ class Daemon(object):
         # a socket of your http server alive
         def _create_manager(self):
             manager = SyncManager(('127.0.0.1', 0))
-        
-        
+
+
             def close_http_daemon(daemon):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase
                     daemon.lock.release()
-                except Exception, exp:
+                except Exception as exp:
                     pass
                 daemon.shutdown()
-        
-        
+
+
             # Some multiprocessing lib got problems with start() that cannot take args
             # so we must look at it before
-            startargs = inspect.getargspec(manager.start)
+            if six.PY2:
+                startargs = inspect.getargspec(manager.start)
+            else:
+                startargs = inspect.getfullargspec(manager.start)
             # startargs[0] will be ['self'] if old multiprocessing lib
             # and ['self', 'initializer', 'initargs'] in newer ones
             # note: windows do not like pickle http_daemon...
@@ -753,14 +762,14 @@ class Daemon(object):
 
     # Main "go daemon" mode. Will launch the double fork(), close old file descriptor
     # and such things to have a true DAEMON :D
-    # use_pyro= open the TCP port for communication
+    # bind_port= open the TCP port for communication
     # fake= use for test to do not launch runonly feature, like the stats reaper thread
-    def do_daemon_init_and_start(self, use_pyro=True, fake=False):
+    def do_daemon_init_and_start(self, bind_port=True, fake=False):
         self.change_to_workdir()
         self.change_to_user_group()
         self.check_parallel_run()
-        if use_pyro:
-            self.setup_pyro_daemon()
+        if bind_port:
+            self.setup_daemon()
 
         # Setting log level
         logger.setLevel(self.log_level)
@@ -793,7 +802,7 @@ class Daemon(object):
 
         # Now start the http_daemon thread
         self.http_thread = None
-        if use_pyro:
+        if bind_port:
             # Directly acquire it, so the http_thread will wait for us
             self.http_daemon.lock.acquire()
             self.http_thread = threading.Thread(None, self.http_daemon_thread, 'http_thread')
@@ -804,8 +813,7 @@ class Daemon(object):
         # profiler.start()
 
 
-    # TODO: we do not use pyro anymore, change the function name....
-    def setup_pyro_daemon(self):
+    def setup_daemon(self):
         if hasattr(self, 'use_ssl'):  # "common" daemon
             ssl_conf = self
         else:
@@ -817,14 +825,14 @@ class Daemon(object):
 
         # The SSL part
         if use_ssl:
-            ssl_cert = os.path.abspath(str(ssl_conf.server_cert))
+            ssl_cert = os.path.abspath(ssl_conf.server_cert)
             if not os.path.exists(ssl_cert):
                 logger.error('Error : the SSL certificate %s is missing (server_cert).'
                              'Please fix it in your configuration', ssl_cert)
                 sys.exit(2)
-            ca_cert = os.path.abspath(str(ssl_conf.ca_cert))
+            ca_cert = os.path.abspath(ssl_conf.ca_cert)
             logger.info("Using ssl ca cert file: %s", ca_cert)
-            ssl_key = os.path.abspath(str(ssl_conf.server_key))
+            ssl_key = os.path.abspath(ssl_conf.server_key)
             if not os.path.exists(ssl_key):
                 logger.error('Error : the SSL key %s is missing (server_key).'
                              'Please fix it in your configuration', ssl_key)
@@ -851,7 +859,7 @@ class Daemon(object):
             return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error, e:
+        except select.error as e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []
@@ -889,7 +897,7 @@ class Daemon(object):
     def find_uid_from_name(self):
         try:
             return getpwnam(self.user)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The user %s is unknown", self.user)
             return None
 
@@ -897,7 +905,7 @@ class Daemon(object):
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The group %s is unknown", self.group)
             return None
 
@@ -941,7 +949,7 @@ class Daemon(object):
             logger.info('Trying to initialize additional groups for the daemon')
             try:
                 os.initgroups(self.user, gid)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting '
                                'with initgroups (%s)', e.strerror)
         elif hasattr(os, 'setgroups'):
@@ -949,14 +957,14 @@ class Daemon(object):
                      [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
             try:
                 os.setgroups(groups)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting '
                                'with setgroups (%s)', e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
-        except OSError, e:
+        except OSError as e:
             logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting",
                          self.user, self.group, e.strerror, e.errno)
             sys.exit(2)
@@ -968,7 +976,7 @@ class Daemon(object):
     def parse_config_file(self):
         properties = self.__class__.properties
         if self.config_file is not None:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
                 logger.error("Bad or missing config file: %s ", self.config_file)
@@ -978,7 +986,7 @@ class Daemon(object):
                     if key in properties:
                         value = properties[key].pythonize(value)
                     setattr(self, key, value)
-            except ConfigParser.InterpolationMissingOptionError, e:
+            except configparser.InterpolationMissingOptionError as e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
                 logger.error("Incorrect or missing variable '%s' in config file : %s",
@@ -996,21 +1004,21 @@ class Daemon(object):
     # Some paths can be relatives. We must have a full path by taking
     # the config file by reference
     def relative_paths_to_full(self, reference_path):
-        # print "Create relative paths with", reference_path
+        # print("Create relative paths with", reference_path)
         properties = self.__class__.properties
         for prop, entry in properties.items():
             if isinstance(entry, ConfigPathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     new_path = os.path.join(reference_path, path)
-                    # print "DBG: changing", entry, "from", path, "to", new_path
+                    # print("DBG: changing", entry, "from", path, "to", new_path)
                     path = new_path
                 setattr(self, prop, path)
-                # print "Setting %s for %s" % (path, prop)
+                # print("Setting %s for %s" % (path, prop))
 
 
     def manage_signal(self, sig, frame):
-        logger.debug("I'm process %d and I received signal %s", os.getpid(), str(sig))
+        logger.debug("I'm process %d and I received signal %s", os.getpid(), sig)
         if sig == signal.SIGUSR1:  # if USR1, ask a memory dump
             self.need_dump_memory = True
         elif sig == signal.SIGUSR2:  # if USR2, ask objects dump
@@ -1059,9 +1067,9 @@ class Daemon(object):
         # finish
         try:
             self.http_daemon.run()
-        except Exception, exp:
-            logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
-            output = cStringIO.StringIO()
+        except Exception as exp:
+            logger.error('The HTTP daemon failed with the error %s, exiting', exp)
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this error: %s", output.getvalue())
             output.close()
@@ -1070,7 +1078,7 @@ class Daemon(object):
             os._exit(2)
 
 
-    # Wait up to timeout to handle the pyro daemon requests.
+    # Wait up to timeout to handle the http daemon requests.
     # If suppl_socks is given it also looks for activity on that list of fd.
     # Returns a 3-tuple:
     # If timeout: first arg is 0, second is [], third is possible system time change value
@@ -1166,7 +1174,7 @@ class Daemon(object):
                     f(self)
                 except Exception as exp:
                     logger.warning('The instance %s raised an exception %s. I disabled it,'
-                                   'and set it to restart later', inst.get_name(), str(exp))
+                                   'and set it to restart later', inst.get_name(), exp)
                     self.modules_manager.set_to_restart(inst)
 
         statsmgr.timing('hook.%s' % hook_name, time.time() - _t, 'perf')
@@ -1223,7 +1231,7 @@ class Daemon(object):
                     o = queue.get(block=False)
                 except (Empty, IOError, EOFError) as err:
                     if not isinstance(err, Empty):
-                        logger.error("An external module queue got a problem '%s'", str(exp))
+                        logger.error("An external module queue got a problem '%s'", exp)
                     break
                 else:
                     had_some_objects = True

@@ -29,6 +29,7 @@ For example, if a scheduler dies, it sends the late scheduler's conf
 to another scheduler available.
 It also reads orders form users (nagios.cmd) and sends them to schedulers.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import sys

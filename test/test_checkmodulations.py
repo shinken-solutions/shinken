@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -35,11 +37,11 @@ class TestCheckModulations(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("host_modulated")
         self.assertIsNot(host, None)
-        print host.checkmodulations
+        print(host.checkmodulations)
 
         mod = self.sched.checkmodulations.find_by_name("MODULATION")
         self.assertIsNot(mod, None)
@@ -48,7 +50,7 @@ class TestCheckModulations(ShinkenTest):
 
         c = None
         for c in host.get_checks_in_progress():
-            print c.command
+            print(c.command)
             self.assertEqual('plugins/nothing VALUE', c.command)
 
 

@@ -28,11 +28,14 @@ to look at the schedulingitem class that manage all
 scheduling/consume check smart things :)
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import time
 import itertools
 
-from item import Items
-from schedulingitem import SchedulingItem
+from shinken.objects.item import Items
+from shinken.objects.schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
@@ -46,10 +49,7 @@ from shinken.log import logger, naglog_result
 
 import uuid
 
-class Host(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
+class Host(six.with_metaclass(AutoSlots, SchedulingItem)):
 
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
@@ -276,7 +276,7 @@ class Host(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -723,7 +723,7 @@ class Host(SchedulingItem):
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[host::%s] %s", self.get_name(), err)
 
@@ -814,7 +814,7 @@ class Host(SchedulingItem):
         for hg in self.hostgroups:
             # naglog_result('info', 'get_groupname : %s %s %s' % (hg.id, hg.alias, hg.get_name()))
             # groupname = "%s [%s]" % (hg.alias, hg.get_name())
-            groupname = "%s" % (hg.alias)
+            groupname = hg.alias
         return groupname
 
 
@@ -958,7 +958,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         incl = True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid include expression: %s: %s" % (d, e))
             return not incl
@@ -968,7 +968,7 @@ class Host(SchedulingItem):
                     fct = get_exclude_match_expr(d)
                     if fct(sdesc):
                         return True
-                except Exception, e:
+                except Exception as e:
                     self.configuration_errors.append(
                         "Invalid exclude expression: %s: %s" % (d, e))
         return False
@@ -1519,7 +1519,7 @@ class Hosts(Items):
                 else:
                     err = "the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
                     self.configuration_warnings.append(err)
-            # print "Me,", h.host_name, "define my parents", new_parents
+            # print("Me,", h.host_name, "define my parents", new_parents)
             # We find the id, we replace the names
             h.parents = new_parents
 
@@ -1531,7 +1531,7 @@ class Hosts(Items):
             if getattr(r, 'default', False):
                 default_realm = r
         # if default_realm is None:
-        #    print "Error: there is no default realm defined!"
+        #    print("Error: there is no default realm defined!")
         for h in self:
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
@@ -1571,7 +1571,7 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        for t in self.templates.itervalues():
+        for t in self.templates.values():
             # items::explode_contact_groups_into_contacts
             # take all contacts from our contact_groups into our contact property
             self.explode_contact_groups_into_contacts(t, contactgroups)
@@ -1602,7 +1602,7 @@ class Hosts(Items):
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
-                print cw
+                print(cw)
 
 
     # Create dependencies:

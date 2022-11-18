@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken.util import safe_print
 from shinken.misc.sorter import hst_srv_sort, last_state_change_earlier
 from shinken.misc.filter import only_related_to
@@ -37,12 +39,9 @@ class DataManager(object):
     # UI will launch us names in str, we got unicode
     # in our rg, so we must manage it here
     def get_host(self, hname):
-        hname = hname.decode('utf8', 'ignore')
         return self.rg.hosts.find_by_name(hname)
 
     def get_service(self, hname, sdesc):
-        hname = hname.decode('utf8', 'ignore')
-        sdesc = sdesc.decode('utf8', 'ignore')
         return self.rg.services.find_srv_by_name_and_hostname(hname, sdesc)
 
     def get_all_hosts_and_services(self):
@@ -52,11 +51,9 @@ class DataManager(object):
         return all
 
     def get_contact(self, name):
-        name = name.decode('utf8', 'ignore')
         return self.rg.contacts.find_by_name(name)
 
     def get_contactgroup(self, name):
-        name = name.decode('utf8', 'ignore')
         return self.rg.contactgroups.find_by_name(name)
 
     def get_contacts(self):
@@ -247,7 +244,7 @@ class DataManager(object):
                     if (s.business_impact > 2 and not 0 <= s.my_own_business_impact <= 2)])
         res.extend([h for h in self.rg.hosts
                     if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)])
-        print "DUMP IMPORTANT"
+        print("DUMP IMPORTANT")
         for i in res:
             safe_print(i.get_full_name(), i.business_impact, i.my_own_business_impact)
         return res
@@ -259,7 +256,7 @@ class DataManager(object):
                     if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
         s_states = [s.state_id for s in self.rg.services
                     if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
-        print "get_overall_state:: hosts and services business problems", h_states, s_states
+        print("get_overall_state:: hosts and services business problems", h_states, s_states)
         if len(h_states) == 0:
             h_state = 0
         else:
@@ -317,7 +314,7 @@ class DataManager(object):
                     if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
         s_states = [s.state_id for s in self.rg.services
                     if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
-        print "get_len_overall_state:: hosts and services business problems", h_states, s_states
+        print("get_len_overall_state:: hosts and services business problems", h_states, s_states)
         # Just return the number of impacting elements
         return len(h_states) + len(s_states)
 
@@ -334,7 +331,7 @@ class DataManager(object):
                 par_elts = self.get_business_parents(i, levels=levels - 1)
                 res['fathers'].append(par_elts)
 
-        print "get_business_parents::Give elements", res
+        print("get_business_parents::Give elements", res)
         return res
 
     # Ok, we do not have true root problems, but we can try to guess isn't it?

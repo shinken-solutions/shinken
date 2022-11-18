@@ -335,7 +335,7 @@ class Router(object):
         except IndexError:
             msg = "Not enough arguments to fill out anonymous wildcards."
             raise RouteBuildError(msg)
-        except KeyError, e:
+        except KeyError as e:
             raise RouteBuildError(*e.args)
 
         if args:
@@ -419,7 +419,7 @@ class Router(object):
             except (AssertionError, IndexError), e:  # AssertionError: Too many groups
                 self.dynamic.append((re.compile('(^%s$)' % fpat),
                                     [(gpat, target)]))
-            except re.error, e:
+            except re.error as e:
                 raise RouteSyntaxError("Could not add Route: %s (%s)" % (rule, e))
 
     def _compile_pattern(self, rule):
@@ -684,14 +684,14 @@ class Bottle(object):
         try:
             callback, args = self._match(environ)
             return callback(**args)
-        except HTTPResponse, r:
+        except HTTPResponse as r:
             return r
         except RouteReset:  # Route reset requested by the callback or a plugin.
             del self.ccache[environ['route.handle']]
             return self._handle(environ)  # Try again.
         except (KeyboardInterrupt, SystemExit, MemoryError):
             raise
-        except Exception, e:
+        except Exception as e:
             if not self.catchall:
                 raise
             stacktrace = format_exc(10)
@@ -747,9 +747,9 @@ class Bottle(object):
                 first = out.next()
         except StopIteration:
             return self._cast('', request, response)
-        except HTTPResponse, e:
+        except HTTPResponse as e:
             first = e
-        except Exception, e:
+        except Exception as e:
             first = HTTPError(500, 'Unhandled exception', e, format_exc(10))
             if isinstance(e, (KeyboardInterrupt, SystemExit, MemoryError))\
                or not self.catchall:
@@ -784,7 +784,7 @@ class Bottle(object):
             return out
         except (KeyboardInterrupt, SystemExit, MemoryError):
             raise
-        except Exception, e:
+        except Exception as e:
             if not self.catchall:
                 raise
             err = '<h1>Critical error while processing request: %s</h1>' \
@@ -1948,7 +1948,7 @@ class FlupSCGIServer(ServerAdapter):
 class WSGIRefServer(ServerAdapter):
     def run(self, handler):  # pragma: no cover
         from wsgiref.simple_server import make_server, WSGIRequestHandler
-        print "Launching Swsgi backend"
+        print("Launching Swsgi backend")
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
                 def log_request(*args, **kw):
@@ -1961,7 +1961,7 @@ class WSGIRefServer(ServerAdapter):
 # Shinken: add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler):  # pragma: no cover
-        print "Call the Select version"
+        print("Call the Select version")
         from wsgiref.simple_server import make_server, WSGIRequestHandler
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
@@ -1976,7 +1976,7 @@ class WSGIRefServerSelect(ServerAdapter):
 class CherryPyServer(ServerAdapter):
     def run(self, handler):  # pragma: no cover
         from cherrypy import wsgiserver
-        print "Launching CherryPy backend"
+        print("Launching CherryPy backend")
         server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
         try:
             server.start()
@@ -1987,7 +1987,7 @@ class CherryPyServer(ServerAdapter):
 class PasteServer(ServerAdapter):
     def run(self, handler):  # pragma: no cover
         from paste import httpserver
-        print "Launching Paste backend"
+        print("Launching Paste backend")
         if not self.quiet:
             from paste.translogger import TransLogger
             handler = TransLogger(handler)
@@ -2015,8 +2015,8 @@ class FapwsServer(ServerAdapter):
         evwsgi.start(self.host, port)
         # fapws3 never releases the GIL. Complain upstream. I tried. No luck.
         if 'BOTTLE_CHILD' in os.environ and not self.quiet:
-            print "WARNING: Auto-reloading does not work with Fapws3."
-            print "         (Fapws3 breaks python thread support)"
+            print("WARNING: Auto-reloading does not work with Fapws3.")
+            print("         (Fapws3 breaks python thread support)")
         evwsgi.set_base_module(base)
 
         def app(environ, start_response):
@@ -2244,9 +2244,9 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         raise RuntimeError("Server must be a subclass of ServerAdapter")
     server.quiet = server.quiet or quiet
     if not server.quiet and not os.environ.get('BOTTLE_CHILD'):
-        print "Bottle server starting up (using %s)..." % repr(server)
-        print "Listening on http://%s:%d/" % (server.host, server.port)
-        print "Use Ctrl-C to quit."
+        print("Bottle server starting up (using %s)..." % repr(server))
+        print("Listening on http://%s:%d/" % (server.host, server.port))
+        print("Use Ctrl-C to quit.")
         print
     try:
         if reloader:
@@ -2261,7 +2261,7 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
     except KeyboardInterrupt:
         pass
     if not server.quiet and not os.environ.get('BOTTLE_CHILD'):
-        print "Shutting down..."
+        print("Shutting down...")
     # Shinken
     return res
 
@@ -2343,7 +2343,7 @@ def _reloader_observer(server, app, interval):
                     os.unlink(lockfile)
                 sys.exit(p.poll())
             elif not server.quiet:
-                print "Reloading server..."
+                print("Reloading server...")
     except KeyboardInterrupt:
         pass
     if os.path.exists(lockfile):

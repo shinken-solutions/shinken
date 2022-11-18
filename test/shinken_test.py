@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 #
 # This file is used to test host- and service-downtimes.
 #
 
+import six
 import sys
 from sys import __stdout__
 from functools import partial
@@ -11,7 +14,6 @@ from functools import partial
 import time
 import datetime
 import os
-import string
 import re
 import random
 import copy
@@ -97,19 +99,20 @@ def safe_print(*args, **kw):
     if kw:
         raise ValueError('unhandled named/keyword argument(s): %r' % kw)
     #
-    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
-                                else
-                            unicode(str(a), in_bytes_encoding, 'replace')
-                        for a in args )
+    make_in_data_gen = lambda: (
+            a if isinstance(a, six.string_types)
+            else ("%s" % a).encode(in_bytes_encoding, 'replace')
+            for a in args
+        )
 
     possible_codings = ( out_encoding, )
     if out_encoding != 'ascii':
         possible_codings += ( 'ascii', )
 
     for coding in possible_codings:
-        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
+        data = ' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
         try:
-            sys.stdout.write(data)
+            sys.stdout.write(data.decode("utf-8"))
             break
         except UnicodeError as err:
             # there might still have some problem with the underlying sys.stdout.
@@ -120,7 +123,7 @@ def safe_print(*args, **kw):
                 raise
             sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
                 coding, err))
-    sys.stdout.write(b'\n')
+    sys.stdout.write('\n')
 
 
 
@@ -227,7 +230,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.apply_inheritance()
         #import pdb;pdb.set_trace()
         self.conf.explode()
-        #print "Aconf.services has %d elements" % len(self.conf.services)
+        #print("Aconf.services has %d elements" % len(self.conf.services))
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
@@ -241,7 +244,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
-            print "The conf is not correct, I stop here"
+            print("The conf is not correct, I stop here")
             self.conf.dump()
             return
         self.conf.clean()
@@ -281,7 +284,7 @@ class ShinkenTest(unittest.TestCase):
     def fake_check(self, ref, exit_status, output="OK",
                    check_variant=SchedulingItem.default_check_variant,
                    fake_timeout=False):
-        #print "fake", ref
+        #print("fake", ref)
         now = time.time()
         ref.schedule(force=True)
         # now checks are schedule and we get them in
@@ -324,7 +327,7 @@ class ShinkenTest(unittest.TestCase):
             obj.checks_in_progress = []
         for loop in range(1, count + 1):
             if verbose is True:
-                print "processing check", loop
+                print("processing check", loop)
             for ref in reflist:
                 ext = {}
                 if isinstance(ref, dict):
@@ -362,12 +365,12 @@ class ShinkenTest(unittest.TestCase):
         self.sched.delete_zombie_actions()
         checks = self.sched.get_to_run_checks(True, False, worker_name='tester')
         actions = self.sched.get_to_run_checks(False, True, worker_name='tester')
-        #print "------------ worker loop checks ----------------"
-        #print checks
-        #print "------------ worker loop actions ----------------"
+        #print("------------ worker loop checks ----------------")
+        #print(checks)
+        #print("------------ worker loop actions ----------------")
         if verbose is True:
             self.show_actions()
-        #print "------------ worker loop new ----------------"
+        #print("------------ worker loop new ----------------")
         for a in actions:
             a.status = 'inpoller'
             a.check_time = time.time()
@@ -375,39 +378,39 @@ class ShinkenTest(unittest.TestCase):
             self.sched.put_results(a)
         if verbose is True:
             self.show_actions()
-        #print "------------ worker loop end ----------------"
+        #print("------------ worker loop end ----------------")
 
 
     def show_logs(self):
-        print "--- logs <<<----------------------------------"
+        print("--- logs <<<----------------------------------")
         if hasattr(self, "sched"):
             broks = self.sched.broks
         else:
             broks = self.broks
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
+                #brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
 
-        print "--- logs >>>----------------------------------"
+        print("--- logs >>>----------------------------------")
 
 
     def show_actions(self):
-        print "--- actions <<<----------------------------------"
+        print("--- actions <<<----------------------------------")
         if hasattr(self, "sched"):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
+        for a in sorted(actions.values(), key=lambda x: x.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
                 else:
                     ref = "host: %s svc: %s" % (a.ref.host.get_name(), a.ref.get_name())
-                print "NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status)
+                print("NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status))
             elif a.is_a == 'eventhandler':
-                print "EVENTHANDLER:", a
-        print "--- actions >>>----------------------------------"
+                print("EVENTHANDLER:", a)
+        print("--- actions >>>----------------------------------")
 
 
     def show_and_clear_logs(self):
@@ -465,15 +468,15 @@ class ShinkenTest(unittest.TestCase):
         broks = sorted(self.sched.broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
-                print "%s (%s): %s" % (lognum, brok.id, brok.data['log'])
+                #brok.prepare()
+                print("%s (%s): %s" % (lognum, brok.id, brok.data['log']))
                 if index == lognum:
-                    print brok.data['log']
+                    print(brok.data['log'])
                     if re.search(regex, brok.data['log']):
                         return
                 lognum += 1
 
-        [b.prepare() for b in self.broks]
+        #[b.prepare() for b in self.broks]
         self.assertTrue(no_match, "%s found a matched log line in broks :\n"
                             "index=%s pattern=%r\n"
                             "broks_logs=[[[\n%s\n]]]" % (
@@ -489,10 +492,10 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(broks, lambda x, y: x.id - y.id)
+        broks = sorted(broks, key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
-                brok.prepare()
+                #brok.prepare()
                 if re.search(regex, brok.data['log']):
                     self.assertTrue(not assert_not,
                                     "Found matching log line:\n"
@@ -521,9 +524,9 @@ class ShinkenTest(unittest.TestCase):
         return res
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + str.center(self.id(), 78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def xtest_conf_is_correct(self):
         self.print_header()

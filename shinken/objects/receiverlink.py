@@ -23,11 +23,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
-from shinken.http_client import HTTPExceptions
+from shinken.http_client import HTTPException
+from shinken.serializer import serialize
 
 
 class ReceiverLink(SatelliteLink):
@@ -53,7 +55,9 @@ class ReceiverLink(SatelliteLink):
     def register_to_my_realm(self):
         self.realm.receivers.append(self)
 
-    def push_host_names(self, sched_id, hnames):
+    def push_host_names(self, data):
+        sched_id = data["sched_id"]
+        hnames = data["hnames"]
         try:
             if self.con is None:
                 self.create_connection()
@@ -66,8 +70,12 @@ class ReceiverLink(SatelliteLink):
 
             # r = self.con.push_host_names(sched_id, hnames)
             self.con.get('ping')
-            self.con.post('push_host_names', {'sched_id': sched_id, 'hnames': hnames}, wait='long')
-        except HTTPExceptions, exp:
+            self.con.put(
+                'push_host_names',
+                serialize({'sched_id': sched_id, 'hnames': hnames}),
+                wait='long'
+            )
+        except HTTPException as exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 

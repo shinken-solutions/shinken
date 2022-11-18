@@ -1,5 +1,4 @@
-CherryPy >= 3, < 9
+CherryPy >= 3
 pycurl
-importlib
-pbr
-html
+six
+bottle

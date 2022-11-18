@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -45,37 +47,37 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'BAD | value1=0 value2=0']])
 
-        print "Go bad now"
+        print("Go bad now")
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
 
         to_del = []
         for a in self.sched.actions.values():
-            print "\n\nA?", a, "\nZZZ%sZZZ" % a.command
+            print("\n\nA?", a, "\nZZZ%sZZZ" % a.command)
             # Set them go NOW
             a.t_to_go = now
             # In fact they are already launched, so we-reenabled them :)
-            print "AHAH?", a.status, a.__class__.my_type
+            print("AHAH?", a.status, a.__class__.my_type)
             if a.__class__.my_type == 'notification' and (a.status == 'zombie' or a.status == ' scheduled'):
                 to_del.append(a.id)
 
             a.status = 'scheduled'
             # And look for good tagging
             if a.command.startswith('plugins/notifier.pl'):
-                print 'TAG:%s' % a.reactionner_tag
+                print('TAG:%s' % a.reactionner_tag)
                 self.assertEqual('runonwindows', a.reactionner_tag)
             if a.command.startswith('plugins/sms.pl'):
-                print 'TAG:%s' % a.reactionner_tag
+                print('TAG:%s' % a.reactionner_tag)
                 self.assertEqual('sms', a.reactionner_tag)
             if a.command.startswith('plugins/test_eventhandler.pl'):
-                print 'TAG: %s' % a.reactionner_tag
+                print('TAG: %s' % a.reactionner_tag)
                 self.assertEqual('eventtag', a.reactionner_tag)
 
-        print "\n\n"
+        print("\n\n")
         for _i in to_del:
-            print "DELETING", self.sched.actions[_i]
+            print("DELETING", self.sched.actions[_i])
             del self.sched.actions[_i]
 
-        print "NOW ACTION!"*20,'\n\n'
+        print("NOW ACTION!"*20,'\n\n')
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
@@ -117,7 +119,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'BAD | value1=0 value2=0']])
 
-        print "Go bad now"
+        print("Go bad now")
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
 
         for a in self.sched.actions.values():
@@ -127,12 +129,12 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             a.status = 'scheduled'
             # And look for good tagging
             if a.command.startswith('plugins/notifier.pl'):
-                print a.__dict__
-                print a.reactionner_tag
+                print(a.__dict__)
+                print(a.reactionner_tag)
                 self.assertEqual('runonwindows', a.reactionner_tag)
             if a.command.startswith('plugins/test_eventhandler.pl'):
-                print a.__dict__
-                print a.reactionner_tag
+                print(a.__dict__)
+                print(a.reactionner_tag)
                 self.assertEqual('eventtag', a.reactionner_tag)
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)

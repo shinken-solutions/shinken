@@ -29,14 +29,14 @@ Arbiter, Scheduler, etc. It just checks for the main requirement of
 Shinken.
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 
-VERSION = "2.4.3"
+VERSION = "3.0.0-RC1"
 
 
 # Make sure people are using Python 2.6 or higher
 # This is the canonical python version check
-if sys.version_info < (2, 6):
-    sys.exit("Shinken requires as a minimum Python 2.6.x, sorry")
-elif sys.version_info >= (3,):
-    sys.exit("Shinken is not yet compatible with Python 3.x, sorry")
+if sys.version_info < (2, 7):
+    sys.exit("Shinken requires as a minimum Python 2.7.x, sorry")

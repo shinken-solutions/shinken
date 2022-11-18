@@ -22,7 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from .satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import IntegerProp, StringProp
 
 

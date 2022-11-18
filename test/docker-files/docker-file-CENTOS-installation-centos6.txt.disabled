@@ -1,0 +1,25 @@
+FROM centos:6
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        yum --nogpgcheck  -y  upgrade
+RUN        yum --nogpgcheck  -y install python-setuptools
+RUN        yum --nogpgcheck  -y install python-pycurl
+RUN        yum --nogpgcheck  -y install python-cherrypy
+RUN        yum --nogpgcheck  -y install python-six
+RUN        yum --nogpgcheck  -y install python-nose
+RUN        yum --nogpgcheck  -y install python-bottle
+RUN        yum --nogpgcheck  -y install python3-setuptools
+RUN        yum --nogpgcheck  -y install python3-pycurl
+RUN        yum --nogpgcheck  -y install python3-cherrypy
+RUN        yum --nogpgcheck  -y install python3-six
+RUN        yum --nogpgcheck  -y install python3-nose
+RUN        yum --nogpgcheck  -y install python3-bottle
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
+
+ADD        . /root/shinken-framework
+
+WORKDIR    /root/shinken-framework
+ENTRYPOINT        test/test_one_linux_installation.sh
+
+

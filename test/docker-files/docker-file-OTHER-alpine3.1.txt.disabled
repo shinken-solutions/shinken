@@ -1,0 +1,21 @@
+FROM alpine:3.1
+MAINTAINER Jean Gabes <naparuba@gmail.com>
+
+RUN        apk update
+RUN        apk add shadow
+RUN        apk add bash
+RUN        apk add python
+RUN        apk add py-curl
+RUN        apk add py-pip
+RUN        apk add py-setuptools
+RUN        apk add py-six
+RUN        apk add shadow
+RUN        pip install bottle
+RUN        pip install cherrypy
+RUN        addgroup -S shinken
+RUN        adduser  -S -h /var/lib/shinken -D -G shinken shinken
+
+ADD        . /root/shinken-framework
+
+WORKDIR       /root/shinken-framework
+ENTRYPOINT    test/test_one_linux_installation.sh

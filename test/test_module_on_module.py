@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -35,14 +37,14 @@ class TestModuleOnModule(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         mod1 = self.sched.conf.modules.find_by_name("Simple-log")
         self.assertIsNot(mod1, None)
-        print "Got module", mod1.get_name()
+        print("Got module", mod1.get_name())
         mod_sub = self.sched.conf.modules.find_by_name("ToNdodb_Mysql")
         self.assertIsNot(mod_sub, None)
-        print "Got sub module", mod_sub.get_name()
+        print("Got sub module", mod_sub.get_name())
         self.assertIn(mod_sub, mod1.modules)
         self.assertEqual([], mod_sub.modules)
 

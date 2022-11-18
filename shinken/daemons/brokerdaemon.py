@@ -22,25 +22,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import os
 import sys
 import time
 import traceback
-import cPickle
 import base64
 import zlib
 import threading
 import copy
 from multiprocessing import active_children
 from collections import deque
+import io
 
 from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids, get_memory, parse_memory_expr, free_memory
+from shinken.serializer import serialize, deserialize, SerializeError
 from shinken.log import logger
 from shinken.stats import statsmgr
 from shinken.external_command import ExternalCommand
-from shinken.http_client import HTTPClient, HTTPExceptions
+from shinken.http_client import HTTPClient, HTTPException
 from shinken.daemon import Daemon, Interface
 
 
@@ -60,7 +64,7 @@ class IStats(Interface):
         for inst in insts:
             try:
                 res.append({'module_name': inst.get_name(), 'queue_size': inst.to_q.qsize()})
-            except Exception, exp:
+            except Exception as exp:
                 res.append({'module_name': inst.get_name(), 'queue_size': 0})
 
         return res
@@ -128,13 +132,13 @@ class Broker(BaseSatellite):
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
-            logger.debug("Enqueuing an external command '%s'", str(ExternalCommand.__dict__))
+            logger.debug("Enqueuing an external command '%s'", ExternalCommand.__dict__)
             self.external_commands.append(elt)
         # Maybe we got a Message from the modules, it's way to ask something
         # like from now a full data from a scheduler for example.
         elif cls_type == 'message':
             # We got a message, great!
-            logger.debug(str(elt.__dict__))
+            logger.debug(elt.__dict__)
             if elt.get_type() == 'NeedData':
                 data = elt.get_data()
                 # Full instance id means: I got no data for this scheduler
@@ -224,18 +228,21 @@ class Broker(BaseSatellite):
         # Ok, we can now update it
         links[id]['last_connection'] = time.time()
 
-        # DBG: print "Init connection with", links[id]['uri']
+        # DBG: print("Init connection with", links[id]['uri'])
         running_id = links[id]['running_id']
-        # DBG: print "Running id before connection", running_id
+        # DBG: print("Running id before connection", running_id)
         uri = links[id]['uri']
         try:
             con = links[id]['con'] = HTTPClient(uri=uri,
                                                 strong_ssl=links[id]['hard_ssl_name_check'],
                                                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions, exp:
+        except HTTPException as exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
-            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+            logger.info(
+                "Connection problem to the %s %s: %s", type, links[id]['name'],
+                exp
+            )
             links[id]['con'] = None
             return
 
@@ -260,12 +267,16 @@ class Broker(BaseSatellite):
                     con.get('fill_initial_broks', {'bname': self.name}, wait='long')
             # Ok all is done, we can save this new running id
             links[id]['running_id'] = new_run_id
-        except HTTPExceptions, exp:
-            logger.info("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
+        except HTTPException as exp:
+            logger.info(
+                "Connection problem to the %s %s: %s",
+                type, links[id]['name'], exp)
             links[id]['con'] = None
             return
-        except KeyError, exp:
-            logger.info("the %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
+        except KeyError as exp:
+            logger.info(
+                "the %s '%s' is not initialized: %s",
+                type, links[id]['name'], exp)
             links[id]['con'] = None
             traceback.print_stack()
             return
@@ -281,10 +292,11 @@ class Broker(BaseSatellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception, exp:
-                logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later",
-                               mod.get_name(), str(exp))
+            except Exception as exp:
+                logger.debug(exp.__dict__)
+                logger.warning(
+                    "The mod %s raise an exception: %s, I'm tagging it to restart later",
+                   mod.get_name(), exp)
                 logger.warning("Exception type: %s", type(exp))
                 logger.warning("Back trace of this kill: %s", traceback.format_exc())
                 self.modules_manager.set_to_restart(mod)
@@ -336,43 +348,45 @@ class Broker(BaseSatellite):
                     t0 = time.time()
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
-                    tmp_broks = con.get(
+                    payload = con.get(
                         'get_broks',
                         {'bname': self.name, 'broks_batch': self.broks_batch},
                         wait='long')
                     try:
-                        _t = base64.b64decode(tmp_broks)
-                        _t = zlib.decompress(_t)
-                        tmp_broks = cPickle.loads(_t)
-                    except (TypeError, zlib.error, cPickle.PickleError), exp:
+                        broks = deserialize(payload)
+                    except (TypeError, SerializeError) as exp:
                         logger.error('Cannot load broks data from %s : %s',
                                      links[sched_id]['name'], exp)
                         links[sched_id]['con'] = None
                         continue
-                    logger.debug("%s Broks get in %s", len(tmp_broks), time.time() - t0)
-                    for b in tmp_broks:
+                    logger.debug("%s Broks get in %s", len(broks), time.time() - t0)
+                    for b in broks:
                         b.instance_id = links[sched_id]['instance_id']
                     # Ok, we can add theses broks to our queues
-                    self.add_broks_to_queue(tmp_broks)
+                    self.add_broks_to_queue(broks)
                 else:  # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
-            except KeyError, exp:
-                logger.debug("Key error for get_broks : %s", str(exp))
+            except KeyError as exp:
+                logger.debug("Key error for get_broks : %s", exp)
                 self.pynag_con_init(sched_id, type=type)
-            except HTTPExceptions, exp:
-                logger.warning("Connection problem to the %s %s: %s",
-                               type, links[sched_id]['name'], str(exp))
+            except HTTPException as exp:
+                logger.warning(
+                    "Connection problem to the %s %s: %s",
+                    type, links[sched_id]['name'], exp
+                )
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
-            except AttributeError, exp:
-                logger.warning("The %s %s should not be initialized: %s",
-                               type, links[sched_id]['name'], str(exp))
+            except AttributeError as exp:
+                logger.warning(
+                    "The %s %s should not be initialized: %s",
+                    type, links[sched_id]['name'], exp
+                )
             # scheduler must not have checks
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
-            except Exception, x:
-                logger.error(str(x))
+            except Exception as e:
+                logger.error(e)
                 logger.error(traceback.format_exc())
                 sys.exit(1)
 
@@ -721,7 +735,7 @@ class Broker(BaseSatellite):
                 return
             self.setup_new_conf()
 
-        # Now we check if arbiter speak to us in the pyro_daemon.
+        # Now we check if arbiter speak to us in the http_daemon.
         # If so, we listen for it
         # When it pushes conf to us, we reinit connections
         self.watch_for_new_conf(0.0)
@@ -800,7 +814,7 @@ class Broker(BaseSatellite):
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
             # We un serialize the brok before consume it
-            b.prepare()
+            #b.prepare()
             _t = time.time()
             self.manage_brok(b)
             statsmgr.timing('core.broker.manage-brok', time.time() - _t, 'perf')
@@ -863,6 +877,6 @@ class Broker(BaseSatellite):
             # Now the main loop
             self.do_mainloop()
 
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise

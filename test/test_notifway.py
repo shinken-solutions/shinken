@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 from shinken_test import unittest, ShinkenTest
@@ -36,14 +38,14 @@ class TestConfig(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the contact"
+        print("Get the contact")
         now = time.time()
         contact = self.sched.contacts.find_by_name("test_contact")
-        print "The contact", contact.__dict__
+        print("The contact", contact.__dict__)
 
-        print "All notification Way:"
+        print("All notification Way:")
         for nw in self.sched.notificationways:
-            print "\t", nw.notificationway_name
+            print("\t", nw.notificationway_name)
 
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
         self.assertIn(email_in_day, contact.notificationways)
@@ -59,20 +61,20 @@ class TestConfig(ShinkenTest):
         self.assertEqual(0, email_in_day.min_business_impact)
         self.assertEqual(5, sms_the_night.min_business_impact)
 
-        print "Contact notification way(s):"
+        print("Contact notification way(s):")
         for nw in contact.notificationways:
-            print "\t", nw.notificationway_name
+            print("\t", nw.notificationway_name)
             for c in nw.service_notification_commands:
-                print "\t\t", c.get_name()
+                print("\t\t", c.get_name())
 
         contact_simple = self.sched.contacts.find_by_name("test_contact_simple")
         # It's the created notifway for this simple contact
         test_contact_simple_inner_notificationway = self.sched.notificationways.find_by_name("test_contact_simple_inner_notificationway")
-        print "Simple contact"
+        print("Simple contact")
         for nw in contact_simple.notificationways:
-            print "\t", nw.notificationway_name
+            print("\t", nw.notificationway_name)
             for c in nw.service_notification_commands:
-                print "\t\t", c.get_name()
+                print("\t\t", c.get_name())
         self.assertIn(test_contact_simple_inner_notificationway, contact_simple.notificationways)
 
         # we take as criticity a huge value from now

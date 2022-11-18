@@ -25,6 +25,8 @@
 
 # This Class is an example of a broker  module
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 from shinken.basemodule import BaseModule
@@ -44,7 +46,7 @@ def get_instance(mod_conf):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_broker(BaseModule):
 
     def __init__(self, mod_conf):
@@ -56,7 +58,7 @@ class Dummy_broker(BaseModule):
         logger.info("[Dummy Broker] Initialization of the dummy broker module")
 
 
-    
+
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_proctitle(self.name)

@@ -38,6 +38,8 @@ apache_md5_crypt() provides a function compatible with Apache's
 
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 MAGIC = '$1$'  # Magic string
 ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -149,4 +151,4 @@ def unix_md5_crypt(pw, salt, magic=None):
 md5crypt = unix_md5_crypt
 
 if __name__ == "__main__":
-    print unix_md5_crypt("cat", "hat")
+    print(unix_md5_crypt("cat", "hat"))

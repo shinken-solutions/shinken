@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 import getopt
 
@@ -32,9 +34,9 @@ def main(argv):
             if o == "-m":
                 try:
                     exec("import " + a)
-                    print "OK"
+                    print("OK")
                 except Exception:
-                    print "KO"
+                    print("KO")
                     ret = 2
     except Exception:
         ret = 1

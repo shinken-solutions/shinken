@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import sys
 import shlex
@@ -79,7 +81,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
 # For a specific host, ask all VM on it to the VCenter
 def get_vm_of_host(check_esx_path, vcenter, host, user, password):
-    print "Listing host", host
+    print("Listing host", host)
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
                    '-l', 'runtime', '-s', 'list']
@@ -123,8 +125,8 @@ def write_output(r, path):
         f.write(buf)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s wrote" % path
-    except IOError, exp:
+        print("File %s wrote" % path)
+    except IOError as exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))
 
 
@@ -139,10 +141,10 @@ def main(check_esx_path, vcenter, user, password, output, rules):
             res[host] = lst
 
     r = create_all_links(res, rules)
-    print "Created %d links" % len(r)
+    print("Created %d links" % len(r))
 
     write_output(r, output)
-    print "Finished!"
+    print("Finished!")
 
 
 # Here we go!

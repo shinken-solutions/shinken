@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -36,7 +38,7 @@ class TestMissingObjectValue(ShinkenTest):
         # in the main config file
         #
 
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.conf.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

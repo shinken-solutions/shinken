@@ -26,6 +26,10 @@
 """ This class is a base class for nearly all configuration
  elements like service, hosts or contacts.
 """
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import time
 import itertools
 from shinken.util import safe_print
@@ -101,7 +105,7 @@ class Item(object):
                 elif key.startswith('_'):  # custom macro, not need to detect something here
                     _t = params[key]
                     # If it's a string, directly use this
-                    if isinstance(_t, basestring):
+                    if isinstance(_t, six.string_types):
                         val = _t
                     # aa list for a custom macro is not managed (conceptually invalid)
                     # so take the first defined
@@ -122,25 +126,19 @@ class Item(object):
 
             # checks for attribute value special syntax (+ or _)
             # we can have '+param' or ['+template1' , 'template2']
-            if isinstance(val, str) and len(val) >= 1 and val[0] == '+':
+            if isinstance(val, six.string_types) and val.startswith('+'):
                 err = "A + value for a single string is not handled"
                 self.configuration_errors.append(err)
-                continue
-
-            if (isinstance(val, list) and
-                    len(val) >= 1 and
-                    isinstance(val[0], unicode) and
-                    len(val[0]) >= 1 and
-                    val[0][0] == '+'):
+            elif isinstance(val, list) and val and \
+               isinstance(val[0], six.string_types) and val[0].startswith('+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
-                val[0] = val[0][1:]
-                if key[0] == "_":
-
+                val[0] = val[0].lstrip("+")
+                if key.startswith("_"):
                     self.plus[key.upper()] = val  # we remove the +
                 else:
                     self.plus[key] = val   # we remove the +
-            elif key[0] == "_":
+            elif key.startswith("_"):
                 if isinstance(val, list):
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
@@ -213,7 +211,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        return str(self.__dict__)
 
 
     def is_tpl(self):
@@ -296,13 +294,12 @@ Like temporary attributes such as "imported_from", etc.. """
         for i in self.templates:
             value = i.get_property_by_inheritance(prop, deep_level + 1)
 
-            if value is not None and value != []:
+            if value:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
                 if isinstance(value, list) and value[0] == '+':
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
-                        value = list(value)
                         value = [x for x in value if x != '+']
                     still_loop = True
 
@@ -320,7 +317,6 @@ Like temporary attributes such as "imported_from", etc.. """
                         new_val.extend(value)
                         value = new_val
 
-
                 # Ok, we can set it
                 setattr(self, prop, value)
 
@@ -337,6 +333,7 @@ Like temporary attributes such as "imported_from", etc.. """
                             value.insert(0, '+')
                         setattr(self, prop, value)
                     return value
+
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
         # self.prop value after all
@@ -400,11 +397,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     def has_plus(self, prop):
-        try:
-            self.plus[prop]
-        except KeyError:
-            return False
-        return True
+        return prop in self.plus
 
 
     def get_all_plus_and_delete(self):
@@ -468,7 +461,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop in properties:
             if hasattr(self, prop):
                 v = getattr(self, prop)
-                # print prop, ":", v
+                # print(prop, ":", v)
                 r[prop] = v
         return r
 
@@ -565,19 +558,14 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop, entry in cls.properties.items():
             # Is this property need preparation for sending?
             if entry.conf_send_preparation is not None:
-                f = entry.conf_send_preparation
-                if f is not None:
-                    val = f(getattr(self, prop))
-                    setattr(self, prop, val)
-
-        if hasattr(cls, 'running_properties'):
-            for prop, entry in cls.running_properties.items():
-                # Is this property need preparation for sending?
-                if entry.conf_send_preparation is not None:
-                    f = entry.conf_send_preparation
-                    if f is not None:
-                        val = f(getattr(self, prop))
-                        setattr(self, prop, val)
+                val = entry.conf_send_preparation(getattr(self, prop))
+                setattr(self, prop, val)
+        running_properties = getattr(cls, 'running_properties', {})
+        for prop, entry in running_properties.items():
+            # Is this property need preparation for sending?
+            if entry.conf_send_preparation is not None:
+                val = entry.conf_send_preparation(getattr(self, prop))
+                setattr(self, prop, val)
 
 
     # Get the property for an object, with good value
@@ -657,17 +645,18 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
-        if hasattr(self, prop):
-            command = getattr(self, prop).strip()
-            if command != '':
-                parms = {}
-                for parm in ('poller_tag', 'reactionner_tag', 'priority'):
-                    if hasattr(self, parm):
-                        parms[parm] = getattr(self, parm)
-                cmdCall = CommandCall(commands, command, **parms)
-                setattr(self, prop, cmdCall)
-            else:
-                setattr(self, prop, None)
+        if not hasattr(self, prop):
+            return
+        command = getattr(self, prop).strip()
+        if command:
+            parms = {}
+            for parm in ('poller_tag', 'reactionner_tag', 'priority'):
+                if hasattr(self, parm):
+                    parms[parm] = getattr(self, parm)
+            cmdCall = CommandCall(commands, command, **parms)
+            setattr(self, prop, cmdCall)
+        else:
+            setattr(self, prop, None)
 
 
     # We look at the 'trigger' prop and we create a trigger for it
@@ -676,8 +665,10 @@ Like temporary attributes such as "imported_from", etc.. """
         if src:
             # Change on the fly the characters
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
-            t = triggers.create_trigger(src,
-                                        'inner-trigger-' + self.__class__.my_type + str(self.id))
+            t = triggers.create_trigger(
+                src,
+                'inner-trigger-%s%s' % (self.__class__.my_type,  self.id)
+            )
             if t:
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
@@ -688,7 +679,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
         self.triggers.extend([self.trigger_name])
-        # print "I am linking my triggers", self.get_full_name(), self.triggers
+        # print("I am linking my triggers", self.get_full_name(), self.triggers)
         new_triggers = []
         for tname in self.triggers:
             if tname == '':
@@ -698,10 +689,10 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
                 new_triggers.append(t)
             else:
-                self.configuration_errors.append('the %s %s does have a unknown trigger_name '
-                                                 '"%s"' % (self.__class__.my_type,
-                                                           self.get_full_name(),
-                                                           tname))
+                self.configuration_errors.append(
+                    'the %s %s does have a unknown trigger_name %s' %
+                    (self.__class__.my_type, self.get_full_name(), tname)
+                )
         self.triggers = new_triggers
 
 
@@ -952,7 +943,7 @@ class Items(object):
 
 
     def __iter__(self):
-        return self.items.itervalues()
+        return iter(self.items.values())
 
 
     def __len__(self):
@@ -1013,8 +1004,8 @@ class Items(object):
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.old_properties_names_to_new()
 
 
@@ -1053,10 +1044,9 @@ class Items(object):
             else:
                 if t is item:
                     self.configuration_errors.append(
-                        '%s %r use/inherits from itself ! Imported from: '
-                        '%s' % (type(item).__name__,
-                                item._get_name(),
-                                item.imported_from))
+                        '%s %r use/inherits from itself ! Imported from: %s' %
+                        (type(item).__name__, item._get_name(), item.imported_from)
+                    )
                 else:
                     tpls.append(t)
         item.templates = tpls
@@ -1066,8 +1056,8 @@ class Items(object):
     # graph too
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             self.linkify_item_templates(i)
         for i in self:
             i.tags = self.get_all_tags(i)
@@ -1095,7 +1085,7 @@ class Items(object):
 
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[items] %s", err)
 
@@ -1145,14 +1135,14 @@ class Items(object):
         s = ''
         cls = self.__class__
         for id in self.items:
-            s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
+            s += "%s:%s%s\n" % (cls, id, self.items[id])
         return s
 
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1171,8 +1161,8 @@ class Items(object):
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_customs_properties_by_inheritance(0)
 
 
@@ -1313,30 +1303,33 @@ class Items(object):
     # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
         for i in self:
-            if hasattr(i, prop):
-                command = getattr(i, prop).strip()
-                if command != '':
-                    cmdCall = self.create_commandcall(i, commands, command)
-                    # TODO: catch None?
-                    setattr(i, prop, cmdCall)
-                else:
-                    setattr(i, prop, None)
+            if not hasattr(i, prop):
+                continue
+            command = getattr(i, prop).strip()
+            if command:
+                cmdCall = self.create_commandcall(i, commands, command)
+                # TODO: catch None?
+                setattr(i, prop, cmdCall)
+            else:
+                setattr(i, prop, None)
 
 
     # Link a command list (commands with , between) in real CommandCalls
     def linkify_command_list_with_commands(self, commands, prop):
         for i in self:
-            if hasattr(i, prop):
-                coms = strip_and_uniq(getattr(i, prop))
-                com_list = []
-                for com in coms:
-                    if com != '':
-                        cmdCall = self.create_commandcall(i, commands, com)
-                        # TODO: catch None?
-                        com_list.append(cmdCall)
-                    else:  # TODO: catch?
-                        pass
-                setattr(i, prop, com_list)
+            if not hasattr(i, prop):
+                continue
+            coms = strip_and_uniq(getattr(i, prop))
+            com_list = []
+            for com in coms:
+                if com:
+                    #print("com: %s" % com)
+                    cmdCall = self.create_commandcall(i, commands, com)
+                    # TODO: catch None?
+                    com_list.append(cmdCall)
+                else:  # TODO: catch?
+                    pass
+            setattr(i, prop, com_list)
 
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
@@ -1403,11 +1396,11 @@ class Items(object):
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
-        # print "\n"*10, "looking for expression", expr
+        # print("\n"*10, "looking for expression", expr)
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        # print "\n"*10, "looking for expression", expr
+        # print("\n"*10, "looking for expression", expr)
         if look_in == 'hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
         else:  # templates
@@ -1451,7 +1444,7 @@ class Items(object):
             try:
                 hnames_list.extend(
                     self.get_hosts_from_hostgroups(hgnames, hostgroups))
-            except ValueError, e:
+            except ValueError as e:
                 item.configuration_errors.append(str(e))
 
         # Expands host names
@@ -1469,7 +1462,7 @@ class Items(object):
                 except KeyError:
                     pass
             elif h == '*':
-                [hnames.add(h.host_name) for h in hosts.items.itervalues()
+                [hnames.add(h.host_name) for h in hosts.items.values()
                  if getattr(h, 'host_name', '')]
             # Else it's a host to add, but maybe it's ALL
             else:

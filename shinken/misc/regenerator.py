@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 # Import all objects we will need
@@ -104,7 +106,7 @@ class Regenerator(object):
         c = sched.conf
         # Simulate a drop conf
         b = sched.get_program_status_brok()
-        b.prepare()
+        #b.prepare()
         self.manage_program_status_brok(b)
 
         # Now we will lie and directly map our objects :)
@@ -187,7 +189,7 @@ class Regenerator(object):
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:
+        except Exception as exp:
             logger.error("[Regen] Warning all done: %s" % exp)
             return
 
@@ -213,7 +215,7 @@ class Regenerator(object):
 
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
-            # print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            # print("Linking %s groups %s" % (h.get_name(), h.hostgroups))
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
                 hgname = hgname.strip()
@@ -447,7 +449,7 @@ class Regenerator(object):
             setattr(o, prop, [])
 
         new_v = []
-        # print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        # print("Linkify Dict SRV/Host", v, o.get_name(), prop)
         for name in v['services']:
             elts = name.split('/')
             hname = elts[0]
@@ -550,7 +552,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result:: Not good!  %s" % exp)
             return
         # logger.debug("Creating a host: %s in instance %d" % (hname, inst_id))
@@ -576,7 +578,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[regen] host_check_result:: Not good!   %s" % exp)
             return
 
@@ -602,7 +604,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_services = self.inp_services[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] host_check_result  Not good!  %s" % exp)
             return
         # logger.debug("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
@@ -628,7 +630,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] manage_initial_servicegroup_status_brok:: Not good!  %s" % exp)
             return
 
@@ -707,7 +709,7 @@ class Regenerator(object):
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
+        except Exception as exp:  # not good. we will cry in theprogram update
             logger.error("[Regen] manage_initial_contactgroup_status_brok Not good!  %s" % exp)
             return
 
@@ -729,15 +731,15 @@ class Regenerator(object):
     # if not: create it and declare it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        # print "Creating timeperiod", data
+        # print("Creating timeperiod", data)
         tpname = data['timeperiod_name']
 
         tp = self.timeperiods.find_by_name(tpname)
         if tp:
-            # print "Already existing timeperiod", tpname
+            # print("Already existing timeperiod", tpname)
             self.update_element(tp, data)
         else:
-            # print "Creating Timeperiod:", tpname
+            # print("Creating Timeperiod:", tpname)
             tp = Timeperiod({})
             self.update_element(tp, data)
             self.timeperiods.add_item(tp)
@@ -752,10 +754,10 @@ class Regenerator(object):
 
         c = self.commands.find_by_name(cname)
         if c:
-            # print "Already existing command", cname, "updating it"
+            # print("Already existing command", cname, "updating it")
             self.update_element(c, data)
         else:
-            # print "Creating a new command", cname
+            # print("Creating a new command", cname)
             c = Command({})
             self.update_element(c, data)
             self.commands.add_item(c)
@@ -795,7 +797,7 @@ class Regenerator(object):
 
         self.update_element(broker, data)
 
-        # print "CMD:", c
+        # print("CMD:", c)
         self.brokers[broker_name] = broker
 
 
@@ -976,7 +978,7 @@ class Regenerator(object):
         try:
             s = self.schedulers[scheduler_name]
             self.update_element(s, data)
-            # print "S:", s
+            # print("S:", s)
         except Exception:
             pass
 

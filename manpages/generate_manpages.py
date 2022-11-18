@@ -3,6 +3,8 @@
 # Author: Thibault Cohen <thibault.cohen@savoirfairelinux.com>
 # Inspired from http://docutils.sourceforge.net/tools/rst2man.py
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import locale
 import os
 try:

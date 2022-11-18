@@ -26,10 +26,13 @@
 """ This Class is the service one, s it manage all service specific thing.
 If you look at the scheduling part, look at the scheduling item class"""
 
-import time
-import re
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import itertools
+import time
 import uuid
+import re
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -53,11 +56,7 @@ from shinken.util import filter_service_by_regex_name
 from shinken.util import filter_service_by_host_name
 
 
-class Service(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
-
+class Service(six.with_metaclass(AutoSlots, SchedulingItem)):
     # Every service have a unique ID, and 0 is always special in
     # database and co...
     id = 1
@@ -82,7 +81,7 @@ class Service(SchedulingItem):
         'service_description':
             StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'display_name':
-            StringProp(default='', fill_brok=['full_status']),
+            StringProp(default='', fill_brok=['full_status'], no_slots=True),
         'servicegroups':
             ListProp(default=[], fill_brok=['full_status'],
                      brok_transformation=to_list_string_of_names, merging='join'),
@@ -279,7 +278,7 @@ class Service(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -698,7 +697,7 @@ class Service(SchedulingItem):
                     state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
-        # Juts print warnings, but raise errors
+        # Juts print(warnings, but raise errors)
         for err in self.configuration_warnings:
             logger.warning("[service::%s] %s", desc, err)
 
@@ -1018,9 +1017,10 @@ class Service(SchedulingItem):
 
     # The last time when the state was not OK
     def last_time_non_ok_or_up(self):
-        non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
-                                                                self.last_time_critical,
-                                                                self.last_time_unknown])
+        non_ok_times = list(filter(
+            lambda x: x > self.last_time_ok,
+            [self.last_time_warning, self.last_time_critical, self.last_time_unknown]
+        ))
         if len(non_ok_times) == 0:
             last_time_non_ok = 0  # program_start would be better
         else:
@@ -1396,8 +1396,8 @@ class Services(Items):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_property_by_inheritance(prop, 0)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1415,21 +1415,21 @@ class Services(Items):
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.get_customs_properties_by_inheritance(0)
 
 
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             self.linkify_item_templates(i)
 
         # Then we set the tags issued from the built templates
         # for i in self:
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(self.items.values(),
+                                 self.templates.values()):
             i.tags = self.get_all_tags(i)
 
 
@@ -1564,7 +1564,7 @@ class Services(Items):
                           (self.get_name(), hst_name)
                     s.configuration_warnings.append(err)
                     continue
-            except AttributeError, exp:
+            except AttributeError as exp:
                 pass  # Will be catch at the is_correct moment
 
     # We look for servicegroups property in services and
@@ -1833,7 +1833,7 @@ class Services(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        for s in self.items.values():
+        for s in list(self.items.values()):
             # items::explode_host_groups_into_hosts
             # take all hosts from our hostgroup_name into our host_name property
             self.explode_host_groups_into_hosts(s, hosts, hostgroups)

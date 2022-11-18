@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import copy
 from shinken_test import *
 
@@ -35,7 +37,7 @@ class TestHost(ShinkenTest):
     # Look if get_*_name return the good result
     def test_get_name(self):
         hst = self.get_hst()
-        print hst.get_dbg_name()
+        print(hst.get_dbg_name())
         self.assertEqual('test_host_0', hst.get_name())
         self.assertEqual('test_host_0', hst.get_dbg_name())
 
@@ -55,8 +57,8 @@ class TestHost(ShinkenTest):
         hst.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-            ## print getattr(hst_copy, p)
-            ## print getattr(hst, p)
+            ## print(getattr(hst_copy, p))
+            ## print(getattr(hst, p))
             self.assertEqual(getattr(hst, p), getattr(hst_copy, p) )
 
 
@@ -168,8 +170,8 @@ class TestHost(ShinkenTest):
         self.assertIn(h, r.childs)
         # and the reverse
         self.assertIn(r, h.parents)
-        print "r.childs", r.childs
-        print "h.childs", h.childs
+        print("r.childs", r.childs)
+        print("h.childs", h.childs)
 
         # And also in the parent/childs dep list
         self.assertIn(h, r.child_dependencies)

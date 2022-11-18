@@ -30,13 +30,14 @@ will find all scheduling related functions, like the schedule
 or the consume_check. It's a very important class!
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import re
 import random
 import time
 import traceback
 
-from item import Item
-
+from shinken.objects.item import Item
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
@@ -62,7 +63,7 @@ class SchedulingItem(Item):
     default_check_variant = "state"
     maintenance_downtime = None
 
-    # Call by pickle to data-ify the host
+    # Call by serialize to data-ify the host
     # we do a dict because list are too dangerous for
     # retention save and co :( even if it's more
     # extensive
@@ -116,7 +117,7 @@ class SchedulingItem(Item):
                 self.state_id = mapping[init_state]["state_id"]
             else:
                 err = "invalid initial_state: %s, should be one of %s" % (
-                    init_state, ", ".join(mapping.keys()))
+                    init_state, ", ".join(sorted(mapping.keys())))
                 self.configuration_errors.append(err)
 
         # Enforced check output
@@ -317,7 +318,7 @@ class SchedulingItem(Item):
             now = time.time()
             period = cm.modulation_period
             if period is None or period.is_time_valid(now):
-                # print "My self", self.get_name(), "go from crit",
+                # print("My self", self.get_name(), "go from crit",)
                 # self.business_impact, "to crit", cm.business_impact
                 self.business_impact = cm.business_impact
                 in_modulation = True
@@ -573,7 +574,7 @@ class SchedulingItem(Item):
                     if i is not None:
                         checks.append(i)
                 # else:
-                # print "DBG: **************** The state is FRESH",
+                # print("DBG: **************** The state is FRESH",)
                 # dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
 
@@ -805,7 +806,7 @@ class SchedulingItem(Item):
     # We do not need ours currents pending notifications,
     # so we zombify them and clean our list
     def remove_in_progress_notifications(self):
-        for n in self.notifications_in_progress.values():
+        for n in list(self.notifications_in_progress.values()):
             self.remove_in_progress_notification(n)
 
 
@@ -838,8 +839,8 @@ class SchedulingItem(Item):
         rt = event_handler.reactionner_tag
         e = EventHandler(cmd, timeout=cls.event_handler_timeout,
                          ref=self, reactionner_tag=rt)
-        # print "DBG: Event handler call created"
-        # print "DBG: ",e.__dict__
+        # print("DBG: Event handler call created")
+        # print("DBG: ",e.__dict__)
         self.raise_event_handler_log_entry(event_handler)
 
         # ok we can put it in our temp action queue
@@ -1005,24 +1006,6 @@ class SchedulingItem(Item):
     def consume_state_result(self, c):
         OK_UP = self.__class__.ok_up  # OK for service, UP for host
 
-        # Protect against bad type output
-        # if str, go in unicode
-        if isinstance(c.output, str):
-            c.output = c.output.decode('utf8', 'ignore')
-            c.long_output = c.long_output.decode('utf8', 'ignore')
-
-        # Same for current output
-        # TODO: remove in future version, this is need only for
-        # migration from old shinken version, that got output as str
-        # and not unicode
-        # if str, go in unicode
-        if isinstance(self.output, str):
-            self.output = self.output.decode('utf8', 'ignore')
-            self.long_output = self.long_output.decode('utf8', 'ignore')
-
-        if isinstance(c.perf_data, str):
-            c.perf_data = c.perf_data.decode('utf8', 'ignore')
-
         # We check for stalking if necessary
         # so if check is here
         self.manage_stalking(c)
@@ -1129,7 +1112,7 @@ class SchedulingItem(Item):
 
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
-            # print "Case 1 (OK following a previous OK):
+            # print("Case 1 (OK following a previous OK):)
             # code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
             # action in return can be notification or other checks (dependencies)
@@ -1145,7 +1128,7 @@ class SchedulingItem(Item):
         # OK following a NON-OK.
         elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
-            # print "Case 2 (OK following a NON-OK):
+            # print("Case 2 (OK following a NON-OK):)
             #  code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
@@ -1177,7 +1160,7 @@ class SchedulingItem(Item):
         # Volatile part
         # Only for service
         elif c.exit_status != 0 and getattr(self, 'is_volatile', False):
-            # print "Case 3 (volatile only)"
+            # print("Case 3 (volatile only)")
             # There are no repeated attempts, so the first non-ok results
             # in a hard state
             self.attempt = 1
@@ -1200,7 +1183,7 @@ class SchedulingItem(Item):
 
         # NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
-            # print "Case 4: NON-OK follows OK: code:%s last_state:%s" %
+            # print("Case 4: NON-OK follows OK: code:%s last_state:%s" %)
             #  (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
@@ -1231,7 +1214,7 @@ class SchedulingItem(Item):
         # check at self.max_check_attempts
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
-            # print "Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" %
+            # print("Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" %)
             # (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
                 if not c.is_dependent():
@@ -1268,7 +1251,7 @@ class SchedulingItem(Item):
                 # not restart notifications)
                 if self.state != self.last_state:
                     self.update_hard_unknown_phase_state()
-                    # print self.last_state, self.last_state_type, self.state_type, self.state
+                    # print(self.last_state, self.last_state_type, self.state_type, self.state)
                     if not self.in_hard_unknown_reach_phase and not \
                             self.was_in_hard_unknown_reach_phase:
                         self.unacknowledge_problem_if_not_sticky()
@@ -1337,12 +1320,10 @@ class SchedulingItem(Item):
         # Get data from check
         self.last_maintenance_chk = int(c.check_time)
         self.maintenance_check_output = c.output
-        if isinstance(self.maintenance_check_output, str):
-            self.maintenance_check_output = self.maintenance_check_output.decode('utf8', 'ignore')
 
         # Item is in production
         if c.in_timeout is True:
-            logger.warn(
+            logger.warning(
                 "[%s] maintenance check went in timeout, result ignored" %
                 self.get_full_name())
         elif c.exit_status == 0:
@@ -1677,7 +1658,7 @@ class SchedulingItem(Item):
                       dependency_check=True)
 
             self.actions.append(c)
-            # print "Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id)
+            # print("Creating new check with new id : %d, old id : %d" % (c.id, c_in_progress.id))
             return c.id
 
         if force or check_variant != self.default_check_variant or \
@@ -1800,7 +1781,7 @@ class SchedulingItem(Item):
 
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
-            # print "Got rule", elts, cmd
+            # print("Got rule", elts, cmd)
             self.got_business_rule = True
             rule = ''
             if len(elts) >= 2:
@@ -1819,7 +1800,7 @@ class SchedulingItem(Item):
 
                 fact = DependencyNodeFactory(self)
                 node = fact.eval_cor_pattern(rule, hosts, services, running)
-                # print "got node", node
+                # print("got node", node)
                 self.processed_business_rule = rule
                 self.business_rule = node
 
@@ -1916,7 +1897,7 @@ class SchedulingItem(Item):
     # We ask us to manage our own internal check,
     # like a business based one
     def manage_internal_check(self, hosts, services, c):
-        # print "DBG, ask me to manage a check!"
+        # print("DBG, ask me to manage a check!")
         if c.command.startswith('bp_'):
             try:
                 # Re evaluate the business rule to take into account macro
@@ -1927,7 +1908,7 @@ class SchedulingItem(Item):
                 self.create_business_rules(hosts, services, running=True)
                 state = self.business_rule.get_state()
                 c.output = self.get_business_rule_output()
-            except Exception, e:
+            except Exception as e:
                 # Notifies the error, and return an UNKNOWN state.
                 c.output = "Error while re-evaluating business rule: %s" % e
                 logger.debug("[%s] Error while re-evaluating business rule:\n%s",
@@ -1946,18 +1927,18 @@ class SchedulingItem(Item):
         c.long_output = c.output
         c.check_time = time.time()
         c.exit_status = state
-        # print "DBG, setting state", state
+        # print("DBG, setting state", state)
 
 
     # If I'm a business rule service/host, I register myself to the
     # elements I will depend on, so They will have ME as an impact
     def create_business_rules_dependencies(self):
         if self.got_business_rule:
-            # print "DBG: ask me to register me in my dependencies", self.get_name()
+            # print("DBG: ask me to register me in my dependencies", self.get_name())
             elts = self.business_rule.list_all_elements()
             # I will register myself in this
             for e in elts:
-                # print "I register to the element", e.get_name()
+                # print("I register to the element", e.get_name())
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
                 # Enforces child hosts/services notification options if told to
@@ -1979,8 +1960,8 @@ class SchedulingItem(Item):
         for t in self.triggers:
             try:
                 t.eval(self)
-            except Exception, exp:
+            except Exception as exp:
                 logger.error(
                     "We got an exception from a trigger on %s for %s",
-                    self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())
+                    self.get_full_name(), traceback.format_exc()
                 )

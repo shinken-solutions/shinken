@@ -1,13 +1,19 @@
 FROM fedora:25
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python
-RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install libcurl-devel
-#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install gcc
-#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install gcc-c++
-#RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install redhat-rpm-config
-RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python-devel
-RUN       yum  --nogpgcheck  -y  --rpmverbosity=error  --errorlevel=1  --color=auto install python-pycurl
+RUN        dnf --nogpgcheck  -y install python-bottle
+RUN        dnf --nogpgcheck  -y install python-cherrypy
+RUN        dnf --nogpgcheck  -y install python-pycurl
+RUN        dnf --nogpgcheck  -y install python-setuptools
+RUN        dnf --nogpgcheck  -y install python-six
+RUN        dnf --nogpgcheck  -y install python3-bottle
+RUN        dnf --nogpgcheck  -y install python3-cherrypy
+RUN        dnf --nogpgcheck  -y install python3-pycurl
+RUN        dnf --nogpgcheck  -y install python3-setuptools
+RUN        dnf --nogpgcheck  -y install python3-six
+RUN        dnf --nogpgcheck  -y install which
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 

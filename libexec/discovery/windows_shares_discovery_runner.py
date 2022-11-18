@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import optparse
 import subprocess
 
@@ -27,7 +29,7 @@ VERSION = '1.0'
 
 def p_debug(s):
     if debug:
-        print "DEBUG:", s
+        print("DEBUG:", s)
 
 def get_elements(line):
     elts = line.split('|', 2)
@@ -69,15 +71,15 @@ try:
         cmd,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         close_fds=True)
-except OSError, exp:
-    print "Error in launching command:", cmd, exp
+except OSError as exp:
+    print("Error in launching command:", cmd, exp)
     raise SystemExit(2)
 
 p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
-    print "Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata)
+    print("Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata))
     raise SystemExit(2)
 
 disks = []
@@ -99,9 +101,9 @@ for line in stdoutdata.splitlines():
 
 
 if len(disks) > 0:
-    print "%s::shares_detected=1" % hostname
-    print "%s::_shares=%s" % (hostname, ','.join(disks))
+    print("%s::shares_detected=1" % hostname)
+    print("%s::_shares=%s" % (hostname, ','.join(disks)))
 
 if len(printers) > 0:
-    print "%s::printers_detected=1" % hostname
-    print "%s::_printers=%s" % (hostname, ','.join(printers))
+    print("%s::printers_detected=1" % hostname)
+    print("%s::_printers=%s" % (hostname, ','.join(printers)))

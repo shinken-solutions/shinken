@@ -26,6 +26,8 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
 from shinken.basemodule import BaseModule
@@ -46,7 +48,7 @@ def get_instance(plugin):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_arbiter(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)

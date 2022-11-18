@@ -23,10 +23,11 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 from shinken.external_command import ExternalCommandManager
 import os
-import cPickle
 
 
 class TestConfig(ShinkenTest):
@@ -38,7 +39,7 @@ class TestConfig(ShinkenTest):
 
     def send_cmd(self, line):
         s = '[%d] %s\n' % (int(time.time()), line)
-        print "Writing %s in %s" % (s, self.conf.command_file)
+        print("Writing %s in %s" % (s, self.conf.command_file))
         fd = open(self.conf.command_file, 'wb')
         fd.write(s)
         fd.close()
@@ -77,7 +78,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', host.state)
         self.assertEqual('Bob is not happy', host.output)
-        print "perf (%s)" % host.perf_data
+        print("perf (%s)" % host.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', host.perf_data)
 
         # The same with a service
@@ -87,7 +88,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('WARNING', svc.state)
         self.assertEqual('Bobby is not happy', svc.output)
-        print "perf (%s)" % svc.perf_data
+        print("perf (%s)" % svc.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', svc.perf_data)
 
         # ACK SERVICE
@@ -137,9 +138,9 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
         self.assertEqual('Bob is not happy', router.output)
-        print "perf (%s)" % router.perf_data
+        print("perf (%s)" % router.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
-        print "Is the last check agree?", past, router.last_chk
+        print("Is the last check agree?", past, router.last_chk)
         self.assertEqual(router.last_chk, past)
 
         # Now an even earlier check, should NOT be take
@@ -150,9 +151,9 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assertEqual('DOWN', router.state)
         self.assertEqual('Bob is not happy', router.output)
-        print "perf (%s)" % router.perf_data
+        print("perf (%s)" % router.perf_data)
         self.assertEqual('rtt=9999;5;10;0;10000', router.perf_data)
-        print "Is the last check agree?", very_past, router.last_chk
+        print("Is the last check agree?", very_past, router.last_chk)
         self.assertEqual(router.last_chk, past)
 
         # Now with crappy characters, like é
@@ -168,7 +169,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] ACKNOWLEDGE_HOST_PROBLEM;test_router_0;2;1;1;Big brother;test' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        print "Host state", host.state, host.problem_has_been_acknowledged
+        print("Host state", host.state, host.problem_has_been_acknowledged)
         self.assertEqual('DOWN', host.state)
         self.assertEqual(True, host.problem_has_been_acknowledged)
 
@@ -176,7 +177,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] REMOVE_HOST_ACKNOWLEDGEMENT;test_router_0' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(2, [])
-        print "Host state", host.state, host.problem_has_been_acknowledged
+        print("Host state", host.state, host.problem_has_been_acknowledged)
         self.assertEqual('DOWN', host.state)
         self.assertEqual(False, host.problem_has_been_acknowledged)
 
@@ -264,25 +265,25 @@ class TestConfig(ShinkenTest):
         # unknown_host_check_result_brok
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy'
         expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': None}
-        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        result = ExternalCommandManager.get_unknown_check_result_brok(excmd).data
         self.assertEqual(expected, result)
 
         # unknown_host_check_result_brok with perfdata
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999'
         expected = {'time_stamp': 1234567890, 'return_code': '2', 'host_name': 'test_host_0', 'output': 'Bob is not happy', 'perf_data': 'rtt=9999'}
-        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        result = ExternalCommandManager.get_unknown_check_result_brok(excmd).data
         self.assertEqual(expected, result)
 
         # unknown_service_check_result_brok
         excmd = '[1234567890] PROCESS_HOST_CHECK_RESULT;host-checked;0;Everything OK'
         expected = {'time_stamp': 1234567890, 'return_code': '0', 'host_name': 'host-checked', 'output': 'Everything OK', 'perf_data': None}
-        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        result = ExternalCommandManager.get_unknown_check_result_brok(excmd).data
         self.assertEqual(expected, result)
 
         # unknown_service_check_result_brok with perfdata
         excmd = '[1234567890] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000'
         expected = {'host_name': 'test_host_0', 'time_stamp': 1234567890, 'service_description': 'test_ok_0', 'return_code': '1', 'output': 'Bobby is not happy', 'perf_data': 'rtt=9999;5;10;0;10000'}
-        result = cPickle.loads(ExternalCommandManager.get_unknown_check_result_brok(excmd).data)
+        result = ExternalCommandManager.get_unknown_check_result_brok(excmd).data
         self.assertEqual(expected, result)
 
     def test_change_and_reset_modattr(self):

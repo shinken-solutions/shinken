@@ -124,10 +124,7 @@ is used for check_cpu. Split this string using & as a separator to understand it
 
 Shinken uses the templates that matches the check_command, like pnp does.
 
-.. important::  The suggested configuration below is not final and has just been created, the
-documentation needs to be updated for the correct usage of the .graph templates used in WebUI.
-There are a number of the already created, see the existing packs to learn how to use them
-properly.
+.. important::  The suggested configuration below is not final and has just been created, the documentation needs to be updated for the correct usage of the .graph templates used in WebUI. There are a number of the already created, see the existing packs to learn how to use them properly.
 
 Sorry for the inconvenience.
 

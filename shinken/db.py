@@ -22,6 +22,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
+
 
 class DB(object):
     """DB is a generic class for SQL Database"""
@@ -29,25 +33,13 @@ class DB(object):
     def __init__(self, table_prefix=''):
         self.table_prefix = table_prefix
 
-    def stringify(self, val):
-        """Get a unicode from a value"""
-        # If raw string, go in unicode
-        if isinstance(val, str):
-            val = val.decode('utf8', 'ignore').replace("'", "''")
-        elif isinstance(val, unicode):
-            val = val.replace("'", "''")
-        else:  # other type, we can str
-            val = unicode(str(val))
-            val = val.replace("'", "''")
-        return val
-
     def create_insert_query(self, table, data):
         """Create a INSERT query in table with all data of data (a dict)"""
-        query = u"INSERT INTO %s " % (self.table_prefix + table)
-        props_str = u' ('
-        values_str = u' ('
+        query = "INSERT INTO %s " % (self.table_prefix + table)
+        props_str = ' ('
+        values_str = ' ('
         i = 0  # f or the ',' problem... look like C here...
-        for prop in data:
+        for prop in sorted(data.keys()):
             i += 1
             val = data[prop]
             # Boolean must be catch, because we want 0 or 1, not True or False
@@ -57,56 +49,51 @@ class DB(object):
                 else:
                     val = 0
 
-            # Get a string of the value
-            val = self.stringify(val)
-
             if i == 1:
-                props_str = props_str + u"%s " % prop
-                values_str = values_str + u"'%s' " % val
+                props_str = props_str + "%s " % prop
+                values_str = values_str + "'%s' " % val
             else:
-                props_str = props_str + u", %s " % prop
-                values_str = values_str + u", '%s' " % val
+                props_str = props_str + ", %s " % prop
+                values_str = values_str + ", '%s' " % val
 
         # Ok we've got data, let's finish the query
-        props_str = props_str + u' )'
-        values_str = values_str + u' )'
-        query = query + props_str + u' VALUES' + values_str
+        props_str = props_str + ' )'
+        values_str = values_str + ' )'
+        query = query + props_str + ' VALUES' + values_str
         return query
 
     def create_update_query(self, table, data, where_data):
         """Create a update query of table with data, and use where data for
         the WHERE clause
         """
-        query = u"UPDATE %s set " % (self.table_prefix + table)
+        query = "UPDATE %s set " % (self.table_prefix + table)
 
         # First data manage
         query_follow = ''
         i = 0  # for the , problem...
-        for prop in data:
+        for prop in sorted(data.keys()):
             # Do not need to update a property that is in where
             # it is even dangerous, will raise a warning
-            if prop not in where_data:
-                i += 1
-                val = data[prop]
-                # Boolean must be catch, because we want 0 or 1, not True or False
-                if isinstance(val, bool):
-                    if val:
-                        val = 1
-                    else:
-                        val = 0
-
-                # Get a string of the value
-                val = self.stringify(val)
-
-                if i == 1:
-                    query_follow += u"%s='%s' " % (prop, val)
+            if prop in where_data:
+                continue
+            i += 1
+            val = data[prop]
+            # Boolean must be catch, because we want 0 or 1, not True or False
+            if isinstance(val, bool):
+                if val:
+                    val = 1
                 else:
-                    query_follow += u", %s='%s' " % (prop, val)
+                    val = 0
+
+            if i == 1:
+                query_follow += "%s='%s' " % (prop, val)
+            else:
+                query_follow += ", %s='%s' " % (prop, val)
 
         # Ok for data, now WHERE, same things
-        where_clause = u" WHERE "
+        where_clause = " WHERE "
         i = 0  # For the 'and' problem
-        for prop in where_data:
+        for prop in sorted(where_data.keys()):
             i += 1
             val = where_data[prop]
             # Boolean must be catch, because we want 0 or 1, not True or False
@@ -116,13 +103,10 @@ class DB(object):
                 else:
                     val = 0
 
-            # Get a string of the value
-            val = self.stringify(val)
-
             if i == 1:
-                where_clause += u"%s='%s' " % (prop, val)
+                where_clause += "%s='%s' " % (prop, val)
             else:
-                where_clause += u"and %s='%s' " % (prop, val)
+                where_clause += "and %s='%s' " % (prop, val)
 
         query = query + query_follow + where_clause
         return query

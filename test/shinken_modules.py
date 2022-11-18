@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import re
 import copy
@@ -58,9 +60,9 @@ class ShinkenModulesTest(ShinkenTest):
         ids.sort()
         for brok_id in ids:
             brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
+            #print("Managing a brok type", brok.type, "of id", brok_id)
             #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
+            #    print("Problem?", brok.data['is_problem'])
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             brok.prepare()
@@ -108,7 +110,7 @@ class ShinkenModulesTest(ShinkenTest):
                     f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
-            print "errors during load", s
+            print("errors during load", s)
         del self.livestatus_broker.debug_output
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
@@ -162,9 +164,9 @@ class TestConfig(ShinkenModulesTest):
         ids.sort()
         for brok_id in ids:
             brok = self.sched.brokers['Default-Broker']['broks'][brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
+            #print("Managing a brok type", brok.type, "of id", brok_id)
             #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
+            #    print("Problem?", brok.data['is_problem'])
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             brok.prepare()
@@ -181,15 +183,15 @@ class TestConfig(ShinkenModulesTest):
         text2 = text2.replace("200           1", "200           0")
         text1 = text1.rstrip()
         text2 = text2.rstrip()
-        #print "text1 //%s//" % text1
-        #print "text2 //%s//" % text2
+        #print("text1 //%s//" % text1)
+        #print("text2 //%s//" % text2)
         sorted1 = "\n".join(sorted(text1.split("\n")))
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
         len2 = len(text2.split("\n"))
-        #print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
-        #print "text1 //%s//" % sorted(text1.split("\n"))
-        #print "text2 //%s//" % sorted(text2.split("\n"))
+        #print("%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2))
+        #print("text1 //%s//" % sorted(text1.split("\n")))
+        #print("text2 //%s//" % sorted(text2.split("\n")))
         if sorted1 == sorted2 and len1 == len2:
             return True
         else:
@@ -202,22 +204,22 @@ class TestConfig(ShinkenModulesTest):
             [line for line in sorted(text1.split("\n"))]
             data1 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text1.split("\n")) if line]]
             data2 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text2.split("\n")) if line]]
-            #print "text1 //%s//" % data1
-            #print "text2 //%s//" % data2
+            #print("text1 //%s//" % data1)
+            #print("text2 //%s//" % data2)
             # cmp is clever enough to handle nested arrays
             return cmp(data1, data2) == 0
 
     def show_broks(self, title):
         print
-        print "--- ", title
+        print("--- ", title)
         for brok in sorted(self.sched.broks, lambda x, y: x.id - y.id):
             if re.compile('^service_').match(brok.type):
                 pass
-                #print "BROK:", brok.type
-                #print "BROK   ", brok.data['in_checking']
+                #print("BROK:", brok.type)
+                #print("BROK   ", brok.data['in_checking'])
         self.update_broker()
         request = 'GET services\nColumns: service_description is_executing\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
+        print(response)
 
 

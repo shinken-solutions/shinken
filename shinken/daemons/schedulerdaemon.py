@@ -22,11 +22,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import six
 import os
 import signal
 import time
 import traceback
-import cPickle
 import zlib
 import base64
 import sys
@@ -38,8 +40,9 @@ from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
-from shinken.util import nighty_five_percent, parse_memory_expr, free_memory
+from shinken.util import nighty_five_percent, parse_memory_expr, free_memory, to_bool
 from shinken.stats import statsmgr
+from shinken.serializer import serialize, deserialize
 
 
 # Interface for Workers
@@ -54,12 +57,15 @@ if not, they must drop their checks """
     #    return self.running_id
 
     # poller or reactionner ask us actions
-    def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'],
-                   reactionner_tags=['None'], worker_name='none',
-                   module_types=['fork'], max_actions=None):
-        # print "We ask us checks"
-        do_checks = (do_checks == 'True')
-        do_actions = (do_actions == 'True')
+    def get_checks(self, do_checks=False, do_actions=False, poller_tags='None',
+                   reactionner_tags='None', worker_name='none',
+                   module_types='fork', max_actions=None):
+        # print("We ask us checks")
+        do_checks = to_bool(do_checks)
+        do_actions = to_bool(do_actions)
+        poller_tags = [t.strip() for t in poller_tags.split(",") if t.strip()]
+        reactionner_tags = [t.strip() for t in reactionner_tags.split(",") if t.strip()]
+        module_types = [t.strip() for t in module_types.split(",") if t.strip()]
         if max_actions is not None:
             try:
                 max_actions = int(max_actions)
@@ -67,14 +73,19 @@ if not, they must drop their checks """
                 logger.error("Invalid max_actions in get_checks, should be an "
                              "integer. Igored.")
                 max_actions = None
-        res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags,
-                                         reactionner_tags, worker_name,
-                                         module_types, max_actions)
-        # print "Sending %d checks" % len(res)
+        res = self.app.get_to_run_checks(
+            do_checks,
+            do_actions,
+            poller_tags,
+            reactionner_tags,
+            worker_name,
+            module_types,
+            max_actions
+        )
+        # print("Sending %d checks" % len(res))
         self.app.nb_checks_send += len(res)
 
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
-        # return zlib.compress(cPickle.dumps(res), 2)
+        return serialize(res)
     get_checks.encode = 'raw'
 
 
@@ -91,8 +102,8 @@ if not, they must drop their checks """
 
         # for c in results:
         # self.sched.put_results(c)
-        return True
-    put_results.method = 'post'
+        return serialize(True)
+    put_results.method = 'PUT'
     put_results.need_lock = False
 
 
@@ -108,7 +119,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         if bname not in self.app.brokers:
             self.fill_initial_broks(bname)
 
-        if broks_batch > 0:
+        if broks_batch:
             try:
                 broks_batch = int(broks_batch)
             except ValueError:
@@ -122,8 +133,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
-        # return zlib.compress(cPickle.dumps(res), 2)
+        return serialize(res)
     get_broks.encode = 'raw'
 
 
@@ -183,13 +193,13 @@ class IForArbiter(IArb):
     # it can send us global command, or specific ones
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
-    run_external_commands.method = 'POST'
+    run_external_commands.method = 'PUT'
 
 
     def put_conf(self, conf):
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
-    put_conf.method = 'POST'
+    put_conf.method = 'PUT'
 
 
     # Call by arbiter if it thinks we are running but we must not (like
@@ -212,13 +222,13 @@ class Injector(Interface):
 
         # first we need to get a real code object
         import marshal
-        print "Calling Inject mode"
+        print("Calling Inject mode")
         code = marshal.loads(bincode)
         result = None
         exec code
         try:
             return result
-        except NameError, exp:
+        except NameError as exp:
             return None
 '''
 
@@ -400,7 +410,7 @@ class Shinken(BaseSatellite):
                           statsd_pattern=statsd_pattern)
 
         t0 = time.time()
-        conf = cPickle.loads(conf_raw)
+        conf = deserialize(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs", t0, time.time() - t0)
 
         if harakiri_threshold is not None:
@@ -467,17 +477,17 @@ class Shinken(BaseSatellite):
 
         # First mix conf and override_conf to have our definitive conf
         for prop in self.override_conf:
-            # print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
+            # print("Overriding the property %s with value %s" % (prop, self.override_conf[prop]))
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
 
         if self.conf.use_timezone != '':
-            logger.debug("Setting our timezone to %s", str(self.conf.use_timezone))
+            logger.debug("Setting our timezone to %s", self.conf.use_timezone)
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
 
         if len(self.modules) != 0:
-            logger.debug("I've got %s modules", str(self.modules))
+            logger.debug("I've got %s modules", self.modules)
 
         # TODO: if scheduler had previous modules instanciated it must clean them!
         self.modules_manager.set_modules(self.modules)
@@ -512,7 +522,7 @@ class Shinken(BaseSatellite):
         # We must update our Config dict macro with good value
         # from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
-        # print "DBG: got macros", self.sched.conf.macros
+        # print("DBG: got macros", self.sched.conf.macros)
 
         # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
@@ -575,6 +585,6 @@ class Shinken(BaseSatellite):
             self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s", self.uri)
             self.do_mainloop()
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise

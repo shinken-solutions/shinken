@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import ShinkenTest, unittest
 from shinken.misc.regenerator import Regenerator
 from shinken.brok import Brok
@@ -23,7 +25,7 @@ class TestReversedList(ShinkenTest):
         reg = Regenerator()
         data = {"instance_id": 0}
         b = Brok('program_status', data)
-        b.prepare()
+        #b.prepare()
         reg.manage_program_status_brok(b)
         reg.all_done_linking(0)
 

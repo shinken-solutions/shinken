@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -33,8 +35,8 @@ class TestMultipleNotHG(ShinkenTest):
     def test_dummy(self):
 
         for s in self.sched.services:
-            print "SERVICES", s.get_full_name()
-        
+            print("SERVICES", s.get_full_name())
+
         svc = self.sched.services.find_srv_by_name_and_hostname("hst_in_BIG", "THE_SERVICE")
         self.assertIsNot(svc, None)
 

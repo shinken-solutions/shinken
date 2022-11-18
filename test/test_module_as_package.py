@@ -1,4 +1,4 @@
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from os.path import abspath, dirname, join
 
@@ -25,12 +25,11 @@ class TestModuleManager_And_Packages(ShinkenTest):
 
         mm = self.modulemanager = ModulesManager('broker', modules_dir, mods)
         mm.load_and_init()
-
         for mod in mm.imported_modules:
-            self.assertEqual(mod.expected_helpers_X, mod.helpers.X)
+            self.assertEqual(mod.expected_helpers_X, mod.helpers_X)
 
         mod1, mod2 = mm.imported_modules
-        self.assertNotEqual(mod1.helpers.X, mod2.helpers.X)
+        self.assertNotEqual(mod1.helpers_X, mod2.helpers_X)
 
 
 

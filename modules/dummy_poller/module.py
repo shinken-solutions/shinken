@@ -26,10 +26,15 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 import signal
 import time
-from Queue import Empty
+if sys.version.startswith("2.7"):
+    from Queue import Empty
+else:
+    from queue import Empty
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -50,7 +55,7 @@ def get_instance(mod_conf):
     return instance
 
 
-# Just print some stuff
+# Just print(some stuff)
 class Dummy_poller(BaseModule):
 
     def __init__(self, mod_conf):
@@ -73,7 +78,7 @@ class Dummy_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 logger.debug("[Dummy Poller] I, %d, got a message!", self.id)
-        except Empty, exp:
+        except Empty as exp:
             if len(self.checks) == 0:
                 time.sleep(1)
 
@@ -98,7 +103,7 @@ class Dummy_poller(BaseModule):
             to_del.append(action)
             try:
                 self.returns_queue.put(action)
-            except IOError, exp:
+            except IOError as exp:
                 logger.info("[Dummy Poller] %d exiting: %s", self.id, exp)
                 sys.exit(2)
         for chk in to_del:

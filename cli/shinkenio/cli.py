@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import pycurl
 import os
@@ -38,7 +39,6 @@ from shinken.log import logger, cprint
 CONFIG = None
 
 
-
 ############# ********************        PUBLISH           ****************###########
 
 def read_package_json(fd):
@@ -47,7 +47,7 @@ def read_package_json(fd):
     buf = buf.decode('utf8', 'ignore')
     try:
         package_json = json.loads(buf)
-    except ValueError, exp:
+    except ValueError as exp:
         logger.error("Bad package.json file : %s", exp)
         sys.exit(2)
     if not package_json:
@@ -125,7 +125,7 @@ def publish_archive(archive):
     c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return
@@ -177,7 +177,7 @@ def search(look_at):
     #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         return
 
@@ -207,11 +207,11 @@ def print_search_matches(matches):
     names = [p['name'] for p in matches]
     names = list(set(names))
     names.sort()
-    
+
     for p in matches:
         name = p['name']
         ps[name] = p
-    
+
     for name in names:
         p = ps[name]
         user_id = p['user_id']
@@ -224,7 +224,7 @@ def print_search_matches(matches):
 
 
 def do_search(*look_at):
-    # test for  generic search 
+    # test for  generic search
     if  look_at == ('all',):
         matches = []
         look_at = ('pack',)
@@ -250,11 +250,11 @@ def inventor(look_at):
     inventory = CONFIG['paths']['inventory']
     logger.debug("dumping inventory %s", inventory)
     # get all sub-direcotries
- 
+
     for d in os.listdir(inventory):
         if os.path.exists(os.path.join(inventory, d, 'package.json')):
             if not look_at or d in look_at:
-                print d
+                print(d)
             # If asked, dump the content.package content
             if look_at or d in look_at:
                 content_p = os.path.join(inventory, d, 'content.json')
@@ -263,7 +263,7 @@ def inventor(look_at):
                     continue
                 try:
                     j = json.loads(open(content_p, 'r').read())
-                except Exception, exp:
+                except Exception as exp:
                     logger.error('Bad %s file "%s"', content_p, exp)
                     continue
                 for d in j:
@@ -273,7 +273,7 @@ def inventor(look_at):
                     else:
                         s += '(f)'
                     s += d['name']
-                    print s
+                    print(s)
 
 
 def do_inventory(*look_at):
@@ -338,7 +338,7 @@ def grab_package(pname):
     #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return ''
@@ -499,7 +499,7 @@ def install_package(pname, raw, update_only=False):
         shutil.copytree(p_doc, doc_dest)
         logger.info("Copy done in the doc directory %s", doc_dest)
 
-        
+
     if not update_only:
         # Now install the pack from $TMP$/pack/* to $PACKS$/pname/*
         p_pack = os.path.join(tmpdir, 'pack')
@@ -554,7 +554,7 @@ def install_package(pname, raw, update_only=False):
     cont = open(os.path.join(p_inv, 'content.json'), 'w')
     cont.write(json.dumps(package_content))
     cont.close()
-    
+
     # We now clean (rm) the tmpdir we don't need any more
     try:
         shutil.rmtree(tmpdir, ignore_errors=True)
@@ -588,7 +588,7 @@ def do_install(pname='', local=False, download_only=False):
             f.write(raw)
             f.close()
             cprint('Download OK: %s' %  tmpf, 'green')
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Package save fail: %s", exp)
             sys.exit(2)
         return

@@ -21,9 +21,10 @@
 # This file is used to test reading and processing of config files
 #
 
-import unittest
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-import string
+import six
+import unittest
 
 from shinken_test import time_hacker
 from shinken.log import logger
@@ -44,10 +45,10 @@ class TestEndParsingType(unittest.TestCase):
             return list
 
         if isinstance(obj, StringProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, UnusedProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, BoolProp):
             return bool
@@ -59,21 +60,21 @@ class TestEndParsingType(unittest.TestCase):
             return float
 
         if isinstance(obj, CharProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, DictProp):
             return dict
 
         if isinstance(obj, AddrProp):
-            return str
+            return six.string_types
 
         if isinstance(obj, ToGuessProp):
-            return str
+            return six.string_types
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + self.id().center(78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def add(self, b):
         if isinstance(b, Brok):
@@ -126,7 +127,7 @@ class TestEndParsingType(unittest.TestCase):
 
         for objs in [self.conf.arbiters]:
             for obj in objs:
-                #print "=== obj : %s ===" % obj.__class__
+                #print("=== obj : %s ===" % obj.__class__)
                 for prop in obj.properties:
                     if hasattr(obj, prop):
                         value = getattr(obj, prop)
@@ -136,7 +137,7 @@ class TestEndParsingType(unittest.TestCase):
                             self.assertIsInstance(value, self.map_type(obj.properties[prop]))
                         else:
                             print("Skipping %s " % prop)
-                #print "==="
+                #print("===")
 
         # Manual check of several attr for self.conf.contacts
         # because contacts contains unicode attr

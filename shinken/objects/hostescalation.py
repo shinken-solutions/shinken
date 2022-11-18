@@ -23,9 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
-from escalation import Escalation
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+from shinken.objects.item import Item, Items
+from shinken.objects.escalation import Escalation
 from shinken.property import IntegerProp, StringProp, ListProp
 
 
@@ -70,6 +71,6 @@ class Hostescalations(Items):
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
 
-        # print "All escalations"
+        # print("All escalations")
         # for es in escalations:
-        #    print es
+        #    print(es)

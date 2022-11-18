@@ -23,11 +23,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 import math
 
 
-class Load:
+class Load(object):
     """This class is for having a easy Load calculation
     without having to send value at regular interval
     (but it's more efficient if you do this :) ) and without
@@ -72,7 +74,7 @@ class Load:
 if __name__ == '__main__':
     load = Load()
     t = time.time()
-    for i in xrange(1, 300):
+    for i in range(1, 300):
         load.update_load(1)
-        print '[', int(time.time() - t), ']', load.get_load(), load.exp
+        print('[', int(time.time() - t), ']', load.get_load(), load.exp)
         time.sleep(5)

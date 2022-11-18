@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -33,7 +35,7 @@ class TestConfig(ShinkenTest):
     def test_bad_contact_call(self):
         # The service got a unknow contact. It should raise an error
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        print "Contacts:", svc.contacts
+        print("Contacts:", svc.contacts)
         self.assertEqual(False, svc.is_correct())
 
 

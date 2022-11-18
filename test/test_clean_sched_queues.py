@@ -22,6 +22,8 @@
 # This file is used to test reading and processing of config files
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from shinken_test import *
 
 
@@ -33,7 +35,7 @@ class TestSchedCleanQueues(ShinkenTest):
     # Try to generate a bunch of external commands
     # and see if they are drop like it should
     def test_sched_clean_queues(self):
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -47,46 +49,46 @@ class TestSchedCleanQueues(ShinkenTest):
 
         #host.__class__.obsess_over = True
         #host.obsess_over_host = True
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             host.get_obsessive_compulsive_processor_command()
-        print "New len", len(host.actions)
+        print("New len", len(host.actions))
         self.assertGreaterEqual(len(host.actions), 1000)
         self.sched.get_new_actions()
-        print len(self.sched.actions)
+        print(len(self.sched.actions))
         # So get our 1000 external commands
         self.assertGreaterEqual(len(self.sched.actions), 1000)
 
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         # Should have something like 16 event handler
-        print len(self.sched.actions)
+        print(len(self.sched.actions))
         self.assertLess(len(self.sched.actions), 30)
 
         # Now for Notifications and co
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             host.create_notifications('PROBLEM')
         self.sched.get_new_actions()
-        print len(self.sched.actions)
+        print(len(self.sched.actions))
         # So get our 1000 notifications
         self.assertGreaterEqual(len(self.sched.actions), 1000)
 
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
-        print len(self.sched.actions)
+        print(len(self.sched.actions))
         self.assertLess(len(self.sched.actions), 30)
 
         #####  And now broks
         l = []
-        for i in xrange(1, 1001):
+        for i in range(1, 1001):
             b = host.get_update_status_brok()
             l.append(b)
         host.broks = l
 
         self.sched.get_new_broks()
-        print "LEn broks", len(self.sched.broks)
+        print("LEn broks", len(self.sched.broks))
         self.assertGreaterEqual(len(self.sched.broks), 1000)
         self.sched.clean_queues()
-        print "LEn broks", len(self.sched.broks)
+        print("LEn broks", len(self.sched.broks))
         self.assertLess(len(self.sched.broks), 30)
 
 

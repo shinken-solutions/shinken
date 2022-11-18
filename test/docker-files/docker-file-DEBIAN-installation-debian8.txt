@@ -1,11 +1,22 @@
 FROM debian:8
 MAINTAINER Jean Gabes <naparuba@gmail.com>
 
-RUN        apt-get update && apt-get install -y python
+RUN        apt-get update
+RUN        apt-get install -y procps
+RUN        apt-get install -y python
+RUN        apt-get install -y python-bottle
+RUN        apt-get install -y python-cherrypy3
+RUN        apt-get install -y python-pycurl
 RUN        apt-get install -y python-setuptools
-RUN         apt-get install -y python-pycurl
-RUN         apt-get install -y procps
-RUN         apt-get install -y python-cherrypy3
+RUN        apt-get install -y python-six
+RUN        apt-get install -y python3
+RUN        apt-get install -y python3-bottle
+RUN        apt-get install -y python3-cherrypy3
+RUN        apt-get install -y python3-pycurl
+RUN        apt-get install -y python3-setuptools
+RUN        apt-get install -y python3-six
+RUN        groupadd --system shinken
+RUN        useradd --system -d /var/lib/shinken -g shinken shinken
 
 ADD        . /root/shinken-framework
 
