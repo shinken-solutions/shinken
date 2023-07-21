@@ -268,10 +268,10 @@ img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\r
 span {font-family: Verdana, sans-serif; font-size: 12pt;}\r
 table {text-align:center; margin-left: auto; margin-right: auto;}\r
 th {white-space: nowrap;}\r
-th.even {background-color: #D9D9D9;}\r
-td.even {background-color: #F2F2F2;}\r
-th.odd {background-color: #F2F2F2;}\r
-td.odd {background-color: #FFFFFF;}\r
+th.even {background-color: #D9D9D9;color: #000000;}\r
+td.even {background-color: #F2F2F2;color: #000000;}\r
+th.odd {background-color: #F2F2F2;color: #000000;}\r
+td.odd {background-color: #FFFFFF;color: #000000;}\r
 th,td {font-family: Verdana, sans-serif; font-size: 10pt; text-align:left;}\r
 th.customer {width: 600px; background-color: #004488; color: #ffffff;}\r
 </style>\r
