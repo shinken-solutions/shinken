@@ -133,10 +133,18 @@ class DataManager(object):
     # Get the hosts tags sorted by names, and zero size in the end
     def get_host_tags_sorted(self):
         r = []
-        names = self.rg.tags.keys()
-        names.sort()
+        names = set()
+        for sched_instance_id in self.rg.hosts_tags:
+            for tpl_name in self.rg.hosts_tags.get(sched_instance_id):
+                names.add(tpl_name)
+        names = sorted(names)
         for n in names:
-            r.append((n, self.rg.tags[n]))
+            # we may have the same template in some schedulers, because
+            # hosts in different schedulers may use the same host template
+            count = 0
+            for sched_instance_id in self.rg.hosts_tags:
+                count += self.rg.hosts_tags.get(sched_instance_id).get(n, 0)
+            r.append((n, count))
         return r
 
     # Get the hosts tagged with a specific tag
@@ -150,10 +158,18 @@ class DataManager(object):
     # Get the services tags sorted by names, and zero size in the end
     def get_service_tags_sorted(self):
         r = []
-        names = self.rg.services_tags.keys()
-        names.sort()
+        names = set()
+        for sched_instance_id in self.rg.services_tags:
+            for tpl_name in self.rg.services_tags.get(sched_instance_id):
+                names.add(tpl_name)
+        names = sorted(names)
         for n in names:
-            r.append((n, self.rg.services_tags[n]))
+            # we may have the same template in some schedulers, because
+            # hosts in different schedulers may use the same host template
+            count = 0
+            for sched_instance_id in self.rg.services_tags:
+                count += self.rg.services_tags.get(sched_instance_id).get(n, 0)
+            r.append((n, count))
         return r
 
     def get_important_impacts(self):
