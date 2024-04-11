@@ -919,9 +919,9 @@ class SchedulingItem(Item):
             if dt.in_scheduled_downtime():
                 self.scheduled_downtime_depth += 1
         if self.scheduled_downtime_depth > 0:
-            self.is_in_scheduled_downtime = True
+            self.in_scheduled_downtime = True
         else:
-            self.is_in_scheduled_downtime = False
+            self.in_scheduled_downtime = False
         if getattr(self, "acknowledgement", None) is not None:
             self.problem_has_been_acknowledged = True
         else:
