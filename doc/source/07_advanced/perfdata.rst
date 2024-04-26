@@ -41,14 +41,14 @@ Plugins can return optional performance data in their output by sending the norm
   
 ::
 
-  PING ok - Packet loss = 0%, RTA = 0.80 ms | percent_packet_loss=0, rta=0.80
+  PING ok - Packet loss = 0%, RTA = 0.80 ms | percent_packet_loss=0 rta=0.80
   
 When Shinken sees this plugin output format it will split the output into two parts:
 
   - Everything before the pipe character is considered to be the normal" plugin output and will be stored in either the $HOSTOUTPUT$ or $SERVICEOUTPUT$ macro
   - Everything after the pipe character is considered to be the plugin-specific performance data and will be stored in the $HOSTPERFDATA$ or $SERVICEPERFDATA$ macro
 
-In the example above, the $HOSTOUTPUT$ or $SERVICEOUTPUT$ macro would contain *"PING ok - Packet loss = 0%, RTA = 0.80 ms"* (without quotes) and the $HOSTPERFDATA$ or $SERVICEPERFDATA$ macro would contain *"percent_packet_loss=0, rta=0.80"* (without quotes).
+In the example above, the $HOSTOUTPUT$ or $SERVICEOUTPUT$ macro would contain *"PING ok - Packet loss = 0%, RTA = 0.80 ms"* (without quotes) and the $HOSTPERFDATA$ or $SERVICEPERFDATA$ macro would contain *"percent_packet_loss=0 rta=0.80"* (without quotes).
 
 Multiple lines of performace data (as well as normal text output) can be obtained from plugins, as described in the :ref:`plugin API documentation <development/pluginapi>`.
 
