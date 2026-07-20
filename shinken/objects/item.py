@@ -761,7 +761,7 @@ class Items(object):
         Cheks if an object holding the same name already exists in the index.
 
         If so, it compares their definition order: the lowest definition order
-        is kept. If definiton order equal, an error is risen.Item
+        is kept. If definition order equal, an error is risen.Item
 
         The method returns the item that should be added after it has decided
         which one should be kept.
